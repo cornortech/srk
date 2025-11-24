@@ -1,0 +1,126 @@
+import { AppRouteImplementationOrOptions } from "@ts-rest/express/src/lib/types";
+import { affiliateContract } from "../../contract/affiliate/contract";
+import { affiliateRequestModel } from "../../model/affiliateRequestModel";
+import { UserModel } from "../../model/userModel";
+import { affiliateBiometricModel } from "../../model/affiliateVerificationModel";
+
+const getAllAffiliateRequestsByStatus: AppRouteImplementationOrOptions<
+  typeof affiliateContract.getAllAffiliateRequestsByStatus
+> = async ({ query }) => {
+  let { status } = query;
+
+  status = status || [];
+
+  try {
+    const affiliateRequests = await affiliateRequestModel
+      .find({
+        status: {
+          $in: status,
+        },
+      })
+      .populate<{
+        userId: {
+          _id: string;
+          email: string;
+          firstName: string;
+          lastName: string;
+          gender: string;
+          profilePicture: string;
+          phoneNumber: string;
+        };
+      }>("userId");
+
+    return {
+      status: 200,
+      body: await Promise.all(
+        affiliateRequests.map(async (request) => {
+          const affiliateBiometricData = await affiliateBiometricModel.findOne({
+            userId: request.userId?._id,
+          });
+
+          return {
+            userId: request.userId?._id.toString(),
+            status: request.status,
+            email: request.userId?.email,
+            firstName: request.userId?.firstName,
+            lastName: request.userId?.lastName,
+            affiliateAgreementUrl: "",
+            gender: request.userId?.gender,
+            phoneNumber: request.userId?.phoneNumber,
+            requestedAt: request.requestedAt,
+            profilePicture: request.userId?.profilePicture,
+            leftThumbPrint: affiliateBiometricData?.leftThumbPrint,
+            rightThumbPrint: affiliateBiometricData?.rightThumbPrint,
+            verificationImage: affiliateBiometricData?.verificationImage,
+          };
+        })
+      ),
+    };
+  } catch (error) {
+    console.log(error);
+    return {
+      status: 500,
+      body: {
+        success: false,
+        message: "Internal server error",
+      },
+    };
+  }
+};
+
+const getTeamsOfUser: AppRouteImplementationOrOptions<
+  typeof affiliateContract.getTeamsOfUser
+> = async ({ params }) => {
+  try {
+    const teams = await UserModel.find({
+      referredBy: params.userId,
+      status: {
+        $in: [
+          "REGISTERED",
+          "PAYMENT_VERIFICATION_APPROVED",
+          "KYC_VERIFICATION_PENDING",
+          "KYC_VERIFICATION_REJECTED",
+          "PORTAL_ACTIVATED",
+          "PORTAL_DEACTIVATED",
+        ],
+      },
+    }).populate<{
+      packageId: {
+        _id: string;
+        title: string;
+      };
+    }>("packageId");
+
+    return {
+      status: 200,
+      body: teams.map((team) => ({
+        _id: team._id.toString(),
+        country: team.country,
+        dob: team.dob,
+        email: team.email,
+        firstName: team.firstName,
+        lastName: team.lastName,
+        phoneNumber: team.phoneNumber,
+        profilePicture: team.profilePicture,
+        createdAt: team.createdAt,
+        gender: team.gender,
+        purpose: team.purpose,
+        packageName: team.packageId?.title,
+      })),
+    };
+  } catch (error) {
+    console.log(error);
+    return {
+      status: 500,
+      body: {
+        success: false,
+        message: "Internal server error",
+      },
+    };
+  }
+};
+
+export const affiliateQueryHandler = {
+  getTeamsOfUser,
+  getAllAffiliateRequestsByStatus,
+};

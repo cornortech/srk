@@ -1,0 +1,161 @@
+import { useRef } from "react";
+import { TPaymentMethod } from "../../lib/types";
+import { Button, Input, Select, SelectItem } from "@nextui-org/react";
+import { TPaymentDetails } from "../SignUpComponent";
+
+export const QrPaymentMethodContent = ({
+  setPaymentDetails,
+  handleSubmit,
+  paymentMethod,
+  isSubmitting,
+  paymentAmount,
+  transactionId,
+  disbleInput,
+  prevImageUrl,
+  paymentProofUrl,
+}: {
+  setPaymentDetails: React.Dispatch<React.SetStateAction<TPaymentDetails>>;
+  handleSubmit: () => void;
+  prevImageUrl?: string;
+  disbleInput: boolean;
+  isSubmitting: boolean;
+  paymentAmount: number;
+  transactionId?: string | null;
+  paymentMethod?: TPaymentMethod | null;
+  paymentProofUrl?: File | null;
+}) => {
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  const handleOnInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setPaymentDetails((prevPaymentDetails) => ({
+      ...prevPaymentDetails,
+      [name]: value,
+    }));
+  };
+
+  const handleOnSelectChange = (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    const value = event.target.value as TPaymentMethod;
+    setPaymentDetails((prevPaymentDetails) => ({
+      ...prevPaymentDetails,
+      paymentMethod: value,
+    }));
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files && files[0]) {
+      setPaymentDetails((prev) => ({
+        ...prev,
+        paymentProof: files[0],
+      }));
+    }
+  };
+
+  return (
+    <div className="w-full  space-y-6">
+      <div>
+        <h1 className="text-3xl font-medium">Scan the QR code</h1>
+      </div>
+      <div>
+        <input
+          type="file"
+          onChange={handleFileChange}
+          className="hidden"
+          ref={fileInputRef}
+        />
+        <img src="/qr/qrPayment.jpg" alt="qr-code" />
+        <div className="my-2 text-center flex flex-col gap-y-3">
+          {/* Please send the exactly Rs.{paymentAmount}. If you are not able to
+          scan the QR code, please contact our customer care.
+           */}
+          <b className="text-2xl ">
+            {" "}
+            Please pay Rs.{paymentAmount} exactly on the QR code.
+          </b>
+          <b className="text-red-500">
+            Note: Don't pay amount which is lower or higher then package price.
+            please pay exact amount otherwise your id will not active and we
+            will not accept any refund.
+          </b>
+          <b className="text-red-500">
+            नोटः प्याकेज मूल्य भन्दा कम वा बढी रकम नतिर्नुहोस्। कृपया सही रकम
+            तिर्नुहोस् अन्यथा तपाईंको आईडी सक्रिय हुनेछैन र हामी कुनै पनि फिर्ती
+            स्वीकार गर्दैनौं।
+          </b>
+        </div>
+      </div>
+      <div className="flex flex-col gap-y-2 ">
+        <Input
+          placeholder="Enter transaction ID"
+          label="Transaction ID"
+          onChange={handleOnInputChange}
+          value={transactionId || ""}
+          disabled={disbleInput}
+          name="transactionId"
+        />
+        <Select
+          defaultSelectedKeys={[paymentMethod || ""]}
+          label="Select Payment Method"
+          onChange={handleOnSelectChange}
+          disabled={disbleInput}
+          name="paymentMethod"
+        >
+          <SelectItem key="" value="" isDisabled >
+            --
+          </SelectItem>
+          <SelectItem key="bankTransfer" value="bankTransfer">
+            Bank Transfer
+          </SelectItem>
+          <SelectItem key="esewa" value="esewa">
+            Esewa
+          </SelectItem>
+          <SelectItem key="khalti" value="khalti">
+            Khalti
+          </SelectItem>
+        </Select>
+        {(prevImageUrl || paymentProofUrl) && (
+          <img
+            src={
+              paymentProofUrl
+                ? URL.createObjectURL(paymentProofUrl)
+                : prevImageUrl || ""
+            }
+            alt="payment-proof"
+            className="w-[200px] h-[200px] object-cover"
+          />
+        )}
+        {!disbleInput && (
+          <>
+            <Button
+              variant="bordered"
+              onPress={() => fileInputRef.current?.click()}
+            >
+              Upload payment proof
+            </Button>
+            {/* <PrimaryButton
+              disabled={isSubmitting}
+              label={isSubmitting ? "Submitting..." : "Confirm and register"}
+              type="button"
+              onclick={handleSubmit}
+            /> */}
+            <Button
+              variant="flat"
+              color="primary"
+              onPress={handleSubmit}
+              disabled={isSubmitting}
+              isLoading={isSubmitting}
+              aria-disabled={isSubmitting}
+              disableRipple={isSubmitting}
+              disableAnimation={isSubmitting}
+            >
+              {isSubmitting ? "Submitting..." : "Confirm and register"}
+            </Button>
+          </>
+        )}
+      </div>
+    </div>
+  );
+};

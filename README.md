@@ -604,6 +604,596 @@ npx nx reset
 
 ---
 
+## 🚀 Deployment to DigitalOcean App Platform
+
+This guide walks you through deploying both the backend API and frontend React app to DigitalOcean App Platform.
+
+### Prerequisites
+
+- DigitalOcean account ([Sign up here](https://cloud.digitalocean.com/registrations/new))
+- GitHub repository with your code
+- MongoDB Atlas database (recommended for production)
+- Firebase project configured
+- Domain name (optional, but recommended)
+
+### Architecture Overview
+
+We'll deploy two separate apps:
+1. **Backend API** (`/apps/backend`) - Node.js Express server
+2. **Frontend** (`/apps/university`) - React static site
+
+---
+
+### Step 1: Prepare MongoDB Atlas
+
+Before deploying, set up a production database:
+
+1. **Create MongoDB Atlas Account**
+   - Go to [mongodb.com/cloud/atlas](https://www.mongodb.com/cloud/atlas)
+   - Create a free tier cluster (M0)
+
+2. **Configure Network Access**
+   - In MongoDB Atlas: Network Access → Add IP Address
+   - **Important**: Add `0.0.0.0/0` to allow access from anywhere (DigitalOcean IPs are dynamic)
+   - Or add specific DigitalOcean datacenter IP ranges
+
+3. **Create Database User**
+   - Database Access → Add New Database User
+   - Choose password authentication
+   - Save credentials securely
+
+4. **Get Connection String**
+   - Clusters → Connect → Connect your application
+   - Copy connection string (format: `mongodb+srv://username:password@cluster.mongodb.net/dbname`)
+   - Keep this for environment variables
+
+---
+
+### Step 2: Prepare Your Repository
+
+1. **Push Code to GitHub**
+   ```bash
+   # Initialize git if not already done
+   git init
+   git add .
+   git commit -m "Initial commit"
+   
+   # Add remote and push
+   git remote add origin https://github.com/yourusername/your-repo.git
+   git branch -M main
+   git push -u origin main
+   ```
+
+2. **Verify Repository Structure**
+   Ensure your repository has:
+   - `/apps/backend/` - Backend application
+   - `/apps/university/` - Frontend application
+   - `/libs/shared/` - Shared libraries
+   - `package.json` at root
+   - `nx.json` configuration
+
+---
+
+### Step 3: Deploy Backend API
+
+#### 3.1 Create Backend App on DigitalOcean
+
+1. **Login to DigitalOcean**
+   - Go to [cloud.digitalocean.com](https://cloud.digitalocean.com)
+   - Navigate to **Apps** section
+   - Click **Create App**
+
+2. **Connect GitHub Repository**
+   - Choose **GitHub** as source
+   - Authorize DigitalOcean to access your repositories
+   - Select your repository
+   - Choose branch (usually `main` or `master`)
+   - **Enable "Autodeploy"** for automatic deployments on push
+
+3. **Configure Backend Service**
+   - DigitalOcean will auto-detect your app
+   - Click **Edit** next to detected service
+   
+   **Configure as follows:**
+   
+   | Setting | Value |
+   |---------|-------|
+   | **Name** | `srk-backend` or `backend-api` |
+   | **Source Directory** | `/` (root, because it's a monorepo) |
+   | **Environment** | `Node.js` |
+   | **Build Command** | `npm install && npx nx build backend` |
+   | **Run Command** | `node dist/apps/backend/main.js` |
+   | **HTTP Port** | `3000` (or `8080`) |
+   | **HTTP Request Routes** | `/` |
+   | **Instance Type** | Basic (512MB RAM) or Professional (1GB RAM) |
+
+#### 3.2 Configure Backend Environment Variables
+
+In the **Environment Variables** section, add:
+
+```bash
+# MongoDB Connection
+DATABASE_URL=mongodb+srv://username:password@cluster.mongodb.net/srk_production?retryWrites=true&w=majority
+
+# Email Configuration
+APP_EMAIL=your-production-email@gmail.com
+SMTP_PW=your_gmail_app_password
+
+# Application URLs (will update after frontend deployment)
+FRONTEND_BASE_URL=https://your-frontend-url.ondigitalocean.app
+
+# Security
+JWT_SECRET=your_production_jwt_secret_here
+WHITE_LISTED_ORIGINS=https://your-frontend-url.ondigitalocean.app,https://your-custom-domain.com
+
+# Firebase Admin SDK
+FIREBASE_PROJECT_ID=your_project_id
+FIREBASE_CLIENT_EMAIL=firebase-adminsdk-xxxxx@project.iam.gserviceaccount.com
+FIREBASE_PRIVATE_KEY=-----BEGIN PRIVATE KEY-----\nYourPrivateKeyHere\n-----END PRIVATE KEY-----\n
+
+# Node Environment
+NODE_ENV=production
+PORT=8080
+```
+
+**Important Notes:**
+- Use **strong, unique** JWT secret (generate with `openssl rand -hex 32`)
+- Escape newlines in `FIREBASE_PRIVATE_KEY` as `\n`
+- Update `FRONTEND_BASE_URL` after deploying frontend
+- Mark sensitive variables as **encrypted** in DigitalOcean
+
+#### 3.3 Configure Health Checks (Optional but Recommended)
+
+- **Health Check Path**: `/api/health` (if you have a health endpoint)
+- **Timeout**: 30 seconds
+
+#### 3.4 Review and Deploy
+
+- Review all settings
+- Click **Create Resources**
+- Wait 5-10 minutes for deployment
+- Once deployed, you'll get a URL like: `https://srk-backend-xxxxx.ondigitalocean.app`
+
+#### 3.5 Verify Backend Deployment
+
+```bash
+# Test your backend API
+curl https://srk-backend-xxxxx.ondigitalocean.app/api/health
+
+# Check if server is responding
+curl -I https://srk-backend-xxxxx.ondigitalocean.app
+```
+
+---
+
+### Step 4: Deploy Frontend (React App)
+
+#### 4.1 Create Frontend App on DigitalOcean
+
+1. **Create New App** or **Add Component**
+   - If creating new app: Follow same GitHub connection steps
+   - If adding to existing app: Click **Add Component** → **From Source Code**
+
+2. **🚨 CRITICAL: Choose Component Type**
+   
+   When DigitalOcean auto-detects your app, it may incorrectly identify it as a "Web Service". You **MUST** manually change this to "Static Site".
+   
+   **How to change:**
+   - Click **Edit** next to the auto-detected component
+   - Find **"Resource Type"** or **"Component Type"** dropdown
+   - Select **"Static Site"** (NOT "Web Service")
+
+3. **Configure Frontend Service**
+   
+   | Setting | Value |
+   |---------|-------|
+   | **Name** | `srk-university` or `frontend` |
+   | **Type** | **Static Site** 🚨 CRITICAL: Must be "Static Site" |
+   | **Source Directory** | `/` (root, because it's a monorepo) |
+   | **Environment** | `Node.js` (only used for build) |
+   | **Build Command** | `npm install && npx nx build university` |
+   | **Output Directory** | `dist/apps/university` 🚨 REQUIRED for static sites |
+   | **Run Command** | ❌ _Leave EMPTY_ (do NOT add any command) |
+   | **HTTP Port** | ❌ _Not applicable_ (remove if present) |
+   | **HTTP Request Routes** | `/` |
+
+   **Key Difference from Backend:**
+   - **Backend** = Web Service (runs Node.js server continuously with `node` command)
+   - **Frontend** = Static Site (just serves pre-built HTML/CSS/JS files from output directory)
+   
+   **Common Mistake:** If you see "Run Command" or "HTTP Port" fields, you've selected "Web Service" by mistake. Change to "Static Site"!
+
+#### 4.2 Configure Frontend Environment Variables
+
+Add these environment variables:
+
+```bash
+# Backend API URL (from previous step)
+VITE_BACKEND_ROOT_URL=https://srk-backend-xxxxx.ondigitalocean.app
+
+# Frontend URL (will be your DigitalOcean URL or custom domain)
+VITE_FRONTEND_ROOT_URL=https://srk-university-xxxxx.ondigitalocean.app
+
+# MongoDB Package ID
+VITE_PRO_PACKAGE_ID=your_mongodb_objectid_here
+
+# Firebase Configuration
+VITE_FIREBASE_API_KEY=your_firebase_api_key
+VITE_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=your-project-id
+VITE_FIREBASE_STORAGE_BUCKET=your-project.appspot.com
+VITE_FIREBASE_MESSAGING_SENDER_ID=123456789
+VITE_FIREBASE_APP_ID=1:123456789:web:abcdef
+
+# Node Environment
+NODE_ENV=production
+```
+
+#### 4.3 Configure Static Site Settings
+
+For a React SPA, you need to handle client-side routing:
+
+1. In **Settings** → **App-Level Configuration**
+2. Add a **Catchall Route** to handle React Router:
+   - Create a `_redirects` file or configure in DigitalOcean UI
+   - Rule: `/* /index.html 200`
+
+**Alternative**: Create `apps/university/public/_redirects` file:
+```
+/*    /index.html   200
+```
+
+#### 4.4 Deploy Frontend
+
+- Click **Save** and **Deploy**
+- Wait 5-10 minutes for build and deployment
+- You'll get a URL like: `https://srk-university-xxxxx.ondigitalocean.app`
+
+#### 4.5 Update Backend CORS Settings
+
+Now that you have the frontend URL, update backend environment variables:
+
+1. Go to backend app settings
+2. Update these variables:
+   ```bash
+   FRONTEND_BASE_URL=https://srk-university-xxxxx.ondigitalocean.app
+   WHITE_LISTED_ORIGINS=https://srk-university-xxxxx.ondigitalocean.app
+   ```
+3. Save and redeploy backend
+
+---
+
+### Step 5: Custom Domain Setup (Optional)
+
+#### 5.1 Add Custom Domain to Frontend
+
+1. **In DigitalOcean App Settings**
+   - Go to your frontend app
+   - Click **Settings** → **Domains**
+   - Click **Add Domain**
+   - Enter your domain: `university.yourdomain.com`
+
+2. **Configure DNS Records**
+   
+   In your domain registrar (Namecheap, GoDaddy, etc.):
+   
+   | Type | Name | Value |
+   |------|------|-------|
+   | CNAME | university | `srk-university-xxxxx.ondigitalocean.app.` |
+   | A | @ | DigitalOcean IP (if using root domain) |
+
+3. **SSL Certificate**
+   - DigitalOcean automatically provisions Let's Encrypt SSL
+   - Wait 5-15 minutes for SSL to activate
+
+#### 5.2 Add Custom Domain to Backend
+
+1. **Add Domain to Backend App**
+   - Go to backend app
+   - Settings → Domains → Add Domain
+   - Enter: `api.yourdomain.com`
+
+2. **Configure DNS**
+   
+   | Type | Name | Value |
+   |------|------|-------|
+   | CNAME | api | `srk-backend-xxxxx.ondigitalocean.app.` |
+
+#### 5.3 Update Environment Variables with Custom Domains
+
+**Frontend `.env`:**
+```bash
+VITE_FRONTEND_ROOT_URL=https://university.yourdomain.com
+VITE_BACKEND_ROOT_URL=https://api.yourdomain.com
+```
+
+**Backend `.env`:**
+```bash
+FRONTEND_BASE_URL=https://university.yourdomain.com
+WHITE_LISTED_ORIGINS=https://university.yourdomain.com,https://www.yourdomain.com
+```
+
+Redeploy both apps after updating.
+
+---
+
+### Step 6: Post-Deployment Verification
+
+#### 6.1 Test Backend API
+
+```bash
+# Test API health
+curl https://api.yourdomain.com/api/health
+
+# Test API endpoint (example)
+curl https://api.yourdomain.com/api/users
+
+# Check CORS headers
+curl -I -X OPTIONS https://api.yourdomain.com/api/users \
+  -H "Origin: https://university.yourdomain.com" \
+  -H "Access-Control-Request-Method: GET"
+```
+
+#### 6.2 Test Frontend
+
+1. Open `https://university.yourdomain.com` in browser
+2. Open Developer Console (F12)
+3. Check for errors
+4. Test key features:
+   - User registration/login
+   - Course browsing
+   - API calls to backend
+
+#### 6.3 Monitor Application Logs
+
+**DigitalOcean Logs:**
+1. Go to your app in DigitalOcean
+2. Click **Runtime Logs**
+3. Monitor for errors or warnings
+
+**Set Up Alerts:**
+1. Settings → Alerts
+2. Configure alerts for:
+   - High CPU usage
+   - Memory usage
+   - Build failures
+   - App crashes
+
+---
+
+### Step 7: Continuous Deployment
+
+With autodeploy enabled, every push to your main branch will trigger:
+
+1. **Automatic Build**
+2. **Run Tests** (if configured)
+3. **Deploy** (if tests pass)
+
+**Workflow:**
+```bash
+# Make changes locally
+git add .
+git commit -m "feat: add new feature"
+git push origin main
+
+# DigitalOcean automatically:
+# 1. Detects push
+# 2. Builds app
+# 3. Deploys (if successful)
+```
+
+---
+
+### Step 8: Database Migration (If Needed)
+
+If you have existing data, migrate to MongoDB Atlas:
+
+```bash
+# Export from old database
+mongodump --uri="mongodb://localhost:27017/srk_university" --out=./backup
+
+# Import to MongoDB Atlas
+mongorestore --uri="mongodb+srv://user:pass@cluster.mongodb.net/srk_production" ./backup
+```
+
+Or run the index cleanup script:
+```bash
+# Set production DATABASE_URL in local .env temporarily
+npx tsx apps/backend/src/utils/script/dropUidIndex.ts
+```
+
+---
+
+### Troubleshooting Deployment
+
+#### Frontend Deployment: "failed to launch: determine start command"
+
+**Problem**: 
+```
+ERROR: failed to launch: determine start command: when there is no default process a command is required
+ERROR failed health checks after 1 attempts with error Readiness probe failed: dial tcp 10.244.34.146:8080: connect: connection refused
+```
+
+**Root Cause**: DigitalOcean is treating your frontend as a "Web Service" instead of a "Static Site"
+
+**Solutions:**
+
+1. **Delete and recreate the component:**
+   - Go to your app in DigitalOcean
+   - Delete the frontend component
+   - Click **"Add Component"** → **"From Source Code"**
+   - When it auto-detects, click **"Edit"**
+   - **CHANGE "Resource Type" to "Static Site"** (dropdown at the top)
+   
+2. **Verify these settings:**
+   ```
+   Type: Static Site (NOT Web Service)
+   Build Command: npm install && npx nx build university
+   Output Directory: dist/apps/university
+   Run Command: [LEAVE EMPTY - do not add anything]
+   HTTP Port: [REMOVE if present]
+   ```
+
+3. **Double-check the Output Directory:**
+   - Must be exactly: `dist/apps/university`
+   - No leading `/` slash
+   - This is where Vite outputs the built files
+
+**Why this happens:**
+- DigitalOcean sees Node.js and assumes it's a server
+- "Web Service" requires a run command and port
+- "Static Site" just needs build output location
+- Static sites are served via CDN, no server needed
+
+**Visual Guide:**
+- ✅ Correct: `Type: Static Site` + `Output Directory: dist/apps/university`
+- ❌ Wrong: `Type: Web Service` + `Run Command: node ...`
+
+#### Build Fails
+
+**Problem**: `Build failed: npm ERR! code ELIFECYCLE`
+
+**Solutions:**
+- Check build command is correct: `npm install && npx nx build backend`
+- Verify all dependencies are in `package.json` (not just devDependencies)
+- Check build logs in DigitalOcean for specific error
+- Try building locally first: `npm run build:backend`
+
+#### Backend Crashes on Startup
+
+**Problem**: App crashes immediately after deployment
+
+**Solutions:**
+- Check environment variables are set correctly
+- Verify MongoDB connection string is valid
+- Check logs for stack trace
+- Ensure `PORT` environment variable is set to `8080`
+- Verify run command: `node dist/apps/backend/main.js`
+
+#### Frontend Shows Blank Page
+
+**Problem**: Frontend loads but shows blank page
+
+**Solutions:**
+- Check browser console for errors
+- Verify `VITE_*` environment variables are set
+- Ensure backend URL is correct and API is responding
+- Check if `_redirects` file exists for SPA routing
+- Verify output directory is `dist/apps/university`
+
+#### CORS Errors
+
+**Problem**: `Access to fetch blocked by CORS policy`
+
+**Solutions:**
+- Verify `WHITE_LISTED_ORIGINS` includes your frontend URL
+- Check backend CORS configuration in `app.ts`
+- Ensure frontend is using correct backend URL
+- Try adding both `www` and non-`www` versions to whitelist
+
+#### MongoDB Connection Timeout
+
+**Problem**: `MongooseServerSelectionError: connection timed out`
+
+**Solutions:**
+- Check MongoDB Atlas Network Access allows `0.0.0.0/0`
+- Verify connection string has correct username/password
+- Check database user has read/write permissions
+- Ensure `retryWrites=true&w=majority` in connection string
+
+#### Environment Variables Not Loading
+
+**Problem**: Variables showing as `undefined`
+
+**Solutions:**
+- Verify all variables are set in DigitalOcean app settings
+- Frontend variables MUST start with `VITE_`
+- Redeploy after adding/changing variables
+- Check for typos in variable names
+- Don't use quotes around values in DigitalOcean UI
+
+---
+
+### Cost Estimation
+
+**Basic Setup (Recommended for starting):**
+- **Backend**: Basic (512MB RAM) - $5/month
+- **Frontend**: Static Site - $0-3/month (depending on bandwidth)
+- **Total**: ~$5-8/month
+
+**Professional Setup:**
+- **Backend**: Professional (1GB RAM) - $12/month
+- **Frontend**: Static Site - $0-3/month
+- **Total**: ~$12-15/month
+
+**Additional Costs:**
+- **MongoDB Atlas**: Free tier (M0) - $0/month
+- **Domain**: ~$10-15/year
+- **Bandwidth**: Included (1TB on basic, more on professional)
+
+---
+
+### Security Best Practices
+
+1. **Environment Variables**
+   - Never commit `.env` files to git
+   - Use different secrets for dev and production
+   - Rotate JWT secrets periodically
+
+2. **CORS Configuration**
+   - Only whitelist necessary origins
+   - Don't use `*` in production
+
+3. **Database Security**
+   - Use strong database passwords
+   - Restrict IP access in MongoDB Atlas
+   - Enable audit logging
+
+4. **SSL/HTTPS**
+   - Always use HTTPS in production
+   - Enable HSTS headers
+   - Use secure cookies
+
+5. **Monitoring**
+   - Set up error tracking (Sentry, LogRocket)
+   - Monitor API response times
+   - Set up uptime monitoring
+
+---
+
+### Useful Commands
+
+```bash
+# View deployment logs
+doctl apps logs <app-id> --follow
+
+# Restart app
+doctl apps restart <app-id>
+
+# List all apps
+doctl apps list
+
+# Get app info
+doctl apps get <app-id>
+
+# Update environment variable
+doctl apps update <app-id> --env-var KEY=VALUE
+```
+
+---
+
+### Next Steps After Deployment
+
+1. **Set up monitoring** with tools like UptimeRobot or Pingdom
+2. **Configure error tracking** with Sentry
+3. **Set up analytics** with Google Analytics or Mixpanel
+4. **Create backups** of your MongoDB database
+5. **Document API** with Swagger/OpenAPI
+6. **Set up CI/CD** for automated testing before deployment
+7. **Configure CDN** for static assets (DigitalOcean Spaces)
+
+---
+
 ## 🐛 Troubleshooting
 
 ### Common Issues

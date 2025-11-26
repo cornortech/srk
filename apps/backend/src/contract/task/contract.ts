@@ -54,7 +54,9 @@ export const taskContract = c.router({
   },
   acceptTaskEnrollmentRequest: {
     method: "PUT",
-    body: z.object({}).optional(),
+    body: z.object({
+      remarks: z.string().optional()
+    }),
     path: "/accept-social-task-enrollement-request/:id",
     responses: {
       200: SuccessSchema,
@@ -67,7 +69,7 @@ export const taskContract = c.router({
   rejectTaskEnrollmentRequest: {
     method: "PUT",
     body: z.object({
-      rejectionReason: z.string().optional()
+      remarks: z.string().optional()
     }),
     path: "/reject-social-task-enrollment-request/:id",
     responses: {

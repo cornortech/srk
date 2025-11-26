@@ -1,0 +1,18 @@
+For Packages and enrollements
+/ social-task-package >> done
+/ get-social-task-packages >> done
+/ enroll-in-package >> done
+/ get-all-task-enrollements-by-status
+/ accept-task-enrollement-request
+/ reject-task-enrollement-request
+
+
+For Social Link follow
+/ get-all-active-social-links-to-follow
+/ follow-social-link
+/ approve-social-follow-request
+/ reject-social-follow-request
+
+
+dashboard
+/ get-task-earnings by userId

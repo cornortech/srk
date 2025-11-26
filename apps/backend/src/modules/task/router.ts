@@ -7,5 +7,6 @@ const s = initServer();
 export const taskRouter = s.router(taskContract, {
  createSocialTaskPackage: taskMutationHandler.createSocialTaskPackage,
  getSocialTaskPackage: taskQueryHandler.getSocialTaskPackage,
- enrollSocialTaskPackage: taskMutationHandler.enrollSocialTaskPackage
+ enrollSocialTaskPackage: taskMutationHandler.enrollSocialTaskPackage,
+ getAllSocialTaskEnrollment: taskQueryHandler.getAllSocialTaskEnrollment
 });

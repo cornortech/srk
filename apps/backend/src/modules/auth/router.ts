@@ -6,6 +6,8 @@ const s = initServer();
 export const authRouter = s.router(authContract, {
   login: authMutationHandler.login,
   register: authMutationHandler.register,
+  getAutoCode: authMutationHandler.getAutoCode,
+  exchangeCode: authMutationHandler.exchangeCode,
   approveKyc: authMutationHandler.verifyKyc,
   rejectKyc: authMutationHandler.rejectKyc,
   rejectPaymentDetails: authMutationHandler.rejectPaymentDetails,

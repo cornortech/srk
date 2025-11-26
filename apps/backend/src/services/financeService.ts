@@ -65,7 +65,8 @@ export class FinanceService {
       affiliateCommissionPercentage =
         commissionPackage?.affiliateCommission || 0;
       eventWalletPercentage = commissionPackage?.eventWallet || 0;
-    }
+    };
+
 
     if (seniorPackage) {
       const packages = [newUserPackage, referringUserPackage, seniorPackage];
@@ -85,7 +86,7 @@ export class FinanceService {
 
       srkBonusPremiumPrice = minPricePackage.discountedPrice;
       srkBonusPercentage = commissionPackage?.srkBonus || 0;
-    }
+    };
 
     // const newUserPackageCommission = commissionPackages.find(
     //   (cp) => cp.packageId.toString() === newUserPackage._id?.toString()

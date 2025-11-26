@@ -1,11 +1,12 @@
-import { AppRouteImplementationOrOptions } from "@ts-rest/express/src/lib/types";
-import { affiliateContract } from "../../contract/affiliate/contract";
-import { affiliateRequestModel } from "../../model/affiliateRequestModel";
-import { UserModel } from "../../model/userModel";
-import { affiliateBiometricModel } from "../../model/affiliateVerificationModel";
-import { balanceModel } from "../../model/balanceModel";
-import EmailService from "../../services/emailService";
-import mongoose from "mongoose";
+import { AppRouteImplementationOrOptions } from '@ts-rest/express/src/lib/types';
+import { affiliateContract } from '../../contract/affiliate/contract';
+import { affiliateRequestModel } from '../../model/affiliateRequestModel';
+import { UserModel } from '../../model/userModel';
+import { SrkBankModel } from '../../model/srkBankModel';
+import { affiliateBiometricModel } from '../../model/affiliateVerificationModel';
+import { balanceModel } from '../../model/balanceModel';
+import EmailService from '../../services/emailService';
+import { methods } from '../../utils/methods';
 
 const affiliateRequest: AppRouteImplementationOrOptions<
   typeof affiliateContract.affiliateRequest
@@ -17,13 +18,13 @@ const affiliateRequest: AppRouteImplementationOrOptions<
 
     if (
       existingAffiliateRequest &&
-      existingAffiliateRequest.status === "pending"
+      existingAffiliateRequest.status === 'pending'
     ) {
       return {
         status: 400,
         body: {
           success: false,
-          message: "Affiliate request is already sent",
+          message: 'Affiliate request is already sent',
         },
       };
     }
@@ -31,11 +32,11 @@ const affiliateRequest: AppRouteImplementationOrOptions<
     if (!existingAffiliateRequest) {
       await affiliateRequestModel.create({
         userId: params.userId,
-        status: "pending",
+        status: 'pending',
         requestedAt: new Date(),
       });
     } else {
-      existingAffiliateRequest.status = "pending";
+      existingAffiliateRequest.status = 'pending';
       existingAffiliateRequest.requestedAt = new Date();
       await existingAffiliateRequest.save();
     }
@@ -43,7 +44,7 @@ const affiliateRequest: AppRouteImplementationOrOptions<
       status: 200,
       body: {
         success: true,
-        message: "Request sent successfully",
+        message: 'Request sent successfully',
       },
     };
   } catch (error) {
@@ -51,80 +52,103 @@ const affiliateRequest: AppRouteImplementationOrOptions<
       status: 500,
       body: {
         success: false,
-        message: "Internal server error",
+        message: 'Internal server error',
       },
     };
   }
 };
-
 const approveAffiliateRequest: AppRouteImplementationOrOptions<
   typeof affiliateContract.approveAffiliateRequest
 > = async ({ params }) => {
   try {
-    const userId = new mongoose.Types.ObjectId(params.userId);
+    const existingAffiliateRequest = await affiliateRequestModel.findOne({
+      userId: params.userId,
+    });
 
-    console.log("Approving affiliate request for userId:", userId);
-    const userExist = await UserModel.findById(userId);
+    const userExist = await UserModel.findById(params.userId);
+
     if (!userExist) {
       return {
         status: 404,
-        body: { success: false, message: "User not found" },
+        body: {
+          success: false,
+          message: 'User not found',
+        },
       };
     }
-
-    const existingAffiliateRequest = await affiliateRequestModel.findOne({
-      userId,
-    });
 
     if (!existingAffiliateRequest) {
       return {
         status: 404,
-        body: { success: false, message: "Request not found" },
+        body: {
+          success: false,
+          message: 'Request not found',
+        },
       };
     }
 
     if (userExist.affiliateEnabled) {
       return {
         status: 400,
-        body: { success: false, message: "Affiliate already enabled" },
+        body: {
+          success: false,
+          message: 'Affiliate already enabled',
+        },
       };
     }
 
     userExist.affiliateEnabled = true;
-    existingAffiliateRequest.status = "approved";
+    existingAffiliateRequest.status = 'approved';
 
-    await Promise.all([existingAffiliateRequest.save(), userExist.save()]);
+    await existingAffiliateRequest.save();
+    await userExist.save();
 
-    // const srkBankExist = await SrkBankModel.findOne({ userId });
-    // if (!srkBankExist) {
-    //   await SrkBankModel.create({ userId });
-    // }
+    const srkBankExist = await SrkBankModel.findOne({
+      userId: params.userId,
+    });
 
-    const userBalanceExist = await balanceModel.findOne({ userId });
+    const userBalanceExist = await balanceModel.findOne({
+      userId: params.userId,
+    });
+
+    if (!srkBankExist) {
+      const newSrkBank = await SrkBankModel.create({
+        userId: params.userId,
+        accountNumber: methods.generateSRKBankId(),
+      });
+      userExist.srkBankId = newSrkBank._id;
+      await userExist.save();
+    }
+
     if (!userBalanceExist) {
-      try {
-        await balanceModel.create({ userId });
-      } catch (err) {
-        console.error("Failed to create balance document:", err);
-        // Optional: return error or continue if you want approval to succeed anyway
-      }
+      await balanceModel.create({
+        userId: params.userId,
+      });
     }
 
     EmailService.sendEmail({
       email: userExist.email,
-      subject: "Affiliate request approved",
-      message: `<p>Hi ${userExist.firstName},</p><p>Your affiliate request has been approved.</p>`,
+      subject: 'Affiliate request approved',
+      message: `
+      <p>Hi ${userExist.firstName},</p>
+      <p> Your affiliate request has been approved.</p>
+      `,
     });
 
     return {
       status: 200,
-      body: { success: true, message: "Request approved successfully" },
+      body: {
+        success: true,
+        message: 'Request approved successfully',
+      },
     };
   } catch (error) {
-    console.error("Error approving affiliate request:", error);
     return {
       status: 500,
-      body: { success: false, message: "Internal server error" },
+      body: {
+        success: false,
+        message: 'Internal server error',
+      },
     };
   }
 };
@@ -140,7 +164,7 @@ const addAffiliateBiometricData: AppRouteImplementationOrOptions<
         status: 404,
         body: {
           success: false,
-          message: "User not found",
+          message: 'User not found',
         },
       };
     }
@@ -168,7 +192,7 @@ const addAffiliateBiometricData: AppRouteImplementationOrOptions<
       status: 200,
       body: {
         success: true,
-        message: "Biometric data added successfully",
+        message: 'Biometric data added successfully',
       },
     };
   } catch (error) {
@@ -176,7 +200,7 @@ const addAffiliateBiometricData: AppRouteImplementationOrOptions<
       status: 500,
       body: {
         success: false,
-        message: "Internal server error",
+        message: 'Internal server error',
       },
     };
   }
@@ -193,7 +217,7 @@ const rejectAffiliateRequest: AppRouteImplementationOrOptions<
         status: 404,
         body: {
           success: false,
-          message: "User not found",
+          message: 'User not found',
         },
       };
     }
@@ -206,12 +230,12 @@ const rejectAffiliateRequest: AppRouteImplementationOrOptions<
         status: 404,
         body: {
           success: false,
-          message: "Request not found",
+          message: 'Request not found',
         },
       };
     }
 
-    existingAffiliateRequest.status = "rejected";
+    existingAffiliateRequest.status = 'rejected';
     existingAffiliateRequest.rejectionReason = body.reason;
     userExist.affiliateEnabled = false;
     await existingAffiliateRequest.save();
@@ -223,14 +247,14 @@ const rejectAffiliateRequest: AppRouteImplementationOrOptions<
       <p>Hi ${userExist.firstName},</p>
       <p> Your affiliate request has been rejected.</p>
       `,
-      subject: "Affiliate request rejected",
+      subject: 'Affiliate request rejected',
     });
 
     return {
       status: 200,
       body: {
         success: true,
-        message: "Request rejected successfully",
+        message: 'Request rejected successfully',
       },
     };
   } catch (error) {
@@ -238,7 +262,7 @@ const rejectAffiliateRequest: AppRouteImplementationOrOptions<
       status: 500,
       body: {
         success: false,
-        message: "Internal server error",
+        message: 'Internal server error',
       },
     };
   }

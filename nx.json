@@ -41,6 +41,13 @@
         "targetName": "test"
       },
       "exclude": ["apps/backend-e2e/**/*"]
+    },
+    {
+      "plugin": "@nx/vitest",
+      "options": {
+        "testTargetName": "vitest:test",
+        "ciTargetName": "test-ci"
+      }
     }
   ],
   "generators": {

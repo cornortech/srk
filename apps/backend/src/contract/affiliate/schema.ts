@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from 'zod';
 
 export const getAllAffiliateRequestsByStatusSchema = z.array(
   z.object({
@@ -21,10 +21,10 @@ export const getAllAffiliateRequestsByStatusSchema = z.array(
 export const getTeamsOfUserSchema = z.array(
   z.object({
     _id: z.string(),
-    email: z.string().email("Invalid email address"),
-    firstName: z.string().min(1, "First name is required"),
-    lastName: z.string().min(1, "Last name is required"),
-    country: z.string().min(1, "Country is required"),
+    email: z.string().email('Invalid email address'),
+    firstName: z.string().min(1, 'First name is required'),
+    lastName: z.string().min(1, 'Last name is required'),
+    country: z.string().min(1, 'Country is required'),
     profilePicture: z.string().nullable().optional(),
     purpose: z.string().optional().nullable(),
     gender: z.string(),

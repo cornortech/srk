@@ -1,26 +1,35 @@
-import { AppRouteImplementationOrOptions } from "@ts-rest/express/src/lib/types";
-import { bankContract } from "../../contract/bank/contract";
-import { UserModel } from "../../model/userModel";
-import { SrkBankModel } from "../../model/srkBankModel";
+import { AppRouteImplementationOrOptions } from '@ts-rest/express/src/lib/types';
+import { bankContract } from '../../contract/bank/contract';
+import { UserModel } from '../../model/userModel';
+import { SrkBankModel } from '../../model/srkBankModel';
 
-const getBankDetails: AppRouteImplementationOrOptions<
-  typeof bankContract.getBankDetails
+const getBankDetailsByUserId: AppRouteImplementationOrOptions<
+  typeof bankContract.getBankDetailsByUserId
 > = async ({ req, res }) => {
   try {
     const userId = req.params.userId;
+
     if (!userId) {
       return {
         status: 400,
         body: {
           success: false,
-          message: "User ID is required",
+          message: 'User ID is required',
         },
       };
     }
 
     const userExist = await UserModel.findById(userId).populate<{
       srkBankId: {
+        accountNumber: string;
+        status: string;
         bankDetailsId: {
+          familyDetails: {
+            fatherName: string;
+            motherName: string;
+            spouseName: string;
+            childrenNames: string[];
+          };
           currentAddress: {
             country: string;
             province: string;
@@ -41,9 +50,8 @@ const getBankDetails: AppRouteImplementationOrOptions<
             idNumber: string;
             idType: string;
             issuedDate: Date;
-            expiryDate: Date;
+            placeOfBirth: string;
             issuedFrom: string;
-            nidAuthority: string;
           };
           documents: {
             ppSizePhoto: string;
@@ -52,11 +60,11 @@ const getBankDetails: AppRouteImplementationOrOptions<
         };
       };
     }>({
-      path: "srkBankId",
-      model: "SrkBank",
+      path: 'srkBankId',
+      model: 'SrkBank',
       populate: {
-        path: "bankDetailsId",
-        model: "BankDetails",
+        path: 'bankDetailsId',
+        model: 'BankDetails',
       },
     });
 
@@ -65,7 +73,7 @@ const getBankDetails: AppRouteImplementationOrOptions<
         status: 404,
         body: {
           success: false,
-          message: "User not found",
+          message: 'User not found',
         },
       };
     }
@@ -74,6 +82,10 @@ const getBankDetails: AppRouteImplementationOrOptions<
       status: 200,
       body: {
         userId: userExist._id.toString(),
+        srkBankDetails: {
+          accountNumber: userExist.srkBankId?.accountNumber || null,
+          status: userExist.srkBankId?.status || null,
+        },
         currentAddress: userExist.srkBankId?.bankDetailsId?.currentAddress
           ? {
               country: userExist.srkBankId.bankDetailsId.currentAddress.country,
@@ -112,15 +124,12 @@ const getBankDetails: AppRouteImplementationOrOptions<
               issuedDate:
                 userExist.srkBankId.bankDetailsId.identificationDetails
                   .issuedDate,
-              expiryDate:
-                userExist.srkBankId.bankDetailsId.identificationDetails
-                  .expiryDate,
               issuedFrom:
                 userExist.srkBankId.bankDetailsId.identificationDetails
                   .issuedFrom,
-              nidAuthority:
+              placeOfBirth:
                 userExist.srkBankId.bankDetailsId.identificationDetails
-                  .nidAuthority,
+                  .placeOfBirth,
             }
           : null,
         documents: userExist.srkBankId?.bankDetailsId?.documents
@@ -131,6 +140,19 @@ const getBankDetails: AppRouteImplementationOrOptions<
                 userExist.srkBankId.bankDetailsId.documents.nationalIdCard,
             }
           : null,
+        familyDetails: userExist.srkBankId?.bankDetailsId?.familyDetails
+          ? {
+              fatherName:
+                userExist.srkBankId.bankDetailsId.familyDetails.fatherName,
+              motherName:
+                userExist.srkBankId.bankDetailsId.familyDetails.motherName,
+              spouseName:
+                userExist.srkBankId.bankDetailsId.familyDetails.spouseName,
+              childrenNames:
+                userExist.srkBankId.bankDetailsId.familyDetails.childrenNames ||
+                [],
+            }
+          : null,
       },
     };
   } catch (error) {
@@ -138,60 +160,196 @@ const getBankDetails: AppRouteImplementationOrOptions<
       status: 500,
       body: {
         success: false,
-        message: error instanceof Error ? error.message : "Unknown error",
+        message: error instanceof Error ? error.message : 'Unknown error',
       },
     };
   }
 };
 
-const getSrkBankRequestByStatus: AppRouteImplementationOrOptions<
-  typeof bankContract.getSrkBankRequestByStatus
+const getBankDetailsByAccountNumber: AppRouteImplementationOrOptions<
+  typeof bankContract.getBankDetailsByAccountNumber
 > = async ({ req, res }) => {
   try {
-    const status = req.query.status;
-
-    const filter: any = {};
-    if (status) {
-      filter.status = status;
+    const accountNumber = req.params.accountNumber;
+    if (!accountNumber) {
+      return {
+        status: 400,
+        body: {
+          success: false,
+          message: 'Account number is required',
+        },
+      };
     }
 
-    const srkBankRequests = await SrkBankModel.find(filter).populate<{
-      userId: {
-        _id: string;
-        firstName: string;
-        lastName: string;
-        email: string;
-        phoneNumber: string;
+    const srkBank = await SrkBankModel.findOne({
+      accountNumber: accountNumber,
+    }).populate<{
+      bankDetailsId: {
+        familyDetails: {
+          fatherName: string;
+          motherName: string;
+          spouseName: string;
+          childrenNames: string[];
+        };
+        currentAddress: {
+          country: string;
+          province: string;
+          district: string;
+          municipality: string;
+          wardNo: string;
+          street: string;
+        };
+        permanentAddress: {
+          country: string;
+          province: string;
+          district: string;
+          municipality: string;
+          wardNo: string;
+          street: string;
+        };
+        identificationDetails: {
+          idNumber: string;
+          idType: string;
+          issuedDate: Date;
+          issuedFrom: string;
+          placeOfBirth: string;
+        };
+        documents: {
+          ppSizePhoto: string;
+          nationalIdCard: string;
+        };
       };
-    }>("userId");
+    }>({
+      path: 'bankDetailsId',
+      model: 'BankDetails',
+    });
+
+    if (!srkBank) {
+      return {
+        status: 404,
+        body: {
+          success: false,
+          message: 'User not found',
+        },
+      };
+    }
+
+    console.log(srkBank);
 
     return {
       status: 200,
-      body: srkBankRequests.map((bank) => ({
-        requestedAt: bank.createdAt,
-        status: bank.status,
-        userId: {
-          _id: bank.userId._id.toString(),
-          firstName: bank.userId.firstName,
-          lastName: bank.userId.lastName,
-          email: bank.userId.email,
-          phoneNumber: bank.userId.phoneNumber,
-          requestedAt: bank.createdAt,
-        },
-      })),
+      body: {
+        userId: srkBank._id.toString(),
+        currentAddress: srkBank?.bankDetailsId?.currentAddress
+          ? {
+              country: srkBank.bankDetailsId.currentAddress.country,
+              province: srkBank.bankDetailsId.currentAddress.province,
+              district: srkBank.bankDetailsId.currentAddress.district,
+              municipality: srkBank.bankDetailsId.currentAddress.municipality,
+              wardNo: srkBank.bankDetailsId.currentAddress.wardNo,
+              street: srkBank.bankDetailsId.currentAddress.street,
+            }
+          : null,
+        permanentAddress: srkBank?.bankDetailsId?.permanentAddress
+          ? {
+              country: srkBank.bankDetailsId.permanentAddress.country,
+              province: srkBank.bankDetailsId.permanentAddress.province,
+              district: srkBank.bankDetailsId.permanentAddress.district,
+              municipality: srkBank.bankDetailsId.permanentAddress.municipality,
+              wardNo: srkBank.bankDetailsId.permanentAddress.wardNo,
+              street: srkBank.bankDetailsId.permanentAddress.street,
+            }
+          : null,
+        identificationDetails: srkBank?.bankDetailsId?.identificationDetails
+          ? {
+              idNumber: srkBank.bankDetailsId.identificationDetails.idNumber,
+              idType: srkBank.bankDetailsId.identificationDetails.idType,
+              issuedDate:
+                srkBank.bankDetailsId.identificationDetails.issuedDate,
+
+              issuedFrom:
+                srkBank.bankDetailsId.identificationDetails.issuedFrom,
+              placeOfBirth:
+                srkBank.bankDetailsId.identificationDetails.placeOfBirth,
+            }
+          : null,
+        documents: srkBank?.bankDetailsId?.documents
+          ? {
+              ppSizePhoto: srkBank.bankDetailsId.documents.ppSizePhoto,
+              nationalIdCard: srkBank.bankDetailsId.documents.nationalIdCard,
+            }
+          : null,
+        familyDetails: srkBank?.bankDetailsId?.familyDetails
+          ? {
+              fatherName: srkBank.bankDetailsId.familyDetails.fatherName,
+              motherName: srkBank.bankDetailsId.familyDetails.motherName,
+              spouseName: srkBank.bankDetailsId.familyDetails.spouseName,
+              childrenNames:
+                srkBank.bankDetailsId.familyDetails.childrenNames || [],
+            }
+          : null,
+      },
     };
   } catch (error) {
     return {
       status: 500,
       body: {
         success: false,
-        message: error instanceof Error ? error.message : "Unknown error",
+        message: error instanceof Error ? error.message : 'Unknown error',
+      },
+    };
+  }
+};
+
+const getBankBalance: AppRouteImplementationOrOptions<
+  typeof bankContract.getBankBalance
+> = async ({ req, res }) => {
+  try {
+    const userId = req.params.userId;
+    if (!userId) {
+      return {
+        status: 400,
+        body: {
+          success: false,
+          message: 'User ID is required',
+        },
+      };
+    }
+
+    const srkBank = await SrkBankModel.findOne({
+      userId: userId,
+    });
+
+    if (!srkBank) {
+      return {
+        status: 404,
+        body: {
+          success: false,
+          message: 'User not found',
+        },
+      };
+    }
+
+    return {
+      status: 200,
+      body: {
+        balance: srkBank.amount,
+      },
+    };
+  } catch (error) {
+    console.log(error);
+    return {
+      status: 500,
+      body: {
+        success: false,
+        message: error instanceof Error ? error.message : 'Unknown error',
       },
     };
   }
 };
 
 export const bankQueryHandlers = {
-  getBankDetails,
-  getSrkBankRequestByStatus,
+  getBankBalance,
+  getBankDetailsByUserId,
+  getBankDetailsByAccountNumber,
 };

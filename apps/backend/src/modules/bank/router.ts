@@ -1,12 +1,21 @@
-import { initServer } from "@ts-rest/express";
-import { bankContract } from "../../contract/bank/contract";
-import { bankQueryHandlers } from "./query";
-import { bankMutationHandlers } from "./mutation";
+import { initServer } from '@ts-rest/express';
+import { bankContract } from '../../contract/bank/contract';
+import { bankQueryHandlers } from './query';
+import { bankMutationHandlers } from './mutation';
 
 const s = initServer();
 
 export const bankRouter = s.router(bankContract, {
-  getBankDetails: bankQueryHandlers.getBankDetails,
+  sendBankRegistrationOtp: bankMutationHandlers.sendBankRegistrationOtp,
+  getBankDetailsByUserId: bankQueryHandlers.getBankDetailsByUserId,
+  getBankDetailsByAccountNumber:
+    bankQueryHandlers.getBankDetailsByAccountNumber,
+  getBankBalance: bankQueryHandlers.getBankBalance,
   createBankDetails: bankMutationHandlers.createBankDetails,
-  getSrkBankRequestByStatus: bankQueryHandlers.getSrkBankRequestByStatus,
+  sendMoney: bankMutationHandlers.sendMoney,
+  validateTransactionPIN: bankMutationHandlers.validateTransactionPIN,
+  validateBankRegistrationOtp: bankMutationHandlers.validateBankRegistrationOtp,
+  uploadBankProfilePicture: bankMutationHandlers.uploadBankProfilePicture,
+  createBankTransactionPin: bankMutationHandlers.createBankTransactionPin,
+  paymentIntent: bankMutationHandlers.createPaymentIntent,
 });

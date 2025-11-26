@@ -1,16 +1,16 @@
-import { AppRouteImplementation } from "@ts-rest/express";
-import { financeContract } from "../../contract/finance/contract";
-import { balancePayoutModel } from "../../model/balancePayoutModel";
-import { BankModel } from "../../model/bankModel";
-import { UserModel } from "../../model/userModel";
-import { KYCModel } from "../../model/kycModel";
-import { balanceModel } from "../../model/balanceModel";
-import { adminBalanceModel } from "../../model/adminBalanceModel";
-import { SrkBankModel } from "../../model/srkBankModel";
-import bankStatement from "../../model/bankStatement";
-import AdminSrkBankService from "../../services/adminSrkBankService";
-import EmailService from "../../services/emailService";
-import { SrkUniversityBankModel } from "../../model/srkUniversityBankModel";
+import { AppRouteImplementation } from '@ts-rest/express';
+import { financeContract } from '../../contract/finance/contract';
+import { balancePayoutModel } from '../../model/balancePayoutModel';
+import { BankModel } from '../../model/bankModel';
+import { UserModel } from '../../model/userModel';
+import { KYCModel } from '../../model/kycModel';
+import { balanceModel } from '../../model/balanceModel';
+import { adminBalanceModel } from '../../model/adminBalanceModel';
+import { SrkBankModel } from '../../model/srkBankModel';
+import bankStatement from '../../model/bankStatement';
+import AdminSrkBankService from '../../services/adminSrkBankService';
+import EmailService from '../../services/emailService';
+import { SrkUniversityBankModel } from '../../model/srkUniversityBankModel';
 
 const createBalancePayout: AppRouteImplementation<
   typeof financeContract.createBalancePayout
@@ -29,7 +29,7 @@ const createBalancePayout: AppRouteImplementation<
         status: 404,
         body: {
           success: false,
-          message: "User balance not found",
+          message: 'User balance not found',
         },
       };
     }
@@ -39,16 +39,17 @@ const createBalancePayout: AppRouteImplementation<
         status: 404,
         body: {
           success: false,
-          message: "User balance not found",
+          message: 'User balance not found',
         },
       };
     }
+
     if (req.body.amount <= 0) {
       return {
         status: 400,
         body: {
           success: false,
-          message: "Amount must be greater than 0",
+          message: 'Amount must be greater than 0',
         },
       };
     }
@@ -57,7 +58,7 @@ const createBalancePayout: AppRouteImplementation<
         status: 400,
         body: {
           success: false,
-          message: "Insufficient balance",
+          message: 'Insufficient balance',
         },
       };
     }
@@ -65,25 +66,25 @@ const createBalancePayout: AppRouteImplementation<
     const tdsAmount = +(req.body.amount * 0.15).toFixed(2);
     const withdrawAmount = +(req.body.amount - tdsAmount).toFixed(2);
 
-    await balanceModel.updateOne(
-      { userId: req.body.userId },
-      {
-        $inc: {
-          balance: -req.body.amount,
-          totalTds: tdsAmount,
-          totalWithdraw: withdrawAmount,
-        },
-      }
-    );
+    // await balanceModel.updateOne(
+    //   { userId: req.body.userId },
+    //   {
+    //     $inc: {
+    //       balance: -req.body.amount,
+    //       totalTds: tdsAmount,
+    //       totalWithdraw: withdrawAmount,
+    //     },
+    //   }
+    // );
 
-    await adminBalanceModel.updateOne(
-      {},
-      {
-        $inc: {
-          tdsAmount: tdsAmount,
-        },
-      }
-    );
+    // await adminBalanceModel.updateOne(
+    //   {},
+    //   {
+    //     $inc: {
+    //       tdsAmount: tdsAmount,
+    //     },
+    //   }
+    // );
 
     const updatedSrkBank = await SrkBankModel.findOneAndUpdate(
       {
@@ -101,10 +102,11 @@ const createBalancePayout: AppRouteImplementation<
 
     await bankStatement.create({
       amount: withdrawAmount,
-      type: "deposit",
+      type: 'deposit',
       bankId: srkBankExist._id,
-      description: "Balance deposit to srk bank",
+      description: 'Balance deposit to srk bank',
       currentAmount: updatedSrkBank?.amount,
+      status: 'completed',
     });
 
     const adminSrkBankExist = await AdminSrkBankService.getSrkBankDocument();
@@ -119,7 +121,7 @@ const createBalancePayout: AppRouteImplementation<
       status: 201,
       body: {
         success: true,
-        message: "Balance payout created successfully",
+        message: 'Balance payout created successfully',
       },
     };
   } catch (error) {
@@ -128,7 +130,7 @@ const createBalancePayout: AppRouteImplementation<
       status: 500,
       body: {
         success: false,
-        message: "Internal server error",
+        message: 'Internal server error',
       },
     };
   }
@@ -144,7 +146,7 @@ const upsertBankDetails: AppRouteImplementation<
         status: 404,
         body: {
           success: false,
-          message: "User not found",
+          message: 'User not found',
         },
       };
     }
@@ -156,7 +158,7 @@ const upsertBankDetails: AppRouteImplementation<
     if (bankDetailExist) {
       await BankModel.findByIdAndUpdate(bankDetailExist._id, {
         ...req.body,
-        status: "pending",
+        status: 'pending',
       });
     } else {
       await BankModel.create({
@@ -169,7 +171,7 @@ const upsertBankDetails: AppRouteImplementation<
         relationWithAccount: req.body.relationWithAccount,
         userId: req.params.userId,
         qrUrl: req.body.qrUrl,
-        status: "pending",
+        status: 'pending',
       });
     }
 
@@ -177,7 +179,7 @@ const upsertBankDetails: AppRouteImplementation<
       status: 200,
       body: {
         success: true,
-        message: "Bank details updated successfully",
+        message: 'Bank details updated successfully',
       },
     };
   } catch (error) {
@@ -186,7 +188,7 @@ const upsertBankDetails: AppRouteImplementation<
       status: 500,
       body: {
         success: false,
-        message: "Internal server error",
+        message: 'Internal server error',
       },
     };
   }
@@ -201,7 +203,7 @@ const upsertKYCDetails: AppRouteImplementation<
         status: 404,
         body: {
           success: false,
-          message: "User not found",
+          message: 'User not found',
         },
       };
     }
@@ -218,14 +220,14 @@ const upsertKYCDetails: AppRouteImplementation<
         ...req.body,
       });
     }
-    userExist.status = "KYC_VERIFICATION_PENDING";
+    userExist.status = 'KYC_VERIFICATION_PENDING';
     await userExist.save();
 
     return {
       status: 200,
       body: {
         success: true,
-        message: "KYC details updated successfully",
+        message: 'KYC details updated successfully',
       },
     };
   } catch (error) {
@@ -234,7 +236,7 @@ const upsertKYCDetails: AppRouteImplementation<
       status: 500,
       body: {
         success: false,
-        message: "Internal server error",
+        message: 'Internal server error',
       },
     };
   }
@@ -253,7 +255,7 @@ export const approveBalancePayout: AppRouteImplementation<
         status: 404,
         body: {
           success: false,
-          message: "Balance payout not found",
+          message: 'Balance payout not found',
         },
       };
     }
@@ -265,13 +267,13 @@ export const approveBalancePayout: AppRouteImplementation<
         status: 404,
         body: {
           success: false,
-          message: "User not found",
+          message: 'User not found',
         },
       };
     }
 
     await balancePayoutModel.findByIdAndUpdate(balancePayoutExist._id, {
-      status: "approved",
+      status: 'approved',
       paymentProofUrl: req.body.paymentProofUrl,
       paymentMethod: req.body.paymentMethod,
       transactionNumber: req.body.transactionNumber,
@@ -291,25 +293,43 @@ export const approveBalancePayout: AppRouteImplementation<
 
     await bankStatement.create({
       amount: balancePayoutExist.amount,
-      type: "payout",
+      type: 'payout',
       bankId: srkBankExist?._id,
-      description: "Balance payout to user",
+      description: 'Balance payout to user',
       currentAmount: srkBankExist?.amount,
     });
+
+    await balanceModel.updateOne(
+      { userId: userExist._id },
+      {
+        $inc: {
+          totalTds: balancePayoutExist.tdsAmount,
+        },
+      }
+    );
+
+    await adminBalanceModel.updateOne(
+      {},
+      {
+        $inc: {
+          tdsAmount: balancePayoutExist.tdsAmount,
+        },
+      }
+    );
 
     EmailService.sendEmail({
       email: userExist.email,
       message: `
         <p>Hi ${userExist.firstName}, your balance payout of ${balancePayoutExist.amount} has been approved successfully.</p>
       `,
-      subject: "Balance payout approved successfully",
+      subject: 'Balance payout approved successfully',
     });
 
     return {
       status: 200,
       body: {
         success: true,
-        message: "Balance payout approved successfully",
+        message: 'Balance payout approved successfully',
       },
     };
   } catch (error) {
@@ -317,7 +337,7 @@ export const approveBalancePayout: AppRouteImplementation<
       status: 500,
       body: {
         success: false,
-        message: "Internal server error",
+        message: 'Internal server error',
       },
     };
   }
@@ -336,7 +356,7 @@ export const rejectBalancePayout: AppRouteImplementation<
         status: 404,
         body: {
           success: false,
-          message: "Balance payout not found",
+          message: 'Balance payout not found',
         },
       };
     }
@@ -350,13 +370,13 @@ export const rejectBalancePayout: AppRouteImplementation<
         status: 404,
         body: {
           success: false,
-          message: "Bank details not found",
+          message: 'Bank details not found',
         },
       };
     }
 
     await balancePayoutModel.findByIdAndUpdate(balancePayoutExist._id, {
-      status: "rejected",
+      status: 'rejected',
       rejectionReason: req.body.reason,
     });
 
@@ -397,15 +417,15 @@ export const rejectBalancePayout: AppRouteImplementation<
       amount: balancePayoutExist.amount,
       bankId: srkBankExist._id,
       currentAmount: updatedSrkBank?.amount,
-      type: "refunded",
-      description: "Rejected balance payout and refunded to user",
+      type: 'refunded',
+      description: 'Rejected balance payout and refunded to user',
     });
 
     return {
       status: 200,
       body: {
         success: true,
-        message: "Balance payout rejected successfully",
+        message: 'Balance payout rejected successfully',
       },
     };
   } catch (error) {
@@ -413,7 +433,7 @@ export const rejectBalancePayout: AppRouteImplementation<
       status: 500,
       body: {
         success: false,
-        message: "Internal server error",
+        message: 'Internal server error',
       },
     };
   }
@@ -432,7 +452,7 @@ const srkBankPayoutRequest: AppRouteImplementation<
         status: 404,
         body: {
           success: false,
-          message: "Srk bank details not found",
+          message: 'Srk bank details not found',
         },
       };
     }
@@ -452,7 +472,7 @@ const srkBankPayoutRequest: AppRouteImplementation<
         status: 403,
         body: {
           success: false,
-          message: "Minimum payout amount is 500",
+          message: 'Minimum payout amount is 500',
         },
       };
     }
@@ -467,7 +487,7 @@ const srkBankPayoutRequest: AppRouteImplementation<
     await balancePayoutModel.create({
       userId: req.body.userId,
       amount: amountAfterTDS,
-      status: "pending",
+      status: 'pending',
       tdsAmount,
       totalAmount,
     });
@@ -482,13 +502,15 @@ const srkBankPayoutRequest: AppRouteImplementation<
 
     await bankStatement.create({
       bankId: srkBankExist._id,
-      type: "payout_request",
+      type: 'payout_request',
       amount: transactionAmount,
-      description: "Srk bank payout request",
+      status: 'completed',
+      description: 'Srk bank payout request',
       currentAmount: updatedSrkBankExist?.amount || 0,
     });
 
     const adminSrkBankDoc = await AdminSrkBankService.getSrkBankDocument();
+
     await adminSrkBankDoc.updateOne({
       $inc: {
         totalPendingPayout: transactionAmount,
@@ -499,7 +521,7 @@ const srkBankPayoutRequest: AppRouteImplementation<
       status: 200,
       body: {
         success: true,
-        message: "Balance payout request sent successfully",
+        message: 'Balance payout request sent successfully',
       },
     };
   } catch (error) {
@@ -508,7 +530,7 @@ const srkBankPayoutRequest: AppRouteImplementation<
       status: 500,
       body: {
         success: false,
-        message: "Internal server error",
+        message: 'Internal server error',
       },
     };
   }
@@ -525,7 +547,7 @@ const createSrkUniversityPayout: AppRouteImplementation<
         status: 404,
         body: {
           success: false,
-          message: "Admin balance not found",
+          message: 'Admin balance not found',
         },
       };
     }
@@ -534,40 +556,40 @@ const createSrkUniversityPayout: AppRouteImplementation<
         status: 404,
         body: {
           success: false,
-          message: "Srk university bank not found",
+          message: 'Srk university bank not found',
         },
       };
     }
     switch (req.body.type) {
-      case "ceoSalary":
+      case 'ceoSalary':
         await adminBalanceExist.updateOne({
           $inc: {
             ceoSalary: -req.body.amount,
           },
         });
         break;
-      case "tdsAmount":
+      case 'tdsAmount':
         await adminBalanceExist.updateOne({
           $inc: {
             tdsAmount: -req.body.amount,
           },
         });
         break;
-      case "eventWallet":
+      case 'eventWallet':
         await adminBalanceExist.updateOne({
           $inc: {
             eventWallet: -req.body.amount,
           },
         });
         break;
-      case "srkBonus":
+      case 'srkBonus':
         await adminBalanceExist.updateOne({
           $inc: {
             srkBonus: -req.body.amount,
           },
         });
         break;
-      case "officeManagementCharge":
+      case 'officeManagementCharge':
         await adminBalanceExist.updateOne({
           $inc: {
             officeManagementCharge: -req.body.amount,
@@ -580,12 +602,12 @@ const createSrkUniversityPayout: AppRouteImplementation<
       await SrkUniversityBankModel.findOneAndUpdate(
         {}, // Your filter criteria here
         { $inc: { amount: req.body.amount } },
-        { returnDocument: "after" } // Returns the updated document
+        { returnDocument: 'after' } // Returns the updated document
       );
 
     await bankStatement.create({
       amount: req.body.amount,
-      type: "deposit",
+      type: 'deposit',
       description: ` ${req.body.type} balance deposited to srk university bank`,
       currentAmount: adminSrkUniversityUpdated?.amount || 0,
       srkUniversityBankId: srkUniversityBankExist._id,
@@ -602,7 +624,7 @@ const createSrkUniversityPayout: AppRouteImplementation<
       status: 200,
       body: {
         success: true,
-        message: "Srk university payout request sent successfully",
+        message: 'Srk university payout request sent successfully',
       },
     };
   } catch (error) {
@@ -610,7 +632,7 @@ const createSrkUniversityPayout: AppRouteImplementation<
       status: 500,
       body: {
         success: false,
-        message: "Internal server error",
+        message: 'Internal server error',
       },
     };
   }
@@ -626,7 +648,7 @@ const srkBankPayoutRequestForAdmin: AppRouteImplementation<
       return {
         status: 404,
         body: {
-          message: "srk university bank not found.",
+          message: 'srk university bank not found.',
           success: false,
         },
       };
@@ -636,7 +658,7 @@ const srkBankPayoutRequestForAdmin: AppRouteImplementation<
       return {
         status: 403,
         body: {
-          message: "You dont have enough srk university balance",
+          message: 'You dont have enough srk university balance',
           success: false,
         },
       };
@@ -658,15 +680,15 @@ const srkBankPayoutRequestForAdmin: AppRouteImplementation<
           },
         },
         {
-          returnDocument: "after",
+          returnDocument: 'after',
         }
       );
 
     await bankStatement.create({
       amount: req.body.amount,
       srkUniversityBankId: srkUniversityBank._id,
-      type: "payout_request",
-      description: "srk university payout request",
+      type: 'payout_request',
+      description: 'srk university payout request',
       currentAmount: srkUniversityBankUpdated?.amount,
     });
 
@@ -681,7 +703,7 @@ const srkBankPayoutRequestForAdmin: AppRouteImplementation<
     return {
       status: 201,
       body: {
-        message: "srk bank payout done ",
+        message: 'srk bank payout done ',
         success: true,
       },
     };
@@ -691,7 +713,7 @@ const srkBankPayoutRequestForAdmin: AppRouteImplementation<
       status: 500,
       body: {
         success: false,
-        message: "Internal server error",
+        message: 'Internal server error',
       },
     };
   }
@@ -708,7 +730,7 @@ const approveBankDetails: AppRouteImplementation<
         status: 404,
         body: {
           success: false,
-          message: "User not found",
+          message: 'User not found',
         },
       };
     }
@@ -722,14 +744,14 @@ const approveBankDetails: AppRouteImplementation<
         status: 404,
         body: {
           success: false,
-          message: "Bank details not found",
+          message: 'Bank details not found',
         },
       };
     }
 
     await BankModel.findByIdAndUpdate(bankExist._id, {
       $set: {
-        status: "approved",
+        status: 'approved',
       },
     });
 
@@ -737,7 +759,7 @@ const approveBankDetails: AppRouteImplementation<
       status: 200,
       body: {
         success: true,
-        message: "Bank details approved successfully",
+        message: 'Bank details approved successfully',
       },
     };
   } catch (error) {
@@ -745,7 +767,7 @@ const approveBankDetails: AppRouteImplementation<
       status: 500,
       body: {
         success: false,
-        message: "Internal server error",
+        message: 'Internal server error',
       },
     };
   }
@@ -761,7 +783,7 @@ const rejectBankRequest: AppRouteImplementation<
         status: 404,
         body: {
           success: false,
-          message: "User not found",
+          message: 'User not found',
         },
       };
     }
@@ -775,7 +797,7 @@ const rejectBankRequest: AppRouteImplementation<
         status: 404,
         body: {
           success: false,
-          message: "Bank details not found",
+          message: 'Bank details not found',
         },
       };
     }
@@ -785,7 +807,7 @@ const rejectBankRequest: AppRouteImplementation<
         status: 400,
         body: {
           success: false,
-          message: "Rejection reason is required",
+          message: 'Rejection reason is required',
         },
       };
     }
@@ -793,7 +815,7 @@ const rejectBankRequest: AppRouteImplementation<
     await BankModel.findByIdAndUpdate(bankExist._id, {
       $set: {
         rejectionReason: req.body.reason,
-        status: "rejected",
+        status: 'rejected',
       },
     });
 
@@ -801,7 +823,7 @@ const rejectBankRequest: AppRouteImplementation<
       status: 200,
       body: {
         success: true,
-        message: "Bank details rejected successfully",
+        message: 'Bank details rejected successfully',
       },
     };
   } catch (error) {
@@ -811,7 +833,7 @@ const rejectBankRequest: AppRouteImplementation<
       status: 500,
       body: {
         success: false,
-        message: "Internal server error",
+        message: 'Internal server error',
       },
     };
   }

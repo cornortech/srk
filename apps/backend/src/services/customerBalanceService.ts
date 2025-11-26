@@ -18,32 +18,21 @@ class CustomerBalanceService {
   }: TUpdateCustomerBalance): Promise<void> {
     const customerBalance = await balanceModel.findOne({ userId });
 
-    console.log(`
-      
-      balance: ${balance},
-      srkBonus: ${srkBonus},
-      eventWallet: ${eventWallet},
-      `);
-
     if (!customerBalance) {
       // Create new customer balance entry if not found
       await balanceModel.create({
         userId,
         balance,
-        // eventWallet,
-        tourEventWallet: eventWallet,
+        eventWallet,
         srkBonus,
         totalEarnings,
-        tourBalance: balance,
       });
     } else {
       // Update existing customer balance
       customerBalance.balance += balance;
-      // customerBalance.eventWallet += eventWallet;
-      customerBalance.tourEventWallet += eventWallet;
+      customerBalance.eventWallet += eventWallet;
       customerBalance.srkBonus += srkBonus;
       customerBalance.totalEarnings += totalEarnings;
-      customerBalance.tourBalance += balance;
       await customerBalance.save();
     }
   }

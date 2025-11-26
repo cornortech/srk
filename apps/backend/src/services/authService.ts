@@ -74,6 +74,9 @@ class AuthService {
     }
     return password;
   }
+  static generateBaseSecret(): string {
+    return crypto.randomBytes(16).toString("hex");
+  }
 }
 
 export default AuthService;

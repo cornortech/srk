@@ -3,49 +3,54 @@ const getFrontendRedirectionUrl = (
   userStatus: string,
   packageId?: string
 ) => {
-  // Determine role
-  const role = isAdmin ? "admin" : "user";
+  const role = isAdmin ? 'admin' : 'user';
 
-  // Default redirection URL
-  let redirectionUrl = "/auth/login";
+  let redirectionUrl = '/auth/login';
 
-  if (role === "user") {
-    // Handle user redirection based on status
+  if (role === 'user') {
     switch (userStatus) {
-      case "PORTAL_ACTIVATED":
-        redirectionUrl = "/study";
+      case 'PORTAL_ACTIVATED':
+        redirectionUrl = '/study';
         break;
 
-      case "KYC_VERIFICATION_REJECTED":
-        redirectionUrl = "/auth/kyc-verification";
+      case 'KYC_VERIFICATION_REJECTED':
+        redirectionUrl = '/auth/kyc-verification';
         break;
 
-      case "KYC_VERIFICATION_PENDING":
-        redirectionUrl = "/auth/kyc-verification";
+      case 'KYC_VERIFICATION_PENDING':
+        redirectionUrl = '/auth/kyc-verification';
         break;
 
-      case "REGISTERED":
-        redirectionUrl = "/auth/kyc-verification";
+      case 'REGISTERED':
+        redirectionUrl = '/auth/kyc-verification';
         break;
 
-      case "PAYMENT_VERIFICATION_REJECTED":
+      case 'PAYMENT_VERIFICATION_REJECTED':
         redirectionUrl = `/auth/payment-verification?packageId=${packageId}`;
         break;
 
-      case "PAYMENT_VERIFICATION_PENDING":
+      case 'PAYMENT_VERIFICATION_PENDING':
         redirectionUrl = `/auth/payment-verification?packageId=${packageId}`;
         break;
 
-      case "PAYMENT_VERIFICATION_APPROVED":
+      case 'PAYMENT_VERIFICATION_APPROVED':
         redirectionUrl = `/auth/kyc-verification`;
         break;
     }
   } else {
     // Admin redirection
-    redirectionUrl = "/admin";
+    redirectionUrl = '/admin';
   }
 
   return redirectionUrl;
 };
 
-export const methods = { getFrontendRedirectionUrl };
+function generateSRKBankId() {
+  let randomNumber = Math.floor(Math.random() * 1e13)
+    .toString()
+    .padStart(13, '0');
+
+  return `SRK${randomNumber}`;
+}
+
+export const methods = { getFrontendRedirectionUrl, generateSRKBankId };

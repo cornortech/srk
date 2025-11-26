@@ -1,32 +1,82 @@
-import { initContract } from "@ts-rest/core";
-import { LoginSchema, LoginSuccessResponse, RegisterSchema } from "./schema";
-import { ErrorSchema, SuccessSchema } from "../common";
-import { z } from "zod";
+import { initContract } from '@ts-rest/core';
+import {
+  getAuthUserDetailsSchema,
+  LoginSchema,
+  LoginSuccessResponse,
+  RegisterSchema,
+} from './schema';
+import { ErrorSchema, SuccessSchema } from '../common';
+import { z } from 'zod';
 
 const c = initContract();
 
 export const authContract = c.router({
   register: {
-    method: "POST",
-    path: "/auth/register",
+    method: 'POST',
+    path: '/auth/register',
     responses: {
       201: SuccessSchema,
     },
     body: RegisterSchema,
-    summary: "Register a new user",
+    summary: 'Register a new user',
   },
   login: {
-    method: "POST",
+    method: 'POST',
     path: `/auth/login`,
     body: LoginSchema,
     responses: {
       200: LoginSuccessResponse,
     },
-    summary: "Login a user",
+    summary: 'Login a user',
+  },
+  getProfile: {
+    method: 'GET',
+    path: '/auth/me',
+    summary: 'get user profile',
+    responses: {
+      200: getAuthUserDetailsSchema,
+      401: ErrorSchema,
+      400: ErrorSchema,
+      404: ErrorSchema,
+      500: ErrorSchema,
+    },
+  },
+  getAutoCode: {
+    method: 'GET',
+    path: '/auth/get-auto-code',
+    responses: {
+      200: z.object({
+        success: z.boolean(),
+        message: z.string(),
+        data: z
+          .object({
+            code: z.string(),
+            redirectUrl: z.string(),
+          })
+          .optional(),
+      }),
+      401: ErrorSchema,
+      500: ErrorSchema,
+    },
+    summary: 'Generate one-time auto code for SSO',
+  },
+  exchangeCode: {
+    method: 'POST',
+    path: '/auth/exchange-code',
+    body: z.object({
+      code: z.string(),
+    }),
+    responses: {
+      200: LoginSuccessResponse,
+      400: ErrorSchema,
+      401: ErrorSchema,
+      500: ErrorSchema,
+    },
+    summary: 'Exchange auto code for JWT token',
   },
   approveKyc: {
-    method: "POST",
-    path: "/auth/approveKyc/:userId",
+    method: 'POST',
+    path: '/auth/approveKyc/:userId',
     body: z.object({}).optional(),
     responses: {
       201: SuccessSchema,
@@ -34,11 +84,11 @@ export const authContract = c.router({
       404: SuccessSchema,
       500: SuccessSchema,
     },
-    summary: "Approve KYC",
+    summary: 'Approve KYC',
   },
   rejectKyc: {
-    method: "POST",
-    path: "/auth/rejectKyc/:userId",
+    method: 'POST',
+    path: '/auth/rejectKyc/:userId',
     body: z.object({
       reason: z.string(),
     }),
@@ -48,11 +98,11 @@ export const authContract = c.router({
       404: SuccessSchema,
       500: SuccessSchema,
     },
-    summary: "Reject KYC",
+    summary: 'Reject KYC',
   },
   rejectPaymentDetails: {
-    method: "POST",
-    path: "/auth/payment/reject-payment-verification/:userId",
+    method: 'POST',
+    path: '/auth/payment/reject-payment-verification/:userId',
     body: z.object({
       reason: z.string(),
     }),
@@ -64,8 +114,8 @@ export const authContract = c.router({
     },
   },
   approvePaymentDetails: {
-    method: "POST",
-    path: "/auth/payment/approve-payment-verification/:userId",
+    method: 'POST',
+    path: '/auth/payment/approve-payment-verification/:userId',
     body: z.object({}).optional(),
     responses: {
       200: SuccessSchema,
@@ -75,11 +125,11 @@ export const authContract = c.router({
     },
   },
   editPaymentDetails: {
-    method: "POST",
-    path: "/auth/payment/edit-payment-verification/:userId",
+    method: 'POST',
+    path: '/auth/payment/edit-payment-verification/:userId',
     body: z.object({
       transactionId: z.string(),
-      paymentMethod: z.enum(["esewa", "khalti", "bankTransfer"]),
+      paymentMethod: z.enum(['esewa', 'khalti', 'bankTransfer']),
       paymentProofUrl: z.string(),
     }),
     responses: {

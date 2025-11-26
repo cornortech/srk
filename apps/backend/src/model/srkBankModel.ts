@@ -1,24 +1,49 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
 const srkBankSchema = new mongoose.Schema(
   {
     userId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: 'User',
       required: true,
     },
     amount: {
       type: Number,
       default: 0,
     },
+    accountNumber: {
+      type: String,
+      unique: true,
+      trim: true,
+      minlength: [16, 'Account number must be 16 digits.'],
+      maxlength: [16, 'Account number must be 16 digits.'],
+    },
+    transactionPIN: {
+      type: String,
+      // trim: true,
+      minLength: [4, 'Transaction PIN must be of 4 characters.'],
+      maxLength: [4, 'Transaction PIN must be of 4 characters.'],
+    },
+    password: {
+      type: String,
+      trim: true,
+      minlength: [6, 'Password must be at least 6 characters long.'],
+    },
     status: {
       type: String,
-      enum: ["pending", "approved", "rejected"],
-      default: "pending",
+      enum: [
+        'ONBOARDING_DETAILS_ADDED',
+        'OTP_VERIFIED',
+        'PROFILE_PICTURE_UPLOADED',
+        'TRANSACTION_PIN_ADDED',
+        'PORTAL_ACTIVATED',
+        'REJECTED',
+      ],
     },
     bankDetailsId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "BankDetails",
+      ref: 'BankDetails',
+      // required: true,
     },
   },
   {
@@ -26,10 +51,4 @@ const srkBankSchema = new mongoose.Schema(
   }
 );
 
-export const SrkBankModel = mongoose.model("SrkBank", srkBankSchema);
-
-// personal details  - name , phone number
-// family details - father name , mother name , spouse name , children names
-// address details  - permanent address, current address
-// identification details - type of id , id number , issued date , issued from , nid authority
-// documents  - pp size photo , national identity card
+export const SrkBankModel = mongoose.model('SrkBank', srkBankSchema);

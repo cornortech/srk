@@ -31,6 +31,11 @@ export const getUserDetailsSchema = z.object({
       discountedPrice: z.number().nullable(),
     }),
   }),
+  srkBank: z.object({
+    _id: z.string().nullable(),
+    accountNumber: z.string().min(1, "Account number is required").nullable(),
+    status: z.string().min(1, "Status is required").nullable(),
+  }).nullable(),
   bankDetails: z
     .object({
       accountHolderName: z.string().min(1, "Account holder name is required"),
@@ -94,13 +99,16 @@ export const updateUserDetailsSchema = z.object({
       phoneNumber: z.string(),
       isActive: z.boolean(),
       purpose: z.enum(["affiliate", "study"]).optional().nullable(),
-      dob: z.string().refine(
-        (value) => {
-          const date = new Date(value);
-          return !isNaN(date.getTime());
-        },
-        { message: "Invalid date of birth" }
-      ).optional(),
+      dob: z
+        .string()
+        .refine(
+          (value) => {
+            const date = new Date(value);
+            return !isNaN(date.getTime());
+          },
+          { message: "Invalid date of birth" }
+        )
+        .optional(),
       gender: z.enum(["Male", "Female", "Other"]).optional(),
     })
     .partial(),

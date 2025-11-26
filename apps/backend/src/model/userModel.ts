@@ -1,5 +1,42 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
+import { Document, Types } from 'mongoose';
 
+export interface IUser extends Document {
+  _id: Types.ObjectId;
+  uid: string; //firebase auth uid
+  firstName: string;
+  lastName?: string;
+  phoneNumber: string;
+  gender: string;
+  dob: Date;
+  country: string;
+  email: string;
+  password: string;
+  affiliateEnabled: boolean;
+  allowedToAddUsers: boolean;
+  profilePicture?: string;
+  referralCode?: string;
+  referredBy?: Types.ObjectId;
+  packageId?: Types.ObjectId;
+  status:
+    | 'REGISTERED'
+    | 'PAYMENT_VERIFICATION_PENDING'
+    | 'PAYMENT_VERIFICATION_REJECTED'
+    | 'PAYMENT_VERIFICATION_APPROVED'
+    | 'KYC_VERIFICATION_PENDING'
+    | 'KYC_VERIFICATION_REJECTED'
+    | 'PORTAL_ACTIVATED'
+    | 'PORTAL_DEACTIVATED';
+  hasSrkBonusDeposited: boolean;
+  isSelfSignup: boolean;
+  purpose?: 'affiliate' | 'study';
+  srkBankId?: Types.ObjectId;
+  baseSecret: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export default IUser;
 const userSchema = new mongoose.Schema(
   {
     firstName: {
@@ -8,7 +45,10 @@ const userSchema = new mongoose.Schema(
     },
     lastName: {
       type: String,
-      required: true,
+    },
+    uid: {
+      type: String,
+      unique: true,
     },
     phoneNumber: {
       type: String,
@@ -52,26 +92,26 @@ const userSchema = new mongoose.Schema(
     },
     referredBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: 'User',
     },
     packageId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Package",
+      ref: 'Package',
     },
     status: {
       type: String,
       required: true,
       enum: [
-        "REGISTERED",
-        "PAYMENT_VERIFICATION_PENDING",
-        "PAYMENT_VERIFICATION_REJECTED",
-        "PAYMENT_VERIFICATION_APPROVED",
-        "KYC_VERIFICATION_PENDING",
-        "KYC_VERIFICATION_REJECTED",
-        "PORTAL_ACTIVATED",
-        "PORTAL_DEACTIVATED",
+        'REGISTERED',
+        'PAYMENT_VERIFICATION_PENDING',
+        'PAYMENT_VERIFICATION_REJECTED',
+        'PAYMENT_VERIFICATION_APPROVED',
+        'KYC_VERIFICATION_PENDING',
+        'KYC_VERIFICATION_REJECTED',
+        'PORTAL_ACTIVATED',
+        'PORTAL_DEACTIVATED',
       ],
-      default: "PAYMENT_VERIFICATION_PENDING",
+      default: 'PAYMENT_VERIFICATION_PENDING',
     },
     hasSrkBonusDeposited: {
       type: Boolean,
@@ -83,11 +123,15 @@ const userSchema = new mongoose.Schema(
     },
     purpose: {
       type: String,
-      enum: ["affiliate", "study"],
+      enum: ['affiliate', 'study'],
     },
     srkBankId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "SrkBank",
+      ref: 'SrkBank',
+    },
+    baseSecret: {
+      type: String,
+      // required: true,
     },
   },
   {
@@ -95,4 +139,4 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-export const UserModel = mongoose.model("User", userSchema);
+export const UserModel = mongoose.model<IUser>('User', userSchema);

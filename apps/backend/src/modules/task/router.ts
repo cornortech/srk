@@ -5,9 +5,10 @@ import { taskMutationHandler } from "./mutation";
 const s = initServer();
 
 export const taskRouter = s.router(taskContract, {
- createSocialTaskPackage: taskMutationHandler.createSocialTaskPackage,
- getSocialTaskPackage: taskQueryHandler.getSocialTaskPackage,
- enrollSocialTaskPackage: taskMutationHandler.enrollSocialTaskPackage,
- getAllSocialTaskEnrollment: taskQueryHandler.getAllSocialTaskEnrollment,
- acceptTaskEnrollmentRequest: taskMutationHandler.acceptTaskEnrollmentRequest
+    createSocialTaskPackage: taskMutationHandler.createSocialTaskPackage,
+    getSocialTaskPackage: taskQueryHandler.getSocialTaskPackage,
+    enrollSocialTaskPackage: taskMutationHandler.enrollSocialTaskPackage,
+    getAllSocialTaskEnrollment: taskQueryHandler.getAllSocialTaskEnrollment,
+    acceptTaskEnrollmentRequest: taskMutationHandler.acceptTaskEnrollmentRequest,
+    rejectTaskEnrollmentRequest: taskMutationHandler.rejectTaskEnrollmentRequest
 });

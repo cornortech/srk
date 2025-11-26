@@ -1,6 +1,7 @@
 import { initContract } from "@ts-rest/core";
 import { ErrorSchema, SuccessSchema } from "../common";
 import { createSocialTaskPackageEnrollmentSchema, createSocialTaskPackageSchema } from "./schema";
+import z from "zod";
 
 const c = initContract();
 
@@ -42,7 +43,7 @@ export const taskContract = c.router({
   },
   getAllSocialTaskEnrollment: {
     method: "GET",
-    path: "/social-task-enrollements-by-status",
+    path: "/social-task-enrollement-by-status",
     responses: {
       200: SuccessSchema,
       403: ErrorSchema,
@@ -50,5 +51,17 @@ export const taskContract = c.router({
       500: ErrorSchema
     },
     summary: "Get All Social Task Enrollments by Status"
+  },
+  acceptTaskEnrollmentRequest: {
+    method: "PUT",
+    body: z.object({}).optional(),
+    path: "/accept-social-task-enrollement-request/:id",
+    responses: {
+      200: SuccessSchema,
+      403: ErrorSchema,
+      404: ErrorSchema,
+      500: ErrorSchema
+    },
+    summary: "Accept Social Task Enrollment by Id"
   }
 });

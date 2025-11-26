@@ -17,7 +17,7 @@ const socialTaskPackageEnrollmentSchema = new mongoose.Schema(
             enum: ["pending", "approved", "rejected"],
             default: "pending",
         },
-        rejectionReason: {
+        remarks: {
             type: String,
             default: ""
         },
@@ -25,7 +25,7 @@ const socialTaskPackageEnrollmentSchema = new mongoose.Schema(
             type: String,
             required: true
         },
-        expirationDate:{
+        expirationDate: {
             type: Date,
             required: true
         },

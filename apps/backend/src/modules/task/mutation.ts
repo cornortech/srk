@@ -33,11 +33,21 @@ const createSocialTaskPackage: AppRouteImplementationOrOptions<typeof taskContra
 
 const enrollSocialTaskPackage: AppRouteImplementationOrOptions<typeof taskContract.enrollSocialTaskPackage> = async ({ body }) => {
     try {
+        const socialTaskPackage = await socialTaskPackageModel.findOne({ _id: body.socialTaskPackage })
+        if (!socialTaskPackage) {
+            return {
+                status: 500,
+                body: {
+                    message: "No Such Package Found",
+                    success: false
+                }
+            }
+        }
         await SocialTaskPackageEnrollmentModel.create({
             userId: body.userId,
             socialTaskPackage: body.socialTaskPackage,
             status: body.status,
-            rejectionReason: body.rejectionReason,
+            remarks: body.remarks,
             paymentScreenshotUrl: body.paymentScreenshotUrl,
             expirationDate: body.expirationDate,
             isExpired: body.isExpired
@@ -61,11 +71,20 @@ const enrollSocialTaskPackage: AppRouteImplementationOrOptions<typeof taskContra
     }
 }
 
-const acceptTaskEnrollmentRequest: AppRouteImplementationOrOptions<typeof taskContract.acceptTaskEnrollmentRequest> = async ({ params }) => {
+const acceptTaskEnrollmentRequest: AppRouteImplementationOrOptions<typeof taskContract.acceptTaskEnrollmentRequest> = async ({ params, body }) => {
     try {
+        const enrollmentRequest = await SocialTaskPackageEnrollmentModel.findOne({ _id: params.id })
+        if (!enrollmentRequest) {
+            return {
+                status: 500,
+                body: {
+                    message: "No Such Enrollment Found"
+                }
+            }
+        }
         await SocialTaskPackageEnrollmentModel.findOneAndUpdate(
             { _id: params.id },
-            { $set: { status: "approved" } },
+            { $set: { status: "approved", remarks: body.remarks } },
             { new: true }
         )
         return {
@@ -89,9 +108,18 @@ const acceptTaskEnrollmentRequest: AppRouteImplementationOrOptions<typeof taskCo
 
 const rejectTaskEnrollmentRequest: AppRouteImplementationOrOptions<typeof taskContract.rejectTaskEnrollmentRequest> = async ({ params, body }) => {
     try {
+        const enrollmentRequest = await SocialTaskPackageEnrollmentModel.findOne({ _id: params.id })
+        if (!enrollmentRequest) {
+            return {
+                status: 500,
+                body: {
+                    message: "No Such Enrollment Found"
+                }
+            }
+        }
         await SocialTaskPackageEnrollmentModel.findOneAndUpdate(
             { _id: params.id },
-            { $set: { status: "rejected", rejectionReason: body.rejectionReason } }
+            { $set: { status: "rejected", remarks: body.remarks } }
         )
         return {
             status: 201,

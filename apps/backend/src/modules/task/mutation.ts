@@ -87,4 +87,29 @@ const acceptTaskEnrollmentRequest: AppRouteImplementationOrOptions<typeof taskCo
     }
 }
 
-export const taskMutationHandler = { createSocialTaskPackage, enrollSocialTaskPackage, acceptTaskEnrollmentRequest }
+const rejectTaskEnrollmentRequest: AppRouteImplementationOrOptions<typeof taskContract.rejectTaskEnrollmentRequest> = async ({ params, body }) => {
+    try {
+        await SocialTaskPackageEnrollmentModel.findOneAndUpdate(
+            { _id: params.id },
+            { $set: { status: "rejected", rejectionReason: body.rejectionReason } }
+        )
+        return {
+            status: 201,
+            body: {
+                message: "Enrollment Request Rejected",
+                success: false
+            }
+        }
+    } catch (error) {
+        console.log(error);
+        return {
+            status: 500,
+            body: {
+                message: "Internal server error",
+                success: false
+            }
+        }
+    }
+
+}
+export const taskMutationHandler = { createSocialTaskPackage, enrollSocialTaskPackage, acceptTaskEnrollmentRequest, rejectTaskEnrollmentRequest }

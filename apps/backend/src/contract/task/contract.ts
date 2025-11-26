@@ -63,5 +63,19 @@ export const taskContract = c.router({
       500: ErrorSchema
     },
     summary: "Accept Social Task Enrollment by Id"
+  },
+  rejectTaskEnrollmentRequest: {
+    method: "PUT",
+    body: z.object({
+      rejectionReason: z.string().optional()
+    }),
+    path: "/reject-social-task-enrollment-request/:id",
+    responses: {
+      200: SuccessSchema,
+      403: ErrorSchema,
+      404: ErrorSchema,
+      500: ErrorSchema
+    },
+    summary: "Reject Social Task Enrollment by Id"
   }
 });

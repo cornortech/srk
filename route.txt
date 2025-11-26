@@ -4,7 +4,7 @@ For Packages and enrollements
 / enroll-in-package >> done
 / get-all-task-enrollements-by-status >> done
 / accept-task-enrollement-request >> done
-/ reject-task-enrollement-request
+/ reject-task-enrollement-request >> done
 
 
 For Social Link follow

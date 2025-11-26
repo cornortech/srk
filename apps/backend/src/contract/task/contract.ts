@@ -15,7 +15,7 @@ export const taskContract = c.router({
       404: ErrorSchema,
       500: ErrorSchema,
     },
-    summary: "Create a new package",
+    summary: "Create a New Package",
   },
   getSocialTaskPackage: {
     method: "GET",
@@ -25,17 +25,30 @@ export const taskContract = c.router({
       403: ErrorSchema,
       404: ErrorSchema,
       500: ErrorSchema,
-    }
+    },
+    summary: "Get Social Task Package"
   },
   enrollSocialTaskPackage: {
     method: "POST",
-    path: "social-task-package/enroll",
+    path: "/social-task-package/enroll",
     body: createSocialTaskPackageEnrollmentSchema,
     responses: {
       200: SuccessSchema,
       403: ErrorSchema,
       404: ErrorSchema,
       500: ErrorSchema,
-    }
+    },
+    summary: "Enroll in Social Task Package"
+  },
+  getAllSocialTaskEnrollment: {
+    method: "GET",
+    path: "/social-task-enrollements-by-status",
+    responses: {
+      200: SuccessSchema,
+      403: ErrorSchema,
+      404: ErrorSchema,
+      500: ErrorSchema
+    },
+    summary: "Get All Social Task Enrollments by Status"
   }
 });

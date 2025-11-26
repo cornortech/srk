@@ -3,7 +3,7 @@ import { taskContract } from "../../contract/task/contract";
 import { socialTaskPackageModel } from "../../model/socialTaskPackageModel";
 import { SocialTaskPackageEnrollmentModel } from "../../model/socialTaskPackageEnrollmentModel";
 
-const createSocialTaskPackage: AppRouteImplementationOrOptions<typeof taskContract.createSocialTaskPackage> = async ({ req, body }) => {
+const createSocialTaskPackage: AppRouteImplementationOrOptions<typeof taskContract.createSocialTaskPackage> = async ({ body }) => {
     try {
         await socialTaskPackageModel.create({
             name: body.name,
@@ -31,12 +31,14 @@ const createSocialTaskPackage: AppRouteImplementationOrOptions<typeof taskContra
     }
 }
 
-const enrollSocialTaskPackage: AppRouteImplementationOrOptions<typeof taskContract.enrollSocialTaskPackage> = async ({ req, body }) => {
+const enrollSocialTaskPackage: AppRouteImplementationOrOptions<typeof taskContract.enrollSocialTaskPackage> = async ({ body }) => {
     try {
         await SocialTaskPackageEnrollmentModel.create({
+            userId: body.userId,
             socialTaskPackage: body.socialTaskPackage,
             status: body.status,
             rejectionReason: body.rejectionReason,
+            paymentScreenshotUrl: body.paymentScreenshotUrl,
             expirationDate: body.expirationDate,
             isExpired: body.isExpired
         })

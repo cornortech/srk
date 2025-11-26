@@ -10,11 +10,12 @@ export const createSocialTaskPackageSchema = z.object({
 export type TCreateSocialTaskPackageSchema = z.TypeOf<typeof createSocialTaskPackageSchema>;
 
 export const createSocialTaskPackageEnrollmentSchema = z.object({
+    userId: z.string(),
     socialTaskPackage: z.string(),
     status: z.string(),
     rejectionReason: z.string(),
     paymentScreenshotUrl: z.string(),
-    expirationDate: z.date(),
+    expirationDate: z.coerce.date(),
     isExpired: z.boolean()
 });
 export type TCreateSocialTaskPackageEnrollmentSchema = z.TypeOf<typeof createSocialTaskPackageEnrollmentSchema>;

@@ -1,8 +1,8 @@
 For Packages and enrollements
-/ social-task-package >> done
+/ create social-task-package >> done
 / get-social-task-packages >> done
 / enroll-in-package >> done
-/ get-all-task-enrollements-by-status
+/ get-all-task-enrollements-by-status >> done
 / accept-task-enrollement-request
 / reject-task-enrollement-request
 

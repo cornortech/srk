@@ -9,7 +9,7 @@ import { affiliateRouter } from "./affiliate/router";
 import { webinarRouter } from "./webinar/router";
 import { bankRouter } from "./bank/router";
 import { tourRouter } from "./tour/router.router";
-import { taskRouter } from "./tasks/router";
+import { taskRouter } from "./task/router";
 
 const s = initServer();
 

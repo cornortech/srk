@@ -17,6 +17,8 @@ interface IPaymentVerification {
   onApprove: () => void;
   onReject: (reason: string) => void;
   user: TGetAllUsersAdmin;
+  isApproving: boolean;
+  isRejecting: boolean;
 }
 
 export function PaymentVerification({
@@ -25,6 +27,8 @@ export function PaymentVerification({
   user,
   onApprove,
   onReject,
+  isApproving,
+  isRejecting,
 }: IPaymentVerification) {
   const [rejectionReason, setRejectionReason] = useState("");
 
@@ -109,12 +113,24 @@ export function PaymentVerification({
         <ModalFooter className="flex justify-end gap-2">
           {displayKycActionButtons && (
             <>
-              <Button color="danger" onPress={() => onReject(rejectionReason)}>
-                Reject
-              </Button>
-              <Button color="success" onPress={onApprove}>
-                Approve
-              </Button>
+              {isRejecting ? (
+                <Button color="danger" disabled>
+                  Rejecting...
+                </Button>
+              ) : (
+                <Button color="danger" onPress={() => onReject(rejectionReason)}>
+                  Reject
+                </Button>
+              )}
+              {isApproving ? (
+                <Button color="success" disabled>
+                  Approving...
+                </Button>
+              ) : (
+                <Button color="success" onPress={onApprove}>
+                  Approve
+                </Button>
+              )}
             </>
           )}
         </ModalFooter>

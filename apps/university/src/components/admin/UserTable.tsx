@@ -25,7 +25,7 @@ export default function UserTable({ users }: UserTableProps) {
   const [activeUser, setActiveUser] = useState<TGetAllUsersAdmin | null>(null);
   const { show } = useAlert();
 
-  const { mutate: approveKycMutation } = useMutation({
+  const { mutate: approveKycMutation , isPending: isApproving } = useMutation({
     mutationFn: async (data: { userId: string }) => {
       if (!data.userId) return;
       await verifyKycApi(data.userId);
@@ -40,7 +40,7 @@ export default function UserTable({ users }: UserTableProps) {
     },
   });
 
-  const { mutate: rejectKycMutation } = useMutation({
+  const { mutate: rejectKycMutation ,isPending: isRejecting } = useMutation({
     mutationKey: ["payout"],
     mutationFn: async (data: { reason: string; userId: string }) => {
       await rejectKycApi(data.userId, data.reason);
@@ -85,6 +85,8 @@ export default function UserTable({ users }: UserTableProps) {
   return (
     <>
       <VerifyKYCModal
+       isApproving={isApproving}
+       isRejecting={isRejecting}
         userId={activeUser?._id || ""}
         isAllowedToAddUser={activeUser?.allowedToAddUsers || false}
         status={activeUser?.status}

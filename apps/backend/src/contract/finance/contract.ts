@@ -1,5 +1,5 @@
-import { initContract } from "@ts-rest/core";
-import { ErrorSchema, SuccessSchema } from "../common";
+import { initContract } from '@ts-rest/core';
+import { ErrorSchema, SuccessSchema } from '../common';
 import {
   createBalancePayoutSchema,
   createBankPayoutRequestSchema,
@@ -14,14 +14,14 @@ import {
   getSrkBonusCashFlowSchema,
   upsertBankDetailsSchema,
   upsertKYCDetailsSchema,
-} from "./schema";
-import { z } from "zod";
+} from './schema';
+import { z } from 'zod';
 const c = initContract();
 
 export const financeContract = c.router({
   createBalancePayout: {
-    method: "POST",
-    path: "/finance/balance-payout",
+    method: 'POST',
+    path: '/finance/balance-payout',
     body: createBalancePayoutSchema,
     responses: {
       201: SuccessSchema,
@@ -29,11 +29,11 @@ export const financeContract = c.router({
       404: ErrorSchema,
       500: ErrorSchema,
     },
-    summary: "Create a balance payout",
+    summary: 'Create a balance payout',
   },
   srkBankPayoutRequest: {
-    method: "POST",
-    path: "/finance/srkBankPayoutRequest",
+    method: 'POST',
+    path: '/finance/srkBankPayoutRequest',
     body: createBankPayoutRequestSchema,
     responses: {
       201: SuccessSchema,
@@ -41,22 +41,22 @@ export const financeContract = c.router({
       404: ErrorSchema,
       500: ErrorSchema,
     },
-    summary: "Create a balance payout",
+    summary: 'Create a balance payout',
   },
   getAllBalancePayoutOfUser: {
-    method: "GET",
-    path: "/finance/getAllBalancePayoutsOfUser/:userId",
+    method: 'GET',
+    path: '/finance/getAllBalancePayoutsOfUser/:userId',
     responses: {
       200: getBalancePayoutSchema,
       403: ErrorSchema,
       404: ErrorSchema,
       500: ErrorSchema,
     },
-    summary: "Get all balance payouts",
+    summary: 'Get all balance payouts',
   },
   getAllBalancePayoutsByStatus: {
-    method: "GET",
-    path: "/finance/getAllBalancePayoutsByStatus",
+    method: 'GET',
+    path: '/finance/getAllBalancePayoutsByStatus',
     query: z.object({
       status: z.string().array().optional(),
       startDate: z.date().optional(),
@@ -69,11 +69,11 @@ export const financeContract = c.router({
       404: ErrorSchema,
       500: ErrorSchema,
     },
-    summary: "Get all balance payouts",
+    summary: 'Get all balance payouts',
   },
   upsertBankDetails: {
-    method: "POST",
-    path: "/finance/upsertBankDetails/:userId",
+    method: 'POST',
+    path: '/finance/upsertBankDetails/:userId',
     body: upsertBankDetailsSchema,
     responses: {
       201: SuccessSchema,
@@ -81,11 +81,11 @@ export const financeContract = c.router({
       404: ErrorSchema,
       500: ErrorSchema,
     },
-    summary: "Create or update bank details",
+    summary: 'Create or update bank details',
   },
   upsertKYCDetails: {
-    method: "POST",
-    path: "/finance/upsertKYCDetails/:userId",
+    method: 'POST',
+    path: '/finance/upsertKYCDetails/:userId',
     body: upsertKYCDetailsSchema,
     responses: {
       201: SuccessSchema,
@@ -93,24 +93,24 @@ export const financeContract = c.router({
       404: ErrorSchema,
       500: ErrorSchema,
     },
-    summary: "Create or update bank details",
+    summary: 'Create or update bank details',
   },
   getFinanceDetailsOfUser: {
-    method: "GET",
-    path: "/finance/getEarningDetailsOfUser/:userId",
+    method: 'GET',
+    path: '/finance/getEarningDetailsOfUser/:userId',
     responses: {
       200: getFinanceDetailsOfUserSchema,
       403: ErrorSchema,
       404: ErrorSchema,
       500: ErrorSchema,
     },
-    summary: "Get earning details of user",
+    summary: 'Get earning details of user',
   },
   getEarningLeaderboard: {
-    method: "GET",
-    path: "/finance/getEarningLeaderboard",
+    method: 'GET',
+    path: '/finance/getEarningLeaderboard',
     query: z.object({
-      timeFrame: z.enum(["weekly", "monthly", "allTime"]),
+      timeFrame: z.enum(['weekly', 'monthly', 'allTime']),
     }),
     responses: {
       200: getEarningLeaderboardSchema,
@@ -118,11 +118,11 @@ export const financeContract = c.router({
       404: ErrorSchema,
       500: ErrorSchema,
     },
-    summary: "Get earning leaderboard",
+    summary: 'Get earning leaderboard',
   },
   approveBalancePayout: {
-    method: "POST",
-    path: "/finance/approveBalancePayout/:payoutId",
+    method: 'POST',
+    path: '/finance/approveBalancePayout/:payoutId',
     body: z.object({
       paymentProofUrl: z.string(),
       transactionNumber: z.string(),
@@ -135,11 +135,11 @@ export const financeContract = c.router({
       404: ErrorSchema,
       500: ErrorSchema,
     },
-    summary: "Approve balance payout",
+    summary: 'Approve balance payout',
   },
   rejectBalancePayout: {
-    method: "POST",
-    path: "/finance/rejectBalancePayout/:payoutId",
+    method: 'POST',
+    path: '/finance/rejectBalancePayout/:payoutId',
     body: z.object({
       reason: z.string(),
     }),
@@ -149,62 +149,62 @@ export const financeContract = c.router({
       404: ErrorSchema,
       500: ErrorSchema,
     },
-    summary: "Reject balance payout",
+    summary: 'Reject balance payout',
   },
   getAdminEarningDetails: {
-    method: "GET",
-    path: "/finance/getAdminEarningDetails",
+    method: 'GET',
+    path: '/finance/getAdminEarningDetails',
     responses: {
       200: getAdminEarningDetailsSchema,
       403: ErrorSchema,
       404: ErrorSchema,
       500: ErrorSchema,
     },
-    summary: "Get admin earning details",
+    summary: 'Get admin earning details',
   },
   getBankStatementOfUser: {
-    method: "GET",
-    path: "/finance/getBankStatementOfUser/:userId",
+    method: 'GET',
+    path: '/finance/getBankStatementOfUser/:userId',
     responses: {
       200: getBankStatementOfUserSchema,
       403: ErrorSchema,
       404: ErrorSchema,
       500: ErrorSchema,
     },
-    summary: "Get bank statement of user",
+    summary: 'Get bank statement of user',
   },
   getBankStatementForAdmin: {
-    method: "GET",
-    path: "/finance/getBankStatementForAdmin",
+    method: 'GET',
+    path: '/finance/getBankStatementForAdmin',
     responses: {
       200: getBankStatementOfUserSchema,
       403: ErrorSchema,
       404: ErrorSchema,
       500: ErrorSchema,
     },
-    summary: "Get bank statement of user",
+    summary: 'Get bank statement of user',
   },
   getSrkBankDetailsForAdmin: {
-    method: "GET",
-    path: "/finance/getSrkBankDetailsForAdmin",
+    method: 'GET',
+    path: '/finance/getSrkBankDetailsForAdmin',
     responses: {
       200: getSrkBankDetailsForAdminSchema,
       403: ErrorSchema,
       404: ErrorSchema,
       500: ErrorSchema,
     },
-    summary: "Get bank statement of user",
+    summary: 'Get bank statement of user',
   },
   createSrkUniversityPayout: {
-    method: "POST",
-    path: "/finance/createSrkUniversityPayout",
+    method: 'POST',
+    path: '/finance/createSrkUniversityPayout',
     body: z.object({
       type: z.enum([
-        "eventWallet",
-        "srkBonus",
-        "tdsAmount",
-        "ceoSalary",
-        "officeManagementCharge",
+        'eventWallet',
+        'srkBonus',
+        'tdsAmount',
+        'ceoSalary',
+        'officeManagementCharge',
       ]),
       amount: z.number(),
     }),
@@ -214,22 +214,22 @@ export const financeContract = c.router({
       404: ErrorSchema,
       500: ErrorSchema,
     },
-    summary: "Create SRK university payout",
+    summary: 'Create SRK university payout',
   },
   getAllSrkUniversityBankStatement: {
-    method: "GET",
-    path: "/finance/getAllSrkUniversityBankStatement",
+    method: 'GET',
+    path: '/finance/getAllSrkUniversityBankStatement',
     responses: {
       200: getBankStatementOfSrkUniversitySchema,
       403: ErrorSchema,
       404: ErrorSchema,
       500: ErrorSchema,
     },
-    summary: "Get bank statement of srk university bank",
+    summary: 'Get bank statement of srk university bank',
   },
   srkBankPayoutRequestForAdmin: {
-    method: "POST",
-    path: "/finance/srkUniversityBankPayout",
+    method: 'POST',
+    path: '/finance/srkUniversityBankPayout',
     body: z.object({
       amount: z.number(),
     }),
@@ -239,49 +239,60 @@ export const financeContract = c.router({
       404: ErrorSchema,
       500: ErrorSchema,
     },
-    summary: "Create a balance payout",
+    summary: 'Create a balance payout',
   },
   approveBankDetails: {
-    method: "POST",
-    path: "/finance/approveBankDetails/:userId",
+    method: 'POST',
+    path: '/finance/approveBankDetails/:userId',
     body: z.object({}).optional(),
+    query: z.object({
+      status: z.string().optional(),
+      limit: z.string().optional(),
+      page: z.string().optional(),
+    }),
     responses: {
       201: SuccessSchema,
       403: ErrorSchema,
       404: ErrorSchema,
       500: ErrorSchema,
     },
-    summary: "Approve bank details",
+    summary: 'Approve bank details',
   },
   getBankTable: {
-    method: "GET",
-    path: "/finance/getBankRequest",
+    method: 'GET',
+    path: '/finance/getBankRequest',
     responses: {
-      200: z.array(
-        z.object({
-          profilePicture: z.string().nullable().optional(),
-          username: z.string(),
-          accountHolderName: z.string(),
-          accountNumber: z.string(),
-          ifscCode: z.string(),
-          bankName: z.string(),
-          branchName: z.string(),
-          accountType: z.string(),
-          relationWithAccount: z.string(),
-          status: z.string(),
-          qrUrl: z.string().optional(),
-          packageTitle: z.string(),
-        })
-      ),
+      200: z.object({
+        data: z.array(
+          z.object({
+            profilePicture: z.string().nullable().optional(),
+            username: z.string(),
+            accountHolderName: z.string(),
+            accountNumber: z.string(),
+            ifscCode: z.string(),
+            bankName: z.string(),
+            branchName: z.string(),
+            accountType: z.string(),
+            relationWithAccount: z.string(),
+            status: z.string(),
+            qrUrl: z.string().optional(),
+            packageTitle: z.string(),
+          })
+        ),
+        page: z.number(),
+        limit: z.number(),
+        totalUsers: z.number(),
+        totalPages: z.number(),
+      }),
       403: ErrorSchema,
       404: ErrorSchema,
       500: ErrorSchema,
     },
-    summary: "Get bank table",
+    summary: 'Get bank table',
   },
   rejectBankRequest: {
-    method: "POST",
-    path: "/finance/rejectBankRequest/:userId",
+    method: 'POST',
+    path: '/finance/rejectBankRequest/:userId',
     body: z.object({
       reason: z.string(),
     }),
@@ -292,22 +303,22 @@ export const financeContract = c.router({
       404: ErrorSchema,
       500: ErrorSchema,
     },
-    summary: "Reject bank request",
+    summary: 'Reject bank request',
   },
   getTeamCashflowOfUser: {
-    method: "GET",
-    path: "/finance/cashflow/user/:userId",
+    method: 'GET',
+    path: '/finance/cashflow/user/:userId',
     responses: {
       200: z.array(getSrkBonusCashFlowSchema),
       403: ErrorSchema,
       404: ErrorSchema,
       500: ErrorSchema,
     },
-    summary: "Get cash flow of user.",
+    summary: 'Get cash flow of user.',
   },
   getSrkBonusFlowForAdmin: {
-    method: "GET",
-    path: "/finance/cashflow",
+    method: 'GET',
+    path: '/finance/cashflow',
     responses: {
       200: z.array(getSrkBonusCashFlowForAdminSchema),
       403: ErrorSchema,

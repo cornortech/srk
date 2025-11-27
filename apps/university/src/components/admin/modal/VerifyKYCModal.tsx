@@ -31,6 +31,8 @@ interface VerifyKYCModalProps {
   backImage: string;
   onApprove: () => void;
   onReject: (reason: string) => void;
+  isApproving: boolean;
+  isRejecting: boolean;
   status?:
     | "REGISTERED"
     | "PAYMENT_VERIFICATION_PENDING"
@@ -55,6 +57,8 @@ export function VerifyKYCModal({
   backImage,
   onApprove,
   onReject,
+  isApproving,
+  isRejecting,
   status,
   courseEnrollAgreementUrl,
   isAllowedToAddUser,
@@ -388,12 +392,20 @@ export function VerifyKYCModal({
         <ModalFooter className="flex justify-end gap-2">
           {displayKycActionButtons && (
             <>
-              <Button color="danger" onPress={() => onReject(rejectionReason)}>
-                Reject
+             { isRejecting ?  <Button color="danger" isDisabled>
+                Rejecting
               </Button>
+               :
+               <Button color="danger" onPress={() => onReject(rejectionReason)}>
+                Reject
+              </Button> 
+              }
+             { isApproving ? <Button color="success" isDisabled>
+                Approving
+              </Button> :
               <Button color="success" onPress={onApprove}>
                 Approve
-              </Button>
+              </Button>}
             </>
           )}
         </ModalFooter>

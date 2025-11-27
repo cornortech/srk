@@ -12,16 +12,33 @@ cloudinary.v2.config({
 import sharp from "sharp";
 
 async function fetchAndCompressImage(url: string): Promise<Uint8Array> {
+  if (!url) {
+    throw new Error('No image URL provided');
+  }
+
   const response = await fetch(url);
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch image: ${response.status} ${response.statusText}`);
+  }
+
   const buffer = await response.arrayBuffer();
 
-  // Compress the image using sharp (this example resizes to 200px width)
-  const compressedBuffer = await sharp(Buffer.from(buffer))
-    .resize({ width: 200 })
-    .png({ quality: 20 })
-    .toBuffer();
+  if (!buffer || buffer.byteLength === 0) {
+    throw new Error('Fetched image buffer is empty');
+  }
 
-  return new Uint8Array(compressedBuffer);
+  try {
+    // Compress the image using sharp (this example resizes to 200px width)
+    const compressedBuffer = await sharp(Buffer.from(buffer))
+      .resize({ width: 200 })
+      .png({ quality: 20 })
+      .toBuffer();
+
+    return new Uint8Array(compressedBuffer);
+  } catch (err) {
+    throw new Error(`Image compression failed: ${String(err)}`);
+  }
 }
 
 // Function to upload a file to Cloudinary
@@ -91,15 +108,21 @@ export async function modifyAndUploadAgreement(
       color: rgb(0, 0, 0),
     });
 
-    // Fetch and embed the image into the PDF
-    const imageBytes = await fetchAndCompressImage(imageUrl);
-    const image = await pdfDoc.embedPng(imageBytes);
-    firstPage.drawImage(image, {
-      x: 452,
-      y: 570,
-      width: 100,
-      height: 120,
-    });
+    // Fetch and embed the image into the PDF (optional)
+    try {
+      const imageBytes = await fetchAndCompressImage(imageUrl);
+      if (imageBytes && imageBytes.length > 0) {
+        const embeddedImage = await pdfDoc.embedPng(imageBytes);
+        firstPage.drawImage(embeddedImage, {
+          x: 452,
+          y: 570,
+          width: 100,
+          height: 120,
+        });
+      }
+    } catch (err) {
+      console.warn('Skipping image embedding due to error:', err);
+    }
 
     // Save the modified PDF locally
     const modifiedPdfBytes = await pdfDoc.save();
@@ -175,15 +198,21 @@ export async function createAffiliatePdfAndUpload(
       color: rgb(0, 0, 0),
     });
 
-    // Fetch and embed the image into the PDF
-    const imageBytes = await fetchAndCompressImage(imageUrl);
-    const image = await pdfDoc.embedPng(imageBytes);
-    firstPage.drawImage(image, {
-      x: 452,
-      y: 570,
-      width: 100,
-      height: 120,
-    });
+    // Fetch and embed the image into the PDF (optional)
+    try {
+      const imageBytes = await fetchAndCompressImage(imageUrl);
+      if (imageBytes && imageBytes.length > 0) {
+        const embeddedImage = await pdfDoc.embedPng(imageBytes);
+        firstPage.drawImage(embeddedImage, {
+          x: 452,
+          y: 570,
+          width: 100,
+          height: 120,
+        });
+      }
+    } catch (err) {
+      console.warn('Skipping image embedding due to error:', err);
+    }
 
     // Save the modified PDF locally
     const modifiedPdfBytes = await pdfDoc.save();

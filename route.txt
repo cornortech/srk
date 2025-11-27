@@ -12,7 +12,7 @@ For Social Link follow
 / get-all-active-social-links-to-follow
 / create-social-task-follow-request >> done
 / approve-social-task-follow-request >> done
-/ reject-social-task-follow-request
+/ reject-social-task-follow-request >> done
 
 
 dashboard

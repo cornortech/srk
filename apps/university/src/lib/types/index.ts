@@ -166,6 +166,14 @@ export type TBalancePayout = {
   updatedAt: Date;
 };
 
+export type TBalancePayoutResponse = {
+  data: TBalancePayout[];
+  page: number;
+  limit: number;
+  totalPayouts: number;
+  totalPages: number;
+}
+
 export const chipColorsStatusMap = {
   pending: "warning",
   approved: "success",

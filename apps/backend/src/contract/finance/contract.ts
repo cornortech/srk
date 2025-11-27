@@ -59,12 +59,20 @@ export const financeContract = c.router({
     path: '/finance/getAllBalancePayoutsByStatus',
     query: z.object({
       status: z.string().array().optional(),
-      startDate: z.date().optional(),
-      endDate: z.date().optional(),
+      limit: z.string().optional(),
+      page: z.string().optional(),
+      startDate: z.string().optional(),
+      endDate: z.string().optional(),
       globalSearch: z.string().optional(),
     }),
     responses: {
-      200: getBalancePayoutSchema,
+      200:z.object({
+        data: getBalancePayoutSchema,
+        page: z.number(),
+        limit: z.number(),
+        totalPayouts: z.number(),
+        totalPages: z.number(),
+      }),
       403: ErrorSchema,
       404: ErrorSchema,
       500: ErrorSchema,

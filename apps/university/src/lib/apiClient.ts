@@ -351,14 +351,22 @@ export const getPayoutOfUserApi = async (userId: string) => {
   return response.data;
 };
 
-export const getBalancePayoutByStatus = async (status: string[]) => {
-  const queryParams =
-    status.length > 1
-      ? status.map((s) => `status=${encodeURIComponent(s)}`).join('&')
-      : `status=${encodeURIComponent(status[0])}`;
+export const getBalancePayoutByStatus = async (
+  status: string[],
+  page = 1,
+  limit = 10
+) => {
+  const statusArray = Array.isArray(status) ? status : [status];
 
   const response = await apiClient.get(
-    `/finance/getAllBalancePayoutsByStatus?${queryParams}`
+    `/finance/getAllBalancePayoutsByStatus?${statusArray}`,
+    {
+      params: {
+        status: statusArray,
+        page,
+        limit,
+      },
+    }
   );
   return response.data;
 };

@@ -1,8 +1,8 @@
-import { AppRouteImplementationOrOptions } from "@ts-rest/express/src/lib/types";
-import { affiliateContract } from "../../contract/affiliate/contract";
-import { affiliateRequestModel } from "../../model/affiliateRequestModel";
-import { UserModel } from "../../model/userModel";
-import { affiliateBiometricModel } from "../../model/affiliateVerificationModel";
+import { AppRouteImplementationOrOptions } from '@ts-rest/express/src/lib/types';
+import { affiliateContract } from '../../contract/affiliate/contract';
+import { affiliateRequestModel } from '../../model/affiliateRequestModel';
+import { UserModel } from '../../model/userModel';
+import { affiliateBiometricModel } from '../../model/affiliateVerificationModel';
 
 const getAllAffiliateRequestsByStatus: AppRouteImplementationOrOptions<
   typeof affiliateContract.getAllAffiliateRequestsByStatus
@@ -12,12 +12,24 @@ const getAllAffiliateRequestsByStatus: AppRouteImplementationOrOptions<
   status = status || [];
 
   try {
+    const page = query?.page ? parseInt(query.page, 10) : 1;
+    const limit = query?.limit ? parseInt(query.limit, 10) : 10;
+
+    const queryReq: Record<string, any> = {};
+
+    const totalRequest = await affiliateRequestModel.countDocuments(queryReq);
+
+    const skip = (page - 1) * limit;
+
     const affiliateRequests = await affiliateRequestModel
       .find({
         status: {
           $in: status,
         },
       })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
       .populate<{
         userId: {
           _id: string;
@@ -28,33 +40,41 @@ const getAllAffiliateRequestsByStatus: AppRouteImplementationOrOptions<
           profilePicture: string;
           phoneNumber: string;
         };
-      }>("userId");
+      }>('userId');
+
+    const formattedRequest = await Promise.all(
+      affiliateRequests.map(async (request) => {
+        const affiliateBiometricData = await affiliateBiometricModel.findOne({
+          userId: request.userId?._id,
+        });
+
+        return {
+          userId: request.userId?._id.toString(),
+          status: request.status,
+          email: request.userId?.email,
+          firstName: request.userId?.firstName,
+          lastName: request.userId?.lastName,
+          affiliateAgreementUrl: '',
+          gender: request.userId?.gender,
+          phoneNumber: request.userId?.phoneNumber,
+          requestedAt: request.requestedAt,
+          profilePicture: request.userId?.profilePicture,
+          leftThumbPrint: affiliateBiometricData?.leftThumbPrint,
+          rightThumbPrint: affiliateBiometricData?.rightThumbPrint,
+          verificationImage: affiliateBiometricData?.verificationImage,
+        };
+      })
+    );
 
     return {
       status: 200,
-      body: await Promise.all(
-        affiliateRequests.map(async (request) => {
-          const affiliateBiometricData = await affiliateBiometricModel.findOne({
-            userId: request.userId?._id,
-          });
-
-          return {
-            userId: request.userId?._id.toString(),
-            status: request.status,
-            email: request.userId?.email,
-            firstName: request.userId?.firstName,
-            lastName: request.userId?.lastName,
-            affiliateAgreementUrl: "",
-            gender: request.userId?.gender,
-            phoneNumber: request.userId?.phoneNumber,
-            requestedAt: request.requestedAt,
-            profilePicture: request.userId?.profilePicture,
-            leftThumbPrint: affiliateBiometricData?.leftThumbPrint,
-            rightThumbPrint: affiliateBiometricData?.rightThumbPrint,
-            verificationImage: affiliateBiometricData?.verificationImage,
-          };
-        })
-      ),
+      body: {
+        data: formattedRequest,
+        page,
+        limit,
+        totalRequest,
+        totalPages: Math.ceil(totalRequest / limit),
+      },
     };
   } catch (error) {
     console.log(error);
@@ -62,7 +82,7 @@ const getAllAffiliateRequestsByStatus: AppRouteImplementationOrOptions<
       status: 500,
       body: {
         success: false,
-        message: "Internal server error",
+        message: 'Internal server error',
       },
     };
   }
@@ -76,12 +96,12 @@ const getTeamsOfUser: AppRouteImplementationOrOptions<
       referredBy: params.userId,
       status: {
         $in: [
-          "REGISTERED",
-          "PAYMENT_VERIFICATION_APPROVED",
-          "KYC_VERIFICATION_PENDING",
-          "KYC_VERIFICATION_REJECTED",
-          "PORTAL_ACTIVATED",
-          "PORTAL_DEACTIVATED",
+          'REGISTERED',
+          'PAYMENT_VERIFICATION_APPROVED',
+          'KYC_VERIFICATION_PENDING',
+          'KYC_VERIFICATION_REJECTED',
+          'PORTAL_ACTIVATED',
+          'PORTAL_DEACTIVATED',
         ],
       },
     }).populate<{
@@ -89,7 +109,7 @@ const getTeamsOfUser: AppRouteImplementationOrOptions<
         _id: string;
         title: string;
       };
-    }>("packageId");
+    }>('packageId');
 
     return {
       status: 200,
@@ -114,7 +134,7 @@ const getTeamsOfUser: AppRouteImplementationOrOptions<
       status: 500,
       body: {
         success: false,
-        message: "Internal server error",
+        message: 'Internal server error',
       },
     };
   }

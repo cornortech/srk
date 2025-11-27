@@ -37,7 +37,7 @@ export const ListOfUsers = () => {
   });
 
   return (
-    <div className="container mx-auto py-10">
+    <div className="container mx-auto py-4">
       <Card>
         <CardHeader className="text-xl font-bold flex flex-row gap-x-4">
           <h1>Users</h1>

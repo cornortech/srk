@@ -15,7 +15,7 @@ import { useMutation } from '@tanstack/react-query';
 import { rejectKycApi, verifyKycApi } from '../../lib/apiClient';
 import useAlert from '../../hooks/useAlert';
 import { AxiosError } from 'axios';
-import { ViewIcon } from 'lucide-react';
+import { ArrowLeft, ArrowRight, ViewIcon } from 'lucide-react';
 
 interface UserTableProps {
   users: TGetAllUsersAdmin[];
@@ -163,10 +163,12 @@ export default function UserTable({
         <div className="flex items-center justify-center gap-4 mt-4">
           <Button
             size="sm"
+            className="hover:bg-green-600 hover:text-white"
             variant="flat"
             isDisabled={page <= 1}
             onPress={() => onPageChange(page - 1)}
           >
+            <ArrowLeft size={16} />
             Prev
           </Button>
 
@@ -176,11 +178,13 @@ export default function UserTable({
 
           <Button
             size="sm"
+            className="hover:bg-green-600 hover:text-white"
             variant="flat"
             isDisabled={page >= totalPages}
             onPress={() => onPageChange(page + 1)}
           >
             Next
+            <ArrowRight size={16} />
           </Button>
         </div>
       )}

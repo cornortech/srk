@@ -21,6 +21,7 @@ export const createSocialTaskPackageEnrollmentSchema = z.object({
 export type TCreateSocialTaskPackageEnrollmentSchema = z.TypeOf<typeof createSocialTaskPackageEnrollmentSchema>;
 
 export const createSocialLinkSchema = z.object({
+    userId: z.string(),
     facebookurl: z.string(),
     instagramUrl: z.string(),
     tiktokUrl: z.string(),

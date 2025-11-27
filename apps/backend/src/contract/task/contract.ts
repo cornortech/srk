@@ -1,6 +1,6 @@
 import { initContract } from "@ts-rest/core";
 import { ErrorSchema, SuccessSchema } from "../common";
-import { createSocialTaskPackageEnrollmentSchema, createSocialTaskPackageSchema } from "./schema";
+import { createSocialLinkSchema, createSocialTaskPackageEnrollmentSchema, createSocialTaskPackageSchema } from "./schema";
 import z from "zod";
 
 const c = initContract();
@@ -53,7 +53,7 @@ export const taskContract = c.router({
     summary: "Get All Social Task Enrollments by Status"
   },
   acceptTaskEnrollmentRequest: {
-    method: "PUT",
+    method: "PATCH",
     body: z.object({
       remarks: z.string().optional()
     }),
@@ -67,7 +67,7 @@ export const taskContract = c.router({
     summary: "Accept Social Task Enrollment by Id"
   },
   rejectTaskEnrollmentRequest: {
-    method: "PUT",
+    method: "PATCH",
     body: z.object({
       remarks: z.string().optional()
     }),
@@ -79,5 +79,17 @@ export const taskContract = c.router({
       500: ErrorSchema
     },
     summary: "Reject Social Task Enrollment by Id"
+  },
+  createSocialLinks: {
+    method: "POST",
+    body: createSocialLinkSchema,
+    path: "/create-social-links",
+    responses: {
+      200: SuccessSchema,
+      403: ErrorSchema,
+      404: ErrorSchema,
+      500: ErrorSchema
+    },
+    summary: "Create Social Links"
   }
 });

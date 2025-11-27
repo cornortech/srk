@@ -2,6 +2,8 @@ import { AppRouteImplementationOrOptions } from "@ts-rest/express/src/lib/types"
 import { taskContract } from "../../contract/task/contract";
 import { socialTaskPackageModel } from "../../model/socialTaskPackageModel";
 import { SocialTaskPackageEnrollmentModel } from "../../model/socialTaskPackageEnrollmentModel";
+import { SocialTaskLinkModel } from "../../model/socialTaskLinkModel";
+import { UserModel } from "../../model/userModel";
 
 const createSocialTaskPackage: AppRouteImplementationOrOptions<typeof taskContract.createSocialTaskPackage> = async ({ body }) => {
     try {
@@ -140,4 +142,43 @@ const rejectTaskEnrollmentRequest: AppRouteImplementationOrOptions<typeof taskCo
     }
 
 }
-export const taskMutationHandler = { createSocialTaskPackage, enrollSocialTaskPackage, acceptTaskEnrollmentRequest, rejectTaskEnrollmentRequest }
+
+const createSocialLinks: AppRouteImplementationOrOptions<typeof taskContract.createSocialLinks> = async ({ body }) => {
+    try {
+        const user = await UserModel.findOne({ _id: body.userId })
+        if (!user) {
+            return {
+                status: 500,
+                body: {
+                    message: "User not found",
+                    success: false
+                }
+            }
+        }
+        await SocialTaskLinkModel.create({
+            userId: body.userId,
+            facebookUrl: body.facebookurl,
+            instagramUrl: body.instagramUrl,
+            tiktokUrl: body.tiktokUrl,
+            youtubeUrl: body.youtubeUrl
+        })
+        return {
+            status: 201,
+            body: {
+                message: "Links added successfully",
+                success: true
+            }
+        }
+
+    } catch (error) {
+        console.log(error);
+        return ({
+            status: 500,
+            body: {
+                message: "Internal server error",
+                success: false
+            }
+        })
+    }
+}
+export const taskMutationHandler = { createSocialTaskPackage, enrollSocialTaskPackage, acceptTaskEnrollmentRequest, rejectTaskEnrollmentRequest, createSocialLinks }

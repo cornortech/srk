@@ -8,7 +8,6 @@ const socialTaskLinkSchema = new mongoose.Schema(
             required: true,
             unique: true,
         },
-
         facebookUrl: {
             type: String,
             default: ""

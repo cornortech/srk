@@ -2,6 +2,7 @@ import { AppRouteImplementationOrOptions } from "@ts-rest/express/src/lib/types"
 import { taskContract } from "../../contract/task/contract";
 import { socialTaskPackageModel } from "../../model/socialTaskPackageModel";
 import { SocialTaskPackageEnrollmentModel } from "../../model/socialTaskPackageEnrollmentModel";
+import { SocialTaskEarningStatementModel } from "../../model/socialTaskEarningStatementModel";
 
 const getSocialTaskPackage: AppRouteImplementationOrOptions<typeof taskContract.getSocialTaskPackage> = async () => {
     try {
@@ -56,7 +57,7 @@ const getAllSocialTaskEnrollment: AppRouteImplementationOrOptions<typeof taskCon
 
 // const getAllActiveSocialLinksToFollow: AppRouteImplementationOrOptions<typeof taskContract.getAllActiveSocialLinksToFollow> = async()=>{
 //     try{
-        
+
 //     }catch(error){
 //         console.log(error)
 //         return{
@@ -69,5 +70,35 @@ const getAllSocialTaskEnrollment: AppRouteImplementationOrOptions<typeof taskCon
 //     }
 // }
 
-
-export const taskQueryHandler = {getSocialTaskPackage, getAllSocialTaskEnrollment}
+const getSocialTaskEarning: AppRouteImplementationOrOptions<typeof taskContract.getSocialTaskEarning> = async ({ params }) => {
+    try {
+        const result = await SocialTaskEarningStatementModel.findOne({ followedBy: params.id })
+        if (!result) {
+            return {
+                status: 500,
+                body: {
+                    message: "Earnings not found",
+                    success: false
+                }
+            }
+        }
+        return {
+            status: 200,
+            body: {
+                message: "Earning",
+                result: result,
+                success: true
+            }
+        }
+    } catch (error) {
+        console.log(error)
+        return {
+            status: 500,
+            body: {
+                message: "Internal server error",
+                success: false
+            }
+        }
+    }
+}
+export const taskQueryHandler = { getSocialTaskPackage, getAllSocialTaskEnrollment, getSocialTaskEarning }

@@ -16,4 +16,4 @@ For Social Link follow
 
 
 dashboard
-/ get-task-earnings by userId
+/ get-social-task-earning by userId  >> done

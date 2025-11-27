@@ -6,6 +6,7 @@ import { SocialTaskLinkModel } from "../../model/socialTaskLinkModel";
 import { UserModel } from "../../model/userModel";
 import { SocialTaskFollowRequestModel } from "../../model/socialTaskFollowRequestModel";
 import { request } from "http";
+import { SocialTaskEarningStatementModel } from "../../model/socialTaskEarningStatementModel";
 
 const createSocialTaskPackage: AppRouteImplementationOrOptions<typeof taskContract.createSocialTaskPackage> = async ({ body }) => {
     try {
@@ -241,11 +242,17 @@ const approveSocialTaskFollowRequest: AppRouteImplementationOrOptions<typeof tas
             { _id: params.id },
             { $set: { status: "approved", remarks: body.remarks } }
         )
+        const updateEarning = await SocialTaskEarningStatementModel.create({
+            followedBy: requestId.followedBy,
+            followedTo: requestId.followedTo,
+            amount: 50
+        })
         return {
             status: 201,
             body: {
                 message: "Request Approved",
                 result: result,
+                updateEarning: updateEarning,
                 success: false
             }
         }

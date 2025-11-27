@@ -142,6 +142,17 @@ export const taskContract = c.router({
       500: ErrorSchema
     },
     summary: "Reject Social Task Follow Request by Id"
+  },
+  getSocialTaskEarning: {
+    method: "GET",
+    path: "/get-social-task-earning/:id",
+    responses: {
+      200: SuccessSchema,
+      403: ErrorSchema,
+      404: ErrorSchema,
+      500: ErrorSchema
+    },
+    summary: "Get Social Task Earning by Id"
   }
   
 });

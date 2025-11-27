@@ -114,7 +114,7 @@ export const Sidebar = ({
           showInMobileView ? "w-full" : isOpen ? "w-64" : "w-20"
         )}
       >
-        <ul className="space-y-2 p-4 mt-8">
+        <ul className="space-y-2 p-4 mt-8 overflow-y-auto h-[93vh]">
           {sidebarFuncMap[sidebarType]?.map((item, index) => {
             if (item.href === "switchToAffiliate") {
               return (

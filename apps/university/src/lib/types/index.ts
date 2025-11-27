@@ -266,8 +266,6 @@ export type TGetAllUsersAdmin = {
     paymentType: "qr" | "onlinePayment";
     paymentMethod: "esewa" | "khalti" | "bankTransfer";
   } | null;
-  page: number;
-  totalPages: number;
 };
 
 export type TUpsertAffiliateBiometricData = {

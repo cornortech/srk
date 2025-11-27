@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState } from 'react';
 import {
   Button,
   Chip,
@@ -12,14 +12,20 @@ import {
   Input,
   Select,
   SelectItem,
-} from "@nextui-org/react";
-import { Search } from "lucide-react";
-import { PayoutDetailsModal } from "./PayoutDetailsModels";
-import { useQuery } from "@tanstack/react-query";
-import { chipColorsStatusMap, TBalancePayout } from "../../lib/types";
-import { getBalancePayoutByStatus } from "../../lib/apiClient";
+} from '@nextui-org/react';
+import { Search } from 'lucide-react';
+import { PayoutDetailsModal } from './PayoutDetailsModels';
+import { useQuery } from '@tanstack/react-query';
+import {
+  chipColorsStatusMap,
+  TBalancePayout,
+  TBalancePayoutResponse,
+} from '../../lib/types';
+import { getBalancePayoutByStatus } from '../../lib/apiClient';
+import TablePagination from './Pagination';
 
 export function BalancePayoutTable() {
+  const [page, setPage] = useState(1);
   const [selectedPayout, setSelectedPayout] = useState<TBalancePayout | null>(
     null
   );
@@ -30,26 +36,25 @@ export function BalancePayoutTable() {
     setSelectedPayout(null);
   };
 
-  const { data: payouts, refetch: refetchBalancePayoutQuery } = useQuery<
-    TBalancePayout[]
-  >({
-    queryKey: ["payouts"],
-    queryFn: async () => {
-      const data = await getBalancePayoutByStatus([
-        "pending",
-        "approved",
-        "rejected",
-      ]);
+  const { data: payouts, refetch: refetchBalancePayoutQuery } =
+    useQuery<TBalancePayoutResponse>({
+      queryKey: ['payouts', page],
+      queryFn: async () => {
+        const data = await getBalancePayoutByStatus(
+          ['pending', 'approved', 'rejected'],
+          page,
+          10
+        );
 
-      return data;
-    },
-  });
+        return data;
+      },
+    });
 
   const handleRefetch = () => {
     refetchBalancePayoutQuery();
   };
 
-  if (!payouts) {
+  if (!payouts?.data) {
     return (
       <div className="flex justify-center items-center h-screen">
         <Spinner />
@@ -83,7 +88,7 @@ export function BalancePayoutTable() {
             placeholder="Search by username or user ID"
             // onChange={(e) => handleFilterChange("search", e.target.value)}
             classNames={{
-              input: "pl-8",
+              input: 'pl-8',
             }}
           />
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-6" />
@@ -102,9 +107,9 @@ export function BalancePayoutTable() {
           <TableColumn>Status</TableColumn>
         </TableHeader>
         <TableBody>
-          {payouts.map((payout, index) => (
+          {payouts?.data.map((payout, index) => (
             <TableRow key={payout._id}>
-              <TableCell>{index + 1}</TableCell>
+              <TableCell>{(page-1)*10 + index + 1}</TableCell>
               <TableCell>{payout.username}</TableCell>
               <TableCell>{payout.packageTitle}</TableCell>
               <TableCell>{payout.amount}</TableCell>
@@ -132,6 +137,13 @@ export function BalancePayoutTable() {
           ))}
         </TableBody>
       </Table>
+      {payouts?.data.length >= 10 && (
+        <TablePagination
+          page={page}
+          totalPages={payouts?.totalPages}
+          onPageChange={(p) => setPage(p)}
+        />
+      )}
       {selectedPayout && (
         <PayoutDetailsModal
           handleRefetch={handleRefetch}

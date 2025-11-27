@@ -13,5 +13,6 @@ export const taskRouter = s.router(taskContract, {
     rejectTaskEnrollmentRequest: taskMutationHandler.rejectTaskEnrollmentRequest,
     createSocialLinks: taskMutationHandler.createSocialLinks,
     getAllActiveSocialLinksToFollow: undefined,
-    createSocialTaskFollowRequest: taskMutationHandler.createSocialTaskFollowRequest
+    createSocialTaskFollowRequest: taskMutationHandler.createSocialTaskFollowRequest,
+    approveSocialTaskFollowRequest:taskMutationHandler.approveSocialTaskFollowRequest
 });

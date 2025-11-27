@@ -69,4 +69,5 @@ const getAllSocialTaskEnrollment: AppRouteImplementationOrOptions<typeof taskCon
 //     }
 // }
 
+
 export const taskQueryHandler = {getSocialTaskPackage, getAllSocialTaskEnrollment}

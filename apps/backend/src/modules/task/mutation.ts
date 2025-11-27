@@ -5,6 +5,7 @@ import { SocialTaskPackageEnrollmentModel } from "../../model/socialTaskPackageE
 import { SocialTaskLinkModel } from "../../model/socialTaskLinkModel";
 import { UserModel } from "../../model/userModel";
 import { SocialTaskFollowRequestModel } from "../../model/socialTaskFollowRequestModel";
+import { request } from "http";
 
 const createSocialTaskPackage: AppRouteImplementationOrOptions<typeof taskContract.createSocialTaskPackage> = async ({ body }) => {
     try {
@@ -223,4 +224,40 @@ const createSocialTaskFollowRequest: AppRouteImplementationOrOptions<typeof task
         }
     }
 }
-export const taskMutationHandler = { createSocialTaskPackage, enrollSocialTaskPackage, acceptTaskEnrollmentRequest, rejectTaskEnrollmentRequest, createSocialLinks, createSocialTaskFollowRequest }
+
+const approveSocialTaskFollowRequest: AppRouteImplementationOrOptions<typeof taskContract.approveSocialTaskFollowRequest> = async ({ params, body }) => {
+    try {
+        const requestId = await SocialTaskFollowRequestModel.findOne({ _id: params.id })
+        if (!requestId) {
+            return {
+                status: 500,
+                body: {
+                    message: "Request not found",
+                    success: false
+                }
+            }
+        }
+        const result = await SocialTaskFollowRequestModel.findOneAndUpdate(
+            { _id: params.id },
+            { $set: { status: "approved", remarks: body.remarks } }
+        )
+        return {
+            status: 201,
+            body: {
+                message: "Request Approved",
+                result: result,
+                success: false
+            }
+        }
+    } catch (error) {
+        console.log(error)
+        return {
+            status: 500,
+            body: {
+                message: "Internal server error",
+                success: false
+            }
+        }
+    }
+}
+export const taskMutationHandler = { createSocialTaskPackage, enrollSocialTaskPackage, acceptTaskEnrollmentRequest, rejectTaskEnrollmentRequest, createSocialLinks, createSocialTaskFollowRequest, approveSocialTaskFollowRequest }

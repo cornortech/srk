@@ -4,6 +4,7 @@ import {
   TAddUserPayload,
   TAdminEarningType,
   TAffiliateRequest,
+  TBankRequestByStatus,
   TCreatePackagePayload,
   TLoginResponse,
   TRegisterPayload,
@@ -233,21 +234,16 @@ export const requestAffiliateProgramApi = async (userId: string) => {
 
 export const getAllAffiliateRequestsByStatusApi = async (
   status: string | string[],
-  page = 1, // default page
-  limit = 10 // default limit
+  page = 1,
+  limit = 10
 ) => {
-  // const queryParams =
-  //   status.length > 1
-  //     ? status.map((s) => `status=${encodeURIComponent(s)}`).join("&")
-  //     : `status=${encodeURIComponent(status[0])}`;
-
   const statusArray = Array.isArray(status) ? status : [status];
 
   const response = await apiClient.get(
     `/affiliate/getAllAffiliateRequestsByStatus?${statusArray}`,
     {
       params: {
-        status: statusArray, // Axios will handle array properly
+        status: statusArray,
         page,
         limit,
       },
@@ -473,8 +469,20 @@ export const uploadVideoApi = async (data: TUploadVideoPayload) => {
   return response.data;
 };
 
-export const getBankRequestApi = async () => {
-  const response = await apiClient.get(`/finance/getBankRequest`);
+export const getBankRequestApi = async (
+  status: string[],
+  page = 1,
+  limit = 10
+) => {
+  const statusArray = Array.isArray(status) ? status : [status]; // Ensure array
+
+  const response = await apiClient.get(`/finance/getBankRequest`, {
+    params: {
+      status: statusArray,
+      page,
+      limit,
+    },
+  });
   return response.data;
 };
 

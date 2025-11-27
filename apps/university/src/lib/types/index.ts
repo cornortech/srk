@@ -332,6 +332,14 @@ export type TBankRequest = {
   packageTitle: string;
 };
 
+export type TBankRequestByStatus = {
+  data: TBankRequest[];
+  page: number;
+  limit: number;
+  totalUsers: number;
+  totalPages: number;
+}
+
 export const userStatusColorMap = {
   REGISTERED: "secondary",
   KYC_VERIFICATION_PENDING: "warning",

@@ -7,26 +7,37 @@ import {
   TableCell,
   Button,
   Chip,
-} from "@nextui-org/react";
-import { useState } from "react";
-import { ViewIcon } from "lucide-react";
-import { TGetAllUsersAdmin, userStatusColorMap } from "../../../lib/types";
-import { PaymentVerification } from "../modal/PaymentVerification";
-import useAlert from "../../../hooks/useAlert";
-import { useMutation } from "@tanstack/react-query";
+} from '@nextui-org/react';
+import { useState } from 'react';
+import { ViewIcon } from 'lucide-react';
+import { TGetAllUsersAdmin, userStatusColorMap } from '../../../lib/types';
+import { PaymentVerification } from '../modal/PaymentVerification';
+import useAlert from '../../../hooks/useAlert';
+import { useMutation } from '@tanstack/react-query';
 import {
   approvePaymentDetailsApi,
   rejectPaymentDetailsApi,
-} from "../../../lib/apiClient";
+} from '../../../lib/apiClient';
+import TablePagination from '../Pagination';
 
 interface UserTableProps {
   users: TGetAllUsersAdmin[];
   refetch: () => void;
 }
 
+interface UserTableProps {
+  users: TGetAllUsersAdmin[];
+  page: number; 
+  totalPages: number;
+  onPageChange: (page: number) => void;
+}
+
 export default function PaymentVerificationPendingUsersTable({
-  refetch,
   users,
+  page,
+  totalPages,
+  onPageChange,
+  refetch,
 }: UserTableProps) {
   const [activeUser, setActiveUser] = useState<TGetAllUsersAdmin | null>(null);
   const { show } = useAlert();
@@ -38,11 +49,11 @@ export default function PaymentVerificationPendingUsersTable({
     },
     onSuccess: () => {
       refetch();
-      show("Payment approved successfully", "success");
+      show('Payment approved successfully', 'success');
       setActiveUser(null);
     },
     onError: () => {
-      show("Something went wrong", "error");
+      show('Something went wrong', 'error');
     },
   });
 
@@ -54,10 +65,10 @@ export default function PaymentVerificationPendingUsersTable({
     onSuccess: () => {
       setActiveUser(null);
       refetch();
-      show("Payment rejected successfully", "success");
+      show('Payment rejected successfully', 'success');
     },
     onError: () => {
-      show("Something went wrong", "error");
+      show('Something went wrong', 'error');
     },
   });
 
@@ -97,7 +108,7 @@ export default function PaymentVerificationPendingUsersTable({
               <TableCell>
                 {user.firstName} {user.lastName}
               </TableCell>
-              <TableCell>{user.packageId?.title || "-"}</TableCell>
+              <TableCell>{user.packageId?.title || '-'}</TableCell>
               <TableCell>
                 {user.referredBy?.firstName} {user.referredBy?.lastName}
               </TableCell>
@@ -125,6 +136,13 @@ export default function PaymentVerificationPendingUsersTable({
           ))}
         </TableBody>
       </Table>
+      {users.length >= 10 && (
+        <TablePagination
+          page={page}
+          totalPages={totalPages}
+          onPageChange={onPageChange}
+        />
+      )}
       {activeUser ? (
         <PaymentVerification
           isOpen={!!activeUser}

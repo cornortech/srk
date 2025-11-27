@@ -16,6 +16,7 @@ import { rejectKycApi, verifyKycApi } from '../../lib/apiClient';
 import useAlert from '../../hooks/useAlert';
 import { AxiosError } from 'axios';
 import { ArrowLeft, ArrowRight, ViewIcon } from 'lucide-react';
+import TablePagination from './Pagination';
 
 interface UserTableProps {
   users: TGetAllUsersAdmin[];
@@ -160,33 +161,11 @@ export default function UserTable({
       </Table>
       {/* PAGINATION */}
       {users.length >= 10 && (
-        <div className="flex items-center justify-center gap-4 mt-4">
-          <Button
-            size="sm"
-            className="hover:bg-green-600 hover:text-white"
-            variant="flat"
-            isDisabled={page <= 1}
-            onPress={() => onPageChange(page - 1)}
-          >
-            <ArrowLeft size={16} />
-            Prev
-          </Button>
-
-          <span className="text-sm font-medium">
-            Page {page} of {totalPages}
-          </span>
-
-          <Button
-            size="sm"
-            className="hover:bg-green-600 hover:text-white"
-            variant="flat"
-            isDisabled={page >= totalPages}
-            onPress={() => onPageChange(page + 1)}
-          >
-            Next
-            <ArrowRight size={16} />
-          </Button>
-        </div>
+        <TablePagination
+          page={page}
+          totalPages={totalPages}
+          onPageChange={onPageChange}
+        />
       )}
     </>
   );

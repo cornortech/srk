@@ -4,6 +4,7 @@ import { socialTaskPackageModel } from "../../model/socialTaskPackageModel";
 import { SocialTaskPackageEnrollmentModel } from "../../model/socialTaskPackageEnrollmentModel";
 import { SocialTaskLinkModel } from "../../model/socialTaskLinkModel";
 import { UserModel } from "../../model/userModel";
+import { SocialTaskFollowRequestModel } from "../../model/socialTaskFollowRequestModel";
 
 const createSocialTaskPackage: AppRouteImplementationOrOptions<typeof taskContract.createSocialTaskPackage> = async ({ body }) => {
     try {
@@ -155,7 +156,7 @@ const createSocialLinks: AppRouteImplementationOrOptions<typeof taskContract.cre
                 }
             }
         }
-        await SocialTaskLinkModel.create({
+        const result = await SocialTaskLinkModel.create({
             userId: body.userId,
             facebookUrl: body.facebookurl,
             instagramUrl: body.instagramUrl,
@@ -166,6 +167,7 @@ const createSocialLinks: AppRouteImplementationOrOptions<typeof taskContract.cre
             status: 201,
             body: {
                 message: "Links added successfully",
+                result: result,
                 success: true
             }
         }
@@ -181,4 +183,44 @@ const createSocialLinks: AppRouteImplementationOrOptions<typeof taskContract.cre
         })
     }
 }
-export const taskMutationHandler = { createSocialTaskPackage, enrollSocialTaskPackage, acceptTaskEnrollmentRequest, rejectTaskEnrollmentRequest, createSocialLinks }
+
+const createSocialTaskFollowRequest: AppRouteImplementationOrOptions<typeof taskContract.createSocialTaskFollowRequest> = async ({ params, body }) => {
+    try {
+        const requestId = await SocialTaskLinkModel.findOne({ _id: params.id })
+        if (!requestId) {
+            return {
+                status: 500,
+                body: {
+                    message: "No request id found",
+                    success: false
+                }
+            }
+        }
+        const result = await SocialTaskFollowRequestModel.create({
+            followedBy: body.followedBy,
+            followedTo: body.followedTo,
+            socialMedia: body.socialMedia,
+            status: body.status,
+            screenshotUrl: body.screenshotUrl,
+            remarks: body.remarks
+        })
+        return {
+            status: 201,
+            body: {
+                result: result,
+                message: "Requested successfully",
+                success: true
+            }
+        }
+    } catch (error) {
+        console.log(error)
+        return {
+            status: 500,
+            body: {
+                message: "Internal server error",
+                success: false
+            }
+        }
+    }
+}
+export const taskMutationHandler = { createSocialTaskPackage, enrollSocialTaskPackage, acceptTaskEnrollmentRequest, rejectTaskEnrollmentRequest, createSocialLinks, createSocialTaskFollowRequest }

@@ -114,5 +114,20 @@ export const taskContract = c.router({
       500: ErrorSchema
     },
     summary: "Create Social Task Follow Request"
+  },
+  approveSocialTaskFollowRequest:{
+    method: "PATCH",
+    path: "/approve-social-task-follow-request/:id",
+    body: z.object({
+      remarks: z.string().optional()
+    }),
+    responses: {
+      200: SuccessSchema,
+      403: ErrorSchema,
+      404: ErrorSchema,
+      500: ErrorSchema
+    },
+    summary: "Approve Social Task Follow Request by Id"
   }
+  
 });

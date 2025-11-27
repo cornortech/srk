@@ -1,15 +1,15 @@
-import path from "path";
-import { PDFDocument, rgb } from "pdf-lib";
-import fs from "fs";
-import cloudinary from "cloudinary";
+import path from 'path';
+import { PDFDocument, rgb } from 'pdf-lib';
+import fs from 'fs';
+import cloudinary from 'cloudinary';
 
 cloudinary.v2.config({
-  cloud_name: "doia6qktn",
-  api_key: "317337221342793",
-  api_secret: "tv-B2nCOnNBOHrP7Gkqd-kcleBE",
+  cloud_name: 'doia6qktn',
+  api_key: '317337221342793',
+  api_secret: 'tv-B2nCOnNBOHrP7Gkqd-kcleBE',
 });
 
-import sharp from "sharp";
+import sharp from 'sharp';
 
 async function fetchAndCompressImage(url: string): Promise<Uint8Array> {
   const response = await fetch(url);
@@ -31,15 +31,15 @@ async function uploadFileToCloudinary(
 ): Promise<string> {
   try {
     const uploadResponse = await cloudinary.v2.uploader.upload(filePath, {
-      resource_type: "raw",
-      folder: folder || "",
-      upload_preset: "srkImg",
+      resource_type: 'raw',
+      folder: folder || '',
+      upload_preset: 'srkImg',
     });
 
-    console.log("Uploaded file URL:", uploadResponse.secure_url);
+    console.log('Uploaded file URL:', uploadResponse.secure_url);
     return uploadResponse.secure_url;
   } catch (error) {
-    console.error("Error uploading file:", error);
+    console.error('Error uploading file:', error);
     throw error;
   }
 }
@@ -51,14 +51,16 @@ export async function modifyAndUploadAgreement(
   createdAt: string,
   ref: string
 ): Promise<string> {
-  if (!imageUrl) return "";
+  if (!imageUrl) return '';
   const modifiedPdfPath = `modifiedAgreement-${Date.now()}.pdf`;
   try {
     const pdfPath = path.join(
       process.cwd(),
-      "static",
-      "pdf",
-      "courseAgreement.pdf"
+      'apps',
+      'backend',
+      'static',
+      'pdf',
+      'courseAgreement.pdf'
     );
 
     console.log(`PDF Path: ${pdfPath}`);
@@ -104,12 +106,20 @@ export async function modifyAndUploadAgreement(
     // Save the modified PDF locally
     const modifiedPdfBytes = await pdfDoc.save();
     fs.writeFileSync(modifiedPdfPath, modifiedPdfBytes);
-    const modifiedPdfUrl = await uploadFileToCloudinary(modifiedPdfPath, "");
-    fs.unlinkSync(modifiedPdfPath);
+    const modifiedPdfUrl = await uploadFileToCloudinary(modifiedPdfPath, '');
+    
+    // Clean up the temporary file
+    if (fs.existsSync(modifiedPdfPath)) {
+      fs.unlinkSync(modifiedPdfPath);
+    }
+    
     return modifiedPdfUrl;
   } catch (error) {
-    fs.unlinkSync(modifiedPdfPath);
-    console.error("Error modifying or uploading PDF:", error);
+    // Clean up the temporary file if it exists
+    if (fs.existsSync(modifiedPdfPath)) {
+      fs.unlinkSync(modifiedPdfPath);
+    }
+    console.error('Error modifying or uploading PDF:', error);
     throw error;
   }
 }
@@ -119,7 +129,7 @@ export async function createAffiliatePdfAndUpload(
   createdAt: string,
   ref: string
 ): Promise<string> {
-  if (!imageUrl) return "";
+  if (!imageUrl) return '';
 
   const modifiedPdfPath = `modifiedAffiliateAgreement-${Date.now()}.pdf`;
   // const modifiedPdfPath = `modifiedAffiliateAgreement.pdf`;
@@ -127,9 +137,11 @@ export async function createAffiliatePdfAndUpload(
   try {
     const pdfPath = path.join(
       process.cwd(),
-      "static",
-      "pdf",
-      "affiliateAgreement.pdf"
+      'apps',
+      'backend',
+      'static',
+      'pdf',
+      'affiliateAgreement.pdf'
     );
 
     console.log(`PDF Path: ${pdfPath}`);
@@ -188,13 +200,20 @@ export async function createAffiliatePdfAndUpload(
     // Save the modified PDF locally
     const modifiedPdfBytes = await pdfDoc.save();
     fs.writeFileSync(modifiedPdfPath, modifiedPdfBytes);
-    const modifiedPdfUrl = await uploadFileToCloudinary(modifiedPdfPath, "");
+    const modifiedPdfUrl = await uploadFileToCloudinary(modifiedPdfPath, '');
 
-    // fs.unlinkSync(modifiedPdfPath);
+    // Clean up the temporary file
+    if (fs.existsSync(modifiedPdfPath)) {
+      fs.unlinkSync(modifiedPdfPath);
+    }
+    
     return modifiedPdfUrl;
   } catch (error) {
-    // fs.unlinkSync(modifiedPdfPath);
-    console.error("Error modifying or uploading PDF:", error);
+    // Clean up the temporary file if it exists
+    if (fs.existsSync(modifiedPdfPath)) {
+      fs.unlinkSync(modifiedPdfPath);
+    }
+    console.error('Error modifying or uploading PDF:', error);
     throw error;
   }
 }

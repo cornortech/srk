@@ -1,23 +1,23 @@
-import { AppRouteImplementationOrOptions } from "@ts-rest/express/src/lib/types";
-import { authContract } from "../../contract/auth/contract";
-import { UserModel } from "../../model/userModel";
-import AuthService from "../../services/authService";
-import { SubscriptionModel } from "../../model/subscriptionModel";
-import { PackageModel } from "../../model/packageModel";
-import mongoose from "mongoose";
-import CustomerBalanceService from "../../services/customerBalanceService";
-import AdminBalanceService from "../../services/adminBalanceService";
-import { KYCModel } from "../../model/kycModel";
-import { env } from "../../config/env";
-import EmailService from "../../services/emailService";
-import { adminModel } from "../../model/adminModel";
-import { balanceModel } from "../../model/balanceModel";
-import { FinanceService } from "../../services/financeService";
-import { modifyAndUploadAgreement } from "../../services/pdfService";
-import moment from "moment";
-import { CoursePaymentModel } from "../../model/coursePayment";
-import { methods } from "../../utils/methods";
-import { EarningStatementModel } from "../../model/earningStatementModel";
+import { AppRouteImplementationOrOptions } from '@ts-rest/express/src/lib/types';
+import { authContract } from '../../contract/auth/contract';
+import { UserModel } from '../../model/userModel';
+import AuthService from '../../services/authService';
+import { SubscriptionModel } from '../../model/subscriptionModel';
+import { PackageModel } from '../../model/packageModel';
+import mongoose from 'mongoose';
+import CustomerBalanceService from '../../services/customerBalanceService';
+import AdminBalanceService from '../../services/adminBalanceService';
+import { KYCModel } from '../../model/kycModel';
+import { env } from '../../config/env';
+import EmailService from '../../services/emailService';
+import { adminModel } from '../../model/adminModel';
+import { balanceModel } from '../../model/balanceModel';
+import { FinanceService } from '../../services/financeService';
+import { modifyAndUploadAgreement } from '../../services/pdfService';
+import moment from 'moment';
+import { CoursePaymentModel } from '../../model/coursePayment';
+import { methods } from '../../utils/methods';
+import { EarningStatementModel } from '../../model/earningStatementModel';
 
 interface CalculateEarningsProps {
   referredBy: string;
@@ -81,7 +81,7 @@ const calculateEarnings = async ({
     await EarningStatementModel.create({
       userId: new mongoose.Types.ObjectId(referredBy),
       referredTo: new mongoose.Types.ObjectId(referredTo),
-      type: "REFERRAL_EANRING",
+      type: 'REFERRAL_EANRING',
       ceoSalary,
       companyTurnover,
       officeManagementCharge,
@@ -108,7 +108,7 @@ const calculateEarnings = async ({
 
       await EarningStatementModel.create({
         userId: new mongoose.Types.ObjectId(seniorId),
-        type: "SENIOR_EARNING",
+        type: 'SENIOR_EARNING',
         earning: srkBonus,
         srkBonus,
         eventWallet: 0,
@@ -119,7 +119,7 @@ const calculateEarnings = async ({
       });
     }
   } catch (error) {
-    console.error("Error calculating earnings:", error);
+    console.error('Error calculating earnings:', error);
   }
 };
 
@@ -135,7 +135,7 @@ const register: AppRouteImplementationOrOptions<
         status: 400,
         body: {
           success: false,
-          message: "User already exists with this email.",
+          message: 'User already exists with this email.',
         },
       };
     }
@@ -153,7 +153,7 @@ const register: AppRouteImplementationOrOptions<
         status: 400,
         body: {
           success: false,
-          message: "Package not found",
+          message: 'Package not found',
         },
       };
     }
@@ -163,7 +163,7 @@ const register: AppRouteImplementationOrOptions<
         status: 400,
         body: {
           success: false,
-          message: "Password is required",
+          message: 'Password is required',
         },
       };
     }
@@ -183,13 +183,13 @@ const register: AppRouteImplementationOrOptions<
           title: string;
           price: number;
         } | null;
-      }>("packageId")
+      }>('packageId')
       .populate<{
         referredBy: {
           packageId: string;
           _id: string;
         };
-      }>("referredBy");
+      }>('referredBy');
 
     if (body.referredBy && referringUser) {
       referredBy = referringUser._id.toString();
@@ -197,10 +197,10 @@ const register: AppRouteImplementationOrOptions<
 
     // Create new user
     const newUser = await UserModel.create({
-      email: body.email.replace(/\s/g, ""),
+      email: body.email.replace(/\s/g, ''),
       // remove whitespaces from firstname and last name
-      firstName: body.firstName.replace(/\s/g, ""),
-      lastName: body.lastName.replace(/\s/g, ""),
+      firstName: body.firstName.replace(/\s/g, ''),
+      lastName: body.lastName.replace(/\s/g, ''),
       password: hashedPassword,
       country: body.country,
       phoneNumber: body.phoneNumber,
@@ -212,8 +212,8 @@ const register: AppRouteImplementationOrOptions<
       packageId: body.packageId,
       purpose: body.purpose,
       status: body.isAddedByUser
-        ? "REGISTERED"
-        : "PAYMENT_VERIFICATION_PENDING",
+        ? 'REGISTERED'
+        : 'PAYMENT_VERIFICATION_PENDING',
       ...(referredBy ? { referredBy } : {}),
     });
 
@@ -224,7 +224,7 @@ const register: AppRouteImplementationOrOptions<
     await SubscriptionModel.create({
       userId: newUser._id,
       packageId: body.packageId,
-      status: "active",
+      status: 'active',
       purchasedAt: new Date(),
       expiresAt: expirationDate,
     });
@@ -232,10 +232,10 @@ const register: AppRouteImplementationOrOptions<
     if (!body.isAddedByUser) {
       await CoursePaymentModel.create({
         userId: newUser._id,
-        transactionId: body.transactionId || "",
-        paymentMethod: body.paymentMethod || "",
-        paymentType: body.paymentType || "qr",
-        paymentProofUrl: body.paymentProofUrl || "",
+        transactionId: body.transactionId || '',
+        paymentMethod: body.paymentMethod || '',
+        paymentType: body.paymentType || 'qr',
+        paymentProofUrl: body.paymentProofUrl || '',
       });
     }
 
@@ -255,12 +255,12 @@ const register: AppRouteImplementationOrOptions<
       if (!packageExists) {
         return {
           status: 400,
-          body: { success: false, message: "Package not found" },
+          body: { success: false, message: 'Package not found' },
         };
       }
 
       const referredByUserEmailTemplate = EmailService.EmailTemplate({
-        heading: "User enrolled with your referral code",
+        heading: 'User enrolled with your referral code',
         message: `
         <p>Hi ${referringUser?.firstName},</p>
         <p>${newUser.firstName} enrolled ${packageExists.title} package with your referral code .</p>
@@ -269,9 +269,9 @@ const register: AppRouteImplementationOrOptions<
       });
 
       EmailService.sendEmail({
-        email: referringUser?.email || "",
+        email: referringUser?.email || '',
         message: referredByUserEmailTemplate,
-        subject: "User enrolled with your referral code",
+        subject: 'User enrolled with your referral code',
       });
 
       let commissionPackageId = referringUser.packageId._id.toString();
@@ -281,18 +281,18 @@ const register: AppRouteImplementationOrOptions<
       }
 
       await calculateEarnings({
-        packageId: commissionPackageId || "",
+        packageId: commissionPackageId || '',
         enrolledPackageId: newUserPackageExist._id.toString(),
         referredBy,
         referredTo: newUser._id.toString(),
-        seniorId: referringUser.referredBy?._id?.toString() || "",
+        seniorId: referringUser.referredBy?._id?.toString() || '',
         referringUserPackageId: referringUser.packageId._id.toString(),
         seniorPackageId: referringUser?.referredBy?.packageId,
       });
     }
 
     const registrationEmailTemplate = EmailService.EmailTemplate({
-      heading: "Registration Successful",
+      heading: 'Registration Successful',
       message: `
       <p>Hi ${newUser.firstName},</p>
       <p>Thank you for registering with Srk University. We're excited to have you on board.</p>
@@ -302,25 +302,25 @@ const register: AppRouteImplementationOrOptions<
         <li>Password: ${body.password}</li>
       </ul>
       `,
-      link_name: "Login Now",
+      link_name: 'Login Now',
       link: `${env.FRONTEND_BASE_URL}/auth/login`,
     });
 
     EmailService.sendEmail({
       email: newUser.email,
       message: registrationEmailTemplate,
-      subject: "Registration Successful",
+      subject: 'Registration Successful',
     });
 
     return {
       status: 201,
-      body: { success: true, message: "User registered successfully" },
+      body: { success: true, message: 'User registered successfully' },
     };
   } catch (error) {
-    console.error("Error in registration:", error);
+    console.error('Error in registration:', error);
     return {
       status: 500,
-      body: { success: false, message: "Internal server error" },
+      body: { success: false, message: 'Internal server error' },
     };
   }
 };
@@ -339,7 +339,7 @@ const login: AppRouteImplementationOrOptions<
       status: 404,
       body: {
         success: false,
-        message: "User not found",
+        message: 'User not found',
       },
     };
   }
@@ -355,28 +355,28 @@ const login: AppRouteImplementationOrOptions<
       status: 401,
       body: {
         success: false,
-        message: "Invalid credentials",
+        message: 'Invalid credentials',
       },
     };
   }
 
   // Determine role
-  const role = adminExist ? "admin" : "user";
+  const role = adminExist ? 'admin' : 'user';
 
   // Set redirection URL based on user type and status
-  let redirectionUrl = "/auth/login"; // Default for users
-  if (role === "user") {
+  let redirectionUrl = '/auth/login'; // Default for users
+  if (role === 'user') {
     if (userExist) {
       redirectionUrl = methods.getFrontendRedirectionUrl(
         false,
         userExist.status,
-        userExist.packageId?.toString() || ""
+        userExist.packageId?.toString() || ''
       );
     } else {
-      redirectionUrl = "/auth/login";
+      redirectionUrl = '/auth/login';
     }
   } else {
-    redirectionUrl = "/admin"; // Admin redirection
+    redirectionUrl = '/admin'; // Admin redirection
   }
 
   // Generate JWT token
@@ -386,7 +386,7 @@ const login: AppRouteImplementationOrOptions<
   });
 
   // Set cookie
-  res.cookie("x-auth-token", token, {
+  res.cookie('x-auth-token', token, {
     maxAge: 24 * 60 * 60 * 1000,
     httpOnly: true,
   });
@@ -395,7 +395,7 @@ const login: AppRouteImplementationOrOptions<
     status: 200,
     body: {
       success: true,
-      message: "User logged in successfully",
+      message: 'User logged in successfully',
       user: {
         _id: loggedInUser._id.toString(),
         email: loggedInUser.email,
@@ -420,7 +420,7 @@ const verifyKyc: AppRouteImplementationOrOptions<
         status: 404,
         body: {
           success: false,
-          message: "User not found",
+          message: 'User not found',
         },
       };
     }
@@ -430,16 +430,16 @@ const verifyKyc: AppRouteImplementationOrOptions<
         status: 404,
         body: {
           success: false,
-          message: "KYC not found",
+          message: 'KYC not found',
         },
       };
     }
-    if (userExist.status === "PORTAL_ACTIVATED") {
+    if (userExist.status === 'PORTAL_ACTIVATED') {
       return {
         status: 400,
         body: {
           success: false,
-          message: "KYC already approved",
+          message: 'KYC already approved',
         },
       };
     }
@@ -449,18 +449,18 @@ const verifyKyc: AppRouteImplementationOrOptions<
       },
       {
         $set: {
-          status: "approved",
+          status: 'approved',
         },
       }
     );
 
-    userExist.status = "PORTAL_ACTIVATED";
+    userExist.status = 'PORTAL_ACTIVATED';
 
     const courseEnrollAgreementUrl = await modifyAndUploadAgreement(
       userExist.firstName,
       kycExist.verificationImage,
-      moment(kycExist.createdAt).format("DD-MM-YYYY"),
-      userExist.referralCode || ""
+      moment(kycExist.createdAt).format('DD-MM-YYYY'),
+      userExist.referralCode || ''
     );
 
     kycExist.courseEnrollAgreement = courseEnrollAgreementUrl;
@@ -469,7 +469,7 @@ const verifyKyc: AppRouteImplementationOrOptions<
 
     EmailService.sendEmail({
       email: userExist.email,
-      subject: "KYC Approved",
+      subject: 'KYC Approved',
       message: `
       <p>Hi ${userExist.firstName},</p>
       <p>Your KYC has been approved. You can now access the study portal now.</p>
@@ -480,13 +480,14 @@ const verifyKyc: AppRouteImplementationOrOptions<
       status: 200,
       body: {
         success: true,
-        message: "KYC approved successfully",
+        message: 'KYC approved successfully',
       },
     };
   } catch (error) {
+    console.log('Error in KYC approval:', error);
     return {
       status: 500,
-      body: { success: false, message: "Internal server error" },
+      body: { success: false, message: 'Internal server error' },
     };
   }
 };
@@ -502,7 +503,7 @@ const rejectKyc: AppRouteImplementationOrOptions<
         status: 404,
         body: {
           success: false,
-          message: "User not found",
+          message: 'User not found',
         },
       };
     }
@@ -523,20 +524,20 @@ const rejectKyc: AppRouteImplementationOrOptions<
       },
       {
         $set: {
-          status: "rejected",
+          status: 'rejected',
           rejectionReason: body.reason,
         },
       }
     );
 
-    userExist.status = "KYC_VERIFICATION_REJECTED";
+    userExist.status = 'KYC_VERIFICATION_REJECTED';
     await userExist.save();
 
     return {
       status: 200,
       body: {
         success: true,
-        message: "KYC rejected successfully",
+        message: 'KYC rejected successfully',
       },
     };
   } catch (error) {
@@ -544,7 +545,7 @@ const rejectKyc: AppRouteImplementationOrOptions<
       status: 500,
       body: {
         success: false,
-        message: "Internal server error",
+        message: 'Internal server error',
       },
     };
   }
@@ -564,7 +565,7 @@ const rejectPaymentDetails: AppRouteImplementationOrOptions<
         status: 404,
         body: {
           success: false,
-          message: "User not found",
+          message: 'User not found',
         },
       };
     }
@@ -574,23 +575,23 @@ const rejectPaymentDetails: AppRouteImplementationOrOptions<
         status: 404,
         body: {
           success: false,
-          message: "Payment details not found.",
+          message: 'Payment details not found.',
         },
       };
     }
 
-    if (userExist.status !== "PAYMENT_VERIFICATION_PENDING") {
+    if (userExist.status !== 'PAYMENT_VERIFICATION_PENDING') {
       return {
         status: 403,
         body: {
           success: false,
-          message: "Payment is not in verification pending state.",
+          message: 'Payment is not in verification pending state.',
         },
       };
     }
 
     paymentDetailsExist.rejectionReason = body.reason;
-    userExist.status = "PAYMENT_VERIFICATION_REJECTED";
+    userExist.status = 'PAYMENT_VERIFICATION_REJECTED';
     await userExist.save();
     await paymentDetailsExist.save();
 
@@ -598,13 +599,13 @@ const rejectPaymentDetails: AppRouteImplementationOrOptions<
       status: 200,
       body: {
         success: true,
-        message: "Payment details rejected.",
+        message: 'Payment details rejected.',
       },
     };
   } catch (error) {
     return {
       status: 500,
-      body: { success: false, message: "Internal server error" },
+      body: { success: false, message: 'Internal server error' },
     };
   }
 };
@@ -620,7 +621,7 @@ const approvePaymentDetails: AppRouteImplementationOrOptions<
         status: 404,
         body: {
           success: false,
-          message: "User not found",
+          message: 'User not found',
         },
       };
     }
@@ -634,17 +635,17 @@ const approvePaymentDetails: AppRouteImplementationOrOptions<
         status: 404,
         body: {
           success: false,
-          message: "Payment details not found.",
+          message: 'Payment details not found.',
         },
       };
     }
 
-    if (userExist.status !== "PAYMENT_VERIFICATION_PENDING") {
+    if (userExist.status !== 'PAYMENT_VERIFICATION_PENDING') {
       return {
         status: 403,
         body: {
           success: false,
-          message: "Payment is not in verification pending state.",
+          message: 'Payment is not in verification pending state.',
         },
       };
     }
@@ -657,20 +658,20 @@ const approvePaymentDetails: AppRouteImplementationOrOptions<
             title: string;
             price: number;
           } | null;
-        }>("packageId")
+        }>('packageId')
         .populate<{
           referredBy: {
             packageId: string;
             _id: string;
           };
-        }>("referredBy");
+        }>('referredBy');
 
       if (!referringUser) {
         return {
           status: 404,
           body: {
             success: false,
-            message: "Referring user not found",
+            message: 'Referring user not found',
           },
         };
       }
@@ -690,12 +691,12 @@ const approvePaymentDetails: AppRouteImplementationOrOptions<
       if (!newUserPackage) {
         return {
           status: 400,
-          body: { success: false, message: "Package not found" },
+          body: { success: false, message: 'Package not found' },
         };
       }
 
       const referredByUserEmailTemplate = EmailService.EmailTemplate({
-        heading: "User enrolled with your referral code",
+        heading: 'User enrolled with your referral code',
         message: `
         <p>Hi ${referringUser?.firstName},</p>
         <p>${userExist.firstName} enrolled ${newUserPackage.title} package with your referral code .</p>
@@ -704,9 +705,9 @@ const approvePaymentDetails: AppRouteImplementationOrOptions<
       });
 
       EmailService.sendEmail({
-        email: referringUser?.email || "",
+        email: referringUser?.email || '',
         message: referredByUserEmailTemplate,
-        subject: "User enrolled with your referral code",
+        subject: 'User enrolled with your referral code',
       });
 
       let commissionPackageId = referringUser.packageId._id.toString();
@@ -716,30 +717,30 @@ const approvePaymentDetails: AppRouteImplementationOrOptions<
       }
 
       await calculateEarnings({
-        packageId: commissionPackageId || "",
+        packageId: commissionPackageId || '',
         referredBy: referringUser._id.toString(),
         referredTo: userExist._id.toString(),
-        seniorId: referringUser.referredBy?._id?.toString() || "",
+        seniorId: referringUser.referredBy?._id?.toString() || '',
         referringUserPackageId: referringUser.packageId._id.toString(),
         seniorPackageId: referringUser?.referredBy?.packageId,
         enrolledPackageId: newUserPackage._id.toString(),
       });
     }
 
-    userExist.status = "REGISTERED";
+    userExist.status = 'REGISTERED';
     await userExist.save();
 
     return {
       status: 200,
       body: {
         success: true,
-        message: "Payment details approved successfully.c",
+        message: 'Payment details approved successfully.c',
       },
     };
   } catch (error) {
     return {
       status: 500,
-      body: { success: false, message: "Internal server error" },
+      body: { success: false, message: 'Internal server error' },
     };
   }
 };
@@ -755,17 +756,17 @@ const editPaymentDetails: AppRouteImplementationOrOptions<
         status: 404,
         body: {
           success: false,
-          message: "User not found",
+          message: 'User not found',
         },
       };
     }
 
-    if (userExist.status === "REGISTERED") {
+    if (userExist.status === 'REGISTERED') {
       return {
         status: 409,
         body: {
           success: false,
-          message: "User is already registered.",
+          message: 'User is already registered.',
         },
       };
     }
@@ -788,21 +789,21 @@ const editPaymentDetails: AppRouteImplementationOrOptions<
       await paymentDetailsExist.save();
     }
 
-    userExist.status = "PAYMENT_VERIFICATION_PENDING";
+    userExist.status = 'PAYMENT_VERIFICATION_PENDING';
     await userExist.save();
 
     return {
       status: 200,
       body: {
         success: true,
-        message: "Payment details updated successfully.",
+        message: 'Payment details updated successfully.',
       },
     };
   } catch (error) {
     console.log(error);
     return {
       status: 500,
-      body: { success: false, message: "Internal server error" },
+      body: { success: false, message: 'Internal server error' },
     };
   }
 };

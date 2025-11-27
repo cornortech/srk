@@ -128,6 +128,20 @@ export const taskContract = c.router({
       500: ErrorSchema
     },
     summary: "Approve Social Task Follow Request by Id"
+  },
+  rejectSocialTaskFollowRequest:{
+    method: "PATCH",
+    path: "/reject-social-task-follow-request/:id",
+    body: z.object({
+      remarks: z.string().optional()
+    }),
+    responses: {
+      200: SuccessSchema,
+      403: ErrorSchema,
+      404: ErrorSchema,
+      500: ErrorSchema
+    },
+    summary: "Reject Social Task Follow Request by Id"
   }
   
 });

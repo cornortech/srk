@@ -260,4 +260,40 @@ const approveSocialTaskFollowRequest: AppRouteImplementationOrOptions<typeof tas
         }
     }
 }
-export const taskMutationHandler = { createSocialTaskPackage, enrollSocialTaskPackage, acceptTaskEnrollmentRequest, rejectTaskEnrollmentRequest, createSocialLinks, createSocialTaskFollowRequest, approveSocialTaskFollowRequest }
+
+const rejectSocialTaskFollowRequest: AppRouteImplementationOrOptions<typeof taskContract.rejectSocialTaskFollowRequest> = async ({ params, body }) => {
+    try {
+        const requestId = await SocialTaskFollowRequestModel.findOne({ _id: params.id })
+        if (!requestId) {
+            return {
+                status: 500,
+                body: {
+                    message: "Request not found",
+                    success: false
+                }
+            }
+        }
+        const result = await SocialTaskFollowRequestModel.findOneAndUpdate(
+            { _id: params.id },
+            { $set: { status: "rejected", remarks: body.remarks } }
+        )
+        return {
+            status: 201,
+            body: {
+                message: "Request Rejected",
+                result: result,
+                success: false
+            }
+        }
+    } catch (error) {
+        console.log(error)
+        return {
+            status: 500,
+            body: {
+                message: "Internal server error",
+                success: false
+            }
+        }
+    }
+}
+export const taskMutationHandler = { createSocialTaskPackage, enrollSocialTaskPackage, acceptTaskEnrollmentRequest, rejectTaskEnrollmentRequest, createSocialLinks, createSocialTaskFollowRequest, approveSocialTaskFollowRequest, rejectSocialTaskFollowRequest }

@@ -54,7 +54,19 @@ const getAllSocialTaskEnrollment: AppRouteImplementationOrOptions<typeof taskCon
     }
 }
 
-export const taskQueryHandler = {
-    getSocialTaskPackage,
-    getAllSocialTaskEnrollment
-}
+// const getAllActiveSocialLinksToFollow: AppRouteImplementationOrOptions<typeof taskContract.getAllActiveSocialLinksToFollow> = async()=>{
+//     try{
+        
+//     }catch(error){
+//         console.log(error)
+//         return{
+//             status: 500,
+//             body:{
+//                 message: "Internal server error",
+//                 success: false
+//             }
+//         }
+//     }
+// }
+
+export const taskQueryHandler = {getSocialTaskPackage, getAllSocialTaskEnrollment}

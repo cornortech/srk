@@ -1,6 +1,6 @@
 import { initContract } from "@ts-rest/core";
 import { ErrorSchema, SuccessSchema } from "../common";
-import { createSocialLinkSchema, createSocialTaskPackageEnrollmentSchema, createSocialTaskPackageSchema } from "./schema";
+import { createSocialLinkSchema, createSocialTaskFollowRequestSchema, createSocialTaskPackageEnrollmentSchema, createSocialTaskPackageSchema } from "./schema";
 import z from "zod";
 
 const c = initContract();
@@ -91,5 +91,28 @@ export const taskContract = c.router({
       500: ErrorSchema
     },
     summary: "Create Social Links"
+  },
+  getAllActiveSocialLinksToFollow: {
+    method: "GET",
+    path: "/get-all-active-social-links-to-follow",
+    responses: {
+      200: SuccessSchema,
+      403: ErrorSchema,
+      404: ErrorSchema,
+      500: ErrorSchema
+    },
+    summary: "Get All Active Social Links to Follow"
+  },
+  createSocialTaskFollowRequest: {
+    method: "POST",
+    body: createSocialTaskFollowRequestSchema,
+    path: "/create-social-task-follow-request/:id",
+    responses: {
+      200: SuccessSchema,
+      403: ErrorSchema,
+      404: ErrorSchema,
+      500: ErrorSchema
+    },
+    summary: "Create Social Task Follow Request"
   }
 });

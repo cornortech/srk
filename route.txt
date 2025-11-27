@@ -8,6 +8,7 @@ For Packages and enrollements
 
 
 For Social Link follow
+/ create-social-links >> done
 / get-all-active-social-links-to-follow
 / follow-social-link
 / approve-social-follow-request

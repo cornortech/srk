@@ -17,6 +17,14 @@ export type TAffiliateRequest = {
   rightThumbPrint?: string;
 };
 
+export type TGetAffiliateRequestByStatus = {
+  data: TAffiliateRequest[];
+  page: number;
+  limit: number;
+  totalUsers: number;
+  totalPages: number;
+}
+
 export type TPromoCodeDetails = {
   firstName: string;
   lastName: string;

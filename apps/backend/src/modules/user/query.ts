@@ -1,12 +1,12 @@
-import { AppRouteImplementationOrOptions } from "@ts-rest/express/src/lib/types";
-import { userContract } from "../../contract/user/contract";
-import { UserModel } from "../../model/userModel";
-import { BankModel } from "../../model/bankModel";
-import { KYCModel } from "../../model/kycModel";
-import { affiliateBiometricModel } from "../../model/affiliateVerificationModel";
-import { affiliateRequestModel } from "../../model/affiliateRequestModel";
-import { methods } from "../../utils/methods";
-import { CoursePaymentModel } from "../../model/coursePayment";
+import { AppRouteImplementationOrOptions } from '@ts-rest/express/src/lib/types';
+import { userContract } from '../../contract/user/contract';
+import { UserModel } from '../../model/userModel';
+import { BankModel } from '../../model/bankModel';
+import { KYCModel } from '../../model/kycModel';
+import { affiliateBiometricModel } from '../../model/affiliateVerificationModel';
+import { affiliateRequestModel } from '../../model/affiliateRequestModel';
+import { methods } from '../../utils/methods';
+import { CoursePaymentModel } from '../../model/coursePayment';
 
 export const getUserDetails: AppRouteImplementationOrOptions<
   typeof userContract.getUserDetails
@@ -25,7 +25,7 @@ export const getUserDetails: AppRouteImplementationOrOptions<
       created_at: Date;
       updated_at: Date;
     };
-  }>("packageId");
+  }>('packageId');
 
   const bankDetails = await BankModel.findOne({ userId: params.userId });
   const kycDetails = await KYCModel.findOne({ userId: params.userId });
@@ -43,7 +43,7 @@ export const getUserDetails: AppRouteImplementationOrOptions<
       status: 404,
       body: {
         success: false,
-        message: "User not found",
+        message: 'User not found',
       },
     };
   }
@@ -65,7 +65,7 @@ export const getUserDetails: AppRouteImplementationOrOptions<
         lastName: userDetails.lastName,
         phoneNumber: userDetails.phoneNumber,
         profilePicture: userDetails.profilePicture,
-        isActive: userDetails.status === "PORTAL_ACTIVATED",
+        isActive: userDetails.status === 'PORTAL_ACTIVATED',
         referralCode: userDetails.referralCode,
         gender: userDetails.gender,
         affiliateEnabled: userDetails.affiliateEnabled,
@@ -73,7 +73,7 @@ export const getUserDetails: AppRouteImplementationOrOptions<
         createdAt: userDetails.createdAt,
         updatedAt: userDetails.updatedAt,
         status: userDetails.status,
-        referredBy: userDetails.referredBy?.toString() || "",
+        referredBy: userDetails.referredBy?.toString() || '',
         purpose: userDetails.purpose,
         packageId: {
           _id: userDetails.packageId._id,
@@ -91,11 +91,11 @@ export const getUserDetails: AppRouteImplementationOrOptions<
       },
       paymentDetails: coursePaymentDetails
         ? {
-            paymentMethod: coursePaymentDetails.paymentMethod || "",
-            paymentProofUrl: coursePaymentDetails.paymentProofUrl || "",
-            paymentType: coursePaymentDetails.paymentType || "",
-            transactionId: coursePaymentDetails.transactionId || "",
-            rejectionReason: coursePaymentDetails.rejectionReason || "",
+            paymentMethod: coursePaymentDetails.paymentMethod || '',
+            paymentProofUrl: coursePaymentDetails.paymentProofUrl || '',
+            paymentType: coursePaymentDetails.paymentType || '',
+            transactionId: coursePaymentDetails.transactionId || '',
+            rejectionReason: coursePaymentDetails.rejectionReason || '',
           }
         : null,
       bankDetails: bankDetails
@@ -105,9 +105,9 @@ export const getUserDetails: AppRouteImplementationOrOptions<
             bankName: bankDetails.bankName,
             branchName: bankDetails.branchName,
             accountHolderName: bankDetails.accountHolderName,
-            ifscCode: bankDetails.ifscCode || "",
+            ifscCode: bankDetails.ifscCode || '',
             relationWithAccount: bankDetails.relationWithAccount,
-            qrUrl: bankDetails.qrUrl || "",
+            qrUrl: bankDetails.qrUrl || '',
             status: bankDetails.status,
             rejectionReason: bankDetails.rejectionReason,
           }
@@ -152,7 +152,7 @@ const getRefferedUsersByUserId: AppRouteImplementationOrOptions<
       status: 404,
       body: {
         success: false,
-        message: "User not found",
+        message: 'User not found',
       },
     };
   }
@@ -190,8 +190,17 @@ const getAllUsers: AppRouteImplementationOrOptions<
       queryReq.status = { $in: query.status };
     }
 
-    const users = await UserModel.find(queryReq)
-      .sort({ createdAt: -1 })
+    // Parse limit from query string
+    const limit = query?.limit ? parseInt(query.limit, 10) : undefined;
+
+    const usersQuery = UserModel.find(queryReq).sort({ createdAt: -1 });
+
+    // Apply limit if provided
+    if (limit && !isNaN(limit) && limit > 0) {
+      usersQuery.limit(limit);
+    }
+
+    const users = await usersQuery
       .populate<{
         referredBy: {
           _id: string;
@@ -207,12 +216,12 @@ const getAllUsers: AppRouteImplementationOrOptions<
           discountedPrice: number;
         };
       }>({
-        path: "referredBy",
-        populate: { path: "referredBy", select: "firstName lastName" }, // Further populating referredBy
+        path: 'referredBy',
+        populate: { path: 'referredBy', select: 'firstName lastName' }, // Further populating referredBy
       })
       .populate({
-        path: "packageId",
-        select: "title description price discountedPrice",
+        path: 'packageId',
+        select: 'title description price discountedPrice',
       });
 
     return {
@@ -243,15 +252,15 @@ const getAllUsers: AppRouteImplementationOrOptions<
             allowedToAddUsers: !!user.allowedToAddUsers,
             purpose: user.purpose || null,
             packageId: {
-              _id: user.packageId?._id.toString() || "",
-              title: user.packageId?.title || "",
-              description: user.packageId?.description || "",
+              _id: user.packageId?._id.toString() || '',
+              title: user.packageId?.title || '',
+              description: user.packageId?.description || '',
               price: user.packageId?.price || null,
               discountedPrice: user.packageId?.discountedPrice || null,
             },
             referredAt: user.createdAt,
-            isActive: user.status === "PORTAL_ACTIVATED",
-            courseEnrollAgreementUrl: kycDetails?.courseEnrollAgreement || "",
+            isActive: user.status === 'PORTAL_ACTIVATED',
+            courseEnrollAgreementUrl: kycDetails?.courseEnrollAgreement || '',
             referredBy: user.referredBy
               ? {
                   _id: user.referredBy?._id.toString(),
@@ -269,10 +278,10 @@ const getAllUsers: AppRouteImplementationOrOptions<
             status: user.status,
             paymentDetails: coursePaymentExist
               ? {
-                  paymentProofUrl: coursePaymentExist.paymentProofUrl || "",
-                  transactionId: coursePaymentExist.transactionId || "",
-                  paymentType: coursePaymentExist.paymentType || "",
-                  paymentMethod: coursePaymentExist.paymentMethod || "",
+                  paymentProofUrl: coursePaymentExist.paymentProofUrl || '',
+                  transactionId: coursePaymentExist.transactionId || '',
+                  paymentType: coursePaymentExist.paymentType || '',
+                  paymentMethod: coursePaymentExist.paymentMethod || '',
                 }
               : null,
             kycDetails: kycDetails
@@ -296,7 +305,7 @@ const getAllUsers: AppRouteImplementationOrOptions<
       status: 500,
       body: {
         success: false,
-        message: "Internal server error",
+        message: 'Internal server error',
       },
     };
   }

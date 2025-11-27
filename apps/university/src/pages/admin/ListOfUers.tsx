@@ -1,34 +1,33 @@
-import { useState } from "react";
-import { Card, CardBody, CardHeader, Input } from "@nextui-org/react";
-import UserTable from "../../components/admin/UserTable";
-import { useQuery } from "@tanstack/react-query";
-import { TGetAllUsersAdmin } from "../../lib/types";
-import { getUsersByStatus } from "../../lib/apiClient";
+import { useState } from 'react';
+import { Card, CardBody, CardHeader, Input } from '@nextui-org/react';
+import UserTable from '../../components/admin/UserTable';
+import { useQuery } from '@tanstack/react-query';
+import { TGetUserByStatusByResponse } from '../../lib/types';
+import { getUsersByStatus } from '../../lib/apiClient';
 
 export const ListOfUsers = () => {
-  const { data: users } = useQuery<TGetAllUsersAdmin[]>({
-    queryKey: ["users"],
-    queryFn: async () => {
-      const res = await getUsersByStatus([
-        "REGISTERED",
-        "PORTAL_ACTIVATED",
-        "PORTAL_DEACTIVATED",
-        "KYC_VERIFICATION_PENDING",
-        "KYC_VERIFICATION_REJECTED",
-        "KYC_VERIFICATION_REJECTED",
-      ]);
-      return res;
-    },
+  const [page, setPage] = useState(1);
+  const [search, setSearch] = useState('');
+
+  const { data: users } = useQuery<TGetUserByStatusByResponse>({
+    queryKey: ['users', page],
+    queryFn: async () =>
+      getUsersByStatus(
+        [
+          'REGISTERED',
+          'PORTAL_ACTIVATED',
+          'PORTAL_DEACTIVATED',
+          'KYC_VERIFICATION_PENDING',
+          'KYC_VERIFICATION_REJECTED',
+        ],
+        page,
+        10
+      ),
   });
 
-  const [search, setSearch] = useState("");
+  if (!users?.data) return <div>Loading...</div>;
 
-  if (!users) {
-    return <div></div>;
-  }
-
-  // Filter users based on email, firstName, or lastName
-  const filteredUsers = users.filter((user) => {
+  const filteredUsers = users.data.filter((user) => {
     const searchTerm = search.toLowerCase();
     return (
       user.email.toLowerCase().includes(searchTerm) ||
@@ -50,7 +49,12 @@ export const ListOfUsers = () => {
           />
         </CardHeader>
         <CardBody>
-          <UserTable users={filteredUsers} />
+          <UserTable
+            users={filteredUsers}
+            page={users.page}
+            totalPages={users.totalPages}
+            onPageChange={(p) => setPage(p)}
+          />
         </CardBody>
       </Card>
     </div>

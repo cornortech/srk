@@ -71,33 +71,41 @@ export const userContract = c.router({
     },
     summary: 'Check promocode of user',
   },
-  getAllUsers: {
-    method: 'GET',
-    path: '/user/getAllUsers',
-    query: z
-      .object({
-        limit: z.string().optional(),
-        status: z
-          .array(
-            z.enum([
-              'REGISTERED',
-              'PAYMENT_VERIFICATION_REJECTED',
-              'PAYMENT_VERIFICATION_PENDING',
-              'KYC_VERIFICATION_PENDING',
-              'KYC_VERIFICATION_REJECTED',
-              'PORTAL_ACTIVATED',
-              'PORTAL_DEACTIVATED',
-            ])
-          )
-          .optional(),
-      })
-      ?.optional(),
-    responses: {
-      200: getAllUsersSchema,
-      403: ErrorSchema,
-      404: ErrorSchema,
-      500: ErrorSchema,
-    },
-    summary: 'Get all users',
+getAllUsers: {
+  method: 'GET',
+  path: '/user/getAllUsers',
+  query: z
+    .object({
+      limit: z.string().optional(),
+      page: z.string().optional(),
+      status: z
+        .array(
+          z.enum([
+            'REGISTERED',
+            'PAYMENT_VERIFICATION_REJECTED',
+            'PAYMENT_VERIFICATION_PENDING',
+            'KYC_VERIFICATION_PENDING',
+            'KYC_VERIFICATION_REJECTED',
+            'PORTAL_ACTIVATED',
+            'PORTAL_DEACTIVATED',
+          ])
+        )
+        .optional(),
+    })
+    ?.optional(),
+  responses: {
+    200: z.object({
+      data: getAllUsersSchema,
+      page: z.number(),
+      limit: z.number(),
+      totalUsers: z.number(),
+      totalPages: z.number(),
+    }),
+    403: ErrorSchema,
+    404: ErrorSchema,
+    500: ErrorSchema,
   },
+  summary: 'Get all users',
+},
+
 });

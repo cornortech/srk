@@ -113,17 +113,24 @@ export const getAllUsersApi = async () => {
   const response = await apiClient.get("/user/getAllUsers");
   return response.data;
 };
-
-export const getUsersByStatus = async (status: string | TUserStatus[]) => {
+export const getUsersByStatus = async (
+  status: string | TUserStatus[],
+  page = 1, // default page
+  limit = 10 // default limit
+) => {
   const statusArray = Array.isArray(status) ? status : [status]; // Ensure array
 
-  const queryString = statusArray
-    .map((s) => `status[]=${encodeURIComponent(s)}`)
-    .join("&"); // Use `status[]` format
+  const response = await apiClient.get("/user/getAllUsers", {
+    params: {
+      status: statusArray, // Axios will handle array properly
+      page,
+      limit,
+    },
+  });
 
-  const response = await apiClient.get(`/user/getAllUsers?${queryString}`);
   return response.data;
 };
+
 
 export const makeCoursePaymentApi = async ({
   userId,

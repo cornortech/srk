@@ -7,21 +7,29 @@ import {
   TableCell,
   Button,
   Chip,
-} from "@nextui-org/react";
-import { TGetAllUsersAdmin, userStatusColorMap } from "../../lib/types";
-import { useState } from "react";
-import { VerifyKYCModal } from "./modal/VerifyKYCModal";
-import { useMutation } from "@tanstack/react-query";
-import { rejectKycApi, verifyKycApi } from "../../lib/apiClient";
-import useAlert from "../../hooks/useAlert";
-import { AxiosError } from "axios";
-import { ViewIcon } from "lucide-react";
+} from '@nextui-org/react';
+import { TGetAllUsersAdmin, userStatusColorMap } from '../../lib/types';
+import { useState } from 'react';
+import { VerifyKYCModal } from './modal/VerifyKYCModal';
+import { useMutation } from '@tanstack/react-query';
+import { rejectKycApi, verifyKycApi } from '../../lib/apiClient';
+import useAlert from '../../hooks/useAlert';
+import { AxiosError } from 'axios';
+import { ViewIcon } from 'lucide-react';
 
 interface UserTableProps {
   users: TGetAllUsersAdmin[];
+  page: number; // current page
+  totalPages: number; // total pages
+  onPageChange: (page: number) => void; // callback
 }
 
-export default function UserTable({ users }: UserTableProps) {
+export default function UserTable({
+  users,
+  page,
+  totalPages,
+  onPageChange,
+}: UserTableProps) {
   const [activeUser, setActiveUser] = useState<TGetAllUsersAdmin | null>(null);
   const { show } = useAlert();
 
@@ -31,34 +39,34 @@ export default function UserTable({ users }: UserTableProps) {
       await verifyKycApi(data.userId);
     },
     onSuccess: () => {
-      show("KYC approved successfully", "success");
+      show('KYC approved successfully', 'success');
       setActiveUser(null);
     },
     onError: (error: AxiosError<{ message: string }>) => {
       console.log(error);
-      show(error.response?.data?.message || "Failed to approve", "error");
+      show(error.response?.data?.message || 'Failed to approve', 'error');
     },
   });
 
   const { mutate: rejectKycMutation } = useMutation({
-    mutationKey: ["payout"],
+    mutationKey: ['payout'],
     mutationFn: async (data: { reason: string; userId: string }) => {
       await rejectKycApi(data.userId, data.reason);
     },
     onSuccess: () => {
-      show("KYC rejected successfully", "success");
+      show('KYC rejected successfully', 'success');
       setActiveUser(null);
     },
     onError: (error: AxiosError<{ message: string }>) => {
       console.log(error);
-      show(error.response?.data?.message || "Failed to reject", "error");
+      show(error.response?.data?.message || 'Failed to reject', 'error');
     },
   });
 
   const handleOnApprove = () => {
     const userId = activeUser?._id;
     if (!userId) {
-      show("User not found", "error");
+      show('User not found', 'error');
       return;
     }
     approveKycMutation({
@@ -71,12 +79,12 @@ export default function UserTable({ users }: UserTableProps) {
   };
   const handleOnReject = (reason: string) => {
     if (!reason) {
-      show("Please enter rejection reason", "error");
+      show('Please enter rejection reason', 'error');
       return;
     }
     const userId = activeUser?._id;
     if (!userId) {
-      show("User not found", "error");
+      show('User not found', 'error');
       return;
     }
     rejectKycMutation({ reason, userId });
@@ -85,15 +93,15 @@ export default function UserTable({ users }: UserTableProps) {
   return (
     <>
       <VerifyKYCModal
-        userId={activeUser?._id || ""}
+        userId={activeUser?._id || ''}
         isAllowedToAddUser={activeUser?.allowedToAddUsers || false}
         status={activeUser?.status}
         isOpen={!!activeUser}
-        backImage={activeUser?.kycDetails?.backImage || ""}
-        frontImage={activeUser?.kycDetails?.frontImage || ""}
-        documentType={activeUser?.kycDetails?.documentType || ""}
-        documentName={activeUser?.kycDetails?.documentNumber || ""}
-        verificationImage={activeUser?.kycDetails?.verificationImage || ""}
+        backImage={activeUser?.kycDetails?.backImage || ''}
+        frontImage={activeUser?.kycDetails?.frontImage || ''}
+        documentType={activeUser?.kycDetails?.documentType || ''}
+        documentName={activeUser?.kycDetails?.documentNumber || ''}
+        verificationImage={activeUser?.kycDetails?.verificationImage || ''}
         onApprove={handleOnApprove}
         onClose={handleOnClose}
         onReject={handleOnReject}
@@ -118,11 +126,11 @@ export default function UserTable({ users }: UserTableProps) {
         <TableBody>
           {users.map((user, index) => (
             <TableRow key={index}>
-              <TableCell>{index + 1}</TableCell>
+              <TableCell>{(page - 1) * 10 + index + 1}</TableCell>
               <TableCell>
                 {user.firstName} {user.lastName}
               </TableCell>
-              <TableCell>{user.packageId?.title || "N/A"} </TableCell>
+              <TableCell>{user.packageId?.title || 'N/A'} </TableCell>
               <TableCell>
                 {user.referredBy?.firstName} {user.referredBy?.lastName}
               </TableCell>
@@ -130,11 +138,11 @@ export default function UserTable({ users }: UserTableProps) {
                 {user.seniorUser?.firstName} {user.seniorUser?.lastName}
               </TableCell>
               <TableCell>{user.email}</TableCell>
-              <TableCell>{user.purpose || "-"}</TableCell>
+              <TableCell>{user.purpose || '-'}</TableCell>
               <TableCell>{user.phoneNumber}</TableCell>
               <TableCell>
                 <Chip variant="flat" color={userStatusColorMap[user.status]}>
-                  {user.status} {user.isSelfSignup ? " (web)" : ""}
+                  {user.status} {user.isSelfSignup ? ' (web)' : ''}
                 </Chip>
               </TableCell>
               <TableCell>
@@ -150,6 +158,32 @@ export default function UserTable({ users }: UserTableProps) {
           ))}
         </TableBody>
       </Table>
+      {/* PAGINATION */}
+      {users.length >= 10 && (
+        <div className="flex items-center justify-center gap-4 mt-4">
+          <Button
+            size="sm"
+            variant="flat"
+            isDisabled={page <= 1}
+            onPress={() => onPageChange(page - 1)}
+          >
+            Prev
+          </Button>
+
+          <span className="text-sm font-medium">
+            Page {page} of {totalPages}
+          </span>
+
+          <Button
+            size="sm"
+            variant="flat"
+            isDisabled={page >= totalPages}
+            onPress={() => onPageChange(page + 1)}
+          >
+            Next
+          </Button>
+        </div>
+      )}
     </>
   );
 }

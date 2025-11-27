@@ -206,6 +206,14 @@ export type TBankStatement = {
   updatedAt: Date;
 };
 
+export type TGetUserByStatusByResponse = {
+  data: TGetAllUsersAdmin[];
+  page: number;
+  limit: number;
+  totalUsers: number;
+  totalPages: number;
+}
+
 export type TGetAllUsersAdmin = {
   _id: string;
   email: string;
@@ -258,6 +266,8 @@ export type TGetAllUsersAdmin = {
     paymentType: "qr" | "onlinePayment";
     paymentMethod: "esewa" | "khalti" | "bankTransfer";
   } | null;
+  page: number;
+  totalPages: number;
 };
 
 export type TUpsertAffiliateBiometricData = {

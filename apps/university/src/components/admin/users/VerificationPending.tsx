@@ -42,7 +42,7 @@ export default function PaymentVerificationPendingUsersTable({
   const [activeUser, setActiveUser] = useState<TGetAllUsersAdmin | null>(null);
   const { show } = useAlert();
 
-  const { mutate: approvePaymentDetailsMutation } = useMutation({
+  const { mutate: approvePaymentDetailsMutation, isPending: isApproving } = useMutation({
     mutationFn: async (userId: string) => {
       const res = await approvePaymentDetailsApi(userId);
       return res;
@@ -57,7 +57,7 @@ export default function PaymentVerificationPendingUsersTable({
     },
   });
 
-  const { mutate: rejectPaymentDetailsMutation } = useMutation({
+  const { mutate: rejectPaymentDetailsMutation, isPending: isRejecting } = useMutation({
     mutationFn: async (data: { userId: string; reason: string }) => {
       const res = await rejectPaymentDetailsApi(data.userId, data.reason);
       return res;
@@ -145,6 +145,8 @@ export default function PaymentVerificationPendingUsersTable({
       )}
       {activeUser ? (
         <PaymentVerification
+          isApproving={isApproving}
+          isRejecting={isRejecting}
           isOpen={!!activeUser}
           onApprove={handleApprove}
           onReject={handleReject}

@@ -23,7 +23,7 @@ class CustomerBalanceService {
       await balanceModel.create({
         userId,
         balance,
-        // eventWallet,
+        // eventWallet, // when event status is on
         // tourEventWallet: eventWallet, // when target status is on
 
         tourEventWallet: 0,
@@ -33,9 +33,9 @@ class CustomerBalanceService {
         tourBalance: 0, //
       });
     } else {
-      // Update existing customer balance
       customerBalance.balance += balance;
-      // customerBalance.eventWallet += eventWallet;
+
+      // customerBalance.eventWallet += eventWallet; // when event status is on
       // customerBalance.tourEventWallet += eventWallet; // when target status is on
 
       customerBalance.srkBonus += srkBonus;

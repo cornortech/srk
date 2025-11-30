@@ -5,7 +5,6 @@ import { SocialTaskPackageEnrollmentModel } from "../../model/socialTaskPackageE
 import { SocialTaskLinkModel } from "../../model/socialTaskLinkModel";
 import { UserModel } from "../../model/userModel";
 import { SocialTaskFollowRequestModel } from "../../model/socialTaskFollowRequestModel";
-import { request } from "http";
 import { SocialTaskEarningStatementModel } from "../../model/socialTaskEarningStatementModel";
 
 const createSocialTaskPackage: AppRouteImplementationOrOptions<typeof taskContract.createSocialTaskPackage> = async ({ body }) => {
@@ -51,8 +50,6 @@ const enrollSocialTaskPackage: AppRouteImplementationOrOptions<typeof taskContra
         await SocialTaskPackageEnrollmentModel.create({
             userId: body.userId,
             socialTaskPackage: body.socialTaskPackage,
-            status: body.status,
-            remarks: body.remarks,
             paymentScreenshotUrl: body.paymentScreenshotUrl,
             expirationDate: body.expirationDate,
             isExpired: body.isExpired
@@ -76,7 +73,7 @@ const enrollSocialTaskPackage: AppRouteImplementationOrOptions<typeof taskContra
     }
 }
 
-const acceptTaskEnrollmentRequest: AppRouteImplementationOrOptions<typeof taskContract.acceptTaskEnrollmentRequest> = async ({ params, body }) => {
+const acceptTaskEnrollmentRequest: AppRouteImplementationOrOptions<typeof taskContract.acceptTaskEnrollmentRequest> = async ({ params}) => {
     try {
         const enrollmentRequest = await SocialTaskPackageEnrollmentModel.findOne({ _id: params.id })
         if (!enrollmentRequest) {
@@ -89,7 +86,7 @@ const acceptTaskEnrollmentRequest: AppRouteImplementationOrOptions<typeof taskCo
         }
         await SocialTaskPackageEnrollmentModel.findOneAndUpdate(
             { _id: params.id },
-            { $set: { status: "approved", remarks: body.remarks } },
+            { $set: { status: "approved" } },
             { new: true }
         )
         return {
@@ -124,7 +121,7 @@ const rejectTaskEnrollmentRequest: AppRouteImplementationOrOptions<typeof taskCo
         }
         await SocialTaskPackageEnrollmentModel.findOneAndUpdate(
             { _id: params.id },
-            { $set: { status: "rejected", remarks: body.remarks } }
+            { $set: { status: "rejected", rejectionReason: body.rejectionReason } }
         )
         return {
             status: 201,
@@ -202,9 +199,7 @@ const createSocialTaskFollowRequest: AppRouteImplementationOrOptions<typeof task
             followedBy: body.followedBy,
             followedTo: body.followedTo,
             socialMedia: body.socialMedia,
-            status: body.status,
             screenshotUrl: body.screenshotUrl,
-            remarks: body.remarks
         })
         return {
             status: 201,
@@ -226,7 +221,7 @@ const createSocialTaskFollowRequest: AppRouteImplementationOrOptions<typeof task
     }
 }
 
-const approveSocialTaskFollowRequest: AppRouteImplementationOrOptions<typeof taskContract.approveSocialTaskFollowRequest> = async ({ params, body }) => {
+const approveSocialTaskFollowRequest: AppRouteImplementationOrOptions<typeof taskContract.approveSocialTaskFollowRequest> = async ({ params}) => {
     try {
         const requestId = await SocialTaskFollowRequestModel.findOne({ _id: params.id })
         if (!requestId) {
@@ -238,11 +233,11 @@ const approveSocialTaskFollowRequest: AppRouteImplementationOrOptions<typeof tas
                 }
             }
         }
-        const result = await SocialTaskFollowRequestModel.findOneAndUpdate(
+        await SocialTaskFollowRequestModel.findOneAndUpdate(
             { _id: params.id },
-            { $set: { status: "approved", remarks: body.remarks } }
+            { $set: { status: "approved" } }
         )
-        const updateEarning = await SocialTaskEarningStatementModel.create({
+        await SocialTaskEarningStatementModel.create({
             followedBy: requestId.followedBy,
             followedTo: requestId.followedTo,
             amount: 50
@@ -251,8 +246,6 @@ const approveSocialTaskFollowRequest: AppRouteImplementationOrOptions<typeof tas
             status: 201,
             body: {
                 message: "Request Approved",
-                result: result,
-                updateEarning: updateEarning,
                 success: false
             }
         }
@@ -280,15 +273,14 @@ const rejectSocialTaskFollowRequest: AppRouteImplementationOrOptions<typeof task
                 }
             }
         }
-        const result = await SocialTaskFollowRequestModel.findOneAndUpdate(
+        await SocialTaskFollowRequestModel.findOneAndUpdate(
             { _id: params.id },
-            { $set: { status: "rejected", remarks: body.remarks } }
+            { $set: { status: "rejected", rejectionReason: body.rejectionReason } }
         )
         return {
             status: 201,
             body: {
                 message: "Request Rejected",
-                result: result,
                 success: false
             }
         }
@@ -303,4 +295,5 @@ const rejectSocialTaskFollowRequest: AppRouteImplementationOrOptions<typeof task
         }
     }
 }
+
 export const taskMutationHandler = { createSocialTaskPackage, enrollSocialTaskPackage, acceptTaskEnrollmentRequest, rejectTaskEnrollmentRequest, createSocialLinks, createSocialTaskFollowRequest, approveSocialTaskFollowRequest, rejectSocialTaskFollowRequest }

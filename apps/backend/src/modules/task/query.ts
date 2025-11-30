@@ -4,7 +4,7 @@ import { socialTaskPackageModel } from "../../model/socialTaskPackageModel";
 import { SocialTaskPackageEnrollmentModel } from "../../model/socialTaskPackageEnrollmentModel";
 import { SocialTaskEarningStatementModel } from "../../model/socialTaskEarningStatementModel";
 
-const getSocialTaskPackage: AppRouteImplementationOrOptions<typeof taskContract.getSocialTaskPackage> = async () => {
+const getSocialTaskPackages: AppRouteImplementationOrOptions<typeof taskContract.getSocialTaskPackages> = async () => {
     try {
         const allPackages = await socialTaskPackageModel.find()
         return {
@@ -27,7 +27,7 @@ const getSocialTaskPackage: AppRouteImplementationOrOptions<typeof taskContract.
     }
 }
 
-const getAllSocialTaskEnrollment: AppRouteImplementationOrOptions<typeof taskContract.getAllSocialTaskEnrollment> = async () => {
+const getAllSocialTaskEnrollments: AppRouteImplementationOrOptions<typeof taskContract.getAllSocialTaskEnrollments> = async () => {
     try {
         const pendingEnrollments = await SocialTaskPackageEnrollmentModel.find({ status: "pending" })
         const approvedEnrollments = await SocialTaskPackageEnrollmentModel.find({ status: "approved" })
@@ -101,4 +101,4 @@ const getSocialTaskEarning: AppRouteImplementationOrOptions<typeof taskContract.
         }
     }
 }
-export const taskQueryHandler = { getSocialTaskPackage, getAllSocialTaskEnrollment, getSocialTaskEarning }
+export const taskQueryHandler = { getSocialTaskPackages, getAllSocialTaskEnrollments, getSocialTaskEarning }

@@ -18,16 +18,16 @@ export const taskContract = c.router({
     },
     summary: "Create a New Package",
   },
-  getSocialTaskPackage: {
+  getSocialTaskPackages: {
     method: "GET",
-    path: "/social-task-package",
+    path: "/social-task-packages",
     responses: {
       200: SuccessSchema,
       403: ErrorSchema,
       404: ErrorSchema,
       500: ErrorSchema,
     },
-    summary: "Get Social Task Package"
+    summary: "Get Social Task Packages"
   },
   enrollSocialTaskPackage: {
     method: "POST",
@@ -41,9 +41,9 @@ export const taskContract = c.router({
     },
     summary: "Enroll in Social Task Package"
   },
-  getAllSocialTaskEnrollment: {
+  getAllSocialTaskEnrollments: {
     method: "GET",
-    path: "/social-task-enrollement-by-status",
+    path: "/social-task-enrollements-by-status",
     responses: {
       200: SuccessSchema,
       403: ErrorSchema,
@@ -54,10 +54,8 @@ export const taskContract = c.router({
   },
   acceptTaskEnrollmentRequest: {
     method: "PATCH",
-    body: z.object({
-      remarks: z.string().optional()
-    }),
     path: "/accept-social-task-enrollement-request/:id",
+    body: z.object({}), // no fields required
     responses: {
       200: SuccessSchema,
       403: ErrorSchema,
@@ -68,10 +66,10 @@ export const taskContract = c.router({
   },
   rejectTaskEnrollmentRequest: {
     method: "PATCH",
-    body: z.object({
-      remarks: z.string().optional()
-    }),
     path: "/reject-social-task-enrollment-request/:id",
+    body: z.object({
+      rejectionReason: z.string()
+    }),
     responses: {
       200: SuccessSchema,
       403: ErrorSchema,
@@ -82,8 +80,8 @@ export const taskContract = c.router({
   },
   createSocialLinks: {
     method: "POST",
-    body: createSocialLinkSchema,
     path: "/create-social-links",
+    body: createSocialLinkSchema,
     responses: {
       200: SuccessSchema,
       403: ErrorSchema,
@@ -105,8 +103,8 @@ export const taskContract = c.router({
   },
   createSocialTaskFollowRequest: {
     method: "POST",
-    body: createSocialTaskFollowRequestSchema,
     path: "/create-social-task-follow-request/:id",
+    body: createSocialTaskFollowRequestSchema,
     responses: {
       200: SuccessSchema,
       403: ErrorSchema,
@@ -115,12 +113,10 @@ export const taskContract = c.router({
     },
     summary: "Create Social Task Follow Request"
   },
-  approveSocialTaskFollowRequest:{
+  approveSocialTaskFollowRequest: {
     method: "PATCH",
     path: "/approve-social-task-follow-request/:id",
-    body: z.object({
-      remarks: z.string().optional()
-    }),
+    body: z.object({}),
     responses: {
       200: SuccessSchema,
       403: ErrorSchema,
@@ -129,11 +125,11 @@ export const taskContract = c.router({
     },
     summary: "Approve Social Task Follow Request by Id"
   },
-  rejectSocialTaskFollowRequest:{
+  rejectSocialTaskFollowRequest: {
     method: "PATCH",
     path: "/reject-social-task-follow-request/:id",
     body: z.object({
-      remarks: z.string().optional()
+      rejectionReason: z.string()
     }),
     responses: {
       200: SuccessSchema,
@@ -154,5 +150,5 @@ export const taskContract = c.router({
     },
     summary: "Get Social Task Earning by Id"
   }
-  
+
 });

@@ -12,8 +12,6 @@ export type TCreateSocialTaskPackageSchema = z.TypeOf<typeof createSocialTaskPac
 export const createSocialTaskPackageEnrollmentSchema = z.object({
     userId: z.string(),
     socialTaskPackage: z.string(),
-    status: z.string(),
-    remarks: z.string(),
     paymentScreenshotUrl: z.string(),
     expirationDate: z.coerce.date(),
     isExpired: z.boolean()
@@ -33,9 +31,7 @@ export const createSocialTaskFollowRequestSchema = z.object({
     followedBy: z.string(),
     followedTo: z.string(),
     socialMedia: z.string(),
-    status: z.string(),
     screenshotUrl: z.string(),
-    remarks: z.string()
 });
 export type TCreateSocialTaskFollowRequestSchema = z.TypeOf<typeof createSocialTaskFollowRequestSchema>;
 

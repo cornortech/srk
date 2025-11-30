@@ -19,7 +19,7 @@ import {
 } from "../../lib/apiClient";
 import { AxiosError } from "axios";
 import useAlert from "../../hooks/useAlert";
-import useUploadFile from "../../hooks/useFileUpload";
+import { useUploadFile } from "@srk/shared/hooks";
 
 type PayoutDetailsModalProps = {
   isOpen: boolean;
@@ -97,7 +97,7 @@ export function PayoutDetailsModal({
       alert("Please upload payment proof");
       return;
     }
-    const { url } = await uploadFile(proofFile, "image");
+    const { url } = await uploadFile(proofFile, "image", "university");
     await approveMutation(url);
   };
 

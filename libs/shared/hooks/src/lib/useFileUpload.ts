@@ -12,9 +12,8 @@ export const useUploadFile = () => {
     const url = await uploadFileToFirebase(file, fileType, app, onProgress);
     return { url }; // Return object with url property
   };
-  return { uploadFile };
+  return { uploadFile ,isUploading: false };
 };
-
 
 const uploadFileToFirebase = (
   file: File,

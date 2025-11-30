@@ -16,7 +16,7 @@ import { useEffect, useState } from "react";
 import { TPaymentDetails } from "../../components/SignUpComponent";
 import useAlert from "../../hooks/useAlert";
 import AlertBanner from "../../components/AlertBanner";
-import useUploadFile from "../../hooks/useFileUpload";
+import {useUploadFile} from "@srk/shared/hooks";
 
 
 const PaymentVerificationAuthPage = () => {
@@ -92,7 +92,7 @@ const PaymentVerificationAuthPage = () => {
       userDetailsData?.paymentDetails?.paymentProofUrl || "";
     if (paymentDetails.paymentProof) {
       // const { url } = await uploadFile(paymentDetails.paymentProof, "image");
-      const { url } = await uploadFile(paymentDetails.paymentProof, "image");
+      const { url } = await uploadFile(paymentDetails.paymentProof, "image","university");
       paymentProofUrl = url;
     }
     makePaymentMutation(paymentProofUrl);

@@ -12,7 +12,7 @@ import useAlert from "../../hooks/useAlert";
 import AlertBanner from "../../components/AlertBanner";
 import { TUserDataReponseData } from "../../lib/types";
 import { methods } from "../../lib/methods";
-import useUploadFile from "../../hooks/useFileUpload";
+import {useUploadFile} from "@srk/shared/hooks";
 
 const AffiliateRequestVerification = () => {
   const [selectedTab, setSelectedTab] = useState("details");
@@ -75,9 +75,10 @@ const AffiliateRequestVerification = () => {
         methods.base64ToFile(
           verificationImage,
           `${Date.now()}-${firstName}-v-image.png`,
-          "image/png"
+          "image/png",
         ),
-        "image"
+        "image",
+        "university"
       );
 
       verificationImageUrl = url;

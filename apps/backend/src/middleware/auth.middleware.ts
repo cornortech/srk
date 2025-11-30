@@ -21,8 +21,6 @@ export const authenticate = async (
   next: NextFunction
 ) => {
   const token = req.headers.authorization?.split('Bearer ')[1];
-  console.log(req.headers);
-  // console.log("Authenticating user with token:", token);
 
   if (!token) {
     return res.status(401).json({ message: 'No token provided' });
@@ -38,8 +36,8 @@ export const authenticate = async (
       return next();
     }
 
-    // Fetch user from the database
     const user = await UserModel.findOne({ email: decodedToken.email });
+    
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }

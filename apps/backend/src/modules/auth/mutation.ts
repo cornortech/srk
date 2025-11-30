@@ -4,7 +4,6 @@ import { UserModel } from '../../model/userModel';
 import AuthService from '../../services/authService';
 import { SubscriptionModel } from '../../model/subscriptionModel';
 import { PackageModel } from '../../model/packageModel';
-import mongoose from 'mongoose';
 import CustomerBalanceService from '../../services/customerBalanceService';
 import AdminBalanceService from '../../services/adminBalanceService';
 import { KYCModel } from '../../model/kycModel';
@@ -14,11 +13,12 @@ import { adminModel } from '../../model/adminModel';
 import { balanceModel } from '../../model/balanceModel';
 import { FinanceService } from '../../services/financeService';
 import { modifyAndUploadAgreement } from '../../services/pdfService';
-import moment from 'moment';
 import { CoursePaymentModel } from '../../model/coursePayment';
 import { methods } from '../../utils/methods';
 import { EarningStatementModel } from '../../model/earningStatementModel';
 import { AutoCodeModel } from '../../model/autoCodeModel';
+import mongoose from 'mongoose';
+import moment from 'moment';
 import crypto from 'crypto';
 
 interface CalculateEarningsProps {
@@ -213,6 +213,8 @@ const register: AppRouteImplementationOrOptions<
       dob: body.dob,
       packageId: body.packageId,
       purpose: body.purpose,
+      uid: body.uid,
+      baseSecret: AuthService.generateBaseSecret(),
       status: body.isAddedByUser
         ? 'REGISTERED'
         : 'PAYMENT_VERIFICATION_PENDING',
@@ -999,4 +1001,3 @@ export const authMutationHandler = {
   rejectPaymentDetails,
   approvePaymentDetails,
 };
- 

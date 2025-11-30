@@ -14,7 +14,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { createCourseApi, getAllPackagesApi } from "../../lib/apiClient";
 import { TPackage } from "../../lib/types/entities";
 import useAlert from "../../hooks/useAlert";
-import useUploadFile from "../../hooks/useFileUpload";
+import {useUploadFile} from "@srk/shared/hooks";
 
 // interface Instructor {
 //   name: string;
@@ -77,7 +77,7 @@ export default function CreateCoursePage() {
     console.log(data, image);
 
     if (image) {
-      await uploadFile(image, "image", (progress, url) => {
+      await uploadFile(image, "image", "university", (progress, url) => {
         setUploadingPercentage(progress);
         if (url && progress === 100) {
           createCourse({

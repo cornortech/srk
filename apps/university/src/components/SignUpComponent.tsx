@@ -17,7 +17,9 @@ import {
 import { TPackage } from "../lib/types/entities";
 import useAlert from "../hooks/useAlert";
 import { SignupPaymentMethod } from "./signup/SignupPaymentMethod";
-import useUploadFile from "../hooks/useFileUpload";
+import { useUploadFile } from "@srk/shared/hooks";
+import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
+import { getFirebaseAuth } from "@srk/shared/api";
 
 const genderOptions = [
   { value: "Male", label: "Male" },
@@ -78,6 +80,7 @@ export function SignupComponent({
   const { show } = useAlert();
   const navigate = useNavigate();
   const { uploadFile } = useUploadFile();
+  const auth = getFirebaseAuth()
 
   const {
     setValue,
@@ -108,7 +111,7 @@ export function SignupComponent({
     setShowConfirmPassword((prev) => !prev);
 
   const { mutate: mutateRegister } = useMutation({
-    mutationFn: async (data: TRegisterPayload) => {
+    mutationFn: async (data: TRegisterPayload & { uid: string }) => {
       const res = await registerApi(data);
       return res;
     },
@@ -150,7 +153,16 @@ export function SignupComponent({
     if (paymentDetails.paymentProof) {
       setIsRegisterring(true);
       try {
-        const { url } = await uploadFile(paymentDetails.paymentProof, "image");
+
+        const userCredential = await createUserWithEmailAndPassword(
+          auth,
+          data.email,
+          data.password
+        );
+
+        await sendEmailVerification(userCredential.user);
+        const { url } = await uploadFile(paymentDetails.paymentProof, "image", "university");
+
         mutateRegister({
           paymentType: "qr",
           email: data.email,
@@ -167,6 +179,7 @@ export function SignupComponent({
           paymentMethod: paymentDetails.paymentMethod,
           transactionId: paymentDetails.transactionId,
           purpose: data.purpose,
+          uid: userCredential.user.uid,
         });
       } catch (err) {
         console.log(err);

@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
 const webinarSchema = new mongoose.Schema(
   {
@@ -24,4 +24,4 @@ const webinarSchema = new mongoose.Schema(
   }
 );
 
-export const WebinarModel = mongoose.model("Webinar", webinarSchema);
+export const WebinarModel = mongoose.model('Webinar', webinarSchema);

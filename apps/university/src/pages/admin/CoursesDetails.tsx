@@ -27,7 +27,7 @@ import { TCourse, TCourseVideo } from "../../lib/types/entities";
 import { TUploadVideoPayload } from "../../lib/types";
 import useAlert from "../../hooks/useAlert";
 import { AxiosError } from "axios";
-import useUploadFile from "../../hooks/useFileUpload";
+import {useUploadFile} from "@srk/shared/hooks";
 
 interface Video {
   url: string;
@@ -126,7 +126,7 @@ function CourseDetail() {
     if (!file || !chapterName) return;
     try {
       const duration = await getVideoDuration(file);
-      const { url } = await uploadFile(file, "video", (progress, url) => {
+      const { url } = await uploadFile(file, "video", "university", (progress, url) => {
         setProgress(progress);
         if (url && progress === 100) {
           setProgress(100);

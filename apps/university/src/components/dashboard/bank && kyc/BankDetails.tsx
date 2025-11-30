@@ -12,8 +12,7 @@ import useAuthStore from "../../../store/useAuth";
 import useAlert from "../../../hooks/useAlert";
 import { useRef, useState } from "react";
 import AlertBanner from "../../AlertBanner";
-import useUploadFile from "../../../hooks/useFileUpload";
-// import useUploadFile from "../../../hooks/useFileUpload";
+import {useUploadFile} from "@srk/shared/hooks";
 
 const accountTypes = [
   { label: "Savings Account", value: "savings" },
@@ -94,7 +93,7 @@ export default function BankDetailsForm({
     let qrUrl = bankDetails?.qrUrl;
 
     if (qrImage) {
-      const { url } = await uploadFile(qrImage, "image");
+      const { url } = await uploadFile(qrImage, "image","university");
       qrUrl = url;
     }
 

@@ -8,5 +8,3 @@ export * from './lib/firebase-client'; // For frontend (React apps)
 
 // API endpoints
 export * from './lib/api/endpoints';
-export * from './lib/api/bank/bank.api';
-export * from './lib/api/bank/bank.validation';

@@ -57,12 +57,12 @@ export function ReusableNavbar({
     setIsMenuOpen(false);
   };
 
- 
+
   return (
     <Navbar
       onMenuOpenChange={setIsMenuOpen}
       className={clsx(
-        "w-full bg-transparent py-2 text-textPrimary fixed h-32 bg-black top-0 z-50 border-b border-primary", 
+        "w-full bg-transparent py-2 text-textPrimary fixed h-32 bg-black top-0 z-50 border-b border-primary",
         className
       )}
       maxWidth="xl"
@@ -100,9 +100,9 @@ export function ReusableNavbar({
                 to={item.href}
                 className="relative text-textPrimary font-semibold"
               >
-                {item.label} 
+                {item.label}
                 {location.pathname === item.href && (
-                  <span  className="absolute left-0 bottom-[-5px]  border border-yellow-500 w-full duration-150"></span>
+                  <span className="absolute left-0 bottom-[-5px]  border border-yellow-500 w-full duration-150"></span>
                 )}
                 {hovered === index && (
                   <motion.div
@@ -186,7 +186,7 @@ export function ReusableNavbar({
                   </Link>
                 </NavbarMenuItem>
               ))}
-            
+
               <NavbarMenuItem>
                 <Link
                   to="/auth/login"
@@ -226,8 +226,8 @@ const LoginUserMenu = () => {
     queryFn: async () => {
       if (!userDetails?._id) return;
       const res = await getUserDetailsApi(userDetails?._id);
-      if (res && res.redirectionUrl) {
-        setRedirectionUrl(res.redirectionUrl);
+      if (res && res.authDetails.redirectionUrl) {
+        setRedirectionUrl(res.authDetails.redirectionUrl);
         return res;
       }
       return res;

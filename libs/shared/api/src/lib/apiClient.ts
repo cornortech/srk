@@ -15,6 +15,7 @@ import {
   TUserStatus,
 } from '@srk/shared/types';
 import { data } from 'react-router-dom';
+import { getFirebaseAuth } from './firebase-client';
 
 // Reusable Axios instance
 export const apiClient = axios.create({
@@ -22,6 +23,24 @@ export const apiClient = axios.create({
     'Content-Type': 'application/json',
   },
 });
+
+// Request interceptor to add Authorization header with Firebase token
+apiClient.interceptors.request.use(
+  async (config) => {
+    try {
+      const auth = getFirebaseAuth();
+      const token = await auth.currentUser?.getIdToken(true); // fetch fresh token
+      console.log('Firebase token added to request:', token);
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+    } catch (error) {
+      console.debug('No Firebase auth token available:', error);
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
 
 /**
  * Initialize the API client with the backend URL
@@ -85,7 +104,7 @@ export const rejectPaymentDetailsApi = async (
 };
 
 export const authMeApi = async () => {
-  const response = await apiClient.get("/auth/me");
+  const response = await apiClient.get('/auth/me');
   return response.data;
 };
 
@@ -98,13 +117,15 @@ export const getAutoCodeApi = async (): Promise<{
     redirectUrl: string;
   };
 }> => {
-  const response = await apiClient.get("/auth/get-auto-code");
+  const response = await apiClient.get('/auth/get-auto-code');
   return response.data;
 };
 
 // SSO: Exchange code for JWT token
-export const exchangeCodeApi = async (code: string): Promise<TLoginResponse> => {
-  const response = await apiClient.post("/auth/exchange-code", { code });
+export const exchangeCodeApi = async (
+  code: string
+): Promise<TLoginResponse> => {
+  const response = await apiClient.post('/auth/exchange-code', { code });
   return response.data;
 };
 

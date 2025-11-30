@@ -9,7 +9,7 @@ import { useMutation } from "@tanstack/react-query";
 import useAuthStore from "../../../store/useAuth";
 import { upsertKycDetailsApi } from "../../../lib/apiClient";
 import { TKyc } from "../../../lib/types/entities";
-import useUploadFile from "../../../hooks/useFileUpload";
+import { useUploadFile } from "@srk/shared/hooks";
 
 const documentTypes = [
   { label: "Citizenship", value: "citizenship" },
@@ -111,19 +111,19 @@ export default function KYCForm({
     try {
       // Upload files sequentially with proper tracking
       if (frontImage) {
-        const { url: front } = await uploadFile(frontImage, "image");
+        const { url: front } = await uploadFile(frontImage, "image", "university");
         frontUrlImage = front;
         setCompletedUploads(prev => prev + 1);
       }
 
       if (backImage) {
-        const { url: back } = await uploadFile(backImage, "image");
+        const { url: back } = await uploadFile(backImage, "image", "university");
         backUrlImage = back;
         setCompletedUploads(prev => prev + 1);
       }
 
       if (newVerificationImageFile) {
-        const { url: vImage } = await uploadFile(newVerificationImageFile, "image");
+        const { url: vImage } = await uploadFile(newVerificationImageFile, "image", "university");
         verifiationImage = vImage;
         setCompletedUploads(prev => prev + 1);
       }
@@ -182,7 +182,7 @@ export default function KYCForm({
           </h2>
 
           {/* Upload Progress Display */}
-    
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Select
               label="Document Type"

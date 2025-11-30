@@ -1,13 +1,13 @@
-import { v4 as uuidv4 } from "uuid";
-import ReceiptModel from "../model/receiptModel";
-import { generateReceiptPdfBuffer } from "../utils/pdfGenerator";
-import { uploader } from "../utils/cloudinary";
-import PaymentMetaDataModel from "../model/paymentMetaModel";
-import { IBankStatement } from "../model/bankStatement";
+import { v4 as uuidv4 } from 'uuid';
+import { IBankStatement } from '../model/bankStatement';
+import { generateReceiptPdfBuffer } from '../utils/pdfGenerator';
+import ReceiptModel from '../model/receiptModel';
+import PaymentMetaDataModel from '../model/paymentMetaModel';
+import { uploader } from '../utils/cloudinary';
 
 interface GenerateReceiptProps {
   bankStatement: {
-    type: IBankStatement["type"];
+    type: IBankStatement['type'];
     amount: number;
     description?: string;
     createdAt?: Date;
@@ -34,7 +34,7 @@ export const generateAndStoreReceipt = async ({
       },
       metadata: {
         referenceNumber: metadata.referenceNumber,
-        remarks: metadata.remarks || "N/A",
+        remarks: metadata.remarks || 'N/A',
       },
     });
 
@@ -43,7 +43,7 @@ export const generateAndStoreReceipt = async ({
     const uploadResult = await uploader.uploadStreamToCloudinary({
       buffer: pdfBuffer,
       publicId,
-      resourceType: "raw",
+      resourceType: 'raw',
     });
 
     // 3. Create Receipt entry in DB
@@ -60,7 +60,7 @@ export const generateAndStoreReceipt = async ({
 
     return receipt;
   } catch (error) {
-    console.error("Error generating/storing receipt:", error);
-    throw new Error("Failed to generate and store receipt.");
+    console.error('Error generating/storing receipt:', error);
+    throw new Error('Failed to generate and store receipt.');
   }
 };

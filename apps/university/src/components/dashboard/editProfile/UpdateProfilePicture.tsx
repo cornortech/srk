@@ -5,7 +5,7 @@ import useAuthStore from "../../../store/useAuth";
 import { TUser } from "../../../lib/types/entities";
 import { updateUserDetailsApi } from "../../../lib/apiClient";
 import useAlert from "../../../hooks/useAlert";
-import useUploadFile from "../../../hooks/useFileUpload";
+import {useUploadFile} from "@srk/shared/hooks";
 
 interface UpdateProfilePictureProps {
   userData: TUser;
@@ -58,7 +58,7 @@ export const UpdateProfilePicture = ({
 
   const handleSubmit = () => {
     if (file) {
-      uploadFile(file, "image", (progress, url) => {
+      uploadFile(file, "image","university", (progress, url) => {
         setProgress(progress);
         if (url && progress === 100) {
           setProgress(100);

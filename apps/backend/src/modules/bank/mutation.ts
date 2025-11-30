@@ -8,7 +8,7 @@ import EmailService from "../../services/emailService";
 import AuthService from "../../services/authService";
 import { methods } from "../../utils/methods";
 import { v4 as uuidv4 } from "uuid";
-import { bankStatementService } from "../../services/bankStatementService";
+import { bankStatementService } from "../../services/bankStatement.service";
 import { PaymentIntentModel } from "../../model/paymentIntentModel";
 import { OtpLib } from "../../libs/otoplib";
 

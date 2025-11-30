@@ -26,7 +26,7 @@ const socialTaskFollowRequestSchema = new mongoose.Schema(
       type: String,
       require: true
     },
-    remarks: {
+    rejectionReason: {
       type: String
     }
   },

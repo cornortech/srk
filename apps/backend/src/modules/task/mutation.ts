@@ -1,6 +1,6 @@
 import { AppRouteImplementationOrOptions } from "@ts-rest/express/src/lib/types";
 import { taskContract } from "../../contract/task/contract";
-import { socialTaskPackageModel } from "../../model/socialTaskPackageModel";
+import { SocialTaskPackageModel } from "../../model/socialTaskPackageModel";
 import { SocialTaskPackageEnrollmentModel } from "../../model/socialTaskPackageEnrollmentModel";
 import { SocialTaskLinkModel } from "../../model/socialTaskLinkModel";
 import { UserModel } from "../../model/userModel";
@@ -9,7 +9,7 @@ import { SocialTaskEarningStatementModel } from "../../model/socialTaskEarningSt
 
 const createSocialTaskPackage: AppRouteImplementationOrOptions<typeof taskContract.createSocialTaskPackage> = async ({ body }) => {
     try {
-        await socialTaskPackageModel.create({
+        await SocialTaskPackageModel.create({
             name: body.name,
             features: body.features,
             totalNumberOfFollowers: body.totalNumberOfFollowers,
@@ -39,7 +39,19 @@ const createSocialTaskPackage: AppRouteImplementationOrOptions<typeof taskContra
 
 const enrollSocialTaskPackage: AppRouteImplementationOrOptions<typeof taskContract.enrollSocialTaskPackage> = async ({ body }) => {
     try {
-        const socialTaskPackage = await socialTaskPackageModel.findOne({ _id: body.socialTaskPackage })
+        const userExist = await UserModel.findOne({ _id: body.userId })
+
+        if (!userExist) {
+            return {
+                status: 500,
+                body: {
+                    message: "User not found",
+                    success: false
+                }
+            }
+        }
+
+        const socialTaskPackage = await SocialTaskPackageModel.findOne({ _id: body.socialTaskPackage })
 
         if (!socialTaskPackage) {
             return {

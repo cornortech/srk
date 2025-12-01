@@ -4,6 +4,7 @@ import { createExpressEndpoints } from "@ts-rest/express";
 import * as swaggerUi from "swagger-ui-express";
 import { contract } from "./contract";
 import { router } from "./modules";
+import ssoRouter from "./modules/sso/router";
 import cookieParser from "cookie-parser";
 import swaggerApiDocs from "./config/swagger";
 import cronJobInit from "./utils/cronjob";
@@ -34,10 +35,15 @@ app.use(
         callback(new Error("Not allowed by CORS"));
       }
     },
+    credentials: true, // Allow cookies to be sent
   })
 );
 
 app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerApiDocs));
+
+// SSO routes
+app.use(ssoRouter);
+
 createExpressEndpoints(contract, router, app);
 cronJobInit();
 

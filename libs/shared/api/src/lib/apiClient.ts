@@ -3,7 +3,7 @@ import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
 class ApiClient {
   private instance: AxiosInstance;
 
-  constructor(baseURL: string = process.env['NX_API_URL'] || 'http://localhost:3000') {
+  constructor(baseURL: string = (import.meta as any).env?.VITE_API_URL || 'http://localhost:4000') {
     this.instance = axios.create({
       baseURL,
       timeout: 10000,

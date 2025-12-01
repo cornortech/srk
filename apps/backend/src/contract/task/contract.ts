@@ -18,6 +18,7 @@ export const taskContract = c.router({
     },
     summary: "Create a New Package",
   },
+
   getSocialTaskPackages: {
     method: "GET",
     path: "/social-task-packages",
@@ -29,6 +30,7 @@ export const taskContract = c.router({
     },
     summary: "Get Social Task Packages"
   },
+
   enrollSocialTaskPackage: {
     method: "POST",
     path: "/social-task-package/enroll",
@@ -41,9 +43,13 @@ export const taskContract = c.router({
     },
     summary: "Enroll in Social Task Package"
   },
+
   getAllSocialTaskEnrollments: {
     method: "GET",
     path: "/social-task-enrollements-by-status",
+    query: z.object({
+      status: z.string()
+    }),
     responses: {
       200: SuccessSchema,
       403: ErrorSchema,
@@ -52,6 +58,7 @@ export const taskContract = c.router({
     },
     summary: "Get All Social Task Enrollments by Status"
   },
+
   acceptTaskEnrollmentRequest: {
     method: "PATCH",
     path: "/accept-social-task-enrollement-request/:id",
@@ -64,6 +71,7 @@ export const taskContract = c.router({
     },
     summary: "Accept Social Task Enrollment by Id"
   },
+
   rejectTaskEnrollmentRequest: {
     method: "PATCH",
     path: "/reject-social-task-enrollment-request/:id",
@@ -78,6 +86,7 @@ export const taskContract = c.router({
     },
     summary: "Reject Social Task Enrollment by Id"
   },
+
   createSocialLinks: {
     method: "POST",
     path: "/create-social-links",
@@ -90,6 +99,7 @@ export const taskContract = c.router({
     },
     summary: "Create Social Links"
   },
+
   getAllActiveSocialLinksToFollow: {
     method: "GET",
     path: "/get-all-active-social-links-to-follow",
@@ -101,6 +111,7 @@ export const taskContract = c.router({
     },
     summary: "Get All Active Social Links to Follow"
   },
+
   createSocialTaskFollowRequest: {
     method: "POST",
     path: "/create-social-task-follow-request/:id",
@@ -113,6 +124,7 @@ export const taskContract = c.router({
     },
     summary: "Create Social Task Follow Request"
   },
+
   approveSocialTaskFollowRequest: {
     method: "PATCH",
     path: "/approve-social-task-follow-request/:id",
@@ -125,6 +137,7 @@ export const taskContract = c.router({
     },
     summary: "Approve Social Task Follow Request by Id"
   },
+
   rejectSocialTaskFollowRequest: {
     method: "PATCH",
     path: "/reject-social-task-follow-request/:id",
@@ -139,6 +152,7 @@ export const taskContract = c.router({
     },
     summary: "Reject Social Task Follow Request by Id"
   },
+
   getSocialTaskEarning: {
     method: "GET",
     path: "/get-social-task-earning/:id",

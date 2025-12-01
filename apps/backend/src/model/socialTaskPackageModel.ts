@@ -27,4 +27,4 @@ const socialTaskPackageSchema = new mongoose.Schema(
 );
 
 
-export const socialTaskPackageModel = mongoose.model("SocialTaskPackage", socialTaskPackageSchema);
+export const SocialTaskPackageModel = mongoose.model("SocialTaskPackage", socialTaskPackageSchema);

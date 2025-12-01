@@ -1,12 +1,12 @@
 import { AppRouteImplementationOrOptions } from "@ts-rest/express/src/lib/types";
 import { taskContract } from "../../contract/task/contract";
-import { socialTaskPackageModel } from "../../model/socialTaskPackageModel";
+import { SocialTaskPackageModel } from "../../model/socialTaskPackageModel";
 import { SocialTaskPackageEnrollmentModel } from "../../model/socialTaskPackageEnrollmentModel";
 import { SocialTaskEarningStatementModel } from "../../model/socialTaskEarningStatementModel";
 
 const getSocialTaskPackages: AppRouteImplementationOrOptions<typeof taskContract.getSocialTaskPackages> = async () => {
     try {
-        const allPackages = await socialTaskPackageModel.find()
+        const allPackages = await SocialTaskPackageModel.find()
 
         return {
             status: 200,
@@ -70,9 +70,9 @@ const getAllSocialTaskEnrollments: AppRouteImplementationOrOptions<typeof taskCo
 
 const getSocialTaskEarning: AppRouteImplementationOrOptions<typeof taskContract.getSocialTaskEarning> = async ({ params }) => {
     try {
-        const earning = await SocialTaskEarningStatementModel.findOne({ followedBy: params.id })
+        const earningExist = await SocialTaskEarningStatementModel.findOne({ followedBy: params.id })
 
-        if (!earning) {
+        if (!earningExist) {
             return {
                 status: 500,
                 body: {
@@ -86,7 +86,7 @@ const getSocialTaskEarning: AppRouteImplementationOrOptions<typeof taskContract.
             status: 200,
             body: {
                 message: "Earning",
-                result: earning,
+                result: earningExist,
                 success: true
             }
         }

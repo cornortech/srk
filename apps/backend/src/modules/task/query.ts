@@ -7,47 +7,45 @@ import { SocialTaskEarningStatementModel } from "../../model/socialTaskEarningSt
 const getSocialTaskPackages: AppRouteImplementationOrOptions<typeof taskContract.getSocialTaskPackages> = async () => {
     try {
         const allPackages = await socialTaskPackageModel.find()
+
         return {
             status: 200,
             body: {
-                message: "Package Successfully Fetched",
                 result: allPackages,
                 success: true
             }
         }
+
     } catch (error) {
         console.error(error);
         return {
             status: 500,
             body: {
                 success: false,
-                message: "Internal server error",
+                message: error.message ? `Internal sever error: ${error.message}` : "Internal server error",
             },
-        };
+        }
     }
 }
 
-const getAllSocialTaskEnrollments: AppRouteImplementationOrOptions<typeof taskContract.getAllSocialTaskEnrollments> = async () => {
+const getAllSocialTaskEnrollments: AppRouteImplementationOrOptions<typeof taskContract.getAllSocialTaskEnrollments> = async ({query}) => {
     try {
-        const pendingEnrollments = await SocialTaskPackageEnrollmentModel.find({ status: "pending" })
-        const approvedEnrollments = await SocialTaskPackageEnrollmentModel.find({ status: "approved" })
-        const rejectedEnrollments = await SocialTaskPackageEnrollmentModel.find({ status: "rejected" })
+        const enrollments = await SocialTaskPackageEnrollmentModel.find({ status: query.status })
+
         return {
             status: 200,
             body: {
-                message: "Enrollements fetched by status",
-                pendingEnrollments: pendingEnrollments,
-                approvedEnrollments: approvedEnrollments,
-                rejectedEnrollments: rejectedEnrollments,
+                result: enrollments,
                 success: true
             }
         }
+
     } catch (error) {
         console.log(error);
         return {
             status: 500,
             body: {
-                message: "Internal server error",
+                message: error.message ? `Internal server error: ${error.message}` : "Internal server error",
                 success: false
 
             }
@@ -72,8 +70,9 @@ const getAllSocialTaskEnrollments: AppRouteImplementationOrOptions<typeof taskCo
 
 const getSocialTaskEarning: AppRouteImplementationOrOptions<typeof taskContract.getSocialTaskEarning> = async ({ params }) => {
     try {
-        const result = await SocialTaskEarningStatementModel.findOne({ followedBy: params.id })
-        if (!result) {
+        const earning = await SocialTaskEarningStatementModel.findOne({ followedBy: params.id })
+
+        if (!earning) {
             return {
                 status: 500,
                 body: {
@@ -82,20 +81,22 @@ const getSocialTaskEarning: AppRouteImplementationOrOptions<typeof taskContract.
                 }
             }
         }
+
         return {
             status: 200,
             body: {
                 message: "Earning",
-                result: result,
+                result: earning,
                 success: true
             }
         }
+
     } catch (error) {
         console.log(error)
         return {
             status: 500,
             body: {
-                message: "Internal server error",
+                message: error.message ? `Internal server error: ${error.message}` : "Internal server error",
                 success: false
             }
         }

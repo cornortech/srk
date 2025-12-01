@@ -16,6 +16,7 @@ const createSocialTaskPackage: AppRouteImplementationOrOptions<typeof taskContra
             isPopular: body.isPopular,
             price: body.price
         })
+
         return {
             status: 201,
             body: {
@@ -23,13 +24,14 @@ const createSocialTaskPackage: AppRouteImplementationOrOptions<typeof taskContra
                 success: true
             }
         }
+
     } catch (error) {
         console.error(error);
         return {
             status: 500,
             body: {
                 success: false,
-                message: "Internal server error",
+                message: error.message ? `Internal server error: ${error.message}` : "Internal server error",
             },
         };
     }
@@ -38,6 +40,7 @@ const createSocialTaskPackage: AppRouteImplementationOrOptions<typeof taskContra
 const enrollSocialTaskPackage: AppRouteImplementationOrOptions<typeof taskContract.enrollSocialTaskPackage> = async ({ body }) => {
     try {
         const socialTaskPackage = await socialTaskPackageModel.findOne({ _id: body.socialTaskPackage })
+
         if (!socialTaskPackage) {
             return {
                 status: 500,
@@ -47,6 +50,7 @@ const enrollSocialTaskPackage: AppRouteImplementationOrOptions<typeof taskContra
                 }
             }
         }
+
         await SocialTaskPackageEnrollmentModel.create({
             userId: body.userId,
             socialTaskPackage: body.socialTaskPackage,
@@ -54,6 +58,7 @@ const enrollSocialTaskPackage: AppRouteImplementationOrOptions<typeof taskContra
             expirationDate: body.expirationDate,
             isExpired: body.isExpired
         })
+
         return {
             status: 201,
             body: {
@@ -61,21 +66,23 @@ const enrollSocialTaskPackage: AppRouteImplementationOrOptions<typeof taskContra
                 success: true
             }
         }
+
     } catch (error) {
         console.error(error);
         return {
             status: 500,
             body: {
                 success: false,
-                message: "Internal server error",
+                message: error.message ? `Internal server error: ${error.message}` : "Internal server error",
             },
         };
     }
 }
 
-const acceptTaskEnrollmentRequest: AppRouteImplementationOrOptions<typeof taskContract.acceptTaskEnrollmentRequest> = async ({ params}) => {
+const acceptTaskEnrollmentRequest: AppRouteImplementationOrOptions<typeof taskContract.acceptTaskEnrollmentRequest> = async ({ params }) => {
     try {
         const enrollmentRequest = await SocialTaskPackageEnrollmentModel.findOne({ _id: params.id })
+
         if (!enrollmentRequest) {
             return {
                 status: 500,
@@ -84,11 +91,13 @@ const acceptTaskEnrollmentRequest: AppRouteImplementationOrOptions<typeof taskCo
                 }
             }
         }
+
         await SocialTaskPackageEnrollmentModel.findOneAndUpdate(
             { _id: params.id },
             { $set: { status: "approved" } },
             { new: true }
         )
+
         return {
             status: 200,
             body: {
@@ -96,12 +105,13 @@ const acceptTaskEnrollmentRequest: AppRouteImplementationOrOptions<typeof taskCo
                 success: true
             }
         }
+
     } catch (error) {
         console.log(error);
         return ({
             status: 500,
             body: {
-                message: "Internal server error",
+                message: error.message ? `Internal server error: ${error.message}` : "Internal server error",
                 success: false
             }
         })
@@ -111,18 +121,21 @@ const acceptTaskEnrollmentRequest: AppRouteImplementationOrOptions<typeof taskCo
 const rejectTaskEnrollmentRequest: AppRouteImplementationOrOptions<typeof taskContract.rejectTaskEnrollmentRequest> = async ({ params, body }) => {
     try {
         const enrollmentRequest = await SocialTaskPackageEnrollmentModel.findOne({ _id: params.id })
+
         if (!enrollmentRequest) {
             return {
-                status: 500,
+                status: 404,
                 body: {
                     message: "No Such Enrollment Found"
                 }
             }
         }
+
         await SocialTaskPackageEnrollmentModel.findOneAndUpdate(
             { _id: params.id },
             { $set: { status: "rejected", rejectionReason: body.rejectionReason } }
         )
+
         return {
             status: 201,
             body: {
@@ -130,12 +143,13 @@ const rejectTaskEnrollmentRequest: AppRouteImplementationOrOptions<typeof taskCo
                 success: false
             }
         }
+
     } catch (error) {
         console.log(error);
         return {
             status: 500,
             body: {
-                message: "Internal server error",
+                message: error.message ? `Internal server error: ${error.message}` : "Internal server error",
                 success: false
             }
         }
@@ -145,8 +159,9 @@ const rejectTaskEnrollmentRequest: AppRouteImplementationOrOptions<typeof taskCo
 
 const createSocialLinks: AppRouteImplementationOrOptions<typeof taskContract.createSocialLinks> = async ({ body }) => {
     try {
-        const user = await UserModel.findOne({ _id: body.userId })
-        if (!user) {
+        const userExist = await UserModel.findOne({ _id: body.userId })
+
+        if (!userExist) {
             return {
                 status: 500,
                 body: {
@@ -155,6 +170,7 @@ const createSocialLinks: AppRouteImplementationOrOptions<typeof taskContract.cre
                 }
             }
         }
+
         const result = await SocialTaskLinkModel.create({
             userId: body.userId,
             facebookUrl: body.facebookurl,
@@ -162,6 +178,7 @@ const createSocialLinks: AppRouteImplementationOrOptions<typeof taskContract.cre
             tiktokUrl: body.tiktokUrl,
             youtubeUrl: body.youtubeUrl
         })
+
         return {
             status: 201,
             body: {
@@ -176,7 +193,7 @@ const createSocialLinks: AppRouteImplementationOrOptions<typeof taskContract.cre
         return ({
             status: 500,
             body: {
-                message: "Internal server error",
+                message: error.message ? `Internal server error: ${error.message}` : "Internal server error",
                 success: false
             }
         })
@@ -185,8 +202,9 @@ const createSocialLinks: AppRouteImplementationOrOptions<typeof taskContract.cre
 
 const createSocialTaskFollowRequest: AppRouteImplementationOrOptions<typeof taskContract.createSocialTaskFollowRequest> = async ({ params, body }) => {
     try {
-        const requestId = await SocialTaskLinkModel.findOne({ _id: params.id })
-        if (!requestId) {
+        const requestExist = await SocialTaskLinkModel.findOne({ _id: params.id })
+
+        if (!requestExist) {
             return {
                 status: 500,
                 body: {
@@ -195,36 +213,39 @@ const createSocialTaskFollowRequest: AppRouteImplementationOrOptions<typeof task
                 }
             }
         }
-        const result = await SocialTaskFollowRequestModel.create({
+
+        await SocialTaskFollowRequestModel.create({
             followedBy: body.followedBy,
             followedTo: body.followedTo,
             socialMedia: body.socialMedia,
             screenshotUrl: body.screenshotUrl,
         })
+
         return {
             status: 201,
             body: {
-                result: result,
                 message: "Requested successfully",
                 success: true
             }
         }
+
     } catch (error) {
         console.log(error)
         return {
             status: 500,
             body: {
-                message: "Internal server error",
+                message: error.message ? `Internal server error: ${error.message}` : "Internal server error",
                 success: false
             }
         }
     }
 }
 
-const approveSocialTaskFollowRequest: AppRouteImplementationOrOptions<typeof taskContract.approveSocialTaskFollowRequest> = async ({ params}) => {
+const approveSocialTaskFollowRequest: AppRouteImplementationOrOptions<typeof taskContract.approveSocialTaskFollowRequest> = async ({ params }) => {
     try {
-        const requestId = await SocialTaskFollowRequestModel.findOne({ _id: params.id })
-        if (!requestId) {
+        const requestExist = await SocialTaskFollowRequestModel.findOne({ _id: params.id })
+
+        if (!requestExist) {
             return {
                 status: 500,
                 body: {
@@ -233,15 +254,18 @@ const approveSocialTaskFollowRequest: AppRouteImplementationOrOptions<typeof tas
                 }
             }
         }
+
         await SocialTaskFollowRequestModel.findOneAndUpdate(
             { _id: params.id },
             { $set: { status: "approved" } }
         )
+
         await SocialTaskEarningStatementModel.create({
-            followedBy: requestId.followedBy,
-            followedTo: requestId.followedTo,
+            followedBy: requestExist.followedBy,
+            followedTo: requestExist.followedTo,
             amount: 50
         })
+
         return {
             status: 201,
             body: {
@@ -249,12 +273,13 @@ const approveSocialTaskFollowRequest: AppRouteImplementationOrOptions<typeof tas
                 success: false
             }
         }
+
     } catch (error) {
         console.log(error)
         return {
             status: 500,
             body: {
-                message: "Internal server error",
+                message: error.message ? `Internal server error: ${error.message}` : "Internal server error",
                 success: false
             }
         }
@@ -263,8 +288,9 @@ const approveSocialTaskFollowRequest: AppRouteImplementationOrOptions<typeof tas
 
 const rejectSocialTaskFollowRequest: AppRouteImplementationOrOptions<typeof taskContract.rejectSocialTaskFollowRequest> = async ({ params, body }) => {
     try {
-        const requestId = await SocialTaskFollowRequestModel.findOne({ _id: params.id })
-        if (!requestId) {
+        const requestExist = await SocialTaskFollowRequestModel.findOne({ _id: params.id })
+
+        if (!requestExist) {
             return {
                 status: 500,
                 body: {
@@ -273,10 +299,12 @@ const rejectSocialTaskFollowRequest: AppRouteImplementationOrOptions<typeof task
                 }
             }
         }
+
         await SocialTaskFollowRequestModel.findOneAndUpdate(
             { _id: params.id },
             { $set: { status: "rejected", rejectionReason: body.rejectionReason } }
         )
+
         return {
             status: 201,
             body: {
@@ -284,12 +312,13 @@ const rejectSocialTaskFollowRequest: AppRouteImplementationOrOptions<typeof task
                 success: false
             }
         }
+
     } catch (error) {
         console.log(error)
         return {
             status: 500,
             body: {
-                message: "Internal server error",
+                message: error.message ? `Internal server error: ${error.message}` : "Internal server error",
                 success: false
             }
         }

@@ -8,6 +8,7 @@ const presetKeyForVideos = "srkVideo";
 interface CallBack {
   (progress: number, url: string): void;
 }
+
 interface ReturnType {
   url: string;
   status: number;

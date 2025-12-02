@@ -5,18 +5,23 @@
   "scripts": {
     "start:university": "nx serve university",
     "start:backend": "nx serve backend",
+    "start:task": "nx serve task",
     "start:all": "nx run-many -t serve",
     "build:university": "nx build university",
     "build:backend": "nx build backend",
+    "build:task": "nx build task",
     "build:all": "nx run-many -t build",
     "test:university": "nx test university",
     "test:backend": "nx test backend",
+    "test:task": "nx test task",
     "test:all": "nx run-many -t test",
     "lint:university": "nx lint university",
     "lint:backend": "nx lint backend",
+    "lint:task": "nx lint task",
     "lint:all": "nx run-many -t lint",
     "format": "nx format:write",
-    "format:check": "nx format:check"
+    "format:check": "nx format:check",
+    "create:admin": "tsx apps/backend/src/scripts/createAdmin.ts"
   },
   "private": true,
   "devDependencies": {

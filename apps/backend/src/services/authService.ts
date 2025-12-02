@@ -37,7 +37,7 @@ class AuthService {
     email: string;
     userId: string;
   }): Promise<string> {
-    return jwt.sign(user, "1234343");
+    return jwt.sign(user, env.JWT_SECRET as string);
   }
 
   /**

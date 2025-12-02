@@ -16,5 +16,6 @@ export const API_ENDPOINTS = {
   sso: {
     getAutoCode: '/auth/sso/get-auto-code',
     exchangeCode: '/auth/sso/exchange-code',
+    getMe: '/auth/sso/me',
   },
 };

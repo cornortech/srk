@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { Button } from '@nextui-org/react';
+import { Button, Spinner } from '@nextui-org/react';
 import { useTaskAuthStore } from '../store/useTaskAuthStore';
 
 /**
@@ -8,7 +8,43 @@ import { useTaskAuthStore } from '../store/useTaskAuthStore';
  */
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { user } = useTaskAuthStore();
+  const { user, isLoading } = useTaskAuthStore();
+
+  // Show loading while checking auth
+  if (isLoading) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        minHeight: '100vh' 
+      }}>
+        <Spinner size="lg" color="warning" />
+      </div>
+    );
+  }
+
+  // Redirect to login if not authenticated
+  if (!user) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        flexDirection: 'column',
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        minHeight: '100vh',
+        gap: '1rem'
+      }}>
+        <p style={{ color: 'rgba(255,255,255,0.7)' }}>You are not logged in.</p>
+        <Button 
+          color="warning" 
+          onClick={() => window.location.href = 'http://localhost:4200'}
+        >
+          Go to University to Login
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div style={{ 

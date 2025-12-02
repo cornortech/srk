@@ -25,6 +25,18 @@ export interface SSOExchangeResponse {
   };
 }
 
+export interface SSOGetMeResponse {
+  success: boolean;
+  message: string;
+  user?: {
+    _id: string;
+    email: string;
+    firstName?: string;
+    lastName?: string;
+    role: string;
+  };
+}
+
 // Create axios instance with credentials
 const createSSOClient = (backendUrl: string) => {
   return axios.create({
@@ -64,5 +76,15 @@ export const exchangeCode = async (
     API_ENDPOINTS.sso.exchangeCode,
     { code }
   );
+  return response.data;
+};
+
+/**
+ * Get current authenticated user from cookie
+ * Used to restore session on page refresh
+ */
+export const getMe = async (backendUrl: string): Promise<SSOGetMeResponse> => {
+  const client = createSSOClient(backendUrl);
+  const response = await client.get<SSOGetMeResponse>(API_ENDPOINTS.sso.getMe);
   return response.data;
 };

@@ -212,7 +212,71 @@ const exchangeCode: AppRouteImplementationOrOptions<
   }
 };
 
+/**
+ * Get current authenticated user from cookie
+ * Used to restore session on page refresh
+ */
+const getMe: AppRouteImplementationOrOptions<typeof ssoContract.getMe> = async ({
+  req,
+}) => {
+  try {
+    const user = (req as any).user;
+
+    if (!user || !user.userId) {
+      return {
+        status: 401,
+        body: {
+          success: false,
+          message: 'Not authenticated',
+        },
+      };
+    }
+
+    // Find user details
+    const userExist = await UserModel.findById(user.userId);
+    const adminExist = await adminModel.findById(user.userId);
+    const loggedInUser = userExist || adminExist;
+
+    if (!loggedInUser) {
+      return {
+        status: 401,
+        body: {
+          success: false,
+          message: 'User not found',
+        },
+      };
+    }
+
+    const role = userExist ? 'user' : 'admin';
+
+    return {
+      status: 200,
+      body: {
+        success: true,
+        message: 'User retrieved successfully',
+        user: {
+          _id: loggedInUser._id.toString(),
+          email: loggedInUser.email,
+          firstName: userExist?.firstName || undefined,
+          lastName: userExist?.lastName || undefined,
+          role,
+        },
+      },
+    };
+  } catch (error) {
+    console.error('Error getting current user:', error);
+    return {
+      status: 500,
+      body: {
+        success: false,
+        message: 'Internal server error',
+      },
+    };
+  }
+};
+
 export const ssoMutationHandler = {
   getAutoCode,
   exchangeCode,
+  getMe,
 };

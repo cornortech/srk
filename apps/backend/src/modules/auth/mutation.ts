@@ -389,6 +389,8 @@ const login: AppRouteImplementationOrOptions<
   res.cookie('x-auth-token', token, {
     maxAge: 24 * 60 * 60 * 1000,
     httpOnly: true,
+    sameSite: 'lax',
+    secure: process.env.NODE_ENV === 'production',
   });
 
   return {

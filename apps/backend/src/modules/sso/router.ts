@@ -16,9 +16,9 @@ createExpressEndpoints(ssoContract, ssoMutationHandler, router, {
   },
   globalMiddleware: [
     (req, res, next) => {
-      // Only apply auth middleware to get-auto-code endpoint
+      // Apply auth middleware to get-auto-code and me endpoints
       // exchange-code doesn't need auth (it's used to GET auth)
-      if (req.path.includes('get-auto-code')) {
+      if (req.path.includes('get-auto-code') || req.path.endsWith('/me')) {
         return JwtAuthMiddleware(req, res, next);
       }
       next();

@@ -36,6 +36,20 @@ const ErrorResponseSchema = z.object({
   message: z.string(),
 });
 
+const GetMeResponseSchema = z.object({
+  success: z.boolean(),
+  message: z.string(),
+  user: z
+    .object({
+      _id: z.string(),
+      email: z.string(),
+      firstName: z.string().optional(),
+      lastName: z.string().optional(),
+      role: z.string(),
+    })
+    .optional(),
+});
+
 export const ssoContract = c.router({
   /**
    * Generate a one-time SSO code for cross-domain authentication
@@ -72,5 +86,20 @@ export const ssoContract = c.router({
       500: ErrorResponseSchema,
     },
     summary: 'Exchange SSO code for JWT authentication',
+  },
+
+  /**
+   * Get current authenticated user from cookie
+   * Used to restore session on page refresh
+   */
+  getMe: {
+    method: 'GET',
+    path: '/auth/sso/me',
+    responses: {
+      200: GetMeResponseSchema,
+      401: ErrorResponseSchema,
+      500: ErrorResponseSchema,
+    },
+    summary: 'Get current authenticated user from cookie',
   },
 });

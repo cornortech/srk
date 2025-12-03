@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { Button, Spinner } from '@nextui-org/react';
-import { useTaskAuthStore } from '../store/useTaskAuthStore';
+import useTaskAuthStore from '../store/useTaskAuthStore';
 
 /**
  * Task Dashboard Page

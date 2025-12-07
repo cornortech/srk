@@ -1,12 +1,8 @@
 import { create } from 'zustand';
+import { SSOUser } from '@srk/shared/contracts';
 
-export interface TaskUser {
-  _id: string;
-  email: string;
-  firstName?: string;
-  lastName?: string;
-  role: string;
-}
+// Re-export the type from contracts for convenience
+export type TaskUser = SSOUser;
 
 interface TaskAuthState {
   user: TaskUser | null;

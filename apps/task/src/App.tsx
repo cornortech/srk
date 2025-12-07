@@ -6,8 +6,7 @@ import Callback from './pages/Callback';
 import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
 import { useTaskAuthStore } from './store/useTaskAuthStore';
-import { getMe } from '@srk/shared/api';
-import { env } from './lib/env';
+import { apiClient } from './lib/apiClient';
 
 const queryClient = new QueryClient();
 
@@ -41,9 +40,10 @@ const AuthInitializer = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const response = await getMe(env.backendUrl);
-        if (response.success && response.user) {
-          setUser(response.user);
+        // Type-safe API call using ts-rest client
+        const response = await apiClient.getMe();
+        if (response.status === 200 && response.body.success && response.body.user) {
+          setUser(response.body.user);
         } else {
           setUser(null);
         }

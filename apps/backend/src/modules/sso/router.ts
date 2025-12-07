@@ -1,5 +1,5 @@
 import { createExpressEndpoints } from '@ts-rest/express';
-import { ssoContract } from '../../contract/sso/contract';
+import { ssoContract } from '@srk/shared/contracts';
 import { ssoMutationHandler } from './mutation';
 import { Router } from 'express';
 import { JwtAuthMiddleware } from '../../utils/middleware';

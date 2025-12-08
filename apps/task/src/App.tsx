@@ -8,13 +8,15 @@ import Login from './pages/Login';
 import { useTaskAuthStore } from './store/useTaskAuthStore';
 import { getMe } from '@srk/shared/api';
 import { env } from './lib/env';
+import { TaskLandingPage } from './pages/page';
+import AfterVerified from './pages/afterVerified/page';
 
 const queryClient = new QueryClient();
 
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <Login />,
+    element: <TaskLandingPage />,
   },
   {
     path: '/login',
@@ -26,7 +28,7 @@ const router = createBrowserRouter([
   },
   {
     path: '/task/dashboard',
-    element: <Dashboard />,
+    element: <AfterVerified />,
   },
   {
     path: '/dashboard',

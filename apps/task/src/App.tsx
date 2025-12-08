@@ -50,7 +50,7 @@ const AuthInitializer = ({ children }: { children: React.ReactNode }) => {
           setUser(null);
         }
       } catch (error) {
-        console.log('Not authenticated');
+        console.log('Not authenticated', error);
         setUser(null);
       }
     };

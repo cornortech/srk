@@ -121,7 +121,7 @@ export const Navbar = () => {
               whileTap={{ scale: 0.95 }}
               className="hidden md:block px-8 py-3 rounded-full bg-gradient-to-r from-[#e1ba73] to-[#b68938] text-black font-bold text-sm uppercase tracking-widest relative overflow-hidden"
             >
-              <Link to="/afterVerified" className="relative z-10">
+              <Link to="/task/verification" className="relative z-10">
                 START EARNING
               </Link>
               <motion.div

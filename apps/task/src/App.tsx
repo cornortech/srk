@@ -10,6 +10,7 @@ import { getMe } from '@srk/shared/api';
 import { env } from './lib/env';
 import { TaskLandingPage } from './pages/page';
 import AfterVerified from './pages/afterVerified/page';
+import { TaskVerificationPage } from './pages/taskVerification/page';
 
 const queryClient = new QueryClient();
 
@@ -25,6 +26,10 @@ const router = createBrowserRouter([
   {
     path: '/callback',
     element: <Callback />,
+  },
+  {
+    path: '/task/verification',
+    element: <TaskVerificationPage />,
   },
   {
     path: '/task/dashboard',

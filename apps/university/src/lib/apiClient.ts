@@ -19,6 +19,7 @@ import { data } from "react-router-dom";
 // Reusable Axios instance
 export const apiClient = axios.create({
   baseURL: import.meta.env.VITE_BACKEND_ROOT_URL, // Backend base URL
+  withCredentials: true, // Important for sending cookies with requests
   headers: {
     "Content-Type": "application/json",
   },

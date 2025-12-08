@@ -13,4 +13,9 @@ export const API_ENDPOINTS = {
     logout: '/api/auth/logout',
     refresh: '/api/auth/refresh',
   },
+  sso: {
+    getAutoCode: '/auth/sso/get-auto-code',
+    exchangeCode: '/auth/sso/exchange-code',
+    getMe: '/auth/sso/me',
+  },
 };

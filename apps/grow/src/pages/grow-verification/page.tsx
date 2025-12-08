@@ -681,7 +681,7 @@ const CameraFeature: React.FC<CameraFeatureProps> = ({
 
 // ============= MAIN PAGE COMPONENT =============
 
-const GrowVerificationPage: React.FC = () => {
+export const GrowVerificationPage = () => {
   const [showCamera, setShowCamera] = useState(false);
   const [capturedMedia, setCapturedMedia] = useState<string | null>(null);
   const [mediaType, setMediaType] = useState<'photo' | 'video'>('photo');
@@ -921,5 +921,3 @@ const GrowVerificationPage: React.FC = () => {
     </div>
   );
 };
-
-export default GrowVerificationPage;

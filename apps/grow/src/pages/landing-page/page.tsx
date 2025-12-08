@@ -12,8 +12,8 @@ import { CTASection } from '../../components/user-components/landing-page/CTASec
 import { Footer } from '../../components/layout-components/Footer';
 import { PackageSelectionFlow } from '../../components/user-components/landing-page/PackageSelectionFlow';
 import { OrderConfirmation } from '../../components/user-components/landing-page/OrderConfirmation';
-import { UserDashboard } from '../user-dashboard/page';
 import { OrderDetails, PackageDetails, UserData, UserDetails } from '../../lib/types/types';
+import { UserDashboard } from '../grow-affiliate/page';
 
 type View =
   | 'landing'
@@ -22,7 +22,7 @@ type View =
   | 'confirmation'
   | 'dashboard';
 
-const GrowLandingPage: React.FC = () => {
+export const GrowLandingPage = () => {
 
   const [user, setUser] = useState<UserData | null>(null);
   const [hasRegistered, setHasRegistered] = useState(false);
@@ -141,5 +141,3 @@ const GrowLandingPage: React.FC = () => {
     </>
   );
 };
-
-export default GrowLandingPage;

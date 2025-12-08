@@ -134,7 +134,8 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
     };
 
     setShowPaymentModal(false);
-    onComplete(finalDetails);
+    // Close the payment flow and go back to landing
+    onBack();
   };
 
   const getSelectedOptionDetails = () => {

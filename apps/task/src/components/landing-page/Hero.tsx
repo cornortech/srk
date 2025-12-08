@@ -1,30 +1,27 @@
-import { useScroll } from "framer-motion";
-import { useCallback, useEffect, useState } from "react";
-import { motion, useTransform, useSpring, AnimatePresence } from 'framer-motion';
-import { Link } from "react-router-dom";
-import { 
-  Menu, X, ArrowRight, Sparkles, Users, Shield, Target, Coins, 
-  Wallet, Zap, CheckCircle, Star, Quote, ArrowUpRight, 
-  ChevronRight, Bot, Fingerprint, ShieldCheck, Globe, BarChart3,
-  Clock, Trophy, DollarSign,
-  Smartphone, Wifi, Server, Rocket,
-  Heart,
-  MessageSquare,
-  Play, Pause,
-  TrendingUp as TrendingUpIcon,
-  Users as UsersIcon,
-  Target as TargetIcon,
-  Wallet as WalletIcon
+import { useCallback, useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
+import {
+  ArrowRight,
+  Sparkles,
+  Users,
+  Shield,
+  Target,
+  Coins,
 } from 'lucide-react';
-import { MagneticButton } from "./MagneticButton";
-import { SpotlightCard } from "./SpotLlightCard";
+import { MagneticButton } from './MagneticButton';
+import { SpotlightCard } from './SpotLlightCard';
 
 export const Hero = () => {
   const steps = [
-    { title: "CONNECT", desc: "Link SRK University Account", icon: Users, delay: 0.2 },
-    { title: "VERIFY", desc: "Complete KYC Process", icon: Shield, delay: 0.4 },
-    { title: "TASK", desc: "Follow & Engage", icon: Target, delay: 0.6 },
-    { title: "EARN", desc: "Instant Wallet Credit", icon: Coins, delay: 0.8 }
+    {
+      title: 'CONNECT',
+      desc: 'Link SRK University Account',
+      icon: Users,
+      delay: 0.2,
+    },
+    { title: 'VERIFY', desc: 'Complete KYC Process', icon: Shield, delay: 0.4 },
+    { title: 'TASK', desc: 'Follow & Engage', icon: Target, delay: 0.6 },
+    { title: 'EARN', desc: 'Instant Wallet Credit', icon: Coins, delay: 0.8 },
   ];
 
   const [activeStep, setActiveStep] = useState(0);
@@ -41,7 +38,7 @@ export const Hero = () => {
     const handleResize = () => {
       setWindowSize({
         width: window.innerWidth,
-        height: window.innerHeight
+        height: window.innerHeight,
       });
     };
 
@@ -59,7 +56,7 @@ export const Hero = () => {
   return (
     <section className="relative min-h-screen flex items-center pt-32 pb-20 px-6 overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-br from-black via-[#0a0705] to-black" />
-      
+
       {Array.from({ length: particleCount }).map((_, i) => (
         <motion.div
           key={`particle-${i}`}
@@ -80,7 +77,7 @@ export const Hero = () => {
         />
       ))}
 
-      <div 
+      <div
         className="absolute inset-0 opacity-[0.03]"
         style={{
           backgroundImage: `
@@ -106,13 +103,13 @@ export const Hero = () => {
             <Sparkles className="w-3.5 h-3.5 text-[#e1ba73] animate-pulse" />
           </motion.div>
 
-          <motion.h1 
+          <motion.h1
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
             className="text-5xl md:text-7xl lg:text-8xl font-bold leading-[0.95] tracking-tight"
           >
-            <motion.span 
+            <motion.span
               className="block text-white mb-3"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -120,18 +117,18 @@ export const Hero = () => {
             >
               Earn Through
             </motion.span>
-            <motion.span 
+            <motion.span
               className="block text-transparent bg-clip-text bg-gradient-to-r from-[#e1ba73] via-[#d4af37] to-[#b68938]"
               style={{
                 backgroundSize: '200% 100%',
               }}
               animate={{
-                backgroundPosition: ['0% 50%', '100% 50%', '0% 50%']
+                backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
               }}
               transition={{
                 duration: 5,
                 repeat: Infinity,
-                ease: "easeInOut"
+                ease: 'easeInOut',
               }}
             >
               Tasks
@@ -154,7 +151,7 @@ export const Hero = () => {
             </p>
           </motion.div>
 
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.6 }}
@@ -165,101 +162,116 @@ export const Hero = () => {
             </MagneticButton>
           </motion.div>
 
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.8 }}
             className="flex items-center justify-center lg:justify-start gap-6 pt-8 border-t border-white/5"
           >
             <div className="flex -space-x-3">
-              {[1,2,3,4].map(i => (
-                <motion.div 
-                  key={i} 
+              {[1, 2, 3, 4].map((i) => (
+                <motion.div
+                  key={i}
                   className="w-11 h-11 rounded-full border-2 border-[#0a0705] flex items-center justify-center text-[#b68938] bg-[#1a1410] relative z-0 hover:z-10"
                   whileHover={{ scale: 1.2, rotate: 5 }}
-                  transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 10 }}
                 >
                   <Users size={18} />
                 </motion.div>
               ))}
             </div>
             <div className="text-left">
-              <div className="text-white font-bold text-base">50K+ Active Members</div>
-              <div className="text-sm text-[#b68938] font-semibold">Verified by SRK University</div>
+              <div className="text-white font-bold text-base">
+                50K+ Active Members
+              </div>
+              <div className="text-sm text-[#b68938] font-semibold">
+                Verified by SRK University
+              </div>
             </div>
           </motion.div>
         </div>
 
         <div className="relative hidden lg:block h-[600px] pl-10">
-          <motion.div 
+          <motion.div
             className="absolute left-[39px] top-0 bottom-0 w-[2px] bg-gradient-to-b from-[#e1ba73]/20 via-[#b68938] to-[#e1ba73]/20"
             initial={{ scaleY: 0 }}
             animate={{ scaleY: 1 }}
             transition={{ duration: 2, ease: [0.22, 1, 0.36, 1] }}
           />
-          
+
           <div className="flex flex-col justify-between h-full py-8">
             {steps.map((step, i) => {
               const Icon = step.icon;
               return (
-                <motion.div 
+                <motion.div
                   key={step.title}
                   initial={{ opacity: 0, x: 100, rotateY: 90 }}
                   animate={{ opacity: 1, x: 0, rotateY: 0 }}
-                  transition={{ duration: 0.8, delay: step.delay, type: "spring" }}
+                  transition={{
+                    duration: 0.8,
+                    delay: step.delay,
+                    type: 'spring',
+                  }}
                   className="relative group pl-16"
                   onMouseEnter={() => handleStepHover(i)}
                 >
                   <div className="absolute left-0 top-1/2 -translate-y-1/2 w-20 h-20 flex items-center justify-center">
-                    <motion.div 
+                    <motion.div
                       className="relative"
-                      animate={{ 
+                      animate={{
                         scale: activeStep === i ? [1, 1.5, 1] : 1,
-                        boxShadow: activeStep === i 
-                          ? ['0 0 0 0 rgba(225, 186, 115, 0)', '0 0 30px 10px rgba(225, 186, 115, 0.5)', '0 0 0 0 rgba(225, 186, 115, 0)']
-                          : '0 0 15px rgba(225,186,115,0.5)'
+                        boxShadow:
+                          activeStep === i
+                            ? [
+                                '0 0 0 0 rgba(225, 186, 115, 0)',
+                                '0 0 30px 10px rgba(225, 186, 115, 0.5)',
+                                '0 0 0 0 rgba(225, 186, 115, 0)',
+                              ]
+                            : '0 0 15px rgba(225,186,115,0.5)',
                       }}
-                      transition={{ 
+                      transition={{
                         scale: { duration: 2, repeat: Infinity },
-                        boxShadow: { duration: 2, repeat: Infinity }
+                        boxShadow: { duration: 2, repeat: Infinity },
                       }}
                     >
                       <div className="w-4 h-4 rounded-full bg-[#0a0705] border-2 border-[#e1ba73] z-10" />
                     </motion.div>
                     <div className="absolute w-8 h-[1px] bg-gradient-to-r from-[#b68938]/30 to-transparent right-1/2 top-1/2" />
                   </div>
-                  
+
                   <SpotlightCard className="w-full max-w-md" hoverable={false}>
                     <div className="p-6">
                       <div className="flex items-center gap-5">
-                        <motion.div 
+                        <motion.div
                           className="p-3.5 rounded-xl bg-gradient-to-br from-[#b68938]/20 to-[#e1ba73]/10 text-[#e1ba73]"
-                          animate={{ 
+                          animate={{
                             rotate: activeStep === i ? [0, 5, -5, 0] : 0,
-                            scale: activeStep === i ? [1, 1.1, 1] : 1
+                            scale: activeStep === i ? [1, 1.1, 1] : 1,
                           }}
                           transition={{ duration: 0.6 }}
                         >
                           <Icon size={22} />
                         </motion.div>
                         <div>
-                          <motion.h4 
+                          <motion.h4
                             className="text-white font-bold text-lg mb-1"
-                            animate={{ 
-                              color: activeStep === i ? '#e1ba73' : '#ffffff'
+                            animate={{
+                              color: activeStep === i ? '#e1ba73' : '#ffffff',
                             }}
                             transition={{ duration: 0.3 }}
                           >
                             {step.title}
                           </motion.h4>
-                          <p className="text-sm text-gray-500 font-medium">{step.desc}</p>
+                          <p className="text-sm text-gray-500 font-medium">
+                            {step.desc}
+                          </p>
                         </div>
                       </div>
-                      
-                      <motion.div 
+
+                      <motion.div
                         className="mt-4 h-1 bg-white/5 rounded-full overflow-hidden"
                         initial={{ width: 0 }}
-                        animate={{ width: activeStep === i ? "100%" : "0%" }}
+                        animate={{ width: activeStep === i ? '100%' : '0%' }}
                         transition={{ duration: 2 }}
                       >
                         <div className="h-full bg-gradient-to-r from-[#e1ba73] to-[#b68938] rounded-full" />

@@ -11,7 +11,7 @@ import { FinalCTA } from '../components/landing-page/FinalCTA';
 import { Footer } from '../components/landing-page/Footer';
 
 export const TaskLandingPage = () => {
-  const [, setIsLoaded] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
     setIsLoaded(true);

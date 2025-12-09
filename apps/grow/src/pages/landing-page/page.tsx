@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { AnimatePresence } from 'framer-motion';
 
-import LoginModel from '../../components/user-components/auth/LoginModel';
 import Navbar from '../../components/layout-components/Navbar';
 import { Hero } from '../../components/user-components/landing-page/Hero';
 import { FlowSection } from '../../components/user-components/landing-page/FlowSection';
@@ -94,18 +93,6 @@ export const GrowLandingPage = () => {
 
 
       />
-
-      <AnimatePresence>
-        {showAuthModal && (
-          <LoginModel
-            initialMode={authMode}
-            onClose={() => setShowAuthModal(false)}
-            onLoginSuccess={handleLoginSuccess}
-            hasRegistered={hasRegistered}
-            onRegistrationComplete={() => setHasRegistered(true)}
-          />
-        )}
-      </AnimatePresence>
 
       <main>
         <AnimatePresence mode="wait">

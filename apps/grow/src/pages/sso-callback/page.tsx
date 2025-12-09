@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { exchangeCode } from '@srk/shared/api';
-import { useTaskAuthStore } from '../store/useTaskAuthStore';
-import { env } from '../lib/env';
-import '../App.css';
+import '../../App.css';
+import env from '../../lib/env';
+import useGrowAuthStore from '../../store/useGrowAuthStore';
+
 
 /**
  * SSO Callback Page
@@ -19,7 +20,7 @@ import '../App.css';
 const Callback = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { setUser, setLoading } = useTaskAuthStore();
+  const { setUser, setLoading } = useGrowAuthStore();
   
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const [message, setMessage] = useState('Authenticating...');
@@ -56,7 +57,7 @@ const Callback = () => {
 
           // Redirect to dashboard
           setTimeout(() => {
-            navigate(response.user?.redirectionUrl || '/task/verification', { replace: true });
+            navigate(response.user?.redirectionUrl || '/grow/verification', { replace: true });
           }, 1000);
         } else {
           setStatus('error');

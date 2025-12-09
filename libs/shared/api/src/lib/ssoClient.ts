@@ -54,7 +54,7 @@ const createSSOClient = (backendUrl: string) => {
  */
 export const getAutoCode = async (
   backendUrl: string,
-  targetApp: 'task' | 'bank' = 'task'
+  targetApp: 'task' | 'grow' | 'bank' = 'task'
 ): Promise<SSOCodeResponse> => {
   const client = createSSOClient(backendUrl);
   const response = await client.get<SSOCodeResponse>(

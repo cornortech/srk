@@ -11,6 +11,7 @@ import { env } from './lib/env';
 import { TaskLandingPage } from './pages/page';
 import AfterVerified from './pages/afterVerified/page';
 import { TaskVerificationPage } from './pages/taskVerification/page';
+import { AdminDashboard } from './pages/admin-dashboard/page';
 
 const queryClient = new QueryClient();
 
@@ -34,6 +35,10 @@ const router = createBrowserRouter([
   {
     path: '/task/dashboard',
     element: <AfterVerified />,
+  },
+  {
+    path: '/admin/dashboard',
+    element: <AdminDashboard />
   },
   {
     path: '/dashboard',

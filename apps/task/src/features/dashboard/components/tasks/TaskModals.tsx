@@ -7,7 +7,7 @@ import {
   followTasks,
   postTasks,
   watchTasks,
-} from '../../data/dummyDashboardData';
+} from '../../../../data/dummyDashboardMockData';
 import { SocialPlatform, Task, TaskType } from '../../types';
 import { DashboardGlassCard } from '../ui/DashboardGlassCard';
 import MagneticButton from '../ui/DashboardMagneticButton';

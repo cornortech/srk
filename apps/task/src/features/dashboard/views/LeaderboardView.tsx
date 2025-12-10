@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { leaderboardData } from '../data/dummyDashboardData';
+import { leaderboardData } from '../../../data/dummyDashboardMockData';
 import DashboardGradientText from '../components/ui/DashboardGradientText';
 import { Award, Clock, Coins, Search, TrendingUp, Trophy } from 'lucide-react';
 import { motion } from 'framer-motion';

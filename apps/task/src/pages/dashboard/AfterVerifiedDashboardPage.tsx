@@ -15,7 +15,7 @@ import {
   postTasks,
   userProfile,
   watchTasks,
-} from '../../features/dashboard/data/dummyDashboardData';
+} from '../../data/dummyDashboardMockData';
 import AnimatedBackground from '../../components/ui/AnimatedBackground';
 import FloatingNotification from '../../features/dashboard/components/ui/DashboardFloatingNotification';
 import { VerificationModal } from '../../features/dashboard/components/verification/VerificationModal';

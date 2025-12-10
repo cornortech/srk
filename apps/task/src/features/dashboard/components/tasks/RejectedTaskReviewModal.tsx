@@ -1,6 +1,6 @@
 import React from 'react';
 import { RejectedTaskEntry, Task } from '../../types';
-import { allPlatforms } from '../../data/dummyDashboardData';
+import { allPlatforms } from '../../../../data/dummyDashboardMockData';
 import { DashboardGlassCard } from '../ui/DashboardGlassCard';
 import { AlertTriangle, Coins, RefreshCw, X } from 'lucide-react';
 import MagneticButton from '../ui/DashboardMagneticButton';

@@ -15,7 +15,7 @@ import {
   followTasks,
   postTasks,
   watchTasks,
-} from '../data/dummyDashboardData';
+} from '../../../data/dummyDashboardMockData';
 import {
   DashboardView,
   RejectedTaskEntry,

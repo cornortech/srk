@@ -18,7 +18,7 @@ import {
   DUMMY_USERS,
   DUMMY_VERIFICATIONS,
   initialPayouts,
-} from '../../features/admin/data/dummyData';
+} from '../../data/dummyAdminDashboardMockData';
 import { VerificationContent } from '../../features/admin/views/VerificationContent';
 import { PayoutRequestsContent } from '../../features/admin/views/PayoutRequestsContent';
 import { TransactionsContent } from '../../features/admin/views/TransactionsContent';

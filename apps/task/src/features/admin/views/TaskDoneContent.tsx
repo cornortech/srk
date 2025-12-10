@@ -8,9 +8,9 @@ import {
   ListChecks,
   CoinsIcon,
 } from 'lucide-react';
-import { DUMMY_TASKS } from '../data/dummyData';
 import { CompletedTask } from '../types';
 import { CARD_BG, GOLD_PRIMARY, GOLD_ACCENT } from '../constants/theme';
+import { DUMMY_TASKS } from '../../../data/dummyAdminDashboardMockData';
 
 export const TaskDoneContent: React.FC = React.memo(() => {
   type TaskTabType = 'follow' | 'watch' | 'share';

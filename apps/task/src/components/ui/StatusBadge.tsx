@@ -1,6 +1,6 @@
 import { AlertCircle, Camera, CheckCircle, Loader2 } from 'lucide-react';
 import React from 'react';
-import { CaptureStatus } from '../../types';
+import { CaptureStatus } from '../../lib/types';
 
 interface StatusBadgeProps {
   status: CaptureStatus;

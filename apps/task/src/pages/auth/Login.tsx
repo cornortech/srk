@@ -4,7 +4,7 @@ import { Button } from '@nextui-org/react';
  * Login Page for Task App
  * This page is shown when SSO fails or user tries to access directly
  */
-const Login = () => {
+export const Login = () => {
   const handleGoToUniversity = () => {
     // Redirect to university login
     window.location.href = 'http://localhost:4200/auth/login';
@@ -74,5 +74,3 @@ const Login = () => {
     </div>
   );
 };
-
-export default Login;

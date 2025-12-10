@@ -18,7 +18,7 @@ interface VerificationModalProps {
   onSuccess: () => void;
 }
 
-const VerificationModal: React.FC<VerificationModalProps> = ({
+export const VerificationModal: React.FC<VerificationModalProps> = ({
   onClose,
   onSuccess,
 }) => {
@@ -571,5 +571,3 @@ const VerificationModal: React.FC<VerificationModalProps> = ({
     </div>
   );
 };
-
-export default VerificationModal;

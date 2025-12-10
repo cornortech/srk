@@ -15,27 +15,27 @@ import {
   postTasks,
   userProfile,
   watchTasks,
-} from '../../../data/dashboard';
-import AnimatedBackground from '../../../components/ui/dashboard/AnimatedBackground';
-import FloatingNotification from '../../../components/ui/dashboard/DashboardFloatingNotification';
-import VerificationModal from '../../../features/dashboard/components/verification/VerificationModal';
-import { VerificationView } from './../../../features/dashboard/views/VerificationView';
-import { AnalyticsView } from './../../../features/dashboard/views/AnalyticsView';
-import { TasksView } from './../../../features/dashboard/views/TasksView';
-import { LeaderboardView } from './../../../features/dashboard/views/LeaderboardView';
-import { CoinExchangeView } from './../../../features/dashboard/views/CoinExchangeView';
-import { ProfileView } from './../../../features/dashboard/views/ProfileView';
-import { LegacyPayoutView } from './../../../features/dashboard/views/LegacyPayoutView';
-import { LandingView } from './../../../features/dashboard/views/LandingView';
+} from '../../data/dashboard';
+import AnimatedBackground from '../../components/ui/dashboard/AnimatedBackground';
+import FloatingNotification from '../../components/ui/dashboard/DashboardFloatingNotification';
+import { VerificationModal } from '../../features/dashboard/components/verification/VerificationModal';
+import { VerificationView } from '../../features/dashboard/views/VerificationView';
+import { AnalyticsView } from '../../features/dashboard/views/AnalyticsView';
+import { TasksView } from '../../features/dashboard/views/TasksView';
+import { LeaderboardView } from '../../features/dashboard/views/LeaderboardView';
+import { CoinExchangeView } from '../../features/dashboard/views/CoinExchangeView';
+import { ProfileView } from '../../features/dashboard/views/ProfileView';
+import { LegacyPayoutView } from '../../features/dashboard/views/LegacyPayoutView';
+import { LandingView } from '../../features/dashboard/views/LandingView';
 import {
   PlatformSelectorModal,
   PlatformSpecificTaskModal,
-} from './../../../features/dashboard/components/tasks/TaskModals';
-import { VerificationUploadModal } from './../../../features/dashboard/components/tasks/VerificationUploadModal';
-import { VideoPlayerModal } from './../../../features/dashboard/components/tasks/VideoPlayerModal';
-import { RejectedTaskReviewModal } from './../../../features/dashboard/components/tasks/RejectedTaskReviewModal';
-import { RequestTaskModal } from './../../../features/dashboard/components/tasks/RequestTaskModal';
-import { DashboardLayout } from './../../../features/dashboard/layout/DashboardLayout';
+} from '../../features/dashboard/components/tasks/TaskModals';
+import { VerificationUploadModal } from '../../features/dashboard/components/tasks/VerificationUploadModal';
+import { VideoPlayerModal } from '../../features/dashboard/components/tasks/VideoPlayerModal';
+import { RejectedTaskReviewModal } from '../../features/dashboard/components/tasks/RejectedTaskReviewModal';
+import { RequestTaskModal } from '../../features/dashboard/components/tasks/RequestTaskModal';
+import { DashboardLayout } from '../../features/dashboard/layout/DashboardLayout';
 
 const AfterVerified: React.FC = () => {
   const [view, setView] = useState<'landing' | 'dashboard'>('landing');

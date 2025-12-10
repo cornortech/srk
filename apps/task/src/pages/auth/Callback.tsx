@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { exchangeCode } from '@srk/shared/api';
-import { useTaskAuthStore } from '../../../store/useTaskAuthStore';
-import { env } from '../../../lib/env';
-import '../../../styles/App.css';
+import { useTaskAuthStore } from '../../store/useTaskAuthStore';
+import { env } from '../../lib/env';
+import '../../styles/App.css';
+import { exchangeCode } from './../../../../../libs/shared/api/src/lib/ssoClient';
 
 /**
  * SSO Callback Page
@@ -16,7 +16,7 @@ import '../../../styles/App.css';
  * 4. On success, sets user in store and redirects to dashboard
  * 5. On failure, shows error and redirects to login
  */
-const Callback = () => {
+export const Callback = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { setUser, setLoading } = useTaskAuthStore();
@@ -135,5 +135,3 @@ const Callback = () => {
     </div>
   );
 };
-
-export default Callback;

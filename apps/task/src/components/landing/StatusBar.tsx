@@ -1,54 +1,40 @@
-import React, { useState, useRef, useEffect, useCallback, memo } from 'react';
-import { motion, useScroll, useTransform, useSpring, AnimatePresence } from 'framer-motion';
-import { 
-  Menu, X, ArrowRight, Sparkles, Users, Shield, Target, Coins, 
-  Wallet, Zap, CheckCircle, Star, Quote, ArrowUpRight, 
-  ChevronRight, Bot, Fingerprint, ShieldCheck, Globe, BarChart3,
-  Clock, Trophy, DollarSign,
-  Smartphone, Wifi, Server, Rocket,
-  Heart,
-  MessageSquare,
-  Play, Pause,
-  TrendingUp as TrendingUpIcon,
-  Users as UsersIcon,
-  Target as TargetIcon,
-  Wallet as WalletIcon
-} from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { useState, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Users, Target, Wallet, Globe } from 'lucide-react';
 import { SpotlightCard } from './SpotLlightCard';
 
 export const StatsBar = () => {
   const [hoveredStat, setHoveredStat] = useState<number | null>(null);
-  
+
   const stats = [
-    { 
-      value: "500+", 
-      label: "Active Tasks Available Now", 
-      icon: Target, 
-      description: "Real-time tasks across all platforms",
-      color: "#e1ba73" 
+    {
+      value: '500+',
+      label: 'Active Tasks Available Now',
+      icon: Target,
+      description: 'Real-time tasks across all platforms',
+      color: '#e1ba73',
     },
-    { 
-      value: "₹10L+", 
-      label: "Total Payouts Processed", 
-      icon: Wallet, 
-      description: "Instant transfers to verified users",
-      color: "#d4af37" 
+    {
+      value: '₹10L+',
+      label: 'Total Payouts Processed',
+      icon: Wallet,
+      description: 'Instant transfers to verified users',
+      color: '#d4af37',
     },
-    { 
-      value: "50K+", 
-      label: "FVC & Manual Verification", 
-      icon: Users, 
-      description: "Human-verified quality control",
-      color: "#b68938" 
+    {
+      value: '50K+',
+      label: 'FVC & Manual Verification',
+      icon: Users,
+      description: 'Human-verified quality control',
+      color: '#b68938',
     },
-    { 
-      value: "Global", 
-      label: "Happy Users Globally", 
-      icon: Globe, 
-      description: "Trusted by creators worldwide",
-      color: "#e1ba73" 
-    }
+    {
+      value: 'Global',
+      label: 'Happy Users Globally',
+      icon: Globe,
+      description: 'Trusted by creators worldwide',
+      color: '#e1ba73',
+    },
   ];
 
   const handleMouseEnter = useCallback((index: number) => {
@@ -61,14 +47,14 @@ export const StatsBar = () => {
 
   return (
     <section className="py-20 relative bg-gradient-to-b from-black/80 to-[#0a0705] overflow-hidden">
-      <motion.div 
+      <motion.div
         className="absolute inset-0"
         animate={{
           background: [
             'radial-gradient(circle at 20% 50%, rgba(225, 186, 115, 0.1) 0%, transparent 50%)',
             'radial-gradient(circle at 80% 50%, rgba(182, 137, 56, 0.1) 0%, transparent 50%)',
-            'radial-gradient(circle at 20% 50%, rgba(225, 186, 115, 0.1) 0%, transparent 50%)'
-          ]
+            'radial-gradient(circle at 20% 50%, rgba(225, 186, 115, 0.1) 0%, transparent 50%)',
+          ],
         }}
         transition={{ duration: 10, repeat: Infinity }}
       />
@@ -83,7 +69,7 @@ export const StatsBar = () => {
                 initial={{ opacity: 0, y: 30, scale: 0.9 }}
                 whileInView={{ opacity: 1, y: 0, scale: 1 }}
                 transition={{ duration: 0.6, delay: index * 0.1 }}
-                viewport={{ once: true, margin: "-50px" }}
+                viewport={{ once: true, margin: '-50px' }}
                 onMouseEnter={() => handleMouseEnter(index)}
                 onMouseLeave={handleMouseLeave}
                 className="relative group"
@@ -108,22 +94,25 @@ export const StatsBar = () => {
                   <div className="p-8 flex flex-col items-center text-center">
                     <motion.div
                       className="relative mb-6"
-                      animate={{ 
+                      animate={{
                         rotate: hoveredStat === index ? 360 : 0,
-                        scale: hoveredStat === index ? 1.1 : 1
+                        scale: hoveredStat === index ? 1.1 : 1,
                       }}
                       transition={{ duration: 0.6 }}
                     >
                       <div className="absolute inset-0 bg-gradient-to-r from-[#e1ba73]/20 to-[#b68938]/20 blur-xl rounded-full" />
                       <div className="relative w-16 h-16 rounded-2xl flex items-center justify-center bg-gradient-to-br from-black/80 to-[#1a1410] border border-white/5">
-                        <Icon className="w-7 h-7" style={{ color: stat.color }} />
+                        <Icon
+                          className="w-7 h-7"
+                          style={{ color: stat.color }}
+                        />
                       </div>
                     </motion.div>
 
-                    <motion.div 
+                    <motion.div
                       className="text-5xl font-bold mb-3"
                       animate={{
-                        color: hoveredStat === index ? stat.color : '#ffffff'
+                        color: hoveredStat === index ? stat.color : '#ffffff',
                       }}
                       transition={{ duration: 0.3 }}
                     >
@@ -134,10 +123,10 @@ export const StatsBar = () => {
                       {stat.label}
                     </div>
 
-                    <motion.div 
+                    <motion.div
                       className="mt-6 h-[2px] bg-gradient-to-r from-transparent via-[#b68938] to-transparent"
                       initial={{ width: 0 }}
-                      animate={{ width: hoveredStat === index ? "80%" : "40%" }}
+                      animate={{ width: hoveredStat === index ? '80%' : '40%' }}
                       transition={{ duration: 0.4 }}
                     />
                   </div>

@@ -1,85 +1,20 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { 
-  Camera, CheckCircle, X, RotateCw, 
-  User, Shield, Sparkles, Loader2, AlertCircle
+import {
+  Camera,
+  CheckCircle,
+  X,
+  RotateCw,
+  User,
+  Shield,
+  Sparkles,
+  Loader2,
+  AlertCircle,
 } from 'lucide-react';
-
-// ============= TYPES =============
-type CaptureStatus = 'idle' | 'capturing' | 'uploading' | 'success' | 'error';
-
-// ============= UTILITY COMPONENTS =============
-
-interface GlassCardProps {
-  children: React.ReactNode;
-  className?: string;
-  hover?: boolean;
-}
-
-const GlassCard: React.FC<GlassCardProps> = ({ children, className = '', hover = true }) => {
-  return (
-    <motion.div
-      className={`relative backdrop-blur-md rounded-2xl border border-white/10 bg-gradient-to-br from-white/5 to-white/2 p-6 ${className}`}
-      style={{
-        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)',
-      }}
-      whileHover={hover ? { y: -5, transition: { duration: 0.2 } } : {}}
-    >
-      <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-[#b68938]/10 via-transparent to-[#e1ba73]/10 opacity-0 hover:opacity-100 transition-opacity duration-500" />
-      <div className="relative z-10">
-        {children}
-      </div>
-    </motion.div>
-  );
-};
-
-interface GradientTextProps {
-  children: React.ReactNode;
-  className?: string;
-}
-
-const GradientText: React.FC<GradientTextProps> = ({ children, className = '' }) => {
-  return (
-    <span 
-      className={`bg-gradient-to-r from-[#b68938] via-[#e1ba73] to-[#b68938] bg-clip-text text-transparent animate-gradient ${className}`}
-      style={{
-        backgroundSize: '200% auto',
-      }}
-    >
-      {children}
-    </span>
-  );
-};
-
-interface StatusBadgeProps {
-  status: CaptureStatus;
-  message?: string;
-}
-
-const StatusBadge: React.FC<StatusBadgeProps> = ({ status, message }) => {
-  const config = {
-    idle: { icon: Camera, color: 'text-blue-400', bg: 'bg-blue-500/10', label: 'Ready' },
-    capturing: { icon: Camera, color: 'text-amber-400', bg: 'bg-amber-500/10', label: 'Capturing' },
-    uploading: { icon: Loader2, color: 'text-blue-400', bg: 'bg-blue-500/10', label: 'Uploading' },
-    success: { icon: CheckCircle, color: 'text-emerald-400', bg: 'bg-emerald-500/10', label: 'Verified' },
-    error: { icon: AlertCircle, color: 'text-red-400', bg: 'bg-red-500/10', label: 'Failed' },
-  }[status];
-
-  const Icon = config.icon;
-
-  return (
-    <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full ${config.bg} border border-white/10`}>
-      {status === 'uploading' ? (
-        <Loader2 size={14} className={`${config.color} animate-spin`} />
-      ) : (
-        <Icon size={14} className={config.color} />
-      )}
-      <span className={`text-sm font-medium ${config.color}`}>
-        {message || config.label}
-      </span>
-    </div>
-  );
-};
+import GlassCard from '../../../components/common/GlassCard';
+import { CaptureStatus } from 'apps/task/src/types';
+import StatusBadge from '../../../components/common/StatusBadge';
+import GradientText from '../../../components/common/GradientText';
 
 // ============= MAIN COMPONENT =============
 
@@ -89,7 +24,7 @@ export const TaskVerificationPage = () => {
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [facingMode, setFacingMode] = useState<'user' | 'environment'>('user');
-  
+
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -98,10 +33,10 @@ export const TaskVerificationPage = () => {
   const startCamera = async () => {
     try {
       setCameraError(null);
-      
+
       // Stop any existing stream
       if (streamRef.current) {
-        streamRef.current.getTracks().forEach(track => track.stop());
+        streamRef.current.getTracks().forEach((track) => track.stop());
       }
 
       // Check if browser supports getUserMedia
@@ -112,17 +47,17 @@ export const TaskVerificationPage = () => {
       }
 
       const constraints = {
-        video: { 
+        video: {
           facingMode: { ideal: facingMode },
           width: { ideal: 1280 },
-          height: { ideal: 720 }
+          height: { ideal: 720 },
         },
-        audio: false
+        audio: false,
       };
 
       try {
         const stream = await navigator.mediaDevices.getUserMedia(constraints);
-        
+
         if (videoRef.current) {
           streamRef.current = stream;
           videoRef.current.srcObject = stream;
@@ -132,12 +67,13 @@ export const TaskVerificationPage = () => {
         }
       } catch (permissionErr: any) {
         // Handle permission denied or device not found
-        const errorMsg = permissionErr.name === 'NotAllowedError' 
-          ? 'Camera permission denied. Please allow camera access in your browser settings.'
-          : permissionErr.name === 'NotFoundError'
-          ? 'No camera device found. Please connect a camera.'
-          : permissionErr.message || 'Failed to access camera';
-        
+        const errorMsg =
+          permissionErr.name === 'NotAllowedError'
+            ? 'Camera permission denied. Please allow camera access in your browser settings.'
+            : permissionErr.name === 'NotFoundError'
+            ? 'No camera device found. Please connect a camera.'
+            : permissionErr.message || 'Failed to access camera';
+
         setCameraError(errorMsg);
         setCameraActive(false);
       }
@@ -151,7 +87,7 @@ export const TaskVerificationPage = () => {
   // Stop camera
   const stopCamera = () => {
     if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current.getTracks().forEach((track) => track.stop());
       streamRef.current = null;
     }
     if (videoRef.current) {
@@ -181,14 +117,14 @@ export const TaskVerificationPage = () => {
     const imageData = canvas.toDataURL('image/png');
     setCapturedImage(imageData);
     setCaptureStatus('capturing');
-    
+
     // Stop camera after capture
     stopCamera();
 
     // Simulate processing
     setTimeout(() => {
       setCaptureStatus('uploading');
-      
+
       // Simulate upload
       setTimeout(() => {
         setCaptureStatus('success');
@@ -205,7 +141,7 @@ export const TaskVerificationPage = () => {
 
   // Toggle camera (front/back)
   const toggleCamera = async () => {
-    setFacingMode(prev => prev === 'user' ? 'environment' : 'user');
+    setFacingMode((prev) => (prev === 'user' ? 'environment' : 'user'));
     // Stop current stream
     stopCamera();
     // Restart with new facingMode
@@ -217,7 +153,7 @@ export const TaskVerificationPage = () => {
   // Handle final submit
   const handleSubmit = () => {
     if (!capturedImage) return;
-    
+
     // Here you would typically send the image to your backend
     console.log('Submitting selfie:', capturedImage);
     alert('Selfie submitted successfully!');
@@ -230,7 +166,7 @@ export const TaskVerificationPage = () => {
     const initializeCamera = async () => {
       if (isMounted) {
         // Small delay to ensure component is ready
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await new Promise((resolve) => setTimeout(resolve, 500));
         if (isMounted) {
           startCamera();
         }
@@ -238,7 +174,7 @@ export const TaskVerificationPage = () => {
     };
 
     initializeCamera();
-    
+
     return () => {
       isMounted = false;
       stopCamera();
@@ -251,7 +187,7 @@ export const TaskVerificationPage = () => {
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-20 left-1/4 w-96 h-96 bg-[#b68938]/10 rounded-full blur-[128px]" />
         <div className="absolute bottom-20 right-1/4 w-96 h-96 bg-[#e1ba73]/10 rounded-full blur-[128px]" />
-        
+
         {/* Floating particles */}
         {[...Array(20)].map((_, i) => (
           <motion.div
@@ -288,13 +224,16 @@ export const TaskVerificationPage = () => {
             </div>
             <div className="text-left">
               <h1 className="text-2xl font-bold">
-                SRK <span className="text-[#e1ba73]">Identity</span> Verification
+                SRK <span className="text-[#e1ba73]">Identity</span>{' '}
+                Verification
               </h1>
-              <p className="text-sm text-gray-400">Secure & Instant Verification</p>
+              <p className="text-sm text-gray-400">
+                Secure & Instant Verification
+              </p>
             </div>
           </motion.div>
 
-          <motion.h1 
+          <motion.h1
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
@@ -302,14 +241,15 @@ export const TaskVerificationPage = () => {
           >
             <GradientText>Live Selfie Capture</GradientText>
           </motion.h1>
-          
-          <motion.p 
+
+          <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2 }}
             className="text-gray-400 max-w-2xl mx-auto text-lg"
           >
-            Take a real-time selfie for identity verification. Ensure good lighting and face the camera clearly.
+            Take a real-time selfie for identity verification. Ensure good
+            lighting and face the camera clearly.
           </motion.p>
         </div>
 
@@ -323,20 +263,44 @@ export const TaskVerificationPage = () => {
                   <User size={24} className="text-blue-400" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-white">Verification Requirements</h3>
-                  <p className="text-sm text-gray-400">Follow these guidelines</p>
+                  <h3 className="text-xl font-bold text-white">
+                    Verification Requirements
+                  </h3>
+                  <p className="text-sm text-gray-400">
+                    Follow these guidelines
+                  </p>
                 </div>
               </div>
 
               <ul className="space-y-4">
                 {[
-                  { icon: CheckCircle, text: 'Face the camera directly', color: 'text-emerald-400' },
-                  { icon: CheckCircle, text: 'Ensure good lighting', color: 'text-emerald-400' },
-                  { icon: CheckCircle, text: 'Remove sunglasses/hat', color: 'text-emerald-400' },
-                  { icon: CheckCircle, text: 'Keep neutral expression', color: 'text-emerald-400' },
-                  { icon: CheckCircle, text: 'No other people in frame', color: 'text-emerald-400' },
+                  {
+                    icon: CheckCircle,
+                    text: 'Face the camera directly',
+                    color: 'text-emerald-400',
+                  },
+                  {
+                    icon: CheckCircle,
+                    text: 'Ensure good lighting',
+                    color: 'text-emerald-400',
+                  },
+                  {
+                    icon: CheckCircle,
+                    text: 'Remove sunglasses/hat',
+                    color: 'text-emerald-400',
+                  },
+                  {
+                    icon: CheckCircle,
+                    text: 'Keep neutral expression',
+                    color: 'text-emerald-400',
+                  },
+                  {
+                    icon: CheckCircle,
+                    text: 'No other people in frame',
+                    color: 'text-emerald-400',
+                  },
                 ].map((item, index) => (
-                  <motion.li 
+                  <motion.li
                     key={index}
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
@@ -356,7 +320,9 @@ export const TaskVerificationPage = () => {
                   <Sparkles size={24} className="text-purple-400" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-white">Why Selfie Verification?</h3>
+                  <h3 className="text-xl font-bold text-white">
+                    Why Selfie Verification?
+                  </h3>
                   <p className="text-sm text-gray-400">Security benefits</p>
                 </div>
               </div>
@@ -367,7 +333,7 @@ export const TaskVerificationPage = () => {
                   'Ensures real person verification',
                   'Quick and automated process',
                   'Encrypted and secure storage',
-                  'One-time verification'
+                  'One-time verification',
                 ].map((benefit, index) => (
                   <div key={index} className="flex items-center gap-3">
                     <div className="w-2 h-2 rounded-full bg-[#b68938]" />
@@ -380,30 +346,54 @@ export const TaskVerificationPage = () => {
             {/* Status card */}
             <GlassCard>
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-bold text-white">Verification Status</h3>
+                <h3 className="text-lg font-bold text-white">
+                  Verification Status
+                </h3>
                 <StatusBadge status={captureStatus} />
               </div>
-              
+
               <div className="space-y-3">
                 {[
-                  { step: 1, label: 'Camera Access', completed: cameraActive || !!capturedImage },
-                  { step: 2, label: 'Selfie Capture', completed: !!capturedImage },
-                  { step: 3, label: 'Face Verification', completed: captureStatus === 'success' },
-                  { step: 4, label: 'Process Complete', completed: captureStatus === 'success' },
+                  {
+                    step: 1,
+                    label: 'Camera Access',
+                    completed: cameraActive || !!capturedImage,
+                  },
+                  {
+                    step: 2,
+                    label: 'Selfie Capture',
+                    completed: !!capturedImage,
+                  },
+                  {
+                    step: 3,
+                    label: 'Face Verification',
+                    completed: captureStatus === 'success',
+                  },
+                  {
+                    step: 4,
+                    label: 'Process Complete',
+                    completed: captureStatus === 'success',
+                  },
                 ].map((step) => (
                   <div key={step.step} className="flex items-center gap-3">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                      step.completed 
-                        ? 'bg-gradient-to-r from-[#b68938] to-[#e1ba73] text-black'
-                        : 'bg-white/5 text-gray-400'
-                    }`}>
+                    <div
+                      className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                        step.completed
+                          ? 'bg-gradient-to-r from-[#b68938] to-[#e1ba73] text-black'
+                          : 'bg-white/5 text-gray-400'
+                      }`}
+                    >
                       {step.completed ? (
                         <CheckCircle size={16} />
                       ) : (
                         <span className="text-sm font-bold">{step.step}</span>
                       )}
                     </div>
-                    <span className={`${step.completed ? 'text-white' : 'text-gray-400'}`}>
+                    <span
+                      className={`${
+                        step.completed ? 'text-white' : 'text-gray-400'
+                      }`}
+                    >
                       {step.label}
                     </span>
                   </div>
@@ -419,7 +409,9 @@ export const TaskVerificationPage = () => {
                 {capturedImage ? 'Selfie Preview' : 'Live Camera'}
               </h3>
               <p className="text-gray-400">
-                {capturedImage ? 'Review your captured selfie' : 'Position your face within the frame'}
+                {capturedImage
+                  ? 'Review your captured selfie'
+                  : 'Position your face within the frame'}
               </p>
             </div>
 
@@ -428,7 +420,9 @@ export const TaskVerificationPage = () => {
               {cameraError ? (
                 <div className="absolute inset-0 flex flex-col items-center justify-center p-6 bg-red-500/10">
                   <AlertCircle size={48} className="text-red-400 mb-4" />
-                  <p className="text-red-400 font-medium text-center">{cameraError}</p>
+                  <p className="text-red-400 font-medium text-center">
+                    {cameraError}
+                  </p>
                   <button
                     onClick={startCamera}
                     className="mt-4 px-6 py-2 bg-gradient-to-r from-[#b68938] to-[#e1ba73] text-black rounded-lg font-bold hover:opacity-90 transition-opacity"
@@ -438,9 +432,9 @@ export const TaskVerificationPage = () => {
                 </div>
               ) : capturedImage ? (
                 <>
-                  <img 
-                    src={capturedImage} 
-                    alt="Captured selfie" 
+                  <img
+                    src={capturedImage}
+                    alt="Captured selfie"
                     className="w-full h-full object-cover"
                   />
                   <button
@@ -466,11 +460,14 @@ export const TaskVerificationPage = () => {
                 </>
               ) : (
                 <div className="absolute inset-0 flex flex-col items-center justify-center p-6">
-                  <Loader2 size={48} className="text-[#b68938] animate-spin mb-4" />
+                  <Loader2
+                    size={48}
+                    className="text-[#b68938] animate-spin mb-4"
+                  />
                   <p className="text-gray-400">Initializing camera...</p>
                 </div>
               )}
-              
+
               {/* Hidden canvas for capture */}
               <canvas ref={canvasRef} className="hidden" />
             </div>
@@ -528,10 +525,9 @@ export const TaskVerificationPage = () => {
               {!cameraError && !capturedImage && (
                 <div className="text-center">
                   <p className="text-sm text-gray-500">
-                    {cameraActive 
+                    {cameraActive
                       ? 'Camera active • Click Capture when ready'
-                      : 'Camera loading...'
-                    }
+                      : 'Camera loading...'}
                   </p>
                 </div>
               )}
@@ -567,13 +563,12 @@ export const TaskVerificationPage = () => {
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20">
             <Shield size={16} className="text-emerald-400" />
             <span className="text-sm text-emerald-400">
-              Your selfie is encrypted and stored securely. We never share your biometric data.
+              Your selfie is encrypted and stored securely. We never share your
+              biometric data.
             </span>
           </div>
         </motion.div>
       </div>
-
-
     </div>
   );
 };

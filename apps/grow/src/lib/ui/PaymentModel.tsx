@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, CheckCircle, Upload,  } from 'lucide-react';
-import {  useNavigate } from 'react-router-dom';
+import {  Link, useNavigate } from 'react-router-dom';
 import { UserDetails } from '../types/types';
 
 interface PaymentModalProps {
@@ -83,9 +83,7 @@ const PaymentModel: React.FC<PaymentModalProps> = ({
     setTransactionId('');
     setScreenshot(null);
     setScreenshotPreview('');
-    navigate("/")
     onClose();
-
   };
 
   if (!isOpen) return null;

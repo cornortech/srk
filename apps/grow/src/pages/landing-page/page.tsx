@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { AnimatePresence } from 'framer-motion';
 
-import LoginModel from '../../components/user-components/auth/LoginModel';
 import Navbar from '../../components/layout-components/Navbar';
 import { Hero } from '../../components/user-components/landing-page/Hero';
 import { FlowSection } from '../../components/user-components/landing-page/FlowSection';
@@ -12,8 +11,8 @@ import { CTASection } from '../../components/user-components/landing-page/CTASec
 import { Footer } from '../../components/layout-components/Footer';
 import { PackageSelectionFlow } from '../../components/user-components/landing-page/PackageSelectionFlow';
 import { OrderConfirmation } from '../../components/user-components/landing-page/OrderConfirmation';
-import { UserDashboard } from '../user-dashboard/page';
 import { OrderDetails, PackageDetails, UserData, UserDetails } from '../../lib/types/types';
+import { UserDashboard } from '../grow-affiliate/page';
 
 type View =
   | 'landing'
@@ -22,7 +21,7 @@ type View =
   | 'confirmation'
   | 'dashboard';
 
-const GrowLandingPage: React.FC = () => {
+export const GrowLandingPage = () => {
 
   const [user, setUser] = useState<UserData | null>(null);
   const [hasRegistered, setHasRegistered] = useState(false);
@@ -95,18 +94,6 @@ const GrowLandingPage: React.FC = () => {
 
       />
 
-      <AnimatePresence>
-        {showAuthModal && (
-          <LoginModel
-            initialMode={authMode}
-            onClose={() => setShowAuthModal(false)}
-            onLoginSuccess={handleLoginSuccess}
-            hasRegistered={hasRegistered}
-            onRegistrationComplete={() => setHasRegistered(true)}
-          />
-        )}
-      </AnimatePresence>
-
       <main>
         <AnimatePresence mode="wait">
           {view === 'landing' && (
@@ -141,5 +128,3 @@ const GrowLandingPage: React.FC = () => {
     </>
   );
 };
-
-export default GrowLandingPage;

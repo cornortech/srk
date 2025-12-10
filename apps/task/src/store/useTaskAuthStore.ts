@@ -1,12 +1,5 @@
 import { create } from 'zustand';
-
-export interface TaskUser {
-  _id: string;
-  email: string;
-  firstName?: string;
-  lastName?: string;
-  role: string;
-}
+import { TaskUser } from '../types';
 
 interface TaskAuthState {
   user: TaskUser | null;

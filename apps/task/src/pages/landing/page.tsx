@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Navbar } from '../components/landing-page/Navbar';
-import { Hero } from '../components/landing-page/Hero';
-import { StatsBar } from '../components/landing-page/StatusBar';
-import { TrustGrid } from '../components/landing-page/TrustGrid';
-import { SynergySection } from '../components/landing-page/SynergySection';
-import { AvailableEverywhere } from '../components/landing-page/AvailableEverywhere';
-import { TrustedByCreators } from '../components/landing-page/TrustedByCreaters';
-import { FinalCTA } from '../components/landing-page/FinalCTA';
-import { Footer } from '../components/landing-page/Footer';
+import { Navbar } from '../../components/landing/Navbar';
+import { Hero } from '../../components/landing/Hero';
+import { StatsBar } from '../../components/landing/StatusBar';
+import { TrustGrid } from '../../components/landing/TrustGrid';
+import { SynergySection } from '../../components/landing/SynergySection';
+import { AvailableEverywhere } from '../../components/landing/AvailableEverywhere';
+import { TrustedByCreators } from '../../components/landing/TrustedByCreaters';
+import { FinalCTA } from '../../components/landing/FinalCTA';
+import { Footer } from '../../components/landing/Footer';
 
 export const TaskLandingPage = () => {
   const [isLoaded, setIsLoaded] = useState(false);

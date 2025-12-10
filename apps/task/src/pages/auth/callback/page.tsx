@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { exchangeCode } from '@srk/shared/api';
-import { useTaskAuthStore } from '../store/useTaskAuthStore';
-import { env } from '../lib/env';
-import '../App.css';
+import { useTaskAuthStore } from '../../../store/useTaskAuthStore';
+import { env } from '../../../lib/env';
+import '../../../styles/App.css';
 
 /**
  * SSO Callback Page
  * This page handles the SSO code exchange when redirected from university app
- * 
+ *
  * Flow:
  * 1. University app redirects to /callback?code=XXXXX
  * 2. This page extracts the code from URL
@@ -20,8 +20,10 @@ const Callback = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { setUser, setLoading } = useTaskAuthStore();
-  
-  const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
+
+  const [status, setStatus] = useState<'loading' | 'success' | 'error'>(
+    'loading'
+  );
   const [message, setMessage] = useState('Authenticating...');
 
   useEffect(() => {
@@ -44,7 +46,7 @@ const Callback = () => {
         if (response.success && response.user) {
           setStatus('success');
           setMessage('Authentication successful! Redirecting...');
-          
+
           // Set user in store
           setUser({
             _id: response.user._id,
@@ -56,7 +58,9 @@ const Callback = () => {
 
           // Redirect to dashboard
           setTimeout(() => {
-            navigate(response.user?.redirectionUrl || '/task/dashboard', { replace: true });
+            navigate(response.user?.redirectionUrl || '/task/dashboard', {
+              replace: true,
+            });
           }, 1000);
         } else {
           setStatus('error');
@@ -68,7 +72,10 @@ const Callback = () => {
       } catch (err: any) {
         console.error('SSO callback error:', err);
         setStatus('error');
-        setMessage(err.response?.data?.message || 'Authentication failed. Please try again.');
+        setMessage(
+          err.response?.data?.message ||
+            'Authentication failed. Please try again.'
+        );
         setTimeout(() => {
           navigate('/login', { replace: true });
         }, 2000);
@@ -83,39 +90,46 @@ const Callback = () => {
   return (
     <div className="loading-container">
       {status === 'loading' && <div className="spinner" />}
-      
+
       {status === 'success' && (
-        <svg 
-          width="50" 
-          height="50" 
-          viewBox="0 0 24 24" 
-          fill="none" 
-          stroke="#22c55e" 
+        <svg
+          width="50"
+          height="50"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="#22c55e"
           strokeWidth="2"
         >
           <path d="M20 6L9 17l-5-5" />
         </svg>
       )}
-      
+
       {status === 'error' && (
-        <svg 
-          width="50" 
-          height="50" 
-          viewBox="0 0 24 24" 
-          fill="none" 
-          stroke="#ef4444" 
+        <svg
+          width="50"
+          height="50"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="#ef4444"
           strokeWidth="2"
         >
           <circle cx="12" cy="12" r="10" />
           <path d="M15 9l-6 6M9 9l6 6" />
         </svg>
       )}
-      
-      <p style={{ 
-        color: status === 'error' ? '#ef4444' : status === 'success' ? '#22c55e' : '#fff',
-        fontSize: '1.1rem',
-        marginTop: '1rem'
-      }}>
+
+      <p
+        style={{
+          color:
+            status === 'error'
+              ? '#ef4444'
+              : status === 'success'
+              ? '#22c55e'
+              : '#fff',
+          fontSize: '1.1rem',
+          marginTop: '1rem',
+        }}
+      >
         {message}
       </p>
     </div>

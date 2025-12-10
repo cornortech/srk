@@ -1,1 +1,1 @@
-export { default } from './page';
+export { TaskLandingPage } from './LandingPage';

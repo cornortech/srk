@@ -1,5 +1,3 @@
-// apps/task/src/features/dashboard/views/LandingView.tsx
-
 import React from 'react';
 import { motion } from 'framer-motion';
 import {

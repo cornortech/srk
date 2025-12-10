@@ -1,12 +1,12 @@
 import { Button, Spinner } from '@nextui-org/react';
-import { useTaskAuthStore } from '../../../store/useTaskAuthStore';
-import TaskCard from '../../../components/common/TaskCard';
+import { useTaskAuthStore } from '../../store/useTaskAuthStore';
+import TaskCard from '../../components/common/TaskCard';
 
 /**
  * Task Dashboard Page
  * Main dashboard after successful SSO authentication
  */
-const Dashboard = () => {
+export const Dashboard = () => {
   const { user, isLoading } = useTaskAuthStore();
 
   // Show loading while checking auth
@@ -199,5 +199,3 @@ const Dashboard = () => {
     </div>
   );
 };
-
-export default Dashboard;

@@ -2,7 +2,6 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { ChevronRight, Coins, Wallet } from 'lucide-react';
 import { DashboardView as DashboardViewType } from '../../../types/dashboard';
-import AnimatedBackground from '../../../components/ui/dashboard/AnimatedBackground';
 import DashboardGradientText from './../../../components/ui/dashboard/DashboardGradientText';
 import MagneticButton from './../../../components/ui/dashboard/DashboardMagneticButton';
 import MobileMenu from './MobileMenu';

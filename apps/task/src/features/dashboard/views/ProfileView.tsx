@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Check, Crown, Shield, Star, Trophy, Zap } from 'lucide-react';
-import { DashboardView, UserProfile } from '../../../types/dashboard';
-import { DashboardGlassCard } from './../../../components/ui/dashboard/DashboardGlassCard';
-import MagneticButton from './../../../components/ui/dashboard/DashboardMagneticButton';
-import DashboardGradientText from './../../../components/ui/dashboard/DashboardGradientText';
-import DashboardStatusBadge from './../../../components/ui/dashboard/DashboardStatusBadge';
+import { DashboardView, UserProfile } from '../types';
+import { DashboardGlassCard } from '../components/ui/DashboardGlassCard';
+import MagneticButton from '../components/ui/DashboardMagneticButton';
+import DashboardGradientText from '../components/ui/DashboardGradientText';
+import DashboardStatusBadge from '../components/ui/DashboardStatusBadge';
 
 interface ProfileViewProps {
   isApproved: boolean;

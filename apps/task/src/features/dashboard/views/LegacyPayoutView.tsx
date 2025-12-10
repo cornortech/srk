@@ -1,10 +1,10 @@
 import React from 'react';
 import { AlertTriangle, ArrowRight } from 'lucide-react';
 
-import { DashboardView } from '../../../types/dashboard';
-import DashboardGradientText from './../../../components/ui/dashboard/DashboardGradientText';
-import { DashboardGlassCard } from './../../../components/ui/dashboard/DashboardGlassCard';
-import MagneticButton from './../../../components/ui/dashboard/DashboardMagneticButton';
+import { DashboardView } from '../types';
+import DashboardGradientText from '../components/ui/DashboardGradientText';
+import { DashboardGlassCard } from '../components/ui/DashboardGlassCard';
+import MagneticButton from '../components/ui/DashboardMagneticButton';
 
 interface LegacyPayoutViewProps {
   setDashView: (view: DashboardView) => void;

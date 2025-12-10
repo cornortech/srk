@@ -1,9 +1,9 @@
 import React from 'react';
-import { RejectedTaskEntry, Task } from './../../../../types/dashboard';
-import { allPlatforms } from './../../../../data/dashboard';
-import { DashboardGlassCard } from './../../../../components/ui/dashboard/DashboardGlassCard';
+import { RejectedTaskEntry, Task } from '../../types';
+import { allPlatforms } from '../../data/dummyDashboardData';
+import { DashboardGlassCard } from '../ui/DashboardGlassCard';
 import { AlertTriangle, Coins, RefreshCw, X } from 'lucide-react';
-import MagneticButton from './../../../../components/ui/dashboard/DashboardMagneticButton';
+import MagneticButton from '../ui/DashboardMagneticButton';
 
 interface RejectedTaskReviewModalProps {
   task: RejectedTaskEntry;

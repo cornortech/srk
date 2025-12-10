@@ -1,2 +1,2 @@
-export {Callback} from './Callback';
-export {Login} from './Login';
+export { CallbackPage } from './CallbackPage';
+export { LoginPage } from './LoginPage';

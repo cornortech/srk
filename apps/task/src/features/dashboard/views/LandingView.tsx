@@ -9,10 +9,10 @@ import {
   Shield,
   TrendingUp,
 } from 'lucide-react';
-import AnimatedBackground from './../../../components/ui/dashboard/AnimatedBackground';
-import DashboardGradientText from './../../../components/ui/dashboard/DashboardGradientText';
-import MagneticButton from '../../../components/ui/dashboard/DashboardMagneticButton';
-import { DashboardGlassCard } from './../../../components/ui/dashboard/DashboardGlassCard';
+import AnimatedBackground from '../../../components/ui/AnimatedBackground';
+import DashboardGradientText from '../components/ui/DashboardGradientText';
+import MagneticButton from '../components/ui/DashboardMagneticButton';
+import { DashboardGlassCard } from '../components/ui/DashboardGlassCard';
 
 interface LandingViewProps {
   setView: (view: 'dashboard') => void;

@@ -1,0 +1,9 @@
+export { Navbar } from '@nextui-org/navbar';
+export { Footer } from './Footer';
+export { Hero } from './Hero';
+export { AvailableEverywhere } from './AvailableEverywhere';
+export { FinalCTA } from './FinalCTA';
+export { StatsBar } from './StatsBar';
+export { SynergySection } from './SynergySection';
+export { TrustedByCreators } from './TrustedByCreaters';
+export { TrustGrid } from './TrustGrid';

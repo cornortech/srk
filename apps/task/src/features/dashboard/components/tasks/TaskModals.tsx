@@ -7,10 +7,10 @@ import {
   followTasks,
   postTasks,
   watchTasks,
-} from '../../../../data/dashboard';
-import { SocialPlatform, Task, TaskType } from '../../../../types/dashboard';
-import { DashboardGlassCard } from './../../../../components/ui/dashboard/DashboardGlassCard';
-import MagneticButton from '../../../../components/ui/dashboard/DashboardMagneticButton';
+} from '../../data/dummyDashboardData';
+import { SocialPlatform, Task, TaskType } from '../../types';
+import { DashboardGlassCard } from '../ui/DashboardGlassCard';
+import MagneticButton from '../ui/DashboardMagneticButton';
 
 interface PlatformSelectorModalProps {
   type: TaskType;

@@ -1,5 +1,5 @@
-import MagneticButton from '../../../../components/ui/dashboard/DashboardMagneticButton';
-import DashboardGlassCard from '../../../../components/ui/dashboard/DashboardGlassCard';
+import MagneticButton from '../ui/DashboardMagneticButton';
+import DashboardGlassCard from '../ui/DashboardGlassCard';
 import { Check, PenTool, Trash2, Type } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 

@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { SignaturePad } from './SignaturePad';
-import DashboardGradientText from '../../../../components/ui/dashboard/DashboardGradientText';
+import DashboardGradientText from '../ui/DashboardGradientText';
 
 interface VerificationModalProps {
   onClose: () => void;

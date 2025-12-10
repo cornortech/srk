@@ -14,8 +14,8 @@ import {
   LogOut,
   Coins,
 } from 'lucide-react';
-import { DashboardView, RejectedTaskEntry } from '../../../types/dashboard';
-import DashboardGlassCard from '../../../components/ui/dashboard/DashboardGlassCard';
+import { DashboardView, RejectedTaskEntry } from '../types';
+import DashboardGlassCard from '../components/ui/DashboardGlassCard';
 
 interface MobileMenuProps {
   isMenuOpen: boolean;

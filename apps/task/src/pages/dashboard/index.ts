@@ -1,2 +1,3 @@
-export * from './MainDashboard';
-export * from './afterVerified';
+export * from './MainDashboardPage';
+export * from './AfterVerifiedDashboardPage';
+export * from "./AdminDashboardPage"

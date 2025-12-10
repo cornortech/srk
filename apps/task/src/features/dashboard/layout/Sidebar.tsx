@@ -12,8 +12,8 @@ import {
 } from 'lucide-react';
 import React from 'react';
 import { motion } from 'framer-motion';
-import { DashboardView, RejectedTaskEntry } from '../../../types/dashboard';
-import { DashboardGlassCard } from './../../../components/ui/dashboard/DashboardGlassCard';
+import { DashboardView, RejectedTaskEntry } from '../types';
+import { DashboardGlassCard } from '../components/ui/DashboardGlassCard';
 
 interface SidebarProps {
   dashView: DashboardView;

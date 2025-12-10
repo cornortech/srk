@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Coins, RefreshCw, Send, Upload, X } from 'lucide-react';
-import { allPlatforms } from '../../../../data/dashboard';
-import { Task } from '../../../../types/dashboard';
-import { DashboardGlassCard } from './../../../../components/ui/dashboard/DashboardGlassCard';
-import MagneticButton from './../../../../components/ui/dashboard/DashboardMagneticButton';
+import { allPlatforms } from '../../data/dummyDashboardData';
+import { Task } from '../../types';
+import { DashboardGlassCard } from '../ui/DashboardGlassCard';
+import MagneticButton from '../ui/DashboardMagneticButton';
 
 interface VerificationUploadModalProps {
   task: Task;

@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Navbar } from '../../components/landing/Navbar';
-import { Hero } from '../../components/landing/Hero';
-import { StatsBar } from '../../components/landing/StatusBar';
-import { TrustGrid } from '../../components/landing/TrustGrid';
-import { SynergySection } from '../../components/landing/SynergySection';
-import { AvailableEverywhere } from '../../components/landing/AvailableEverywhere';
-import { TrustedByCreators } from '../../components/landing/TrustedByCreaters';
-import { FinalCTA } from '../../components/landing/FinalCTA';
-import { Footer } from '../../components/landing/Footer';
+import { Navbar } from '../../features/landing-page/Navbar';
+import { Hero } from '../../features/landing-page/Hero';
+import { StatsBar } from './../../features/landing-page/StatsBar';
+import { TrustGrid } from './../../features/landing-page/TrustGrid';
+import { SynergySection } from './../../features/landing-page/SynergySection';
+import { AvailableEverywhere } from './../../features/landing-page/AvailableEverywhere';
+import { TrustedByCreators } from './../../features/landing-page/TrustedByCreaters';
+import { FinalCTA } from './../../features/landing-page/FinalCTA';
+import { Footer } from './../../features/landing-page/Footer';
 
 export const TaskLandingPage = () => {
   const [isLoaded, setIsLoaded] = useState(false);
@@ -19,28 +19,33 @@ export const TaskLandingPage = () => {
 
   return (
     <main className="bg-black min-h-screen text-white overflow-x-hidden">
-      <div 
+      <div
         className="fixed inset-0 pointer-events-none z-40 opacity-[0.02]"
         style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`
-        }} 
+          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+        }}
       />
 
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <motion.div 
-          animate={{ 
+        <motion.div
+          animate={{
             x: [0, 100, 0],
-            y: [0, 50, 0]
+            y: [0, 50, 0],
           }}
-          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+          transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
           className="absolute top-20 left-1/4 w-96 h-96 bg-gradient-to-r from-[#e1ba73]/10 to-[#b68938]/10 blur-[128px] rounded-full"
         />
-        <motion.div 
-          animate={{ 
+        <motion.div
+          animate={{
             x: [0, -100, 0],
-            y: [0, -50, 0]
+            y: [0, -50, 0],
           }}
-          transition={{ duration: 25, repeat: Infinity, ease: "linear", delay: 5 }}
+          transition={{
+            duration: 25,
+            repeat: Infinity,
+            ease: 'linear',
+            delay: 5,
+          }}
           className="absolute bottom-20 right-1/4 w-96 h-96 bg-gradient-to-r from-[#b68938]/10 to-[#e1ba73]/10 blur-[128px] rounded-full"
         />
       </div>
@@ -55,9 +60,12 @@ export const TaskLandingPage = () => {
       <FinalCTA />
       <Footer />
 
-      <style dangerouslySetInnerHTML={{__html: `
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
         @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=swap');
-        
+     
+
         body {
           background-color: #000000;
           color: #ffffff;
@@ -146,7 +154,9 @@ export const TaskLandingPage = () => {
           text-rendering: optimizeLegibility;
           letter-spacing: -0.02em;
         }
-      `}} />
+      `,
+        }}
+      />
     </main>
   );
 };

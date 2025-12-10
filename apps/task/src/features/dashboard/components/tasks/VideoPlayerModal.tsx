@@ -13,9 +13,9 @@ import {
   Youtube,
 } from 'lucide-react';
 
-import { Task } from '../../../../types/dashboard';
-import { DashboardGlassCard } from './../../../../components/ui/dashboard/DashboardGlassCard';
-import MagneticButton from './../../../../components/ui/dashboard/DashboardMagneticButton';
+import { Task } from '../../types';
+import { DashboardGlassCard } from '../ui/DashboardGlassCard';
+import MagneticButton from '../ui/DashboardMagneticButton';
 
 interface VideoPlayerModalProps {
   task: Task;

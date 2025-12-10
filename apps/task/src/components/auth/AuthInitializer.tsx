@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import useTaskAuthStore from '../../store/useTaskAuthStore';
-import { getMe } from '@srk/shared/api';
 import env from '../../lib/env';
+import { getMe } from '@srk/shared/api';
 
 const AuthInitializer = ({ children }: { children: React.ReactNode }) => {
   const { setUser, setLoading } = useTaskAuthStore();

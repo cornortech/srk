@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { leaderboardData } from './../../../data/dashboard';
-import DashboardGradientText from './../../../components/ui/dashboard/DashboardGradientText';
+import { leaderboardData } from '../data/dummyDashboardData';
+import DashboardGradientText from '../components/ui/DashboardGradientText';
 import { Award, Clock, Coins, Search, TrendingUp, Trophy } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { DashboardGlassCard } from './../../../components/ui/dashboard/DashboardGlassCard';
+import { DashboardGlassCard } from '../components/ui/DashboardGlassCard';
 
 export const LeaderboardView: React.FC = () => {
   const [timeRange, setTimeRange] = useState<'weekly' | 'monthly' | 'allTime'>(

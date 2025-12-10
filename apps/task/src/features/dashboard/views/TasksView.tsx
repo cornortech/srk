@@ -15,17 +15,17 @@ import {
   followTasks,
   postTasks,
   watchTasks,
-} from '../../../data/dashboard';
+} from '../data/dummyDashboardData';
 import {
   DashboardView,
   RejectedTaskEntry,
   SocialPlatform,
   Task,
   TaskType,
-} from '../../../types/dashboard';
-import { DashboardGlassCard } from './../../../components/ui/dashboard/DashboardGlassCard';
-import MagneticButton from '../../../components/ui/dashboard/DashboardMagneticButton';
-import DashboardGradientText from './../../../components/ui/dashboard/DashboardGradientText';
+} from '../types';
+import { DashboardGlassCard } from '../components/ui/DashboardGlassCard';
+import MagneticButton from '../components/ui/DashboardMagneticButton';
+import DashboardGradientText from '../components/ui/DashboardGradientText';
 
 interface TasksViewProps {
   isApproved: boolean;

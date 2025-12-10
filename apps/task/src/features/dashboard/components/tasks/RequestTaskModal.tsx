@@ -1,6 +1,6 @@
-import { SocialPlatform, TaskType } from '../../../../types/dashboard';
+import { SocialPlatform, TaskType } from '../../types';
 import { useState } from 'react';
-import MagneticButton from './../../../../components/ui/dashboard/DashboardMagneticButton';
+import MagneticButton from '../ui/DashboardMagneticButton';
 import {
   ArrowRight,
   Play,
@@ -10,8 +10,8 @@ import {
   Users,
   X,
 } from 'lucide-react';
-import { allPlatforms } from './../../../../data/dashboard';
-import { DashboardGlassCard } from './../../../../components/ui/dashboard/DashboardGlassCard';
+import { allPlatforms } from '../../data/dummyDashboardData';
+import { DashboardGlassCard } from '../ui/DashboardGlassCard';
 import { motion } from 'framer-motion';
 
 interface RequestTaskModalProps {

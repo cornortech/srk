@@ -1,6 +1,6 @@
 import React from 'react';
-import DashboardGradientText from './../../../components/ui/dashboard/DashboardGradientText';
-import { DashboardGlassCard } from './../../../components/ui/dashboard/DashboardGlassCard';
+import DashboardGradientText from '../components/ui/DashboardGradientText';
+import { DashboardGlassCard } from '../components/ui/DashboardGlassCard';
 import { motion } from 'framer-motion';
 import {
   Camera,
@@ -10,8 +10,8 @@ import {
   ShieldCheck,
   Sparkles,
 } from 'lucide-react';
-import DashboardStatusBadge from './../../../components/ui/dashboard/DashboardStatusBadge';
-import MagneticButton from '../../../components/ui/dashboard/DashboardMagneticButton';
+import DashboardStatusBadge from '../components/ui/DashboardStatusBadge';
+import MagneticButton from '../components/ui/DashboardMagneticButton';
 
 interface VerificationViewProps {
   isApproved: boolean;

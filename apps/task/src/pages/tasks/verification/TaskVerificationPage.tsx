@@ -11,10 +11,10 @@ import {
   Loader2,
   AlertCircle,
 } from 'lucide-react';
-import GlassCard from '../../../components/common/GlassCard';
+import GlassCard from '../../../components/ui/GlassCard';
 import { CaptureStatus } from 'apps/task/src/types';
-import StatusBadge from '../../../components/common/StatusBadge';
-import GradientText from '../../../components/common/GradientText';
+import StatusBadge from '../../../components/ui/StatusBadge';
+import GradientText from '../../../components/ui/GradientText';
 
 export const TaskVerificationPage = () => {
   const [captureStatus, setCaptureStatus] = useState<CaptureStatus>('idle');

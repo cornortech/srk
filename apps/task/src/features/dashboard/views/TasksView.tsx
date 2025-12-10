@@ -10,7 +10,6 @@ import {
   Shield,
   Users,
 } from 'lucide-react';
-
 import {
   allPlatforms,
   followTasks,

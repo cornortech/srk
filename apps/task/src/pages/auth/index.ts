@@ -1,2 +1,2 @@
-export * from './callback';
-export * from './login';
+export {Callback} from './Callback';
+export {Login} from './Login';

@@ -1,5 +1,3 @@
-// apps/task/src/features/dashboard/views/AnalyticsView.tsx
-
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Activity, Award, Calendar, TrendingUp, Wallet } from 'lucide-react';

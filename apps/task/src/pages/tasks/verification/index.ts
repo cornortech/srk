@@ -1,1 +1,1 @@
-export { default } from './page';
+export { TaskVerificationPage } from './TaskVerificationPage';

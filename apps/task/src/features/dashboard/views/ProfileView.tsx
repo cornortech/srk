@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Check, Crown, Shield, Star, Trophy, Zap } from 'lucide-react';
-
 import { DashboardView, UserProfile } from '../../../types/dashboard';
 import { DashboardGlassCard } from './../../../components/ui/dashboard/DashboardGlassCard';
 import MagneticButton from './../../../components/ui/dashboard/DashboardMagneticButton';

@@ -1,13 +1,13 @@
 import '../styles/App.css';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
-import Callback from '../pages/auth/callback/page';
-import Dashboard from '../pages/dashboard/main/Dashboard';
-import Login from '../pages/auth/login/page';
-import { TaskLandingPage } from '../pages/landing/page';
-import { TaskVerificationPage } from '../pages/tasks/verification/page';
+import { Callback } from '../pages/auth/Callback';
+import { Dashboard } from '../pages/dashboard/MainDashboard';
+import { Login } from '../pages/auth/Login';
+import { TaskLandingPage } from '../pages/landing/LandingPage';
+import { TaskVerificationPage } from '../pages/tasks/verification/TaskVerificationPage';
 import AuthInitializer from '../components/auth/AuthInitializer';
-import AfterVerified from '../pages/dashboard/afterVerified/page';
+import AfterVerified from '../pages/dashboard/afterVerified';
 
 const queryClient = new QueryClient();
 

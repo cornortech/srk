@@ -16,8 +16,6 @@ import { CaptureStatus } from 'apps/task/src/types';
 import StatusBadge from '../../../components/common/StatusBadge';
 import GradientText from '../../../components/common/GradientText';
 
-// ============= MAIN COMPONENT =============
-
 export const TaskVerificationPage = () => {
   const [captureStatus, setCaptureStatus] = useState<CaptureStatus>('idle');
   const [cameraActive, setCameraActive] = useState(false);

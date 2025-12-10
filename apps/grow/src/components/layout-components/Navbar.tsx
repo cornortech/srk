@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X, Zap } from 'lucide-react';
 import { UserData } from '../../lib/types/types';
-import LoginModel from '../user-components/auth/LoginModel';
+import { Link, useNavigate } from 'react-router-dom';
 
 interface NavbarProps {
   user: UserData | null;
@@ -11,33 +11,18 @@ interface NavbarProps {
 }
 
 const Navbar: React.FC<NavbarProps> = ({
-  user,
   onUserUpdate,
-  onDashboardClick
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [showAuthModal, setShowAuthModal] = useState(false);
-  const [hasRegistered, setHasRegistered] = useState(false);
-
-  useEffect(() => {
-    const users = JSON.parse(localStorage.getItem("srkgrow_users") || "[]");
-    setHasRegistered(users.length > 0);
-  }, []);
+  const navigate = useNavigate();
 
   const handleLoginSuccess = (userData: UserData) => {
     onUserUpdate(userData);
-    setShowAuthModal(false);
   };
 
-  const buttonText = user
-    ? "Dashboard"
-    : hasRegistered
-      ? "Login Now"
-      : "Get Started";
-
-  const buttonAction = user
-    ? onDashboardClick
-    : () => setShowAuthModal(true);
+  const buttonAction = () =>{
+    navigate('/login');
+  }
 
   return (
     <>
@@ -77,7 +62,7 @@ const Navbar: React.FC<NavbarProps> = ({
               onClick={buttonAction}
               className="px-8 py-3 rounded-full bg-gradient-to-r from-[#b68938] to-[#e1ba73] text-black font-bold text-sm uppercase tracking-widest hover:shadow-[0_0_30px_rgba(182,137,56,0.6)]"
             >
-              {buttonText}
+              Login
             </motion.button>
           </div>
 
@@ -87,7 +72,7 @@ const Navbar: React.FC<NavbarProps> = ({
               onClick={buttonAction}
               className="px-4 py-2 rounded-full bg-gradient-to-r from-[#b68938] to-[#e1ba73] text-black font-bold text-sm"
             >
-              {buttonText}
+              Login
             </button>
 
             <button
@@ -118,24 +103,12 @@ const Navbar: React.FC<NavbarProps> = ({
               }}
               className="w-full py-5 rounded-2xl bg-gradient-to-r from-[#b68938] to-[#e1ba73] text-black font-bold text-lg"
             >
-              {buttonText}
+              Login
             </motion.button>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Auth Modal */}
-      <AnimatePresence>
-        {showAuthModal && (
-          <LoginModel
-            onClose={() => setShowAuthModal(false)}
-            onLoginSuccess={handleLoginSuccess}
-            hasRegistered={hasRegistered}
-            initialMode={hasRegistered ? "login" : "register"}
-            onRegistrationComplete={() => setHasRegistered(true)}   // ✅ ADDED FIX
-          />
-        )}
-      </AnimatePresence>
     </>
   );
 };

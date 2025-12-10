@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Navbar } from '../../features/landing-page/Navbar';
-import { Hero } from '../../features/landing-page/Hero';
-import { StatsBar } from './../../features/landing-page/StatsBar';
-import { TrustGrid } from './../../features/landing-page/TrustGrid';
-import { SynergySection } from './../../features/landing-page/SynergySection';
-import { AvailableEverywhere } from './../../features/landing-page/AvailableEverywhere';
-import { TrustedByCreators } from './../../features/landing-page/TrustedByCreaters';
-import { FinalCTA } from './../../features/landing-page/FinalCTA';
-import { Footer } from './../../features/landing-page/Footer';
+import { Navbar } from '../../features/landing-page/components/Navbar';
+import { Hero } from '../../features/landing-page/components/Hero';
+import { StatsBar } from '../../features/landing-page/components/StatsBar';
+import { TrustGrid } from '../../features/landing-page/components/TrustGrid';
+import { SynergySection } from '../../features/landing-page/components/SynergySection';
+import { AvailableEverywhere } from '../../features/landing-page/components/AvailableEverywhere';
+import { TrustedByCreators } from '../../features/landing-page/components/TrustedByCreaters';
+import { FinalCTA } from '../../features/landing-page/components/FinalCTA';
+import { Footer } from '../../features/landing-page/components/Footer';
 
 export const TaskLandingPage = () => {
   const [isLoaded, setIsLoaded] = useState(false);

@@ -10,7 +10,7 @@ import {
   Users,
   X,
 } from 'lucide-react';
-import { allPlatforms } from '../../data/dummyDashboardData';
+import { allPlatforms } from '../../../../data/dummyDashboardMockData';
 import { DashboardGlassCard } from '../ui/DashboardGlassCard';
 import { motion } from 'framer-motion';
 

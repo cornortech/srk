@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { TaskUser } from '../types';
+import { TaskUser } from '../lib/types';
 
 interface TaskAuthState {
   user: TaskUser | null;

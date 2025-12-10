@@ -12,7 +12,7 @@ import {
   AlertCircle,
 } from 'lucide-react';
 import GlassCard from '../../../components/ui/GlassCard';
-import { CaptureStatus } from 'apps/task/src/types';
+import { CaptureStatus } from 'apps/task/src/lib/types';
 import StatusBadge from '../../../components/ui/StatusBadge';
 import GradientText from '../../../components/ui/GradientText';
 

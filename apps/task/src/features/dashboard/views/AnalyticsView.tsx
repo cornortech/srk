@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Activity, Award, Calendar, TrendingUp, Wallet } from 'lucide-react';
 import { DashboardGlassCard } from '../components/ui/DashboardGlassCard';
 import DashboardGradientText from '../components/ui/DashboardGradientText';
-import { analyticsData } from '../data/dummyDashboardData';
+import { analyticsData } from '../../../data/dummyDashboardMockData';
 
 export const AnalyticsView: React.FC = () => {
   const [timeRange, setTimeRange] = useState<'day' | 'week' | 'month' | 'all'>(

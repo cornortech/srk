@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Coins, RefreshCw, Send, Upload, X } from 'lucide-react';
-import { allPlatforms } from '../../data/dummyDashboardData';
+import { allPlatforms } from '../../../../data/dummyDashboardMockData';
 import { Task } from '../../types';
 import { DashboardGlassCard } from '../ui/DashboardGlassCard';
 import MagneticButton from '../ui/DashboardMagneticButton';

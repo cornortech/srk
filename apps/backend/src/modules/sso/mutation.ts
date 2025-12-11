@@ -59,10 +59,16 @@ const getAutoCode: AppRouteImplementationOrOptions<
     // Generate redirect URL based on target app
     let redirectUrl: string;
     if (targetApp === 'task') {
-      const taskDomain = process.env['TASK_FRONTEND_URL'] || 'http://localhost:4400';
+      const taskDomain =
+        process.env['TASK_FRONTEND_URL'] || 'http://localhost:4400';
       redirectUrl = `${taskDomain}/callback?code=${code}`;
+    } else if (targetApp === 'grow') {
+      const growDomain =
+        process.env['GROW_FRONTEND_URL'] || 'http://localhost:4500';
+      redirectUrl = `${growDomain}/callback?code=${code}`;
     } else {
-      const bankDomain = process.env['BANK_FRONTEND_URL'] || 'http://localhost:4300';
+      const bankDomain =
+        process.env['BANK_FRONTEND_URL'] || 'http://localhost:4300';
       redirectUrl = `${bankDomain}/callback?code=${code}`;
     }
 
@@ -162,7 +168,9 @@ const exchangeCode: AppRouteImplementationOrOptions<
     // Set redirection URL based on target app
     let redirectionUrl = '/dashboard';
     if (autoCode.targetApp === 'task') {
-      redirectionUrl = '/task/dashboard';
+      redirectionUrl = '/task/verification';
+    } else if (autoCode.targetApp === 'grow') {
+      redirectionUrl = '/grow/verification';
     } else if (autoCode.targetApp === 'bank') {
       redirectionUrl = '/bank/dashboard';
     }
@@ -216,9 +224,9 @@ const exchangeCode: AppRouteImplementationOrOptions<
  * Get current authenticated user from cookie
  * Used to restore session on page refresh
  */
-const getMe: AppRouteImplementationOrOptions<typeof ssoContract.getMe> = async ({
-  req,
-}) => {
+const getMe: AppRouteImplementationOrOptions<
+  typeof ssoContract.getMe
+> = async ({ req }) => {
   try {
     const user = (req as any).user;
 

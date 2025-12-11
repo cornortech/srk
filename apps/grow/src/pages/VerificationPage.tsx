@@ -12,6 +12,7 @@ import {
   Maximize,
   Minimize,
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 // ============= TYPES =============
 type CaptureStatus = 'idle' | 'capturing' | 'uploading' | 'success' | 'error';
@@ -417,8 +418,11 @@ const CameraFeature: React.FC<CameraFeatureProps> = ({
   }, []);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/95 backdrop-blur-sm">
-      <GlassCard className="w-full max-w-4xl p-6 md:p-8 relative" hover={false}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/95 backdrop-blur-sm overflow-y-auto">
+      <GlassCard
+        className="w-full max-w-4xl p-6 md:p-8 relative my-auto"
+        hover={false}
+      >
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
@@ -436,7 +440,7 @@ const CameraFeature: React.FC<CameraFeatureProps> = ({
         {/* Camera Preview Container */}
         <div
           ref={containerRef}
-          className="relative aspect-video bg-black rounded-xl overflow-hidden mb-6 border-2 border-white/10"
+          className="relative w-full aspect-video bg-black rounded-xl overflow-hidden mb-6 border-2 border-white/10"
         >
           {/* Video Element - Now with proper preview */}
           <video
@@ -523,9 +527,9 @@ const CameraFeature: React.FC<CameraFeatureProps> = ({
         </div>
 
         {/* Camera Controls */}
-        <div className="space-y-6">
+        <div className="space-y-4 overflow-y-auto max-h-[40vh]">
           {/* Mode Selection */}
-          <div className="flex justify-center gap-4">
+          <div className="flex justify-center gap-3 md:gap-4">
             <button
               onClick={() => setCameraMode('photo')}
               className={`px-4 py-2 rounded-lg transition-all ${
@@ -540,7 +544,7 @@ const CameraFeature: React.FC<CameraFeatureProps> = ({
           </div>
 
           {/* Control Buttons */}
-          <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex flex-wrap items-center justify-between gap-3 md:gap-4">
             <div className="flex items-center gap-3">
               {/* Camera Switch */}
 
@@ -561,7 +565,7 @@ const CameraFeature: React.FC<CameraFeatureProps> = ({
             </div>
 
             {/* Main Action Button */}
-            <div className="flex items-center gap-4">
+            <div className="flex flex-col sm:flex-row items-center gap-3 md:gap-4 w-full sm:w-auto">
               {capturedData ? (
                 <>
                   <button
@@ -570,33 +574,36 @@ const CameraFeature: React.FC<CameraFeatureProps> = ({
                       setStatus('idle');
                       startCamera();
                     }}
-                    className="px-6 py-3 bg-white/10 hover:bg-white/20 text-white rounded-xl font-medium transition-colors flex items-center gap-2"
+                    className="px-4 md:px-6 py-2 md:py-3 bg-white/10 hover:bg-white/20 text-white rounded-xl font-medium transition-colors flex items-center gap-2 text-sm md:text-base flex-1 sm:flex-auto justify-center"
                   >
                     <RotateCw size={18} />
-                    Retake
+                    <span className="hidden sm:inline">Retake</span>
+                    <span className="sm:hidden">Retake</span>
                   </button>
                   <button
                     onClick={() => onCapture(capturedData)}
-                    className="px-8 py-3 bg-gradient-to-r from-emerald-500 to-green-500 text-white rounded-xl font-bold hover:shadow-[0_0_30px_rgba(16,185,129,0.3)] transition-all flex items-center gap-2"
+                    className="px-4 md:px-8 py-2 md:py-3 bg-gradient-to-r from-emerald-500 to-green-500 text-white rounded-xl font-bold hover:shadow-[0_0_30px_rgba(16,185,129,0.3)] transition-all flex items-center gap-2 text-sm md:text-base flex-1 sm:flex-auto justify-center"
                   >
                     <CheckCircle size={18} />
-                    Submit Now
+                    <span className="hidden sm:inline">Submit Now</span>
+                    <span className="sm:hidden">Submit</span>
                   </button>
                 </>
               ) : cameraMode === 'photo' ? (
                 <button
                   onClick={capturePhoto}
                   disabled={!cameraActive}
-                  className="px-8 py-3 bg-gradient-to-r from-amber-500 to-yellow-500 text-black rounded-xl font-bold hover:shadow-[0_0_30px_rgba(245,158,11,0.3)] transition-all flex items-center gap-2 disabled:opacity-50"
+                  className="px-4 md:px-8 py-2 md:py-3 bg-gradient-to-r from-amber-500 to-yellow-500 text-black rounded-xl font-bold hover:shadow-[0_0_30px_rgba(245,158,11,0.3)] transition-all flex items-center gap-2 disabled:opacity-50 text-sm md:text-base flex-1 sm:flex-auto justify-center"
                 >
                   <Camera size={18} />
-                  Capture Photo
+                  <span className="hidden sm:inline">Capture Photo</span>
+                  <span className="sm:hidden">Capture</span>
                 </button>
               ) : (
                 <button
                   onClick={isRecording ? stopRecording : startRecording}
                   disabled={!cameraActive}
-                  className={`px-8 py-3 rounded-xl font-bold transition-all flex items-center gap-2 ${
+                  className={`px-4 md:px-8 py-2 md:py-3 rounded-xl font-bold transition-all flex items-center gap-2 text-sm md:text-base flex-1 sm:flex-auto justify-center ${
                     isRecording
                       ? 'bg-gradient-to-r from-red-500 to-rose-500 text-white hover:shadow-[0_0_30px_rgba(239,68,68,0.3)]'
                       : 'bg-gradient-to-r from-amber-500 to-yellow-500 text-black hover:shadow-[0_0_30px_rgba(245,158,11,0.3)]'
@@ -605,12 +612,16 @@ const CameraFeature: React.FC<CameraFeatureProps> = ({
                   {isRecording ? (
                     <>
                       <div className="w-2 h-2 rounded-full bg-white animate-pulse" />
-                      Stop Recording ({formatTime(recordTime)})
+                      <span className="hidden sm:inline">
+                        Stop Recording ({formatTime(recordTime)})
+                      </span>
+                      <span className="sm:hidden">Stop</span>
                     </>
                   ) : (
                     <>
                       <Video size={18} />
-                      Start Recording
+                      <span className="hidden sm:inline">Start Recording</span>
+                      <span className="sm:hidden">Record</span>
                     </>
                   )}
                 </button>
@@ -702,10 +713,16 @@ export const GrowVerificationPage = () => {
     }, 2000);
   };
 
+  const navigate = useNavigate();
+
   const openCamera = (type: 'photo' | 'video') => {
     setMediaType(type);
     setShowCamera(true);
   };
+
+  if (submissionStatus === 'success') {
+    setTimeout(() => navigate('/'), 3000);
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0a0705] to-black text-white">

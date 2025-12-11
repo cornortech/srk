@@ -59,7 +59,7 @@ export const ssoContract = c.router({
     method: 'GET',
     path: '/auth/sso/get-auto-code',
     query: z.object({
-      targetApp: z.enum(['task', 'bank']).default('task'),
+      targetApp: z.enum(['task', 'grow', 'bank']).default('task'),
     }),
     responses: {
       200: SSOCodeResponseSchema,

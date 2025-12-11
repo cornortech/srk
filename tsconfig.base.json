@@ -24,7 +24,9 @@
       "@srk/shared/store": ["libs/shared/store/src/index.ts"],
       "@srk/shared/api": ["libs/shared/api/src/index.ts"],
       "@srk/shared/types": ["libs/shared/types/src/index.ts"],
-      "@srk/shared/assets": ["libs/shared/assets/src/index.ts"]
+      "@srk/shared/assets": ["libs/shared/assets/src/index.ts"],
+      "@srk/task": ["apps/task/src/index.ts"],
+      "@srk/task/*": ["apps/task/src/*"]
     }
   },
   "exclude": ["node_modules", "tmp"]

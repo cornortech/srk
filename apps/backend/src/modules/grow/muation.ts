@@ -1,6 +1,7 @@
 import { AppRouteImplementationOrOptions } from "@ts-rest/express/src/lib/types"
 import { growContract } from "../../contract/grow/contract"
 import { growSocialMediaPackageUserModel } from "../../model/growSocialMediaPackageUserModel"
+import { parseArgs } from "util"
 
 // const createGrowSocialMediaEnrollement:AppRouteImplementation<
 // typeof growContract.createGrowSocialMediaEnrollement
@@ -68,4 +69,41 @@ const acceptSocialGrowFollowRequest: AppRouteImplementationOrOptions<typeof grow
 }
 
 
-export const growMutationHandler = { acceptSocialGrowFollowRequest }
+const rejectSocialGrowFollowRequest: AppRouteImplementationOrOptions<typeof growContract.rejectSocialGrowFollowRequest> = async ({ params, body }) => {
+    try {
+        const enrollementRequest = await growSocialMediaPackageUserModel.findOne({ _id: params.id })
+
+        if (!enrollementRequest) {
+            return {
+                status: 500,
+                body: {
+                    message: "No Such Enrollment Found",
+                }
+            }
+        }
+
+        await growSocialMediaPackageUserModel.findOneAndUpdate(
+            { _id: params.id },
+            { $set: { status: "verificationRejected", rejectionReason: body.rejectionReason } }
+        )
+
+        return {
+            status: 200,
+            body: {
+                message: "Follow Request Rejected",
+                success: false
+            }
+        }
+    } catch (error) {
+        console.log(error)
+        return ({
+            status: 500,
+            body: {
+                message: error.message ? `Internal server error: ${error.message}` : "Internal server error",
+                success: false
+            }
+        })
+    }
+}
+
+export const growMutationHandler = { acceptSocialGrowFollowRequest, rejectSocialGrowFollowRequest }

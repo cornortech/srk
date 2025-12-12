@@ -10,6 +10,7 @@ import { webinarRouter } from "./webinar/router";
 import { bankRouter } from "./bank/router";
 import { tourRouter } from "./tour/router.router";
 import { taskRouter } from "./task/router";
+import { growRouter } from "./grow/router";
 
 const s = initServer();
 
@@ -23,5 +24,6 @@ export const router = s.router(contract, {
   webinar: webinarRouter,
   bank: bankRouter,
   tour: tourRouter,
-  task: taskRouter
+  task: taskRouter,
+  grow: growRouter
 });

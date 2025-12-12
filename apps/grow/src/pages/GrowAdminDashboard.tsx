@@ -100,9 +100,9 @@ export const GrowOnlyAdminDashboard = () => {
     setActiveView(view);
   }, []);
 
-  const handleSidebarToggle = useCallback(() => {
+  const handleSidebarToggle = () => {
     setIsSidebarOpen((prev) => !prev);
-  }, []);
+  };
 
   const handleSidebarClose = useCallback(() => {
     setIsSidebarOpen(false);
@@ -171,18 +171,25 @@ export const GrowOnlyAdminDashboard = () => {
 
       <FloatingParticles />
 
-      <Sidebar activeView={activeView} setActiveView={handleViewChange} />
+      <div className="hidden lg:block">
+        <Sidebar activeView={activeView} setActiveView={handleViewChange} />
+      </div>
 
       <AnimatePresence>
         {isSidebarOpen && (
-          <Sidebar activeView={activeView} setActiveView={handleViewChange} />
+          <Sidebar
+            activeView={activeView}
+            setActiveView={handleViewChange}
+            isMobile={true}
+            onClose={handleSidebarClose}
+          />
         )}
       </AnimatePresence>
 
-      <FloatingNavBar
+      {/* <FloatingNavBar
         activeView={activeView}
         setActiveView={handleViewChange}
-      />
+      /> */}
 
       <main ref={mainRef} className="lg:ml-64 min-h-screen">
         <motion.header

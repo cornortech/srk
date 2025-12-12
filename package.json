@@ -25,7 +25,8 @@
     "lint:all": "nx run-many -t lint",
     "format": "nx format:write",
     "format:check": "nx format:check",
-    "create:admin": "tsx apps/backend/src/scripts/createAdmin.ts"
+    "create:admin": "tsx apps/backend/src/scripts/createAdmin.ts",
+    "seed:create-grow-packages": "tsx apps/backend/src/utils/script/createSrkGrowPackage.ts"
   },
   "private": true,
   "devDependencies": {

@@ -30,4 +30,19 @@ export const growContract = c.router({
         },
         summary: "Approve Social Grow Follow Request by Id"
     },
+
+    rejectSocialGrowFollowRequest: {
+        method: "PATCH",
+        path: "/reject-social-grow-follow-request/:id",
+        body: z.object({
+            rejectionReason: z.string()
+        }),
+        responses: {
+            200: SuccessSchema,
+            403: ErrorSchema,
+            404: ErrorSchema,
+            500: ErrorSchema
+        },
+        summary: "Reject Social Grow Follow Request by Id"
+    }
 });

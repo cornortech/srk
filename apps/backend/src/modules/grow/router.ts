@@ -6,5 +6,6 @@ const s = initServer();
 
 export const growRouter = s.router(growContract, {
     createGrowSocialMediaEnrollement: undefined,
-    acceptSocialGrowFollowRequest: growMutationHandler.acceptSocialGrowFollowRequest
+    acceptSocialGrowFollowRequest: growMutationHandler.acceptSocialGrowFollowRequest,
+    rejectSocialGrowFollowRequest: growMutationHandler.rejectSocialGrowFollowRequest
 });

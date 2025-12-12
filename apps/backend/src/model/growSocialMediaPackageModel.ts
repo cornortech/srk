@@ -6,7 +6,7 @@ const growSocialMediaPackageSchema = new mongoose.Schema(
             type: String,
             requred: true,
         },
-        descripttion: {
+        description: {
             type: String,
             required: true,
         },

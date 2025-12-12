@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 export interface IAutoCode extends mongoose.Document {
   code: string;
   userId: mongoose.Types.ObjectId;
-  targetApp: 'task' | 'grow' | 'bank'; // Which app the code is for
+  targetApp: 'task' | 'growaffiliate' | 'growsocialmedia' | 'bank'; // Which app the code is for
   expiresAt: Date;
   isUsed: boolean;
   createdAt: Date;
@@ -25,7 +25,7 @@ const autoCodeSchema = new mongoose.Schema(
     },
     targetApp: {
       type: String,
-      enum: ['task', 'grow', 'bank'],
+      enum: ['task', 'growaffiliate', 'growsocialmedia', 'bank'],
       required: true,
     },
     expiresAt: {

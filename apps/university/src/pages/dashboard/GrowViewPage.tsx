@@ -1,8 +1,8 @@
 import React, { useState, useRef, useCallback, type ReactNode } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
-import { ArrowRight, TrendingUp, Users, ExternalLink, Sparkles } from 'lucide-react';
-import TaskProgramButton from '../../components/TaskProgramButton';
-import GrowProgramButton from '../../components/GrowProgramButton';
+import { TrendingUp, Users, Sparkles } from 'lucide-react';
+import GrowAffiliateProgramButton from '../../components/GrowProgramButton';
+import GrowSocialMediaProgramButton from '../../components/GrowSocialMediaButton';
 
 interface MagneticButtonProps {
   children: ReactNode;
@@ -278,7 +278,7 @@ const SRKGrowPortal = () => {
                 </div>
 
                 {/* Button */}
-                <TaskProgramButton size="lg" variant="solid" />
+                <GrowAffiliateProgramButton size="lg" variant="solid" />
               </div>
             </SpotlightCard>
           </motion.div>
@@ -329,7 +329,7 @@ const SRKGrowPortal = () => {
                 </div>
 
                 {/* Button */}
-                <GrowProgramButton size="lg" variant="solid" />
+                <GrowSocialMediaProgramButton size="lg" variant="solid" />
 
               </div>
             </SpotlightCard>

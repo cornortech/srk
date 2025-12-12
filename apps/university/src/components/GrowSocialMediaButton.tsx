@@ -1,33 +1,33 @@
 import { Button } from '@nextui-org/react';
-import { toast } from 'sonner';
 import useGrowSSO from '../../../../libs/shared/hooks/src/lib/useGrowSSO'
+import { toast } from 'sonner';
 
-interface GrowProgramButtonProps {
+interface TaskSocialMediaButtonProps {
   className?: string;
   variant?: 'solid' | 'bordered' | 'light' | 'flat' | 'faded' | 'shadow' | 'ghost';
   size?: 'sm' | 'md' | 'lg';
 }
 
 /**
- * Button to redirect user to Grow Program via SSO
- * Place this in the university dashboard where users can access the Grow app
+ * Button to redirect user to Task SocialMedia via SSO
+ * Place this in the university dashboard where users can access the task app
  */
-const GrowAffiliateProgramButton = ({ 
+const GrowSocialMediaProgramButton = ({ 
   className = '', 
   variant = 'solid',
   size = 'md'
-}: GrowProgramButtonProps) => {
+}: TaskSocialMediaButtonProps) => {
   const backendUrl = import.meta.env.VITE_BACKEND_ROOT_URL || 'http://localhost:4000';
   
-  const { redirectToGrowAffiliateProgram, isLoading, error } = useGrowSSO({
+  const { redirectToGrowSocialMediaProgram, isLoading, error } = useGrowSSO({
     backendUrl,
   });
 
   const handleClick = async () => {
     try {
-      await redirectToGrowAffiliateProgram();
+      await redirectToGrowSocialMediaProgram();
     } catch (err) {
-      toast.error('Failed to redirect to Grow Affiliate');
+      toast.error('Failed to redirect to Grow SocialMedia');
     }
   };
 
@@ -45,9 +45,9 @@ const GrowAffiliateProgramButton = ({
       isLoading={isLoading}
       onClick={handleClick}
     >
-      {isLoading ? 'Redirecting...' : '🎯 Go to Grow Affiliate'}
+      {isLoading ? 'Redirecting...' : '🎯 Go to Grow SocialMedia'}
     </Button>
   );
 };
 
-export default GrowAffiliateProgramButton;
+export default GrowSocialMediaProgramButton;

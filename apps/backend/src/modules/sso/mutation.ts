@@ -62,7 +62,7 @@ const getAutoCode: AppRouteImplementationOrOptions<
       const taskDomain =
         process.env['TASK_FRONTEND_URL'] || 'http://localhost:4400';
       redirectUrl = `${taskDomain}/callback?code=${code}`;
-    } else if (targetApp === 'grow') {
+    } else if (targetApp === 'growaffiliate' || targetApp === 'growsocialmedia') {
       const growDomain =
         process.env['GROW_FRONTEND_URL'] || 'http://localhost:4500';
       redirectUrl = `${growDomain}/callback?code=${code}`;
@@ -169,8 +169,10 @@ const exchangeCode: AppRouteImplementationOrOptions<
     let redirectionUrl = '/dashboard';
     if (autoCode.targetApp === 'task') {
       redirectionUrl = '/task/verification';
-    } else if (autoCode.targetApp === 'grow') {
+    } else if (autoCode.targetApp === 'growaffiliate') {
       redirectionUrl = '/grow/verification';
+    } else if (autoCode.targetApp === 'growsocialmedia'){
+      redirectionUrl = '/';
     } else if (autoCode.targetApp === 'bank') {
       redirectionUrl = '/bank/dashboard';
     }

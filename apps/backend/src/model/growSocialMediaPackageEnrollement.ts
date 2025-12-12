@@ -26,6 +26,10 @@ const growSocialMediaPackageEnrollmentSchema = new mongoose.Schema(
             type: String,
             required: true,
         },
+        isActive: {
+            type: Boolean,
+            default: false, 
+        }
     }, 
     {
         timestamps: true,

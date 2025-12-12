@@ -16,6 +16,10 @@ const router = createBrowserRouter([
     path: '/',
     element: <GrowLandingPage />,
   },
+    {
+    path: "/landing/:section",
+    element: <GrowLandingPage />,
+  },
   {
     path: '/callback',
     element: <CallbackPage />,

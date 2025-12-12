@@ -17,6 +17,7 @@ import {
   UserDetails,
 } from '../lib/types/types';
 import { UserDashboard } from './UserDashboard';
+import { useParams, useSearchParams } from 'react-router-dom';
 
 type View =
   | 'landing'
@@ -28,7 +29,8 @@ type View =
 export const GrowLandingPage = () => {
   const [user, setUser] = useState<UserData | null>(null);
   const [view, setView] = useState<View>('landing');
-
+  const { section } = useParams();
+  
   const [hasRegistered, setHasRegistered] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authMode, _setAuthMode] = useState<'login' | 'register'>('login');
@@ -103,7 +105,9 @@ export const GrowLandingPage = () => {
             <>
               <Hero />
               <FlowSection />
-              <PackagesSection onPackageSelect={handlePackageSelect} />
+              {section === 'packages' && (
+                <PackagesSection onPackageSelect={handlePackageSelect} />
+              )}
               <BenefitsSection />
               <FAQSection />
               <CTASection onPackageSelect={handlePackageSelect} />

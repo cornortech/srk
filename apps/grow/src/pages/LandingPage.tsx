@@ -7,16 +7,13 @@ import { BenefitsSection } from '../features/landing/components/BenefitsSection'
 import { FAQSection } from '../features/landing/components/FAQSection';
 import { CTASection } from '../features/landing/components/CTASection';
 import { Footer } from '../components/layout/Footer';
-import { PackageSelectionFlow } from '../features/landing/components/PackageSelectionFlow';
-import { OrderConfirmation } from '../features/landing/components/OrderConfirmation';
 import {
   OrderDetails,
   PackageDetails,
   UserData,
   UserDetails,
 } from '../lib/types/types';
-import { UserDashboard } from './UserDashboard';
-import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useScrollIntent } from '../features/landing/hooks/useScrollIntent';
 
 type View =
@@ -79,7 +76,10 @@ export const GrowLandingPage = () => {
       <main>
         <Hero />
         <FlowSection />
-        <PackagesSection onPackageSelect={handlePackageSelect} />
+        <PackagesSection
+          ref={packagesRef}
+          onPackageSelect={handlePackageSelect}
+        />
         <BenefitsSection />
         <FAQSection />
         <CTASection onPackageSelect={handlePackageSelect} />

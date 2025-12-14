@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const growSocialMediaPackageEnrollmentSchema = new mongoose.Schema(
+const growSocialMediaPackagePaymentSchema = new mongoose.Schema(
     {
         growPackageEnrollementId: {
             type: mongoose.Schema.Types.ObjectId,
@@ -36,7 +36,7 @@ const growSocialMediaPackageEnrollmentSchema = new mongoose.Schema(
     },
 );
 
-export const growSocialMediaPackagePayementModel = mongoose.model(
+export const growSocialMediaPackagePaymentModel = mongoose.model(
     "growSocialMediaPackagePayment",
-    growSocialMediaPackageEnrollmentSchema,
+    growSocialMediaPackagePaymentSchema,
 );

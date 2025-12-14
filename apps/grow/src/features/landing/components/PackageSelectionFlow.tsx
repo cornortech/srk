@@ -52,6 +52,7 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
     packageType: selectedPackage.id,
     postLinks: ['', '', '', ''],
     additionalInfo: '',
+    kyc: [''],
   });
 
   const socialPlatforms: SocialPlatform[] = [
@@ -123,10 +124,14 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
       }
     }
 
-    const finalDetails: UserDetails = {
+    const finalDetails: CheckoutUserDetails = {
       name: userDetails.name,
       email: userDetails.email,
       phone: userDetails.phone,
+      password: userDetails.password,
+      confirmPassword: userDetails.confirmPassword,
+      country: userDetails.country,
+      gender: userDetails.gender,
       platform: selectedPlatform!,
       engagementType: engagementType!,
       selectedOption,
@@ -135,6 +140,8 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
         socialLinkValue || `https://${selectedPlatform}.com/your-profile`,
       additionalInfo: userDetails.additionalInfo,
       postLinks: userDetails.postLinks,
+      promoCode: userDetails.promoCode,
+      kyc: userDetails.kyc,
     };
 
     setShowPaymentModal(false);

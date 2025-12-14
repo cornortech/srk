@@ -5,9 +5,13 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 
 interface LoginFormProps {
   onLoginSuccess?: (email: string) => void;
+  onBuyPackage?: () => void;
 }
 
-export const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess }) => {
+export const LoginForm: React.FC<LoginFormProps> = ({
+  onLoginSuccess,
+  onBuyPackage,
+}) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -41,7 +45,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess }) => {
   };
   const navigate = useNavigate();
   const handleBuyPackage = () => {
-    navigate('/landing/packages');
+    navigate('/#packages');
   };
 
   return (
@@ -157,8 +161,9 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess }) => {
         <div className="flex flex-wrap gap-2 mt-4 text-[13px]">
           <p> Haven't bought package yet?</p>
           <button
+            type="button"
             className="flex items-center justify-center text-secondary hover:italic"
-            onClick={handleBuyPackage}
+            onClick={onBuyPackage}
           >
             Buy Now
             <ArrowRight className="h-4" />

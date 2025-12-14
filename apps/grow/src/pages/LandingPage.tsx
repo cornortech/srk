@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import Navbar from '../components/layout/Navbar';
 import { Hero } from '../features/landing/components/Hero';
@@ -17,7 +17,8 @@ import {
   UserDetails,
 } from '../lib/types/types';
 import { UserDashboard } from './UserDashboard';
-import { useParams, useSearchParams } from 'react-router-dom';
+import { useLocation, useParams, useSearchParams } from 'react-router-dom';
+import { useScrollIntent } from '../features/landing/hooks/useScrollIntent';
 
 type View =
   | 'landing'
@@ -30,7 +31,14 @@ export const GrowLandingPage = () => {
   const [user, setUser] = useState<UserData | null>(null);
   const [view, setView] = useState<View>('landing');
   const { section } = useParams();
-  
+  const packagesRef = useRef<HTMLElement>(null);
+
+  const sectionRefs = {
+    packages: packagesRef,
+  };
+
+  useScrollIntent(sectionRefs);
+
   const [hasRegistered, setHasRegistered] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authMode, _setAuthMode] = useState<'login' | 'register'>('login');
@@ -105,9 +113,10 @@ export const GrowLandingPage = () => {
             <>
               <Hero />
               <FlowSection />
-              {section === 'packages' && (
-                <PackagesSection onPackageSelect={handlePackageSelect} />
-              )}
+              <PackagesSection
+                ref={packagesRef}
+                onPackageSelect={handlePackageSelect}
+              />
               <BenefitsSection />
               <FAQSection />
               <CTASection onPackageSelect={handlePackageSelect} />

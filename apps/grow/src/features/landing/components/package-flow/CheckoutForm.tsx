@@ -321,6 +321,36 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
                 />
               </div>
             )}
+
+            <div>
+              <label className="block text-sm font-bold text-gray-400 mb-2 uppercase tracking-widest">
+                Promo Code *
+              </label>
+              <input
+                type="text"
+                name="promoCode"
+                value={userDetails.promoCode}
+                onChange={handleUserDetailsChange}
+                required
+                className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-600 focus:outline-none focus:border-[#b68938] focus:ring-1 focus:ring-[#b68938] transition-all"
+                placeholder="Provide promo code if available"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-bold text-gray-400 mb-2 uppercase tracking-widest">
+                Upload KYC documents *
+              </label>
+              <input
+                type="file"
+                name="kyc"
+                value={userDetails.kyc}
+                onChange={handleUserDetailsChange}
+                required
+                multiple
+                className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-600 focus:outline-none focus:border-[#b68938] focus:ring-1 focus:ring-[#b68938] transition-all"
+                placeholder="Provide promo code if available"
+              />
+            </div>
           </div>
 
           {/* Terms & Conditions */}

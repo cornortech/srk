@@ -1,4 +1,3 @@
-import { describe } from "node:test";
 import { z } from "zod";
 
 export const createPackageSchema = z.object({
@@ -58,7 +57,7 @@ export const getPackageByIdSchema = z.object({
 });
 export type TGetPackageByIdSchema = z.TypeOf<typeof getPackageByIdSchema>;
 
-export const growPackageTypeSchema = z.object({
+export const growPackageSubTypesSchema = z.object({
   _id: z.string(),
   growSocialMediaPackageTypeId: z.string(),
   name: z.string(),
@@ -74,7 +73,7 @@ export const getAllSrkGrowPackagesSchema = z.array(
   z.object({
     _id: z.string(),
     name: z.string(),
-    descripttion: z.string(),
+    description: z.string(),
     socialMediaPlatforms: z.array(z.string()),
     amount: z.number(),
     createdAt: z.date(),
@@ -88,7 +87,7 @@ export const getAllSrkGrowPackagesSchema = z.array(
         amount: z.number(),
         createdAt: z.date(),
         updatedAt: z.date(),
-        packageSubTypes: z.array(growPackageTypeSchema),
+        packageSubTypes: z.array(growPackageSubTypesSchema),
       }),
     )
   })

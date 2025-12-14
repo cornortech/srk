@@ -1,7 +1,8 @@
 import { AppRouteImplementationOrOptions } from "@ts-rest/express/src/lib/types"
 import { growContract } from "../../contract/grow/contract"
-import { growSocialMediaPackageUserModel } from "../../model/growSocialMediaPackageUserModel"
 import { parseArgs } from "util"
+import { growSocialMediaPackageEnrollmentModel } from "../../model/growSocialMediaPackageEnrollement"
+import { growSocialMediaPackagePayementModel, growSocialMediaPackagePaymentModel } from "../../model/growSocialMediaPackagePayementModel"
 
 // const createGrowSocialMediaEnrollement:AppRouteImplementation<
 // typeof growContract.createGrowSocialMediaEnrollement
@@ -31,7 +32,7 @@ import { parseArgs } from "util"
 
 const acceptSocialGrowFollowRequest: AppRouteImplementationOrOptions<typeof growContract.acceptSocialGrowFollowRequest> = async ({ params }) => {
     try {
-        const enrollmentRequest = await growSocialMediaPackageUserModel.findOne({ _id: params.id })
+        const enrollmentRequest = await growSocialMediaPackageEnrollmentModel.findOne({ _id: params.id })
 
         if (!enrollmentRequest) {
             return {
@@ -42,9 +43,9 @@ const acceptSocialGrowFollowRequest: AppRouteImplementationOrOptions<typeof grow
             }
         }
 
-        await growSocialMediaPackageUserModel.findOneAndUpdate(
-            { _id: params.id },
-            { $set: { status: "portalActivated" } },
+        await growSocialMediaPackagePaymentModel.findOneAndUpdate(
+            {growPackageEnrollementId: params.id},
+            { $set: { status: "approved" } },
             { new: true }
         )
 
@@ -71,7 +72,7 @@ const acceptSocialGrowFollowRequest: AppRouteImplementationOrOptions<typeof grow
 
 const rejectSocialGrowFollowRequest: AppRouteImplementationOrOptions<typeof growContract.rejectSocialGrowFollowRequest> = async ({ params, body }) => {
     try {
-        const enrollementRequest = await growSocialMediaPackageUserModel.findOne({ _id: params.id })
+        const enrollementRequest = await growSocialMediaPackageEnrollmentModel.findOne({ _id: params.id })
 
         if (!enrollementRequest) {
             return {
@@ -82,9 +83,9 @@ const rejectSocialGrowFollowRequest: AppRouteImplementationOrOptions<typeof grow
             }
         }
 
-        await growSocialMediaPackageUserModel.findOneAndUpdate(
-            { _id: params.id },
-            { $set: { status: "verificationRejected", rejectionReason: body.rejectionReason } }
+        await growSocialMediaPackagePaymentModel.findOneAndUpdate(
+            { growPackageEnrollementId: params.id },
+            { $set: { status: "rejected", rejectionReason: body.rejectionReason } }
         )
 
         return {

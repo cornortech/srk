@@ -1,5 +1,5 @@
 import { initServer } from "@ts-rest/express";
-import { growContract } from "../../contract/grow/contract";
+import { growContract } from "@srk/shared/contracts";
 import { growMutationHandler } from "./mutation";
 
 const s = initServer();

@@ -1,5 +1,5 @@
 import { initServer } from "@ts-rest/express";
-import { taskContract } from "../../contract/task/contract";
+import { taskContract } from "@srk/shared/contracts";
 import { taskQueryHandler } from "./query";
 import { taskMutationHandler } from "./mutation";
 const s = initServer();

@@ -1,5 +1,5 @@
 import { AppRouteImplementationOrOptions } from "@ts-rest/express/src/lib/types";
-import { packageContract } from "../../contract/package/contract";
+import { packageContract } from "@srk/shared/contracts";
 import { PackageModel } from "../../model/packageModel";
 import { growSocialMediaPackageModel } from "../../model/growSocialMediaPackageModel";
 import { growSocialMediaPackageTypeModel } from "../../model/growSocialMediaPackageTypeModel";

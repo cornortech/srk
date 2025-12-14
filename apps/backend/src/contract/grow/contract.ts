@@ -1,6 +1,7 @@
 import { initContract } from "@ts-rest/core";
 import { createGrowSocialMediaEnrollementSchema, validateGrowUserPromoCodeResponseSchema, validateGrowUserPromoCodeSchema } from "./schema";
 import { ErrorSchema, SuccessSchema } from "../common";
+import { z } from "zod";
 
 const c = initContract();
 
@@ -30,4 +31,32 @@ export const growContract = c.router({
         },
         summary: "Validate enetered promo code and return its details with discount",
     },
+
+    acceptSocialGrowFollowRequest: {
+        method: "PATCH",
+        path: "/accept-social-grow-follow-request/:id",
+        body: z.object({}),
+        responses: {
+            200: SuccessSchema,
+            403: ErrorSchema,
+            404: ErrorSchema,
+            500: ErrorSchema
+        },
+        summary: "Approve Social Grow Follow Request by Id"
+    },
+
+    rejectSocialGrowFollowRequest: {
+        method: "PATCH",
+        path: "/reject-social-grow-follow-request/:id",
+        body: z.object({
+            rejectionReason: z.string()
+        }),
+        responses: {
+            200: SuccessSchema,
+            403: ErrorSchema,
+            404: ErrorSchema,
+            500: ErrorSchema
+        },
+        summary: "Reject Social Grow Follow Request by Id"
+    }
 });

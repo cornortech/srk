@@ -226,7 +226,86 @@ export const validateGrowUserPromoCode: AppRouteImplementationOrOptions<
     };
 };
 
+const acceptSocialGrowFollowRequest: AppRouteImplementationOrOptions<typeof growContract.acceptSocialGrowFollowRequest> = async ({ params }) => {
+    try {
+        const enrollmentRequest = await growSocialMediaPackageUserModel.findOne({ _id: params.id })
+
+        if (!enrollmentRequest) {
+            return {
+                status: 500,
+                body: {
+                    message: "No Such Enrollment Found"
+                }
+            }
+        }
+
+        await growSocialMediaPackageUserModel.findOneAndUpdate(
+            { _id: params.id },
+            { $set: { status: "portalActivated" } },
+            { new: true }
+        )
+
+        return {
+            status: 200,
+            body: {
+                message: "Follow Request Approved",
+                success: true
+            }
+        }
+
+    } catch (error) {
+        console.log(error);
+        return ({
+            status: 500,
+            body: {
+                message: error.message ? `Internal server error: ${error.message}` : "Internal server error",
+                success: false
+            }
+        })
+    }
+}
+
+
+const rejectSocialGrowFollowRequest: AppRouteImplementationOrOptions<typeof growContract.rejectSocialGrowFollowRequest> = async ({ params, body }) => {
+    try {
+        const enrollementRequest = await growSocialMediaPackageUserModel.findOne({ _id: params.id })
+
+        if (!enrollementRequest) {
+            return {
+                status: 500,
+                body: {
+                    message: "No Such Enrollment Found",
+                }
+            }
+        }
+
+        await growSocialMediaPackageUserModel.findOneAndUpdate(
+            { _id: params.id },
+            { $set: { status: "verificationRejected", rejectionReason: body.rejectionReason } }
+        )
+
+        return {
+            status: 200,
+            body: {
+                message: "Follow Request Rejected",
+                success: false
+            }
+        }
+    } catch (error) {
+        console.log(error)
+        return ({
+            status: 500,
+            body: {
+                message: error.message ? `Internal server error: ${error.message}` : "Internal server error",
+                success: false
+            }
+        })
+    }
+}
+
 export const growMutationHandler = {
     createGrowSocialMediaEnrollement,
     validateGrowUserPromoCode,
+    acceptSocialGrowFollowRequest,
+    rejectSocialGrowFollowRequest,
 }

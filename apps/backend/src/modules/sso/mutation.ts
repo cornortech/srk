@@ -1,5 +1,5 @@
 import { AppRouteImplementationOrOptions } from '@ts-rest/express/src/lib/types';
-import { ssoContract } from '../../contract/sso/contract';
+import { ssoContract } from '@srk/shared/contracts';
 import { AutoCodeModel } from '../../model/autoCodeModel';
 import { UserModel } from '../../model/userModel';
 import { adminModel } from '../../model/adminModel';

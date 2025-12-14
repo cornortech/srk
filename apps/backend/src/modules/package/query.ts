@@ -1,10 +1,13 @@
 import { AppRouteImplementationOrOptions } from "@ts-rest/express/src/lib/types";
-import { packageContract } from "../../contract/package/contract";
+import { packageContract } from "@srk/shared/contracts";
 import { PackageModel } from "../../model/packageModel";
+import { growSocialMediaPackageModel } from "../../model/growSocialMediaPackageModel";
+import { growSocialMediaPackageTypeModel } from "../../model/growSocialMediaPackageTypeModel";
+import { growSocialMediaPackageSubTypeModel } from "../../model/growSocialMediaPackageSubTypeModel";
 
 const getAllPackages: AppRouteImplementationOrOptions<
   typeof packageContract.getAllPackages
-> = async ({ req, res }) => {
+> = async () => {
   try {
     const packages = await PackageModel.find().sort({
       discountedPrice: 1,
@@ -42,7 +45,7 @@ const getAllPackages: AppRouteImplementationOrOptions<
 
 const getPackageById: AppRouteImplementationOrOptions<
   typeof packageContract.getPackageById
-> = async ({ req, res, params }) => {
+> = async ({ params }) => {
   try {
     const packageExist = await PackageModel.findById(params.id);
 
@@ -86,7 +89,84 @@ const getPackageById: AppRouteImplementationOrOptions<
   }
 };
 
+// SRK Grow Packages
+
+const getAllSrkGrowPackages: AppRouteImplementationOrOptions<
+  typeof packageContract.getAllSrkGrowPackages
+> = async () => {
+  try {
+    // Fetch all grow social media packages
+    const packages = await growSocialMediaPackageModel.find();
+
+    // For each package, fetch its types and subtypes
+    const packagesWithTypes = await Promise.all(
+      packages.map(async (pkg) => {
+        const packageTypes = await growSocialMediaPackageTypeModel.find({
+          growSocialMediaPackageId: pkg._id,
+        });
+
+        // For each type, fetch its subtypes
+        const typesWithSubTypes = await Promise.all(
+          packageTypes.map(async (type) => {
+            const subTypes = await growSocialMediaPackageSubTypeModel.find({
+              growSocialMediaPackageTypeId: type._id,
+            });
+
+            return {
+              _id: type._id.toString(),
+              growSocialMediaPackageId: type.growSocialMediaPackageId.toString(),
+              name: type.name,
+              description: type.description,
+              amount: type.amount,
+              createdAt: type.createdAt,
+              updatedAt: type.updatedAt,
+              packageSubTypes: subTypes.map((subType) => ({
+                _id: subType._id.toString(),
+                growSocialMediaPackageTypeId: subType.growSocialMediaPackageTypeId.toString(),
+                name: subType.name,
+                description: subType.description,
+                noOfLikes: subType.noOfLikes,
+                noOfVideos: subType.noOfVideos,
+                noOfFollowers: subType.noOfFollowers,
+                createdAt: subType.createdAt,
+                updatedAt: subType.updatedAt,
+              })),
+            };
+          })
+        );
+
+        return {
+          _id: pkg._id.toString(),
+          name: pkg.name,
+          description: pkg.description,
+          socialMediaPlatforms: pkg.socialMediaPlatforms,
+          amount: pkg.amount,
+          isPopular: pkg.isPopular,
+          createdAt: pkg.createdAt,
+          updatedAt: pkg.updatedAt,
+          packageTypes: typesWithSubTypes,
+        };
+      })
+    );
+
+    return {
+      status: 200,
+      body: packagesWithTypes,
+    };
+  } catch (error) {
+    console.error("Error fetching SRK Grow packages:", error);
+    return {
+      status: 500,
+      body: {
+        success: false,
+        message: "Internal server error",
+      },
+    };
+  }
+};
+
 export const packageQueryHandler = {
   getAllPackages,
   getPackageById,
+  getAllSrkGrowPackages,
 };

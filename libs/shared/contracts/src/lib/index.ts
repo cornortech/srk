@@ -9,6 +9,7 @@ import { webinarContract } from "./webinar/contract";
 import { bankContract } from "./bank/contract";
 import { tourContract } from "./tour/tour.contract";
 import { taskContract } from "./task/contract";
+import { growContract } from "./grow/contract";
 
 const c = initContract();
 
@@ -22,5 +23,6 @@ export const contract = c.router({
   webinar: webinarContract,
   bank: bankContract,
   tour: tourContract,
-  task: taskContract
+  task: taskContract,
+  grow: growContract
 });

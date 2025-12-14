@@ -56,3 +56,42 @@ export const getPackageByIdSchema = z.object({
   updated_at: z.date(),
 });
 export type TGetPackageByIdSchema = z.TypeOf<typeof getPackageByIdSchema>;
+
+export const growPackageSubTypesSchema = z.object({
+  _id: z.string(),
+  growSocialMediaPackageTypeId: z.string(),
+  name: z.string(),
+  description: z.string(),
+  noOfLikes: z.number().optional(),
+  noOfVideos: z.number().optional(),
+  noOfFollowers: z.number().optional(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+export const getAllSrkGrowPackagesSchema = z.array(
+  z.object({
+    _id: z.string(),
+    name: z.string(),
+    description: z.string(),
+    socialMediaPlatforms: z.array(z.string()),
+    amount: z.number(),
+    isPopular: z.boolean(),
+    createdAt: z.date(),
+    updatedAt: z.date(),
+    packageTypes: z.array(
+      z.object({
+        _id: z.string(),
+        growSocialMediaPackageId: z.string(),
+        name: z.string(),
+        description: z.string(),
+        amount: z.number(),
+        createdAt: z.date(),
+        updatedAt: z.date(),
+        packageSubTypes: z.array(growPackageSubTypesSchema),
+      }),
+    )
+  })
+);
+
+export type TGetAllSrkGrowPackagesSchema = z.TypeOf<typeof getAllSrkGrowPackagesSchema>;

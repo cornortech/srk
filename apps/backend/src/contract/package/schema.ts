@@ -76,6 +76,7 @@ export const getAllSrkGrowPackagesSchema = z.array(
     description: z.string(),
     socialMediaPlatforms: z.array(z.string()),
     amount: z.number(),
+    isPopular: z.boolean(),
     createdAt: z.date(),
     updatedAt: z.date(),
     packageTypes: z.array(

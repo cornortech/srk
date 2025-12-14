@@ -19,6 +19,10 @@ const growSocialMediaPackageSchema = new mongoose.Schema(
             type: Number,
             required: true,
         },
+        isPopular: {
+            type: Boolean,
+            default: false,
+        }
     },
     {
         timestamps: true,

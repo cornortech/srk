@@ -7,7 +7,7 @@ import { growSocialMediaPackageSubTypeModel } from "../../model/growSocialMediaP
 
 const getAllPackages: AppRouteImplementationOrOptions<
   typeof packageContract.getAllPackages
-> = async ({ req, res }) => {
+> = async () => {
   try {
     const packages = await PackageModel.find().sort({
       discountedPrice: 1,
@@ -45,7 +45,7 @@ const getAllPackages: AppRouteImplementationOrOptions<
 
 const getPackageById: AppRouteImplementationOrOptions<
   typeof packageContract.getPackageById
-> = async ({ req, res, params }) => {
+> = async ({ params }) => {
   try {
     const packageExist = await PackageModel.findById(params.id);
 
@@ -93,7 +93,7 @@ const getPackageById: AppRouteImplementationOrOptions<
 
 const getAllSrkGrowPackages: AppRouteImplementationOrOptions<
   typeof packageContract.getAllSrkGrowPackages
-> = async ({ req, res }) => {
+> = async () => {
   try {
     // Fetch all grow social media packages
     const packages = await growSocialMediaPackageModel.find();
@@ -141,6 +141,7 @@ const getAllSrkGrowPackages: AppRouteImplementationOrOptions<
           description: pkg.description,
           socialMediaPlatforms: pkg.socialMediaPlatforms,
           amount: pkg.amount,
+          isPopular: pkg.isPopular,
           createdAt: pkg.createdAt,
           updatedAt: pkg.updatedAt,
           packageTypes: typesWithSubTypes,

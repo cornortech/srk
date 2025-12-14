@@ -20,13 +20,13 @@ const createGrowSocialMediaEnrollement: AppRouteImplementationOrOptions<
         } = body;
 
         // 1. Validate promo code and find referredBy user using promocode
-        let referral = null;
-        if (userData.promoCode) {
-            referral = await growSocialMediaPackageUserModel.findOne({
-                promoCode: userData.promoCode
+        let growSocialMediaRefferalUser = null;
+        if (userData.usedPromoCode) {
+            growSocialMediaRefferalUser = await growSocialMediaPackageUserModel.findOne({
+                promoCode: userData.usedPromoCode
             });
 
-            if (!referral) {
+            if (!growSocialMediaRefferalUser) {
                 return {
                     status: 400,
                     body: {
@@ -91,7 +91,7 @@ const createGrowSocialMediaEnrollement: AppRouteImplementationOrOptions<
         const hashedPassword = await AuthService.hashPassword(userData.password);
 
         // Generate a unique promo code for the new user
-        const growUserPromoCode = await AuthService.generateUniqueReferralCode();
+        const growUserPromoCode = await AuthService.generateUniquePromoCodeForSrkGrowUser();
 
         const packageUser = await growSocialMediaPackageUserModel.create({
             fullName: userData.fullName,
@@ -103,26 +103,24 @@ const createGrowSocialMediaEnrollement: AppRouteImplementationOrOptions<
             kycURL: userData.kycURL,
             status: "verificationPending",
             promoCode: growUserPromoCode,
-            referredBy: referral ? referral._id : null,
+            referredBy: growSocialMediaRefferalUser ? growSocialMediaRefferalUser._id : null,
         });
 
         // 5. Create enrollment
-        await growSocialMediaPackageEnrollmentModel.create({
+        const createSrkGrowPackageEnrollement = await growSocialMediaPackageEnrollmentModel.create({
             growSocialMediaPackageUserId: packageUser._id,
             growSocialMediaPackageId: enrollementData.growSocialMediaPackageId,
             growSocialMediaPackageTypeId: enrollementData.growSocialMediaPackageTypeId,
             growSocialMediaPackageSubTypeId: enrollementData.growSocialMediaPackageSubTypeId,
             profileLinkURL: enrollementData.profileLinkURL,
-            isActive: enrollementData.isActive || false,
         });
 
         // 6. Create payment record
         await growSocialMediaPackagePaymentModel.create({
-            growPackageEnrollementId: paymentData.growPackageEnrollementId,
+            growPackageEnrollementId: createSrkGrowPackageEnrollement._id,
             paymentURL: paymentData.paymentURL,
             transactionId: paymentData.transactionId,
             paymentMethod: paymentData.paymentMethod,
-            status: "pending",
         });
 
         return {
@@ -154,11 +152,11 @@ export const validateGrowUserPromoCode: AppRouteImplementationOrOptions<
             growSocialMediaPackageId,
         } = body;
 
-        const validPromoCode = await growSocialMediaPackageUserModel.findOne({
-            promoCode
+        const srkGrowUser = await growSocialMediaPackageUserModel.findOne({
+            promoCode,
         });
 
-        if (!validPromoCode) {
+        if (!srkGrowUser) {
             return {
                 status: 400,
                 body: {
@@ -168,7 +166,7 @@ export const validateGrowUserPromoCode: AppRouteImplementationOrOptions<
             };
         };
 
-        if (validPromoCode.status !== 'portalActivated') {
+        if (srkGrowUser.status !== 'portalActivated') {
             return {
                 status: 400,
                 body: {
@@ -190,12 +188,12 @@ export const validateGrowUserPromoCode: AppRouteImplementationOrOptions<
         }
 
         const packageDiscount: Record<string, number> = {
-            starter: 0.10,
-            intermediate: 0.15,
-            pro: 0.20,
+            "693bd21b224b9cd931c7cee0": 0.10,
+            "693bd21b224b9cd931c7cef2": 0.15,
+            "693bd21c224b9cd931c7cf04": 0.20,
         };
 
-        const discountPercentage = packageDiscount[growPackage.name.toLowerCase()] || 0;
+        const discountPercentage = packageDiscount[growPackage._id.toString()];
         const originalAmount = growPackage.amount;
         const discountAmount = originalAmount * discountPercentage;
         const finalAmountAfterDiscount = originalAmount - discountAmount;
@@ -210,6 +208,7 @@ export const validateGrowUserPromoCode: AppRouteImplementationOrOptions<
                     discountPercentage: discountPercentage * 100,
                     discountAmount,
                     finalAmountAfterDiscount,
+                    fullName: srkGrowUser.fullName,
                 },
             }
         };
@@ -226,9 +225,9 @@ export const validateGrowUserPromoCode: AppRouteImplementationOrOptions<
     };
 };
 
-const acceptSocialGrowFollowRequest: AppRouteImplementationOrOptions<typeof growContract.acceptSocialGrowFollowRequest> = async ({ params }) => {
+const acceptSocialGrowEnrollementRequest: AppRouteImplementationOrOptions<typeof growContract.acceptSocialGrowEnrollementRequest> = async ({ params }) => {
     try {
-        const enrollmentRequest = await growSocialMediaPackageUserModel.findOne({ _id: params.id })
+        const enrollmentRequest = await growSocialMediaPackageEnrollmentModel.findById(params.enrollementId);
 
         if (!enrollmentRequest) {
             return {
@@ -240,10 +239,29 @@ const acceptSocialGrowFollowRequest: AppRouteImplementationOrOptions<typeof grow
         }
 
         await growSocialMediaPackageUserModel.findOneAndUpdate(
-            { _id: params.id },
-            { $set: { status: "portalActivated" } },
-            { new: true }
-        )
+            {
+                _id: enrollmentRequest.growSocialMediaPackageUserId
+            },
+            {
+                $set: {
+                    status: "portalActivated"
+                }
+            },
+            {
+                new: true
+            }
+        );
+
+        await growSocialMediaPackageEnrollmentModel.findOneAndUpdate(
+            {
+                _id: params.enrollementId
+            },
+            {
+                $set: {
+                    isActive: true
+                }
+            }
+        );
 
         return {
             status: 200,
@@ -266,9 +284,9 @@ const acceptSocialGrowFollowRequest: AppRouteImplementationOrOptions<typeof grow
 }
 
 
-const rejectSocialGrowFollowRequest: AppRouteImplementationOrOptions<typeof growContract.rejectSocialGrowFollowRequest> = async ({ params, body }) => {
+const rejectSocialGrowEnrollementRequest: AppRouteImplementationOrOptions<typeof growContract.rejectSocialGrowEnrollementRequest> = async ({ params, body }) => {
     try {
-        const enrollementRequest = await growSocialMediaPackageUserModel.findOne({ _id: params.id })
+        const enrollementRequest = await growSocialMediaPackageEnrollmentModel.findById(params.enrollementId);
 
         if (!enrollementRequest) {
             return {
@@ -280,9 +298,24 @@ const rejectSocialGrowFollowRequest: AppRouteImplementationOrOptions<typeof grow
         }
 
         await growSocialMediaPackageUserModel.findOneAndUpdate(
-            { _id: params.id },
-            { $set: { status: "verificationRejected", rejectionReason: body.rejectionReason } }
-        )
+            { _id: enrollementRequest.growSocialMediaPackageUserId },
+            {
+                $set: {
+                    status: "verificationRejected"
+                }
+            }
+        );
+
+        await growSocialMediaPackagePaymentModel.findOneAndUpdate({
+            growPackageEnrollementId: enrollementRequest._id
+        },
+            {
+                $set: {
+                    status: "rejected",
+                    rejectionReason: body.rejectionReason
+                }
+            },
+        );
 
         return {
             status: 200,
@@ -306,6 +339,6 @@ const rejectSocialGrowFollowRequest: AppRouteImplementationOrOptions<typeof grow
 export const growMutationHandler = {
     createGrowSocialMediaEnrollement,
     validateGrowUserPromoCode,
-    acceptSocialGrowFollowRequest,
-    rejectSocialGrowFollowRequest,
+    acceptSocialGrowEnrollementRequest,
+    rejectSocialGrowEnrollementRequest,
 }

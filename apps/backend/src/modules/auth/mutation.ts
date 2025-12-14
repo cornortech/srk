@@ -1,5 +1,5 @@
 import { AppRouteImplementationOrOptions } from '@ts-rest/express/src/lib/types';
-import { authContract } from '../../contract/auth/contract';
+import { authContract } from '@srk/shared/contracts';
 import { UserModel } from '../../model/userModel';
 import AuthService from '../../services/authService';
 import { SubscriptionModel } from '../../model/subscriptionModel';

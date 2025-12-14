@@ -8,6 +8,9 @@ import { GrowVerificationPage } from './pages/VerificationPage';
 import SocialMediaGrow from './pages/SocialMediaPage';
 import { GrowOnlyAdminDashboard } from './pages/GrowAdminDashboard';
 import { GrowDashboard } from './pages/GrowDashboard';
+import { PackageFlowPage } from './pages/PackageFlowPage';
+import { OrderConfirmationPage } from './pages/OrderConfirmationPage';
+import { UserDashboardPage } from './pages/UserDashboardPage';
 
 const queryClient = new QueryClient();
 
@@ -19,6 +22,18 @@ const router = createBrowserRouter([
     {
     path: "/landing/:section",
     element: <GrowLandingPage />,
+  },
+  {
+    path: '/package-flow',
+    element: <PackageFlowPage />,
+  },
+  {
+    path: '/order-confirmation',
+    element: <OrderConfirmationPage />,
+  },
+  {
+    path: '/dashboard',
+    element: <UserDashboardPage />,
   },
   {
     path: '/callback',

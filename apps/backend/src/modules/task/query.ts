@@ -1,5 +1,5 @@
 import { AppRouteImplementationOrOptions } from "@ts-rest/express/src/lib/types";
-import { taskContract } from "../../contract/task/contract";
+import { taskContract } from "@srk/shared/contracts";
 import { SocialTaskPackageModel } from "../../model/socialTaskPackageModel";
 import { SocialTaskPackageEnrollmentModel } from "../../model/socialTaskPackageEnrollmentModel";
 import { SocialTaskEarningStatementModel } from "../../model/socialTaskEarningStatementModel";

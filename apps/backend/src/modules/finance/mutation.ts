@@ -1,5 +1,5 @@
 import { AppRouteImplementation } from "@ts-rest/express";
-import { financeContract } from "../../contract/finance/contract";
+import { financeContract } from "@srk/shared/contracts";
 import { balancePayoutModel } from "../../model/balancePayoutModel";
 import { BankModel } from "../../model/bankModel";
 import { UserModel } from "../../model/userModel";

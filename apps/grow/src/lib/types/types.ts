@@ -8,6 +8,7 @@ export type EngagementType = 'follow' | 'reach';
 export type PackageType = 'starter' | 'intermediate' | 'pro';
 export type KYCStatus = 'not_started' | 'pending' | 'approved' | 'rejected';
 
+
 export interface PackageDetails {
   id: PackageType;
   name: string;

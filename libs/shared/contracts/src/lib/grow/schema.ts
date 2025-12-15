@@ -24,10 +24,14 @@ export const createGrowSocialMediaEnrollementSchema = z.object({
     }),
 });
 
+export type TCreateGrowSocialMediaEnrollement = z.infer<typeof createGrowSocialMediaEnrollementSchema>
+
 export const validateGrowUserPromoCodeSchema = z.object({
     promoCode: z.string().min(1, "Promo code is required"),
     growSocialMediaPackageId: z.string().min(1, "Package ID is required"),
 });
+
+export type TValidateGrowUserPromoCode = z.infer<typeof validateGrowUserPromoCodeSchema>
 
 export const validateGrowUserPromoCodeResponseSchema = z.object({
     discountDetails: z.object({
@@ -37,3 +41,5 @@ export const validateGrowUserPromoCodeResponseSchema = z.object({
         finalAmountAfterDiscount: z.number().min(0),
     }),
 });
+
+export type TValidateGrowUserPromoCodeResponse = z.infer<typeof validateGrowUserPromoCodeResponseSchema>

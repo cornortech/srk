@@ -1,4 +1,4 @@
-import { PackageDetails, PackageType, SocialPlatform } from "../types/types";
+import { PackageDetails, PackageType, SocialPlatform } from '../types/types';
 
 export const SOCIAL_COLORS: Record<SocialPlatform, string> = {
   youtube: '#FF0000',
@@ -25,7 +25,7 @@ export const PACKAGES_DATA: Record<PackageType, PackageDetails> = {
     reachOptions: [
       { videos: 1, likesPerVideo: 200 },
       { videos: 2, likesPerVideo: 100 },
-      { videos: 4, likesPerVideo: 50 }
+      { videos: 4, likesPerVideo: 50 },
     ],
     popular: false,
   },
@@ -46,7 +46,7 @@ export const PACKAGES_DATA: Record<PackageType, PackageDetails> = {
       { videos: 1, likesPerVideo: 500 },
       { videos: 2, likesPerVideo: 250 },
       { videos: 4, likesPerVideo: 125 },
-      { videos: 8, likesPerVideo: 63 }
+      { videos: 8, likesPerVideo: 63 },
     ],
     popular: true,
   },
@@ -68,7 +68,7 @@ export const PACKAGES_DATA: Record<PackageType, PackageDetails> = {
       { videos: 2, likesPerVideo: 350 },
       { videos: 4, likesPerVideo: 175 },
       { videos: 8, likesPerVideo: 88 },
-      { videos: 12, likesPerVideo: 58 }
+      { videos: 12, likesPerVideo: 58 },
     ],
     popular: false,
   },

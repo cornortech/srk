@@ -1,42 +1,51 @@
-import React, { useState, type FormEvent } from "react";
-import { motion } from "framer-motion";
-import { Mail, Lock, Loader2, Eye, EyeOff } from "lucide-react";
+import React, { useState, type FormEvent } from 'react';
+import { motion } from 'framer-motion';
+import { Mail, Lock, Loader2, Eye, EyeOff, ArrowRight } from 'lucide-react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 interface LoginFormProps {
   onLoginSuccess?: (email: string) => void;
+  onBuyPackage?: () => void;
 }
 
-export const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess }) => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+export const LoginForm: React.FC<LoginFormProps> = ({
+  onLoginSuccess,
+  onBuyPackage,
+}) => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
 
   const handleLogin = async (e: FormEvent) => {
     e.preventDefault();
-    setError("");
+    setError('');
     setLoading(true);
 
     try {
       await new Promise((r) => setTimeout(r, 1200));
 
       if (!email || !password) {
-        setError("Please fill in all fields");
+        setError('Please fill in all fields');
         setLoading(false);
         return;
       }
 
-      console.log("Login attempt:", { email, password });
-      
+      console.log('Login attempt:', { email, password });
+
       if (onLoginSuccess) {
         onLoginSuccess(email);
       }
     } catch (err) {
-      setError("Login failed. Please try again.");
+      setError('Login failed. Please try again.');
     } finally {
       setLoading(false);
     }
+  };
+  const navigate = useNavigate();
+  const handleBuyPackage = () => {
+    navigate('/#packages');
   };
 
   return (
@@ -94,7 +103,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess }) => {
             <div className="relative group">
               <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 group-focus-within:text-[#b68938] transition-colors" />
               <input
-                type={showPassword ? "text" : "password"}
+                type={showPassword ? 'text' : 'password'}
                 className="w-full bg-black/40 text-white pl-12 pr-12 py-4 rounded-xl border border-white/10 focus:border-[#b68938]/50 focus:bg-black/60 transition-all outline-none backdrop-blur-sm"
                 placeholder="••••••••"
                 value={password}
@@ -124,16 +133,16 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess }) => {
             className="relative w-full py-4 mt-2 bg-gradient-to-r from-[#b68938] via-[#e1ba73] to-[#b68938] bg-[length:200%_100%] text-black rounded-xl font-bold overflow-hidden group disabled:opacity-50 disabled:cursor-not-allowed"
             disabled={loading}
             style={{
-              boxShadow: "0 0 30px rgba(182, 137, 56, 0.3)",
+              boxShadow: '0 0 30px rgba(182, 137, 56, 0.3)',
             }}
           >
             <motion.div
               className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
-              animate={{ x: loading ? ["-100%", "100%"] : "0%" }}
+              animate={{ x: loading ? ['-100%', '100%'] : '0%' }}
               transition={{
                 duration: 1,
                 repeat: loading ? Infinity : 0,
-                ease: "linear",
+                ease: 'linear',
               }}
             />
             <span className="relative z-10 flex items-center justify-center gap-2">
@@ -143,16 +152,28 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLoginSuccess }) => {
                   Signing In...
                 </>
               ) : (
-                "Sign In"
+                'Sign In'
               )}
             </span>
           </motion.button>
         </form>
 
+        <div className="flex flex-wrap gap-2 mt-4 text-[13px]">
+          <p> Haven't bought package yet?</p>
+          <button
+            type="button"
+            className="flex items-center justify-center text-secondary hover:italic"
+            onClick={onBuyPackage}
+          >
+            Buy Now
+            <ArrowRight className="h-4" />
+          </button>
+        </div>
+
         {/* Footer */}
         <div className="mt-6 text-center">
           <p className="text-xs text-gray-600">
-            By continuing, you agree to our{" "}
+            By continuing, you agree to our{' '}
             <span className="text-[#b68938] hover:text-[#e1ba73] cursor-pointer transition-colors">
               Terms of Service
             </span>

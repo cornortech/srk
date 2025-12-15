@@ -1,11 +1,12 @@
 import { initServer } from "@ts-rest/express";
-import { growContract } from "../../contract/grow/contract";
-import { growMutationHandler } from "./muation";
+import { growContract } from "@srk/shared/contracts";
+import { growMutationHandler } from "./mutation";
 
 const s = initServer();
 
 export const growRouter = s.router(growContract, {
-    createGrowSocialMediaEnrollement: undefined,
-    acceptSocialGrowFollowRequest: growMutationHandler.acceptSocialGrowFollowRequest,
-    rejectSocialGrowFollowRequest: growMutationHandler.rejectSocialGrowFollowRequest
+    createGrowSocialMediaEnrollement: growMutationHandler.createGrowSocialMediaEnrollement,
+    validateGrowUserPromoCode: growMutationHandler.validateGrowUserPromoCode,
+    acceptSocialGrowEnrollementRequest: growMutationHandler.acceptSocialGrowEnrollementRequest,
+    rejectSocialGrowEnrollementRequest: growMutationHandler.rejectSocialGrowEnrollementRequest,
 });

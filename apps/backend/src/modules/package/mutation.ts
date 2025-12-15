@@ -1,5 +1,5 @@
 import { AppRouteImplementation } from "@ts-rest/express";
-import { packageContract } from "../../contract/package/contract";
+import { packageContract } from "@srk/shared/contracts";
 import { PackageModel } from "../../model/packageModel";
 
 export const createPackage: AppRouteImplementation<

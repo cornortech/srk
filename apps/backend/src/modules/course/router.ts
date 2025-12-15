@@ -1,5 +1,5 @@
 import { initServer } from "@ts-rest/express";
-import { courseContract } from "../../contract/course/contract";
+import { courseContract } from "@srk/shared/contracts";
 import { courseMutationHandler } from "./mutation";
 import { courseQueryHandler } from "./query";
 const s = initServer();

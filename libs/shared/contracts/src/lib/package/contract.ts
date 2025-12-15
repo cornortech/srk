@@ -5,6 +5,7 @@ import {
   getAllPackagesSchema,
   getAllSrkGrowPackagesSchema,
   getPackageByIdSchema,
+  srkGrowPackageSchema,
 } from "./schema";
 import { z } from "zod";
 
@@ -67,5 +68,17 @@ export const packageContract = c.router({
       500: ErrorSchema,
     },
     summary: "Get all SRK Grow packages",
-  }
+  },
+
+    getSrkGrowPackageById: {
+    method: "GET",
+    path: "/grow/package/:id",
+    responses: {
+      200: srkGrowPackageSchema,
+      403: ErrorSchema,
+      404: ErrorSchema,
+      500: ErrorSchema,
+    },
+    summary: "Get SRK Grow package by ID",
+  },
 });

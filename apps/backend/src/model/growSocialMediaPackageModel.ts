@@ -15,10 +15,22 @@ const growSocialMediaPackageSchema = new mongoose.Schema(
             enum: ["Instagram", "TikTok", "YouTube", "Twitter", "Facebook"],
             default: [],
         },
+        features: {
+            type: [String],
+            required: true,
+        },
+        amountBeforeDiscount: {
+            type: Number,
+            required: true,
+        },
         amount: {
             type: Number,
             required: true,
         },
+        isPopular: {
+            type: Boolean,
+            default: false,
+        }
     },
     {
         timestamps: true,

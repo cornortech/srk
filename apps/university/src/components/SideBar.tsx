@@ -22,7 +22,7 @@ import { updateUserDetailsApi } from "../lib/apiClient";
 
 interface Tsidebar {
   sideBarName: string;
-  sidebarType: "study" | "affiliate" | "admin" | "visitor";
+  sidebarType: "study" | "srkgrow" | "affiliate" | "admin" | "visitor";
   showInMobileView?: boolean;
   handleCloseMenu?: () => void;
 }
@@ -64,6 +64,10 @@ export const Sidebar = ({
   });
   const sidebarFuncMap = {
     affiliate: getAffiliateSidebarItems(!!userDetails?.allowedToAddUsers),
+    srkgrow: getStudySidebarItems(
+      !!userDetails?.affiliateEnabled,
+      userDetails?.purpose
+    ),
     study: getStudySidebarItems(
       !!userDetails?.affiliateEnabled,
       userDetails?.purpose

@@ -14,7 +14,6 @@ const growSocialMediaPackagePaymentSchema = new mongoose.Schema(
         transactionId: {
             type: String,
             required: true,
-            unique: true,
         },
         paymentMethod: {
             type: String,

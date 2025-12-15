@@ -10,4 +10,5 @@ export const packageRouter = s.router(packageContract, {
   createPackage: packageMutationHandler.createPackage,
   deletePackageById: packageMutationHandler.deletePackageById,
   getAllSrkGrowPackages: packageQueryHandler.getAllSrkGrowPackages,
+  getSrkGrowPackageById: packageQueryHandler.getSrkGrowPackageById
 });

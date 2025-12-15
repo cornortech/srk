@@ -6,10 +6,12 @@ import GrowProgramButton from '../../components/GrowProgramButton';
 
 export const Invoice = () => {
   const { userDetails } = useAuthStore();
+
   const packageDetails = userDetails?.packageId;
   if (!packageDetails || !userDetails) {
     return <></>;
   }
+
   return (
     <div className="container mx-auto py-8">
       <DescriptionBanner pageDescription="Invoice Download" />

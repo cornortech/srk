@@ -5,6 +5,7 @@ import {
   Menu,
   AlignLeftIcon,
   LayoutDashboardIcon,
+  LucideWorkflow,
 } from "lucide-react";
 import { useState } from "react";
 import {
@@ -19,6 +20,8 @@ import useAlert from "../hooks/useAlert";
 import { Button } from "@nextui-org/react";
 import { useMutation } from "@tanstack/react-query";
 import { updateUserDetailsApi } from "../lib/apiClient";
+import { useTaskSSO } from "@srk/shared/hooks";
+import { toast } from "sonner";
 
 interface Tsidebar {
   sideBarName: string;
@@ -33,11 +36,17 @@ export const Sidebar = ({
   sideBarName,
   showInMobileView,
 }: Tsidebar) => {
+
+  const backendUrl = import.meta.env.VITE_BACKEND_ROOT_URL || 'http://localhost:4000';
   const [isOpen, setIsOpen] = useState(true);
   const location = useLocation();
   const { userDetails, clearAuthDetails, toggleRefresh } = useAuthStore();
   const { show } = useAlert();
   const navigate = useNavigate();
+
+  const { redirectToTaskProgram, isLoading: loadingTaskRedirecting, error } = useTaskSSO({
+    backendUrl,
+  });
 
   const toggleSidebar = () => {
     setIsOpen(!isOpen);
@@ -62,6 +71,7 @@ export const Sidebar = ({
       show("Failed to update user details", "error");
     },
   });
+
   const sidebarFuncMap = {
     affiliate: getAffiliateSidebarItems(!!userDetails?.allowedToAddUsers),
     study: getStudySidebarItems(
@@ -81,6 +91,7 @@ export const Sidebar = ({
       handleCloseMenu();
     }
   };
+
   const handleRedirect = () => {
     if (userDetails?.redirectionUrl) {
       navigate(userDetails?.redirectionUrl);
@@ -100,6 +111,21 @@ export const Sidebar = ({
   const handleSwitchToAffiliate = () => {
     updateUserPermission();
   };
+
+
+
+
+  const handleRedirectToTaskSSO = async () => {
+    try {
+      await redirectToTaskProgram();
+    } catch (err) {
+      toast.error('Failed to redirect to Task Program');
+    }
+  };
+
+  if(error) {
+    toast.error(error);
+  }
 
   return (
     <div
@@ -153,6 +179,17 @@ export const Sidebar = ({
               </li>
             );
           })}
+
+          {
+            sidebarType === "affiliate" ? <div
+              className="flex cursor-pointer items-center gap-x-3 w-full justify-start text-textPrimary bg-bgSecondary p-2 rounded-md transition-all duration-300 ease-in-out"
+              color="primary"
+              onClick={handleRedirectToTaskSSO}
+            >
+              <LucideWorkflow />
+              {loadingTaskRedirecting ? 'Redirecting...' : 'Task Program'}
+            </div> : null
+          }
           {showInMobileView && sidebarType === "visitor" && (
             <div
               className="flex cursor-pointer items-center gap-x-3 w-full justify-start text-textPrimary bg-bgSecondary p-2 rounded-md transition-all duration-300 ease-in-out"

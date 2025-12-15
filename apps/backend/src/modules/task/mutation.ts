@@ -6,6 +6,7 @@ import { SocialTaskLinkModel } from '../../model/socialTaskLinkModel';
 import { UserModel } from '../../model/userModel';
 import { SocialTaskFollowRequestModel } from '../../model/socialTaskFollowRequestModel';
 import { SocialTaskEarningStatementModel } from '../../model/socialTaskEarningStatementModel';
+import SrkTaskUserVerificationModel from '../../model/srkTaskVerificationModel';
 
 const createSocialTaskPackage: AppRouteImplementationOrOptions<
   typeof taskContract.createSocialTaskPackage
@@ -370,6 +371,164 @@ const rejectSocialTaskFollowRequest: AppRouteImplementationOrOptions<
   }
 };
 
+const submitSrkTaskUserVerification: AppRouteImplementationOrOptions<
+  typeof taskContract.submitSrkTaskUserVerification
+> = async ({ body }) => {
+  try {
+    // Implementation for submitting SRK task user verification
+
+    const srkUniversityUserExist = await UserModel.findById(body.srkAccountId);
+
+    if (!srkUniversityUserExist) {
+      return {
+        status: 404,
+        body: {
+          message: 'SRK University User not found',
+          success: false,
+        },
+      };
+    }
+
+    const srkTaskUserVerificationExist =
+      await SrkTaskUserVerificationModel.findOne({
+        srkAccountId: srkUniversityUserExist._id,
+      });
+
+    if (!srkTaskUserVerificationExist) {
+      // Create a new verification record
+      await SrkTaskUserVerificationModel.create({
+        srkAccountId: body.srkAccountId,
+        verificationImageUrl: body.verificationImageUrl,
+        verificationDocumentUrl: body.verificationDocumentUrl,
+        signatureImageUrl: body.signatureImageUrl,
+        fullName: body.fullName,
+        dob: new Date(body.dob),
+        status: 'pending',
+      });
+    } else {
+      await SrkTaskUserVerificationModel.findByIdAndUpdate(
+        srkTaskUserVerificationExist._id,
+        {
+          status: 'pending',
+          verificationImageUrl: body.verificationImageUrl,
+          verificationDocumentUrl: body.verificationDocumentUrl,
+          signatureImageUrl: body.signatureImageUrl,
+          fullName: body.fullName,
+          dob: new Date(body.dob),
+        }
+      );
+    }
+
+    return {
+      status: 201,
+      body: {
+        message: 'SRK Task User Verification submitted successfully',
+        success: true,
+      },
+    };
+  } catch (error) {
+    console.log(error);
+    return {
+      status: 500,
+      body: {
+        message: error.message
+          ? `Internal server error: ${error.message}`
+          : 'Internal server error',
+        success: false,
+      },
+    };
+  }
+};
+
+const acceptSrkTaskUserVerification: AppRouteImplementationOrOptions<
+  typeof taskContract.acceptSrkTaskUserVerification
+> = async ({ params }) => {
+  try {
+    const verificationRequest = await SrkTaskUserVerificationModel.findOne({
+      _id: params.id,
+    });
+
+    if (!verificationRequest) {
+      return {
+        status: 404,
+        body: {
+          message: 'Verification request not found',
+          success: false,
+        },
+      };
+    }
+
+    await SrkTaskUserVerificationModel.findOneAndUpdate(
+      { _id: params.id },
+      { $set: { status: 'approved' } },
+      { new: true }
+    );
+
+    return {
+      status: 200,
+      body: {
+        message: 'SRK Task User Verification approved successfully',
+        success: true,
+      },
+    };
+  } catch (error) {
+    console.log(error);
+    return {
+      status: 500,
+      body: {
+        message: error.message
+          ? `Internal server error: ${error.message}`
+          : 'Internal server error',
+        success: false,
+      },
+    };
+  }
+};
+
+const rejectSrkTaskUserVerification: AppRouteImplementationOrOptions<
+  typeof taskContract.rejectSrkTaskUserVerification
+> = async ({ params, body }) => {
+  try {
+    const verificationRequest = await SrkTaskUserVerificationModel.findOne({
+      _id: params.id,
+    });
+
+    if (!verificationRequest) {
+      return {
+        status: 404,
+        body: {
+          message: 'Verification request not found',
+          success: false,
+        },
+      };
+    }
+
+    await SrkTaskUserVerificationModel.findOneAndUpdate(
+      { _id: params.id },
+      { $set: { status: 'rejected', rejectionReason: body.rejectionReason } }
+    );
+
+    return {
+      status: 200,
+      body: {
+        message: 'SRK Task User Verification rejected',
+        success: true,
+      },
+    };
+  } catch (error) {
+    console.log(error);
+    return {
+      status: 500,
+      body: {
+        message: error.message
+          ? `Internal server error: ${error.message}`
+          : 'Internal server error',
+        success: false,
+      },
+    };
+  }
+};
+
 export const taskMutationHandler = {
   createSocialTaskPackage,
   enrollSocialTaskPackage,
@@ -379,4 +538,7 @@ export const taskMutationHandler = {
   createSocialTaskFollowRequest,
   approveSocialTaskFollowRequest,
   rejectSocialTaskFollowRequest,
+  submitSrkTaskUserVerification,
+  acceptSrkTaskUserVerification,
+  rejectSrkTaskUserVerification,
 };

@@ -11,7 +11,6 @@ import { tourRouter } from './tour/router.router';
 import { taskRouter } from './task/router';
 import { growRouter } from './grow/router';
 import { apiContract } from '@srk/shared/contracts';
-import { ssoRouter } from './sso/router';
 
 const s = initServer();
 
@@ -27,5 +26,4 @@ export const router = s.router(apiContract, {
   tour: tourRouter,
   task: taskRouter,
   grow: growRouter,
-  sso: ssoRouter
 });

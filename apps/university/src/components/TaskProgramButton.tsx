@@ -23,7 +23,7 @@ const TaskProgramButton = ({
     backendUrl,
   });
 
-  const handleClick = async () => {
+  const handlePress = async () => {
     try {
       await redirectToTaskProgram();
     } catch (err) {
@@ -43,7 +43,7 @@ const TaskProgramButton = ({
       size={size}
       className={className}
       isLoading={isLoading}
-      onClick={handleClick}
+      onPress={handlePress}
     >
       {isLoading ? 'Redirecting...' : '🎯 Go to Task Program'}
     </Button>

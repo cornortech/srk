@@ -15,7 +15,7 @@ import MagneticButton from '../components/ui/DashboardMagneticButton';
 import { DashboardGlassCard } from '../components/ui/DashboardGlassCard';
 
 interface LandingViewProps {
-  setView: (view: 'dashboard') => void;
+  setView: ((view: 'dashboard') => void) | (() => void);
   addNotification: (message: string, type: 'success') => void;
 }
 
@@ -75,7 +75,12 @@ export const LandingView: React.FC<LandingViewProps> = ({
       >
         <MagneticButton
           onClick={() => {
-            setView('dashboard');
+            // Handle both function signatures
+            if (setView.length === 0) {
+              (setView as () => void)();
+            } else {
+              (setView as (view: 'dashboard') => void)('dashboard');
+            }
             addNotification('Welcome to SRK Portal!', 'success');
           }}
           className="text-lg relative"

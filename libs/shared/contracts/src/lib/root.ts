@@ -17,7 +17,6 @@ const c = initContract();
 export const apiContract = c.router({
   auth: authContract,
   grow: growContract,
-  sso: ssoContract,
   user: userContract,
   package: packageContract,
   course: courseContract,

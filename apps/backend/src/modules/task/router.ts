@@ -14,7 +14,10 @@ export const taskRouter = s.router(taskContract, {
     createSocialLinks: taskMutationHandler.createSocialLinks,
     getAllActiveSocialLinksToFollow: undefined,
     createSocialTaskFollowRequest: taskMutationHandler.createSocialTaskFollowRequest,
-    approveSocialTaskFollowRequest:taskMutationHandler.approveSocialTaskFollowRequest,
-    rejectSocialTaskFollowRequest:taskMutationHandler.rejectSocialTaskFollowRequest,
-    getSocialTaskEarning:taskQueryHandler.getSocialTaskEarning
+    approveSocialTaskFollowRequest: taskMutationHandler.approveSocialTaskFollowRequest,
+    rejectSocialTaskFollowRequest: taskMutationHandler.rejectSocialTaskFollowRequest,
+    getSocialTaskEarning: taskQueryHandler.getSocialTaskEarning,
+    submitSrkTaskUserVerification: taskMutationHandler.submitSrkTaskUserVerification,
+    acceptSrkTaskUserVerification: taskMutationHandler.acceptSrkTaskUserVerification,
+    rejectSrkTaskUserVerification: taskMutationHandler.rejectSrkTaskUserVerification,
 });

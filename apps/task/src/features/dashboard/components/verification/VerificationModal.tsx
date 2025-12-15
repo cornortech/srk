@@ -1,17 +1,14 @@
-import {
-  AlertTriangle,
-  Camera,
-  CheckCircle,
-  ChevronLeft,
-  ChevronRight,
-  Loader2,
-  Send,
-  Upload,
-  X,
-} from 'lucide-react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { SignaturePad } from './SignaturePad';
+import { X } from 'lucide-react';
 import DashboardGradientText from '../ui/DashboardGradientText';
+import {
+  DocumentStep,
+  SelfieStep,
+  SignatureStep,
+  DetailsStep,
+  ReviewStep,
+  VerificationFormData,
+} from './steps';
 
 interface VerificationModalProps {
   onClose: () => void;
@@ -23,10 +20,10 @@ export const VerificationModal: React.FC<VerificationModalProps> = ({
   onSuccess,
 }) => {
   const [currentStep, setCurrentStep] = useState(1);
-  const [formData, setFormData] = useState({
-    documentFile: null as File | null,
-    selfieImage: null as string | null,
-    signature: null as string | null,
+  const [formData, setFormData] = useState<VerificationFormData>({
+    documentFile: null,
+    selfieImage: null,
+    signature: null,
     fullName: '',
     dob: '',
   });
@@ -42,6 +39,8 @@ export const VerificationModal: React.FC<VerificationModalProps> = ({
   const [cameraError, setCameraError] = useState<string | null>(null);
 
   const totalSteps = 5;
+
+  // Navigation
   const nextStep = () =>
     setCurrentStep((prev) => Math.min(prev + 1, totalSteps));
   const prevStep = () => setCurrentStep((prev) => Math.max(prev - 1, 1));
@@ -135,6 +134,12 @@ export const VerificationModal: React.FC<VerificationModalProps> = ({
     }
   };
 
+  const handleRetakeSelfie = () => {
+    setFormData((f) => ({ ...f, selfieImage: null }));
+    startCamera();
+  };
+
+  // Form handlers
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -159,371 +164,76 @@ export const VerificationModal: React.FC<VerificationModalProps> = ({
 
     if (Math.random() > 0.1) {
       setSubmissionStatus('success');
-      setCurrentStep(totalSteps);
       setTimeout(() => {
         onSuccess();
         onClose();
       }, 2000);
     } else {
       setSubmissionStatus('error');
-      setCurrentStep(totalSteps);
     }
     setIsSubmitting(false);
   };
 
+  const handleRetry = () => {
+    setSubmissionStatus(null);
+    setCurrentStep(4);
+  };
+
+  // Render current step
   const renderStepContent = () => {
     switch (currentStep) {
       case 1:
         return (
-          <div className="space-y-6">
-            <h2 className="text-xl font-semibold text-white">
-              1. Upload Document
-            </h2>
-            <p className="text-gray-400">
-              Please upload a valid government-issued ID (e.g., Passport,
-              Driver's License).
-            </p>
-
-            <div
-              className="border-2 border-dashed border-[#ac9976] rounded-lg p-8 text-center bg-gray-700/50 cursor-pointer"
-              onClick={() => document.getElementById('documentUpload')?.click()}
-            >
-              <Upload className="w-8 h-8 mx-auto mb-3" />
-
-              <input
-                id="documentUpload"
-                type="file"
-                accept="image/*,.pdf"
-                onChange={handleFileChange}
-                className="hidden"
-              />
-
-              <p className="text-amber-400 font-medium">
-                {formData.documentFile
-                  ? formData.documentFile.name
-                  : 'Click to select file'}
-              </p>
-
-              <p className="text-xs text-gray-500 mt-1">
-                PDF or image files up to 5MB.
-              </p>
-            </div>
-
-            <div className="pt-4 flex justify-end">
-              <button
-                onClick={nextStep}
-                disabled={!formData.documentFile}
-                className="px-6 py-2 bg-gradient-to-r from-[#ac9976] to-[#e1ba73] text-black font-medium rounded-lg hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
-              >
-                Next: Selfie <ChevronRight className="w-4 h-4 ml-2" />
-              </button>
-            </div>
-          </div>
+          <DocumentStep
+            formData={formData}
+            onNext={nextStep}
+            onFileChange={handleFileChange}
+          />
         );
       case 2:
         return (
-          <div className="space-y-6">
-            <h2 className="text-xl font-semibold text-white">
-              2. Selfie Capture
-            </h2>
-            <p className="text-gray-400">
-              Please position your face clearly within the frame for a live
-              photo.
-            </p>
-
-            <div className="relative aspect-video bg-black rounded-xl overflow-hidden shadow-inner">
-              <video
-                ref={videoRef}
-                autoPlay
-                muted
-                playsInline
-                className={`w-full h-full object-cover transition-opacity duration-500 ${
-                  isCameraActive ? 'opacity-100' : 'opacity-10'
-                }`}
-              />
-              <canvas ref={canvasRef} className="hidden" />
-
-              {!isCameraActive && !formData.selfieImage && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-900/90 p-4 text-center">
-                  {cameraError ? (
-                    <>
-                      <AlertTriangle className="w-8 h-8 text-red-400 mb-2" />
-                      <p className="text-red-400 font-medium mb-4">
-                        {cameraError}
-                      </p>
-                    </>
-                  ) : (
-                    <>
-                      <Loader2 className="w-8 h-8 text-amber-400 animate-spin mb-2" />
-                      <p className="text-white font-medium mb-4">
-                        Initializing camera...
-                      </p>
-                    </>
-                  )}
-                  <button
-                    onClick={startCamera}
-                    className="bg-gradient-to-r from-[#ac9976] to-[#e1ba73] hover:opacity-90 text-black font-semibold py-2 px-6 rounded-lg flex items-center transition"
-                  >
-                    <Camera className="w-5 h-5 mr-2" /> Start Camera
-                  </button>
-                </div>
-              )}
-
-              {formData.selfieImage && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-900/90">
-                  <img
-                    src={formData.selfieImage}
-                    alt="Selfie Preview"
-                    className="max-h-full max-w-full object-contain rounded-xl shadow-xl border-4 border-amber-500"
-                  />
-                  <button
-                    onClick={() => {
-                      setFormData((f) => ({ ...f, selfieImage: null }));
-                      startCamera();
-                    }}
-                    className="absolute top-2 right-2 p-2 bg-red-600 rounded-full text-white hover:bg-red-700 transition"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
-                </div>
-              )}
-            </div>
-
-            <div className="flex justify-between items-center pt-4">
-              <button
-                onClick={prevStep}
-                className="text-gray-400 hover:text-white transition px-4 py-2 flex items-center"
-              >
-                <ChevronLeft className="w-4 h-4 mr-2" /> Back
-              </button>
-
-              {!formData.selfieImage ? (
-                <button
-                  onClick={takePicture}
-                  disabled={!isCameraActive}
-                  className="p-3 bg-gradient-to-r from-[#ac9976] to-yellow-500 rounded-full hover:opacity-90 disabled:opacity-50 transition shadow-lg"
-                >
-                  <Camera className="w-6 h-6 text-black" />
-                </button>
-              ) : (
-                <button
-                  onClick={nextStep}
-                  className="px-6 py-2 bg-gradient-to-r from-[#ac9976] to-yellow-500 text-black font-medium rounded-lg hover:opacity-90 transition flex items-center"
-                >
-                  Next: Signature <ChevronRight className="w-4 h-4 ml-2" />
-                </button>
-              )}
-            </div>
-          </div>
+          <SelfieStep
+            formData={formData}
+            onNext={nextStep}
+            onPrev={prevStep}
+            videoRef={videoRef}
+            canvasRef={canvasRef}
+            isCameraActive={isCameraActive}
+            cameraError={cameraError}
+            onStartCamera={startCamera}
+            onTakePicture={takePicture}
+            onRetake={handleRetakeSelfie}
+          />
         );
       case 3:
         return (
-          <div className="space-y-6">
-            <h2 className="text-xl font-semibold text-white">
-              3. Digital Signature
-            </h2>
-            <p className="text-gray-400">
-              Draw your signature in the box below
-            </p>
-
-            <SignaturePad onSave={handleSignatureSave} />
-
-            <div className="flex justify-between pt-4">
-              <button
-                onClick={prevStep}
-                className="text-gray-400 hover:text-white transition px-4 py-2 flex items-center"
-              >
-                <ChevronLeft className="w-4 h-4 mr-2" /> Back
-              </button>
-              <button
-                onClick={nextStep}
-                disabled={!formData.signature}
-                className="px-6 py-2 bg-gradient-to-r from-[#ac9976] to-[#e1ba73] text-black font-medium rounded-lg hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
-              >
-                Next: Details
-                <ChevronRight className="w-4 h-4 ml-2" />
-              </button>
-            </div>
-          </div>
+          <SignatureStep
+            formData={formData}
+            onNext={nextStep}
+            onPrev={prevStep}
+            onSignatureSave={handleSignatureSave}
+          />
         );
       case 4:
         return (
-          <div className="space-y-6">
-            <h2 className="text-xl font-semibold text-white">
-              4. Personal Details
-            </h2>
-            <div className="space-y-4">
-              <input
-                type="text"
-                name="fullName"
-                placeholder="Full Name (as per ID)"
-                value={formData.fullName}
-                onChange={handleInputChange}
-                className="w-full p-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-400 focus:ring-amber-500/50 focus:border-amber-500/50"
-              />
-              <input
-                type="date"
-                name="dob"
-                placeholder="Date of Birth"
-                value={formData.dob}
-                onChange={handleInputChange}
-                className="w-full p-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-400 focus:ring-amber-500/50 focus:border-amber-500/50"
-              />
-
-              {/* Signature Preview */}
-              {formData.signature && (
-                <div>
-                  <p className="text-gray-400 mb-2">Signature Preview:</p>
-                  <div className="p-4 bg-white/5 rounded-lg border border-white/10">
-                    <img
-                      src={formData.signature}
-                      alt="Signature Preview"
-                      className="h-20 mx-auto object-contain"
-                    />
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div className="flex justify-between pt-4">
-              <button
-                onClick={prevStep}
-                className="text-gray-400 hover:text-white transition px-4 py-2 flex items-center"
-              >
-                <ChevronLeft className="w-4 h-4 mr-2" /> Back
-              </button>
-              <button
-                onClick={nextStep}
-                disabled={
-                  !formData.fullName || !formData.dob || !formData.signature
-                }
-                className="px-6 py-2 bg-gradient-to-r from-[#ac9976] to-[#e1ba73]  text-black font-medium rounded-lg hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
-              >
-                Next: Review <ChevronRight className="w-4 h-4 ml-2" />
-              </button>
-            </div>
-          </div>
+          <DetailsStep
+            formData={formData}
+            onNext={nextStep}
+            onPrev={prevStep}
+            onInputChange={handleInputChange}
+          />
         );
       case 5:
         return (
-          <div className="space-y-6">
-            <h2 className="text-xl font-semibold text-white">
-              5. Review and Submit
-            </h2>
-            <div className="space-y-3 p-4 bg-white/5 rounded-lg">
-              <div className="text-sm">
-                <span className="font-semibold text-gray-400">Document:</span>{' '}
-                <span className="text-white ml-2">
-                  {formData.documentFile?.name || 'Missing'}
-                </span>
-              </div>
-              <div className="text-sm">
-                <span className="font-semibold text-gray-400">Selfie:</span>
-                <span className="text-white ml-2">
-                  {formData.selfieImage ? 'Captured' : 'Missing'}
-                </span>
-                {formData.selfieImage && (
-                  <img
-                    src={formData.selfieImage}
-                    alt="Selfie"
-                    className="w-16 h-auto mt-2 rounded-md border border-amber-500"
-                  />
-                )}
-              </div>
-              <div className="text-sm">
-                <span className="font-semibold text-gray-400">Signature:</span>
-                <span className="text-white ml-2">
-                  {formData.signature ? 'Provided' : 'Missing'}
-                </span>
-                {formData.signature && (
-                  <img
-                    src={formData.signature}
-                    alt="Signature"
-                    className="w-32 h-auto mt-2 rounded-md border border-amber-500"
-                  />
-                )}
-              </div>
-              <div className="text-sm">
-                <span className="font-semibold text-gray-400">Name:</span>{' '}
-                <span className="text-white ml-2">
-                  {formData.fullName || 'Missing'}
-                </span>
-              </div>
-              <div className="text-sm">
-                <span className="font-semibold text-gray-400">DOB:</span>{' '}
-                <span className="text-white ml-2">
-                  {formData.dob || 'Missing'}
-                </span>
-              </div>
-              <div className="text-sm text-amber-400 pt-3 italic">
-                I confirm that all information provided is accurate and true.
-              </div>
-            </div>
-
-            {submissionStatus === 'success' ? (
-              <div className="text-center p-6 bg-linear-to-r from-emerald-500/10 to-green-500/10 border border-emerald-500/20 rounded-xl">
-                <CheckCircle className="w-12 h-12 mx-auto text-emerald-500 mb-4" />
-                <h3 className="text-xl font-bold text-white mb-2">
-                  Verification Submitted
-                </h3>
-                <p className="text-gray-400">
-                  Your identity verification is under review. This may take 1-2
-                  business days.
-                </p>
-                <div className="mt-4 text-sm text-emerald-400">
-                  Redirecting to Tasks tab...
-                </div>
-              </div>
-            ) : submissionStatus === 'error' ? (
-              <div className="text-center p-6 bg-linear-to-r from-red-500/10 to-rose-500/10 border border-red-500/20 rounded-xl">
-                <AlertTriangle className="w-12 h-12 mx-auto text-red-500 mb-4" />
-                <h3 className="text-xl font-bold text-white mb-2">
-                  Submission Failed
-                </h3>
-                <p className="text-gray-400">
-                  An error occurred. Please check your connection and try again.
-                </p>
-                <button
-                  onClick={() => setCurrentStep(4)}
-                  className="mt-4 px-6 py-2 bg-linear-to-r from-amber-500 to-yellow-500 text-black font-medium rounded-lg hover:opacity-90 transition"
-                >
-                  Try Again
-                </button>
-              </div>
-            ) : (
-              <div className="flex justify-between pt-4">
-                <button
-                  onClick={prevStep}
-                  className="text-gray-400 hover:text-white transition px-4 py-2 flex items-center"
-                >
-                  <ChevronLeft className="w-4 h-4 mr-2" /> Back
-                </button>
-                <button
-                  onClick={handleSubmit}
-                  disabled={
-                    isSubmitting ||
-                    !formData.documentFile ||
-                    !formData.selfieImage ||
-                    !formData.signature ||
-                    !formData.fullName ||
-                    !formData.dob
-                  }
-                  className="px-6 py-2 bg-gradient-to-r from-emerald-500 to-green-500 text-white font-medium rounded-lg hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
-                >
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />{' '}
-                      Submitting...
-                    </>
-                  ) : (
-                    <>
-                      <Send className="w-4 h-4 mr-2" /> Submit Verification
-                    </>
-                  )}
-                </button>
-              </div>
-            )}
-          </div>
+          <ReviewStep
+            formData={formData}
+            onNext={() => {}}
+            onPrev={prevStep}
+            isSubmitting={isSubmitting}
+            submissionStatus={submissionStatus}
+            onSubmit={handleSubmit}
+            onRetry={handleRetry}
+          />
         );
       default:
         return null;
@@ -534,6 +244,7 @@ export const VerificationModal: React.FC<VerificationModalProps> = ({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm overflow-y-auto">
       <div className="w-full max-w-2xl bg-linear-to-br from-[#1a1410]/90 to-[#0a0a0a]/90 border border-amber-500/20 rounded-2xl shadow-2xl">
         <div className="p-6 sm:p-8">
+          {/* Header */}
           <div className="flex items-center justify-between mb-8">
             <h1 className="text-2xl sm:text-3xl font-extrabold text-white">
               <span className="bg-linear-to-r from-[#ac9976] to-[#e1ba73] bg-clip-text text-transparent">
@@ -551,23 +262,45 @@ export const VerificationModal: React.FC<VerificationModalProps> = ({
           </div>
 
           {/* Progress Bar */}
-          <div className="mb-8 p-4 bg-white/5 rounded-xl border border-white/10">
-            <h2 className="text-lg font-semibold from-[#ac9976] to-[#e1ba73] text-center mb-2">
-              Step {currentStep} of {totalSteps - (submissionStatus ? 1 : 0)}
-            </h2>
-            <div className="w-full bg-white/10 rounded-full h-2.5">
-              <div
-                className="bg-gradient-to-r from-[#ac9976] to-[#e1ba73] h-2.5 rounded-full transition-all duration-500"
-                style={{
-                  width: `${Math.min(100, (currentStep / totalSteps) * 100)}%`,
-                }}
-              />
-            </div>
-          </div>
+          <ProgressBar
+            currentStep={currentStep}
+            totalSteps={totalSteps}
+            submissionStatus={submissionStatus}
+          />
 
+          {/* Step Content */}
           {renderStepContent()}
         </div>
       </div>
     </div>
   );
 };
+
+// Progress Bar Component
+interface ProgressBarProps {
+  currentStep: number;
+  totalSteps: number;
+  submissionStatus: 'success' | 'error' | null;
+}
+
+const ProgressBar: React.FC<ProgressBarProps> = ({
+  currentStep,
+  totalSteps,
+  submissionStatus,
+}) => (
+  <div className="mb-8 p-4 bg-white/5 rounded-xl border border-white/10">
+    <h2 className="text-lg font-semibold from-[#ac9976] to-[#e1ba73] text-center mb-2">
+      Step {currentStep} of {totalSteps - (submissionStatus ? 1 : 0)}
+    </h2>
+    <div className="w-full bg-white/10 rounded-full h-2.5">
+      <div
+        className="bg-gradient-to-r from-[#ac9976] to-[#e1ba73] h-2.5 rounded-full transition-all duration-500"
+        style={{
+          width: `${Math.min(100, (currentStep / totalSteps) * 100)}%`,
+        }}
+      />
+    </div>
+  </div>
+);
+
+export default VerificationModal;

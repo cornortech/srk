@@ -1,5 +1,4 @@
-import { useState, useEffect } from 'react';
-import { AnimatePresence } from 'framer-motion';
+import { useState, useEffect, useRef } from 'react';
 import Navbar from '../components/layout/Navbar';
 import { Hero } from '../features/landing/components/Hero';
 import { FlowSection } from '../features/landing/components/FlowSection';
@@ -8,15 +7,15 @@ import { BenefitsSection } from '../features/landing/components/BenefitsSection'
 import { FAQSection } from '../features/landing/components/FAQSection';
 import { CTASection } from '../features/landing/components/CTASection';
 import { Footer } from '../components/layout/Footer';
-import { PackageSelectionFlow } from '../features/landing/components/PackageSelectionFlow';
-import { OrderConfirmation } from '../features/landing/components/OrderConfirmation';
 import {
   OrderDetails,
   PackageDetails,
   UserData,
   UserDetails,
 } from '../lib/types/types';
-import { UserDashboard } from './UserDashboard';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useScrollIntent } from '../features/landing/hooks/useScrollIntent';
+import { TSrkGrowPackagesSchema } from '@srk/shared/contracts';
 
 type View =
   | 'landing'
@@ -26,8 +25,18 @@ type View =
   | 'dashboard';
 
 export const GrowLandingPage = () => {
+  const navigate = useNavigate();
   const [user, setUser] = useState<UserData | null>(null);
   const [view, setView] = useState<View>('landing');
+  const { section } = useParams();
+  const packagesRef = useRef<HTMLElement>(null);
+  const [growPackages, setGrowPackages] = useState<TSrkGrowPackagesSchema[]>([]);
+
+  const sectionRefs = {
+    packages: packagesRef,
+  };
+
+  useScrollIntent(sectionRefs);
 
   const [hasRegistered, setHasRegistered] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -41,52 +50,85 @@ export const GrowLandingPage = () => {
   console.log(checkoutUser);
 
   useEffect(() => {
-    const registered = !!localStorage.getItem('srkgrow-hasregistered');
-    setHasRegistered(registered);
-
     const savedUser = localStorage.getItem('srkgrow-activesession');
     if (savedUser) {
       setUser(JSON.parse(savedUser));
-      setView('dashboard');
+      navigate('/dashboard');
     }
-  }, []);
+  }, [navigate]);
 
   const handleUserUpdate = (userData: UserData | null) => {
     setUser(userData);
     localStorage.setItem('srkgrow_loggedInUser', JSON.stringify(userData));
   };
 
-  const handleLoginSuccess = (userData: UserData) => {
-    setUser(userData);
-    localStorage.setItem('srkgrow-activesession', JSON.stringify(userData));
-    setHasRegistered(true);
-    setView('dashboard');
-    setShowAuthModal(false);
+  // Helper function to convert API response to PackageDetails format
+  const convertApiPackageToDetails = (pkg: TSrkGrowPackagesSchema): PackageDetails => {
+    // Determine package type ID based on name
+    let packageId: 'starter' | 'intermediate' | 'pro' = 'starter';
+    const nameLower = pkg.name.toLowerCase();
+    if (nameLower.includes('pro')) {
+      packageId = 'pro';
+    } else if (nameLower.includes('intermediate')) {
+      packageId = 'intermediate';
+    }
+
+    // Extract follower and reach options from packageTypes and packageSubTypes
+    const followerOptions: number[] = [];
+    const reachOptions: Array<{ videos: number; likesPerVideo: number }> = [];
+
+    pkg.packageTypes?.forEach((type) => {
+      const typeName = type.name.toLowerCase();
+      
+      if (typeName.includes('follow')) {
+        // Extract follower counts from package sub types
+        type.packageSubTypes?.forEach((subType) => {
+          if (subType.noOfFollowers) {
+            followerOptions.push(subType.noOfFollowers);
+          }
+        });
+      } else if (typeName.includes('reach')) {
+        // Extract reach options (videos + likes)
+        type.packageSubTypes?.forEach((subType) => {
+          if (subType.noOfVideos && subType.noOfLikes) {
+            reachOptions.push({
+              videos: subType.noOfVideos,
+              likesPerVideo: subType.noOfLikes,
+            });
+          }
+        });
+      }
+    });
+
+    // Fallback to defaults if extraction failed
+    const finalFollowerOptions = followerOptions.length > 0 
+      ? followerOptions 
+      : [200, 500, 700]; // Default follower tiers
+    
+    const finalReachOptions = reachOptions.length > 0 
+      ? reachOptions 
+      : [
+          { videos: 1, likesPerVideo: 200 },
+          { videos: 2, likesPerVideo: 100 },
+        ]; // Default reach options
+
+    return {
+      id: packageId,
+      name: pkg.name,
+      price: `${pkg.amount}`, // Assuming amount is already formatted
+      description: pkg.description,
+      features: pkg.packageTypes?.map(pt => pt.description).filter(Boolean) || [],
+      followerOptions: finalFollowerOptions,
+      reachOptions: finalReachOptions,
+      period: 'one-time',
+      popular: pkg.isPopular,
+    };
   };
 
-  const handleLogout = () => {
-    setUser(null);
-    localStorage.removeItem('srkgrow-activesession');
-    setView('landing');
-  };
-
-  const handlePackageSelect = (pkg: PackageDetails) => {
-    setSelectedPackage(pkg);
-    setView('packageflow');
+  const handlePackageSelect = (pkg: TSrkGrowPackagesSchema) => {
+    const packageDetails = convertApiPackageToDetails(pkg);
+    navigate('/package-flow', { state: { package: packageDetails } });
     window.scrollTo(0, 0);
-  };
-
-  const handlePackageFlowComplete = (details: UserDetails) => {
-    setCheckoutUser(details);
-    setView('checkout');
-    window.scrollTo(0, 0);
-  };
-
-  const handleBackToLanding = () => {
-    setView('landing');
-    setSelectedPackage(null);
-    setCheckoutUser(null);
-    setOrderDetails(null);
   };
 
   return (
@@ -94,42 +136,21 @@ export const GrowLandingPage = () => {
       <Navbar
         user={user}
         onUserUpdate={handleUserUpdate}
-        onDashboardClick={() => setView('dashboard')}
+        onDashboardClick={() => navigate('/dashboard')}
       />
 
       <main>
-        <AnimatePresence mode="wait">
-          {view === 'landing' && (
-            <>
-              <Hero />
-              <FlowSection />
-              <PackagesSection onPackageSelect={handlePackageSelect} />
-              <BenefitsSection />
-              <FAQSection />
-              <CTASection onPackageSelect={handlePackageSelect} />
-              <Footer />
-            </>
-          )}
-
-          {view === 'packageflow' && selectedPackage && (
-            <PackageSelectionFlow
-              selectedPackage={selectedPackage}
-              onBack={handleBackToLanding}
-              onComplete={handlePackageFlowComplete}
-            />
-          )}
-
-          {view === 'confirmation' && orderDetails && (
-            <OrderConfirmation
-              orderDetails={orderDetails}
-              onBack={handleBackToLanding}
-            />
-          )}
-
-          {view === 'dashboard' && user && (
-            <UserDashboard user={user} onLogout={handleLogout} />
-          )}
-        </AnimatePresence>
+        <Hero />
+        <FlowSection />
+        <PackagesSection
+          ref={packagesRef}
+          onPackageSelect={handlePackageSelect}
+          onGrowPackagesLoaded={setGrowPackages}
+        />
+        <BenefitsSection />
+        <FAQSection />
+        <CTASection onPackageSelect={handlePackageSelect} growPackages={growPackages} />
+        <Footer />
       </main>
     </>
   );

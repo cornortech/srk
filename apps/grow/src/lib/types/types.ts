@@ -1,7 +1,13 @@
-export type SocialPlatform = 'youtube' | 'facebook' | 'instagram' | 'twitter' | 'tiktok';
+export type SocialPlatform =
+  | 'youtube'
+  | 'facebook'
+  | 'instagram'
+  | 'twitter'
+  | 'tiktok';
 export type EngagementType = 'follow' | 'reach';
 export type PackageType = 'starter' | 'intermediate' | 'pro';
 export type KYCStatus = 'not_started' | 'pending' | 'approved' | 'rejected';
+
 
 export interface PackageDetails {
   id: PackageType;
@@ -23,8 +29,8 @@ export interface UserData {
   name: string;
   kycStatus: 'pending' | 'approved' | 'rejected';
   approved: boolean; // Add this line
-  country:string ; 
-  phone:number ; 
+  country: string;
+  phone: number;
   kycDocuments: {
     id: string;
     name: string;
@@ -70,6 +76,7 @@ export interface CheckoutUserDetails extends Omit<UserDetails, 'phone'> {
   gender: string;
   promoCode: string;
   postLinks?: string[];
+  kyc: string[];
 }
 
 export interface StatusModalProps {

@@ -1,5 +1,5 @@
 import { initServer } from "@ts-rest/express";
-import { authContract } from "../../contract/auth/contract";
+import { authContract } from "@srk/shared/contracts";
 import { authMutationHandler } from "./mutation";
 const s = initServer();
 

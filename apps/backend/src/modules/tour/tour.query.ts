@@ -1,5 +1,5 @@
 import { AppRouteImplementationOrOptions } from "@ts-rest/express/src/lib/types";
-import { tourContract } from "../../contract/tour/tour.contract";
+import { tourContract } from "@srk/shared/contracts";
 import { balanceModel } from "../../model/balanceModel";
 import { TourTargetModel } from "../../model/TourTargetModel";
 

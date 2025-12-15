@@ -6,52 +6,51 @@ interface UseGrowSSOOptions {
 }
 
 interface UseGrowSSOReturn {
-  redirectToGrowProgram: () => Promise<void>;
+  redirectToGrowAffiliateProgram: () => Promise<void>;
+  redirectToGrowSocialMediaProgram: () => Promise<void>;
   isLoading: boolean;
   error: string | null;
 }
 
-/**
- * Hook for SSO redirect from University to Task app
- * Usage:
- * ```tsx
- * const { redirectToTaskProgram, isLoading, error } = useTaskSSO({
- *   backendUrl: 'http://localhost:4000'
- * });
- * 
- * <Button onClick={redirectToTaskProgram} disabled={isLoading}>
- *   Go to Task Program
- * </Button>
- * ```
- */
 const useGrowSSO = ({ backendUrl }: UseGrowSSOOptions): UseGrowSSOReturn => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const redirectToGrowProgram = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
+  const handleRedirect = useCallback(
+    async (program: 'growaffiliate' | 'growsocialmedia') => {
+      setIsLoading(true);
+      setError(null);
 
-    try {
-      const response: SSOCodeResponse = await getAutoCode(backendUrl, 'grow');
+      try {
+        const response: SSOCodeResponse = await getAutoCode(backendUrl, program);
 
-      if (response.success && response.data?.redirectUrl) {
-        // Redirect to task app with the SSO code
-        window.location.href = response.data.redirectUrl;
-      } else {
-        setError(response.message || 'Failed to generate SSO code');
+        if (response.success && response.data?.redirectUrl) {
+          window.location.href = response.data.redirectUrl;
+        } else {
+          setError(response.message || 'Failed to generate SSO code');
+        }
+      } catch (err: any) {
+        const errorMessage =
+          err.response?.data?.message ||
+          err.message ||
+          'SSO redirect failed';
+
+        setError(errorMessage);
+        console.error('SSO redirect error:', err);
+      } finally {
+        setIsLoading(false);
       }
-    } catch (err: any) {
-      const errorMessage = err.response?.data?.message || err.message || 'SSO redirect failed';
-      setError(errorMessage);
-      console.error('SSO redirect error:', err);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [backendUrl]);
+    },
+    [backendUrl]
+  );
+
+  const redirectToGrowAffiliateProgram = () => handleRedirect('growaffiliate');
+  const redirectToGrowSocialMediaProgram = () =>
+    handleRedirect('growsocialmedia');
 
   return {
-    redirectToGrowProgram,
+    redirectToGrowAffiliateProgram,
+    redirectToGrowSocialMediaProgram,
     isLoading,
     error,
   };

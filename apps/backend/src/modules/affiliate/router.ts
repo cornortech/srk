@@ -1,5 +1,5 @@
 import { initServer } from "@ts-rest/express";
-import { affiliateContract } from "../../contract/affiliate/contract";
+import { affiliateContract } from "@srk/shared/contracts";
 import { affiliateMutationHandler } from "./mutation";
 import { affiliateQueryHandler } from "./query";
 const s = initServer();

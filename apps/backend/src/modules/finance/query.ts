@@ -4,7 +4,7 @@ import {
 } from "@ts-rest/express/src/lib/types";
 import mongoose from "mongoose";
 import { balancePayoutModel } from "../../model/balancePayoutModel";
-import { financeContract } from "../../contract/finance/contract";
+import { financeContract } from "@srk/shared/contracts";
 import { balanceModel } from "../../model/balanceModel";
 import { adminBalanceModel } from "../../model/adminBalanceModel";
 import bankStatement from "../../model/bankStatement";
@@ -13,7 +13,7 @@ import { AdminSrkBankModel } from "../../model/AdminSrkBankModel";
 import { UserModel } from "../../model/userModel";
 import { BankModel } from "../../model/bankModel";
 import { SrkUniversityBankModel } from "../../model/srkUniversityBankModel";
-import { TGetSrkBonusCashFlow } from "../../contract/finance/schema";
+import { TGetSrkBonusCashFlow } from "@srk/shared/contracts";
 
 const getAllBalancePayoutOfUser: AppRouteImplementationOrOptions<
   typeof financeContract.getAllBalancePayoutOfUser

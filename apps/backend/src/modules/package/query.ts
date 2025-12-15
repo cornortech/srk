@@ -1,5 +1,5 @@
 import { AppRouteImplementationOrOptions } from "@ts-rest/express/src/lib/types";
-import { packageContract } from "../../contract/package/contract";
+import { packageContract } from "@srk/shared/contracts";
 import { PackageModel } from "../../model/packageModel";
 import { growSocialMediaPackageModel } from "../../model/growSocialMediaPackageModel";
 import { growSocialMediaPackageTypeModel } from "../../model/growSocialMediaPackageTypeModel";
@@ -7,7 +7,7 @@ import { growSocialMediaPackageSubTypeModel } from "../../model/growSocialMediaP
 
 const getAllPackages: AppRouteImplementationOrOptions<
   typeof packageContract.getAllPackages
-> = async ({ req, res }) => {
+> = async () => {
   try {
     const packages = await PackageModel.find().sort({
       discountedPrice: 1,
@@ -45,7 +45,7 @@ const getAllPackages: AppRouteImplementationOrOptions<
 
 const getPackageById: AppRouteImplementationOrOptions<
   typeof packageContract.getPackageById
-> = async ({ req, res, params }) => {
+> = async ({ params }) => {
   try {
     const packageExist = await PackageModel.findById(params.id);
 
@@ -93,7 +93,7 @@ const getPackageById: AppRouteImplementationOrOptions<
 
 const getAllSrkGrowPackages: AppRouteImplementationOrOptions<
   typeof packageContract.getAllSrkGrowPackages
-> = async ({ req, res }) => {
+> = async () => {
   try {
     // Fetch all grow social media packages
     const packages = await growSocialMediaPackageModel.find();
@@ -141,6 +141,7 @@ const getAllSrkGrowPackages: AppRouteImplementationOrOptions<
           description: pkg.description,
           socialMediaPlatforms: pkg.socialMediaPlatforms,
           amount: pkg.amount,
+          isPopular: pkg.isPopular,
           createdAt: pkg.createdAt,
           updatedAt: pkg.updatedAt,
           packageTypes: typesWithSubTypes,
@@ -164,8 +165,68 @@ const getAllSrkGrowPackages: AppRouteImplementationOrOptions<
   }
 };
 
+// SRK Grow Package by Id
+const getSrkGrowPackageById: AppRouteImplementationOrOptions<typeof packageContract.getSrkGrowPackageById> = async ({ params }) => {
+  try {
+    const packageExist = (await growSocialMediaPackageModel.findOne({
+      _id: params.id,
+    })) as any;
+
+    if (!packageExist) {
+      return {
+        status: 404,
+        body: {
+          message: "Package doesnot exist!",
+        },
+      };
+    }
+
+    return {
+      status: 200,
+      body: {
+        _id: packageExist._id.toString(),
+        name: packageExist.name,
+        description: packageExist.description,
+        socialMediaPlatforms: packageExist.socialMediaPlatforms,
+        amount: packageExist.amount,
+        isPopular: packageExist.isPopular,
+        packageTypes: packageExist.packageTypes.map((type: any) => ({
+          _id: type._id.toString(),
+          growSocialMediaPackageId: type.growSocialMediaPackageId.toString(),
+          name: type.name,
+          description: type.description,
+          amount: type.amount,
+          createdAt: type.createdAt,
+          updatedAt: type.updatedAt,
+          packageSubTypes: type.packageSubTypes.map((sub: any) => ({
+            _id: sub._id.toString(),
+            growPackageTypeId: sub.growPackageTypeId.toString(),
+            name: sub.name,
+            description: sub.description,
+            amount: sub.amount,
+            createdAt: sub.createdAt,
+            updatedAt: sub.updatedAt,
+          })),
+        })),
+      },
+    };
+  } catch (error: any) {
+    console.log(error);
+    return {
+      status: 500,
+      body: {
+        message: error.message
+          ? `Internal server error: ${error.message}`
+          : "Internal server error",
+        success: false,
+      },
+    };
+  }
+};
+
 export const packageQueryHandler = {
   getAllPackages,
   getPackageById,
   getAllSrkGrowPackages,
+  getSrkGrowPackageById
 };

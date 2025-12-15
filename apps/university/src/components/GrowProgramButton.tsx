@@ -12,22 +12,22 @@ interface GrowProgramButtonProps {
  * Button to redirect user to Grow Program via SSO
  * Place this in the university dashboard where users can access the Grow app
  */
-const GrowProgramButton = ({ 
+const GrowAffiliateProgramButton = ({ 
   className = '', 
   variant = 'solid',
   size = 'md'
 }: GrowProgramButtonProps) => {
   const backendUrl = import.meta.env.VITE_BACKEND_ROOT_URL || 'http://localhost:4000';
   
-  const { redirectToGrowProgram, isLoading, error } = useGrowSSO({
+  const { redirectToGrowAffiliateProgram, isLoading, error } = useGrowSSO({
     backendUrl,
   });
 
   const handleClick = async () => {
     try {
-      await redirectToGrowProgram();
+      await redirectToGrowAffiliateProgram();
     } catch (err) {
-      toast.error('Failed to redirect to Grow Program');
+      toast.error('Failed to redirect to Grow Affiliate');
     }
   };
 
@@ -45,9 +45,9 @@ const GrowProgramButton = ({
       isLoading={isLoading}
       onClick={handleClick}
     >
-      {isLoading ? 'Redirecting...' : '🎯 Go to Grow Program'}
+      {isLoading ? 'Redirecting...' : '🎯 Go to Grow Affiliate'}
     </Button>
   );
 };
 
-export default GrowProgramButton;
+export default GrowAffiliateProgramButton;

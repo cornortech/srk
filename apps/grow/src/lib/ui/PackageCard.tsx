@@ -3,11 +3,12 @@ import { motion } from 'framer-motion';
 import { CheckCircle } from 'lucide-react';
 import { PackageDetails } from '../types/types';
 import SpotlightCard from './SpotlightCards';
+import { TSrkGrowPackagesSchema } from '@srk/shared/contracts';
 
 interface PackageCardProps {
-  pkg: PackageDetails;
+  pkg: TSrkGrowPackagesSchema;
   index: number;
-  onPackageSelect: (pkg: PackageDetails) => void;
+  onPackageSelect: (pkg: TSrkGrowPackagesSchema) => void;
 }
 
 const PackageCard: React.FC<PackageCardProps> = ({ pkg, index, onPackageSelect }) => (
@@ -22,10 +23,10 @@ const PackageCard: React.FC<PackageCardProps> = ({ pkg, index, onPackageSelect }
     <SpotlightCard
       delay={index * 0.1}
       className={`relative h-full ${
-        pkg.popular ? "ring-2 ring-[#b68938] md:scale-105" : ""
+        pkg.isPopular ? "ring-2 ring-[#b68938] md:scale-105" : ""
       }`}
     >
-      {pkg.popular && (
+      {pkg.isPopular && (
         <motion.div
           className="absolute -top-4 left-1/2 -translate-x-1/2 px-6 py-2 rounded-full bg-gradient-to-r from-[#b68938] to-[#e1ba73] text-black text-xs font-bold uppercase tracking-widest shadow-lg"
           animate={{ y: [0, -5, 0] }}
@@ -50,18 +51,18 @@ const PackageCard: React.FC<PackageCardProps> = ({ pkg, index, onPackageSelect }
             className="text-5xl font-bold text-[#b68938]"
             whileHover={{ scale: 1.1 }}
           >
-            {pkg.price}
+            {pkg.amount}
           </motion.span>
-          {pkg.originalPrice && (
+          {/* {pkg.originalPrice && (
             <span className="text-lg text-gray-500 line-through ml-2">
               {pkg.originalPrice}
             </span>
-          )}
-          <span className="text-gray-500 ml-2">{pkg.period}</span>
+          )} */}
+          <span className="text-gray-500 ml-2">One Time</span>
         </div>
 
-        <ul className="space-y-4 mb-8 relative z-10">
-          {pkg.features.map((feature, fi) => (
+        {/* <ul className="space-y-4 mb-8 relative z-10">
+          {pkg..map((feature, fi) => (
             <motion.li
               key={fi}
               className="flex items-start gap-3"
@@ -77,19 +78,19 @@ const PackageCard: React.FC<PackageCardProps> = ({ pkg, index, onPackageSelect }
               <span className="text-gray-300 text-sm">{feature}</span>
             </motion.li>
           ))}
-        </ul>
+        </ul> */}
 
         <motion.button
           onClick={() => onPackageSelect(pkg)}
           className={`w-full py-4 rounded-xl font-bold text-sm uppercase tracking-widest transition-all relative overflow-hidden group ${
-            pkg.popular
+            pkg.isPopular
               ? "bg-gradient-to-r from-[#b68938] to-[#e1ba73] text-black hover:shadow-[0_0_40px_rgba(182,137,56,0.5)]"
               : "bg-white/5 text-white border border-white/10 hover:bg-white/10"
           }`}
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
         >
-          {pkg.popular && (
+          {pkg.isPopular && (
             <motion.div
               className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
               animate={{ x: ["-100%", "100%"] }}

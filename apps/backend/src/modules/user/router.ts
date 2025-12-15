@@ -1,6 +1,6 @@
 import { initServer } from "@ts-rest/express";
 import { userMutationHandler } from "./mutation";
-import { userContract } from "../../contract/user/contract";
+import { userContract } from "@srk/shared/contracts";
 import { userQueryHandler } from "./query";
 const s = initServer();
 

@@ -2,14 +2,16 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Sparkles, ArrowRight } from 'lucide-react';
 import { PackageDetails } from '../../../lib/types/types';
-import {MagneticButton} from '../../../lib/ui/MagneticButton';
+import { MagneticButton } from '../../../lib/ui/MagneticButton';
 import { PACKAGES_DATA } from '../../../lib/utils/constants';
+import { TSrkGrowPackagesSchema } from '@srk/shared/contracts';
 
 interface CTASectionProps {
-  onPackageSelect: (pkg: PackageDetails) => void;
+  onPackageSelect: (pkg: TSrkGrowPackagesSchema) => void;
+  growPackages?: TSrkGrowPackagesSchema[];
 }
 
-export const CTASection: React.FC<CTASectionProps> = ({ onPackageSelect }) => {
+export const CTASection: React.FC<CTASectionProps> = ({ onPackageSelect, growPackages }) => {
   return (
     <section className="py-32 px-6 relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-br from-[#b68938]/20 via-black to-[#e1ba73]/20" />
@@ -18,7 +20,7 @@ export const CTASection: React.FC<CTASectionProps> = ({ onPackageSelect }) => {
         className="absolute inset-0"
         style={{
           backgroundImage:
-            "radial-gradient(circle at 50% 50%, rgba(182, 137, 56, 0.3), transparent 70%)",
+            'radial-gradient(circle at 50% 50%, rgba(182, 137, 56, 0.3), transparent 70%)',
         }}
         animate={{
           scale: [1, 1.2, 1],
@@ -27,7 +29,7 @@ export const CTASection: React.FC<CTASectionProps> = ({ onPackageSelect }) => {
         transition={{
           duration: 5,
           repeat: Infinity,
-          ease: "easeInOut",
+          ease: 'easeInOut',
         }}
       />
 
@@ -58,23 +60,23 @@ export const CTASection: React.FC<CTASectionProps> = ({ onPackageSelect }) => {
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
           className="backdrop-blur-xl rounded-3xl p-12 md:p-16 border border-[#b68938]/30 relative overflow-hidden group"
-          style={{ background: "rgba(26, 20, 16, 0.6)" }}
+          style={{ background: 'rgba(26, 20, 16, 0.6)' }}
         >
           <motion.div
             className="absolute inset-0 rounded-3xl"
             style={{
               background:
-                "conic-gradient(from 0deg, transparent, rgba(182, 137, 56, 0.3), transparent)",
+                'conic-gradient(from 0deg, transparent, rgba(182, 137, 56, 0.3), transparent)',
             }}
             animate={{ rotate: 360 }}
-            transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+            transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
           />
 
           <motion.div
             initial={{ scale: 0 }}
             whileInView={{ scale: 1 }}
             viewport={{ once: true }}
-            transition={{ delay: 0.2, type: "spring" }}
+            transition={{ delay: 0.2, type: 'spring' }}
           >
             <Sparkles className="w-12 h-12 text-[#b68938] mx-auto mb-6" />
           </motion.div>
@@ -86,7 +88,7 @@ export const CTASection: React.FC<CTASectionProps> = ({ onPackageSelect }) => {
             viewport={{ once: true }}
             transition={{ delay: 0.3 }}
           >
-            Ready to{" "}
+            Ready to{' '}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#b68938] to-[#e1ba73]">
               Grow?
             </span>
@@ -116,17 +118,15 @@ export const CTASection: React.FC<CTASectionProps> = ({ onPackageSelect }) => {
               </MagneticButton>
             </a>
             <motion.button
-              onClick={() =>
-                onPackageSelect(PACKAGES_DATA.intermediate)
-              }
+              onClick={() => growPackages && growPackages.length > 0 && onPackageSelect(growPackages[1] || growPackages[0])}
               className="px-8 py-4 rounded-full bg-white/5 hover:bg-white/10 text-white border border-white/20 font-bold text-sm uppercase tracking-widest transition-all relative overflow-hidden group"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
               <motion.div
                 className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent"
-                initial={{ x: "-100%" }}
-                whileHover={{ x: "100%" }}
+                initial={{ x: '-100%' }}
+                whileHover={{ x: '100%' }}
                 transition={{ duration: 0.6 }}
               />
               <span className="relative z-10">Get Started Now</span>
@@ -140,7 +140,7 @@ export const CTASection: React.FC<CTASectionProps> = ({ onPackageSelect }) => {
             viewport={{ once: true }}
             transition={{ delay: 0.6 }}
           >
-            {["No Contract", "Instant Activation", "24/7 Support"].map(
+            {['No Contract', 'Instant Activation', '24/7 Support'].map(
               (item, i) => (
                 <motion.div
                   key={item}

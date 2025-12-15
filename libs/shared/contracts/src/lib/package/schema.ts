@@ -69,6 +69,8 @@ export const growPackageSubTypesSchema = z.object({
   updatedAt: z.date(),
 });
 
+export type TGetGrowPackagesubTypes = z.TypeOf<typeof growPackageSubTypesSchema>
+
 export const getAllSrkGrowPackagesSchema = z.array(
   z.object({
     _id: z.string(),
@@ -94,4 +96,4 @@ export const getAllSrkGrowPackagesSchema = z.array(
   })
 );
 
-export type TGetAllSrkGrowPackagesSchema = z.TypeOf<typeof getAllSrkGrowPackagesSchema>;
+export type TGetAllSrkGrowPackages = z.TypeOf<typeof getAllSrkGrowPackagesSchema>;

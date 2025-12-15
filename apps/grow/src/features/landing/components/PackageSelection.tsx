@@ -1,80 +1,28 @@
-import React, { forwardRef, useEffect, useState } from 'react';
+import React, { forwardRef } from 'react';
 import { motion } from 'framer-motion';
-import { PACKAGES_DATA } from '../../../lib/utils/constants';
 import { PackageDetails } from '../../../lib/types/types';
 import PackageCard from '../../../lib/ui/PackageCard';
-import { TSrkGrowPackagesSchema } from '@srk/shared/contracts';
 import { api } from '../../../lib/api';
 
-export interface PackagesSectionProps {
-  onPackageSelect: (pkg: TSrkGrowPackagesSchema) => void;
-  onGrowPackagesLoaded?: (packages: TSrkGrowPackagesSchema[]) => void;
+interface PackagesSectionProps {
+  onPackageSelect: (pkg: PackageDetails) => void;
 }
 
 const PackagesSection = forwardRef<HTMLElement, PackagesSectionProps>(
-  ({ onPackageSelect, onGrowPackagesLoaded }, ref) => {
-    const generalPackages = [
-      PACKAGES_DATA.starter,
-      PACKAGES_DATA.intermediate,
-      PACKAGES_DATA.pro,
-    ];
+  ({ onPackageSelect }, ref) => {
+    const { data: growPackagesRes, isLoading } =
+      api.package.getAllSrkGrowPackages.useQuery(['packages']);
 
-    const [packages, setPackages] = useState<TSrkGrowPackagesSchema[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-
-    useEffect(() => {
-      const fetchPackages = async () => {
-        try {
-          setIsLoading(true);
-          // Call the core API directly without React Query hook
-          const response = await api.package.getAllSrkGrowPackages();
-          console.log('API Response:', response);
-          
-          if (Array.isArray(response.body)) {
-            setPackages(response.body);
-            if (onGrowPackagesLoaded) {
-              onGrowPackagesLoaded(response.body);
-            }
-          }
-        } catch (err) {
-          const errorMsg = err instanceof Error ? err.message : 'Failed to load packages';
-          console.error('Error loading packages:', err);
-          setError(errorMsg);
-        } finally {
-          setIsLoading(false);
-        }
-      };
-
-      fetchPackages();
-    }, [onGrowPackagesLoaded]);
-
-    if (isLoading) {
-      return (
-        <section
-          ref={ref}
-          id="packages"
-          className="py-32 px-6 bg-gradient-to-b from-[#0a0705] to-black relative overflow-hidden"
-        >
-          <div className="text-center py-20">
-            <p className="text-gray-400">Loading packages...</p>
-          </div>
-        </section>
-      );
+    if (
+      growPackagesRes?.status !== 200 ||
+      !growPackagesRes ||
+      !growPackagesRes.body
+    ) {
+      return <>No data found</>;
     }
 
-    if (error) {
-      return (
-        <section
-          ref={ref}
-          id="packages"
-          className="py-32 px-6 bg-gradient-to-b from-[#0a0705] to-black relative overflow-hidden"
-        >
-          <div className="text-center py-20">
-            <p className="text-red-400">Error loading packages: {error}</p>
-          </div>
-        </section>
-      );
+    if (isLoading) {
+      return <>Loading Packages</>;
     }
 
     return (
@@ -113,20 +61,14 @@ const PackagesSection = forwardRef<HTMLElement, PackagesSectionProps>(
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
-            {Array.isArray(packages) && packages.length > 0 ? (
-              packages.map((pkg: TSrkGrowPackagesSchema, i: number) => (
-                <PackageCard
-                  key={`general-${i}`}
-                  pkg={pkg}
-                  index={i}
-                  onPackageSelect={onPackageSelect}
-                />
-              ))
-            ) : (
-              <p className="text-gray-400 col-span-3 text-center py-8">
-                No packages available to display
-              </p>
-            )}
+            {growPackagesRes.body.map((pkg, i) => (
+              <PackageCard
+                key={`general-${i}`}
+                pkg={pkg}
+                index={i}
+                onPackageSelect={onPackageSelect}
+              />
+            ))}
           </div>
         </div>
       </section>

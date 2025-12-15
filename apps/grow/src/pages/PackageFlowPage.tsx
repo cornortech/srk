@@ -8,8 +8,6 @@ export const PackageFlowPage = () => {
   const selectedPackage = location.state?.package as PackageDetails;
 
   if (!selectedPackage) {
-    // If accessed directly without state, redirect to landing
-    // In a real app, you might want to fetch package by ID from URL params
     setTimeout(() => navigate('/'), 0);
     return null;
   }

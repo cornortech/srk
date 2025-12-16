@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import SpotlightCard from './SpotlightCards';
 import { TSrkGrowPackagesSchema } from '@srk/shared/contracts';
+import { CheckCircle } from 'lucide-react';
 
 interface PackageCardProps {
   pkg: TSrkGrowPackagesSchema;
@@ -55,16 +56,16 @@ const PackageCard: React.FC<PackageCardProps> = ({
           >
             {pkg.amount}
           </motion.span>
-          {/* {pkg.originalPrice && (
+          {pkg.amountBeforeDiscount && (
             <span className="text-lg text-gray-500 line-through ml-2">
-              {pkg.originalPrice}
+              {pkg.amountBeforeDiscount}
             </span>
-          )} */}
+          )}
           <span className="text-gray-500 ml-2">One Time</span>
         </div>
 
-        {/* <ul className="space-y-4 mb-8 relative z-10">
-          {pkg..map((feature, fi) => (
+        <ul className="space-y-4 mb-8 relative z-10">
+          {pkg.features.map((feature, fi) => (
             <motion.li
               key={fi}
               className="flex items-start gap-3"
@@ -80,7 +81,7 @@ const PackageCard: React.FC<PackageCardProps> = ({
               <span className="text-gray-300 text-sm">{feature}</span>
             </motion.li>
           ))}
-        </ul> */}
+        </ul>
 
         <motion.button
           onClick={() => onPackageSelect(pkg)}

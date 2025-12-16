@@ -8,13 +8,10 @@ import {
   UserDetails,
 } from '../../../lib/types/types';
 import PaymentModel from '../../../lib/ui/PaymentModel';
-import { StepProgress } from './package-flow/StepProgress';
-import { CheckoutForm } from './package-flow/CheckoutForm';
-import {
-  EngagementStep,
-  OptionStep,
-  PlatformStep,
-} from './package-flow/StepViews';
+import { StepProgress } from './StepProgress';
+import { CheckoutForm } from './CheckoutForm';
+import { EngagementStep, OptionStep, PlatformStep } from './StepViews';
+import { api } from '../../../lib/api';
 
 interface PackageSelectionFlowProps {
   selectedPackage: PackageDetails;
@@ -126,7 +123,8 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
       selectedOption: selectedSubTypeIndex,
       packageId: selectedPackage._id,
       socialLink:
-        userDetails.socialLink || `https://${selectedPlatform}.com/your-profile`,
+        userDetails.socialLink ||
+        `https://${selectedPlatform}.com/your-profile`,
       additionalInfo: userDetails.additionalInfo,
       postLinks: userDetails.postLinks,
       promoCode: userDetails.promoCode,

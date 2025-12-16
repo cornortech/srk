@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom';
-import { PackageSelectionFlow } from '../features/landing/components/PackageSelectionFlow';
+import { PackageSelectionFlow } from '../features/package-flow/components/PackageSelectionFlow';
 import { PackageDetails, UserDetails } from '../lib/types/types';
 
 export const PackageFlowPage = () => {

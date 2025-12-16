@@ -82,11 +82,11 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
     >
   ) => {
     const { name, value } = e.target;
-    setUserDetails((prev) => ({ ...prev, [name]: value }));
+    setUserDetails((prev: CheckoutUserDetails) => ({ ...prev, [name]: value }));
   };
 
   const handlePostLinkChange = (index: number, value: string) => {
-    setUserDetails((prev) => {
+    setUserDetails((prev: CheckoutUserDetails) => {
       const newPostLinks = [...(prev.postLinks || ['', '', '', ''])];
       newPostLinks[index] = value;
       return { ...prev, postLinks: newPostLinks };

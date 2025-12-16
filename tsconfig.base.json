@@ -25,7 +25,8 @@
       "@srk/shared/assets": ["libs/shared/assets/src/index.ts"],
       "@srk/task": ["apps/task/src/index.ts"],
       "@srk/task/*": ["apps/task/src/*"],
-      "@srk/shared/contracts": ["libs/shared/contracts/src/index.ts"]
+      "@srk/shared/contracts": ["libs/shared/contracts/src/index.ts"],
+      "@srk/shared/firebase": ["libs/shared/firebase/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

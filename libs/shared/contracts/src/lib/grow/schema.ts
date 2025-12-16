@@ -83,6 +83,19 @@ export const validateGrowUserPromoCodeResponseSchema = z.object({
   }),
 });
 
-export type TValidateGrowUserPromoCodeResponse = z.infer<
-  typeof validateGrowUserPromoCodeResponseSchema
->;
+export type TValidateGrowUserPromoCodeResponse = z.infer<typeof validateGrowUserPromoCodeResponseSchema>
+
+export const srkGrowUsersSchema = z.object({
+    _id: z.string(),
+    fullName: z.string(),
+    referredBy: z.string().optional(),
+    status: z.enum(['verificationPending', 'portalActivated', 'portalDeactivated']),
+    socialMediaPackage: z.object({
+        _id: z.string(),
+        name: z.string(),
+    }),
+});
+
+export const getAllSrkGrowUsersResponseSchema = z.array(srkGrowUsersSchema);
+
+export type TGetAllSrkGrowUsersResponse = z.infer<typeof getAllSrkGrowUsersResponseSchema>;

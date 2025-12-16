@@ -1,7 +1,7 @@
 import { growContract } from "@srk/shared/contracts";
 import { AppRouteImplementationOrOptions } from "@ts-rest/express/src/lib/types";
 import { growSocialMediaPackageEnrollmentModel } from "../../model/growSocialMediaPackageEnrollement";
-import { GrowEnrollmentPopulated } from "../../utils/types/growQuery";
+import { GrowEnrollmentPopulated, GrowPackageUserPopulated } from "../../utils/types/growQuery";
 
 const getAllSrkGrowEnrollementUser: AppRouteImplementationOrOptions<
   typeof growContract.getAllGrowSocialMediaEnrollement
@@ -135,11 +135,59 @@ const getSrkGrowEnrollementUserById: AppRouteImplementationOrOptions<
   }
 };
 
+const getAllSrkGrowUsers: AppRouteImplementationOrOptions<
+  typeof growContract.getAllSrkGrowUsers
+> = async () => {
+  try {
 
+    const usersLists = await growSocialMediaPackageEnrollmentModel.
+      find({})
+      .populate<GrowPackageUserPopulated>({
+        path: "growSocialMediaPackageUserId",
+        select: "fullName referredBy status",
+        populate: {
+          path: "referredBy",
+          select: "fullName",
+        },
+      })
+      .populate<GrowPackageUserPopulated>({
+        path: "growSocialMediaPackageId",
+        select: "name",
+      })
+      .sort({ createdAt: -1 })
+      .lean();
+
+    return {
+      status: 200,
+      body: usersLists.map((u) => ({
+        _id: u.growSocialMediaPackageUserId._id.toString(),
+        fullName: u.growSocialMediaPackageUserId.fullName,
+        referredBy: u.growSocialMediaPackageUserId.referredBy?.fullName ?? null,
+        status: u.growSocialMediaPackageUserId.status,
+        socialMediaPackage: {
+          _id: u.growSocialMediaPackageId._id.toString(),
+          name: u.growSocialMediaPackageId.name,
+        },
+      })),
+    }
+
+  } catch (error) {
+    console.error(error);
+    return {
+      status: 500,
+      body: {
+        success: false,
+        message: error.message ? `Internal server error: ${error.message}` : "Internal server error",
+      },
+
+    }
+  };
+};
 
 // SRK Grow Enrollment Users
 
-export const growEnrollmentUserQueryHandler = {
-  getSrkGrowEnrollementUserById,
+export const growQueryHandler = {
   getAllSrkGrowEnrollementUser,
+  getSrkGrowEnrollementUserById,
+  getAllSrkGrowUsers
 };

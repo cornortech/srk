@@ -33,3 +33,20 @@ export interface GrowEnrollmentPopulated {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface GrowPackageUserPopulated {
+  _id: Types.ObjectId;
+  growSocialMediaPackageUserId: {
+    _id: Types.ObjectId;
+    fullName: string;
+    status: "verificationPending" | "portalActivated" | "portalDeactivated";
+    referredBy?: {
+      _id: Types.ObjectId;
+      fullName: string;
+    };
+  }
+  growSocialMediaPackageId: {
+    _id: Types.ObjectId;
+    name: string;
+  };
+}

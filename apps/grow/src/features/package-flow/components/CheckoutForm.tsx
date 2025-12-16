@@ -6,7 +6,7 @@ import {
   EngagementType,
   PackageDetails,
   SocialPlatform,
-} from '../../../../lib/types/types';
+} from '../../../lib/types/types';
 
 interface CheckoutFormProps {
   selectedPackage: PackageDetails;
@@ -87,17 +87,18 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
             <div className="flex justify-between items-center py-3 border-b border-white/10">
               <span className="text-gray-400">Price</span>
               <span className="text-2xl font-bold text-[#b68938]">
-                {selectedPackage.price}
+                {selectedPackage.amount}
               </span>
             </div>
           </div>
-          {selectedPackage.originalPrice && (
+          {/* originalPrice not available in PackageDetails type currently */}
+          {/* {selectedPackage.originalPrice && (
             <div className="mt-4 px-4 py-2 rounded-lg bg-gradient-to-r from-[#b68938]/20 to-[#e1ba73]/20 border border-[#b68938]/30 text-center">
               <span className="text-[#e1ba73] font-bold text-sm">
                 Save {selectedPackage.originalPrice}
               </span>
             </div>
-          )}
+          )} */}
         </motion.div>
       </div>
 
@@ -365,9 +366,9 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
                 I agree to the Terms & Conditions and Privacy Policy. I
                 understand that all engagements come from verified SRK
                 University students and the delivery time is{' '}
-                {selectedPackage.id === 'starter'
+                {selectedPackage._id === 'starter'
                   ? '7 days'
-                  : selectedPackage.id === 'intermediate'
+                  : selectedPackage._id === 'intermediate'
                   ? '3 days'
                   : '24 hours'}
                 .
@@ -388,7 +389,7 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
               onClick={handleSubmit}
               className="px-8 py-3 rounded-full font-bold text-sm uppercase tracking-widest transition-all bg-gradient-to-r from-[#b68938] to-[#e1ba73] text-black hover:shadow-[0_0_30px_rgba(182,137,56,0.5)] hover:scale-105 active:scale-95"
             >
-              Complete Order for {selectedPackage.price}
+              Complete Order for {selectedPackage.amount}
             </button>
           </div>
 

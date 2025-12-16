@@ -132,3 +132,10 @@ export interface PlatformData {
   tasks: number;
   completed: number;
 }
+
+export interface DiscountDetails {
+  originalAmount: number;
+  discountPercentage: number;
+  discountAmount: number;
+  finalAmountAfterDiscount: number;
+}

@@ -12,6 +12,7 @@ import { StepProgress } from './StepProgress';
 import { CheckoutForm } from './CheckoutForm';
 import { EngagementStep, OptionStep, PlatformStep } from './StepViews';
 import { api } from '../../../lib/api';
+import { useSRKFileUpload } from '@srk/shared/hooks';
 
 interface PackageSelectionFlowProps {
   selectedPackage: PackageDetails;
@@ -51,6 +52,71 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
     additionalInfo: '',
     kyc: [''],
   });
+
+  const [promoError, setPromoError] = useState<string | null>(null);
+  const [promoSuccessMessage, setPromoSuccessMessage] = useState<string | null>(
+    null
+  );
+  const [discountDetails, setDiscountDetails] = useState<{
+    originalAmount: number;
+    discountPercentage: number;
+    discountAmount: number;
+    finalAmountAfterDiscount: number;
+  } | null>(null);
+
+  const [kycFiles, setKycFiles] = useState<File[]>([]);
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const { uploadFile, isUploading: isUploadingKYC } = useSRKFileUpload('grow');
+
+  const validatePromo = api.grow.validateGrowUserPromoCode.useMutation({
+    onSuccess: (data) => {
+      console.log('data', data);
+      if (data.status === 200) {
+        setDiscountDetails(data.body.discountDetails);
+
+        setPromoSuccessMessage(
+          (data.body as any).message || 'Promo code applied!'
+        );
+        setPromoError(null);
+      } else {
+        // Handle error responses (400, 409, 500)
+        setPromoError((data.body as any).message || 'Invalid promo code');
+        setDiscountDetails(null);
+        setPromoSuccessMessage(null);
+      }
+    },
+    onError: (err) => {
+      // Cast to any to safely access message from error response
+      setPromoError(
+        (err as any).body?.message || 'Failed to validate promo code'
+      );
+      setDiscountDetails(null);
+      setPromoSuccessMessage(null);
+    },
+  });
+
+  const createEnrollment =
+    api.grow.createGrowSocialMediaEnrollement.useMutation({
+      onSuccess: (data) => {
+        // Handle success if needed, e.g. toast?
+        // PaymentModel handles the success UI view
+      },
+      onError: (error) => {
+        console.error('Enrollment failed', error);
+        alert('Failed to create enrollment. Please try again.');
+        throw error; // Re-throw to let PaymentModel know
+      },
+    });
+
+  const handleValidatePromoCode = () => {
+    if (!userDetails.promoCode) return;
+    validatePromo.mutate({
+      body: {
+        promoCode: userDetails.promoCode,
+        growSocialMediaPackageId: selectedPackage._id,
+      },
+    });
+  };
 
   const socialPlatforms: SocialPlatform[] = [
     'youtube',
@@ -93,47 +159,151 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
     });
   };
 
-  const handleSubmit = () => {
-    if (
-      !selectedPlatform ||
-      !engagementType ||
-      !userDetails.name ||
-      !userDetails.email ||
-      !userDetails.phone
-    ) {
-      alert('Please fill in all required fields');
+  const validateForm = () => {
+    const errors: Record<string, string> = {};
+
+    if (!userDetails.name) errors.name = 'Full Name is required';
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!userDetails.email || !emailRegex.test(userDetails.email)) {
+      errors.email = 'Valid Email Address is required';
+    }
+
+    if (!userDetails.phone || userDetails.phone.length < 10) {
+      errors.phone = 'Phone number must be at least 10 digits';
+    }
+
+    if (!userDetails.password || userDetails.password.length < 8) {
+      errors.password = 'Password must be at least 8 characters';
+    }
+
+    if (userDetails.password !== userDetails.confirmPassword) {
+      errors.confirmPassword = 'Passwords do not match';
+    }
+
+    if (!userDetails.country) errors.country = 'Country is required';
+    if (!selectedPlatform) errors.platform = 'Platform is required';
+    if (!engagementType) errors.engagementType = 'Engagement Type is required';
+
+    if (kycFiles.length === 0) {
+      errors.kyc = 'At least one KYC document is required';
+    }
+
+    if (showMultiplePostLinks) {
+      (userDetails.postLinks || []).forEach((link, index) => {
+        try {
+          new URL(link);
+        } catch {
+          errors[`postLink_${index}`] =
+            'Please enter a valid URL (e.g., https://example.com)';
+        }
+      });
+      // Check count
+      if (
+        (userDetails.postLinks?.filter((l) => l).length || 0) < numPostLinks
+      ) {
+        errors.postLinks = `Please provide all ${numPostLinks} links`;
+      }
+    } else {
+      // Single link
+      const link = userDetails.socialLink || '';
+      try {
+        new URL(link);
+      } catch {
+        errors.socialLink = `Please enter a valid URL (e.g., https://${selectedPlatform}.com/profile)`;
+      }
+    }
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const handleSubmit = async () => {
+    if (!validateForm()) {
+      // Scroll to top or first error could be good UX, but simple alert or showing errors is start
       return;
     }
 
-    // Open payment modal instead of completing immediately
-    setShowPaymentModal(true);
+    try {
+      // Upload KYC files
+      const uploadedUrls: string[] = [];
+      if (kycFiles.length > 0) {
+        // Upload sequentially or parallel
+        for (const file of kycFiles) {
+          const result = await uploadFile(file, 'image'); // banking on mostly images
+          uploadedUrls.push(result.url);
+        }
+      }
+
+      setUserDetails((prev) => ({ ...prev, kyc: uploadedUrls }));
+      setShowPaymentModal(true);
+    } catch (error) {
+      console.error('File upload failed', error);
+      alert('Failed to upload KYC documents. Please try again.');
+    }
   };
 
-  const handlePaymentComplete = () => {
-    const finalDetails: CheckoutUserDetails = {
-      name: userDetails.name,
-      email: userDetails.email,
-      phone: userDetails.phone,
-      password: userDetails.password,
-      confirmPassword: userDetails.confirmPassword,
-      country: userDetails.country,
-      gender: userDetails.gender,
-      platform: selectedPlatform!,
-      engagementType: engagementType!,
-      selectedOption: selectedSubTypeIndex,
-      packageId: selectedPackage._id,
-      socialLink:
-        userDetails.socialLink ||
-        `https://${selectedPlatform}.com/your-profile`,
-      additionalInfo: userDetails.additionalInfo,
-      postLinks: userDetails.postLinks,
-      promoCode: userDetails.promoCode,
-      kyc: userDetails.kyc,
-    };
+  const handlePaymentSubmit = async (paymentData: {
+    transactionId: string;
+    paymentProofUrl: string;
+    paymentMethod: string;
+  }) => {
+    try {
+      const kycUrl = userDetails.kyc?.[0] || '';
 
-    setShowPaymentModal(false);
-    // Close the payment flow and go back to landing
-    onBack();
+      const packageType = selectedPackage.packageTypes[selectedTypeIndex];
+      const packageSubType =
+        packageType?.packageSubTypes?.[selectedSubTypeIndex];
+
+      if (!packageType || !packageSubType) {
+        throw new Error('Invalid package option selected');
+      }
+
+      // Ensure valid profile link
+      let profileLink = userDetails.socialLink || '';
+      if (!profileLink) {
+        // Fallback to a constructed URL to satisfy schema if user didn't provide one
+        // Ideally this should be validated in the form step, but as a safeguard:
+        profileLink = `https://${selectedPlatform}.com/user`;
+      } else if (!profileLink.startsWith('http')) {
+        profileLink = `https://${profileLink}`;
+      }
+
+      await createEnrollment.mutateAsync({
+        body: {
+          userData: {
+            fullName: userDetails.name,
+            email: userDetails.email,
+            phoneNumber: userDetails.phone,
+            country: userDetails.country,
+            gender: (userDetails.gender.charAt(0).toUpperCase() +
+              userDetails.gender.slice(1)) as 'Male' | 'Female' | 'Other',
+            password: userDetails.password,
+            kycURL: kycUrl,
+            usedPromoCode: userDetails.promoCode || undefined,
+          },
+          enrollementData: {
+            growSocialMediaPackageId: selectedPackage._id,
+            growSocialMediaPackageTypeId: packageType._id || 'unknown',
+            growSocialMediaPackageSubTypeId: packageSubType._id || 'unknown',
+            profileLinkURL: profileLink,
+          },
+          paymentData: {
+            paymentURL: paymentData.paymentProofUrl,
+            transactionId: paymentData.transactionId,
+            paymentMethod: paymentData.paymentMethod as
+              | 'esewa'
+              | 'khalti'
+              | 'bankTransfer',
+          },
+        },
+      });
+
+      // We don't close modal immediately, let PaymentModel show success screen
+    } catch (error) {
+      console.error('Failed to create enrollment', error);
+      throw error; // Propagate to PaymentModel to show error
+    }
   };
 
   const getSelectedOptionDetails = () => {
@@ -247,6 +417,15 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
               handleBack={() => setStep(3)}
               showMultiplePostLinks={showMultiplePostLinks}
               numPostLinks={numPostLinks}
+              onValidatePromoCode={handleValidatePromoCode}
+              isValidatingPromo={validatePromo.isPending}
+              promoError={promoError}
+              promoSuccessMessage={promoSuccessMessage}
+              discountDetails={discountDetails}
+              kycFiles={kycFiles}
+              setKycFiles={setKycFiles}
+              formErrors={formErrors}
+              isUploadingKYC={isUploadingKYC}
             />
           )}
         </div>
@@ -255,14 +434,20 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
       {/* Payment Modal */}
       <PaymentModel
         isOpen={showPaymentModal}
-        onClose={handlePaymentComplete}
+        onClose={() => {
+          setShowPaymentModal(false);
+          if (createEnrollment.isSuccess) onBack();
+        }}
         userDetails={{
           ...userDetails,
           platform: selectedPlatform!,
           engagementType: engagementType!,
         }}
-        packagePrice={String(selectedPackage.amount)}
+        packagePrice={String(
+          discountDetails?.finalAmountAfterDiscount || selectedPackage.amount
+        )}
         packageName={selectedPackage.name}
+        onSubmit={handlePaymentSubmit}
       />
     </div>
   );

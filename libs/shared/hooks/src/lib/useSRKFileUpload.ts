@@ -1,5 +1,5 @@
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
-import { storage } from '@srk/shared/firebase';
+import { storage } from '../../../firebase/src';
 import { v4 as uuidv4 } from 'uuid';
 import { useState } from 'react';
 

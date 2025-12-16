@@ -5,9 +5,9 @@ import {
   EngagementType,
   PackageDetails,
 } from '../../../../lib/types/types';
-import SocialPlatformCard from '../../../../lib/ui/SocialPlatformCard';
-import EngagementOption from '../../../../lib/ui/EngagementOption';
-import SelectOption from '../../../../lib/ui/SelectOption';
+import SocialPlatformCard from '../../../lib/ui/SocialPlatformCard';
+import EngagementOption from '../../../lib/ui/EngagementOption';
+import SelectOption from '../../../lib/ui/SelectOption';
 
 interface PlatformStepProps {
   platforms: SocialPlatform[];

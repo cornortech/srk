@@ -8,7 +8,7 @@ const s = initServer();
 export const growRouter = s.router(growContract, {
     createGrowSocialMediaEnrollement: growMutationHandler.createGrowSocialMediaEnrollement,
     validateGrowUserPromoCode: growMutationHandler.validateGrowUserPromoCode,
-    acceptSocialGrowEnrollementRequest: growMutationHandler.acceptSocialGrowEnrollementRequest,
-    rejectSocialGrowEnrollementRequest: growMutationHandler.rejectSocialGrowEnrollementRequest,
+    acceptSocialGrowEnrollmentRequest: growMutationHandler.acceptSocialGrowEnrollmentRequest,
+    rejectSocialGrowEnrollmentRequest: growMutationHandler.rejectSocialGrowEnrollmentRequest,
     getSrkGrowProfile: growQueryHandler.getSrkGrowProfile
 });

@@ -39,7 +39,7 @@ const getAllSrkGrowEnrollementUser: AppRouteImplementationOrOptions<
             e.growSocialMediaPackageTypeId._id.toString(),
           growSocialMediaPackageSubTypeId:
             e.growSocialMediaPackageSubTypeId._id.toString(),
-          profileLinkURL: e.profileLinkURL,
+          profileLinkURL: e.profileLinkURL && e.profileLinkURL[0],
           isActive: e.isActive,
         },
 
@@ -115,7 +115,7 @@ const getSrkGrowEnrollementUserById: AppRouteImplementationOrOptions<
             _id: enrollment.growSocialMediaPackageSubTypeId._id,
             title: enrollment.growSocialMediaPackageSubTypeId.title,
           },
-          profileLinkURL: enrollment.profileLinkURL,
+          profileLinkURL: enrollment.profileLinkURL && enrollment.profileLinkURL[0],
           isActive: enrollment.isActive,
         },
 

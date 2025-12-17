@@ -811,9 +811,7 @@ const editPaymentDetails: AppRouteImplementationOrOptions<
   }
 };
 
-const loginSrkGrow: AppRouteImplementationOrOptions<
-  typeof authContract.loginSrkGrow
-> = async ({ res, body }) => {
+const loginSrkGrow: AppRouteImplementationOrOptions<typeof authContract.loginSrkGrow> = async ({ res, body }) => {
   try {
     const userExist = await growSocialMediaPackageUserModel.findOne({
       email: body.email,

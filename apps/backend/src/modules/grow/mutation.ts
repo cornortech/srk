@@ -225,9 +225,9 @@ export const validateGrowUserPromoCode: AppRouteImplementationOrOptions<
     };
 };
 
-const acceptSocialGrowEnrollementRequest: AppRouteImplementationOrOptions<typeof growContract.acceptSocialGrowEnrollementRequest> = async ({ params }) => {
+const acceptSocialGrowEnrollmentRequest: AppRouteImplementationOrOptions<typeof growContract.acceptSocialGrowEnrollmentRequest> = async ({ params }) => {
     try {
-        const enrollmentRequest = await growSocialMediaPackageEnrollmentModel.findById(params.enrollementId);
+        const enrollmentRequest = await growSocialMediaPackageEnrollmentModel.findById(params.enrollmentId);
 
         if (!enrollmentRequest) {
             return {
@@ -254,7 +254,7 @@ const acceptSocialGrowEnrollementRequest: AppRouteImplementationOrOptions<typeof
 
         await growSocialMediaPackageEnrollmentModel.findOneAndUpdate(
             {
-                _id: params.enrollementId
+                _id: params.enrollmentId
             },
             {
                 $set: {
@@ -284,9 +284,9 @@ const acceptSocialGrowEnrollementRequest: AppRouteImplementationOrOptions<typeof
 }
 
 
-const rejectSocialGrowEnrollementRequest: AppRouteImplementationOrOptions<typeof growContract.rejectSocialGrowEnrollementRequest> = async ({ params, body }) => {
+const rejectSocialGrowEnrollmentRequest: AppRouteImplementationOrOptions<typeof growContract.rejectSocialGrowEnrollmentRequest> = async ({ params, body }) => {
     try {
-        const enrollementRequest = await growSocialMediaPackageEnrollmentModel.findById(params.enrollementId);
+        const enrollementRequest = await growSocialMediaPackageEnrollmentModel.findById(params.enrollmentId);
 
         if (!enrollementRequest) {
             return {
@@ -339,6 +339,6 @@ const rejectSocialGrowEnrollementRequest: AppRouteImplementationOrOptions<typeof
 export const growMutationHandler = {
     createGrowSocialMediaEnrollement,
     validateGrowUserPromoCode,
-    acceptSocialGrowEnrollementRequest,
-    rejectSocialGrowEnrollementRequest,
+    acceptSocialGrowEnrollmentRequest,
+    rejectSocialGrowEnrollmentRequest,
 }

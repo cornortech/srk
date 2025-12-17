@@ -1,9 +1,4 @@
-import { MOCK_USER_VERIFICATION_DATA } from '../../../data/adminMock';
-import {
-  DashboardData,
-  PaymentVerificationItem,
-  VerificationItem,
-} from '../../../lib/types/admin';
+import { DashboardData } from '../../../lib/types/admin';
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { GradientText } from '../components/ui/GradientText';
@@ -15,14 +10,29 @@ import { api } from '../../../lib/api';
 import moment from 'moment';
 import { useSRKAlert } from '@srk/shared/hooks';
 import { PostLinksModal } from '../Modals/PostLinksModal';
+import TablePagination from '../../../lib/ui/TablePagination';
 
 interface UserVerificationViewProps {
   data: DashboardData;
 }
 
 export const UserVerificationView: React.FC<UserVerificationViewProps> = () => {
+  const [page, setPage] = useState(1);
+
   const { data: growEnrollementUserData, isLoading } =
-    api.grow.getAllGrowSocialMediaEnrollement.useQuery(['enrolledUser']);
+    api.grow.getAllGrowSocialMediaEnrollement.useQuery(
+      ['enrolledUser', page], // queryKey
+      {
+        query: {
+          page: page,
+          limit: 10,
+        },
+      }
+    );
+
+
+  const limit = 10;
+  const totalPage = growEnrollementUserData?.body.totalPages ?? 1;
 
   const [documentViewerOpen, setDocumentViewerOpen] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState<{
@@ -216,7 +226,7 @@ export const UserVerificationView: React.FC<UserVerificationViewProps> = () => {
                 </tr>
               </thead>
               <tbody>
-                {growEnrollementUserData?.body.map((item, index) => (
+                {growEnrollementUserData?.body.data.map((item, index) => (
                   <motion.tr
                     key={item._id}
                     initial={{ y: 20, opacity: 0 }}
@@ -226,7 +236,7 @@ export const UserVerificationView: React.FC<UserVerificationViewProps> = () => {
                   >
                     <td className="py-4 px-6">
                       <code className="text-sm font-mono text-white group-hover:text-[#e1ba73] transition-colors">
-                        {index + 1}
+                        {index + 1 + (page - 1) * 10}
                       </code>
                     </td>
                     <td className="py-4 px-6">
@@ -321,6 +331,14 @@ export const UserVerificationView: React.FC<UserVerificationViewProps> = () => {
           </div>
         </div>
       </GlassCard>
+
+      {totalPage > 1 && (
+        <TablePagination
+          page={page}
+          totalPages={totalPage}
+          onPageChange={setPage}
+        />
+      )}
 
       <AnimatePresence>
         {documentViewerOpen && selectedDocument && (

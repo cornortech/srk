@@ -165,9 +165,7 @@ const getSrkBankRequestByStatus: AppRouteImplementationOrOptions<
       };
     }>("userId");
 
-    return {
-      status: 200,
-      body: srkBankRequests.map((bank) => ({
+    const formattedRequests = srkBankRequests.map((bank) => ({
         requestedAt: bank.createdAt,
         status: bank.status,
         userId: {
@@ -178,7 +176,11 @@ const getSrkBankRequestByStatus: AppRouteImplementationOrOptions<
           phoneNumber: bank.userId.phoneNumber,
           requestedAt: bank.createdAt,
         },
-      })),
+      }));
+
+    return {
+      status: 200,
+      body: formattedRequests,
     };
   } catch (error) {
     return {

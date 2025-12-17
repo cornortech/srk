@@ -29,8 +29,8 @@ export const growContract = c.router({
     method: 'GET',
     path: '/get-all-social-media-enrollement',
     query: z.object({
-      limit: z.number().optional(),
-      page: z.number().optional(),
+      limit: z.coerce.number().optional(),
+      page: z.coerce.number().optional(),
     })?.optional(),
     responses: {
       200: z.object({

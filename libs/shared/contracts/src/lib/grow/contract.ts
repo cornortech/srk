@@ -58,5 +58,17 @@ export const growContract = c.router({
             500: ErrorSchema
         },
         summary: "Reject Social Grow Enrollement Request by Id"
-    }
+    },
+
+    getSrkGrowProfile: {
+        method: "GET",
+        path: "/get-srk-grow-profile/:id",
+        responses: {
+            200: SuccessSchema,
+            403: ErrorSchema,
+            404: ErrorSchema,
+            500: ErrorSchema,
+        },
+        summary: "Get Srk Grow Profile by Id"
+    },
 });

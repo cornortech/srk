@@ -284,37 +284,62 @@ const getAllBalancePayoutsByStatus: AppRouteImplementationOrOptions<
   typeof financeContract.getAllBalancePayoutsByStatus
 > = async ({ req }) => {
   try {
-    const { status, startDate, endDate, globalSearch } = req.query;
+    const { status, startDate, endDate, globalSearch } = req.query as {
+      status?: string | string[];
+      startDate?: string;
+      endDate?: string;
+      globalSearch?: string;
+      page?: string;
+      limit?: string;
+    };
 
-    // Build the query object
+    // Convert status to array
+    const statusArray = status
+      ? Array.isArray(status)
+        ? status
+        : [status]
+      : [];
+
+    // Pagination
+    const page = req.query.page ? parseInt(req.query.page as string, 10) : 1;
+    const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 10;
+
+    const skip = (page - 1) * limit;
+
+    // Build query object
     const query: any = {};
 
-    // Filter by status (if provided)
-    if (status) {
-      query.status = { $in: Array.isArray(status) ? status : [status] };
+    // Status filter
+    if (statusArray.length > 0) {
+      query.status = { $in: statusArray };
     }
 
-    // Filter by date range (if provided)
+    // Date filter
     if (startDate && endDate) {
       query.createdAt = {
-        $gte: new Date(startDate as unknown as string),
-        $lte: new Date(endDate as unknown as string),
+        $gte: new Date(startDate),
+        $lte: new Date(endDate),
       };
     }
 
-    // Global search (if provided)
+    // Global search
     if (globalSearch) {
       query.$or = [
         { payoutId: { $regex: globalSearch, $options: "i" } },
-        { userId: { $regex: globalSearch, $options: "i" } },
         { status: { $regex: globalSearch, $options: "i" } },
+        { transactionNumber: { $regex: globalSearch, $options: "i" } },
       ];
     }
 
-    // Fetch data from the database
+    // Count total
+    const totalRequest = await balancePayoutModel.countDocuments(query);
+
+    // Fetch paginated data
     const payouts = await balancePayoutModel
       .find(query)
       .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
       .populate<{
         userId: {
           _id: string;
@@ -335,35 +360,46 @@ const getAllBalancePayoutsByStatus: AppRouteImplementationOrOptions<
         },
       });
 
-    // Return the response
+    // Format records
+    const formatted = await Promise.all(
+      payouts.map(async (p) => {
+        const username = p.isAdmin
+          ? "Admin"
+          : `${p.userId.firstName} ${p.userId.lastName}`;
+
+        const bankExist = await BankModel.findOne({
+          userId: p.userId,
+        });
+
+        return {
+          _id: p._id.toString(),
+          paymentProofUrl: p.paymentProofUrl || "",
+          username,
+          userId: p.userId?._id,
+          amount: p.amount,
+          status: p.status,
+          tdsAmount: p.tdsAmount,
+          totalAmount: p.totalAmount,
+          transactionNumber: p.transactionNumber || "-",
+          qrUrl: bankExist?.qrUrl || "",
+          createdAt: p.createdAt,
+          updatedAt: p.updatedAt,
+          paymentMethod: p.paymentMethod || "",
+          packageTitle: p.userId?.packageId?.title || "",
+        };
+      })
+    );
+
+    // Return consistent paginated response
     return {
       status: 200,
-      body: await Promise.all(
-        payouts.map(async (p) => {
-          const username = p.isAdmin
-            ? `Admin`
-            : `${p.userId.firstName} ${p.userId.lastName}`;
-          const bankExist = await BankModel.findOne({
-            userId: p.userId,
-          });
-          return {
-            _id: p._id.toString(),
-            paymentProofUrl: p.paymentProofUrl || "",
-            username: username,
-            userId: p.userId?._id,
-            amount: p.amount,
-            status: p.status,
-            tdsAmount: p.tdsAmount,
-            totalAmount: p.totalAmount,
-            transactionNumber: p.transactionNumber || "-",
-            qrUrl: bankExist?.qrUrl || "",
-            createdAt: p.createdAt,
-            updatedAt: p.updatedAt,
-            paymentMethod: p.paymentMethod || "",
-            packageTitle: p.userId?.packageId?.title || "",
-          };
-        })
-      ),
+      body: {
+        data: formatted,
+        limit,
+        page,
+        totalRequest,
+        totalPages: Math.ceil(totalRequest / limit),
+      },
     };
   } catch (error) {
     console.error("Error fetching balance payouts:", error);
@@ -376,6 +412,7 @@ const getAllBalancePayoutsByStatus: AppRouteImplementationOrOptions<
     };
   }
 };
+
 
 const getAdminEarningDetails: AppRouteImplementationOrOptions<
   typeof financeContract.getAdminEarningDetails
@@ -661,46 +698,80 @@ const getBankTable: AppRouteImplementationOrOptions<
   typeof financeContract.getBankTable
 > = async ({ req }) => {
   try {
-    const bankTable = await BankModel.find({}).populate<{
-      userId: {
-        _id: string;
-        firstName: string;
-        lastName: string;
-        profilePicture: string;
-        packageId: {
+    const { status } = req.query as { status?: string | string[] };
+
+    const statusArray: string[] = status
+      ? Array.isArray(status)
+        ? status
+        : [status]
+      : [];
+
+    const page = req.query.page ? parseInt(req.query.page as string, 10) : 1;
+    const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 10;
+
+    const skip = (page - 1) * limit;
+
+    const queryReq: Record<string, any> = {};
+
+    if (statusArray.length > 0) {
+      queryReq.status = { $in: statusArray };
+    }
+
+    const totalRequest = await BankModel.countDocuments(queryReq);
+
+    const bankTable = await BankModel.find(queryReq)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .populate<{
+        userId: {
           _id: string;
-          title: string;
+          firstName: string;
+          lastName: string;
+          profilePicture: string;
+          packageId: {
+            _id: string;
+            title: string;
+          };
         };
-      };
-    }>({
-      path: "userId",
-      populate: {
-        path: "packageId",
-        select: "title",
-      },
-    });
+      }>({
+        path: "userId",
+        populate: {
+          path: "packageId",
+          select: "title",
+        },
+      });
+
+    // Format response
+    const formattedBankTable = bankTable.map((bank) => ({
+      username: `${bank.userId.firstName} ${bank.userId.lastName}`,
+      profilePicture: bank.userId.profilePicture,
+      _id: bank._id.toString(),
+      userId: bank.userId._id.toString(),
+      bankName: bank.bankName,
+      accountHolderName: bank.accountHolderName,
+      accountNumber: bank.accountNumber,
+      ifscCode: bank.ifscCode || "",
+      accountType: bank.accountType,
+      branchName: bank.branchName,
+      relationWithAccount: bank.relationWithAccount,
+      status: bank.status,
+      qrUrl: bank.qrUrl || "",
+      packageTitle: bank.userId.packageId?.title || "",
+    }));
 
     return {
       status: 200,
-      body: bankTable.map((bank) => ({
-        username: `${bank.userId.firstName} ${bank.userId.lastName}`,
-        profilePicture: bank.userId.profilePicture,
-        _id: bank._id.toString(),
-        userId: bank.userId._id.toString(),
-        bankName: bank.bankName,
-        accountHolderName: bank.accountHolderName,
-        accountNumber: bank.accountNumber,
-        ifscCode: bank.ifscCode || "",
-        accountType: bank.accountType,
-        branchName: bank.branchName,
-        relationWithAccount: bank.relationWithAccount,
-        status: bank.status,
-        qrUrl: bank.qrUrl || "",
-        packageTitle: bank.userId.packageId?.title || "",
-      })),
+      body: {
+        data: formattedBankTable,
+        limit,
+        page,
+        totalRequest,
+        totalPages: Math.ceil(totalRequest / limit),
+      },
     };
   } catch (error) {
-    console.error("Error fetching balance details:", error);
+    console.error("Error fetching bank table:", error);
     return {
       status: 500,
       body: {
@@ -710,6 +781,7 @@ const getBankTable: AppRouteImplementationOrOptions<
     };
   }
 };
+
 
 import { Types } from "mongoose";
 import { EarningStatementModel } from "../../model/earningStatementModel";

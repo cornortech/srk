@@ -77,6 +77,7 @@ export const userContract = c.router({
     query: z
       .object({
         limit: z.string().optional(),
+        page: z.string().optional(),
         status: z
           .array(
             z.enum([
@@ -93,7 +94,13 @@ export const userContract = c.router({
       })
       ?.optional(),
     responses: {
-      200: getAllUsersSchema,
+      200: z.object({
+        data: getAllUsersSchema,
+        page: z.number(),
+        limit: z.number(),
+        totalUsers: z.number(),
+        totalPages: z.number(),
+      }),
       403: ErrorSchema,
       404: ErrorSchema,
       500: ErrorSchema,

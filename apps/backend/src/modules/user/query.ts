@@ -183,24 +183,27 @@ const getAllUsers: AppRouteImplementationOrOptions<
   typeof userContract.getAllUsers
 > = async ({ query }) => {
   try {
+    const page = query?.page ? parseInt(query.page, 10) : 1;
+    const limit = query?.limit ? parseInt(query.limit, 10) : 10;
+
     const queryReq: Record<string, any> = {};
 
-    // Ensure status is properly handled as an array
+    // Status array filter
     if (query?.status) {
       queryReq.status = { $in: query.status };
     }
 
-    // Parse limit from query string
-    const limit = query?.limit ? parseInt(query.limit, 10) : undefined;
+    // Count total users matching filters
+    const totalUsers = await UserModel.countDocuments(queryReq);
 
-    const usersQuery = UserModel.find(queryReq).sort({ createdAt: -1 });
+    // Calculate skip
+    const skip = (page - 1) * limit;
 
-    // Apply limit if provided
-    if (limit && !isNaN(limit) && limit > 0) {
-      usersQuery.limit(limit);
-    }
-
-    const users = await usersQuery
+    // Get paginated users
+    const users = await UserModel.find(queryReq)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
       .populate<{
         referredBy: {
           _id: string;
@@ -222,83 +225,93 @@ const getAllUsers: AppRouteImplementationOrOptions<
       .populate({
         path: 'packageId',
         select: 'title description price discountedPrice',
-      });
+      })
+      .sort({ createdAt: -1 });
+
+    const formattedUsers = await Promise.all(
+      users.map(async (user) => {
+        const kycDetails = await KYCModel.findOne({ userId: user._id });
+        const coursePaymentExist = await CoursePaymentModel.findOne({
+          userId: user._id,
+        });
+
+        let seniorUser = null;
+        if (user.referredBy?.referredBy) {
+          seniorUser = await UserModel.findById(user.referredBy?.referredBy);
+        }
+
+        return {
+          _id: user._id.toString(),
+          country: user.country,
+          dob: user.dob,
+          email: user.email,
+          firstName: user.firstName,
+          isSelfSignup: !!user.isSelfSignup,
+          lastName: user.lastName,
+          phoneNumber: user.phoneNumber,
+          profilePicture: user.profilePicture,
+          gender: user.gender,
+          referralCode: user.referralCode,
+          allowedToAddUsers: !!user.allowedToAddUsers,
+          purpose: user.purpose || null,
+          packageId: {
+            _id: user.packageId?._id?.toString() || '',
+            title: user.packageId?.title || '',
+            description: user.packageId?.description || '',
+            price: user.packageId?.price || null,
+            discountedPrice: user.packageId?.discountedPrice || null,
+          },
+          referredAt: user.createdAt,
+          isActive: user.status === 'PORTAL_ACTIVATED',
+          courseEnrollAgreementUrl: kycDetails?.courseEnrollAgreement || '',
+          referredBy: user.referredBy
+            ? {
+                _id: user.referredBy._id.toString(),
+                firstName: user.referredBy.firstName,
+                lastName: user.referredBy.lastName,
+              }
+            : null,
+          seniorUser: seniorUser
+            ? {
+                _id: seniorUser._id.toString(),
+                firstName: seniorUser.firstName,
+                lastName: seniorUser.lastName,
+              }
+            : null,
+          status: user.status,
+          paymentDetails: coursePaymentExist
+            ? {
+                paymentProofUrl: coursePaymentExist.paymentProofUrl || '',
+                transactionId: coursePaymentExist.transactionId || '',
+                paymentType: coursePaymentExist.paymentType || '',
+                paymentMethod: coursePaymentExist.paymentMethod || '',
+              }
+            : null,
+          kycDetails: kycDetails
+            ? {
+                _id: kycDetails._id.toString(),
+                status: kycDetails.status,
+                rejectionReason: kycDetails.rejectionReason,
+                frontImage: kycDetails.frontImage,
+                backImage: kycDetails.backImage,
+                documentType: kycDetails.documentType,
+                documentNumber: kycDetails.documentNumber,
+                verificationImage: kycDetails.verificationImage,
+              }
+            : null,
+        };
+      })
+    );
 
     return {
       status: 200,
-      body: await Promise.all(
-        users.map(async (user) => {
-          const kycDetails = await KYCModel.findOne({ userId: user._id });
-          const coursePaymentExist = await CoursePaymentModel.findOne({
-            userId: user._id,
-          });
-          let seniorUser = null;
-          if (user.referredBy?.referredBy) {
-            seniorUser = await UserModel.findById(user.referredBy?.referredBy);
-          }
-
-          return {
-            _id: user._id.toString(),
-            country: user.country,
-            dob: user.dob,
-            email: user.email,
-            firstName: user.firstName,
-            isSelfSignup: !!user.isSelfSignup,
-            lastName: user.lastName,
-            phoneNumber: user.phoneNumber,
-            profilePicture: user.profilePicture,
-            gender: user.gender,
-            referralCode: user.referralCode,
-            allowedToAddUsers: !!user.allowedToAddUsers,
-            purpose: user.purpose || null,
-            packageId: {
-              _id: user.packageId?._id.toString() || '',
-              title: user.packageId?.title || '',
-              description: user.packageId?.description || '',
-              price: user.packageId?.price || null,
-              discountedPrice: user.packageId?.discountedPrice || null,
-            },
-            referredAt: user.createdAt,
-            isActive: user.status === 'PORTAL_ACTIVATED',
-            courseEnrollAgreementUrl: kycDetails?.courseEnrollAgreement || '',
-            referredBy: user.referredBy
-              ? {
-                  _id: user.referredBy?._id.toString(),
-                  firstName: user.referredBy?.firstName,
-                  lastName: user.referredBy?.lastName,
-                }
-              : null,
-            seniorUser: seniorUser
-              ? {
-                  _id: seniorUser?._id.toString(),
-                  firstName: seniorUser?.firstName,
-                  lastName: seniorUser?.lastName,
-                }
-              : null,
-            status: user.status,
-            paymentDetails: coursePaymentExist
-              ? {
-                  paymentProofUrl: coursePaymentExist.paymentProofUrl || '',
-                  transactionId: coursePaymentExist.transactionId || '',
-                  paymentType: coursePaymentExist.paymentType || '',
-                  paymentMethod: coursePaymentExist.paymentMethod || '',
-                }
-              : null,
-            kycDetails: kycDetails
-              ? {
-                  _id: kycDetails._id.toString(),
-                  status: kycDetails.status,
-                  rejectionReason: kycDetails.rejectionReason,
-                  frontImage: kycDetails.frontImage,
-                  backImage: kycDetails.backImage,
-                  documentType: kycDetails.documentType,
-                  documentNumber: kycDetails.documentNumber,
-                  verificationImage: kycDetails.verificationImage,
-                }
-              : null,
-          };
-        })
-      ),
+      body: {
+        data: formattedUsers,
+        page,
+        limit,
+        totalUsers,
+        totalPages: Math.ceil(totalUsers / limit),
+      },
     };
   } catch (error) {
     return {

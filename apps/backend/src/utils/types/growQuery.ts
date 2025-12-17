@@ -29,6 +29,7 @@ export interface GrowEnrollmentPopulated {
   growSocialMediaPackageSubTypeId: {
     _id: Types.ObjectId;
     title: string;
+    amount: string;
   };
   createdAt: string;
   updatedAt: string;

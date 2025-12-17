@@ -1,5 +1,5 @@
 import { initContract } from "@ts-rest/core";
-import { LoginSchema, LoginSuccessResponse, RegisterSchema } from "./schema";
+import { LoginSchema, LoginSrkGrowSchema, LoginSuccessResponse, RegisterSchema } from "./schema";
 import { ErrorSchema, SuccessSchema } from "../common";
 import { z } from "zod";
 
@@ -89,5 +89,17 @@ export const authContract = c.router({
       409: ErrorSchema,
       500: SuccessSchema,
     },
+  },
+  loginSrkGrow: {
+    method: "POST",
+    path: `/auth/login-srk-grow`,
+    body: LoginSrkGrowSchema,
+    responses: {
+      201: SuccessSchema,
+      403: SuccessSchema,
+      404: SuccessSchema,
+      500: SuccessSchema,
+    },
+    summary: "Login Srk Grow User",
   },
 });

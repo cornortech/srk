@@ -1,27 +1,27 @@
-import { useState } from "react";
-import { Card, CardBody, CardHeader, Input } from "@nextui-org/react";
-import { useQuery } from "@tanstack/react-query";
-import { TGetAllUsersAdmin } from "../../lib/types";
-import { getUsersByStatus } from "../../lib/apiClient";
-import PaymentVerificationPendingUsersTable from "../../components/admin/users/VerificationPending";
+import { useState } from 'react';
+import { Card, CardBody, CardHeader, Input } from '@nextui-org/react';
+import { useQuery } from '@tanstack/react-query';
+import { TGetUserByStatusByResponse } from '../../lib/types';
+import { getUsersByStatus } from '../../lib/apiClient';
+import PaymentVerificationPendingUsersTable from '../../components/admin/users/VerificationPending';
 
 export const VerificatinPendingPage = () => {
-  const { data: users, refetch } = useQuery<TGetAllUsersAdmin[]>({
-    queryKey: ["verificaitonPendingUsers"],
+  const [page, setPage] = useState(1);
+  const { data: users, refetch } = useQuery<TGetUserByStatusByResponse>({
+    queryKey: ['verificaitonPendingUsers'],
     queryFn: async () => {
-      const res = await getUsersByStatus(["PAYMENT_VERIFICATION_PENDING"]);
+      const res = await getUsersByStatus(['PAYMENT_VERIFICATION_PENDING']);
       return res;
     },
   });
 
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState('');
 
-  if (!users) {
+  if (!users?.data) {
     return <div></div>;
   }
 
-  // Filter users based on email, firstName, or lastName
-  const filteredUsers = users.filter((user) => {
+  const filteredUsers = users?.data.filter((user) => {
     const searchTerm = search.toLowerCase();
     return (
       user.email.toLowerCase().includes(searchTerm) ||
@@ -46,6 +46,9 @@ export const VerificatinPendingPage = () => {
           <PaymentVerificationPendingUsersTable
             users={filteredUsers}
             refetch={() => refetch()}
+            page={users.page}
+            totalPages={users.totalPages}
+            onPageChange={(p) => setPage(p)}
           />
         </CardBody>
       </Card>

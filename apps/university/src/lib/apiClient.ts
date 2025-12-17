@@ -1,8 +1,10 @@
-import axios from "axios";
-import { TPackage } from "./types/entities";
+import axios from 'axios';
+import { TPackage } from './types/entities';
 import {
   TAddUserPayload,
   TAdminEarningType,
+  TAffiliateRequest,
+  TBankRequestByStatus,
   TCreatePackagePayload,
   TLoginResponse,
   TRegisterPayload,
@@ -13,15 +15,15 @@ import {
   TUpsertKYCDetails,
   TUserDataReponseData,
   TUserStatus,
-} from "./types";
-import { data } from "react-router-dom";
+} from './types';
+import { data } from 'react-router-dom';
 
 // Reusable Axios instance
 export const apiClient = axios.create({
   baseURL: import.meta.env.VITE_BACKEND_ROOT_URL, // Backend base URL
   withCredentials: true, // Important for sending cookies with requests
   headers: {
-    "Content-Type": "application/json",
+    'Content-Type': 'application/json',
   },
 });
 
@@ -35,14 +37,14 @@ export interface LoginError {
 // auth
 
 export const registerApi = async (data: TRegisterPayload) => {
-  const response = await apiClient.post("/auth/register", data);
+  const response = await apiClient.post('/auth/register', data);
   return response.data;
 };
 export const loginApi = async (data: {
   email: string;
   password: string;
 }): Promise<TLoginResponse> => {
-  const response = await apiClient.post("/auth/login", data);
+  const response = await apiClient.post('/auth/login', data);
   return response.data; // Ensure the backend sends the proper structure
 };
 
@@ -111,18 +113,24 @@ export const updateUserDetailsApi = async ({
 };
 
 export const getAllUsersApi = async () => {
-  const response = await apiClient.get("/user/getAllUsers");
+  const response = await apiClient.get('/user/getAllUsers');
   return response.data;
 };
-
-export const getUsersByStatus = async (status: string | TUserStatus[]) => {
+export const getUsersByStatus = async (
+  status: string | TUserStatus[],
+  page = 1, // default page
+  limit = 10 // default limit
+) => {
   const statusArray = Array.isArray(status) ? status : [status]; // Ensure array
 
-  const queryString = statusArray
-    .map((s) => `status[]=${encodeURIComponent(s)}`)
-    .join("&"); // Use `status[]` format
+  const response = await apiClient.get('/user/getAllUsers', {
+    params: {
+      status: statusArray, // Axios will handle array properly
+      page,
+      limit,
+    },
+  });
 
-  const response = await apiClient.get(`/user/getAllUsers?${queryString}`);
   return response.data;
 };
 
@@ -157,7 +165,7 @@ export const applyPromocodeApi = async (promocode: string) => {
 // packages
 
 export const getAllPackagesApi = async () => {
-  const response = await apiClient.get("/package/all");
+  const response = await apiClient.get('/package/all');
   return response.data;
 };
 
@@ -169,7 +177,7 @@ export const getPackageDetailsApi = async (
 };
 
 export const addPackageApi = async (data: TCreatePackagePayload) => {
-  const response = await apiClient.post("/package/create", data);
+  const response = await apiClient.post('/package/create', data);
   return response.data;
 };
 
@@ -179,14 +187,14 @@ export const deletePackageApi = async (id: string) => {
 };
 
 export const createUserApi = async (data: TAddUserPayload) => {
-  const response = await apiClient.post("/auth/register", data);
+  const response = await apiClient.post('/auth/register', data);
   return response.data;
 };
 
 // course
 
 export const getAllCoursesApi = async () => {
-  const response = await apiClient.get("/course/getAllCourses");
+  const response = await apiClient.get('/course/getAllCourses');
   return response.data;
 };
 
@@ -209,7 +217,7 @@ type TCreateCoursePayload = {
   package: string[];
 };
 export const createCourseApi = async (data: TCreateCoursePayload) => {
-  const response = await apiClient.post("/course/create", data);
+  const response = await apiClient.post('/course/create', data);
   return response.data;
 };
 // course video
@@ -225,14 +233,22 @@ export const requestAffiliateProgramApi = async (userId: string) => {
   return response.data;
 };
 
-export const getAllAffiliateRequestsByStatusApi = async (status: string[]) => {
-  const queryParams =
-    status.length > 1
-      ? status.map((s) => `status=${encodeURIComponent(s)}`).join("&")
-      : `status=${encodeURIComponent(status[0])}`;
+export const getAllAffiliateRequestsByStatusApi = async (
+  status: string | string[],
+  page = 1,
+  limit = 10
+) => {
+  const statusArray = Array.isArray(status) ? status : [status];
 
   const response = await apiClient.get(
-    `/affiliate/getAllAffiliateRequestsByStatus?${queryParams}`
+    `/affiliate/getAllAffiliateRequestsByStatus?${statusArray}`,
+    {
+      params: {
+        status: statusArray,
+        page,
+        limit,
+      },
+    }
   );
 
   return response.data;
@@ -310,7 +326,7 @@ export const getEarningDetailsofUserApi = async (userId: string) => {
 };
 
 export const getEarningLeaderboardApi = async (
-  timeFrame: "weekly" | "monthly" | "allTime"
+  timeFrame: 'weekly' | 'monthly' | 'allTime'
 ) => {
   const response = await apiClient.get(
     `/finance/getEarningLeaderboard?timeFrame=${timeFrame}`
@@ -336,14 +352,22 @@ export const getPayoutOfUserApi = async (userId: string) => {
   return response.data;
 };
 
-export const getBalancePayoutByStatus = async (status: string[]) => {
-  const queryParams =
-    status.length > 1
-      ? status.map((s) => `status=${encodeURIComponent(s)}`).join("&")
-      : `status=${encodeURIComponent(status[0])}`;
+export const getBalancePayoutByStatus = async (
+  status: string[],
+  page = 1,
+  limit = 10
+) => {
+  const statusArray = Array.isArray(status) ? status : [status];
 
   const response = await apiClient.get(
-    `/finance/getAllBalancePayoutsByStatus?${queryParams}`
+    `/finance/getAllBalancePayoutsByStatus?${statusArray}`,
+    {
+      params: {
+        status: statusArray,
+        page,
+        limit,
+      },
+    }
   );
   return response.data;
 };
@@ -454,8 +478,20 @@ export const uploadVideoApi = async (data: TUploadVideoPayload) => {
   return response.data;
 };
 
-export const getBankRequestApi = async () => {
-  const response = await apiClient.get(`/finance/getBankRequest`);
+export const getBankRequestApi = async (
+  status: string[],
+  page = 1,
+  limit = 10
+) => {
+  const statusArray = Array.isArray(status) ? status : [status]; // Ensure array
+
+  const response = await apiClient.get(`/finance/getBankRequest`, {
+    params: {
+      status: statusArray,
+      page,
+      limit,
+    },
+  });
   return response.data;
 };
 
@@ -479,7 +515,7 @@ export const rejectBankRequestApi = async (userId: string, reason: string) => {
 // webinar
 
 export const getAllWebinarsApi = async () => {
-  const response = await apiClient.get("/webinar/all");
+  const response = await apiClient.get('/webinar/all');
   return response.data;
 };
 
@@ -491,7 +527,7 @@ export type TCreateWebinarPayload = {
 };
 
 export const createWebinarApi = async (data: TCreateWebinarPayload) => {
-  const response = await apiClient.post("/webinar/create", data);
+  const response = await apiClient.post('/webinar/create', data);
   return response.data;
 };
 

@@ -1,35 +1,48 @@
-import { Card, CardBody, CardHeader } from "@nextui-org/react";
-import AffiliateRequestTable from "../../components/admin/AffiliateRequestTable";
-import { TAffiliateRequest } from "../../lib/types";
-import { useQueryClient, useQuery } from "@tanstack/react-query";
-import { getAllAffiliateRequestsByStatusApi } from "../../lib/apiClient";
+import { Card, CardBody, CardHeader } from '@nextui-org/react';
+import AffiliateRequestTable from '../../components/admin/AffiliateRequestTable';
+import { TGetAffiliateRequestByStatus } from '../../lib/types';
+import { useQueryClient, useQuery } from '@tanstack/react-query';
+import { getAllAffiliateRequestsByStatusApi } from '../../lib/apiClient';
+import { useState } from 'react';
 
 export const AffilateRequestList = () => {
+  const [page, setPage] = useState(1);
   const queryClient = useQueryClient();
 
-  const { data: affiliateRequestData } = useQuery<TAffiliateRequest[]>({
-    queryKey: ["affiliate-requests"],
-    queryFn: async () => {
-      return getAllAffiliateRequestsByStatusApi([
-        "pending",
-        "approved",
-        "rejected",
-      ]);
-    },
-  });
+  const { data: affiliateRequestData } = useQuery<TGetAffiliateRequestByStatus>(
+    {
+      queryKey: ['affiliate-requests', page],
+      queryFn: async () => {
+        return getAllAffiliateRequestsByStatusApi(
+          ['pending', 'approved', 'rejected'],
+          page,
+          10
+        );
+      },
+    }
+  );
   const refetchData = () => {
-    queryClient.invalidateQueries({ queryKey: ["affiliate-requests"] });
+    queryClient.invalidateQueries({ queryKey: ['affiliate-requests'] });
   };
+
+  if (!affiliateRequestData?.data) return <div>Loading...</div>;
+
   if (!affiliateRequestData) return <>...</>;
   return (
-    <div className="container mx-auto py-10">
+    <div className="container mx-auto py-4">
       <Card>
-        <CardHeader className="text-xl font-bold">
+        <CardHeader className="text-xl font-bold flex flex-row gap-x-4">
           Affiliate Request List
         </CardHeader>
         <CardBody>A list of accounts that have affiliate requests.</CardBody>
         <div>
-          <AffiliateRequestTable refetchData={refetchData} users={affiliateRequestData} />
+          <AffiliateRequestTable
+            refetchData={refetchData}
+            users={affiliateRequestData.data}
+            page={affiliateRequestData.page}
+            totalPages={affiliateRequestData.totalPages}
+            onPageChange={(p) => setPage(p)}
+          />
         </div>
       </Card>
     </div>

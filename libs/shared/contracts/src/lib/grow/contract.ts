@@ -27,9 +27,19 @@ export const growContract = c.router({
   },
   getAllGrowSocialMediaEnrollement: {
     method: 'GET',
-    path: '/get-social-media-enrollement',
+    path: '/get-all-social-media-enrollement',
+    query: z.object({
+      limit: z.number().optional(),
+      page: z.number().optional(),
+    })?.optional(),
     responses: {
-      200: getAllGrowSocialMediaEnrollementSchema,
+      200: z.object({
+        data: getAllGrowSocialMediaEnrollementSchema,
+        page: z.number(),
+        limit: z.number(),
+        totalUsers: z.number(),
+        totalPages: z.number(),
+      }),
       400: ErrorSchema,
       409: ErrorSchema,
       500: ErrorSchema,

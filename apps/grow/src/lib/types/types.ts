@@ -48,14 +48,17 @@ export interface UserData {
   password: string;
   name: string;
   kycStatus: 'pending' | 'approved' | 'rejected';
-  approved: boolean; // Add this line
+  approved: boolean;
   country: string;
   phone: number;
+  transactionId?: string;
+  paymentProofUrl?: string;
   kycDocuments: {
     id: string;
     name: string;
     size: number;
     type: string;
+    url?: string;
     status: 'pending' | 'approved' | 'rejected';
     submittedAt: string;
   }[];

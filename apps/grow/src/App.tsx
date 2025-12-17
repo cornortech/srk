@@ -5,7 +5,6 @@ import { GrowLandingPage } from './pages/LandingPage';
 import CallbackPage from './pages/CallbackPage';
 import { LoginPage } from './pages/LoginPage';
 import { GrowVerificationPage } from './pages/VerificationPage';
-import SocialMediaGrow from './pages/SocialMediaPage';
 import { GrowOnlyAdminDashboard } from './pages/GrowAdminDashboard';
 import { GrowDashboard } from './pages/GrowDashboard';
 import { PackageFlowPage } from './pages/PackageFlowPage';
@@ -19,8 +18,8 @@ const router = createBrowserRouter([
     path: '/',
     element: <GrowLandingPage />,
   },
-    {
-    path: "/landing/:section",
+  {
+    path: '/landing/:section',
     element: <GrowLandingPage />,
   },
   {
@@ -46,10 +45,6 @@ const router = createBrowserRouter([
   {
     path: '/grow/verification',
     element: <GrowVerificationPage />,
-  },
-  {
-    path: '/socialmedia-grow',
-    element: <SocialMediaGrow />,
   },
   {
     path: '/admin/dashboard',

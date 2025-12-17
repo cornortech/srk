@@ -13,7 +13,7 @@ export const UserDashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
-    <div className="flex h-screen bg-[#0a0705] text-white overflow-hidden font-sans pt-[80px]">
+    <div className="flex h-screen bg-[#0a0705] text-white overflow-hidden font-sans ">
       {/* Mobile Menu Overlay */}
       {isMobileMenuOpen && (
         <div

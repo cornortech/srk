@@ -31,6 +31,7 @@ export interface GrowEnrollmentPopulated {
     title: string;
     amount: string;
   };
+  
   createdAt: string;
   updatedAt: string;
 }

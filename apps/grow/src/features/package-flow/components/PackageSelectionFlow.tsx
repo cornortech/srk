@@ -220,8 +220,38 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
 
   const handleSubmit = async () => {
     if (!validateForm()) {
-      // Scroll to top or first error could be good UX, but simple alert or showing errors is start
       return;
+    }
+
+    // Force Validate Promo Code if present
+    if (userDetails.promoCode) {
+      try {
+        const result = await validatePromo.mutateAsync({
+          body: {
+            promoCode: userDetails.promoCode,
+            growSocialMediaPackageId: selectedPackage._id,
+          },
+        });
+
+        if (result.status === 200) {
+          setDiscountDetails(result.body.discountDetails);
+          setPromoSuccessMessage(
+            (result.body as any).message || 'Promo code applied!'
+          );
+          setPromoError(null);
+        } else {
+          const msg = (result.body as any).message || 'Invalid promo code';
+          setPromoError(msg);
+          // Optionally scroll to promo input
+          return;
+        }
+      } catch (err) {
+        console.error(err);
+        const msg =
+          (err as any).body?.message || 'Failed to validate promo code';
+        setPromoError(msg);
+        return;
+      }
     }
 
     try {

@@ -117,6 +117,7 @@ export interface OrderDetails {
   email: string;
   phone: string;
   socialLink: string;
+  packageType: string;
 }
 
 export interface DashboardProps {

@@ -32,9 +32,9 @@ export const growContract = c.router({
         summary: "Validate enetered promo code and return its details with discount",
     },
 
-    acceptSocialGrowEnrollementRequest: {
+    acceptSocialGrowEnrollmentRequest: {
         method: "PUT",
-        path: "/grow/accept-social-grow-enrollement-request/:enrollementId",
+        path: "/grow/accept-social-grow-enrollment-request/:enrollmentId",
         body: z.object({}),
         responses: {
             200: SuccessSchema,
@@ -42,12 +42,12 @@ export const growContract = c.router({
             404: ErrorSchema,
             500: ErrorSchema
         },
-        summary: "Approve Social Grow Enrollement Request by Id"
+        summary: "Approve Social Grow Enrollment Request by Id"
     },
 
-    rejectSocialGrowEnrollementRequest: {
+    rejectSocialGrowEnrollmentRequest: {
         method: "PUT",
-        path: "/grow/reject-social-grow-enrollement-request/:enrollementId",
+        path: "/grow/reject-social-grow-enrollment-request/:enrollmentId",
         body: z.object({
             rejectionReason: z.string()
         }),
@@ -57,6 +57,18 @@ export const growContract = c.router({
             404: ErrorSchema,
             500: ErrorSchema
         },
-        summary: "Reject Social Grow Enrollement Request by Id"
-    }
+        summary: "Reject Social Grow Enrollment Request by Id"
+    },
+
+    getSrkGrowProfile: {
+        method: "GET",
+        path: "/get-srk-grow-profile/:id",
+        responses: {
+            200: SuccessSchema,
+            403: ErrorSchema,
+            404: ErrorSchema,
+            500: ErrorSchema,
+        },
+        summary: "Get Srk Grow Profile by Id"
+    },
 });

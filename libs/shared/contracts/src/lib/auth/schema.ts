@@ -45,3 +45,8 @@ export const RegisterSchema = z
     },
     { message: "Password is required", path: ["password"] }
   );
+
+export const LoginSrkGrowSchema = z.object({
+  email: z.string(),
+  password: z.string(),
+});

@@ -2,6 +2,7 @@ import { growContract } from "@srk/shared/contracts";
 import { AppRouteImplementationOrOptions } from "@ts-rest/express/src/lib/types";
 import { growSocialMediaPackageEnrollmentModel } from "../../model/growSocialMediaPackageEnrollement";
 import { GrowEnrollmentPopulated, GrowPackageUserPopulated } from "../../utils/types/growQuery";
+import { growPackageEngagementPostModel } from "../../model/growEngagementPostModel";
 
 const getAllSrkGrowEnrollementUser: AppRouteImplementationOrOptions<
   typeof growContract.getAllGrowSocialMediaEnrollement
@@ -16,43 +17,58 @@ const getAllSrkGrowEnrollementUser: AppRouteImplementationOrOptions<
         .populate<GrowEnrollmentPopulated>("growSocialMediaPackageSubTypeId")
         .sort({ createdAt: -1 });
 
+    const packageEnrollement = await Promise.all(
+      enrollments.map(async (e) => {
+        const postEngagement = await growPackageEngagementPostModel.findOne({
+          growSocialMediaPackageEnrollmentId: e._id,
+        });
+
+        return {
+          _id: e._id.toString(),
+          userData: {
+            fullName: e.growSocialMediaPackageUserId.fullName,
+            email: e.growSocialMediaPackageUserId.email,
+            gender: e.growSocialMediaPackageUserId.gender,
+            phoneNumber: e.growSocialMediaPackageUserId.phoneNumber,
+            country: e.growSocialMediaPackageUserId.country,
+            kycURL: e.growSocialMediaPackageUserId.kycURL,
+            usedPromoCode:
+              e.growSocialMediaPackageUserId.usedPromoCode ?? undefined,
+            status: e.growSocialMediaPackageUserId.status,
+          },
+
+          enrollementData: {
+            growSocialMediaPackageId:
+              e.growSocialMediaPackageId._id.toString(),
+            growSocialMediaPackageTypeId:
+              e.growSocialMediaPackageTypeId._id.toString(),
+            growSocialMediaPackageSubTypeId:
+              e.growSocialMediaPackageSubTypeId._id.toString(),
+            profileLinkURL: e.profileLinkURL && e.profileLinkURL[0] ? e.profileLinkURL[0] : undefined,
+            isActive: e.isActive,
+          },
+
+          postEngagement: {
+            postURLs: postEngagement?.postURLs.length ? postEngagement.postURLs : undefined,
+          },
+
+          paymentData: {
+            paymentMethod: "esewa" as const,
+            paymentURL: "",
+            transactionId: "",
+            rejectionReason: "",
+          },
+          createdAt: e.createdAt,
+          updatedAt: e.updatedAt,
+        };
+      })
+    );
+
     return {
       status: 200,
-      body: enrollments.map((e) => ({
-        _id: e._id.toString(),
-        userData: {
-          fullName: e.growSocialMediaPackageUserId.fullName,
-          email: e.growSocialMediaPackageUserId.email,
-          gender: e.growSocialMediaPackageUserId.gender,
-          phoneNumber: e.growSocialMediaPackageUserId.phoneNumber,
-          country: e.growSocialMediaPackageUserId.country,
-          kycURL: e.growSocialMediaPackageUserId.kycURL,
-          usedPromoCode:
-            e.growSocialMediaPackageUserId.usedPromoCode ?? undefined,
-          status: e.growSocialMediaPackageUserId.status,
-        },
+      body: packageEnrollement
+    }
 
-        enrollementData: {
-          growSocialMediaPackageId:
-            e.growSocialMediaPackageId._id.toString(),
-          growSocialMediaPackageTypeId:
-            e.growSocialMediaPackageTypeId._id.toString(),
-          growSocialMediaPackageSubTypeId:
-            e.growSocialMediaPackageSubTypeId._id.toString(),
-          profileLinkURL: e.profileLinkURL && e.profileLinkURL[0],
-          isActive: e.isActive,
-        },
-
-        paymentData: {
-          paymentMethod: "esewa",
-          paymentURL: "",
-          transactionId: "",
-          rejectionReason: "",
-        },
-        createdAt: e.createdAt,
-        updatedAt: e.updatedAt,
-      })),
-    };
   } catch (error) {
     console.error(error);
     return {

@@ -140,7 +140,9 @@ const getAllSrkGrowPackages: AppRouteImplementationOrOptions<
           name: pkg.name,
           description: pkg.description,
           socialMediaPlatforms: pkg.socialMediaPlatforms,
+          features: pkg.features,
           amount: pkg.amount,
+          amountBeforeDiscount: pkg.amountBeforeDiscount,
           isPopular: pkg.isPopular,
           createdAt: pkg.createdAt,
           updatedAt: pkg.updatedAt,
@@ -168,9 +170,9 @@ const getAllSrkGrowPackages: AppRouteImplementationOrOptions<
 // SRK Grow Package by Id
 const getSrkGrowPackageById: AppRouteImplementationOrOptions<typeof packageContract.getSrkGrowPackageById> = async ({ params }) => {
   try {
-    const packageExist = (await growSocialMediaPackageModel.findOne({
-      _id: params.id,
-    })) as any;
+    const packageExist = await growSocialMediaPackageModel
+      .findById(params.id)
+    .lean();
 
     if (!packageExist) {
       return {
@@ -181,16 +183,17 @@ const getSrkGrowPackageById: AppRouteImplementationOrOptions<typeof packageContr
       };
     }
 
-    return {
-      status: 200,
-      body: {
-        _id: packageExist._id.toString(),
-        name: packageExist.name,
-        description: packageExist.description,
-        socialMediaPlatforms: packageExist.socialMediaPlatforms,
-        amount: packageExist.amount,
-        isPopular: packageExist.isPopular,
-        packageTypes: packageExist.packageTypes.map((type: any) => ({
+    const packageTypes = await growSocialMediaPackageTypeModel
+      .find({ growSocialMediaPackageId: packageExist._id })
+      .lean();
+
+    const packageTypesWithSubTypes = await Promise.all(
+      packageTypes.map(async (type) => {
+        const subTypes = await growSocialMediaPackageSubTypeModel
+          .find({ growSocialMediaPackageTypeId: type._id })
+          .lean();
+
+        return {
           _id: type._id.toString(),
           growSocialMediaPackageId: type.growSocialMediaPackageId.toString(),
           name: type.name,
@@ -198,19 +201,36 @@ const getSrkGrowPackageById: AppRouteImplementationOrOptions<typeof packageContr
           amount: type.amount,
           createdAt: type.createdAt,
           updatedAt: type.updatedAt,
-          packageSubTypes: type.packageSubTypes.map((sub: any) => ({
+          packageSubTypes: subTypes.map((sub) => ({
             _id: sub._id.toString(),
-            growPackageTypeId: sub.growPackageTypeId.toString(),
+            growPackageTypeId: sub.growSocialMediaPackageTypeId.toString(),
             name: sub.name,
             description: sub.description,
-            amount: sub.amount,
+            noOfLikes: sub.noOfLikes,
+            noOfVideos: sub.noOfVideos,
+            noOfFollowers: sub.noOfFollowers,
             createdAt: sub.createdAt,
             updatedAt: sub.updatedAt,
           })),
-        })),
+        };
+      })
+    );
+
+    return {
+      status: 200,
+      body: {
+        _id: packageExist._id.toString(),
+        name: packageExist.name,
+        description: packageExist.description,
+        socialMediaPlatforms: packageExist.socialMediaPlatforms,
+        features: packageExist.features,
+        amount: packageExist.amount,
+        amountBeforeDiscount: packageExist.amountBeforeDiscount,
+        isPopular: packageExist.isPopular,
+        packageTypes: packageTypesWithSubTypes,
       },
     };
-  } catch (error: any) {
+  } catch (error) {
     console.log(error);
     return {
       status: 500,

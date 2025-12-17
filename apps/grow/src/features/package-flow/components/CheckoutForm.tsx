@@ -1,12 +1,12 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Shield } from 'lucide-react';
+import { Shield, Upload, X, CheckCircle } from 'lucide-react';
 import {
   CheckoutUserDetails,
   EngagementType,
   PackageDetails,
   SocialPlatform,
-} from '../../../../lib/types/types';
+} from '../../../lib/types/types';
 
 interface CheckoutFormProps {
   selectedPackage: PackageDetails;
@@ -24,6 +24,20 @@ interface CheckoutFormProps {
   handleBack: () => void;
   showMultiplePostLinks: boolean;
   numPostLinks: number;
+  onValidatePromoCode: () => void;
+  isValidatingPromo: boolean;
+  promoError: string | null;
+  promoSuccessMessage: string | null;
+  discountDetails: {
+    originalAmount: number;
+    discountPercentage: number;
+    discountAmount: number;
+    finalAmountAfterDiscount: number;
+  } | null;
+  kycFiles: File[];
+  setKycFiles: React.Dispatch<React.SetStateAction<File[]>>;
+  formErrors: Record<string, string>;
+  isUploadingKYC: boolean;
 }
 
 export const CheckoutForm: React.FC<CheckoutFormProps> = ({
@@ -38,7 +52,27 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
   handleBack,
   showMultiplePostLinks,
   numPostLinks,
+  onValidatePromoCode,
+  isValidatingPromo,
+  promoError,
+  promoSuccessMessage,
+  discountDetails,
+  kycFiles,
+  setKycFiles,
+  formErrors,
+  isUploadingKYC,
 }) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const newFiles = Array.from(e.target.files);
+      setKycFiles((prev) => [...prev, ...newFiles]);
+    }
+  };
+
+  const removeFile = (index: number) => {
+    setKycFiles((prev) => prev.filter((_, i) => i !== index));
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -86,18 +120,24 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
             </div>
             <div className="flex justify-between items-center py-3 border-b border-white/10">
               <span className="text-gray-400">Price</span>
-              <span className="text-2xl font-bold text-[#b68938]">
-                {selectedPackage.price}
-              </span>
+              <div className="text-right">
+                {discountDetails ? (
+                  <>
+                    <span className="block text-sm text-gray-500 line-through">
+                      {selectedPackage.amount}
+                    </span>
+                    <span className="text-2xl font-bold text-[#b68938]">
+                      {discountDetails.finalAmountAfterDiscount}
+                    </span>
+                  </>
+                ) : (
+                  <span className="text-2xl font-bold text-[#b68938]">
+                    {selectedPackage.amount}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
-          {selectedPackage.originalPrice && (
-            <div className="mt-4 px-4 py-2 rounded-lg bg-gradient-to-r from-[#b68938]/20 to-[#e1ba73]/20 border border-[#b68938]/30 text-center">
-              <span className="text-[#e1ba73] font-bold text-sm">
-                Save {selectedPackage.originalPrice}
-              </span>
-            </div>
-          )}
         </motion.div>
       </div>
 
@@ -128,6 +168,9 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
                 className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-600 focus:outline-none focus:border-[#b68938] focus:ring-1 focus:ring-[#b68938] transition-all"
                 placeholder="Enter your full name"
               />
+              {formErrors.name && (
+                <p className="mt-1 text-xs text-red-500">{formErrors.name}</p>
+              )}
             </div>
 
             <div>
@@ -143,6 +186,9 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
                 className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-600 focus:outline-none focus:border-[#b68938] focus:ring-1 focus:ring-[#b68938] transition-all"
                 placeholder="you@example.com"
               />
+              {formErrors.email && (
+                <p className="mt-1 text-xs text-red-500">{formErrors.email}</p>
+              )}
             </div>
 
             <div>
@@ -158,6 +204,11 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
                 className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-600 focus:outline-none focus:border-[#b68938] focus:ring-1 focus:ring-[#b68938] transition-all"
                 placeholder="Create a strong password"
               />
+              {formErrors.password && (
+                <p className="mt-1 text-xs text-red-500">
+                  {formErrors.password}
+                </p>
+              )}
             </div>
 
             <div>
@@ -173,6 +224,11 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
                 className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-600 focus:outline-none focus:border-[#b68938] focus:ring-1 focus:ring-[#b68938] transition-all"
                 placeholder="Confirm your password"
               />
+              {formErrors.confirmPassword && (
+                <p className="mt-1 text-xs text-red-500">
+                  {formErrors.confirmPassword}
+                </p>
+              )}
             </div>
 
             <div>
@@ -188,6 +244,9 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
                 className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-600 focus:outline-none focus:border-[#b68938] focus:ring-1 focus:ring-[#b68938] transition-all"
                 placeholder="+91 9876543210"
               />
+              {formErrors.phone && (
+                <p className="mt-1 text-xs text-red-500">{formErrors.phone}</p>
+              )}
             </div>
 
             <div>
@@ -249,20 +308,14 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
                 <option value="" className="bg-[#1a1410] text-white">
                   Select gender
                 </option>
-                <option value="male" className="bg-[#1a1410] text-white">
+                <option value="Male" className="bg-[#1a1410] text-white">
                   Male
                 </option>
-                <option value="female" className="bg-[#1a1410] text-white">
+                <option value="Female" className="bg-[#1a1410] text-white">
                   Female
                 </option>
-                <option value="other" className="bg-[#1a1410] text-white">
+                <option value="Other" className="bg-[#1a1410] text-white">
                   Other
-                </option>
-                <option
-                  value="prefer-not-to-say"
-                  className="bg-[#1a1410] text-white"
-                >
-                  Prefer not to say
                 </option>
               </select>
             </div>
@@ -275,25 +328,41 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
                 </label>
                 <div className="space-y-4">
                   {Array.from({ length: numPostLinks }).map((_, index) => (
-                    <div key={index} className="flex items-center space-x-4">
-                      <span className="text-sm text-gray-500 min-w-[60px]">
-                        Post {index + 1}:
-                      </span>
-                      <input
-                        type="url"
-                        value={userDetails.postLinks?.[index] || ''}
-                        onChange={(e) =>
-                          handlePostLinkChange(index, e.target.value)
-                        }
-                        required
-                        className="flex-1 px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-600 focus:outline-none focus:border-[#b68938] focus:ring-1 focus:ring-[#b68938] transition-all"
-                        placeholder={`https://${selectedPlatform}.com/your-video-${
-                          index + 1
-                        }`}
-                      />
+                    <div key={index}>
+                      <div className="flex items-center space-x-4">
+                        <span className="text-sm text-gray-500 min-w-[60px]">
+                          Post {index + 1}:
+                        </span>
+                        <input
+                          type="url"
+                          value={userDetails.postLinks?.[index] || ''}
+                          onChange={(e) =>
+                            handlePostLinkChange(index, e.target.value)
+                          }
+                          required
+                          className={`flex-1 px-4 py-3 rounded-xl bg-white/5 border ${
+                            formErrors[`postLink_${index}`]
+                              ? 'border-red-500'
+                              : 'border-white/10'
+                          } text-white placeholder-gray-600 focus:outline-none focus:border-[#b68938] focus:ring-1 focus:ring-[#b68938] transition-all`}
+                          placeholder={`https://${selectedPlatform}.com/your-video-${
+                            index + 1
+                          }`}
+                        />
+                      </div>
+                      {formErrors[`postLink_${index}`] && (
+                        <p className="mt-1 ml-[76px] text-xs text-red-500">
+                          {formErrors[`postLink_${index}`]}
+                        </p>
+                      )}
                     </div>
                   ))}
                 </div>
+                {formErrors.postLinks && (
+                  <p className="mt-2 text-xs text-red-500">
+                    {formErrors.postLinks}
+                  </p>
+                )}
                 <p className="mt-2 text-xs text-gray-500">
                   Please provide {numPostLinks} separate links for each
                   post/video
@@ -319,37 +388,114 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
                       : `https://${selectedPlatform}.com/your-video`
                   }
                 />
+                {formErrors.socialLink && (
+                  <p className="mt-1 text-xs text-red-500">
+                    {formErrors.socialLink}
+                  </p>
+                )}
               </div>
             )}
 
             <div>
               <label className="block text-sm font-bold text-gray-400 mb-2 uppercase tracking-widest">
-                Promo Code *
+                Promo Code
               </label>
-              <input
-                type="text"
-                name="promoCode"
-                value={userDetails.promoCode}
-                onChange={handleUserDetailsChange}
-                required
-                className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-600 focus:outline-none focus:border-[#b68938] focus:ring-1 focus:ring-[#b68938] transition-all"
-                placeholder="Provide promo code if available"
-              />
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  name="promoCode"
+                  value={userDetails.promoCode}
+                  onChange={handleUserDetailsChange}
+                  className="flex-1 px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-600 focus:outline-none focus:border-[#b68938] focus:ring-1 focus:ring-[#b68938] transition-all"
+                  placeholder="Provide promo code if available"
+                />
+                <button
+                  type="button"
+                  onClick={onValidatePromoCode}
+                  disabled={isValidatingPromo || !userDetails.promoCode}
+                  className="px-6 py-2 rounded-xl bg-[#b68938]/20 text-[#b68938] border border-[#b68938]/50 hover:bg-[#b68938]/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all font-bold"
+                >
+                  {isValidatingPromo ? 'Checking...' : 'Apply'}
+                </button>
+              </div>
+              {promoError && (
+                <p className="mt-2 text-sm text-red-500">{promoError}</p>
+              )}
+              {promoSuccessMessage && (
+                <p className="mt-2 text-sm text-green-500">
+                  {promoSuccessMessage}
+                </p>
+              )}
             </div>
             <div>
               <label className="block text-sm font-bold text-gray-400 mb-2 uppercase tracking-widest">
                 Upload KYC documents *
               </label>
-              <input
-                type="file"
-                name="kyc"
-                value={userDetails.kyc}
-                onChange={handleUserDetailsChange}
-                required
-                multiple
-                className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-600 focus:outline-none focus:border-[#b68938] focus:ring-1 focus:ring-[#b68938] transition-all"
-                placeholder="Provide promo code if available"
-              />
+              <div className="space-y-4">
+                <div className="relative">
+                  <input
+                    type="file"
+                    multiple
+                    accept="image/*,application/pdf"
+                    onChange={handleFileChange}
+                    className="hidden"
+                    id="kyc-upload"
+                  />
+                  <label
+                    htmlFor="kyc-upload"
+                    className="flex items-center justify-between w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 cursor-pointer hover:border-[#b68938]/50 transition-all group"
+                  >
+                    <span className="text-gray-400 select-none">
+                      {kycFiles.length > 0
+                        ? `${kycFiles.length} document${
+                            kycFiles.length > 1 ? 's' : ''
+                          } selected`
+                        : 'Click to upload documents (ID/Passport)'}
+                    </span>
+                    <Upload
+                      size={20}
+                      className="text-gray-400 group-hover:text-[#b68938] transition-colors"
+                    />
+                  </label>
+                </div>
+
+                {/* File List */}
+                {kycFiles.length > 0 && (
+                  <div className="space-y-2">
+                    {kycFiles.map((file, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center justify-between p-3 rounded-lg bg-white/5 border border-white/10"
+                      >
+                        <div className="flex items-center space-x-3 overflow-hidden">
+                          <div className="w-10 h-10 rounded-lg bg-[#b68938]/20 flex items-center justify-center flex-shrink-0">
+                            {/* Simple icon or preview if image */}
+                            <CheckCircle size={20} className="text-[#b68938]" />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-sm font-medium text-white truncate">
+                              {file.name}
+                            </p>
+                            <p className="text-xs text-gray-400">
+                              {(file.size / 1024 / 1024).toFixed(2)} MB
+                            </p>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => removeFile(index)}
+                          className="p-2 rounded-full hover:bg-white/10 text-gray-400 hover:text-red-500 transition-colors"
+                        >
+                          <X size={18} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {formErrors.kyc && (
+                  <p className="mt-1 text-xs text-red-500">{formErrors.kyc}</p>
+                )}
+              </div>
             </div>
           </div>
 
@@ -365,9 +511,9 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
                 I agree to the Terms & Conditions and Privacy Policy. I
                 understand that all engagements come from verified SRK
                 University students and the delivery time is{' '}
-                {selectedPackage.id === 'starter'
+                {selectedPackage._id === 'starter'
                   ? '7 days'
-                  : selectedPackage.id === 'intermediate'
+                  : selectedPackage._id === 'intermediate'
                   ? '3 days'
                   : '24 hours'}
                 .
@@ -386,9 +532,10 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
 
             <button
               onClick={handleSubmit}
-              className="px-8 py-3 rounded-full font-bold text-sm uppercase tracking-widest transition-all bg-gradient-to-r from-[#b68938] to-[#e1ba73] text-black hover:shadow-[0_0_30px_rgba(182,137,56,0.5)] hover:scale-105 active:scale-95"
+              disabled={isUploadingKYC}
+              className="px-8 py-3 rounded-full font-bold text-sm uppercase tracking-widest transition-all bg-gradient-to-r from-[#b68938] to-[#e1ba73] text-black hover:shadow-[0_0_30px_rgba(182,137,56,0.5)] hover:scale-105 active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed"
             >
-              Complete Order for {selectedPackage.price}
+              {isUploadingKYC ? 'Uploading KYC...' : 'Proceed to Payment'}
             </button>
           </div>
 

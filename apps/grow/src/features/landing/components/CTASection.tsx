@@ -2,16 +2,13 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Sparkles, ArrowRight } from 'lucide-react';
 import { PackageDetails } from '../../../lib/types/types';
-import { MagneticButton } from '../../../lib/ui/MagneticButton';
-import { PACKAGES_DATA } from '../../../lib/utils/constants';
-import { TSrkGrowPackagesSchema } from '@srk/shared/contracts';
+import {MagneticButton} from '../../../lib/ui/MagneticButton';
 
 interface CTASectionProps {
-  onPackageSelect: (pkg: TSrkGrowPackagesSchema) => void;
-  growPackages?: TSrkGrowPackagesSchema[];
+  onPackageSelect: (pkg: PackageDetails) => void;
 }
 
-export const CTASection: React.FC<CTASectionProps> = ({ onPackageSelect, growPackages }) => {
+export const CTASection: React.FC<CTASectionProps> = ({ onPackageSelect }) => {
   return (
     <section className="py-32 px-6 relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-br from-[#b68938]/20 via-black to-[#e1ba73]/20" />
@@ -118,7 +115,7 @@ export const CTASection: React.FC<CTASectionProps> = ({ onPackageSelect, growPac
               </MagneticButton>
             </a>
             <motion.button
-              onClick={() => growPackages && growPackages.length > 0 && onPackageSelect(growPackages[1] || growPackages[0])}
+              onClick={() => onPackageSelect({} as PackageDetails)}
               className="px-8 py-4 rounded-full bg-white/5 hover:bg-white/10 text-white border border-white/20 font-bold text-sm uppercase tracking-widest transition-all relative overflow-hidden group"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}

@@ -11,6 +11,7 @@ import { GrowDashboard } from './pages/GrowDashboard';
 import { PackageFlowPage } from './pages/PackageFlowPage';
 import { OrderConfirmationPage } from './pages/OrderConfirmationPage';
 import { UserDashboardPage } from './pages/UserDashboardPage';
+import ViewerPage from './pages/ViewDocumentPage';
 
 const queryClient = new QueryClient();
 
@@ -56,6 +57,10 @@ const router = createBrowserRouter([
     element: <GrowOnlyAdminDashboard />,
   },
   {
+    path: '/admin/view-document',
+    element: <ViewerPage />,
+  },
+    {
     path: '/affilate/dashboard',
     element: <GrowDashboard />,
   },

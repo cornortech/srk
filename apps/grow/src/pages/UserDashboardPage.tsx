@@ -10,7 +10,12 @@ export const UserDashboardPage = () => {
   useEffect(() => {
     const savedUser = localStorage.getItem('srkgrow-activesession');
     if (savedUser) {
-      setUser(JSON.parse(savedUser));
+      const parsedUser: UserData = JSON.parse(savedUser);
+      setUser(parsedUser);
+
+      if (parsedUser.kycStatus !== 'approved') {
+        navigate('/grow/verification');
+      }
     } else {
       navigate('/');
     }

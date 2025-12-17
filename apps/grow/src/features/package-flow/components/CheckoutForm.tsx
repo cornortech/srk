@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Shield, Upload, X, CheckCircle } from 'lucide-react';
 import {
@@ -62,6 +62,8 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
   formErrors,
   isUploadingKYC,
 }) => {
+  const [termsAccepted, setTermsAccepted] = useState(false);
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const newFiles = Array.from(e.target.files);
@@ -505,6 +507,8 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
               <input
                 type="checkbox"
                 required
+                checked={termsAccepted}
+                onChange={(e) => setTermsAccepted(e.target.checked)}
                 className="w-5 h-5 rounded bg-white/5 border border-white/10 focus:ring-[#b68938] focus:ring-2 focus:ring-offset-2 focus:ring-offset-black text-[#b68938] transition-all"
               />
               <span className="text-sm text-gray-400 group-hover:text-gray-300 transition-colors">
@@ -532,8 +536,8 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
 
             <button
               onClick={handleSubmit}
-              disabled={isUploadingKYC}
-              className="px-8 py-3 rounded-full font-bold text-sm uppercase tracking-widest transition-all bg-gradient-to-r from-[#b68938] to-[#e1ba73] text-black hover:shadow-[0_0_30px_rgba(182,137,56,0.5)] hover:scale-105 active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed"
+              disabled={isUploadingKYC || !termsAccepted}
+              className="px-8 py-3 rounded-full font-bold text-sm uppercase tracking-widest transition-all bg-gradient-to-r from-[#b68938] to-[#e1ba73] text-black hover:shadow-[0_0_30px_rgba(182,137,56,0.5)] hover:scale-105 active:scale-95 disabled:from-[#b68938] disabled:to-[#e1ba73] disabled:text-gray-900 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:active:scale-100 disabled:hover:shadow-none disabled:opacity-70 disabled:cursor-not-allowed"
             >
               {isUploadingKYC ? 'Uploading KYC...' : 'Proceed to Payment'}
             </button>

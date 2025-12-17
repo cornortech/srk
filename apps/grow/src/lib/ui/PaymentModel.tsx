@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, CheckCircle, Upload } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { UserDetails } from '../types/types';
+import { useSRKFileUpload } from '@srk/shared/hooks';
 
 interface PaymentModalProps {
   isOpen: boolean;
@@ -10,6 +11,11 @@ interface PaymentModalProps {
   userDetails: UserDetails;
   packagePrice: string;
   packageName: string;
+  onSubmit: (data: {
+    transactionId: string;
+    paymentProofUrl: string;
+    paymentMethod: string;
+  }) => Promise<void>;
 }
 
 type PaymentMethod = 'esewa' | 'khalti' | 'bank' | null;
@@ -20,6 +26,7 @@ const PaymentModel: React.FC<PaymentModalProps> = ({
   userDetails,
   packagePrice,
   packageName,
+  onSubmit,
 }) => {
   const [step, setStep] = useState<'payment' | 'success'>('payment');
   const [selectedMethod, setSelectedMethod] = useState<PaymentMethod>(null);
@@ -28,6 +35,7 @@ const PaymentModel: React.FC<PaymentModalProps> = ({
   const [screenshotPreview, setScreenshotPreview] = useState<string>('');
   const [isProcessing, setIsProcessing] = useState(false);
   const navigate = useNavigate();
+  const { uploadFile } = useSRKFileUpload('grow');
   const paymentMethods = [
     {
       id: 'esewa' as PaymentMethod,
@@ -71,10 +79,22 @@ const PaymentModel: React.FC<PaymentModalProps> = ({
     }
 
     setIsProcessing(true);
-    // Simulate payment processing
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    setIsProcessing(false);
-    setStep('success');
+    try {
+      const { url } = await uploadFile(screenshot, 'image');
+
+      await onSubmit({
+        transactionId,
+        paymentProofUrl: url,
+        paymentMethod: selectedMethod,
+      });
+
+      setStep('success');
+    } catch (error) {
+      console.error('Payment submission failed', error);
+      alert('Failed to process payment. Please try again.');
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const handleClose = () => {

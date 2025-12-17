@@ -83,18 +83,17 @@ export const UserVerificationView: React.FC<UserVerificationViewProps> = () => {
     }
   };
 
-  const handleViewPostLinks = (item: PaymentVerificationItem) => {
+  const handleViewPostLinks = (item: any) => {
     setSelectedPostLinks(item.postLinks || []);
     setSelectedUserName(item.fullName);
     setPostLinksModalOpen(true);
   };
 
-  const handleViewDocuments = (item: VerificationItem) => {
-    setSelectedDocument({
-      url: item.kycDocument,
-      title: `${item.name}'s KYC Document`,
-    });
-    setDocumentViewerOpen(true);
+  const handleViewDocuments = (item: any) => {
+    const docs = item.userData.kycDocuments || [];
+    const encoded = encodeURIComponent(JSON.stringify(docs));
+
+    window.open(`/admin/view-document?data=${encoded}`, '_blank');
   };
 
   return (
@@ -200,10 +199,10 @@ export const UserVerificationView: React.FC<UserVerificationViewProps> = () => {
                     Submitted Date
                   </th>
                   <th className="text-left py-4 px-6 text-sm font-medium text-gray-400">
-                    KYC Document
+                    Social Links
                   </th>
                   <th className="text-left py-4 px-6 text-sm font-medium text-gray-400">
-                    Payment Document
+                    View Document
                   </th>
                   <th className="text-left py-4 px-6 text-sm font-medium text-gray-400">
                     Amount
@@ -254,22 +253,24 @@ export const UserVerificationView: React.FC<UserVerificationViewProps> = () => {
                     </td>
                     <td className="py-4 px-6">
                       <button
-                        // onClick={() => handleViewPostLinks(item)}
+                        onClick={() => handleViewPostLinks(item)}
                         className="flex items-center gap-2 px-3 py-1 bg-white/5 text-white rounded-lg hover:bg-white/10 transition-colors"
                       >
                         <span>👁️</span>
                         View Links ({item.userData.kycURL?.length || 0})
                       </button>
                     </td>
+
                     <td className="py-4 px-6">
                       <button
-                        // onClick={() => handleViewDocuments(item)}
+                        onClick={() => handleViewDocuments(item)}
                         className="flex items-center gap-2 px-3 py-1 bg-white/5 text-white rounded-lg hover:bg-white/10 transition-colors"
                       >
                         <span>👁️</span>
                         View KYC
                       </button>
                     </td>
+
                     <td className="py-4 px-6">
                       <code className="text-sm font-mono text-white group-hover:text-[#e1ba73] transition-colors">
                         ₹{item.paymentData.transactionId}

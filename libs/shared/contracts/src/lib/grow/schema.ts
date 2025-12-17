@@ -15,13 +15,17 @@ export const createGrowSocialMediaEnrollementSchema = z.object({
     growSocialMediaPackageId: z.string(),
     growSocialMediaPackageTypeId: z.string(),
     growSocialMediaPackageSubTypeId: z.string(),
-    profileLinkURL: z.string().url('Invalid Profile Link URL'),
+    platform: z.string(),
+    profileLinkURL: z.string().url('Invalid Profile Link URL').optional(),
   }),
   paymentData: z.object({
     paymentURL: z.string().url('Invalid payment URL'),
     transactionId: z.string().min(1, 'Transaction ID is required'),
     paymentMethod: z.enum(['esewa', 'khalti', 'bankTransfer']),
   }),
+  postEngagement: z.object({
+    postURLs: z.array(z.string().url('Invalid Post URL')).optional(),
+  }).optional(),
 });
 
 export type TCreateGrowSocialMediaEnrollement = z.infer<
@@ -45,13 +49,16 @@ export const getGrowSocialMediaEnrollementByIdSchema = z.object({
     growSocialMediaPackageId: z.string(),
     growSocialMediaPackageTypeId: z.string(),
     growSocialMediaPackageSubTypeId: z.string(),
-    profileLinkURL: z.string().url('Invalid Profile Link URL'),
+    profileLinkURL: z.string().url('Invalid Profile Link URL').optional(),
   }),
   paymentData: z.object({
     paymentURL: z.string().url('Invalid payment URL'),
     transactionId: z.string().min(1, 'Transaction ID is required'),
     paymentMethod: z.enum(['esewa', 'khalti', 'bankTransfer']),
     rejectionReason: z.string(),
+  }),
+  postEngagement: z.object({
+    postURLs: z.array(z.string().url('Invalid Post URL')).optional(),
   }),
   createdAt: z.string(),
   updatedAt: z.string(),
@@ -86,14 +93,14 @@ export const validateGrowUserPromoCodeResponseSchema = z.object({
 export type TValidateGrowUserPromoCodeResponse = z.infer<typeof validateGrowUserPromoCodeResponseSchema>
 
 export const srkGrowUsersSchema = z.object({
+  _id: z.string(),
+  fullName: z.string(),
+  referredBy: z.string().optional(),
+  status: z.enum(['verificationPending', 'portalActivated', 'portalDeactivated']),
+  socialMediaPackage: z.object({
     _id: z.string(),
-    fullName: z.string(),
-    referredBy: z.string().optional(),
-    status: z.enum(['verificationPending', 'portalActivated', 'portalDeactivated']),
-    socialMediaPackage: z.object({
-        _id: z.string(),
-        name: z.string(),
-    }),
+    name: z.string(),
+  }),
 });
 
 export const getAllSrkGrowUsersResponseSchema = z.array(srkGrowUsersSchema);

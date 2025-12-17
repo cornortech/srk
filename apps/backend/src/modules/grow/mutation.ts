@@ -7,6 +7,7 @@ import { growSocialMediaPackageSubTypeModel } from "../../model/growSocialMediaP
 import { growSocialMediaPackageEnrollmentModel } from "../../model/growSocialMediaPackageEnrollement";
 import { growSocialMediaPackagePaymentModel } from "../../model/growSocialMediaPackagePaymentModel";
 import AuthService from "../../services/authService";
+import { growPackageEngagementPostModel } from "../../model/growEngagementPostModel";
 
 const createGrowSocialMediaEnrollement: AppRouteImplementationOrOptions<
     typeof growContract.createGrowSocialMediaEnrollement
@@ -16,8 +17,11 @@ const createGrowSocialMediaEnrollement: AppRouteImplementationOrOptions<
         const {
             userData,
             enrollementData,
-            paymentData
+            paymentData,
+            postEngagement,
         } = body;
+
+        const postURLs = postEngagement.postURLs ?? [];
 
         // 1. Validate promo code and find referredBy user using promocode
         let growSocialMediaRefferalUser = null;
@@ -71,6 +75,16 @@ const createGrowSocialMediaEnrollement: AppRouteImplementationOrOptions<
             };
         }
 
+        if (packageSubTypeExists.noOfVideos !== postURLs.length) {
+            return {
+                status: 400,
+                body: {
+                    success: false,
+                    message: `Number of video URLs provided (${postURLs.length}) doesnot match the required number (${packageSubTypeExists.noOfVideos})`,
+                },
+            }
+        }
+
         // 3. Check duplicate enrollment (active)
         const existingPackageEnrollment = await growSocialMediaPackageEnrollmentModel.findOne({
             "growSocialMediaPackageUserId.email": userData.email,
@@ -112,7 +126,8 @@ const createGrowSocialMediaEnrollement: AppRouteImplementationOrOptions<
             growSocialMediaPackageId: enrollementData.growSocialMediaPackageId,
             growSocialMediaPackageTypeId: enrollementData.growSocialMediaPackageTypeId,
             growSocialMediaPackageSubTypeId: enrollementData.growSocialMediaPackageSubTypeId,
-            profileLinkURL: enrollementData.profileLinkURL,
+            platform: enrollementData.platform,
+            profileLinkURL: [enrollementData.profileLinkURL],
         });
 
         // 6. Create payment record
@@ -123,13 +138,23 @@ const createGrowSocialMediaEnrollement: AppRouteImplementationOrOptions<
             paymentMethod: paymentData.paymentMethod,
         });
 
+        if (postURLs.length > 0) {
+            await growPackageEngagementPostModel.insertMany(
+                postURLs.map((url: string) => ({
+                    growSocialMediaPackageEnrollmentId:
+                        createSrkGrowPackageEnrollement._id,
+                    postURL: url,
+                }))
+            );
+        }
+
         return {
             status: 201,
             body: {
                 success: true,
                 message: "Enrollment submitted successfully",
-            }
-        }
+            },
+        };
 
     } catch (error) {
         console.error("Error creating grow social media enrollement:", error);

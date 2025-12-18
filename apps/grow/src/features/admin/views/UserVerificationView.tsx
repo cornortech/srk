@@ -49,7 +49,7 @@ export const UserVerificationView: React.FC<UserVerificationViewProps> = () => {
   const { show } = useSRKAlert();
 
   const { mutate: acceptEnrollementMutation, isPending: approvePending } =
-    api.grow.acceptSocialGrowEnrollementRequest.useMutation({
+    api.grow.acceptSocialGrowEnrollmentRequest.useMutation({
       onSuccess: (res) => {
         if (res.status === 200) {
           show('Enrollement User approved', 'success');
@@ -67,7 +67,7 @@ export const UserVerificationView: React.FC<UserVerificationViewProps> = () => {
   };
 
   const { mutate: rejectEnrollementMutation, isPending: rejectPending } =
-    api.grow.rejectSocialGrowEnrollementRequest.useMutation({
+    api.grow.rejectSocialGrowEnrollmentRequest.useMutation({
       onSuccess: (res) => {
         if (res.status === 200) {
           show('Enrollement User rejected', 'success');

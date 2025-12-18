@@ -6,11 +6,15 @@ export interface GrowUser {
   email: string;
   fullName: string;
   status: 'verificationPending' | 'portalActivated' | 'verificationRejected';
-  kycURL?: string;
+  kycURL?: string[]; // Multiple docs
   rejectionReason?: string;
   phone?: string;
   country?: string;
   createdAt?: string | Date;
+  transactionId?: string;
+  paymentProofUrl?: string;
+  paymentURL?: string;
+  paymentMethod?: 'esewa' | 'khalti' | 'bankTransfer';
 }
 
 interface GrowAuthState {
@@ -46,8 +50,8 @@ export const useGrowAuthStore = create<GrowAuthState>()(
         }),
     }),
     {
-      name: 'srkgrow-auth-storage', // name of the item in the storage (must be unique)
-      storage: createJSONStorage(() => localStorage), // (optional) by default, 'localStorage' is used
+      name: 'srkgrow-auth-storage',
+      storage: createJSONStorage(() => localStorage),
     }
   )
 );

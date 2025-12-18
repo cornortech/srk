@@ -8,7 +8,7 @@ export const createGrowSocialMediaEnrollementSchema = z.object({
     gender: z.enum(['Male', 'Female', 'Other']),
     phoneNumber: z.string().min(10, 'Phone number must be at least 10 digits'),
     country: z.string().min(1, 'Country is required'),
-    kycURL: z.string().url('Invalid KYC URL'),
+    kycURL: z.array(z.string()),
     usedPromoCode: z.string().optional(),
   }),
   enrollementData: z.object({
@@ -58,12 +58,22 @@ export const getSrkGrowProfileResponseSchema = z.object({
     fullName: z.string(),
     email: z.string(),
     status: z.string(),
-    kycURL: z.string(),
+    kycURL: z.array(z.string()),
     rejectionReason: z.string().optional(),
     phone: z.string().optional(),
     country: z.string().optional(),
     gender: z.string().optional(),
     promoCode: z.string().optional(),
     createdAt: z.union([z.string(), z.date()]).optional(),
+    transactionId: z.string().optional(),
+    paymentURL: z.string().optional(),
+    paymentMethod: z.string().optional(),
   }),
+});
+
+export const resubmitGrowVerificationSchema = z.object({
+  userId: z.string(),
+  kycURLs: z.array(z.string()),
+  transactionId: z.string(),
+  paymentURL: z.string(),
 });

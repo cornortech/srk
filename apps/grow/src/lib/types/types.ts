@@ -53,7 +53,7 @@ export interface UserData {
   gender: 'Male' | 'Female' | 'Other';
   phone: string;
   country: string;
-  kycURL: string;
+  kycURL: string[];
   status: KYCStatus;
   promoCode: string;
   rejectionReason?: string; // Added field

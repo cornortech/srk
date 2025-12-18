@@ -7,7 +7,7 @@ import { growSocialMediaPackageSubTypeModel } from "../../model/growSocialMediaP
 import { growSocialMediaPackageEnrollmentModel } from "../../model/growSocialMediaPackageEnrollement";
 import { growSocialMediaPackagePaymentModel } from "../../model/growSocialMediaPackagePaymentModel";
 import AuthService from "../../services/authService";
-import { growPackageEngagementPostModel } from "../../model/growEngagementPostModel";
+import { growPackageEngagementPostModel } from "../../model/growPackageEngagementPostModel";
 
 const createGrowSocialMediaEnrollement: AppRouteImplementationOrOptions<
     typeof growContract.createGrowSocialMediaEnrollement
@@ -75,7 +75,7 @@ const createGrowSocialMediaEnrollement: AppRouteImplementationOrOptions<
             };
         }
 
-        if (packageSubTypeExists.noOfVideos !== postURLs.length) {
+        if (!enrollementData?.profileLinkURL?.length && postURLs.length !== packageSubTypeExists.noOfVideos) {
             return {
                 status: 400,
                 body: {
@@ -86,17 +86,34 @@ const createGrowSocialMediaEnrollement: AppRouteImplementationOrOptions<
         }
 
         // 3. Check duplicate enrollment (active)
-        const existingPackageEnrollment = await growSocialMediaPackageEnrollmentModel.findOne({
-            "growSocialMediaPackageUserId.email": userData.email,
-            isActive: true,
+
+        const existingUser = await growSocialMediaPackageUserModel.findOne({
+            email: userData.email,
         });
 
-        if (existingPackageEnrollment) {
+        if (existingUser) {
+            const activeEnrollment = await growSocialMediaPackageEnrollmentModel.findOne({
+                growSocialMediaPackageUserId: existingUser._id,
+                isActive: true,
+            });
+
+            if (activeEnrollment) {
+                return {
+                    status: 409,
+                    body: {
+                        success: false,
+                        message: "User already has an active enrollment",
+                    },
+                };
+            }
+        }
+
+        if (enrollementData?.profileLinkURL?.length && postURLs.length) {
             return {
-                status: 409,
+                status: 400,
                 body: {
                     success: false,
-                    message: "User already has an active enrollment"
+                    message: "Cannot provide both profileLinkURL and postURLs at the same time",
                 },
             };
         }
@@ -126,8 +143,8 @@ const createGrowSocialMediaEnrollement: AppRouteImplementationOrOptions<
             growSocialMediaPackageId: enrollementData.growSocialMediaPackageId,
             growSocialMediaPackageTypeId: enrollementData.growSocialMediaPackageTypeId,
             growSocialMediaPackageSubTypeId: enrollementData.growSocialMediaPackageSubTypeId,
-            platform: enrollementData.platform,
-            profileLinkURL: [enrollementData.profileLinkURL],
+            socialMediaPlatform: enrollementData.socialMediaPlatform,
+            profileLinkURL: enrollementData.profileLinkURL,
         });
 
         // 6. Create payment record
@@ -139,13 +156,10 @@ const createGrowSocialMediaEnrollement: AppRouteImplementationOrOptions<
         });
 
         if (postURLs.length > 0) {
-            await growPackageEngagementPostModel.insertMany(
-                postURLs.map((url: string) => ({
-                    growSocialMediaPackageEnrollmentId:
-                        createSrkGrowPackageEnrollement._id,
-                    postURL: url,
-                }))
-            );
+            await growPackageEngagementPostModel.create({
+                growSocialMediaPackageEnrollmentId: createSrkGrowPackageEnrollement._id,
+                postURLs: postURLs,
+            });
         }
 
         return {

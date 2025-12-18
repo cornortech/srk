@@ -9,6 +9,7 @@ const growPackageEngagementPostSchema = new mongoose.Schema(
         },
         postURLs: {
             type: [String],
+            default: [],
         }
     },
     {

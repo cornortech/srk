@@ -417,10 +417,51 @@ const srkGrowAffiliateVerificationRequest: AppRouteImplementationOrOptions<typeo
 };
 
 
+const approveSrkGrowAffiliateVerificationRequest: AppRouteImplementationOrOptions<typeof growContract.approveSrkGrowAffiliateVerificationRequest> = async ({ params }) => {
+    try {
+        const requestExist = await growSrkAffiliateVerificationModel.findOne({ _id: params.id, });
+
+        if (!requestExist) {
+            return {
+                status: 500,
+                body: {
+                    message: 'Request not found',
+                    success: false,
+                },
+            };
+        }
+
+        await growSrkAffiliateVerificationModel.findOneAndUpdate(
+            { _id: params.id },
+            { $set: { status: 'approved' } }
+        )
+
+        return {
+            status: 201,
+            body: {
+                message: 'Request Approved',
+                success: false,
+            },
+        };
+    } catch (error) {
+        console.log(error);
+        return {
+            status: 500,
+            body: {
+                message: error.message
+                    ? `Internal server error: ${error.message}`
+                    : 'Internal server error',
+                success: false,
+            },
+        };
+    }
+};
+
 export const growMutationHandler = {
     createGrowSocialMediaEnrollement,
     validateGrowUserPromoCode,
     acceptSocialGrowEnrollmentRequest,
     rejectSocialGrowEnrollmentRequest,
-    srkGrowAffiliateVerificationRequest
+    srkGrowAffiliateVerificationRequest,
+    approveSrkGrowAffiliateVerificationRequest
 }

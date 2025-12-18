@@ -6,6 +6,11 @@ import { growQueryHandler } from './query';
 const s = initServer();
 
 export const growRouter = s.router(growContract, {
+  getAllGrowSocialMediaEnrollement:
+    growQueryHandler.getAllSrkGrowEnrollementUser,
+  getGrowSocialMediaEnrollementById:
+    growQueryHandler.getSrkGrowEnrollementUserById,
+  getAllSrkGrowUsers: growQueryHandler.getAllSrkGrowUsers,
   createGrowSocialMediaEnrollement:
     growMutationHandler.createGrowSocialMediaEnrollement,
   validateGrowUserPromoCode: growMutationHandler.validateGrowUserPromoCode,

@@ -1,9 +1,12 @@
 import { initContract } from '@ts-rest/core';
 import {
+  getSrkGrowProfileResponseSchema,
   createGrowSocialMediaEnrollementSchema,
+  getAllSrkGrowUsersResponseSchema,
+  getAllGrowSocialMediaEnrollementSchema,
+  getGrowSocialMediaEnrollementByIdSchema,
   validateGrowUserPromoCodeResponseSchema,
   validateGrowUserPromoCodeSchema,
-  getSrkGrowProfileResponseSchema,
 } from './schema';
 import { ErrorSchema, SuccessSchema } from '../common';
 import { z } from 'zod';
@@ -25,6 +28,42 @@ export const growContract = c.router({
       'Create a new grow social media enrollement for user with user details and payment details',
   },
 
+  getAllGrowSocialMediaEnrollement: {
+    method: 'GET',
+    path: '/get-social-media-enrollement',
+    responses: {
+      200: getAllGrowSocialMediaEnrollementSchema,
+      400: ErrorSchema,
+      409: ErrorSchema,
+      500: ErrorSchema,
+    },
+    summary:
+      'Get all grow social media enrollement for user with user details and payment details',
+  },
+
+  getGrowSocialMediaEnrollementById: {
+    method: 'GET',
+    path: '/get-social-media-enrollement-by-id/:enrollmentID',
+    responses: {
+      200: getGrowSocialMediaEnrollementByIdSchema,
+      400: ErrorSchema,
+      409: ErrorSchema,
+      500: ErrorSchema,
+    },
+    summary:
+      'Get grow social media enrollement for user by ID with user details and payment details',
+  },
+
+  getAllSrkGrowUsers: {
+    method: 'GET',
+    path: '/grow-users',
+    responses: {
+      200: getAllSrkGrowUsersResponseSchema,
+      500: ErrorSchema,
+    },
+    summary: 'Get all srk grow users who is registered',
+  },
+
   validateGrowUserPromoCode: {
     method: 'POST',
     path: '/validate-promo-code',
@@ -41,7 +80,7 @@ export const growContract = c.router({
 
   acceptSocialGrowEnrollmentRequest: {
     method: 'PUT',
-    path: '/grow/accept-social-grow-enrollment-request/:enrollmentId',
+    path: '/grow/accept-social-grow-enrollement-request/:enrollementId',
     body: z.object({}),
     responses: {
       200: SuccessSchema,
@@ -49,7 +88,7 @@ export const growContract = c.router({
       404: ErrorSchema,
       500: ErrorSchema,
     },
-    summary: 'Approve Social Grow Enrollment Request by Id',
+    summary: 'Approve Social Grow Enrollement Request by Id',
   },
 
   rejectSocialGrowEnrollmentRequest: {

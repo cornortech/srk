@@ -7,12 +7,15 @@ import { growSocialMediaPackageSubTypeModel } from '../../model/growSocialMediaP
 import { growSocialMediaPackageEnrollmentModel } from '../../model/growSocialMediaPackageEnrollement';
 import { growSocialMediaPackagePaymentModel } from '../../model/growSocialMediaPackagePaymentModel';
 import AuthService from '../../services/authService';
+import { growPackageEngagementPostModel } from '../../model/growPackageEngagementPostModel';
 
 const createGrowSocialMediaEnrollement: AppRouteImplementationOrOptions<
   typeof growContract.createGrowSocialMediaEnrollement
 > = async ({ body }) => {
   try {
-    const { userData, enrollementData, paymentData } = body;
+    const { userData, enrollementData, paymentData, postEngagement } = body;
+
+    const postURLs = postEngagement.postURLs ?? [];
 
     // 1. Validate promo code and find referredBy user using promocode
     let growSocialMediaRefferalUser = null;
@@ -83,19 +86,50 @@ const createGrowSocialMediaEnrollement: AppRouteImplementationOrOptions<
       };
     }
 
-    // 3. Check duplicate enrollment (active)
-    const existingPackageEnrollment =
-      await growSocialMediaPackageEnrollmentModel.findOne({
-        'growSocialMediaPackageUserId.email': userData.email,
-        isActive: true,
-      });
-
-    if (existingPackageEnrollment) {
+    if (
+      !enrollementData?.profileLinkURL?.length &&
+      postURLs.length !== packageSubTypeExists.noOfVideos
+    ) {
       return {
-        status: 409,
+        status: 400,
         body: {
           success: false,
-          message: 'User already has an active enrollment',
+          message: `Number of video URLs provided (${postURLs.length}) doesnot match the required number (${packageSubTypeExists.noOfVideos})`,
+        },
+      };
+    }
+
+    // 3. Check duplicate enrollment (active)
+
+    const existingUser = await growSocialMediaPackageUserModel.findOne({
+      email: userData.email,
+    });
+
+    if (existingUser) {
+      const activeEnrollment =
+        await growSocialMediaPackageEnrollmentModel.findOne({
+          growSocialMediaPackageUserId: existingUser._id,
+          isActive: true,
+        });
+
+      if (activeEnrollment) {
+        return {
+          status: 409,
+          body: {
+            success: false,
+            message: 'User already has an active enrollment',
+          },
+        };
+      }
+    }
+
+    if (enrollementData?.profileLinkURL?.length && postURLs.length) {
+      return {
+        status: 400,
+        body: {
+          success: false,
+          message:
+            'Cannot provide both profileLinkURL and postURLs at the same time',
         },
       };
     }
@@ -131,6 +165,7 @@ const createGrowSocialMediaEnrollement: AppRouteImplementationOrOptions<
           enrollementData.growSocialMediaPackageTypeId,
         growSocialMediaPackageSubTypeId:
           enrollementData.growSocialMediaPackageSubTypeId,
+        socialMediaPlatform: enrollementData.socialMediaPlatform,
         profileLinkURL: enrollementData.profileLinkURL,
       });
 
@@ -141,6 +176,13 @@ const createGrowSocialMediaEnrollement: AppRouteImplementationOrOptions<
       transactionId: paymentData.transactionId,
       paymentMethod: paymentData.paymentMethod,
     });
+
+    if (postURLs.length > 0) {
+      await growPackageEngagementPostModel.create({
+        growSocialMediaPackageEnrollmentId: createSrkGrowPackageEnrollement._id,
+        postURLs: postURLs,
+      });
+    }
 
     return {
       status: 201,
@@ -252,7 +294,9 @@ const acceptSocialGrowEnrollmentRequest: AppRouteImplementationOrOptions<
 > = async ({ params }) => {
   try {
     const enrollmentRequest =
-      await growSocialMediaPackageEnrollmentModel.findById(params.enrollmentId);
+      await growSocialMediaPackageEnrollmentModel.findById(
+        params.enrollementId
+      );
 
     if (!enrollmentRequest) {
       return {
@@ -279,7 +323,7 @@ const acceptSocialGrowEnrollmentRequest: AppRouteImplementationOrOptions<
 
     await growSocialMediaPackageEnrollmentModel.findOneAndUpdate(
       {
-        _id: params.enrollmentId,
+        _id: params.enrollementId,
       },
       {
         $set: {

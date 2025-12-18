@@ -1,62 +1,105 @@
 import { growContract } from "@srk/shared/contracts";
 import { AppRouteImplementationOrOptions } from "@ts-rest/express/src/lib/types";
-import { growSocialMediaPackageEnrollmentModel } from "../../model/growSocialMediaPackageEnrollement";
-import { GrowEnrollmentPopulated, GrowPackageUserPopulated } from "../../utils/types/growQuery";
+import { growSocialMediaPackageEnrollmentModel } from "../../model/growSocialMediaPackageEnrollment";
+import { GrowEnrollmentPopulated, GrowPackageUserPopulated, GrowProfileResponsePopulated } from "../../utils/types/growQuery";
 import { growPackageEngagementPostModel } from "../../model/growPackageEngagementPostModel";
-import { growSocialMediaPackageUserModel } from "../../model/growSocialMediaPackageUserModel";
 import { growSocialMediaPackagePaymentModel } from "../../model/growSocialMediaPackagePaymentModel";
+import { growSocialMediaPackageUserModel } from "../../model/growSocialMediaPackageUserModel";
 
-const getSrkGrowProfile: AppRouteImplementationOrOptions<
+export const getSrkGrowProfile: AppRouteImplementationOrOptions<
   typeof growContract.getSrkGrowProfile
 > = async ({ params }) => {
   try {
-    const profileExist = await growSocialMediaPackageUserModel
-      .findOne({ _id: params.id })
-      .lean();
 
-    if (!profileExist) {
+    const {
+      userId
+    } = params;
+
+    const packageUser = await growSocialMediaPackageUserModel
+      .findById(userId)
+      .populate<GrowProfileResponsePopulated["growSocialMediaPackageUser"]>({
+        path: "referredBy",
+        select: "fullName",
+      });
+
+    if (!packageUser) {
       return {
         status: 404,
         body: {
-          message: 'Profile not found',
-          success: false,
+          message: "User not found"
         },
       };
     }
 
-    // Aggregate with Enrollment and Payment
-    const enrollment = await growSocialMediaPackageEnrollmentModel
+    const packageEnrollment = await growSocialMediaPackageEnrollmentModel
       .findOne({
-        growSocialMediaPackageUserId: profileExist._id,
+        growSocialMediaPackageUserId: packageUser._id,
       })
-      .lean();
+      .populate<GrowProfileResponsePopulated["growSocialMediaPackageEnrollment"]>({
+        path: "growSocialMediaPackageId",
+        select: "name amount",
+      });
 
-    let paymentInfo = null;
-    if (enrollment) {
-      paymentInfo = await growSocialMediaPackagePaymentModel
-        .findOne({
-          growPackageEnrollementId: enrollment._id,
-        })
-        .lean();
-    }
+    const packagePayment = packageEnrollment ? await growSocialMediaPackagePaymentModel.findOne({
+      growPackageenrollmentId: packageEnrollment._id,
+    })
+      : null;
+
+    const engagementPosts = packageEnrollment
+      ? await growPackageEngagementPostModel.findOne({
+        growSocialMediaPackageEnrollmentId: packageEnrollment._id,
+      })
+      : null;
 
     return {
       status: 200,
       body: {
-        message: 'Profile found',
-        result: {
-          ...profileExist,
-          _id: profileExist._id.toString(),
-          kycURL: Array.isArray(profileExist.kycURL)
-            ? profileExist.kycURL
-            : profileExist.kycURL
-              ? [profileExist.kycURL]
+        userDetails: {
+          _id: packageUser._id.toString(),
+          srkUniversityId: packageUser.srkUniversityUserId?.toString(),
+          fullName: packageUser.fullName,
+          email: packageUser.email,
+          status: packageUser.status,
+          phone: packageUser.phone,
+          kycURL: packageUser.kycURL,
+          country: packageUser.country,
+          gender: packageUser.gender,
+          promoCode: packageUser.promoCode,
+
+          profileLinkURL:
+            packageEnrollment?.profileLinkURL && packageEnrollment.profileLinkURL.length
+              ? packageEnrollment.profileLinkURL
               : [],
-          transactionId: paymentInfo?.transactionId,
-          paymentURL: paymentInfo?.paymentURL,
-          paymentMethod: paymentInfo?.paymentMethod,
+          userType: packageUser.userType,
+
+          referredBy: packageUser.referredBy
+            ? {
+              name: packageUser.referredBy.fullName,
+            }
+            : null,
         },
-        success: true,
+
+        enrollmentData: packageEnrollment
+          ? {
+            enrollmentPackageDetails: {
+              name: packageEnrollment.growSocialMediaPackageId.name,
+              amount: packageEnrollment.growSocialMediaPackageId.amount,
+              socialMediaPlatform: packageEnrollment.socialMediaPlatform,
+            },
+
+            engagementPostURLs: engagementPosts?.postURLs ?? [],
+
+            enrollmentPaymentDetails: packagePayment
+              ? {
+                paymentUrl: packagePayment.paymentURL,
+                transactionId: packagePayment.transactionId,
+                paymentMethod: packagePayment.paymentMethod,
+                rejectionReason:
+                  packagePayment.rejectionReason ?? null,
+              }
+              : null,
+          }
+          : null,
       },
     };
   } catch (error) {
@@ -64,17 +107,14 @@ const getSrkGrowProfile: AppRouteImplementationOrOptions<
     return {
       status: 500,
       body: {
-        success: false,
-        message: error.message
-          ? `Internal sever error: ${ error.message }`
-          : 'Internal server error',
+        message: "Internal server error",
       },
     };
   }
 };
 
-const getAllSrkGrowEnrollementUser: AppRouteImplementationOrOptions<
-  typeof growContract.getAllGrowSocialMediaEnrollement
+const getAllSrkGrowEnrollmentUser: AppRouteImplementationOrOptions<
+  typeof growContract.getAllGrowSocialMediaEnrollment
 > = async () => {
   try {
     const enrollments =
@@ -86,7 +126,7 @@ const getAllSrkGrowEnrollementUser: AppRouteImplementationOrOptions<
         .populate<GrowEnrollmentPopulated>("growSocialMediaPackageSubTypeId")
         .sort({ createdAt: -1 });
 
-    const packageEnrollement = await Promise.all(
+    const packageEnrollment = await Promise.all(
       enrollments.map(async (e) => {
         const postEngagement = await growPackageEngagementPostModel.findOne({
           growSocialMediaPackageEnrollmentId: e._id,
@@ -106,7 +146,7 @@ const getAllSrkGrowEnrollementUser: AppRouteImplementationOrOptions<
             status: e.growSocialMediaPackageUserId.status,
           },
 
-          enrollementData: {
+          enrollmentData: {
             growSocialMediaPackageId:
               e.growSocialMediaPackageId._id.toString(),
             growSocialMediaPackageTypeId:
@@ -135,7 +175,7 @@ const getAllSrkGrowEnrollementUser: AppRouteImplementationOrOptions<
 
     return {
       status: 200,
-      body: packageEnrollement
+      body: packageEnrollment
     }
 
   } catch (error) {
@@ -150,8 +190,8 @@ const getAllSrkGrowEnrollementUser: AppRouteImplementationOrOptions<
   }
 };
 
-const getSrkGrowEnrollementUserById: AppRouteImplementationOrOptions<
-  typeof growContract.getGrowSocialMediaEnrollementById
+const getSrkGrowEnrollmentUserById: AppRouteImplementationOrOptions<
+  typeof growContract.getGrowSocialMediaEnrollmentById
 > = async ({ params }) => {
   try {
     const enrollment =
@@ -186,7 +226,7 @@ const getSrkGrowEnrollementUserById: AppRouteImplementationOrOptions<
           kycURL: enrollment.growSocialMediaPackageUserId.kycURL,
         },
 
-        enrollementData: {
+        enrollmentData: {
           package: {
             _id: enrollment.growSocialMediaPackageId._id,
             title: enrollment.growSocialMediaPackageId.title,
@@ -275,7 +315,7 @@ const getAllSrkGrowUsers: AppRouteImplementationOrOptions<
 
 export const growQueryHandler = {
   getSrkGrowProfile,
-  getAllSrkGrowEnrollementUser,
-  getSrkGrowEnrollementUserById,
+  getAllSrkGrowEnrollmentUser,
+  getSrkGrowEnrollmentUserById,
   getAllSrkGrowUsers
 };

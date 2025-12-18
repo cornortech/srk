@@ -29,7 +29,7 @@ const growSocialMediaPackageUserSchema = new mongoose.Schema(
             required: true,
         },
         kycURL: {
-            type: String,
+            type: [String],
             required: true,
         },
         status: {
@@ -41,6 +41,11 @@ const growSocialMediaPackageUserSchema = new mongoose.Schema(
             type: String,
             required: true,
             unique: true,
+        },
+        userType: {
+            type: String,
+            enum: ["affiliate", "package"],
+            required: true,
         },
         srkUniversityUserId: {
             type: mongoose.Schema.Types.ObjectId,

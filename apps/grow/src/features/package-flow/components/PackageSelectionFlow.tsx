@@ -97,7 +97,7 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
   });
 
   const createEnrollment =
-    api.grow.createGrowSocialMediaEnrollement.useMutation({
+    api.grow.createGrowSocialMediaEnrollment.useMutation({
       onSuccess: (data) => {
         // Handle success if needed, e.g. toast?
         // PaymentModel handles the success UI view
@@ -320,7 +320,7 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
             kycURL: kycUrls,
             usedPromoCode: userDetails.promoCode || undefined,
           },
-          enrollementData: {
+          enrollmentData: {
             growSocialMediaPackageId: selectedPackage._id,
             growSocialMediaPackageTypeId: packageType._id || 'unknown',
             growSocialMediaPackageSubTypeId: packageSubType._id || 'unknown',

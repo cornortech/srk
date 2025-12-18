@@ -78,4 +78,21 @@ export const growContract = c.router({
     },
     summary: 'Get Srk Grow Profile by Id',
   },
+  resubmitGrowVerification: {
+    method: 'POST',
+    path: '/resubmit-verification',
+    body: z.object({
+      userId: z.string(),
+      kycURLs: z.array(z.string()),
+      transactionId: z.string(),
+      paymentURL: z.string(),
+    }),
+    responses: {
+      200: SuccessSchema,
+      400: ErrorSchema,
+      404: ErrorSchema,
+      500: ErrorSchema,
+    },
+    summary: 'Resubmit verification with new KYC and payment details',
+  },
 });

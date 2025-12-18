@@ -7,6 +7,8 @@ import {
   FileText,
   CreditCard,
   Loader2,
+  Trash2,
+  ExternalLink,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { GradientText } from '../features/verification/components/ui/GradientText';
@@ -19,12 +21,14 @@ export const GrowVerificationPage = () => {
   const navigate = useNavigate();
   const { user, setUser, logout } = useGrowAuthStore();
   const [kycFiles, setKycFiles] = useState<File[]>([]);
+  const [currentKycDocs, setCurrentKycDocs] = useState<string[]>([]);
   const [transactionId, setTransactionId] = useState('');
   const [paymentProof, setPaymentProof] = useState<File | null>(null);
   const { uploadFile, isUploading } = useSRKFileUpload('grow-resubmission');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { data: profileData } = api.grow.getSrkGrowProfile.useQuery(
+  // API Hooks
+  const { data: profileData, refetch } = api.grow.getSrkGrowProfile.useQuery(
     ['growProfile', user?._id || ''],
     { params: { id: user?._id || '' } },
     {
@@ -34,6 +38,24 @@ export const GrowVerificationPage = () => {
     }
   );
 
+  const resubmitMutation = api.grow.resubmitGrowVerification.useMutation({
+    onSuccess: (data) => {
+      if (data.status === 200) {
+        console.log('✅ Resubmission successful');
+        refetch(); // Refresh profile to get updated status
+        setKycFiles([]);
+        setPaymentProof(null);
+      } else {
+        alert(data.body.message || 'Resubmission failed');
+      }
+    },
+    onError: (error) => {
+      console.error('Resubmission error:', error);
+      alert('An error occurred during resubmission.');
+    },
+  });
+
+  // Sync profile data to store and local state
   useEffect(() => {
     if (profileData?.status === 200) {
       const updatedUser = profileData.body.result;
@@ -45,7 +67,21 @@ export const GrowVerificationPage = () => {
         phone: updatedUser.phone,
         country: updatedUser.country,
         createdAt: updatedUser.createdAt,
+        transactionId: updatedUser.transactionId,
+        paymentURL: updatedUser.paymentURL,
+        paymentMethod: updatedUser.paymentMethod as any,
       });
+
+      // Prefill fields
+      if (updatedUser.transactionId)
+        setTransactionId(updatedUser.transactionId);
+      if (updatedUser.kycURL) {
+        setCurrentKycDocs(
+          Array.isArray(updatedUser.kycURL)
+            ? updatedUser.kycURL
+            : [updatedUser.kycURL]
+        );
+      }
     }
   }, [profileData, setUser]);
 
@@ -62,8 +98,17 @@ export const GrowVerificationPage = () => {
 
   const handleKycFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      setKycFiles(Array.from(e.target.files));
+      const newFiles = Array.from(e.target.files);
+      setKycFiles((prev) => [...prev, ...newFiles]);
     }
+  };
+
+  const removeNewFile = (index: number) => {
+    setKycFiles((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const removeCurrentDoc = (index: number) => {
+    setCurrentKycDocs((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handlePaymentProofChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -76,39 +121,42 @@ export const GrowVerificationPage = () => {
     e.preventDefault();
     if (!user) return;
 
+    if (currentKycDocs.length === 0 && kycFiles.length === 0) {
+      alert('Please provide at least one KYC document.');
+      return;
+    }
+
     setIsSubmitting(true);
     try {
-      // 1. Upload new files if present
-      let kycUrls: string[] = [];
-      if (kycFiles.length > 0) {
-        for (const file of kycFiles) {
-          const { url } = await uploadFile(file, 'image');
-          kycUrls.push(url);
-        }
+      // 1. Upload new KYC files
+      let newKycUrls: string[] = [];
+      for (const file of kycFiles) {
+        const { url } = await uploadFile(file, 'image');
+        newKycUrls.push(url);
       }
 
-      let paymentUrl = '';
+      // 2. Upload new Payment Proof if changed
+      let finalPaymentUrl = user.paymentURL || '';
       if (paymentProof) {
         const { url } = await uploadFile(paymentProof, 'image');
-        paymentUrl = url;
+        finalPaymentUrl = url;
       }
 
-      const updatedUser: GrowUser = {
-        ...user,
-        status: 'verificationPending',
-      };
+      // 3. Combine remaining current docs and new ones
+      const totalKycUrls = [...currentKycDocs, ...newKycUrls];
 
-      localStorage.setItem(
-        'srkgrow-activesession',
-        JSON.stringify(updatedUser)
-      );
-      setUser(updatedUser);
-      setKycFiles([]);
-      setPaymentProof(null);
-      setTransactionId('');
+      // 4. Call Backend API
+      resubmitMutation.mutate({
+        body: {
+          userId: user._id,
+          kycURLs: totalKycUrls,
+          transactionId,
+          paymentURL: finalPaymentUrl,
+        },
+      });
     } catch (error) {
       console.error('Resubmission failed', error);
-      alert('Failed to resubmit. Please try again.');
+      alert('Failed to upload documents. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -118,7 +166,6 @@ export const GrowVerificationPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0a0705] to-black text-white flex items-center justify-center p-4">
-      {/* Background Ambience */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-20 left-1/4 w-96 h-96 bg-[#b68938]/10 rounded-full blur-[128px]" />
         <div className="absolute bottom-20 right-1/4 w-96 h-96 bg-[#e1ba73]/10 rounded-full blur-[128px]" />
@@ -165,7 +212,6 @@ export const GrowVerificationPage = () => {
 
         {user.status === 'verificationRejected' && (
           <div className="grid lg:grid-cols-5 gap-8">
-            {/* Status Panel */}
             <div className="lg:col-span-2 space-y-6">
               <GlassCard className="border-red-500/30 bg-red-500/5">
                 <div className="flex items-center gap-3 mb-4">
@@ -197,14 +243,12 @@ export const GrowVerificationPage = () => {
               </div>
             </div>
 
-            {/* Resubmission Form */}
             <div className="lg:col-span-3">
               <GlassCard>
                 <h3 className="text-2xl font-bold text-white mb-6">
                   Update Verification
                 </h3>
                 <form onSubmit={handleResubmit} className="space-y-6">
-                  {/* Transaction ID */}
                   <div>
                     <label className="block text-sm font-bold text-gray-400 mb-2 uppercase tracking-widest">
                       Transaction ID
@@ -225,24 +269,30 @@ export const GrowVerificationPage = () => {
                     </div>
                   </div>
 
-                  {/* Payment Screenshot */}
                   <div>
                     <label className="block text-sm font-bold text-gray-400 mb-2 uppercase tracking-widest">
-                      Update Payment Screenshot
+                      Payment Screenshot
                     </label>
 
-                    {/* Existing Proof Preview - Note: Backend API missing payment URL in profile currently, so this might be empty unless we store it in local state or update backend */}
-                    {!paymentProof && (user as any).paymentProofUrl && (
+                    {!paymentProof && user.paymentURL && (
                       <div className="mb-3 relative group rounded-xl overflow-hidden border border-white/10">
                         <img
-                          src={(user as any).paymentProofUrl}
+                          src={user.paymentURL}
                           alt="Current Proof"
                           className="w-full h-32 object-cover opacity-60 group-hover:opacity-100 transition-opacity"
                         />
-                        <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="absolute inset-0 flex items-center justify-center gap-2">
                           <span className="bg-black/60 px-3 py-1 rounded-full text-xs text-white backdrop-blur-sm border border-white/10">
                             Current Upload
                           </span>
+                          <a
+                            href={user.paymentURL}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="p-2 bg-white/10 rounded-full text-white hover:bg-[#b68938] transition-all opacity-0 group-hover:opacity-100"
+                          >
+                            <ExternalLink size={14} />
+                          </a>
                         </div>
                       </div>
                     )}
@@ -262,7 +312,7 @@ export const GrowVerificationPage = () => {
                         <span className="text-gray-400 truncate">
                           {paymentProof
                             ? paymentProof.name
-                            : (user as any).paymentProofUrl
+                            : user.paymentURL
                             ? 'Change screenshot'
                             : 'Select screenshot'}
                         </span>
@@ -271,44 +321,61 @@ export const GrowVerificationPage = () => {
                     </div>
                   </div>
 
-                  {/* KYC Docs */}
                   <div>
                     <label className="block text-sm font-bold text-gray-400 mb-2 uppercase tracking-widest">
-                      Re-upload KYC Documents
+                      KYC Documents
                     </label>
 
-                    {/* Existing KYC List */}
-                    {/* Existing KYC Doc */}
-                    {user.kycURL && kycFiles.length === 0 && (
-                      <div className="mb-3">
-                        <div className="flex items-center justify-between p-3 rounded-lg bg-white/5 border border-white/10">
+                    {/* Current Documents */}
+                    <div className="space-y-2 mb-4">
+                      {currentKycDocs.map((url, idx) => (
+                        <div
+                          key={idx}
+                          className="flex items-center justify-between p-3 rounded-lg bg-white/5 border border-white/10"
+                        >
                           <div className="flex items-center gap-3 overflow-hidden">
-                            <FileText
-                              size={16}
-                              className="text-gray-500 flex-shrink-0"
-                            />
-                            <div className="min-w-0">
-                              <p className="text-sm text-gray-300 truncate">
-                                <a
-                                  href={user.kycURL}
-                                  target="_blank"
-                                  rel="noreferrer"
-                                  className="hover:text-[#b68938] transition-colors underline"
-                                >
-                                  View KYC Document
-                                </a>
-                              </p>
-                              <p className="text-xs text-red-400">
-                                Marked as Invalid
-                              </p>
-                            </div>
+                            <FileText size={16} className="text-[#b68938]" />
+                            <a
+                              href={url}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="text-sm text-gray-300 truncate hover:text-[#b68938] underline"
+                            >
+                              Existing Document {idx + 1}
+                            </a>
                           </div>
+                          <button
+                            type="button"
+                            onClick={() => removeCurrentDoc(idx)}
+                            className="p-1 text-gray-500 hover:text-red-500 transition-all"
+                          >
+                            <Trash2 size={16} />
+                          </button>
                         </div>
-                        <p className="text-xs text-gray-500 italic mt-1">
-                          * Uploading new files will replace this.
-                        </p>
-                      </div>
-                    )}
+                      ))}
+
+                      {/* New Documents */}
+                      {kycFiles.map((file, idx) => (
+                        <div
+                          key={`new-${idx}`}
+                          className="flex items-center justify-between p-3 rounded-lg bg-[#b68938]/10 border border-[#b68938]/30"
+                        >
+                          <div className="flex items-center gap-3 overflow-hidden">
+                            <Upload size={16} className="text-[#b68938]" />
+                            <span className="text-sm text-white truncate">
+                              {file.name}
+                            </span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => removeNewFile(idx)}
+                            className="p-1 text-[#b68938] hover:text-red-500 transition-all"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
 
                     <div className="relative group cursor-pointer">
                       <input
@@ -324,9 +391,7 @@ export const GrowVerificationPage = () => {
                         className="flex items-center justify-between w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 cursor-pointer hover:border-[#b68938]/50 transition-all"
                       >
                         <span className="text-gray-400 truncate">
-                          {kycFiles.length > 0
-                            ? `${kycFiles.length} new files selected`
-                            : 'Select new documents'}
+                          Add more documents
                         </span>
                         <Upload size={18} className="text-gray-500" />
                       </label>
@@ -335,10 +400,14 @@ export const GrowVerificationPage = () => {
 
                   <button
                     type="submit"
-                    disabled={isUploading || isSubmitting}
+                    disabled={
+                      isUploading || isSubmitting || resubmitMutation.isPending
+                    }
                     className="w-full py-4 rounded-xl font-bold uppercase tracking-widest bg-gradient-to-r from-[#b68938] to-[#e1ba73] text-black hover:shadow-[0_0_20px_rgba(182,137,56,0.4)] disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
                   >
-                    {isUploading || isSubmitting ? (
+                    {isUploading ||
+                    isSubmitting ||
+                    resubmitMutation.isPending ? (
                       <>
                         <Loader2 size={20} className="animate-spin" />
                         Submitting...

@@ -279,7 +279,7 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
     paymentMethod: string;
   }) => {
     try {
-      const kycUrl = userDetails.kyc?.[0] || '';
+      const kycUrls = userDetails.kyc || [];
 
       const packageType = selectedPackage.packageTypes[selectedTypeIndex];
       const packageSubType =
@@ -309,7 +309,7 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
             gender: (userDetails.gender.charAt(0).toUpperCase() +
               userDetails.gender.slice(1)) as 'Male' | 'Female' | 'Other',
             password: userDetails.password,
-            kycURL: kycUrl,
+            kycURL: kycUrls,
             usedPromoCode: userDetails.promoCode || undefined,
           },
           enrollementData: {

@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
 const growSocialMediaPackageUserSchema = new mongoose.Schema(
     {
@@ -52,12 +52,12 @@ const growSocialMediaPackageUserSchema = new mongoose.Schema(
             ref: "growSocialMediaPackageUser",
         },
     },
-    {
-        timestamps: true,
-    },
+  {
+    timestamps: true,
+  }
 );
 
 export const growSocialMediaPackageUserModel = mongoose.model(
-    "growSocialMediaPackageUser",
-    growSocialMediaPackageUserSchema,
+  'growSocialMediaPackageUser',
+  growSocialMediaPackageUserSchema
 );

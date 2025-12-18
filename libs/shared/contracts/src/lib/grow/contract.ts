@@ -133,7 +133,7 @@ export const growContract = c.router({
 
     approveSrkGrowAffiliateVerificationRequest: {
         method: "PATCH",
-        path: "/approve-srk-grow-verification-follow-request/:id",
+        path: "/grow/affiliate/approve-verification-follow-request/:id",
         body: z.object({}),
         responses: {
             200: SuccessSchema,
@@ -143,4 +143,19 @@ export const growContract = c.router({
         },
         summary: "Approve SRK Grow Verification Follow Request by Id"
     },
+
+    rejectSrkGrowAffiliateVerificationRequest: {
+        method: "PATCH",
+        path: "/grow/affiliate/reject-verification-follow-request/:id",
+        body: z.object({
+            rejectionReason: z.string()
+        }),
+        responses: {
+            200: SuccessSchema,
+            403: ErrorSchema,
+            404: ErrorSchema,
+            500: ErrorSchema
+        },
+        summary: "Reject SRK Grow Verification Follow Request By Id"
+    }
 });

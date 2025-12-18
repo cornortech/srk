@@ -1,4 +1,4 @@
-import { AppRouteImplementationOrOptions } from "@ts-rest/express/src/lib/types";
+import { AppRouteImplementationOrOptions, isAppRouteImplementation } from "@ts-rest/express/src/lib/types";
 import { growContract } from "@srk/shared/contracts";
 import { growSocialMediaPackageUserModel } from "../../model/growSocialMediaPackageUserModel";
 import { growSocialMediaPackageModel } from "../../model/growSocialMediaPackageModel";
@@ -456,6 +456,44 @@ const approveSrkGrowAffiliateVerificationRequest: AppRouteImplementationOrOption
         };
     }
 };
+const rejectSrkGrowAffiliateVerificationRequest: AppRouteImplementationOrOptions<typeof growContract.rejectSrkGrowAffiliateVerificationRequest> = async ({ params, body }) => {
+    try {
+        const requestExist = await growSrkAffiliateVerificationModel.findOne({ _id: params.id })
+        if (!requestExist) {
+            return {
+                status: 500,
+                body: {
+                    message: 'Request not found',
+                    success: false,
+                }
+            }
+        }
+
+        await growSrkAffiliateVerificationModel.findOneAndUpdate(
+            { _id: params.id },
+            { $set: { status: 'approved', rejectionReason: body.rejectionReason } }
+        )
+
+        return {
+            status: 201,
+            body: {
+                message: 'Request Rejected',
+                rejectionReason: body.rejectionReason,
+                success: false,
+            },
+        };
+
+    } catch (error) {
+        console.log(error)
+        return {
+            status: 500,
+            body: {
+                message: error.message ? `Internal server error: ${error.message}` : "Internal server error.",
+                succss: false
+            }
+        }
+    }
+}
 
 export const growMutationHandler = {
     createGrowSocialMediaEnrollement,
@@ -463,5 +501,6 @@ export const growMutationHandler = {
     acceptSocialGrowEnrollmentRequest,
     rejectSocialGrowEnrollmentRequest,
     srkGrowAffiliateVerificationRequest,
-    approveSrkGrowAffiliateVerificationRequest
+    approveSrkGrowAffiliateVerificationRequest,
+    rejectSrkGrowAffiliateVerificationRequest
 }

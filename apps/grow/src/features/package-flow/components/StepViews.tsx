@@ -5,9 +5,9 @@ import {
   EngagementType,
   PackageDetails,
 } from '../../../../lib/types/types';
-import SocialPlatformCard from '../../../../lib/ui/SocialPlatformCard';
-import EngagementOption from '../../../../lib/ui/EngagementOption';
-import SelectOption from '../../../../lib/ui/SelectOption';
+import SocialPlatformCard from '../../../lib/ui/SocialPlatformCard';
+import EngagementOption from '../../../lib/ui/EngagementOption';
+import SelectOption from '../../../lib/ui/SelectOption';
 
 interface PlatformStepProps {
   platforms: SocialPlatform[];
@@ -67,13 +67,15 @@ export const EngagementStep: React.FC<EngagementStepProps> = ({
 
 interface OptionStepProps {
   engagementType: EngagementType;
-  selectedOption: number;
-  onSelect: (i: number) => void;
+  selectedTypeIndex: number;
+  selectedSubTypeIndex: number;
+  onSelect: (typeIndex: number, subTypeIndex: number) => void;
   packageData: PackageDetails;
 }
 export const OptionStep: React.FC<OptionStepProps> = ({
   engagementType,
-  selectedOption,
+  selectedTypeIndex,
+  selectedSubTypeIndex,
   onSelect,
   packageData,
 }) => (
@@ -82,28 +84,37 @@ export const OptionStep: React.FC<OptionStepProps> = ({
     animate={{ opacity: 1, y: 0 }}
     className="max-w-2xl mx-auto space-y-4"
   >
-    {engagementType === 'follow'
-      ? packageData.followerOptions.map((f, i) => (
-          <SelectOption
-            key={i}
-            option={{ followers: f }}
-            type="follow"
-            index={i}
-            selected={selectedOption === i}
-            onClick={() => onSelect(i)}
-            packageData={packageData}
-          />
-        ))
-      : packageData.reachOptions.map((o, i) => (
-          <SelectOption
-            key={i}
-            option={o}
-            type="reach"
-            index={i}
-            selected={selectedOption === i}
-            onClick={() => onSelect(i)}
-            packageData={packageData}
-          />
-        ))}
+    {packageData.packageTypes?.map((packageType, typeIndex) => (
+      <div key={packageType._id}>
+        {packageType.packageSubTypes?.map((subType, subTypeIndex) => {
+          const relevantField =
+            engagementType === 'follow'
+              ? subType.noOfFollowers
+              : subType.noOfVideos;
+
+          if (!relevantField) return null;
+
+          return (
+            <SelectOption
+              key={`${typeIndex}-${subTypeIndex}`}
+              option={{
+                followers:
+                  engagementType === 'follow'
+                    ? subType.noOfFollowers || 0
+                    : subType.noOfVideos || 0,
+              }}
+              type={engagementType}
+              index={subTypeIndex}
+              selected={
+                selectedTypeIndex === typeIndex &&
+                selectedSubTypeIndex === subTypeIndex
+              }
+              onClick={() => onSelect(typeIndex, subTypeIndex)}
+              packageData={packageData}
+            />
+          );
+        })}
+      </div>
+    ))}
   </motion.div>
 );

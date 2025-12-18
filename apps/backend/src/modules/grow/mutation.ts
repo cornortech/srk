@@ -7,6 +7,9 @@ import { growSocialMediaPackageSubTypeModel } from "../../model/growSocialMediaP
 import { growSocialMediaPackageEnrollmentModel } from "../../model/growSocialMediaPackageEnrollement";
 import { growSocialMediaPackagePaymentModel } from "../../model/growSocialMediaPackagePaymentModel";
 import AuthService from "../../services/authService";
+import { growPackageEngagementPostModel } from "../../model/growPackageEngagementPostModel";
+import { UserModel } from "../../model/userModel";
+import { growSrkAffiliateVerificationModel } from "../../model/growSrkAffiliateVerificationModel";
 
 const createGrowSocialMediaEnrollement: AppRouteImplementationOrOptions<
     typeof growContract.createGrowSocialMediaEnrollement
@@ -16,8 +19,11 @@ const createGrowSocialMediaEnrollement: AppRouteImplementationOrOptions<
         const {
             userData,
             enrollementData,
-            paymentData
+            paymentData,
+            postEngagement,
         } = body;
+
+        const postURLs = postEngagement.postURLs ?? [];
 
         // 1. Validate promo code and find referredBy user using promocode
         let growSocialMediaRefferalUser = null;
@@ -71,18 +77,45 @@ const createGrowSocialMediaEnrollement: AppRouteImplementationOrOptions<
             };
         }
 
-        // 3. Check duplicate enrollment (active)
-        const existingPackageEnrollment = await growSocialMediaPackageEnrollmentModel.findOne({
-            "growSocialMediaPackageUserId.email": userData.email,
-            isActive: true,
-        });
-
-        if (existingPackageEnrollment) {
+        if (!enrollementData?.profileLinkURL?.length && postURLs.length !== packageSubTypeExists.noOfVideos) {
             return {
-                status: 409,
+                status: 400,
                 body: {
                     success: false,
-                    message: "User already has an active enrollment"
+                    message: `Number of video URLs provided (${postURLs.length}) doesnot match the required number (${packageSubTypeExists.noOfVideos})`,
+                },
+            }
+        }
+
+        // 3. Check duplicate enrollment (active)
+
+        const existingUser = await growSocialMediaPackageUserModel.findOne({
+            email: userData.email,
+        });
+
+        if (existingUser) {
+            const activeEnrollment = await growSocialMediaPackageEnrollmentModel.findOne({
+                growSocialMediaPackageUserId: existingUser._id,
+                isActive: true,
+            });
+
+            if (activeEnrollment) {
+                return {
+                    status: 409,
+                    body: {
+                        success: false,
+                        message: "User already has an active enrollment",
+                    },
+                };
+            }
+        }
+
+        if (enrollementData?.profileLinkURL?.length && postURLs.length) {
+            return {
+                status: 400,
+                body: {
+                    success: false,
+                    message: "Cannot provide both profileLinkURL and postURLs at the same time",
                 },
             };
         }
@@ -112,6 +145,7 @@ const createGrowSocialMediaEnrollement: AppRouteImplementationOrOptions<
             growSocialMediaPackageId: enrollementData.growSocialMediaPackageId,
             growSocialMediaPackageTypeId: enrollementData.growSocialMediaPackageTypeId,
             growSocialMediaPackageSubTypeId: enrollementData.growSocialMediaPackageSubTypeId,
+            socialMediaPlatform: enrollementData.socialMediaPlatform,
             profileLinkURL: enrollementData.profileLinkURL,
         });
 
@@ -123,13 +157,20 @@ const createGrowSocialMediaEnrollement: AppRouteImplementationOrOptions<
             paymentMethod: paymentData.paymentMethod,
         });
 
+        if (postURLs.length > 0) {
+            await growPackageEngagementPostModel.create({
+                growSocialMediaPackageEnrollmentId: createSrkGrowPackageEnrollement._id,
+                postURLs: postURLs,
+            });
+        }
+
         return {
             status: 201,
             body: {
                 success: true,
                 message: "Enrollment submitted successfully",
-            }
-        }
+            },
+        };
 
     } catch (error) {
         console.error("Error creating grow social media enrollement:", error);
@@ -227,7 +268,7 @@ export const validateGrowUserPromoCode: AppRouteImplementationOrOptions<
 
 const acceptSocialGrowEnrollmentRequest: AppRouteImplementationOrOptions<typeof growContract.acceptSocialGrowEnrollmentRequest> = async ({ params }) => {
     try {
-        const enrollmentRequest = await growSocialMediaPackageEnrollmentModel.findById(params.enrollmentId);
+        const enrollmentRequest = await growSocialMediaPackageEnrollmentModel.findById(params.enrollementId);
 
         if (!enrollmentRequest) {
             return {
@@ -254,7 +295,7 @@ const acceptSocialGrowEnrollmentRequest: AppRouteImplementationOrOptions<typeof 
 
         await growSocialMediaPackageEnrollmentModel.findOneAndUpdate(
             {
-                _id: params.enrollmentId
+                _id: params.enrollementId
             },
             {
                 $set: {
@@ -286,7 +327,7 @@ const acceptSocialGrowEnrollmentRequest: AppRouteImplementationOrOptions<typeof 
 
 const rejectSocialGrowEnrollmentRequest: AppRouteImplementationOrOptions<typeof growContract.rejectSocialGrowEnrollmentRequest> = async ({ params, body }) => {
     try {
-        const enrollementRequest = await growSocialMediaPackageEnrollmentModel.findById(params.enrollmentId);
+        const enrollementRequest = await growSocialMediaPackageEnrollmentModel.findById(params.enrollementId);
 
         if (!enrollementRequest) {
             return {
@@ -336,9 +377,50 @@ const rejectSocialGrowEnrollmentRequest: AppRouteImplementationOrOptions<typeof 
     }
 }
 
+
+const srkGrowAffiliateVerificationRequest: AppRouteImplementationOrOptions<typeof growContract.srkGrowAffiliateVerificationRequest> = async ({ body }) => {
+    try {
+        const srkUniversityUserExist = await UserModel.findOne({ _id: body.srkuniversityUserId });
+
+        if (!srkUniversityUserExist) {
+            return {
+                status: 500,
+                body: {
+                    message: 'Srk University User not found',
+                    success: false,
+                },
+            };
+        }
+
+        await growSrkAffiliateVerificationModel.create({
+            srkuniversityUserId: body.srkuniversityUserId,
+            verificationImageUrl: body.verificationImageUrl
+        });
+
+        return {
+            status: 201,
+            body: {
+                message: 'Requested successfully',
+                success: true,
+            },
+        };
+    } catch (error) {
+        console.log(error);
+        return {
+            status: 500,
+            body: {
+                message: error.message ? `Internal server error: ${error.message}` : 'Internal server error',
+                success: false,
+            },
+        };
+    }
+};
+
+
 export const growMutationHandler = {
     createGrowSocialMediaEnrollement,
     validateGrowUserPromoCode,
     acceptSocialGrowEnrollmentRequest,
     rejectSocialGrowEnrollmentRequest,
+    srkGrowAffiliateVerificationRequest
 }

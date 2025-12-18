@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
 import { ArrowLeft } from 'lucide-react';
 import {
   CheckoutUserDetails,
@@ -9,13 +8,10 @@ import {
   UserDetails,
 } from '../../../lib/types/types';
 import PaymentModel from '../../../lib/ui/PaymentModel';
-import { StepProgress } from './package-flow/StepProgress';
-import { CheckoutForm } from './package-flow/CheckoutForm';
-import {
-  EngagementStep,
-  OptionStep,
-  PlatformStep,
-} from './package-flow/StepViews';
+import { StepProgress } from './StepProgress';
+import { CheckoutForm } from './CheckoutForm';
+import { EngagementStep, OptionStep, PlatformStep } from './StepViews';
+import { api } from '../../../lib/api';
 
 interface PackageSelectionFlowProps {
   selectedPackage: PackageDetails;
@@ -34,7 +30,8 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
   const [engagementType, setEngagementType] = useState<EngagementType | null>(
     null
   );
-  const [selectedOption, setSelectedOption] = useState<number>(0);
+  const [selectedTypeIndex, setSelectedTypeIndex] = useState<number>(0);
+  const [selectedSubTypeIndex, setSelectedSubTypeIndex] = useState<number>(0);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [userDetails, setUserDetails] = useState<CheckoutUserDetails>({
     name: '',
@@ -49,7 +46,7 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
     platform: 'youtube' as SocialPlatform,
     engagementType: 'follow' as EngagementType,
     selectedOption: 0,
-    packageType: selectedPackage.id,
+    packageId: selectedPackage._id,
     postLinks: ['', '', '', ''],
     additionalInfo: '',
     kyc: [''],
@@ -73,8 +70,9 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
     setStep(3);
   };
 
-  const handleOptionSelect = (index: number) => {
-    setSelectedOption(index);
+  const handleOptionSelect = (typeIndex: number, subTypeIndex: number) => {
+    setSelectedTypeIndex(typeIndex);
+    setSelectedSubTypeIndex(subTypeIndex);
     setStep(4);
   };
 
@@ -112,18 +110,6 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
   };
 
   const handlePaymentComplete = () => {
-    let socialLinkValue = userDetails.socialLink;
-    if (
-      engagementType === 'reach' &&
-      selectedPackage.reachOptions[selectedOption]?.videos > 1
-    ) {
-      const validLinks =
-        userDetails.postLinks?.filter((link) => link.trim() !== '') || [];
-      if (validLinks.length > 0) {
-        socialLinkValue = validLinks.join(', ');
-      }
-    }
-
     const finalDetails: CheckoutUserDetails = {
       name: userDetails.name,
       email: userDetails.email,
@@ -134,10 +120,11 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
       gender: userDetails.gender,
       platform: selectedPlatform!,
       engagementType: engagementType!,
-      selectedOption,
-      packageType: selectedPackage.id,
+      selectedOption: selectedSubTypeIndex,
+      packageId: selectedPackage._id,
       socialLink:
-        socialLinkValue || `https://${selectedPlatform}.com/your-profile`,
+        userDetails.socialLink ||
+        `https://${selectedPlatform}.com/your-profile`,
       additionalInfo: userDetails.additionalInfo,
       postLinks: userDetails.postLinks,
       promoCode: userDetails.promoCode,
@@ -150,21 +137,30 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
   };
 
   const getSelectedOptionDetails = () => {
+    const packageType = selectedPackage.packageTypes[selectedTypeIndex];
+    if (!packageType || !packageType.packageSubTypes) {
+      return { description: 'Select an option' };
+    }
+
+    const subType = packageType.packageSubTypes[selectedSubTypeIndex];
+    if (!subType) {
+      return { description: 'Select an option' };
+    }
+
     if (engagementType === 'follow') {
       return {
-        followers: selectedPackage.followerOptions[selectedOption],
-        description: `${selectedPackage.followerOptions[selectedOption]} followers/subscribers`,
+        followers: subType.noOfFollowers || 0,
+        description: `${subType.noOfFollowers || 0} followers/subscribers`,
       };
     } else {
-      const option = selectedPackage.reachOptions[selectedOption];
       return {
-        videos: option.videos,
-        likesPerVideo: option.likesPerVideo,
-        totalLikes: option.videos * option.likesPerVideo,
-        description: `${option.videos} video${
-          option.videos > 1 ? 's' : ''
-        } with ${option.likesPerVideo} likes each (Total: ${
-          option.videos * option.likesPerVideo
+        videos: subType.noOfVideos || 0,
+        likesPerVideo: subType.noOfLikes || 0,
+        totalLikes: (subType.noOfVideos || 0) * (subType.noOfLikes || 0),
+        description: `${subType.noOfVideos || 0} video${
+          (subType.noOfVideos || 0) > 1 ? 's' : ''
+        } with ${subType.noOfLikes || 0} likes each (Total: ${
+          (subType.noOfVideos || 0) * (subType.noOfLikes || 0)
         } likes)`,
       };
     }
@@ -174,11 +170,15 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
 
   const showMultiplePostLinks =
     engagementType === 'reach' &&
-    selectedPackage.reachOptions[selectedOption]?.videos > 1;
+    (selectedPackage.packageTypes[selectedTypeIndex]?.packageSubTypes[
+      selectedSubTypeIndex
+    ]?.noOfVideos || 0) > 1;
 
   const numPostLinks =
     engagementType === 'reach'
-      ? selectedPackage.reachOptions[selectedOption]?.videos || 0
+      ? selectedPackage.packageTypes[selectedTypeIndex]?.packageSubTypes[
+          selectedSubTypeIndex
+        ]?.noOfVideos || 0
       : 0;
 
   return (
@@ -199,7 +199,7 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
           </button>
           <h1 className="text-3xl md:text-4xl font-bold text-white">
             {selectedPackage.name} Package -{' '}
-            <span className="text-[#b68938]">{selectedPackage.price}</span>
+            <span className="text-[#b68938]">{selectedPackage.amount}</span>
           </h1>
         </div>
 
@@ -227,7 +227,8 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
           {step === 3 && engagementType && (
             <OptionStep
               engagementType={engagementType}
-              selectedOption={selectedOption}
+              selectedTypeIndex={selectedTypeIndex}
+              selectedSubTypeIndex={selectedSubTypeIndex}
               onSelect={handleOptionSelect}
               packageData={selectedPackage}
             />
@@ -260,7 +261,7 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
           platform: selectedPlatform!,
           engagementType: engagementType!,
         }}
-        packagePrice={selectedPackage.price}
+        packagePrice={String(selectedPackage.amount)}
         packageName={selectedPackage.name}
       />
     </div>

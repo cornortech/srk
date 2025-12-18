@@ -5,21 +5,41 @@ export type SocialPlatform =
   | 'twitter'
   | 'tiktok';
 export type EngagementType = 'follow' | 'reach';
-export type PackageType = 'starter' | 'intermediate' | 'pro';
 export type KYCStatus = 'not_started' | 'pending' | 'approved' | 'rejected';
 
+export interface PackageSubType {
+  _id: string;
+  growSocialMediaPackageTypeId: string;
+  name: string;
+  description: string;
+  noOfLikes?: number;
+  noOfVideos?: number;
+  noOfFollowers?: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface PackageType {
+  _id: string;
+  growSocialMediaPackageId: string;
+  name: string;
+  description: string;
+  amount: number;
+  createdAt: Date;
+  updatedAt: Date;
+  packageSubTypes: PackageSubType[];
+}
 
 export interface PackageDetails {
-  id: PackageType;
+  _id: string;
   name: string;
-  price: string;
-  originalPrice?: string;
   description: string;
-  features: string[];
-  followerOptions: number[];
-  reachOptions: Array<{ videos: number; likesPerVideo: number }>;
-  period: string;
-  popular?: boolean;
+  socialMediaPlatforms: string[];
+  amount: number;
+  isPopular: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  packageTypes: PackageType[];
 }
 
 export interface UserData {
@@ -63,7 +83,7 @@ export interface UserDetails {
   platform: SocialPlatform;
   engagementType: EngagementType;
   selectedOption: number;
-  packageType: PackageType;
+  packageId: string;
   additionalInfo?: string;
   postLinks?: string[];
 }
@@ -87,23 +107,16 @@ export interface StatusModalProps {
 }
 
 export interface OrderDetails {
-  packageType: PackageType;
   platform: SocialPlatform;
   engagementType: EngagementType;
   selectedOption: number;
-  amount: string;
+  amount: number;
   timestamp: string;
   transactionId: string;
   name: string;
   email: string;
   phone: string;
   socialLink: string;
-}
-
-export interface LoginModalProps {
-  onClose: () => void;
-  onLoginSuccess: (userData: UserData) => void;
-  initialMode: 'login' | 'register';
 }
 
 export interface DashboardProps {

@@ -118,5 +118,16 @@ export const growContract = c.router({
         },
         summary: "SRK Grow Affiliate Verification Request"
       },
-    
+
+      getAllSrkGrowAffiliateVerificationRequest: {
+        method: "GET",
+        path: "/grow/affiliate/get-all-verification-request",
+        responses: {
+          200: SuccessSchema,
+          403: ErrorSchema,
+          404: ErrorSchema,
+          500: ErrorSchema
+        },
+        summary: "Get All SRK Grow Affiliate Verification Request"
+      },
 });

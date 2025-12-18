@@ -3,6 +3,7 @@ import { AppRouteImplementationOrOptions } from "@ts-rest/express/src/lib/types"
 import { growSocialMediaPackageEnrollmentModel } from "../../model/growSocialMediaPackageEnrollement";
 import { GrowEnrollmentPopulated, GrowPackageUserPopulated } from "../../utils/types/growQuery";
 import { growPackageEngagementPostModel } from "../../model/growPackageEngagementPostModel";
+import { growSrkAffiliateVerificationModel } from "../../model/growSrkAffiliateVerificationModel";
 
 const getAllSrkGrowEnrollementUser: AppRouteImplementationOrOptions<
   typeof growContract.getAllGrowSocialMediaEnrollement
@@ -200,10 +201,36 @@ const getAllSrkGrowUsers: AppRouteImplementationOrOptions<
   };
 };
 
+const getAllSrkGrowAffiliateVerificationRequest: AppRouteImplementationOrOptions<typeof growContract.getAllSrkGrowAffiliateVerificationRequest> = async () => {
+    try {
+        const gorwAffiliations = await growSrkAffiliateVerificationModel.find()
+
+        return {
+            status: 200,
+            body: {
+                result: gorwAffiliations,
+                success: true
+            }
+        }
+
+    } catch (error) {
+        console.log(error);
+        return {
+            status: 500,
+            body: {
+                message: error.message ? `Internal server error: ${error.message}` : "Internal server error",
+                success: false
+
+            }
+        }
+    }
+}
+
 // SRK Grow Enrollment Users
 
 export const growQueryHandler = {
   getAllSrkGrowEnrollementUser,
   getSrkGrowEnrollementUserById,
-  getAllSrkGrowUsers
+  getAllSrkGrowUsers,
+  getAllSrkGrowAffiliateVerificationRequest
 };

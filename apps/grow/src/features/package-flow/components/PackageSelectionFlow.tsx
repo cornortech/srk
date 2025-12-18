@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import {
   CheckoutUserDetails,
@@ -50,7 +50,7 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
     packageId: selectedPackage._id,
     postLinks: ['', '', '', ''],
     additionalInfo: '',
-    kyc: [''],
+    kyc: [],
   });
 
   const [promoError, setPromoError] = useState<string | null>(null);
@@ -67,6 +67,7 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
   const [kycFiles, setKycFiles] = useState<File[]>([]);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const { uploadFile, isUploading: isUploadingKYC } = useSRKFileUpload('grow');
+  const uploadedKycUrlsRef = useRef<string[]>([]);
 
   const validatePromo = api.grow.validateGrowUserPromoCode.useMutation({
     onSuccess: (data) => {
@@ -265,7 +266,11 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
         }
       }
 
+      // Update state for persistence (if needed for re-renders)
       setUserDetails((prev) => ({ ...prev, kyc: uploadedUrls }));
+      uploadedKycUrlsRef.current = uploadedUrls;
+
+      // Open modal
       setShowPaymentModal(true);
     } catch (error) {
       console.error('File upload failed', error);
@@ -279,7 +284,10 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
     paymentMethod: string;
   }) => {
     try {
-      const kycUrls = userDetails.kyc || [];
+      const kycUrls =
+        uploadedKycUrlsRef.current.length > 0
+          ? uploadedKycUrlsRef.current
+          : userDetails.kyc || [];
 
       const packageType = selectedPackage.packageTypes[selectedTypeIndex];
       const packageSubType =

@@ -2,10 +2,39 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { UserDashboard } from './UserDashboard';
 import useGrowAuthStore from '../store/useGrowAuthStore';
+import { api } from '../lib/api';
 
 export const UserDashboardPage = () => {
   const navigate = useNavigate();
-  const { user, logout } = useGrowAuthStore();
+  const { user, setUser, logout } = useGrowAuthStore();
+
+  const { data: profileData } = api.grow.getSrkGrowProfile.useQuery(
+    ['growProfile', user?._id || ''],
+    { params: { id: user?._id || '' } },
+    {
+      enabled: !!user?._id,
+      refetchOnWindowFocus: true,
+      queryKey: ['growProfile', user?._id || ''],
+    }
+  );
+
+  useEffect(() => {
+    if (profileData?.status === 200) {
+      const updatedUser = profileData.body.result;
+      setUser({
+        ...user!,
+        status: updatedUser.status as any,
+        rejectionReason: updatedUser.rejectionReason,
+        kycURL: updatedUser.kycURL,
+        phone: updatedUser.phone,
+        country: updatedUser.country,
+        createdAt: updatedUser.createdAt,
+        transactionId: updatedUser.transactionId,
+        paymentURL: updatedUser.paymentURL,
+        paymentMethod: updatedUser.paymentMethod as any,
+      });
+    }
+  }, [profileData, setUser]);
 
   useEffect(() => {
     if (!user) {
@@ -19,12 +48,6 @@ export const UserDashboardPage = () => {
     return null;
   }
 
-  // Adapter to match UserData if strict typing is enforced in UserDashboard
-  // Assuming UserDashboard needs UserData, we map what we have.
-  // Note: GrowUser might be missing fields like 'phone', 'country' if we didn't store them.
-  // We accepted GrowUser has having limited fields in store.
-  // Ideally we should sync more fields in login if Dashboard needs them.
-  // For now casting as any or partial match.
   return (
     <UserDashboard
       user={user as any}

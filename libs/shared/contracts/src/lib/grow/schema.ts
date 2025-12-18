@@ -15,9 +15,9 @@ export const createGrowSocialMediaEnrollementSchema = z.object({
     growSocialMediaPackageId: z.string(),
     growSocialMediaPackageTypeId: z.string(),
     growSocialMediaPackageSubTypeId: z.string(),
-    platform: z.string(),
-    profileLinkURL: z.string().url('Invalid Profile Link URL').optional(),
-  }),
+    socialMediaPlatform: z.string(),
+    profileLinkURL: z.array(z.string().url('Invalid Profile Url')).optional(),
+  }).optional(),
   paymentData: z.object({
     paymentURL: z.string().url('Invalid payment URL'),
     transactionId: z.string().min(1, 'Transaction ID is required'),

@@ -30,6 +30,10 @@ const growSocialMediaPackageEnrollmentSchema = new mongoose.Schema(
         profileLinkURL: {
             type: [String],
         },
+        amount: {
+            type: Number,
+            requred: true,
+        },
         isActive: {
             type: Boolean,
             default: false,

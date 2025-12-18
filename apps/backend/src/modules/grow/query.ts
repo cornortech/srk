@@ -2,7 +2,7 @@ import { growContract } from "@srk/shared/contracts";
 import { AppRouteImplementationOrOptions } from "@ts-rest/express/src/lib/types";
 import { growSocialMediaPackageEnrollmentModel } from "../../model/growSocialMediaPackageEnrollement";
 import { GrowEnrollmentPopulated, GrowPackageUserPopulated } from "../../utils/types/growQuery";
-import { growPackageEngagementPostModel } from "../../model/growEngagementPostModel";
+import { growPackageEngagementPostModel } from "../../model/growPackageEngagementPostModel";
 
 const getAllSrkGrowEnrollementUser: AppRouteImplementationOrOptions<
   typeof growContract.getAllGrowSocialMediaEnrollement

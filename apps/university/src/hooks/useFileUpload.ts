@@ -57,7 +57,7 @@ const useUploadFile = () => {
       const extension = file.name.split(".").pop();
       const uniqueFileName = `${fileType}-${uniqueSuffix}.${extension}`;
 
-      const storageRef = ref(storage, `/test/${fileType}/${uniqueFileName}`);
+      const storageRef = ref(storage, `/temp/${fileType}/${uniqueFileName}`);
       const uploadTask = uploadBytesResumable(storageRef, file);
 
       uploadTask.on(

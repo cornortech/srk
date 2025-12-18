@@ -1,7 +1,9 @@
 import { growContract } from '@srk/shared/contracts';
 import { AppRouteImplementationOrOptions } from '@ts-rest/express/src/lib/types';
 import { growSocialMediaPackageEnrollmentModel } from '../../model/growSocialMediaPackageEnrollement';
-import { GrowEnrollmentPopulated } from '../../utils/types/growQuery';
+import { GrowEnrollmentPopulated, GrowPackageUserPopulated } from "../../utils/types/growQuery";
+import { growPackageEngagementPostModel } from "../../model/growPackageEngagementPostModel";
+import { growSrkAffiliateVerificationModel } from "../../model/growSrkAffiliateVerificationModel";
 
 const getAllSrkGrowEnrollementUser: AppRouteImplementationOrOptions<
   typeof growContract.getAllGrowSocialMediaEnrollement
@@ -24,6 +26,53 @@ const getAllSrkGrowEnrollementUser: AppRouteImplementationOrOptions<
       .populate<GrowEnrollmentPopulated>('growSocialMediaPackageTypeId')
       .populate<GrowEnrollmentPopulated>('growSocialMediaPackageSubTypeId')
       .sort({ createdAt: -1 });
+
+    const packageEnrollement = await Promise.all(
+      enrollments.map(async (e) => {
+        const postEngagement = await growPackageEngagementPostModel.findOne({
+          growSocialMediaPackageEnrollmentId: e._id,
+        });
+
+        return {
+          _id: e._id.toString(),
+          userData: {
+            fullName: e.growSocialMediaPackageUserId.fullName,
+            email: e.growSocialMediaPackageUserId.email,
+            gender: e.growSocialMediaPackageUserId.gender,
+            phoneNumber: e.growSocialMediaPackageUserId.phoneNumber,
+            country: e.growSocialMediaPackageUserId.country,
+            kycURL: e.growSocialMediaPackageUserId.kycURL,
+            usedPromoCode:
+              e.growSocialMediaPackageUserId.usedPromoCode ?? undefined,
+            status: e.growSocialMediaPackageUserId.status,
+          },
+
+          enrollementData: {
+            growSocialMediaPackageId:
+              e.growSocialMediaPackageId._id.toString(),
+            growSocialMediaPackageTypeId:
+              e.growSocialMediaPackageTypeId._id.toString(),
+            growSocialMediaPackageSubTypeId:
+              e.growSocialMediaPackageSubTypeId._id.toString(),
+            profileLinkURL: e.profileLinkURL && e.profileLinkURL[0] ? e.profileLinkURL[0] : string,
+            isActive: e.isActive,
+          },
+
+          postEngagement: {
+            postURLs: postEngagement?.postURLs.length ? postEngagement.postURLs : undefined,
+          },
+
+          paymentData: {
+            paymentMethod: "esewa" as const,
+            paymentURL: "",
+            transactionId: "",
+            rejectionReason: "",
+          },
+          createdAt: e.createdAt,
+          updatedAt: e.updatedAt,
+        };
+      })
+    );
 
     return {
       status: 200,
@@ -127,7 +176,7 @@ const getSrkGrowEnrollementUserById: AppRouteImplementationOrOptions<
             _id: enrollment.growSocialMediaPackageSubTypeId._id,
             title: enrollment.growSocialMediaPackageSubTypeId.title,
           },
-          profileLinkURL: enrollment.profileLinkURL,
+          profileLinkURL: enrollment.profileLinkURL && enrollment.profileLinkURL[0],
           isActive: enrollment.isActive,
         },
 
@@ -147,9 +196,85 @@ const getSrkGrowEnrollementUserById: AppRouteImplementationOrOptions<
   }
 };
 
+const getAllSrkGrowUsers: AppRouteImplementationOrOptions<
+  typeof growContract.getAllSrkGrowUsers
+> = async () => {
+  try {
+
+    const usersLists = await growSocialMediaPackageEnrollmentModel.
+      find({})
+      .populate<GrowPackageUserPopulated>({
+        path: "growSocialMediaPackageUserId",
+        select: "fullName referredBy status",
+        populate: {
+          path: "referredBy",
+          select: "fullName",
+        },
+      })
+      .populate<GrowPackageUserPopulated>({
+        path: "growSocialMediaPackageId",
+        select: "name",
+      })
+      .sort({ createdAt: -1 })
+      .lean();
+
+    return {
+      status: 200,
+      body: usersLists.map((u) => ({
+        _id: u.growSocialMediaPackageUserId._id.toString(),
+        fullName: u.growSocialMediaPackageUserId.fullName,
+        referredBy: u.growSocialMediaPackageUserId.referredBy?.fullName ?? null,
+        status: u.growSocialMediaPackageUserId.status,
+        socialMediaPackage: {
+          _id: u.growSocialMediaPackageId._id.toString(),
+          name: u.growSocialMediaPackageId.name,
+        },
+      })),
+    }
+
+  } catch (error) {
+    console.error(error);
+    return {
+      status: 500,
+      body: {
+        success: false,
+        message: error.message ? `Internal server error: ${error.message}` : "Internal server error",
+      },
+
+    }
+  };
+};
+
+const getAllSrkGrowAffiliateVerificationRequest: AppRouteImplementationOrOptions<typeof growContract.getAllSrkGrowAffiliateVerificationRequest> = async () => {
+    try {
+        const gorwAffiliations = await growSrkAffiliateVerificationModel.find()
+
+        return {
+            status: 200,
+            body: {
+                result: gorwAffiliations,
+                success: true
+            }
+        }
+
+    } catch (error) {
+        console.log(error);
+        return {
+            status: 500,
+            body: {
+                message: error.message ? `Internal server error: ${error.message}` : "Internal server error",
+                success: false
+
+            }
+        }
+    }
+}
+
 // SRK Grow Enrollment Users
 
-export const growEnrollmentUserQueryHandler = {
-  getSrkGrowEnrollementUserById,
+export const growQueryHandler = {
   getAllSrkGrowEnrollementUser,
+  getSrkGrowEnrollementUserById,
+  getAllSrkGrowUsers,
+  getAllSrkGrowAffiliateVerificationRequest
 };

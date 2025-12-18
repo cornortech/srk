@@ -1,10 +1,12 @@
 import { initContract } from '@ts-rest/core';
 import {
-  createGrowSocialMediaEnrollementSchema,
-  getAllGrowSocialMediaEnrollementSchema,
-  getGrowSocialMediaEnrollementByIdSchema,
-  validateGrowUserPromoCodeResponseSchema,
-  validateGrowUserPromoCodeSchema,
+    createGrowSocialMediaEnrollementSchema,
+    getAllSrkGrowUsersResponseSchema,
+    getAllGrowSocialMediaEnrollementSchema,
+    getGrowSocialMediaEnrollementByIdSchema,
+    validateGrowUserPromoCodeResponseSchema,
+    validateGrowUserPromoCodeSchema,
+    srkGrowAffiliateVerificationSchema,
 } from './schema';
 import { ErrorSchema, SuccessSchema } from '../common';
 import { z } from 'zod';
@@ -60,45 +62,108 @@ export const growContract = c.router({
       'Get grow social media enrollement for user by ID with user details and payment details',
   },
 
-  validateGrowUserPromoCode: {
-    method: 'POST',
-    path: '/validate-promo-code',
-    body: validateGrowUserPromoCodeSchema,
-    responses: {
-      200: validateGrowUserPromoCodeResponseSchema,
-      400: ErrorSchema,
-      409: ErrorSchema,
-      500: ErrorSchema,
+    getAllSrkGrowUsers: {
+        method: "GET",
+        path: "/grow-users",
+        responses: {
+            200: getAllSrkGrowUsersResponseSchema,
+            500: ErrorSchema,
+        },
+        summary: "Get all srk grow users who is registered",
     },
-    summary:
-      'Validate enetered promo code and return its details with discount',
-  },
 
-  acceptSocialGrowEnrollementRequest: {
-    method: 'PUT',
-    path: '/grow/accept-social-grow-enrollement-request/:enrollementId',
-    body: z.object({}),
-    responses: {
-      200: SuccessSchema,
-      403: ErrorSchema,
-      404: ErrorSchema,
-      500: ErrorSchema,
+    validateGrowUserPromoCode: {
+        method: 'POST',
+        path: '/validate-promo-code',
+        body: validateGrowUserPromoCodeSchema,
+        responses: {
+            200: validateGrowUserPromoCodeResponseSchema,
+            400: ErrorSchema,
+            409: ErrorSchema,
+            500: ErrorSchema,
+        },
+        summary:
+            'Validate enetered promo code and return its details with discount',
     },
-    summary: 'Approve Social Grow Enrollement Request by Id',
-  },
 
-  rejectSocialGrowEnrollementRequest: {
-    method: 'PUT',
-    path: '/grow/reject-social-grow-enrollement-request/:enrollementId',
-    body: z.object({
-      rejectionReason: z.string(),
-    }),
-    responses: {
-      200: SuccessSchema,
-      403: ErrorSchema,
-      404: ErrorSchema,
-      500: ErrorSchema,
+    acceptSocialGrowEnrollmentRequest: {
+        method: 'PUT',
+        path: '/grow/accept-social-grow-enrollement-request/:enrollementId',
+        body: z.object({}),
+        responses: {
+            200: SuccessSchema,
+            403: ErrorSchema,
+            404: ErrorSchema,
+            500: ErrorSchema,
+        },
+        summary: 'Approve Social Grow Enrollement Request by Id',
     },
-    summary: 'Reject Social Grow Enrollement Request by Id',
-  },
+
+    rejectSocialGrowEnrollmentRequest: {
+        method: 'PUT',
+        path: '/grow/reject-social-grow-enrollement-request/:enrollementId',
+        body: z.object({
+            rejectionReason: z.string(),
+        }),
+        responses: {
+            200: SuccessSchema,
+            403: ErrorSchema,
+            404: ErrorSchema,
+            500: ErrorSchema,
+        },
+        summary: 'Reject Social Grow Enrollement Request by Id',
+    },
+
+    srkGrowAffiliateVerificationRequest: {
+        method: "POST",
+        path: "/grow/affiliate/verification-request",
+        body: srkGrowAffiliateVerificationSchema,
+        responses: {
+            200: SuccessSchema,
+            403: ErrorSchema,
+            404: ErrorSchema,
+            500: ErrorSchema
+        },
+        summary: "SRK Grow Affiliate Verification Request"
+    },
+
+    getAllSrkGrowAffiliateVerificationRequest: {
+        method: "GET",
+        path: "/grow/affiliate/get-all-verification-request",
+        responses: {
+            200: SuccessSchema,
+            403: ErrorSchema,
+            404: ErrorSchema,
+            500: ErrorSchema
+        },
+        summary: "Get All SRK Grow Affiliate Verification Request"
+    },
+
+    approveSrkGrowAffiliateVerificationRequest: {
+        method: "PATCH",
+        path: "/grow/affiliate/approve-verification-follow-request/:id",
+        body: z.object({}),
+        responses: {
+            200: SuccessSchema,
+            403: ErrorSchema,
+            404: ErrorSchema,
+            500: ErrorSchema
+        },
+        summary: "Approve SRK Grow Verification Follow Request by Id"
+    },
+
+    rejectSrkGrowAffiliateVerificationRequest: {
+        method: "PATCH",
+        path: "/grow/affiliate/reject-verification-follow-request/:id",
+        body: z.object({
+            rejectionReason: z.string()
+        }),
+        responses: {
+            200: SuccessSchema,
+            403: ErrorSchema,
+            404: ErrorSchema,
+            500: ErrorSchema
+        },
+        summary: "Reject SRK Grow Verification Follow Request By Id"
+    }
 });

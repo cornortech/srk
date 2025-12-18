@@ -7,8 +7,19 @@ import useGrowAuthStore, { GrowUser } from '../store/useGrowAuthStore';
 export const LoginPage = () => {
   const navigate = useNavigate();
   const setUser = useGrowAuthStore((state) => state.setUser);
-  const user = useGrowAuthStore((state) => state.user); // Added to get user from store
+  const user = useGrowAuthStore((state) => state.user);
   const [userIdToFetch, setUserIdToFetch] = useState<string | null>(null);
+
+  // Guard: Redirect if already logged in
+  useEffect(() => {
+    if (user) {
+      if (user.status === 'portalActivated') {
+        navigate('/dashboard');
+      } else {
+        navigate('/grow/verification');
+      }
+    }
+  }, [user, navigate]);
 
   // Profile Query
   const { data: profileData } = api.grow.getSrkGrowProfile.useQuery(
@@ -43,7 +54,7 @@ export const LoginPage = () => {
 
       // Redirect Logic based on synced status
       if (growUser.status === 'portalActivated') {
-        navigate('/srk-grow/dashboard');
+        navigate('/dashboard');
       } else {
         navigate('/grow/verification');
       }

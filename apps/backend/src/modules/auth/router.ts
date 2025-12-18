@@ -11,4 +11,5 @@ export const authRouter = s.router(authContract, {
   rejectPaymentDetails: authMutationHandler.rejectPaymentDetails,
   approvePaymentDetails: authMutationHandler.approvePaymentDetails,
   editPaymentDetails: authMutationHandler.editPaymentDetails,
+  loginSrkGrow: authMutationHandler.loginSrkGrow
 });

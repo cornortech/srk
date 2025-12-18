@@ -4,19 +4,19 @@ import { growSocialMediaPackageUserModel } from "../../model/growSocialMediaPack
 import { growSocialMediaPackageModel } from "../../model/growSocialMediaPackageModel";
 import { growSocialMediaPackageTypeModel } from "../../model/growSocialMediaPackageTypeModel";
 import { growSocialMediaPackageSubTypeModel } from "../../model/growSocialMediaPackageSubTypeModel";
-import { growSocialMediaPackageEnrollmentModel } from "../../model/growSocialMediaPackageEnrollement";
+import { growSocialMediaPackageEnrollmentModel } from "../../model/growSocialMediaPackageEnrollment";
 import { growSocialMediaPackagePaymentModel } from "../../model/growSocialMediaPackagePaymentModel";
 import AuthService from "../../services/authService";
 import { growPackageEngagementPostModel } from "../../model/growPackageEngagementPostModel";
 
-const createGrowSocialMediaEnrollement: AppRouteImplementationOrOptions<
-    typeof growContract.createGrowSocialMediaEnrollement
+const createGrowSocialMediaEnrollment: AppRouteImplementationOrOptions<
+    typeof growContract.createGrowSocialMediaEnrollment
 > = async ({ body }) => {
     try {
 
         const {
             userData,
-            enrollementData,
+            enrollmentData,
             paymentData,
             postEngagement,
         } = body;
@@ -42,7 +42,7 @@ const createGrowSocialMediaEnrollement: AppRouteImplementationOrOptions<
         }
 
         // 2. Validate Package, Type, SubType
-        const packageExists = await growSocialMediaPackageModel.findById(enrollementData.growSocialMediaPackageId);
+        const packageExists = await growSocialMediaPackageModel.findById(enrollmentData.growSocialMediaPackageId);
         if (!packageExists) {
             return {
                 status: 400,
@@ -53,8 +53,8 @@ const createGrowSocialMediaEnrollement: AppRouteImplementationOrOptions<
             };
         };
 
-        const packageTypeExists = await growSocialMediaPackageTypeModel.findById(enrollementData.growSocialMediaPackageTypeId);
-        if (!packageTypeExists || String(packageTypeExists.growSocialMediaPackageId) !== enrollementData.growSocialMediaPackageId) {
+        const packageTypeExists = await growSocialMediaPackageTypeModel.findById(enrollmentData.growSocialMediaPackageTypeId);
+        if (!packageTypeExists || String(packageTypeExists.growSocialMediaPackageId) !== enrollmentData.growSocialMediaPackageId) {
             return {
                 status: 400,
                 body: {
@@ -64,8 +64,8 @@ const createGrowSocialMediaEnrollement: AppRouteImplementationOrOptions<
             };
         }
 
-        const packageSubTypeExists = await growSocialMediaPackageSubTypeModel.findById(enrollementData.growSocialMediaPackageSubTypeId);
-        if (!packageSubTypeExists || String(packageSubTypeExists.growSocialMediaPackageTypeId) !== enrollementData.growSocialMediaPackageTypeId) {
+        const packageSubTypeExists = await growSocialMediaPackageSubTypeModel.findById(enrollmentData.growSocialMediaPackageSubTypeId);
+        if (!packageSubTypeExists || String(packageSubTypeExists.growSocialMediaPackageTypeId) !== enrollmentData.growSocialMediaPackageTypeId) {
             return {
                 status: 400,
                 body: {
@@ -75,7 +75,7 @@ const createGrowSocialMediaEnrollement: AppRouteImplementationOrOptions<
             };
         }
 
-        if (!enrollementData?.profileLinkURL?.length && postURLs.length !== packageSubTypeExists.noOfVideos) {
+        if (!enrollmentData?.profileLinkURL?.length && postURLs.length !== packageSubTypeExists.noOfVideos) {
             return {
                 status: 400,
                 body: {
@@ -108,7 +108,7 @@ const createGrowSocialMediaEnrollement: AppRouteImplementationOrOptions<
             }
         }
 
-        if (enrollementData?.profileLinkURL?.length && postURLs.length) {
+        if (enrollmentData?.profileLinkURL?.length && postURLs.length) {
             return {
                 status: 400,
                 body: {
@@ -132,24 +132,24 @@ const createGrowSocialMediaEnrollement: AppRouteImplementationOrOptions<
             phone: userData.phoneNumber,
             country: userData.country,
             kycURL: userData.kycURL,
-            status: "verificationPending",
             promoCode: growUserPromoCode,
+            userType: "package",
             referredBy: growSocialMediaRefferalUser ? growSocialMediaRefferalUser._id : null,
         });
 
         // 5. Create enrollment
-        const createSrkGrowPackageEnrollement = await growSocialMediaPackageEnrollmentModel.create({
+        const createSrkGrowPackageEnrollment = await growSocialMediaPackageEnrollmentModel.create({
             growSocialMediaPackageUserId: packageUser._id,
-            growSocialMediaPackageId: enrollementData.growSocialMediaPackageId,
-            growSocialMediaPackageTypeId: enrollementData.growSocialMediaPackageTypeId,
-            growSocialMediaPackageSubTypeId: enrollementData.growSocialMediaPackageSubTypeId,
-            socialMediaPlatform: enrollementData.socialMediaPlatform,
-            profileLinkURL: enrollementData.profileLinkURL,
+            growSocialMediaPackageId: enrollmentData.growSocialMediaPackageId,
+            growSocialMediaPackageTypeId: enrollmentData.growSocialMediaPackageTypeId,
+            growSocialMediaPackageSubTypeId: enrollmentData.growSocialMediaPackageSubTypeId,
+            socialMediaPlatform: enrollmentData.socialMediaPlatform,
+            profileLinkURL: enrollmentData.profileLinkURL,
         });
 
         // 6. Create payment record
         await growSocialMediaPackagePaymentModel.create({
-            growPackageEnrollementId: createSrkGrowPackageEnrollement._id,
+            growPackageenrollmentId: createSrkGrowPackageEnrollment._id,
             paymentURL: paymentData.paymentURL,
             transactionId: paymentData.transactionId,
             paymentMethod: paymentData.paymentMethod,
@@ -157,7 +157,7 @@ const createGrowSocialMediaEnrollement: AppRouteImplementationOrOptions<
 
         if (postURLs.length > 0) {
             await growPackageEngagementPostModel.create({
-                growSocialMediaPackageEnrollmentId: createSrkGrowPackageEnrollement._id,
+                growSocialMediaPackageEnrollmentId: createSrkGrowPackageEnrollment._id,
                 postURLs: postURLs,
             });
         }
@@ -171,7 +171,7 @@ const createGrowSocialMediaEnrollement: AppRouteImplementationOrOptions<
         };
 
     } catch (error) {
-        console.error("Error creating grow social media enrollement:", error);
+        console.error("Error creating grow social media enrollment:", error);
         return {
             status: 500,
             body: {
@@ -270,7 +270,7 @@ const acceptSocialGrowEnrollmentRequest: AppRouteImplementationOrOptions<
 > = async ({ params }) => {
     try {
         const enrollmentRequest =
-            await growSocialMediaPackageEnrollmentModel.findById(params.enrollementId);
+            await growSocialMediaPackageEnrollmentModel.findById(params.enrollmentId);
 
         if (!enrollmentRequest) {
             return {
@@ -297,7 +297,7 @@ const acceptSocialGrowEnrollmentRequest: AppRouteImplementationOrOptions<
 
         await growSocialMediaPackageEnrollmentModel.findOneAndUpdate(
             {
-                _id: params.enrollementId,
+                _id: params.enrollmentId,
             },
             {
                 $set: {
@@ -331,10 +331,10 @@ const rejectSocialGrowEnrollmentRequest: AppRouteImplementationOrOptions<
     typeof growContract.rejectSocialGrowEnrollmentRequest
 > = async ({ params, body }) => {
     try {
-        const enrollementRequest =
+        const enrollmentRequest =
             await growSocialMediaPackageEnrollmentModel.findById(params.enrollmentId);
 
-        if (!enrollementRequest) {
+        if (!enrollmentRequest) {
             return {
                 status: 500,
                 body: {
@@ -344,7 +344,7 @@ const rejectSocialGrowEnrollmentRequest: AppRouteImplementationOrOptions<
         }
 
         await growSocialMediaPackageUserModel.findOneAndUpdate(
-            { _id: enrollementRequest.growSocialMediaPackageUserId },
+            { _id: enrollmentRequest.growSocialMediaPackageUserId },
             {
                 $set: {
                     status: 'verificationRejected',
@@ -354,7 +354,7 @@ const rejectSocialGrowEnrollmentRequest: AppRouteImplementationOrOptions<
 
         await growSocialMediaPackagePaymentModel.findOneAndUpdate(
             {
-                growPackageEnrollementId: enrollementRequest._id,
+                growPackageEnrollmentId: enrollmentRequest._id,
             },
             {
                 $set: {
@@ -418,7 +418,7 @@ const resubmitGrowVerification: AppRouteImplementationOrOptions<
         if (enrollment) {
             // 3. Update Payment record
             await growSocialMediaPackagePaymentModel.findOneAndUpdate(
-                { growPackageEnrollementId: enrollment._id },
+                { growPackageEnrollmentId: enrollment._id },
                 {
                     $set: {
                         transactionId,
@@ -444,7 +444,7 @@ const resubmitGrowVerification: AppRouteImplementationOrOptions<
 };
 
 export const growMutationHandler = {
-    createGrowSocialMediaEnrollement,
+    createGrowSocialMediaEnrollment,
     validateGrowUserPromoCode,
     acceptSocialGrowEnrollmentRequest,
     rejectSocialGrowEnrollmentRequest,

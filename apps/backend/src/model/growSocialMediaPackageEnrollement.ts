@@ -22,15 +22,23 @@ const growSocialMediaPackageEnrollmentSchema = new mongoose.Schema(
             ref: "growSocialMediaPackageSubType",
             required: true,
         },
-        profileLinkURL: {
+        socialMediaPlatform: {
             type: String,
+            enum: ["Instagram", "TikTok", "YouTube", "Twitter", "Facebook"],
             required: true,
+        },
+        profileLinkURL: {
+            type: [String],
+        },
+        amount: {
+            type: Number,
+            requred: true,
         },
         isActive: {
             type: Boolean,
-            default: false, 
+            default: false,
         }
-    }, 
+    },
     {
         timestamps: true,
     },

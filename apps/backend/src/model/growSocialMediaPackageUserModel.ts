@@ -49,7 +49,7 @@ const growSocialMediaPackageUserSchema = new mongoose.Schema(
         },
         referredBy: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "User",
+            ref: "growSocialMediaPackageUser",
         },
     },
     {

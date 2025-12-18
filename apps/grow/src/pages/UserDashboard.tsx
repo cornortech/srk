@@ -45,11 +45,13 @@ export const UserDashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
                 ? 'My Profile'
                 : 'Task Upload'}
             </h1>
-            <p className="text-gray-400 text-lg">Welcome back, {user.name}</p>
+            <p className="text-gray-400 text-lg">
+              Welcome back, {user.fullName}
+            </p>
           </div>
           <div className="flex items-center gap-4">
             <div className="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm text-gray-400 hidden md:block">
-              ID: {user.id.slice(0, 8)}...
+              ID: {user._id.slice(0, 8)}...
             </div>
             <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-gradient-to-r from-[#b68938] to-[#e1ba73] flex items-center justify-center text-black font-bold text-lg md:text-xl"></div>
           </div>

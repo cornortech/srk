@@ -811,7 +811,9 @@ const editPaymentDetails: AppRouteImplementationOrOptions<
   }
 };
 
-const loginSrkGrow: AppRouteImplementationOrOptions<typeof authContract.loginSrkGrow> = async ({ res, body }) => {
+const loginSrkGrow: AppRouteImplementationOrOptions<
+  typeof authContract.loginSrkGrow
+> = async ({ res, body }) => {
   try {
     const userExist = await growSocialMediaPackageUserModel.findOne({
       email: body.email,
@@ -822,7 +824,7 @@ const loginSrkGrow: AppRouteImplementationOrOptions<typeof authContract.loginSrk
         status: 404,
         body: {
           success: false,
-          message: "User not found",
+          message: 'User not found',
         },
       };
     }
@@ -837,33 +839,38 @@ const loginSrkGrow: AppRouteImplementationOrOptions<typeof authContract.loginSrk
         status: 401,
         body: {
           success: false,
-          message: "Invalid credentials",
+          message: 'Invalid credentials',
         },
       };
     }
 
-    const redirectionUrl = "/srk-grow/dashboard";
+    const redirectionUrl =
+      userExist.status === 'portalActivated'
+        ? '/srk-grow/dashboard'
+        : '/grow/verification';
 
     const token = await AuthService.generateJwtToken({
       email: userExist.email,
-      userId: userExist._id.toString()
+      userId: userExist._id.toString(),
     });
 
-    res.cookie("x-auth-token", token, {
+    res.cookie('x-auth-token', token, {
       maxAge: 24 * 60 * 60 * 1000,
       httpOnly: true,
-      sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
+      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production',
     });
 
     return {
       status: 200,
       body: {
         success: true,
-        message: "User logged in successfully",
+        message: 'User logged in successfully',
         user: {
           _id: userExist._id.toString(),
           email: userExist.email,
+          fullName: userExist.fullName,
+          status: userExist.status,
           redirectionUrl,
         },
       },
@@ -874,12 +881,11 @@ const loginSrkGrow: AppRouteImplementationOrOptions<typeof authContract.loginSrk
       status: 500,
       body: {
         success: false,
-        message: "Internal server error",
+        message: 'Internal server error',
       },
     };
   }
 };
-
 
 export const authMutationHandler = {
   register,
@@ -889,5 +895,5 @@ export const authMutationHandler = {
   editPaymentDetails,
   rejectPaymentDetails,
   approvePaymentDetails,
-  loginSrkGrow
+  loginSrkGrow,
 };

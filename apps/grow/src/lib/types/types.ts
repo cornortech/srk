@@ -5,7 +5,10 @@ export type SocialPlatform =
   | 'twitter'
   | 'tiktok';
 export type EngagementType = 'follow' | 'reach';
-export type KYCStatus = 'not_started' | 'pending' | 'approved' | 'rejected';
+export type KYCStatus =
+  | 'verificationPending'
+  | 'portalActivated'
+  | 'verificationRejected';
 
 export interface PackageSubType {
   _id: string;
@@ -43,24 +46,44 @@ export interface PackageDetails {
 }
 
 export interface UserData {
-  id: string;
+  _id: string; // Changed from id to _id
+  fullName: string;
   email: string;
   password: string;
-  name: string;
-  kycStatus: 'pending' | 'approved' | 'rejected';
-  approved: boolean; // Add this line
+  gender: 'Male' | 'Female' | 'Other';
+  phone: string;
   country: string;
-  phone: number;
-  kycDocuments: {
+  kycURL: string[];
+  status: KYCStatus;
+  promoCode: string;
+  rejectionReason?: string; // Added field
+  srkUniversityUserId: string;
+  referredBy: string;
+  transactionId?: string;
+  paymentProofUrl?: string;
+  kycDocuments?: {
     id: string;
     name: string;
     size: number;
     type: string;
-    status: 'pending' | 'approved' | 'rejected';
+    url?: string;
+    status: KYCStatus;
     submittedAt: string;
   }[];
-  createdAt: string;
-  lastLogin: string;
+  createdAt?: string;
+  lastLogin?: string;
+}
+
+export interface kycSchema {
+  userId: string;
+  frontImage: string;
+  backImage: string;
+  documentType: string;
+  verificationImage: string;
+  documentNumber: string;
+  status: 'pending' | 'approved' | 'rejected';
+  courseEnrollAgreement: string;
+  rejectionReason: string;
 }
 
 export interface LoginModalProps {
@@ -71,7 +94,7 @@ export interface LoginModalProps {
 export interface KYCDocument {
   id: string;
   name: string;
-  status: 'pending' | 'approved' | 'rejected';
+  status: KYCStatus;
   submittedAt: string;
 }
 
@@ -117,6 +140,7 @@ export interface OrderDetails {
   email: string;
   phone: string;
   socialLink: string;
+  packageType: string;
 }
 
 export interface DashboardProps {
@@ -131,4 +155,11 @@ export interface PlatformData {
   progress: number;
   tasks: number;
   completed: number;
+}
+
+export interface DiscountDetails {
+  originalAmount: number;
+  discountPercentage: number;
+  discountAmount: number;
+  finalAmountAfterDiscount: number;
 }

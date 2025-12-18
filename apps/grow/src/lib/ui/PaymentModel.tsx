@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, CheckCircle, Upload } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { UserDetails } from '../types/types';
+import { useSRKFileUpload } from '@srk/shared/hooks';
 
 interface PaymentModalProps {
   isOpen: boolean;
@@ -10,6 +11,11 @@ interface PaymentModalProps {
   userDetails: UserDetails;
   packagePrice: string;
   packageName: string;
+  onSubmit: (data: {
+    transactionId: string;
+    paymentProofUrl: string;
+    paymentMethod: string;
+  }) => Promise<void>;
 }
 
 type PaymentMethod = 'esewa' | 'khalti' | 'bank' | null;
@@ -20,6 +26,7 @@ const PaymentModel: React.FC<PaymentModalProps> = ({
   userDetails,
   packagePrice,
   packageName,
+  onSubmit,
 }) => {
   const [step, setStep] = useState<'payment' | 'success'>('payment');
   const [selectedMethod, setSelectedMethod] = useState<PaymentMethod>(null);
@@ -27,7 +34,9 @@ const PaymentModel: React.FC<PaymentModalProps> = ({
   const [screenshot, setScreenshot] = useState<File | null>(null);
   const [screenshotPreview, setScreenshotPreview] = useState<string>('');
   const [isProcessing, setIsProcessing] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const navigate = useNavigate();
+  const { uploadFile } = useSRKFileUpload('grow');
   const paymentMethods = [
     {
       id: 'esewa' as PaymentMethod,
@@ -65,16 +74,29 @@ const PaymentModel: React.FC<PaymentModalProps> = ({
   };
 
   const handleSubmit = async () => {
+    setErrorMessage(null);
     if (!selectedMethod || !transactionId || !screenshot) {
-      alert('Please fill in all required fields');
+      setErrorMessage('Please fill in all required fields');
       return;
     }
 
     setIsProcessing(true);
-    // Simulate payment processing
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    setIsProcessing(false);
-    setStep('success');
+    try {
+      const { url } = await uploadFile(screenshot, 'image');
+
+      await onSubmit({
+        transactionId,
+        paymentProofUrl: url,
+        paymentMethod: selectedMethod,
+      });
+
+      setStep('success');
+    } catch (error) {
+      console.error('Payment submission failed', error);
+      setErrorMessage('Failed to process payment. Please try again.');
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const handleClose = () => {
@@ -272,7 +294,7 @@ const PaymentModel: React.FC<PaymentModalProps> = ({
                   </div>
 
                   {/* Transaction ID Input */}
-                  <div className="mb-8">
+                  <div className="mb-4">
                     <label className="block text-sm font-bold text-gray-400 mb-3 uppercase tracking-widest">
                       Transaction ID / Reference Number *
                     </label>
@@ -288,6 +310,14 @@ const PaymentModel: React.FC<PaymentModalProps> = ({
                       confirmation message
                     </p>
                   </div>
+
+                  {errorMessage && (
+                    <div className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/30">
+                      <p className="text-sm text-red-500 text-center font-medium">
+                        {errorMessage}
+                      </p>
+                    </div>
+                  )}
 
                   {/* Submit Button */}
                   <motion.button

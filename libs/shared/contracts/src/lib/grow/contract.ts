@@ -6,6 +6,7 @@ import {
     getGrowSocialMediaEnrollementByIdSchema,
     validateGrowUserPromoCodeResponseSchema,
     validateGrowUserPromoCodeSchema,
+    getSrkGrowProfileResponseSchema,
 } from './schema';
 import { ErrorSchema, SuccessSchema } from '../common';
 import { z } from 'zod';
@@ -77,7 +78,7 @@ export const growContract = c.router({
             'Validate enetered promo code and return its details with discount',
     },
 
-    acceptSocialGrowEnrollementRequest: {
+    acceptSocialGrowEnrollmentRequest: {
         method: 'PUT',
         path: '/grow/accept-social-grow-enrollement-request/:enrollementId',
         body: z.object({}),
@@ -90,18 +91,47 @@ export const growContract = c.router({
         summary: 'Approve Social Grow Enrollement Request by Id',
     },
 
-    rejectSocialGrowEnrollementRequest: {
-        method: 'PUT',
-        path: '/grow/reject-social-grow-enrollement-request/:enrollementId',
-        body: z.object({
-            rejectionReason: z.string(),
-        }),
-        responses: {
-            200: SuccessSchema,
-            403: ErrorSchema,
-            404: ErrorSchema,
-            500: ErrorSchema,
-        },
-        summary: 'Reject Social Grow Enrollement Request by Id',
+  rejectSocialGrowEnrollmentRequest: {
+    method: 'PUT',
+    path: '/grow/reject-social-grow-enrollment-request/:enrollmentId',
+    body: z.object({
+      rejectionReason: z.string(),
+    }),
+    responses: {
+      200: SuccessSchema,
+      403: ErrorSchema,
+      404: ErrorSchema,
+      500: ErrorSchema,
     },
+    summary: 'Reject Social Grow Enrollment Request by Id',
+  },
+
+  getSrkGrowProfile: {
+    method: 'GET',
+    path: '/get-srk-grow-profile/:id',
+    responses: {
+      200: getSrkGrowProfileResponseSchema,
+      403: ErrorSchema,
+      404: ErrorSchema,
+      500: ErrorSchema,
+    },
+    summary: 'Get Srk Grow Profile by Id',
+  },
+  resubmitGrowVerification: {
+    method: 'POST',
+    path: '/resubmit-verification',
+    body: z.object({
+      userId: z.string(),
+      kycURLs: z.array(z.string()),
+      transactionId: z.string(),
+      paymentURL: z.string(),
+    }),
+    responses: {
+      200: SuccessSchema,
+      400: ErrorSchema,
+      404: ErrorSchema,
+      500: ErrorSchema,
+    },
+    summary: 'Resubmit verification with new KYC and payment details',
+  },
 });

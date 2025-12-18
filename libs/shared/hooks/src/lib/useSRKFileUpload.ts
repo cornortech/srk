@@ -1,5 +1,5 @@
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
-import { storage } from '../lib/firebase';
+import { storage } from '../../../firebase/src';
 import { v4 as uuidv4 } from 'uuid';
 import { useState } from 'react';
 
@@ -10,7 +10,7 @@ export interface UploadProgress {
   };
 }
 
-const useUploadFile = () => {
+export const useSRKFileUpload = (appName: string) => {
   const [uploadProgress, setUploadProgress] = useState<UploadProgress>({});
   const [isUploading, setIsUploading] = useState(false);
 
@@ -19,7 +19,7 @@ const useUploadFile = () => {
     fileType: 'video' | 'image',
     onProgress?: (progress: number, url?: string) => void
   ): Promise<{ url: string }> => {
-    const uploadId = uuidv4(); // Generate unique ID for this upload
+    const uploadId = uuidv4();
     setIsUploading(true);
 
     try {
@@ -31,7 +31,6 @@ const useUploadFile = () => {
       );
       return { url };
     } catch (error) {
-      // Clean up progress on error
       setUploadProgress((prev) => {
         const updated = { ...prev };
         delete updated[uploadId];
@@ -57,9 +56,11 @@ const useUploadFile = () => {
       const extension = file.name.split('.').pop();
       const uniqueFileName = `${fileType}-${uniqueSuffix}.${extension}`;
 
+      // Dynamic path: /prod/appName or /dev/appName
+      const envPrefix = import.meta.env.PROD ? 'prod' : 'dev';
       const storageRef = ref(
         storage,
-        `/dev/grow/${fileType}/${uniqueFileName}`
+        `/${envPrefix}/${appName}/${fileType}/${uniqueFileName}`
       );
       const uploadTask = uploadBytesResumable(storageRef, file);
 
@@ -159,4 +160,4 @@ const useUploadFile = () => {
   };
 };
 
-export default useUploadFile;
+export default useSRKFileUpload;

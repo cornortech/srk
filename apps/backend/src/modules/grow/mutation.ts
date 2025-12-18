@@ -180,16 +180,13 @@ const createGrowSocialMediaEnrollement: AppRouteImplementationOrOptions<
             },
         };
     }
-};
+}
 
 export const validateGrowUserPromoCode: AppRouteImplementationOrOptions<
     typeof growContract.validateGrowUserPromoCode
 > = async ({ body }) => {
     try {
-        const {
-            promoCode,
-            growSocialMediaPackageId,
-        } = body;
+        const { promoCode, growSocialMediaPackageId } = body;
 
         const srkGrowUser = await growSocialMediaPackageUserModel.findOne({
             promoCode,
@@ -200,36 +197,38 @@ export const validateGrowUserPromoCode: AppRouteImplementationOrOptions<
                 status: 400,
                 body: {
                     success: false,
-                    message: "Invalid promo code"
+                    message: 'Invalid promo code',
                 },
             };
-        };
+        }
 
         if (srkGrowUser.status !== 'portalActivated') {
             return {
                 status: 400,
                 body: {
                     success: false,
-                    message: "Promo code owner is not active or eligible"
+                    message: 'Promo code owner is not active or eligible',
                 },
             };
         }
 
-        const growPackage = await growSocialMediaPackageModel.findById(growSocialMediaPackageId);
+        const growPackage = await growSocialMediaPackageModel.findById(
+            growSocialMediaPackageId
+        );
         if (!growPackage) {
             return {
                 status: 400,
                 body: {
                     success: false,
-                    message: "Package not found"
-                }
+                    message: 'Package not found',
+                },
             };
         }
 
         const packageDiscount: Record<string, number> = {
-            "693bd21b224b9cd931c7cee0": 0.10,
-            "693bd21b224b9cd931c7cef2": 0.15,
-            "693bd21c224b9cd931c7cf04": 0.20,
+            '693bd21b224b9cd931c7cee0': 0.1,
+            '693bd21b224b9cd931c7cef2': 0.15,
+            '693bd21c224b9cd931c7cf04': 0.2,
         };
 
         const discountPercentage = packageDiscount[growPackage._id.toString()];
@@ -241,7 +240,8 @@ export const validateGrowUserPromoCode: AppRouteImplementationOrOptions<
             status: 200,
             body: {
                 success: true,
-                message: `Promo code valid! You get a discount of ${discountPercentage * 100}% on the ${growPackage.name} package.`,
+                message: `Promo code valid! You get a discount of ${discountPercentage * 100
+                    }% on the ${growPackage.name} package.`,
                 discountDetails: {
                     originalAmount,
                     discountPercentage: discountPercentage * 100,
@@ -249,135 +249,204 @@ export const validateGrowUserPromoCode: AppRouteImplementationOrOptions<
                     finalAmountAfterDiscount,
                     fullName: srkGrowUser.fullName,
                 },
-            }
+            },
         };
-
     } catch (error) {
-        console.error("Error validating promo code:", error);
+        console.error('Error validating promo code:', error);
         return {
             status: 500,
             body: {
                 success: false,
-                message: error.message ? `Internal server error: ${error.message}` : "Internal server error",
+                message: error.message
+                    ? `Internal server error: ${error.message}`
+                    : 'Internal server error',
             },
-        }
-    };
+        };
+    }
 };
 
-const acceptSocialGrowEnrollementRequest: AppRouteImplementationOrOptions<typeof growContract.acceptSocialGrowEnrollementRequest> = async ({ params }) => {
+const acceptSocialGrowEnrollmentRequest: AppRouteImplementationOrOptions<
+    typeof growContract.acceptSocialGrowEnrollmentRequest
+> = async ({ params }) => {
     try {
-        const enrollmentRequest = await growSocialMediaPackageEnrollmentModel.findById(params.enrollementId);
+        const enrollmentRequest =
+            await growSocialMediaPackageEnrollmentModel.findById(params.enrollementId);
 
         if (!enrollmentRequest) {
             return {
                 status: 500,
                 body: {
-                    message: "No Such Enrollment Found"
-                }
-            }
+                    message: 'No Such Enrollment Found',
+                },
+            };
         }
 
         await growSocialMediaPackageUserModel.findOneAndUpdate(
             {
-                _id: enrollmentRequest.growSocialMediaPackageUserId
+                _id: enrollmentRequest.growSocialMediaPackageUserId,
             },
             {
                 $set: {
-                    status: "portalActivated"
-                }
+                    status: 'portalActivated',
+                },
             },
             {
-                new: true
+                new: true,
             }
         );
 
         await growSocialMediaPackageEnrollmentModel.findOneAndUpdate(
             {
-                _id: params.enrollementId
+                _id: params.enrollementId,
             },
             {
                 $set: {
-                    isActive: true
-                }
+                    isActive: true,
+                },
             }
         );
 
         return {
             status: 200,
             body: {
-                message: "Follow Request Approved",
-                success: true
-            }
-        }
-
+                message: 'Follow Request Approved',
+                success: true,
+            },
+        };
     } catch (error) {
         console.log(error);
-        return ({
+        return {
             status: 500,
             body: {
-                message: error.message ? `Internal server error: ${error.message}` : "Internal server error",
-                success: false
-            }
-        })
+                message: error.message
+                    ? `Internal server error: ${error.message}`
+                    : 'Internal server error',
+                success: false,
+            },
+        };
     }
-}
+};
 
-
-const rejectSocialGrowEnrollementRequest: AppRouteImplementationOrOptions<typeof growContract.rejectSocialGrowEnrollementRequest> = async ({ params, body }) => {
+const rejectSocialGrowEnrollmentRequest: AppRouteImplementationOrOptions<
+    typeof growContract.rejectSocialGrowEnrollmentRequest
+> = async ({ params, body }) => {
     try {
-        const enrollementRequest = await growSocialMediaPackageEnrollmentModel.findById(params.enrollementId);
+        const enrollementRequest =
+            await growSocialMediaPackageEnrollmentModel.findById(params.enrollmentId);
 
         if (!enrollementRequest) {
             return {
                 status: 500,
                 body: {
-                    message: "No Such Enrollment Found",
-                }
-            }
+                    message: 'No Such Enrollment Found',
+                },
+            };
         }
 
         await growSocialMediaPackageUserModel.findOneAndUpdate(
             { _id: enrollementRequest.growSocialMediaPackageUserId },
             {
                 $set: {
-                    status: "verificationRejected"
-                }
+                    status: 'verificationRejected',
+                },
             }
         );
 
-        await growSocialMediaPackagePaymentModel.findOneAndUpdate({
-            growPackageEnrollementId: enrollementRequest._id
-        },
+        await growSocialMediaPackagePaymentModel.findOneAndUpdate(
+            {
+                growPackageEnrollementId: enrollementRequest._id,
+            },
             {
                 $set: {
-                    status: "rejected",
-                    rejectionReason: body.rejectionReason
-                }
-            },
+                    status: 'rejected',
+                    rejectionReason: body.rejectionReason,
+                },
+            }
         );
 
         return {
             status: 200,
             body: {
-                message: "Follow Request Rejected",
-                success: false
-            }
-        }
+                message: 'Follow Request Rejected',
+                success: false,
+            },
+        };
     } catch (error) {
-        console.log(error)
-        return ({
+        console.log(error);
+        return {
             status: 500,
             body: {
-                message: error.message ? `Internal server error: ${error.message}` : "Internal server error",
-                success: false
-            }
-        })
+                message: error.message
+                    ? `Internal server error: ${error.message}`
+                    : 'Internal server error',
+                success: false,
+            },
+        };
     }
-}
+};
+
+const resubmitGrowVerification: AppRouteImplementationOrOptions<
+    typeof growContract.resubmitGrowVerification
+> = async ({ body }) => {
+    try {
+        const { userId, kycURLs, transactionId, paymentURL } = body;
+
+        // 1. Update User Profile
+        const user = await growSocialMediaPackageUserModel.findByIdAndUpdate(
+            userId,
+            {
+                $set: {
+                    kycURL: kycURLs,
+                    status: 'verificationPending',
+                },
+            },
+            { new: true }
+        );
+
+        if (!user) {
+            return {
+                status: 404,
+                body: { success: false, message: 'User not found' },
+            };
+        }
+
+        // 2. Find associated enrollment
+        const enrollment = await growSocialMediaPackageEnrollmentModel.findOne({
+            growSocialMediaPackageUserId: userId,
+        });
+
+        if (enrollment) {
+            // 3. Update Payment record
+            await growSocialMediaPackagePaymentModel.findOneAndUpdate(
+                { growPackageEnrollementId: enrollment._id },
+                {
+                    $set: {
+                        transactionId,
+                        paymentURL,
+                        status: 'pending',
+                        rejectionReason: null,
+                    },
+                }
+            );
+        }
+
+        return {
+            status: 200,
+            body: { success: true, message: 'Verification resubmitted successfully' },
+        };
+    } catch (error) {
+        console.error('Error resubmitting verification:', error);
+        return {
+            status: 500,
+            body: { success: false, message: 'Internal server error' },
+        };
+    }
+};
 
 export const growMutationHandler = {
     createGrowSocialMediaEnrollement,
     validateGrowUserPromoCode,
-    acceptSocialGrowEnrollementRequest,
-    rejectSocialGrowEnrollementRequest,
-}
+    acceptSocialGrowEnrollmentRequest,
+    rejectSocialGrowEnrollmentRequest,
+    resubmitGrowVerification,
+};

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { LogOut } from 'lucide-react';
 
 import { DashboardProps } from '../lib/types/types';
 import { UserSidebar } from '../features/user-dashboard/components/UserSidebar';
@@ -13,7 +14,7 @@ export const UserDashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
-    <div className="flex h-screen bg-[#0a0705] text-white overflow-hidden font-sans pt-[80px]">
+    <div className="flex h-screen bg-[#0a0705] text-white overflow-hidden font-sans ">
       {/* Mobile Menu Overlay */}
       {isMobileMenuOpen && (
         <div
@@ -45,13 +46,26 @@ export const UserDashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
                 ? 'My Profile'
                 : 'Task Upload'}
             </h1>
-            <p className="text-gray-400 text-lg">Welcome back, {user.name}</p>
+            <p className="text-gray-400 text-lg">
+              Welcome back, {user.fullName}
+            </p>
           </div>
           <div className="flex items-center gap-4">
             <div className="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm text-gray-400 hidden md:block">
-              ID: {user.id.slice(0, 8)}...
+              ID: {user._id.slice(0, 8)}...
             </div>
-            <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-gradient-to-r from-[#b68938] to-[#e1ba73] flex items-center justify-center text-black font-bold text-lg md:text-xl"></div>
+
+            <button
+              onClick={onLogout}
+              className="px-4 py-2 rounded-full bg-red-500/10 border border-red-500/20 text-red-500 hover:bg-red-500/20 transition-all font-bold text-xs uppercase tracking-widest flex items-center gap-2"
+            >
+              <LogOut size={14} />
+              Logout
+            </button>
+
+            <div className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-gradient-to-r from-[#b68938] to-[#e1ba73] flex items-center justify-center text-black font-bold text-lg md:text-xl">
+              {user.fullName.charAt(0).toUpperCase()}
+            </div>
           </div>
         </header>
 

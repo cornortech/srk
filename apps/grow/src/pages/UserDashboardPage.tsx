@@ -1,27 +1,60 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { UserDashboard } from './UserDashboard';
-import { UserData } from '../lib/types/types';
+import useGrowAuthStore from '../store/useGrowAuthStore';
+import { api } from '../lib/api';
 
 export const UserDashboardPage = () => {
   const navigate = useNavigate();
-  const [user, setUser] = useState<UserData | null>(null);
+  const { user, setUser, logout } = useGrowAuthStore();
+
+  const { data: profileData } = api.grow.getSrkGrowProfile.useQuery(
+    ['growProfile', user?._id || ''],
+    { params: { id: user?._id || '' } },
+    {
+      enabled: !!user?._id,
+      refetchOnWindowFocus: true,
+      queryKey: ['growProfile', user?._id || ''],
+    }
+  );
 
   useEffect(() => {
-    const savedUser = localStorage.getItem('srkgrow-activesession');
-    if (savedUser) {
-      setUser(JSON.parse(savedUser));
-    } else {
-      navigate('/');
+    if (profileData?.status === 200) {
+      const updatedUser = profileData.body.result;
+      setUser({
+        ...user!,
+        status: updatedUser.status as any,
+        rejectionReason: updatedUser.rejectionReason,
+        kycURL: updatedUser.kycURL,
+        phone: updatedUser.phone,
+        country: updatedUser.country,
+        createdAt: updatedUser.createdAt,
+        transactionId: updatedUser.transactionId,
+        paymentURL: updatedUser.paymentURL,
+        paymentMethod: updatedUser.paymentMethod as any,
+      });
     }
-  }, [navigate]);
+  }, [profileData, setUser]);
 
-  const handleLogout = () => {
-    localStorage.removeItem('srkgrow-activesession');
-    navigate('/');
-  };
+  useEffect(() => {
+    if (!user) {
+      navigate('/login');
+    } else if (user.status !== 'portalActivated') {
+      navigate('/grow/verification');
+    }
+  }, [user, navigate]);
 
-  if (!user) return null;
+  if (!user || user.status !== 'portalActivated') {
+    return null;
+  }
 
-  return <UserDashboard user={user} onLogout={handleLogout} />;
+  return (
+    <UserDashboard
+      user={user as any}
+      onLogout={() => {
+        logout();
+        navigate('/login');
+      }}
+    />
+  );
 };

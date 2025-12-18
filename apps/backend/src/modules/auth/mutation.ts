@@ -18,6 +18,7 @@ import moment from 'moment';
 import { CoursePaymentModel } from '../../model/coursePayment';
 import { methods } from '../../utils/methods';
 import { EarningStatementModel } from '../../model/earningStatementModel';
+import { growSocialMediaPackageUserModel } from '../../model/growSocialMediaPackageUserModel';
 
 interface CalculateEarningsProps {
   referredBy: string;
@@ -809,6 +810,83 @@ const editPaymentDetails: AppRouteImplementationOrOptions<
     };
   }
 };
+
+const loginSrkGrow: AppRouteImplementationOrOptions<
+  typeof authContract.loginSrkGrow
+> = async ({ res, body }) => {
+  try {
+    const userExist = await growSocialMediaPackageUserModel.findOne({
+      email: body.email,
+    });
+
+    if (!userExist) {
+      return {
+        status: 404,
+        body: {
+          success: false,
+          message: 'User not found',
+        },
+      };
+    }
+
+    const isPasswordValid = await AuthService.verifyPassword(
+      body.password,
+      userExist.password
+    );
+
+    if (!isPasswordValid) {
+      return {
+        status: 401,
+        body: {
+          success: false,
+          message: 'Invalid credentials',
+        },
+      };
+    }
+
+    const redirectionUrl =
+      userExist.status === 'portalActivated'
+        ? '/dashboard'
+        : '/grow/verification';
+
+    const token = await AuthService.generateJwtToken({
+      email: userExist.email,
+      userId: userExist._id.toString(),
+    });
+
+    res.cookie('x-auth-token', token, {
+      maxAge: 24 * 60 * 60 * 1000,
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production',
+    });
+
+    return {
+      status: 200,
+      body: {
+        success: true,
+        message: 'User logged in successfully',
+        user: {
+          _id: userExist._id.toString(),
+          email: userExist.email,
+          fullName: userExist.fullName,
+          status: userExist.status,
+          redirectionUrl,
+        },
+      },
+    };
+  } catch (error: any) {
+    console.error(error);
+    return {
+      status: 500,
+      body: {
+        success: false,
+        message: 'Internal server error',
+      },
+    };
+  }
+};
+
 export const authMutationHandler = {
   register,
   login,
@@ -817,4 +895,5 @@ export const authMutationHandler = {
   editPaymentDetails,
   rejectPaymentDetails,
   approvePaymentDetails,
+  loginSrkGrow,
 };

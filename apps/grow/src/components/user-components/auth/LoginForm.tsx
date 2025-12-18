@@ -6,29 +6,43 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 interface LoginFormProps {
   onLoginSuccess?: (email: string) => void;
   onBuyPackage?: () => void;
+  onSubmit?: (data: { email: string; password: string }) => void;
+  isLoading?: boolean;
+  externalError?: string | null;
 }
 
 export const LoginForm: React.FC<LoginFormProps> = ({
   onLoginSuccess,
   onBuyPackage,
+  onSubmit,
+  isLoading: externalLoading = false,
+  externalError = null,
 }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [internalLoading, setInternalLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+
+  const loading = externalLoading || internalLoading;
 
   const handleLogin = async (e: FormEvent) => {
     e.preventDefault();
     setError('');
-    setLoading(true);
+
+    if (onSubmit) {
+      onSubmit({ email, password });
+      return;
+    }
+
+    setInternalLoading(true);
 
     try {
       await new Promise((r) => setTimeout(r, 1200));
 
       if (!email || !password) {
         setError('Please fill in all fields');
-        setLoading(false);
+        setInternalLoading(false);
         return;
       }
 
@@ -40,7 +54,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
     } catch (err) {
       setError('Login failed. Please try again.');
     } finally {
-      setLoading(false);
+      setInternalLoading(false);
     }
   };
   const navigate = useNavigate();
@@ -65,13 +79,15 @@ export const LoginForm: React.FC<LoginFormProps> = ({
         </div>
 
         {/* Error Message */}
-        {error && (
+        {(error || externalError) && (
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-xl"
           >
-            <p className="text-red-400 text-sm font-medium">{error}</p>
+            <p className="text-red-400 text-sm font-medium">
+              {externalError || error}
+            </p>
           </motion.div>
         )}
 

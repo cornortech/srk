@@ -3,9 +3,7 @@ import {
   Shield,
   Clock,
   AlertTriangle,
-  CheckCircle,
   Upload,
-  X,
   FileText,
   CreditCard,
   Loader2,
@@ -13,33 +11,54 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { GradientText } from '../features/verification/components/ui/GradientText';
 import { GlassCard } from '../features/verification/components/ui/GlassCard';
-import { UserData } from '../lib/types/types';
 import { useSRKFileUpload } from '@srk/shared/hooks';
+import { api } from '../lib/api';
+import useGrowAuthStore, { GrowUser } from '../store/useGrowAuthStore';
 
 export const GrowVerificationPage = () => {
   const navigate = useNavigate();
-  const [user, setUser] = useState<UserData | null>(null);
+  const { user, setUser, logout } = useGrowAuthStore();
   const [kycFiles, setKycFiles] = useState<File[]>([]);
   const [transactionId, setTransactionId] = useState('');
   const [paymentProof, setPaymentProof] = useState<File | null>(null);
   const { uploadFile, isUploading } = useSRKFileUpload('grow-resubmission');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  useEffect(() => {
-    const savedUser = localStorage.getItem('srkgrow-activesession');
-    if (savedUser) {
-      const parsedUser = JSON.parse(savedUser);
-      setUser(parsedUser);
-      if (parsedUser.transactionId) {
-        setTransactionId(parsedUser.transactionId);
-      }
-      if (parsedUser.kycStatus === 'approved') {
-        navigate('/dashboard');
-      }
-    } else {
-      navigate('/login');
+  const { data: profileData } = api.grow.getSrkGrowProfile.useQuery(
+    ['growProfile', user?._id || ''],
+    { params: { id: user?._id || '' } },
+    {
+      enabled: !!user?._id,
+      refetchOnWindowFocus: true,
+      queryKey: ['growProfile', user?._id || ''],
     }
-  }, [navigate]);
+  );
+
+  useEffect(() => {
+    if (profileData?.status === 200) {
+      const updatedUser = profileData.body.result;
+      setUser({
+        ...user!,
+        status: updatedUser.status as any,
+        rejectionReason: updatedUser.rejectionReason,
+        kycURL: updatedUser.kycURL,
+        phone: updatedUser.phone,
+        country: updatedUser.country,
+        createdAt: updatedUser.createdAt,
+      });
+    }
+  }, [profileData, setUser]);
+
+  useEffect(() => {
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+
+    if (user.status === 'portalActivated') {
+      navigate('/srk-grow/dashboard');
+    }
+  }, [user, navigate]);
 
   const handleKycFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -62,8 +81,6 @@ export const GrowVerificationPage = () => {
       // 1. Upload new files if present
       let kycUrls: string[] = [];
       if (kycFiles.length > 0) {
-        // Mocking multi-upload sequential for simplicity using the hook
-        // Ideally usePromise.all
         for (const file of kycFiles) {
           const { url } = await uploadFile(file, 'image');
           kycUrls.push(url);
@@ -76,13 +93,9 @@ export const GrowVerificationPage = () => {
         paymentUrl = url;
       }
 
-      // 2. Mock Backend Update
-      // In real app: await api.updateVerification(user.id, { ... })
-
-      const updatedUser: UserData = {
+      const updatedUser: GrowUser = {
         ...user,
-        kycStatus: 'pending',
-        // In a real scenario we'd update these fields on the backend
+        status: 'verificationPending',
       };
 
       localStorage.setItem(
@@ -119,7 +132,7 @@ export const GrowVerificationPage = () => {
           <p className="text-gray-400">Manage your verification status</p>
         </div>
 
-        {user.kycStatus === 'pending' && (
+        {user.status === 'verificationPending' && (
           <GlassCard className="max-w-xl mx-auto text-center py-12 px-8">
             <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-blue-500/10 flex items-center justify-center">
               <Clock size={48} className="text-blue-400 animate-pulse" />
@@ -139,8 +152,8 @@ export const GrowVerificationPage = () => {
             <div className="mt-8">
               <button
                 onClick={() => {
-                  localStorage.removeItem('srkgrow-activesession');
-                  navigate('/');
+                  logout();
+                  navigate('/login');
                 }}
                 className="text-gray-500 hover:text-white transition-colors text-sm underline"
               >
@@ -150,7 +163,7 @@ export const GrowVerificationPage = () => {
           </GlassCard>
         )}
 
-        {user.kycStatus === 'rejected' && (
+        {user.status === 'verificationRejected' && (
           <div className="grid lg:grid-cols-5 gap-8">
             {/* Status Panel */}
             <div className="lg:col-span-2 space-y-6">
@@ -170,9 +183,8 @@ export const GrowVerificationPage = () => {
                     Reason for Rejection
                   </span>
                   <p className="text-white text-sm">
-                    {/* Mock Reason */}
-                    "One or more documents were blurry or invalid. Payment
-                    screenshot transaction ID did not match."
+                    {user.rejectionReason ||
+                      'One or more documents were blurry or invalid.'}
                   </p>
                 </div>
               </GlassCard>
@@ -219,11 +231,11 @@ export const GrowVerificationPage = () => {
                       Update Payment Screenshot
                     </label>
 
-                    {/* Existing Proof Preview */}
-                    {!paymentProof && user.paymentProofUrl && (
+                    {/* Existing Proof Preview - Note: Backend API missing payment URL in profile currently, so this might be empty unless we store it in local state or update backend */}
+                    {!paymentProof && (user as any).paymentProofUrl && (
                       <div className="mb-3 relative group rounded-xl overflow-hidden border border-white/10">
                         <img
-                          src={user.paymentProofUrl}
+                          src={(user as any).paymentProofUrl}
                           alt="Current Proof"
                           className="w-full h-32 object-cover opacity-60 group-hover:opacity-100 transition-opacity"
                         />
@@ -250,7 +262,7 @@ export const GrowVerificationPage = () => {
                         <span className="text-gray-400 truncate">
                           {paymentProof
                             ? paymentProof.name
-                            : user.paymentProofUrl
+                            : (user as any).paymentProofUrl
                             ? 'Change screenshot'
                             : 'Select screenshot'}
                         </span>
@@ -266,36 +278,37 @@ export const GrowVerificationPage = () => {
                     </label>
 
                     {/* Existing KYC List */}
-                    {user.kycDocuments &&
-                      user.kycDocuments.length > 0 &&
-                      kycFiles.length === 0 && (
-                        <div className="mb-3 space-y-2">
-                          {user.kycDocuments.map((doc: any, i: number) => (
-                            <div
-                              key={i}
-                              className="flex items-center justify-between p-3 rounded-lg bg-white/5 border border-white/10"
-                            >
-                              <div className="flex items-center gap-3 overflow-hidden">
-                                <FileText
-                                  size={16}
-                                  className="text-gray-500 flex-shrink-0"
-                                />
-                                <div className="min-w-0">
-                                  <p className="text-sm text-gray-300 truncate">
-                                    {doc.name}
-                                  </p>
-                                  <p className="text-xs text-red-400">
-                                    Marked as Invalid
-                                  </p>
-                                </div>
-                              </div>
+                    {/* Existing KYC Doc */}
+                    {user.kycURL && kycFiles.length === 0 && (
+                      <div className="mb-3">
+                        <div className="flex items-center justify-between p-3 rounded-lg bg-white/5 border border-white/10">
+                          <div className="flex items-center gap-3 overflow-hidden">
+                            <FileText
+                              size={16}
+                              className="text-gray-500 flex-shrink-0"
+                            />
+                            <div className="min-w-0">
+                              <p className="text-sm text-gray-300 truncate">
+                                <a
+                                  href={user.kycURL}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="hover:text-[#b68938] transition-colors underline"
+                                >
+                                  View KYC Document
+                                </a>
+                              </p>
+                              <p className="text-xs text-red-400">
+                                Marked as Invalid
+                              </p>
                             </div>
-                          ))}
-                          <p className="text-xs text-gray-500 italic mt-1">
-                            * Uploading new files will replace these.
-                          </p>
+                          </div>
                         </div>
-                      )}
+                        <p className="text-xs text-gray-500 italic mt-1">
+                          * Uploading new files will replace this.
+                        </p>
+                      </div>
+                    )}
 
                     <div className="relative group cursor-pointer">
                       <input

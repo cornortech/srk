@@ -31,7 +31,7 @@ const router = createBrowserRouter([
     element: <OrderConfirmationPage />,
   },
   {
-    path: '/dashboard',
+    path: '/srk-grow/dashboard',
     element: <UserDashboardPage />,
   },
   {

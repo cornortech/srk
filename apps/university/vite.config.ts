@@ -7,6 +7,9 @@ import { nxCopyAssetsPlugin } from '@nx/vite/plugins/nx-copy-assets.plugin';
 export default defineConfig(() => ({
   root: __dirname,
   cacheDir: '../../node_modules/.vite/apps/university',
+
+  base: '/', // 🔥🔥🔥 REQUIRED FIX FOR SPA ROUTING
+
   server: {
     port: 4200,
     host: 'localhost',
@@ -16,10 +19,7 @@ export default defineConfig(() => ({
     host: 'localhost',
   },
   plugins: [react(), nxViteTsPaths(), nxCopyAssetsPlugin(['*.md'])],
-  // Uncomment this if you are using workers.
-  // worker: {
-  //  plugins: [ nxViteTsPaths() ],
-  // },
+
   build: {
     outDir: '../../dist/apps/university',
     emptyOutDir: true,
@@ -28,6 +28,7 @@ export default defineConfig(() => ({
       transformMixedEsModules: true,
     },
   },
+
   test: {
     name: 'frontend',
     watch: false,
@@ -37,7 +38,7 @@ export default defineConfig(() => ({
     reporters: ['default'],
     coverage: {
       reportsDirectory: '../../coverage/apps/university',
-      provider: 'v8' as const,
+      provider: 'v8',
     },
   },
 }));

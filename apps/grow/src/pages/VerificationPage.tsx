@@ -9,6 +9,7 @@ import {
   Loader2,
   Trash2,
   ExternalLink,
+  X,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { GradientText } from '../features/verification/components/ui/GradientText';
@@ -92,7 +93,7 @@ export const GrowVerificationPage = () => {
     }
 
     if (user.status === 'portalActivated') {
-      navigate('/srk-grow/dashboard');
+      navigate('/dashboard');
     }
   }, [user, navigate]);
 
@@ -240,6 +241,26 @@ export const GrowVerificationPage = () => {
                 <p className="text-xs text-gray-400">
                   Contact support@srk.com for assistance with your verification.
                 </p>
+              </div>
+
+              <div className="flex flex-col gap-3">
+                <button
+                  onClick={() => navigate('/')}
+                  className="w-full py-3 rounded-xl bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-all flex items-center justify-center gap-2 font-bold text-sm uppercase tracking-widest"
+                >
+                  <ExternalLink size={16} />
+                  Back to Home
+                </button>
+                <button
+                  onClick={() => {
+                    logout();
+                    navigate('/login');
+                  }}
+                  className="w-full py-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 hover:bg-red-500/20 transition-all flex items-center justify-center gap-2 font-bold text-sm uppercase tracking-widest"
+                >
+                  <X size={16} />
+                  Logout
+                </button>
               </div>
             </div>
 

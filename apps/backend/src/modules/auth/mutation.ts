@@ -846,7 +846,7 @@ const loginSrkGrow: AppRouteImplementationOrOptions<
 
     const redirectionUrl =
       userExist.status === 'portalActivated'
-        ? '/srk-grow/dashboard'
+        ? '/dashboard'
         : '/grow/verification';
 
     const token = await AuthService.generateJwtToken({

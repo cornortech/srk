@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useRef } from 'react';
 import Navbar from '../components/layout/Navbar';
 import { Hero } from '../features/landing/components/Hero';
 import { FlowSection } from '../features/landing/components/FlowSection';
@@ -7,25 +7,12 @@ import { BenefitsSection } from '../features/landing/components/BenefitsSection'
 import { FAQSection } from '../features/landing/components/FAQSection';
 import { CTASection } from '../features/landing/components/CTASection';
 import { Footer } from '../components/layout/Footer';
-import {
-  OrderDetails,
-  PackageDetails,
-  UserData,
-  UserDetails,
-} from '../lib/types/types';
-import { useNavigate, useParams } from 'react-router-dom';
+import { PackageDetails } from '../lib/types/types';
+import { useNavigate } from 'react-router-dom';
 import { useScrollIntent } from '../features/landing/hooks/useScrollIntent';
-
-type View =
-  | 'landing'
-  | 'packageflow'
-  | 'checkout'
-  | 'confirmation'
-  | 'dashboard';
 
 export const GrowLandingPage = () => {
   const navigate = useNavigate();
-  const [user, setUser] = useState<UserData | null>(null);
   const packagesRef = useRef<HTMLElement>(null);
 
   const sectionRefs = {
@@ -34,24 +21,6 @@ export const GrowLandingPage = () => {
 
   useScrollIntent(sectionRefs);
 
-  const [authMode, _setAuthMode] = useState<'login' | 'register'>('login');
-
-  const [checkoutUser, setCheckoutUser] = useState<UserDetails | null>(null);
-  console.log(checkoutUser);
-
-  useEffect(() => {
-    const savedUser = localStorage.getItem('srkgrow-activesession');
-    if (savedUser) {
-      setUser(JSON.parse(savedUser));
-      navigate('/dashboard');
-    }
-  }, [navigate]);
-
-  const handleUserUpdate = (userData: UserData | null) => {
-    setUser(userData);
-    localStorage.setItem('srkgrow_loggedInUser', JSON.stringify(userData));
-  };
-
   const handlePackageSelect = (pkg: PackageDetails) => {
     navigate('/package-flow', { state: { package: pkg } });
     window.scrollTo(0, 0);
@@ -59,11 +28,7 @@ export const GrowLandingPage = () => {
 
   return (
     <>
-      <Navbar
-        user={user}
-        onUserUpdate={handleUserUpdate}
-        onDashboardClick={() => navigate('/dashboard')}
-      />
+      <Navbar />
 
       <main>
         <Hero />

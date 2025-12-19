@@ -60,6 +60,12 @@ export interface UserDetails {
   packageId: string;
   additionalInfo?: string;
   postLinks?: string[];
+  password?: string;
+  confirmPassword?: string;
+  country?: string;
+  gender?: string;
+  promoCode?: string;
+  kyc?: string[];
 }
 
 export interface CheckoutUserDetails extends Omit<UserDetails, 'phone'> {

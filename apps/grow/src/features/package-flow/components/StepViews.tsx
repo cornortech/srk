@@ -4,7 +4,7 @@ import {
   SocialPlatform,
   EngagementType,
   PackageDetails,
-} from '../../../../lib/types/types';
+} from '../../../lib/types/types';
 import SocialPlatformCard from '../../../lib/ui/SocialPlatformCard';
 import EngagementOption from '../../../lib/ui/EngagementOption';
 import SelectOption from '../../../lib/ui/SelectOption';
@@ -85,24 +85,29 @@ export const OptionStep: React.FC<OptionStepProps> = ({
     className="max-w-2xl mx-auto space-y-4"
   >
     {packageData.packageTypes?.map((packageType, typeIndex) => (
-      <div key={packageType._id}>
+      <div key={packageType._id} className="space-y-4">
         {packageType.packageSubTypes?.map((subType, subTypeIndex) => {
-          const relevantField =
+          const showItem =
             engagementType === 'follow'
               ? subType.noOfFollowers
               : subType.noOfVideos;
 
-          if (!relevantField) return null;
+          if (!showItem) return null;
+
+          const optionData =
+            engagementType === 'follow'
+              ? {
+                  followers: subType.noOfFollowers || 0,
+                }
+              : {
+                  videos: subType.noOfVideos || 0,
+                  likesPerVideo: subType.noOfLikes || 0,
+                };
 
           return (
             <SelectOption
               key={`${typeIndex}-${subTypeIndex}`}
-              option={{
-                followers:
-                  engagementType === 'follow'
-                    ? subType.noOfFollowers || 0
-                    : subType.noOfVideos || 0,
-              }}
+              option={optionData}
               type={engagementType}
               index={subTypeIndex}
               selected={

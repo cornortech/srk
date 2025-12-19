@@ -38,6 +38,7 @@ export interface PackageDetails {
   name: string;
   description: string;
   socialMediaPlatforms: string[];
+  amountBeforeDiscount?: number;
   amount: number;
   isPopular: boolean;
   createdAt: Date;

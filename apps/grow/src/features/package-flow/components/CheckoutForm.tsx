@@ -2,24 +2,21 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Shield, Upload, X, CheckCircle } from 'lucide-react';
 import {
-  CheckoutUserDetails,
   EngagementType,
   PackageDetails,
   SocialPlatform,
 } from '../../../lib/types/types';
+import { UseFormReturn } from 'react-hook-form';
+import { TCreateGrowSocialMediaEnrollement } from '@srk/shared/contracts';
 
 interface CheckoutFormProps {
   selectedPackage: PackageDetails;
   selectedPlatform: SocialPlatform;
   engagementType: EngagementType;
   optionDescription: string;
-  userDetails: CheckoutUserDetails;
-  handleUserDetailsChange: (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
-  ) => void;
-  handlePostLinkChange: (index: number, value: string) => void;
+  form: UseFormReturn<TCreateGrowSocialMediaEnrollement>;
+  confirmPassword: string;
+  setConfirmPassword: (val: string) => void;
   handleSubmit: () => void;
   handleBack: () => void;
   showMultiplePostLinks: boolean;
@@ -36,7 +33,6 @@ interface CheckoutFormProps {
   } | null;
   kycFiles: File[];
   setKycFiles: React.Dispatch<React.SetStateAction<File[]>>;
-  formErrors: Record<string, string>;
   isUploadingKYC: boolean;
 }
 
@@ -45,9 +41,9 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
   selectedPlatform,
   engagementType,
   optionDescription,
-  userDetails,
-  handleUserDetailsChange,
-  handlePostLinkChange,
+  form,
+  confirmPassword,
+  setConfirmPassword,
   handleSubmit,
   handleBack,
   showMultiplePostLinks,
@@ -59,10 +55,14 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
   discountDetails,
   kycFiles,
   setKycFiles,
-  formErrors,
   isUploadingKYC,
 }) => {
   const [termsAccepted, setTermsAccepted] = useState(false);
+  const {
+    register,
+    formState: { errors },
+    watch,
+  } = form;
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -74,6 +74,8 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
   const removeFile = (index: number) => {
     setKycFiles((prev) => prev.filter((_, i) => i !== index));
   };
+
+  const promoCodeValue = watch('userData.usedPromoCode');
 
   return (
     <motion.div
@@ -169,16 +171,20 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
                 Full Name *
               </label>
               <input
+                {...register('userData.fullName')}
                 type="text"
-                name="name"
-                value={userDetails.name}
-                onChange={handleUserDetailsChange}
                 required
-                className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-600 focus:outline-none focus:border-[#b68938] focus:ring-1 focus:ring-[#b68938] transition-all"
+                className={`w-full px-4 py-3 rounded-xl bg-white/5 border ${
+                  errors.userData?.fullName
+                    ? 'border-red-500'
+                    : 'border-white/10'
+                } text-white placeholder-gray-600 focus:outline-none focus:border-[#b68938] focus:ring-1 focus:ring-[#b68938] transition-all`}
                 placeholder="Enter your full name"
               />
-              {formErrors.name && (
-                <p className="mt-1 text-xs text-red-500">{formErrors.name}</p>
+              {errors.userData?.fullName && (
+                <p className="mt-1 text-xs text-red-500">
+                  {errors.userData.fullName.message}
+                </p>
               )}
             </div>
 
@@ -187,16 +193,18 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
                 Email Address *
               </label>
               <input
+                {...register('userData.email')}
                 type="email"
-                name="email"
-                value={userDetails.email}
-                onChange={handleUserDetailsChange}
                 required
-                className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-600 focus:outline-none focus:border-[#b68938] focus:ring-1 focus:ring-[#b68938] transition-all"
+                className={`w-full px-4 py-3 rounded-xl bg-white/5 border ${
+                  errors.userData?.email ? 'border-red-500' : 'border-white/10'
+                } text-white placeholder-gray-600 focus:outline-none focus:border-[#b68938] focus:ring-1 focus:ring-[#b68938] transition-all`}
                 placeholder="you@example.com"
               />
-              {formErrors.email && (
-                <p className="mt-1 text-xs text-red-500">{formErrors.email}</p>
+              {errors.userData?.email && (
+                <p className="mt-1 text-xs text-red-500">
+                  {errors.userData.email.message}
+                </p>
               )}
             </div>
 
@@ -205,17 +213,19 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
                 Password *
               </label>
               <input
+                {...register('userData.password')}
                 type="password"
-                name="password"
-                value={userDetails.password}
-                onChange={handleUserDetailsChange}
                 required
-                className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-600 focus:outline-none focus:border-[#b68938] focus:ring-1 focus:ring-[#b68938] transition-all"
+                className={`w-full px-4 py-3 rounded-xl bg-white/5 border ${
+                  errors.userData?.password
+                    ? 'border-red-500'
+                    : 'border-white/10'
+                } text-white placeholder-gray-600 focus:outline-none focus:border-[#b68938] focus:ring-1 focus:ring-[#b68938] transition-all`}
                 placeholder="Create a strong password"
               />
-              {formErrors.password && (
+              {errors.userData?.password && (
                 <p className="mt-1 text-xs text-red-500">
-                  {formErrors.password}
+                  {errors.userData.password.message}
                 </p>
               )}
             </div>
@@ -226,18 +236,12 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
               </label>
               <input
                 type="password"
-                name="confirmPassword"
-                value={userDetails.confirmPassword}
-                onChange={handleUserDetailsChange}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
                 required
                 className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-600 focus:outline-none focus:border-[#b68938] focus:ring-1 focus:ring-[#b68938] transition-all"
                 placeholder="Confirm your password"
               />
-              {formErrors.confirmPassword && (
-                <p className="mt-1 text-xs text-red-500">
-                  {formErrors.confirmPassword}
-                </p>
-              )}
             </div>
 
             <div>
@@ -245,16 +249,20 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
                 Phone Number *
               </label>
               <input
+                {...register('userData.phoneNumber')}
                 type="tel"
-                name="phone"
-                value={userDetails.phone}
-                onChange={handleUserDetailsChange}
                 required
-                className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-600 focus:outline-none focus:border-[#b68938] focus:ring-1 focus:ring-[#b68938] transition-all"
+                className={`w-full px-4 py-3 rounded-xl bg-white/5 border ${
+                  errors.userData?.phoneNumber
+                    ? 'border-red-500'
+                    : 'border-white/10'
+                } text-white placeholder-gray-600 focus:outline-none focus:border-[#b68938] focus:ring-1 focus:ring-[#b68938] transition-all`}
                 placeholder="+91 9876543210"
               />
-              {formErrors.phone && (
-                <p className="mt-1 text-xs text-red-500">{formErrors.phone}</p>
+              {errors.userData?.phoneNumber && (
+                <p className="mt-1 text-xs text-red-500">
+                  {errors.userData.phoneNumber.message}
+                </p>
               )}
             </div>
 
@@ -263,11 +271,13 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
                 Country *
               </label>
               <select
-                name="country"
-                value={userDetails.country}
-                onChange={handleUserDetailsChange}
+                {...register('userData.country')}
                 required
-                className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white focus:outline-none focus:border-[#b68938] focus:ring-1 focus:ring-[#b68938] transition-all appearance-none cursor-pointer"
+                className={`w-full px-4 py-3 rounded-xl bg-white/5 border ${
+                  errors.userData?.country
+                    ? 'border-red-500'
+                    : 'border-white/10'
+                } text-white focus:outline-none focus:border-[#b68938] focus:ring-1 focus:ring-[#b68938] transition-all appearance-none cursor-pointer`}
                 style={{
                   backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23b68938' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
                   backgroundPosition: 'right 0.5rem center',
@@ -295,17 +305,23 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
                   Other
                 </option>
               </select>
+              {errors.userData?.country && (
+                <p className="mt-1 text-xs text-red-500">
+                  {errors.userData.country.message}
+                </p>
+              )}
             </div>
 
             <div>
               <label className="block text-sm font-bold text-gray-400 mb-2 uppercase tracking-widest">
-                Gender
+                Gender *
               </label>
               <select
-                name="gender"
-                value={userDetails.gender}
-                onChange={handleUserDetailsChange}
-                className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white focus:outline-none focus:border-[#b68938] focus:ring-1 focus:ring-[#b68938] transition-all appearance-none cursor-pointer"
+                {...register('userData.gender')}
+                required
+                className={`w-full px-4 py-3 rounded-xl bg-white/5 border ${
+                  errors.userData?.gender ? 'border-red-500' : 'border-white/10'
+                } text-white focus:outline-none focus:border-[#b68938] focus:ring-1 focus:ring-[#b68938] transition-all appearance-none cursor-pointer`}
                 style={{
                   backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23b68938' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
                   backgroundPosition: 'right 0.5rem center',
@@ -327,6 +343,11 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
                   Other
                 </option>
               </select>
+              {errors.userData?.gender && (
+                <p className="mt-1 text-xs text-red-500">
+                  {errors.userData.gender.message}
+                </p>
+              )}
             </div>
 
             {/* Dynamic Post Link Fields */}
@@ -343,35 +364,35 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
                           Post {index + 1}:
                         </span>
                         <input
+                          {...register(
+                            `postEngagement.postURLs.${index}` as any
+                          )}
                           type="url"
-                          value={userDetails.postLinks?.[index] || ''}
-                          onChange={(e) =>
-                            handlePostLinkChange(index, e.target.value)
-                          }
                           required
                           className={`flex-1 px-4 py-3 rounded-xl bg-white/5 border ${
-                            formErrors[`postLink_${index}`]
+                            errors.postEngagement?.postURLs?.[index]
                               ? 'border-red-500'
                               : 'border-white/10'
                           } text-white placeholder-gray-600 focus:outline-none focus:border-[#b68938] focus:ring-1 focus:ring-[#b68938] transition-all`}
-                          placeholder={`https://${selectedPlatform}.com/your-video-${
+                          placeholder={`https://${selectedPlatform.toLowerCase()}.com/your-video-${
                             index + 1
                           }`}
                         />
                       </div>
-                      {formErrors[`postLink_${index}`] && (
+                      {errors.postEngagement?.postURLs?.[index] && (
                         <p className="mt-1 ml-[76px] text-xs text-red-500">
-                          {formErrors[`postLink_${index}`]}
+                          {errors.postEngagement.postURLs[index]?.message}
                         </p>
                       )}
                     </div>
                   ))}
                 </div>
-                {formErrors.postLinks && (
-                  <p className="mt-2 text-xs text-red-500">
-                    {formErrors.postLinks}
-                  </p>
-                )}
+                {errors.postEngagement?.postURLs &&
+                  !Array.isArray(errors.postEngagement.postURLs) && (
+                    <p className="mt-2 text-xs text-red-500">
+                      {errors.postEngagement.postURLs.message}
+                    </p>
+                  )}
                 <p className="mt-2 text-xs text-gray-500">
                   Please provide {numPostLinks} separate links for each
                   post/video
@@ -385,21 +406,35 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
                     : 'Post/Video Link *'}
                 </label>
                 <input
+                  {...register(
+                    (engagementType === 'follow'
+                      ? 'enrollementData.profileLinkURL.0'
+                      : 'postEngagement.postURLs.0') as any
+                  )}
                   type="url"
-                  name="socialLink"
-                  value={userDetails.socialLink}
-                  onChange={handleUserDetailsChange}
                   required
-                  className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-600 focus:outline-none focus:border-[#b68938] focus:ring-1 focus:ring-[#b68938] transition-all"
+                  className={`w-full px-4 py-3 rounded-xl bg-white/5 border ${
+                    (
+                      engagementType === 'follow'
+                        ? errors.enrollementData?.profileLinkURL?.[0]
+                        : errors.postEngagement?.postURLs?.[0]
+                    )
+                      ? 'border-red-500'
+                      : 'border-white/10'
+                  } text-white placeholder-gray-600 focus:outline-none focus:border-[#b68938] focus:ring-1 focus:ring-[#b68938] transition-all`}
                   placeholder={
                     engagementType === 'follow'
-                      ? `https://${selectedPlatform}.com/your-profile`
-                      : `https://${selectedPlatform}.com/your-video`
+                      ? `https://${selectedPlatform.toLowerCase()}.com/your-profile`
+                      : `https://${selectedPlatform.toLowerCase()}.com/your-video`
                   }
                 />
-                {formErrors.socialLink && (
+                {(engagementType === 'follow'
+                  ? errors.enrollementData?.profileLinkURL?.[0]
+                  : errors.postEngagement?.postURLs?.[0]) && (
                   <p className="mt-1 text-xs text-red-500">
-                    {formErrors.socialLink}
+                    {engagementType === 'follow'
+                      ? errors.enrollementData?.profileLinkURL?.[0]?.message
+                      : errors.postEngagement?.postURLs?.[0]?.message}
                   </p>
                 )}
               </div>
@@ -411,17 +446,15 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
               </label>
               <div className="flex gap-2">
                 <input
+                  {...register('userData.usedPromoCode')}
                   type="text"
-                  name="promoCode"
-                  value={userDetails.promoCode}
-                  onChange={handleUserDetailsChange}
                   className="flex-1 px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-600 focus:outline-none focus:border-[#b68938] focus:ring-1 focus:ring-[#b68938] transition-all"
                   placeholder="Provide promo code if available"
                 />
                 <button
                   type="button"
                   onClick={onValidatePromoCode}
-                  disabled={isValidatingPromo || !userDetails.promoCode}
+                  disabled={isValidatingPromo || !promoCodeValue}
                   className="px-6 py-2 rounded-xl bg-[#b68938]/20 text-[#b68938] border border-[#b68938]/50 hover:bg-[#b68938]/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all font-bold"
                 >
                   {isValidatingPromo ? 'Checking...' : 'Apply'}
@@ -478,7 +511,6 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
                       >
                         <div className="flex items-center space-x-3 overflow-hidden">
                           <div className="w-10 h-10 rounded-lg bg-[#b68938]/20 flex items-center justify-center flex-shrink-0">
-                            {/* Simple icon or preview if image */}
                             <CheckCircle size={20} className="text-[#b68938]" />
                           </div>
                           <div className="min-w-0">
@@ -501,8 +533,10 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
                     ))}
                   </div>
                 )}
-                {formErrors.kyc && (
-                  <p className="mt-1 text-xs text-red-500">{formErrors.kyc}</p>
+                {errors.userData?.kycURL && (
+                  <p className="mt-1 text-xs text-red-500">
+                    {errors.userData.kycURL.message}
+                  </p>
                 )}
               </div>
             </div>

@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { LoginForm } from '../components/user-components/auth/LoginForm';
 import { api } from '../lib/api';
 import useGrowAuthStore, { GrowUser } from '../store/useGrowAuthStore';
+import { LoginSrkGrowSchema } from '@srk/shared/contracts';
+import { z } from 'zod';
 
 export const LoginPage = () => {
   const navigate = useNavigate();
@@ -102,6 +104,15 @@ export const LoginPage = () => {
   const handleLoginSubmit = (formData: { email: string; password: string }) => {
     console.log('🔐 Login attempt:', formData.email);
     setLoginError(null); // Clear previous errors
+
+    try {
+      LoginSrkGrowSchema.parse(formData);
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        setLoginError(err.errors[0]?.message || 'Invalid input');
+        return;
+      }
+    }
 
     loginMutation.mutate({
       body: {

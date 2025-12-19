@@ -36,8 +36,10 @@ export const TsRestLoginExample = () => {
 
   return (
     <div className="p-8 max-w-md mx-auto bg-gray-900 text-white rounded-lg mt-10">
-      <h2 className="text-2xl mb-4 font-bold text-[#b68938]">TS-Rest Login Example</h2>
-      
+      <h2 className="text-2xl mb-4 font-bold text-[#b68938]">
+        TS-Rest Login Example
+      </h2>
+
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="block mb-1">Email</label>
@@ -49,7 +51,7 @@ export const TsRestLoginExample = () => {
             placeholder="Enter email"
           />
         </div>
-        
+
         <div>
           <label className="block mb-1">Password</label>
           <input

@@ -578,7 +578,7 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
             <button
               onClick={handleSubmit}
               disabled={isUploadingKYC || !termsAccepted}
-              className="px-8 py-3 rounded-full font-bold text-sm uppercase tracking-widest transition-all bg-gradient-to-r from-[#b68938] to-[#e1ba73] text-black hover:shadow-[0_0_30px_rgba(182,137,56,0.5)] hover:scale-105 active:scale-95 disabled:from-[#b68938] disabled:to-[#e1ba73] disabled:text-gray-900 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:active:scale-100 disabled:hover:shadow-none disabled:opacity-70 disabled:cursor-not-allowed"
+              className="px-8 py-3 rounded-full font-bold text-sm uppercase tracking-widest transition-all bg-gradient-to-r from-[#b68938] to-[#e1ba73] text-black hover:shadow-[0_0_30px_rgba(182,137,56,0.5)] hover:scale-105 active:scale-95 disabled:from-[#b68938] disabled:to-[#e1ba73] disabled:text-gray-900 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:active:scale-100 disabled:hover:shadow-none disabled:opacity-70 "
             >
               {isUploadingKYC ? 'Uploading KYC...' : 'Proceed to Payment'}
             </button>

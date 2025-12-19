@@ -45,7 +45,7 @@ export const getSrkGrowProfile: AppRouteImplementationOrOptions<
 
     const packagePayment = packageEnrollment
       ? await growSocialMediaPackagePaymentModel.findOne({
-          growPackageenrollmentId: packageEnrollment._id,
+          growPackageEnrollmentId: packageEnrollment._id,
         })
       : null;
 

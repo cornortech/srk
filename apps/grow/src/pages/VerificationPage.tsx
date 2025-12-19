@@ -49,7 +49,7 @@ export const GrowVerificationPage = () => {
   // API Hooks
   const { data: profileData, refetch } = api.grow.getSrkGrowProfile.useQuery(
     ['growProfile', user?._id],
-    (user?._id ? { params: { userId: user._id } } : ({} as any)),
+    user?._id ? { params: { userId: user._id } } : ({} as any),
     {
       enabled: !!user?._id,
       refetchOnWindowFocus: true,
@@ -95,7 +95,8 @@ export const GrowVerificationPage = () => {
       });
 
       if (updatedUser._id) setValue('userId', updatedUser._id);
-      if (payment?.transactionId) setValue('transactionId', payment.transactionId);
+      if (payment?.transactionId)
+        setValue('transactionId', payment.transactionId);
       if (payment?.paymentUrl) setValue('paymentURL', payment.paymentUrl);
       if (updatedUser.kycURL) {
         const docs = Array.isArray(updatedUser.kycURL)
@@ -249,7 +250,8 @@ export const GrowVerificationPage = () => {
                     Reason for Rejection
                   </span>
                   <p className="text-white text-sm">
-                    {user.rejectionReason ||
+                    {profileData?.body.enrollmentData?.enrollmentPaymentDetails
+                      ?.rejectionReason!! ||
                       'One or more documents were blurry or invalid.'}
                   </p>
                 </div>

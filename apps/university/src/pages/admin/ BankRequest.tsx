@@ -52,8 +52,6 @@ export default function BankRequest() {
     },
   });
 
-  console.log('bankRequest', bankRequest);
-
   const { mutate: approveMutation } = useMutation({
     mutationFn: async (userId: string) => {
       if (!userId) return;
@@ -89,9 +87,12 @@ export default function BankRequest() {
     console.log(`rejecting ${userId}`);
   };
 
-  if (!bankRequest?.data) {
-    return <div></div>;
-  }
+  // if (!bankRequest?.data) {
+  //   return <div></div>;
+  // }
+
+  const bankRequestList = bankRequest?.data || [];
+
   return (
     <>
       <Table aria-label="Affiliate Request table">
@@ -107,9 +108,9 @@ export default function BankRequest() {
           <TableColumn>Action</TableColumn>
         </TableHeader>
         <TableBody>
-          {bankRequest?.data.map((user, index) => (
+          {bankRequestList.map((user, index) => (
             <TableRow key={index}>
-              <TableCell>{(page-1)*10 + index + 1}</TableCell>
+              <TableCell>{(page - 1) * 10 + index + 1}</TableCell>
               <TableCell>
                 <Image
                   src={user.profilePicture}
@@ -143,10 +144,10 @@ export default function BankRequest() {
         </TableBody>
       </Table>
 
-      {bankRequest.data?.length >= 10 && (
+      {bankRequestList.length >= 10 && (
         <TablePagination
-          page={bankRequest.page}
-          totalPages={bankRequest.totalPages}
+          page={bankRequest?.page || 1}
+          totalPages={bankRequest?.totalPages || 1}
           onPageChange={(p) => setPage(p)}
         />
       )}

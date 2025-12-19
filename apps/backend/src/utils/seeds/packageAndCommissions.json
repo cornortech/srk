@@ -1,0 +1,341 @@
+{
+  "packages": [
+    {
+      "_id": "67a997f4c27936f72e05b085",
+      "title": "SRK Basic",
+      "description": "Srk basic",
+      "price": 2284.29,
+      "currency": "NPR",
+      "discountedPrice": 1599,
+      "features": [
+        {
+          "text": "Access to 3 courses",
+          "included": true,
+          "_id": "67a997f4c27936f72e05b086"
+        },
+        {
+          "text": "Course completion certificate",
+          "included": true,
+          "_id": "67a997f4c27936f72e05b087"
+        },
+        {
+          "text": "3+ Pro tips and mentorship",
+          "included": true,
+          "_id": "67a997f4c27936f72e05b088"
+        },
+        {
+          "text": "Complimentary access to advanced training systems",
+          "included": false,
+          "_id": "67a997f4c27936f72e05b089"
+        },
+        {
+          "text": "24/7 exclusive, dedicated support system",
+          "included": false,
+          "_id": "67a997f4c27936f72e05b08a"
+        },
+        {
+          "text": "Personalized coaching sessions by distinguished, certified coaches",
+          "included": false,
+          "_id": "67a997f4c27936f72e05b08b"
+        },
+        {
+          "text": "Live Session",
+          "included": false,
+          "_id": "67a997f4c27936f72e05b08c"
+        },
+        {
+          "text": "Access to all items from the Ultimate SRK VIP collection",
+          "included": false,
+          "_id": "67a997f4c27936f72e05b08d"
+        }
+      ],
+      "image": "",
+      "createdAt": "2025-02-10T06:08:52.969Z",
+      "updatedAt": "2025-12-11T09:16:03.955Z",
+      "__v": 0
+    },
+    {
+      "_id": "67a99a16c27936f72e05b1b6",
+      "title": "SRK Standard",
+      "description": "description",
+      "price": 4712.86,
+      "currency": "NPR",
+      "discountedPrice": 3299,
+      "features": [
+        {
+          "text": "Access to 5 courses",
+          "included": true,
+          "_id": "67a99a16c27936f72e05b1b7"
+        },
+        {
+          "text": "Course completion certificate",
+          "included": true,
+          "_id": "67a99a16c27936f72e05b1b8"
+        },
+        {
+          "text": "24/7 exclusive, dedicated support system",
+          "included": true,
+          "_id": "67a99a16c27936f72e05b1b9"
+        },
+        {
+          "text": "5+ Pro tips and mentorship",
+          "included": true,
+          "_id": "67a99a16c27936f72e05b1ba"
+        },
+        {
+          "text": "Complimentary access to advanced training systems",
+          "included": true,
+          "_id": "67a99a16c27936f72e05b1bb"
+        },
+        {
+          "text": "Personalized coaching sessions by distinguished, certified coaches",
+          "included": false,
+          "_id": "67a99a16c27936f72e05b1bc"
+        },
+        {
+          "text": "Live Session",
+          "included": false,
+          "_id": "67a99a16c27936f72e05b1bd"
+        },
+        {
+          "text": "Access to all items from the Ultimate SRK VIP collection",
+          "included": false,
+          "_id": "67a99a16c27936f72e05b1be"
+        }
+      ],
+      "image": "",
+      "createdAt": "2025-02-10T06:17:58.282Z",
+      "updatedAt": "2025-12-11T09:16:03.842Z",
+      "__v": 0
+    },
+    {
+      "_id": "67a99b68c27936f72e05b2e1",
+      "title": "SRK Premium",
+      "description": "asdf",
+      "price": 7570,
+      "currency": "NPR",
+      "discountedPrice": 5299,
+      "features": [
+        {
+          "text": "Access to 7 courses",
+          "included": true,
+          "_id": "67a99b68c27936f72e05b2e2"
+        },
+        {
+          "text": "Course completion certificate",
+          "included": true,
+          "_id": "67a99b68c27936f72e05b2e3"
+        },
+        {
+          "text": "Complimentary access to advanced training systems",
+          "included": true,
+          "_id": "67a99b68c27936f72e05b2e4"
+        },
+        {
+          "text": "24/7 exclusive, dedicated support system",
+          "included": true,
+          "_id": "67a99b68c27936f72e05b2e5"
+        },
+        {
+          "text": "Personalized coaching sessions by distinguished, certified coaches",
+          "included": true,
+          "_id": "67a99b68c27936f72e05b2e6"
+        },
+        {
+          "text": "7+ Pro tips and mentorship",
+          "included": true,
+          "_id": "67a99b68c27936f72e05b2e7"
+        },
+        {
+          "text": "Live Session",
+          "included": false,
+          "_id": "67a99b68c27936f72e05b2e8"
+        }
+      ],
+      "image": "",
+      "createdAt": "2025-02-10T06:23:36.809Z",
+      "updatedAt": "2025-12-11T09:16:03.727Z",
+      "__v": 0
+    },
+    {
+      "_id": "67a99c07c27936f72e05b362",
+      "title": "SRK PRO",
+      "description": "sdfasf",
+      "price": 10712.86,
+      "currency": "NPR",
+      "discountedPrice": 7499,
+      "features": [
+        {
+          "text": "Access to 10 courses",
+          "included": true,
+          "_id": "67a99c07c27936f72e05b363"
+        },
+        {
+          "text": "Course completion certificate",
+          "included": true,
+          "_id": "67a99c07c27936f72e05b364"
+        },
+        {
+          "text": "Complimentary access to advanced training systems",
+          "included": true,
+          "_id": "67a99c07c27936f72e05b365"
+        },
+        {
+          "text": "24/7 exclusive, dedicated support system",
+          "included": true,
+          "_id": "67a99c07c27936f72e05b366"
+        },
+        {
+          "text": "10+ Pro tips and mentorship",
+          "included": true,
+          "_id": "67a99c07c27936f72e05b367"
+        },
+        {
+          "text": "Personalized coaching sessions by distinguished, certified coaches",
+          "included": true,
+          "_id": "67a99c07c27936f72e05b368"
+        },
+        {
+          "text": "Live Session",
+          "included": true,
+          "_id": "67a99c07c27936f72e05b369"
+        },
+        {
+          "text": "Access to all items from the Ultimate SRK VIP collection",
+          "included": true,
+          "_id": "67a99c07c27936f72e05b36a"
+        }
+      ],
+      "image": "",
+      "createdAt": "2025-02-10T06:26:15.242Z",
+      "updatedAt": "2025-12-11T09:16:03.612Z",
+      "__v": 0
+    },
+    {
+      "_id": "67d2e42d2033036da8f85204",
+      "title": "SRK Lite",
+      "description": "..",
+      "price": 1427,
+      "currency": "NPR",
+      "discountedPrice": 999,
+      "features": [
+        {
+          "text": "Access to 1 courses",
+          "included": true,
+          "_id": "67a997f4c27936f72e05b086"
+        },
+        {
+          "text": "Course completion certificate",
+          "included": false,
+          "_id": "67a997f4c27936f72e05b087"
+        },
+        {
+          "text": "3+ Pro tips and mentorship",
+          "included": false,
+          "_id": "67a997f4c27936f72e05b088"
+        },
+        {
+          "text": "Complimentary access to advanced training systems",
+          "included": false,
+          "_id": "67a997f4c27936f72e05b089"
+        },
+        {
+          "text": "24/7 exclusive, dedicated support system",
+          "included": false,
+          "_id": "67a997f4c27936f72e05b08a"
+        },
+        {
+          "text": "Personalized coaching sessions by distinguished, certified coaches",
+          "included": false,
+          "_id": "67a997f4c27936f72e05b08b"
+        },
+        {
+          "text": "Live Session",
+          "included": false,
+          "_id": "67a997f4c27936f72e05b08c"
+        },
+        {
+          "text": "Access to all items from the Ultimate SRK VIP collection",
+          "included": false,
+          "_id": "67a997f4c27936f72e05b08d"
+        }
+      ],
+      "image": "",
+      "createdAt": "2025-02-10T06:08:52.969Z",
+      "updatedAt": "2025-12-11T09:16:04.072Z",
+      "__v": 0
+    }
+  ],
+  "commissions": [
+    {
+      "_id": "679b8d6214c48be9ae7c08da",
+      "packageId": "67a99c07c27936f72e05b362",
+      "affiliateCommission": 65.35,
+      "eventWallet": 4.29,
+      "srkBonus": 4,
+      "ceoSalary": 2.86,
+      "officeManagementCharge": 8,
+      "companyTurnover": 6.32,
+      "createdAt": "2025-01-30T14:32:02.020Z",
+      "__v": 0,
+      "tms": 3.33,
+      "vat": 13
+    },
+    {
+      "_id": "679b8d6214c48be9ae7c08dd",
+      "packageId": "67a99b68c27936f72e05b2e1",
+      "affiliateCommission": 65.11,
+      "eventWallet": 4,
+      "srkBonus": 3.78,
+      "ceoSalary": 3,
+      "officeManagementCharge": 7.55,
+      "companyTurnover": 6.83,
+      "createdAt": "2025-01-30T14:32:02.115Z",
+      "__v": 0,
+      "tms": 3.78,
+      "vat": 13
+    },
+    {
+      "_id": "679b8d6214c48be9ae7c08e0",
+      "packageId": "67a99a16c27936f72e05b1b6",
+      "affiliateCommission": 56.08,
+      "eventWallet": 5,
+      "srkBonus": 4.55,
+      "ceoSalary": 3.33,
+      "officeManagementCharge": 9.09,
+      "companyTurnover": 14.63,
+      "createdAt": "2025-01-30T14:32:02.206Z",
+      "__v": 0,
+      "tms": 4.55,
+      "vat": 13.28
+    },
+    {
+      "_id": "679b8d6214c48be9ae7c08e3",
+      "packageId": "67a997f4c27936f72e05b085",
+      "affiliateCommission": 63.79,
+      "eventWallet": 6.67,
+      "srkBonus": 6.25,
+      "ceoSalary": 3.33,
+      "officeManagementCharge": 12.51,
+      "companyTurnover": 9.66,
+      "createdAt": "2025-01-30T14:32:02.299Z",
+      "__v": 0,
+      "tms": 6.25,
+      "vat": 14.71
+    },
+    {
+      "_id": "67d2e5b92033036da8f85206",
+      "packageId": "67d2e42d2033036da8f85204",
+      "affiliateCommission": 54.06,
+      "eventWallet": 5.56,
+      "srkBonus": 5.01,
+      "ceoSalary": 5.56,
+      "officeManagementCharge": 10.01,
+      "companyTurnover": 13.15,
+      "createdAt": "2025-01-30T14:32:02.299Z",
+      "__v": 0,
+      "tms": 5.01,
+      "vat": 12.75
+    }
+  ]
+}

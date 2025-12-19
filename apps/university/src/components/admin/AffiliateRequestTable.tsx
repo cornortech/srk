@@ -112,7 +112,7 @@ export default function AffiliateRequestTable({
         <TableBody>
           {users.map((user, index) => (
             <TableRow key={index}>
-              <TableCell>{index + 1}</TableCell>
+              <TableCell>{(page - 1) * 10 + index + 1}</TableCell>
               <TableCell>{moment(user.requestedAt).format('lll')}</TableCell>
               {/* <TableCell>
                 <Image

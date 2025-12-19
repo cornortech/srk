@@ -21,7 +21,7 @@ const createGrowSocialMediaEnrollment: AppRouteImplementationOrOptions<
             postEngagement,
         } = body;
 
-        const postURLs = postEngagement.postURLs ?? [];
+        const postURLs = postEngagement?.postURLs ?? [];
 
         // 1. Validate promo code and find referredBy user using promocode
         let growSocialMediaRefferalUser = null;

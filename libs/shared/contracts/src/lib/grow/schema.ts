@@ -1,6 +1,6 @@
 import z from 'zod';
 
-export const createGrowSocialMediaEnrollementSchema = z.object({
+export const createGrowSocialMediaEnrollmentSchema = z.object({
   userData: z.object({
     fullName: z.string().min(1, 'Full name is required'),
     email: z.string().email('Invalid email address'),
@@ -10,16 +10,15 @@ export const createGrowSocialMediaEnrollementSchema = z.object({
     country: z.string().min(1, 'Country is required'),
     kycURL: z.array(z.string()),
     usedPromoCode: z.string().optional(),
+    userType: z.enum(['affiliate', 'package']),
   }),
-  enrollementData: z
-    .object({
-      growSocialMediaPackageId: z.string(),
-      growSocialMediaPackageTypeId: z.string(),
-      growSocialMediaPackageSubTypeId: z.string(),
-      socialMediaPlatform: z.string(),
-      profileLinkURL: z.array(z.string().url('Invalid Profile Url')).optional(),
-    })
-    .optional(),
+  enrollmentData: z.object({
+    growSocialMediaPackageId: z.string(),
+    growSocialMediaPackageTypeId: z.string(),
+    growSocialMediaPackageSubTypeId: z.string(),
+    socialMediaPlatform: z.string(),
+    profileLinkURL: z.array(z.string().url('Invalid Profile Url')).optional(),
+  }),
   paymentData: z.object({
     paymentURL: z.string().url('Invalid payment URL'),
     transactionId: z.string().min(1, 'Transaction ID is required'),
@@ -32,11 +31,11 @@ export const createGrowSocialMediaEnrollementSchema = z.object({
     .optional(),
 });
 
-export type TCreateGrowSocialMediaEnrollement = z.infer<
-  typeof createGrowSocialMediaEnrollementSchema
+export type TCreateGrowSocialMediaEnrollment = z.infer<
+  typeof createGrowSocialMediaEnrollmentSchema
 >;
 
-export const getGrowSocialMediaEnrollementByIdSchema = z.object({
+export const getGrowSocialMediaEnrollmentByIdSchema = z.object({
   _id: z.string(),
   userData: z.object({
     fullName: z.string().min(1, 'Full name is required'),
@@ -49,7 +48,7 @@ export const getGrowSocialMediaEnrollementByIdSchema = z.object({
     usedPromoCode: z.string().optional(),
     status: z.string(),
   }),
-  enrollementData: z.object({
+  enrollmentData: z.object({
     growSocialMediaPackageId: z.string(),
     growSocialMediaPackageTypeId: z.string(),
     growSocialMediaPackageSubTypeId: z.string(),
@@ -68,12 +67,12 @@ export const getGrowSocialMediaEnrollementByIdSchema = z.object({
   updatedAt: z.string(),
 });
 
-export type TGetGrowSocialMediaEnrollementById = z.infer<
-  typeof getGrowSocialMediaEnrollementByIdSchema
+export type TGetGrowSocialMediaEnrollmentById = z.infer<
+  typeof getGrowSocialMediaEnrollmentByIdSchema
 >;
 
-export const getAllGrowSocialMediaEnrollementSchema = z.array(
-  getGrowSocialMediaEnrollementByIdSchema
+export const getAllGrowSocialMediaEnrollmentSchema = z.array(
+  getGrowSocialMediaEnrollmentByIdSchema
 );
 
 export const validateGrowUserPromoCodeSchema = z.object({
@@ -98,34 +97,6 @@ export type TValidateGrowUserPromoCodeResponse = z.infer<
   typeof validateGrowUserPromoCodeResponseSchema
 >;
 
-export const getSrkGrowProfileResponseSchema = z.object({
-  success: z.boolean(),
-  message: z.string(),
-  result: z.object({
-    _id: z.string(),
-    fullName: z.string(),
-    email: z.string(),
-    status: z.string(),
-    kycURL: z.array(z.string()),
-    rejectionReason: z.string().optional(),
-    phone: z.string().optional(),
-    country: z.string().optional(),
-    gender: z.string().optional(),
-    promoCode: z.string().optional(),
-    createdAt: z.union([z.string(), z.date()]).optional(),
-    transactionId: z.string().optional(),
-    paymentURL: z.string().optional(),
-    paymentMethod: z.string().optional(),
-  }),
-});
-
-export const resubmitGrowVerificationSchema = z.object({
-  userId: z.string(),
-  kycURLs: z.array(z.string()),
-  transactionId: z.string(),
-  paymentURL: z.string(),
-});
-
 export const srkGrowUsersSchema = z.object({
   _id: z.string(),
   fullName: z.string(),
@@ -145,4 +116,59 @@ export const getAllSrkGrowUsersResponseSchema = z.array(srkGrowUsersSchema);
 
 export type TGetAllSrkGrowUsersResponse = z.infer<
   typeof getAllSrkGrowUsersResponseSchema
+>;
+
+export const getSrkGrowProfileResponseSchema = z.object({
+  userDetails: z.object({
+    _id: z.string(),
+    srkUniversityId: z.string().optional(),
+    fullName: z.string(),
+    email: z.string(),
+    status: z.string(),
+    phone: z.string().optional(),
+    kycURL: z.array(z.string()),
+    country: z.string().optional(),
+    gender: z.string().optional(),
+    promoCode: z.string().optional(),
+    profileLinkURL: z.array(z.string()).optional(),
+    userType: z.enum(['affiliate', 'package']),
+    referredBy: z
+      .object({
+        name: z.string(),
+      })
+      .nullable(),
+  }),
+  enrollmentData: z
+    .object({
+      enrollmentPackageDetails: z.object({
+        name: z.string(),
+        amount: z.number(),
+        socialMediaPlatform: z.string(),
+      }),
+      enagagementPostURLs: z.array(z.string()).optional(),
+      enrollmentPaymentDetails: z
+        .object({
+          paymentUrl: z.string(),
+          transactionId: z.string(),
+          paymentMethod: z.string().optional(),
+          rejectionReason: z.string().optional(),
+        })
+        .nullable(),
+    })
+    .nullable(),
+});
+
+export type TGetSrkGrowProfileResponse = z.infer<
+  typeof getSrkGrowProfileResponseSchema
+>;
+
+export const resubmitGrowVerificationSchema = z.object({
+  userId: z.string(),
+  kycURLs: z.array(z.string()),
+  transactionId: z.string(),
+  paymentURL: z.string(),
+});
+
+export type TResubmitGrowVerification = z.infer<
+  typeof resubmitGrowVerificationSchema
 >;

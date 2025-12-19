@@ -46,7 +46,7 @@ export const taskContract = c.router({
 
   getAllSocialTaskEnrollments: {
     method: "GET",
-    path: "/social-task-enrollements-by-status",
+    path: "/social-task-enrollments-by-status",
     query: z.object({
       status: z.string()
     }),
@@ -61,7 +61,7 @@ export const taskContract = c.router({
 
   acceptTaskEnrollmentRequest: {
     method: "PATCH",
-    path: "/accept-social-task-enrollement-request/:id",
+    path: "/accept-social-task-enrollment-request/:id",
     body: z.object({}), // no fields required
     responses: {
       200: SuccessSchema,

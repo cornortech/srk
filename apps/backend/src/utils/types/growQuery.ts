@@ -50,3 +50,43 @@ export interface GrowPackageUserPopulated {
     name: string;
   };
 }
+
+export interface GrowProfileResponsePopulated {
+  growSocialMediaPackageUser: {
+    _id: Types.ObjectId;
+    srkUniversityUserId?: Types.ObjectId | null;
+    fullName: string;
+    email: string;
+    status: string;
+    phone?: string;
+    kycURL: string[];
+    country?: string;
+    gender?: string;
+    promoCode?: string;
+
+    referredBy?: {
+      _id: Types.ObjectId;
+      fullName: string;
+    } | null;
+  };
+
+  growSocialMediaPackageEnrollment?: {
+    _id: Types.ObjectId;
+    socialMediaPlatform: string;
+    profileLinkURL?: string[];
+
+    growSocialMediaPackageId: {
+      _id: Types.ObjectId;
+      name: string;
+      amount: number;
+    };
+
+    payment?: {
+      _id: Types.ObjectId;
+      paymentURL: string;
+      transactionId: string;
+      paymentMethod?: string;
+      rejectionReason?: string | null;
+    };
+  } | null;
+}

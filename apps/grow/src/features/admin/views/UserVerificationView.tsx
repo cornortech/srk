@@ -16,8 +16,8 @@ interface UserVerificationViewProps {
 }
 
 export const UserVerificationView: React.FC<UserVerificationViewProps> = () => {
-  const { data: growEnrollementUserData, isLoading } =
-    api.grow.getAllGrowSocialMediaEnrollement.useQuery(['enrolledUser']);
+  const { data: growEnrollmentUserData, isLoading } =
+    api.grow.getAllGrowSocialMediaEnrollment.useQuery(['enrolledUser']);
 
   const [documentViewerOpen, setDocumentViewerOpen] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState<{
@@ -30,29 +30,29 @@ export const UserVerificationView: React.FC<UserVerificationViewProps> = () => {
 
   const { show } = useSRKAlert();
 
-  const { mutate: acceptEnrollementMutation, isPending: approvePending } =
-    api.grow.acceptSocialGrowEnrollementRequest.useMutation({
+  const { mutate: acceptEnrollmentMutation, isPending: approvePending } =
+    api.grow.acceptSocialGrowEnrollmentRequest.useMutation({
       onSuccess: (res) => {
         if (res.status === 200) {
-          show('Enrollement User approved', 'success');
+          show('Enrollment User approved', 'success');
         }
       },
     });
 
   const handleApprove = (id: string) => {
     setSelectedItemId(id);
-    acceptEnrollementMutation({
+    acceptEnrollmentMutation({
       params: {
-        enrollementId: id,
+        enrollmentId: id,
       },
     });
   };
 
-  const { mutate: rejectEnrollementMutation, isPending: rejectPending } =
-    api.grow.rejectSocialGrowEnrollementRequest.useMutation({
+  const { mutate: rejectEnrollmentMutation, isPending: rejectPending } =
+    api.grow.rejectSocialGrowEnrollmentRequest.useMutation({
       onSuccess: (res) => {
         if (res.status === 200) {
-          show('Enrollement User approved', 'success');
+          show('Enrollment User approved', 'success');
         }
       },
     });
@@ -64,9 +64,9 @@ export const UserVerificationView: React.FC<UserVerificationViewProps> = () => {
 
   const handleRejectionSubmit = (rejectionReason: string) => {
     if (selectedItemId) {
-      rejectEnrollementMutation({
+      rejectEnrollmentMutation({
         params: {
-          enrollementId: selectedItemId,
+          enrollmentId: selectedItemId,
         },
         body: {
           rejectionReason: rejectionReason,
@@ -197,7 +197,7 @@ export const UserVerificationView: React.FC<UserVerificationViewProps> = () => {
                 </tr>
               </thead>
               <tbody>
-                {growEnrollementUserData?.body.map((item, index) => (
+                {growEnrollmentUserData?.body.map((item, index) => (
                   <motion.tr
                     key={item._id}
                     initial={{ y: 20, opacity: 0 }}

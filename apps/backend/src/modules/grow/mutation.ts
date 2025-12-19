@@ -149,7 +149,7 @@ const createGrowSocialMediaEnrollment: AppRouteImplementationOrOptions<
 
         // 6. Create payment record
         await growSocialMediaPackagePaymentModel.create({
-            growPackageenrollmentId: createSrkGrowPackageEnrollment._id,
+            growPackageEnrollmentId: createSrkGrowPackageEnrollment._id,
             paymentURL: paymentData.paymentURL,
             transactionId: paymentData.transactionId,
             paymentMethod: paymentData.paymentMethod,

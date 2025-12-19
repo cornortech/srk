@@ -1,6 +1,6 @@
-import { PackageCommissionModel } from "../model/packageCommissionModel";
-import { PackageModel } from "../model/packageModel";
-import { calculateAmountFromPercentage } from "../modules/auth/mutation";
+import { PackageCommissionModel } from '../model/packageCommissionModel';
+import { PackageModel } from '../model/packageModel';
+import { calculateAmountFromPercentage } from '../modules/auth/mutation';
 
 export class FinanceService {
   static async getFiananceAmountCommission({
@@ -16,11 +16,11 @@ export class FinanceService {
   }): Promise<{
     earning: number;
     srkBonus: number;
-    eventWallet: number;
-    ceoSalary: number;
     officeManagementCharge: number;
     companyTurnover: number;
     balance: number;
+    tms: number;
+    vat: number;
   }> {
     const seniorPackage = await PackageModel.findById(seniorPackageId);
     const referringUserPackage = await PackageModel.findById(
@@ -30,19 +30,19 @@ export class FinanceService {
     const newUserPackage = await PackageModel.findById(newUserPackageId);
 
     if (!referringUserPackage || !newUserPackage) {
-      throw new Error("Package not found");
+      throw new Error('Package not found');
     }
 
     if (!enrolledPackage) {
-      throw new Error("Enrolled package not found");
+      throw new Error('Enrolled package not found');
     }
 
     const commissionPackages = await PackageCommissionModel.find({});
     let affiliateCommissionPercentage = 0;
     let srkBonusPercentage = 0;
-    let ceoSalaryPercentage = 0;
     let officeManagementChargePercentage = 0;
-    let eventWalletPercentage = 0;
+    let tmsPercentage = 0;
+    let vatPercentage = 0;
     let srkBonusPremiumPrice = 0;
 
     const courseEnrollPrice = newUserPackage.discountedPrice;
@@ -54,7 +54,6 @@ export class FinanceService {
 
       affiliateCommissionPercentage =
         commissionPackage?.affiliateCommission || 0;
-      eventWalletPercentage = commissionPackage?.eventWallet || 0;
 
       // if the user's package is lesser than mine than use calculate amount according to user's package .
     } else {
@@ -64,7 +63,6 @@ export class FinanceService {
 
       affiliateCommissionPercentage =
         commissionPackage?.affiliateCommission || 0;
-      eventWalletPercentage = commissionPackage?.eventWallet || 0;
     }
 
     if (seniorPackage) {
@@ -95,19 +93,15 @@ export class FinanceService {
       (cp) => cp.packageId.toString() === enrolledPackage._id?.toString()
     );
 
-    ceoSalaryPercentage = enrolledPackageCommission?.ceoSalary || 0;
-
     officeManagementChargePercentage =
       enrolledPackageCommission?.officeManagementCharge || 0;
+
+    tmsPercentage = enrolledPackageCommission?.tms || 0;
+    vatPercentage = enrolledPackageCommission?.vat || 0;
 
     const balance = calculateAmountFromPercentage(
       courseEnrollPrice,
       affiliateCommissionPercentage
-    );
-
-    const ceoSalary = calculateAmountFromPercentage(
-      enrolledPackage?.discountedPrice || 0,
-      ceoSalaryPercentage
     );
 
     const officeManagementCharge = calculateAmountFromPercentage(
@@ -115,9 +109,14 @@ export class FinanceService {
       officeManagementChargePercentage
     );
 
-    const eventWallet = calculateAmountFromPercentage(
-      courseEnrollPrice,
-      eventWalletPercentage
+    const tms = calculateAmountFromPercentage(
+      enrolledPackage?.discountedPrice || 0,
+      tmsPercentage
+    );
+
+    const vat = calculateAmountFromPercentage(
+      enrolledPackage?.discountedPrice || 0,
+      vatPercentage
     );
 
     let srkBonus = 0;
@@ -136,33 +135,31 @@ export class FinanceService {
     const companyTurnover = +(
       enrolledPackage.discountedPrice -
       balance -
-      eventWallet -
-      ceoSalary -
       srkBonus -
-      officeManagementCharge
+      officeManagementCharge -
+      tms -
+      vat
     ).toFixed(2);
 
     // console.log(
     //   `
     //   courseEnrollPrice: ${enrolledPackage?.discountedPrice || 0}
     //   balance: ${balance}
-    //   eventWallet: ${eventWallet}
-    //   ceoSalary: ${ceoSalary}
     //   officeManagementCharge: ${officeManagementCharge}
     //   srkBonus: ${srkBonus}
     //   companyTurnover: ${companyTurnover}
-    //   earning(balance + eventWallet): ${balance + eventWallet}
+    //   earning(balance): ${balance}
     //   `
     // );
 
     return {
-      earning: balance + eventWallet,
+      earning: balance,
       balance,
-      ceoSalary,
       companyTurnover,
-      eventWallet,
       officeManagementCharge,
       srkBonus,
+      tms,
+      vat,
     };
   }
 }

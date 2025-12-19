@@ -52,12 +52,12 @@ const calculateEarnings = async ({
   try {
     let {
       balance,
-      ceoSalary,
       companyTurnover,
       earning,
-      eventWallet,
       officeManagementCharge,
       srkBonus,
+      tms,
+      vat,
     } = await FinanceService.getFiananceAmountCommission({
       newUserPackageId: packageId,
       referringUserPackageId,
@@ -68,27 +68,29 @@ const calculateEarnings = async ({
     await CustomerBalanceService.depositCustomerBalance({
       userId: referredBy,
       balance,
-      eventWallet,
       totalEarnings: balance,
     });
 
     await AdminBalanceService.depositAdminBalance({
-      ceoSalary,
       officeManagementCharge,
       companyTurnover,
+      tms,
+      vat,
     });
 
     await EarningStatementModel.create({
       userId: new mongoose.Types.ObjectId(referredBy),
       referredTo: new mongoose.Types.ObjectId(referredTo),
       type: 'REFERRAL_EANRING',
-      ceoSalary,
+      ceoSalary: 0,
       companyTurnover,
       officeManagementCharge,
       eventWallet: 0,
       balanceWallet: balance,
       srkBonus,
       earning: balance,
+      tms,
+      vat,
     });
 
     if (seniorId) {
@@ -116,6 +118,8 @@ const calculateEarnings = async ({
         officeManagementCharge: 0,
         balanceWallet: srkBonus,
         companyTurnover: 0,
+        tms: 0,
+        vat: 0,
       });
     }
   } catch (error) {
@@ -738,6 +742,7 @@ const approvePaymentDetails: AppRouteImplementationOrOptions<
       },
     };
   } catch (error) {
+    console.log(`Error in approvePaymentDetails:`, error);
     return {
       status: 500,
       body: { success: false, message: 'Internal server error' },

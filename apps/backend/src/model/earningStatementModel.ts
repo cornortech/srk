@@ -1,20 +1,20 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
 const earningStatementModelSchema = new mongoose.Schema(
   {
     userId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: 'User',
       required: true,
     },
     type: {
       type: String,
       required: true,
-      enum: ["REFERRAL_EANRING", "SENIOR_EARNING"],
+      enum: ['REFERRAL_EANRING', 'SENIOR_EARNING'],
     },
     referredTo: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: 'User',
     },
     earning: {
       type: Number,
@@ -44,6 +44,16 @@ const earningStatementModelSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    // v2 - task management system
+    tms: {
+      type: Number,
+      required: true,
+    },
+    // v2 - value added task
+    vat: {
+      type: Number,
+      required: true,
+    },
   },
   {
     timestamps: true,
@@ -51,6 +61,6 @@ const earningStatementModelSchema = new mongoose.Schema(
 );
 
 export const EarningStatementModel = mongoose.model(
-  "EarningStatementModel",
+  'EarningStatementModel',
   earningStatementModelSchema
 );

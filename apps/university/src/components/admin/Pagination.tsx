@@ -21,7 +21,7 @@ export default function TablePagination({
         variant="flat"
         isDisabled={page <= 1}
         onPress={() => onPageChange(page - 1)}
-        className="hover:bg-green-600 hover:text-white"
+        className="hover:bg-bgSecondary bg-primary hover:text-white"
       >
         <ArrowLeft size={16} /> Prev
       </Button>
@@ -35,7 +35,7 @@ export default function TablePagination({
         variant="flat"
         isDisabled={page >= totalPages}
         onPress={() => onPageChange(page + 1)}
-        className="hover:bg-green-600 hover:text-white"
+        className="hover:bg-bgSecondary bg-primary hover:text-white"
       >
         Next <ArrowRight size={16} />
       </Button>

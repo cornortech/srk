@@ -1,7 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import {
-  CheckoutUserDetails,
   EngagementType,
   PackageDetails,
   SocialPlatform,
@@ -55,7 +54,6 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
         phoneNumber: '',
         country: '',
         kycURL: [],
-        userType: 'package' as const,
         usedPromoCode: '',
       },
       enrollmentData: {
@@ -325,7 +323,6 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
             gender: watch('userData.gender') as any,
             password: watch('userData.password'),
             kycURL: kycUrls,
-            userType: 'package' as const,
             usedPromoCode: watch('userData.usedPromoCode') || undefined,
           },
           enrollmentData: {
@@ -458,7 +455,11 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
               selectedPlatform={selectedPlatform}
               engagementType={engagementType}
               optionDescription={optionDetails.description}
-              form={form}
+              form={
+                form as unknown as import('react-hook-form').UseFormReturn<
+                  import('@srk/shared/contracts').TCreateGrowSocialMediaEnrollment
+                >
+              }
               confirmPassword={confirmPassword}
               setConfirmPassword={setConfirmPassword}
               handleSubmit={handleSubmit}

@@ -63,7 +63,7 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
         growSocialMediaPackageTypeId: '',
         growSocialMediaPackageSubTypeId: '',
         socialMediaPlatform: '',
-        profileLinkURL: [''],
+        profileLinkURL: [],
       },
       paymentData: {
         paymentURL: 'https://placeholder.com', // Placeholder for validation
@@ -71,7 +71,7 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
         paymentMethod: 'esewa',
       },
       postEngagement: {
-        postURLs: ['', '', '', ''],
+        postURLs: [],
       },
     },
   });
@@ -217,12 +217,40 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
 
     // New validation for Profile Link or Post URLs
     if (engagementType === 'follow') {
+      // Filter out empty strings before validation
+      const profileLinks = watch('enrollmentData.profileLinkURL') || [];
+      const filteredProfileLinks = profileLinks.filter(
+        (link: string) => link.trim() !== ''
+      );
+
+      if (filteredProfileLinks.length === 0) {
+        toast.error('Please provide a profile link');
+        return;
+      }
+
+      // Set the filtered values
+      setValue('enrollmentData.profileLinkURL', filteredProfileLinks);
+
       const profileLinkReady = await trigger('enrollmentData.profileLinkURL');
       if (!profileLinkReady) {
         toast.error('Invalid Profile Link');
         return;
       }
     } else {
+      // Filter out empty strings before validation
+      const postLinks = watch('postEngagement.postURLs') || [];
+      const filteredPostLinks = postLinks.filter(
+        (link: string) => link.trim() !== ''
+      );
+
+      if (filteredPostLinks.length === 0) {
+        toast.error('Please provide at least one post URL');
+        return;
+      }
+
+      // Set the filtered values
+      setValue('postEngagement.postURLs', filteredPostLinks);
+
       const postLinksReady = await trigger('postEngagement.postURLs');
       if (!postLinksReady) {
         toast.error('Invalid Post URLs');

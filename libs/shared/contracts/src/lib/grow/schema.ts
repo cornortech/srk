@@ -10,7 +10,6 @@ export const createGrowSocialMediaEnrollmentSchema = z.object({
     country: z.string().min(1, 'Country is required'),
     kycURL: z.array(z.string()),
     usedPromoCode: z.string().optional(),
-    userType: z.enum(['affiliate', 'package']),
   }),
   enrollmentData: z.object({
     growSocialMediaPackageId: z.string(),
@@ -130,7 +129,7 @@ export const getSrkGrowProfileResponseSchema = z.object({
     country: z.string().optional(),
     gender: z.string().optional(),
     promoCode: z.string().optional(),
-    profileLinkURL: z.array(z.string()).optional(),
+    profileLinkURL: z.array(z.string().url()).optional(),
     userType: z.enum(['affiliate', 'package']),
     referredBy: z
       .object({
@@ -138,24 +137,20 @@ export const getSrkGrowProfileResponseSchema = z.object({
       })
       .nullable(),
   }),
-  enrollmentData: z
-    .object({
-      enrollmentPackageDetails: z.object({
-        name: z.string(),
-        amount: z.number(),
-        socialMediaPlatform: z.string(),
-      }),
-      enagagementPostURLs: z.array(z.string()).optional(),
-      enrollmentPaymentDetails: z
-        .object({
-          paymentUrl: z.string(),
-          transactionId: z.string(),
-          paymentMethod: z.string().optional(),
-          rejectionReason: z.string().optional(),
-        })
-        .nullable(),
-    })
-    .nullable(),
+  enrollmentData: z.object({
+    enrollmentPackageDetails: z.object({
+      name: z.string(),
+      amount: z.number(),
+      socialMediaPlatform: z.string(),
+    }),
+    enagagementPostURLs: z.array(z.string().url()).optional(),
+    enrollmentPaymentDetails: z.object({
+      paymentUrl: z.string(),
+      transactionId: z.string(),
+      paymentMethod: z.string().optional(),
+      rejectionReason: z.string().optional(),
+    }).nullable(),
+  }).nullable(),
 });
 
 export type TGetSrkGrowProfileResponse = z.infer<

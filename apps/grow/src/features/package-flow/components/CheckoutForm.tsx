@@ -7,14 +7,14 @@ import {
   SocialPlatform,
 } from '../../../lib/types/types';
 import { UseFormReturn } from 'react-hook-form';
-import { TCreateGrowSocialMediaEnrollement } from '@srk/shared/contracts';
+import { TCreateGrowSocialMediaEnrollment } from '@srk/shared/contracts';
 
 interface CheckoutFormProps {
   selectedPackage: PackageDetails;
   selectedPlatform: SocialPlatform;
   engagementType: EngagementType;
   optionDescription: string;
-  form: UseFormReturn<TCreateGrowSocialMediaEnrollement>;
+  form: UseFormReturn<TCreateGrowSocialMediaEnrollment>;
   confirmPassword: string;
   setConfirmPassword: (val: string) => void;
   handleSubmit: () => void;
@@ -408,7 +408,7 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
                 <input
                   {...register(
                     (engagementType === 'follow'
-                      ? 'enrollementData.profileLinkURL.0'
+                      ? 'enrollmentData.profileLinkURL.0'
                       : 'postEngagement.postURLs.0') as any
                   )}
                   type="url"
@@ -416,7 +416,7 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
                   className={`w-full px-4 py-3 rounded-xl bg-white/5 border ${
                     (
                       engagementType === 'follow'
-                        ? errors.enrollementData?.profileLinkURL?.[0]
+                        ? errors.enrollmentData?.profileLinkURL?.[0]
                         : errors.postEngagement?.postURLs?.[0]
                     )
                       ? 'border-red-500'
@@ -429,11 +429,11 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
                   }
                 />
                 {(engagementType === 'follow'
-                  ? errors.enrollementData?.profileLinkURL?.[0]
+                  ? errors.enrollmentData?.profileLinkURL?.[0]
                   : errors.postEngagement?.postURLs?.[0]) && (
                   <p className="mt-1 text-xs text-red-500">
                     {engagementType === 'follow'
-                      ? errors.enrollementData?.profileLinkURL?.[0]?.message
+                      ? errors.enrollmentData?.profileLinkURL?.[0]?.message
                       : errors.postEngagement?.postURLs?.[0]?.message}
                   </p>
                 )}

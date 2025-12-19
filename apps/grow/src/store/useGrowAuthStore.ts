@@ -5,7 +5,13 @@ import { z } from 'zod';
 
 export type GrowUser = z.infer<
   typeof getSrkGrowProfileResponseSchema
->['result'];
+>['userDetails'] & {
+  transactionId?: string | null;
+  paymentURL?: string | null;
+  paymentMethod?: string | null;
+  rejectionReason?: string | null;
+  createdAt?: string | null;
+};
 
 interface GrowAuthState {
   user: GrowUser | null;

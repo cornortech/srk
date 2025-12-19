@@ -48,8 +48,8 @@ export const GrowVerificationPage = () => {
 
   // API Hooks
   const { data: profileData, refetch } = api.grow.getSrkGrowProfile.useQuery(
-    ['growProfile', user?._id || ''],
-    { params: { id: user?._id || '' } },
+    ['growProfile', user?._id],
+    (user?._id ? { params: { userId: user._id } } : ({} as any)),
     {
       enabled: !!user?._id,
       refetchOnWindowFocus: true,
@@ -80,25 +80,23 @@ export const GrowVerificationPage = () => {
   // Sync profile data to store and local state
   useEffect(() => {
     if (profileData?.status === 200) {
-      const updatedUser = profileData.body.result;
+      const updatedUser = profileData.body.userDetails;
+      const payment = profileData.body.enrollmentData?.enrollmentPaymentDetails;
       setUser({
         ...user!,
         status: updatedUser.status as any,
-        rejectionReason: updatedUser.rejectionReason,
+        rejectionReason: payment?.rejectionReason ?? null,
         kycURL: updatedUser.kycURL,
         phone: updatedUser.phone,
         country: updatedUser.country,
-        createdAt: updatedUser.createdAt,
-        transactionId: updatedUser.transactionId,
-        paymentURL: updatedUser.paymentURL,
-        paymentMethod: updatedUser.paymentMethod as any,
+        transactionId: payment?.transactionId,
+        paymentURL: payment?.paymentUrl,
+        paymentMethod: payment?.paymentMethod as any,
       });
 
       if (updatedUser._id) setValue('userId', updatedUser._id);
-      if (updatedUser.transactionId)
-        setValue('transactionId', updatedUser.transactionId);
-      if (updatedUser.paymentURL)
-        setValue('paymentURL', updatedUser.paymentURL);
+      if (payment?.transactionId) setValue('transactionId', payment.transactionId);
+      if (payment?.paymentUrl) setValue('paymentURL', payment.paymentUrl);
       if (updatedUser.kycURL) {
         const docs = Array.isArray(updatedUser.kycURL)
           ? updatedUser.kycURL

@@ -142,8 +142,17 @@ export const getSrkGrowProfileResponseSchema = z.object({
       name: z.string(),
       amount: z.number(),
       socialMediaPlatform: z.string(),
+      packageType: z.object({
+        name: z.string(),
+        packageSubType: z.object({
+          name: z.string(),
+          noOfLikes: z.number().optional(),
+          noOfVideos: z.number().optional(),
+          noOfFollowers: z.number().optional(),
+        }),
+      }),
     }),
-    enagagementPostURLs: z.array(z.string().url()).optional(),
+    engagementPostURLs: z.array(z.string().url()).optional(),
     enrollmentPaymentDetails: z.object({
       paymentUrl: z.string(),
       transactionId: z.string(),

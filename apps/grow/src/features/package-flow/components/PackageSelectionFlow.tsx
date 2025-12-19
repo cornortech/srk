@@ -14,8 +14,8 @@ import { EngagementStep, OptionStep, PlatformStep } from './StepViews';
 import { api } from '../../../lib/api';
 import { useSRKFileUpload } from '@srk/shared/hooks';
 import {
-  createGrowSocialMediaEnrollementSchema,
-  TCreateGrowSocialMediaEnrollement,
+  createGrowSocialMediaEnrollmentSchema,
+  TCreateGrowSocialMediaEnrollment,
 } from '@srk/shared/contracts';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
@@ -44,8 +44,8 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
   const [selectedSubTypeIndex, setSelectedSubTypeIndex] = useState<number>(0);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
 
-  const form = useForm<TCreateGrowSocialMediaEnrollement>({
-    resolver: zodResolver(createGrowSocialMediaEnrollementSchema),
+  const form = useForm<TCreateGrowSocialMediaEnrollment>({
+    resolver: zodResolver(createGrowSocialMediaEnrollmentSchema),
     defaultValues: {
       userData: {
         fullName: '',
@@ -55,9 +55,10 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
         phoneNumber: '',
         country: '',
         kycURL: [],
+        userType: 'package' as const,
         usedPromoCode: '',
       },
-      enrollementData: {
+      enrollmentData: {
         growSocialMediaPackageId: selectedPackage._id,
         growSocialMediaPackageTypeId: '',
         growSocialMediaPackageSubTypeId: '',
@@ -124,17 +125,19 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
     },
   });
 
-  const createEnrollment =
-    api.grow.createGrowSocialMediaEnrollement.useMutation({
-      onSuccess: () => {
-        // Handled by PaymentModel
+  const createEnrollment = api.grow.createGrowSocialMediaEnrollment.useMutation(
+    {
+      onSuccess: (data) => {
+        // Handle success if needed, e.g. toast?
+        // PaymentModel handles the success UI view
       },
       onError: (error) => {
         console.error('Enrollment failed', error);
         toast.error('Failed to create enrollment. Please try again.');
         throw error;
       },
-    });
+    }
+  );
 
   const handleValidatePromoCode = () => {
     const promoCode = watch('userData.usedPromoCode');
@@ -157,7 +160,7 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
 
   const handlePlatformSelect = (platform: SocialPlatform) => {
     setSelectedPlatform(platform);
-    setValue('enrollementData.socialMediaPlatform', platform);
+    setValue('enrollmentData.socialMediaPlatform', platform);
     setStep(2);
   };
 
@@ -174,11 +177,11 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
     const packageSubType = packageType?.packageSubTypes?.[subTypeIndex];
 
     setValue(
-      'enrollementData.growSocialMediaPackageTypeId',
+      'enrollmentData.growSocialMediaPackageTypeId',
       packageType?._id || ''
     );
     setValue(
-      'enrollementData.growSocialMediaPackageSubTypeId',
+      'enrollmentData.growSocialMediaPackageSubTypeId',
       packageSubType?._id || ''
     );
 
@@ -214,7 +217,7 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
 
     // New validation for Profile Link or Post URLs
     if (engagementType === 'follow') {
-      const profileLinkReady = await trigger('enrollementData.profileLinkURL');
+      const profileLinkReady = await trigger('enrollmentData.profileLinkURL');
       if (!profileLinkReady) {
         toast.error('Invalid Profile Link');
         return;
@@ -281,7 +284,7 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
         throw new Error('Invalid package option selected');
       }
 
-      const profileLinks = watch('enrollementData.profileLinkURL');
+      const profileLinks = watch('enrollmentData.profileLinkURL');
       const postLinks = watch('postEngagement.postURLs');
 
       await createEnrollment.mutateAsync({
@@ -294,9 +297,10 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
             gender: watch('userData.gender') as any,
             password: watch('userData.password'),
             kycURL: kycUrls,
+            userType: 'package' as const,
             usedPromoCode: watch('userData.usedPromoCode') || undefined,
           },
-          enrollementData: {
+          enrollmentData: {
             growSocialMediaPackageId: selectedPackage._id,
             growSocialMediaPackageTypeId: packageType._id,
             growSocialMediaPackageSubTypeId: packageSubType._id,
@@ -457,7 +461,7 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
           name: watch('userData.fullName'),
           email: watch('userData.email'),
           phone: watch('userData.phoneNumber'),
-          socialLink: watch('enrollementData.profileLinkURL')?.[0] || '',
+          socialLink: watch('enrollmentData.profileLinkURL')?.[0] || '',
           platform: selectedPlatform!,
           engagementType: engagementType!,
           password: watch('userData.password'),
@@ -468,6 +472,7 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
           postLinks: watch('postEngagement.postURLs'),
           kyc: watch('userData.kycURL'),
           selectedOption: selectedSubTypeIndex,
+          userType: 'package' as const,
           packageId: selectedPackage._id,
         }}
         packagePrice={String(

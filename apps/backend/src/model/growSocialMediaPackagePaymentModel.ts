@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const growSocialMediaPackagePaymentSchema = new mongoose.Schema(
     {
-        growPackageEnrollementId: {
+        growPackageEnrollmentId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "growSocialMediaPackageEnrollment",
             required: true,

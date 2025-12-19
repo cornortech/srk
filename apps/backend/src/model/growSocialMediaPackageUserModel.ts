@@ -42,6 +42,11 @@ const growSocialMediaPackageUserSchema = new mongoose.Schema(
       required: true,
       unique: true,
     },
+    userType: {
+      type: String,
+      enum: ['affiliate', 'package'],
+      required: true,
+    },
     srkUniversityUserId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
@@ -52,7 +57,6 @@ const growSocialMediaPackageUserSchema = new mongoose.Schema(
       ref: 'growSocialMediaPackageUser',
     },
   },
-
   {
     timestamps: true,
   }

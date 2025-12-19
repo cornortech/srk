@@ -193,7 +193,9 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
     if (showMultiplePostLinks) {
       (userDetails.postLinks || []).forEach((link, index) => {
         try {
-          new URL(link);
+          if (link) {
+            new URL(link);
+          }
         } catch {
           errors[`postLink_${index}`] =
             'Please enter a valid URL (e.g., https://example.com)';
@@ -209,7 +211,11 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
       // Single link
       const link = userDetails.socialLink || '';
       try {
-        new URL(link);
+        if (link) {
+          new URL(link);
+        } else {
+          errors.socialLink = 'Profile/Post link is required';
+        }
       } catch {
         errors.socialLink = `Please enter a valid URL (e.g., https://${selectedPlatform}.com/profile)`;
       }
@@ -324,7 +330,8 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
             growSocialMediaPackageId: selectedPackage._id,
             growSocialMediaPackageTypeId: packageType._id || 'unknown',
             growSocialMediaPackageSubTypeId: packageSubType._id || 'unknown',
-            profileLinkURL: profileLink,
+            profileLinkURL: [profileLink],
+            socialMediaPlatform: selectedPlatform!,
           },
           paymentData: {
             paymentURL: paymentData.paymentProofUrl,
@@ -334,6 +341,14 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
               | 'khalti'
               | 'bankTransfer',
           },
+          postEngagement:
+            engagementType === 'reach'
+              ? {
+                  postURLs: (userDetails.postLinks || []).filter(
+                    (link) => link.trim() !== ''
+                  ),
+                }
+              : undefined,
         },
       });
 

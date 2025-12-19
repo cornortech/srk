@@ -1,7 +1,7 @@
 import {
   TSrkGrowPackagesSchema,
   TValidateGrowUserPromoCodeResponse,
-  TGetGrowSocialMediaEnrollementById,
+  TGetGrowSocialMediaEnrollmentById,
 } from '@srk/shared/contracts';
 
 export type SocialPlatform =
@@ -15,13 +15,14 @@ export type KYCStatus =
   | 'verificationPending'
   | 'portalActivated'
   | 'verificationRejected';
+export type UserType = 'Affiliate' | 'User';
 
 export type PackageSubType =
   TSrkGrowPackagesSchema['packageTypes'][0]['packageSubTypes'][0];
 export type PackageType = TSrkGrowPackagesSchema['packageTypes'][0];
 export type PackageDetails = TSrkGrowPackagesSchema;
 
-export type UserData = TGetGrowSocialMediaEnrollementById['userData'] & {
+export type UserData = TGetGrowSocialMediaEnrollmentById['userData'] & {
   _id: string;
 };
 
@@ -66,6 +67,7 @@ export interface UserDetails {
   gender?: string;
   promoCode?: string;
   kyc?: string[];
+  userType: 'affiliate' | 'package';
 }
 
 export interface CheckoutUserDetails extends Omit<UserDetails, 'phone'> {

@@ -9,8 +9,8 @@ export const UserDashboardPage = () => {
   const { user, setUser, logout } = useGrowAuthStore();
 
   const { data: profileData } = api.grow.getSrkGrowProfile.useQuery(
-    ['growProfile', user?._id || ''],
-    { params: { id: user?._id || '' } },
+    ['growProfile', user?._id],
+    (user?._id ? { params: { userId: user._id } } : ({} as any)),
     {
       enabled: !!user?._id,
       refetchOnWindowFocus: true,
@@ -20,18 +20,18 @@ export const UserDashboardPage = () => {
 
   useEffect(() => {
     if (profileData?.status === 200) {
-      const updatedUser = profileData.body.result;
+      const updatedUser = profileData.body.userDetails;
+      const payment = profileData.body.enrollmentData?.enrollmentPaymentDetails;
       setUser({
         ...user!,
         status: updatedUser.status as any,
-        rejectionReason: updatedUser.rejectionReason,
+        rejectionReason: payment?.rejectionReason ?? null,
         kycURL: updatedUser.kycURL,
         phone: updatedUser.phone,
         country: updatedUser.country,
-        createdAt: updatedUser.createdAt,
-        transactionId: updatedUser.transactionId,
-        paymentURL: updatedUser.paymentURL,
-        paymentMethod: updatedUser.paymentMethod as any,
+        transactionId: payment?.transactionId,
+        paymentURL: payment?.paymentUrl,
+        paymentMethod: payment?.paymentMethod as any,
       });
     }
   }, [profileData, setUser]);

@@ -1,21 +1,11 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
+import { getSrkGrowProfileResponseSchema } from '@srk/shared/contracts';
+import { z } from 'zod';
 
-export interface GrowUser {
-  _id: string;
-  email: string;
-  fullName: string;
-  status: 'verificationPending' | 'portalActivated' | 'verificationRejected';
-  kycURL?: string[]; // Multiple docs
-  rejectionReason?: string;
-  phone?: string;
-  country?: string;
-  createdAt?: string | Date;
-  transactionId?: string;
-  paymentProofUrl?: string;
-  paymentURL?: string;
-  paymentMethod?: 'esewa' | 'khalti' | 'bankTransfer';
-}
+export type GrowUser = z.infer<
+  typeof getSrkGrowProfileResponseSchema
+>['result'];
 
 interface GrowAuthState {
   user: GrowUser | null;

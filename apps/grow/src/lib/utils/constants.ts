@@ -1,11 +1,11 @@
 import { PackageDetails, PackageType, SocialPlatform } from '../types/types';
 
 export const SOCIAL_COLORS: Record<SocialPlatform, string> = {
-  youtube: '#FF0000',
-  facebook: '#1877F2',
-  instagram: '#E4405F',
-  twitter: '#1DA1F2',
-  tiktok: '#000000',
+  YouTube: '#FF0000',
+  Facebook: '#1877F2',
+  Instagram: '#E4405F',
+  Twitter: '#1DA1F2',
+  TikTok: '#000000',
 };
 
 export const PACKAGES_DATA: Record<PackageType, PackageDetails> = {

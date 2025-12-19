@@ -35,13 +35,23 @@ export const getSrkGrowProfile: AppRouteImplementationOrOptions<
       .findOne({
         growSocialMediaPackageUserId: packageUser._id,
       })
-      .populate<GrowProfileResponsePopulated["growSocialMediaPackageEnrollment"]>({
-        path: "growSocialMediaPackageId",
-        select: "name amount",
-      });
+      .populate<GrowProfileResponsePopulated["growSocialMediaPackageEnrollment"]>([
+        {
+          path: "growSocialMediaPackageId",
+          select: "name amount",
+        },
+        {
+          path: "growSocialMediaPackageTypeId",
+          select: "name",
+        },
+        {
+          path: "growSocialMediaPackageSubTypeId",
+          select: "name noOfLikes noOfVideos noOfFollowers",
+        },
+      ]);
 
     const packagePayment = packageEnrollment ? await growSocialMediaPackagePaymentModel.findOne({
-      growPackageenrollmentId: packageEnrollment._id,
+      growPackageEnrollmentId: packageEnrollment._id,
     })
       : null;
 
@@ -85,6 +95,16 @@ export const getSrkGrowProfile: AppRouteImplementationOrOptions<
               name: packageEnrollment.growSocialMediaPackageId.name,
               amount: packageEnrollment.growSocialMediaPackageId.amount,
               socialMediaPlatform: packageEnrollment.socialMediaPlatform,
+              packageType: {
+                name: packageEnrollment.growSocialMediaPackageTypeId.name,
+
+                packageSubType: {
+                  name: packageEnrollment.growSocialMediaPackageSubTypeId.name,
+                  noOfLikes: packageEnrollment.growSocialMediaPackageSubTypeId.noOfLikes,
+                  noOfVideos: packageEnrollment.growSocialMediaPackageSubTypeId.noOfVideos,
+                  noOfFollowers: packageEnrollment.growSocialMediaPackageSubTypeId.noOfFollowers,
+                },
+              },
             },
 
             engagementPostURLs: engagementPosts?.postURLs ?? [],

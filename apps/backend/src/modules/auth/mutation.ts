@@ -742,6 +742,7 @@ const approvePaymentDetails: AppRouteImplementationOrOptions<
       },
     };
   } catch (error) {
+    console.log(`Error in approvePaymentDetails:`, error);
     return {
       status: 500,
       body: { success: false, message: 'Internal server error' },

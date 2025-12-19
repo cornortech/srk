@@ -81,6 +81,19 @@ export interface GrowProfileResponsePopulated {
       amount: number;
     };
 
+    growSocialMediaPackageTypeId: {
+      _id: Types.ObjectId;
+      name: string;
+    };
+
+    growSocialMediaPackageSubTypeId: {
+      _id: Types.ObjectId;
+      name: string;
+      noOfLikes?: number;
+      noOfVideos?: number;
+      noOfFollowers?: number;
+    };
+
     payment?: {
       _id: Types.ObjectId;
       paymentURL: string;

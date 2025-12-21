@@ -33,6 +33,7 @@ export const UserDashboardPage = () => {
         paymentURL: payment?.paymentUrl,
         paymentMethod: payment?.paymentMethod as any,
         enrollmentData: profileData.body.enrollmentData,
+        createdAt: updatedUser.createdAt,
       });
     }
   }, [profileData, setUser]);

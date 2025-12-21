@@ -51,6 +51,7 @@ export const LoginPage = () => {
         referredBy: userProfile.referredBy ?? null,
         srkUniversityId: userProfile.srkUniversityId,
         profileLinkURL: userProfile.profileLinkURL,
+        createdAt: userProfile.createdAt,
         rejectionReason: payment?.rejectionReason ?? null,
         phone: userProfile.phone,
         country: userProfile.country,
@@ -91,6 +92,7 @@ export const LoginPage = () => {
           kycURL: [],
           userType: ((loginUser as any).userType as any) || 'package',
           referredBy: null,
+          createdAt: (loginUser as any).createdAt,
         });
 
         // Navigate immediately if redirectionUrl exists

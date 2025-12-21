@@ -113,38 +113,40 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ user }) => {
                       </p>
                     </div>
                   ))
-                : user.kycURL?.map((url, index) => (
-                    <div
-                      key={index}
-                      className="p-4 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-between"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-[#b68938]/10 flex items-center justify-center text-[#b68938]">
-                          <CheckCircle size={20} />
+                : (Array.isArray(user.kycURL) ? user.kycURL : [user.kycURL])
+                    .filter((url): url is string => !!url)
+                    .map((url, index) => (
+                      <div
+                        key={index}
+                        className="p-4 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-between"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-lg bg-[#b68938]/10 flex items-center justify-center text-[#b68938]">
+                            <CheckCircle size={20} />
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-white">
+                              Document {index + 1}
+                            </p>
+                            <a
+                              href={url}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="text-xs text-gray-400 hover:text-[#b68938] transition-colors"
+                            >
+                              Click to view
+                            </a>
+                          </div>
                         </div>
-                        <div>
-                          <p className="text-sm font-medium text-white">
-                            Document {index + 1}
-                          </p>
-                          <a
-                            href={url}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="text-xs text-gray-400 hover:text-[#b68938] transition-colors"
-                          >
-                            Click to view
-                          </a>
+                        <div className="text-right">
+                          <span className="px-2 py-1 rounded-full text-[10px] font-bold bg-green-500/10 text-green-400 uppercase">
+                            {user.status === 'portalActivated'
+                              ? 'Verified'
+                              : 'Attached'}
+                          </span>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <span className="px-2 py-1 rounded-full text-[10px] font-bold bg-green-500/10 text-green-400 uppercase">
-                          {user.status === 'portalActivated'
-                            ? 'Verified'
-                            : 'Attached'}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
+                    ))}
             </div>
           </div>
         )}

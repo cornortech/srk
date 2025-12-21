@@ -28,7 +28,10 @@ export type UserData = Omit<
 > & {
   _id: string;
   kycURL?: string[] | string;
+  kycDocuments?: KYCDocument[];
   enrollmentData?: any;
+  createdAt?: string;
+  phone?: string;
 };
 
 export interface kycSchema {
@@ -53,6 +56,7 @@ export interface KYCDocument {
   name: string;
   status: KYCStatus;
   submittedAt: string;
+  url?: string;
 }
 
 export interface UserDetails {

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Shield, Upload, X, CheckCircle } from 'lucide-react';
+import { Shield, Upload, X, CheckCircle, Eye, EyeOff } from 'lucide-react';
 import {
   EngagementType,
   PackageDetails,
@@ -59,6 +59,8 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
   isUploadingKYC,
 }) => {
   const [termsAccepted, setTermsAccepted] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const {
     register,
     formState: { errors },
@@ -213,17 +215,26 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
               <label className="block text-sm font-bold text-gray-400 mb-2 uppercase tracking-widest">
                 Password *
               </label>
-              <input
-                {...register('userData.password')}
-                type="password"
-                required
-                className={`w-full px-4 py-3 rounded-xl bg-white/5 border ${
-                  errors.userData?.password
-                    ? 'border-red-500'
-                    : 'border-white/10'
-                } text-white placeholder-gray-600 focus:outline-none focus:border-[#b68938] focus:ring-1 focus:ring-[#b68938] transition-all`}
-                placeholder="Create a strong password"
-              />
+              <div className="relative">
+                <input
+                  {...register('userData.password')}
+                  type={showPassword ? 'text' : 'password'}
+                  required
+                  className={`w-full px-4 py-3 rounded-xl bg-white/5 border ${
+                    errors.userData?.password
+                      ? 'border-red-500'
+                      : 'border-white/10'
+                  } text-white placeholder-gray-600 focus:outline-none focus:border-[#b68938] focus:ring-1 focus:ring-[#b68938] transition-all pr-12`}
+                  placeholder="Create a strong password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+                >
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
               {errors.userData?.password && (
                 <p className="mt-1 text-xs text-red-500">
                   {errors.userData.password.message}
@@ -235,14 +246,27 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
               <label className="block text-sm font-bold text-gray-400 mb-2 uppercase tracking-widest">
                 Confirm Password *
               </label>
-              <input
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-                className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-600 focus:outline-none focus:border-[#b68938] focus:ring-1 focus:ring-[#b68938] transition-all"
-                placeholder="Confirm your password"
-              />
+              <div className="relative">
+                <input
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                  className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-600 focus:outline-none focus:border-[#b68938] focus:ring-1 focus:ring-[#b68938] transition-all pr-12"
+                  placeholder="Confirm your password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+                >
+                  {showConfirmPassword ? (
+                    <EyeOff size={20} />
+                  ) : (
+                    <Eye size={20} />
+                  )}
+                </button>
+              </div>
             </div>
 
             <div>

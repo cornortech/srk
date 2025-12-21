@@ -138,12 +138,22 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
     }
   );
 
+  const watchedPromoCode = watch('userData.usedPromoCode');
+
+  React.useEffect(() => {
+    if (!watchedPromoCode || watchedPromoCode.trim() === '') {
+      setPromoError(null);
+      setPromoSuccessMessage(null);
+      setDiscountDetails(null);
+    }
+  }, [watchedPromoCode]);
+
   const handleValidatePromoCode = () => {
     const promoCode = watch('userData.usedPromoCode');
-    if (!promoCode) return;
+    if (!promoCode || !promoCode.trim()) return;
     validatePromo.mutate({
       body: {
-        promoCode,
+        promoCode: promoCode.trim(),
         growSocialMediaPackageId: selectedPackage._id,
       },
     });
@@ -262,7 +272,7 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
       try {
         const result = await validatePromo.mutateAsync({
           body: {
-            promoCode,
+            promoCode: promoCode.trim(),
             growSocialMediaPackageId: selectedPackage._id,
           },
         });
@@ -336,7 +346,10 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
           paymentData: {
             paymentURL: paymentData.paymentProofUrl,
             transactionId: paymentData.transactionId,
-            paymentMethod: paymentData.paymentMethod as any,
+            paymentMethod:
+              paymentData.paymentMethod === 'bank'
+                ? 'bankTransfer'
+                : (paymentData.paymentMethod as any),
           },
           postEngagement:
             engagementType === 'reach'

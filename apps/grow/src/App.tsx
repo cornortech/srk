@@ -20,10 +20,6 @@ const router = createBrowserRouter([
     element: <GrowLandingPage />,
   },
   {
-    path: '/landing/:section',
-    element: <GrowLandingPage />,
-  },
-  {
     path: '/package-flow',
     element: <PackageFlowPage />,
   },

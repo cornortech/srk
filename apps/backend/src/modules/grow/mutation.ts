@@ -88,13 +88,13 @@ const createGrowSocialMediaEnrollment: AppRouteImplementationOrOptions<
 
     if (
       !enrollmentData?.profileLinkURL?.length &&
-      postURLs.length !== packageSubTypeExists.noOfVideos
+      postURLs.length > packageSubTypeExists.noOfVideos
     ) {
       return {
         status: 400,
         body: {
           success: false,
-          message: `Number of video URLs provided (${postURLs.length}) doesnot match the required number (${packageSubTypeExists.noOfVideos})`,
+          message: `You can provide a maximum of ${packageSubTypeExists.noOfVideos} video URLs, but received ${postURLs.length}.`,
         },
       };
     }
@@ -104,6 +104,16 @@ const createGrowSocialMediaEnrollment: AppRouteImplementationOrOptions<
     const existingUser = await growSocialMediaPackageUserModel.findOne({
       email: userData.email,
     });
+
+    if (!growSocialMediaRefferalUser) {
+      return {
+        status: 400,
+        body: {
+          success: false,
+          message: 'Invalid promo code',
+        },
+      };
+    }
 
     if (existingUser) {
       const activeEnrollment =

@@ -136,30 +136,35 @@ export const getSrkGrowProfileResponseSchema = z.object({
         name: z.string(),
       })
       .nullable(),
+    createdAt: z.string(),
   }),
-  enrollmentData: z.object({
-    enrollmentPackageDetails: z.object({
-      name: z.string(),
-      amount: z.number(),
-      socialMediaPlatform: z.string(),
-      packageType: z.object({
+  enrollmentData: z
+    .object({
+      enrollmentPackageDetails: z.object({
         name: z.string(),
-        packageSubType: z.object({
+        amount: z.number(),
+        socialMediaPlatform: z.string(),
+        packageType: z.object({
           name: z.string(),
-          noOfLikes: z.number().optional(),
-          noOfVideos: z.number().optional(),
-          noOfFollowers: z.number().optional(),
+          packageSubType: z.object({
+            name: z.string(),
+            noOfLikes: z.number().optional(),
+            noOfVideos: z.number().optional(),
+            noOfFollowers: z.number().optional(),
+          }),
         }),
       }),
-    }),
-    engagementPostURLs: z.array(z.string().url()).optional(),
-    enrollmentPaymentDetails: z.object({
-      paymentUrl: z.string(),
-      transactionId: z.string(),
-      paymentMethod: z.string().optional(),
-      rejectionReason: z.string().optional(),
-    }).nullable(),
-  }).nullable(),
+      engagementPostURLs: z.array(z.string().url()).optional(),
+      enrollmentPaymentDetails: z
+        .object({
+          paymentUrl: z.string(),
+          transactionId: z.string(),
+          paymentMethod: z.string().optional(),
+          rejectionReason: z.string().optional(),
+        })
+        .nullable(),
+    })
+    .nullable(),
 });
 
 export type TGetSrkGrowProfileResponse = z.infer<

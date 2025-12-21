@@ -126,6 +126,7 @@ export const getSrkGrowProfileResponseSchema = z.object({
     referredBy: z.object({
       name: z.string(),
     }).nullable(),
+    createdAt: z.string(),
   }),
   enrollmentData: z.object({
     enrollmentPackageDetails: z.object({
@@ -162,3 +163,7 @@ export const resubmitGrowVerificationSchema = z.object({
 });
 
 export type TResubmitGrowVerification = z.infer<typeof resubmitGrowVerificationSchema>;
+
+export const createGrowSocialMediaTaks = z.object({
+  
+})

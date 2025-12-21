@@ -87,6 +87,7 @@ export const getSrkGrowProfile: AppRouteImplementationOrOptions<
               name: packageUser.referredBy.fullName,
             }
             : null,
+          createdAt: packageUser.createdAt.toISOString(),
         },
 
         enrollmentData: packageEnrollment

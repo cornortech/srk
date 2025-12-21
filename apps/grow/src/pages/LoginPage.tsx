@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LoginForm } from '../components/user-components/auth/LoginForm';
 import { api } from '../lib/api';
 import useGrowAuthStore, { GrowUser } from '../store/useGrowAuthStore';
-import { LoginSrkGrowSchema } from '@srk/shared/contracts';
+import { LoginSchema } from '@srk/shared/contracts';
 import { z } from 'zod';
+import { LoginForm } from '../features/auth/LoginForm';
 
 export const LoginPage = () => {
   const navigate = useNavigate();
@@ -117,7 +117,7 @@ export const LoginPage = () => {
     setLoginError(null); // Clear previous errors
 
     try {
-      LoginSrkGrowSchema.parse(formData);
+      LoginSchema.parse(formData);
     } catch (err) {
       if (err instanceof z.ZodError) {
         setLoginError(err.errors[0]?.message || 'Invalid input');

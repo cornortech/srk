@@ -2,7 +2,6 @@ import React, { useState, useRef } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import {
   EngagementType,
-  PackageDetails,
   SocialPlatform,
   UserDetails,
 } from '../../../lib/types/types';
@@ -15,14 +14,16 @@ import { useSRKFileUpload } from '@srk/shared/hooks';
 import {
   createGrowSocialMediaEnrollmentSchema,
   TCreateGrowSocialMediaEnrollment,
+  TSrkGrowPackagesSchema,
 } from '@srk/shared/contracts';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useToast } from '../../../lib/contexts/ToastContext';
+import { formatRupees } from '../../../lib/utils/formatters';
 
 interface PackageSelectionFlowProps {
-  selectedPackage: PackageDetails;
+  selectedPackage: TSrkGrowPackagesSchema;
   onComplete: (userDetails: UserDetails) => void;
   onBack: () => void;
 }
@@ -213,7 +214,7 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
       return;
     }
 
-    // New validation for Profile Link or Post URLs
+    // validation for Profile Link or Post URLs
     if (engagementType === 'follow') {
       // Filter out empty strings before validation
       const profileLinks = watch('enrollmentData.profileLinkURL') || [];
@@ -414,7 +415,9 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
           </button>
           <h1 className="text-3xl md:text-4xl font-bold text-white">
             {selectedPackage.name} Package -{' '}
-            <span className="text-[#b68938]">{selectedPackage.amount}</span>
+            <span className="text-[#b68938]">
+              {formatRupees(selectedPackage.amount)}
+            </span>
           </h1>
         </div>
 

@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Users, Video } from 'lucide-react';
 import { PackageDetails } from '../types/types';
+import { formatRupees } from '../utils/formatters';
 
 interface SelectionOptionProps {
   option: { videos?: number; likesPerVideo?: number; followers?: number };
@@ -90,7 +91,7 @@ const SelectOption: React.FC<SelectionOptionProps> = ({
               isFollow ? 'text-emerald-400' : 'text-blue-400'
             }`}
           >
-            {packageData.amount}
+            {formatRupees(packageData.amount)}
           </div>
         </div>
       </div>

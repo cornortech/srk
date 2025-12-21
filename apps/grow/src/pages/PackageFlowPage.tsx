@@ -1,11 +1,12 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import { PackageSelectionFlow } from '../features/package-flow/components/PackageSelectionFlow';
-import { PackageDetails, UserDetails } from '../lib/types/types';
+import { UserDetails } from '../lib/types/types';
+import { TSrkGrowPackagesSchema } from '@srk/shared/contracts';
 
 export const PackageFlowPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const selectedPackage = location.state?.package as PackageDetails;
+  const selectedPackage = location.state?.package as TSrkGrowPackagesSchema;
 
   if (!selectedPackage) {
     setTimeout(() => navigate('/'), 0);

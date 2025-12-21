@@ -22,8 +22,13 @@ export type PackageSubType =
 export type PackageType = TSrkGrowPackagesSchema['packageTypes'][0];
 export type PackageDetails = TSrkGrowPackagesSchema;
 
-export type UserData = TGetGrowSocialMediaEnrollmentById['userData'] & {
+export type UserData = Omit<
+  TGetGrowSocialMediaEnrollmentById['userData'],
+  'kycURL'
+> & {
   _id: string;
+  kycURL?: string[] | string;
+  enrollmentData?: any;
 };
 
 export interface kycSchema {

@@ -10,7 +10,7 @@ export const UserDashboardPage = () => {
 
   const { data: profileData } = api.grow.getSrkGrowProfile.useQuery(
     ['growProfile', user?._id],
-    (user?._id ? { params: { userId: user._id } } : ({} as any)),
+    user?._id ? { params: { userId: user._id } } : ({} as any),
     {
       enabled: !!user?._id,
       refetchOnWindowFocus: true,
@@ -32,6 +32,7 @@ export const UserDashboardPage = () => {
         transactionId: payment?.transactionId,
         paymentURL: payment?.paymentUrl,
         paymentMethod: payment?.paymentMethod as any,
+        enrollmentData: profileData.body.enrollmentData,
       });
     }
   }, [profileData, setUser]);

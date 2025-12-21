@@ -4,10 +4,10 @@ import { Mail, Lock, Loader2, Eye, EyeOff, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { LoginSrkGrowSchema } from '@srk/shared/contracts';
+import { LoginSchema } from '@srk/shared/contracts';
 import { z } from 'zod';
 
-type LoginFormData = z.infer<typeof LoginSrkGrowSchema>;
+type LoginFormData = z.infer<typeof LoginSchema>;
 
 interface LoginFormProps {
   onLoginSuccess?: (email: string) => void;
@@ -31,7 +31,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
     handleSubmit,
     formState: { errors },
   } = useForm<LoginFormData>({
-    resolver: zodResolver(LoginSrkGrowSchema),
+    resolver: zodResolver(LoginSchema),
     defaultValues: {
       email: '',
       password: '',

@@ -17,4 +17,5 @@ export const growRouter = s.router(growContract, {
     growMutationHandler.rejectSocialGrowEnrollmentRequest,
   getSrkGrowProfile: growQueryHandler.getSrkGrowProfile,
   resubmitGrowVerification: growMutationHandler.resubmitGrowVerification,
+  createGrowSocialMediaTasks: growMutationHandler.createGrowSocialMediaTasks,
 });

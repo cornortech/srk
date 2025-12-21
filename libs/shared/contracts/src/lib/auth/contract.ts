@@ -1,10 +1,5 @@
 import { initContract } from '@ts-rest/core';
-import {
-  LoginSchema,
-  LoginSrkGrowSchema,
-  LoginSuccessResponse,
-  RegisterSchema,
-} from './schema';
+import { LoginSchema, LoginSuccessResponse, RegisterSchema } from './schema';
 import { ErrorSchema, SuccessSchema } from '../common';
 import { z } from 'zod';
 const c = initContract();
@@ -97,7 +92,7 @@ export const authContract = c.router({
   loginSrkGrow: {
     method: 'POST',
     path: `/auth/login-srk-grow`,
-    body: LoginSrkGrowSchema,
+    body: LoginSchema,
     responses: {
       200: LoginSuccessResponse,
       403: SuccessSchema,

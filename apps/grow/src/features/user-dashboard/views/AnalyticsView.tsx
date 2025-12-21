@@ -13,6 +13,7 @@ import {
   Music2,
 } from 'lucide-react';
 import { PlatformData } from '../../../lib/types/types';
+import useGrowAuthStore from '../../../store/useGrowAuthStore';
 
 const analyticsData: {
   platforms: PlatformData[];
@@ -74,6 +75,46 @@ const analyticsData: {
 };
 
 export const AnalyticsView: React.FC = () => {
+  const { user } = useGrowAuthStore();
+  const enrollmentData = user?.enrollmentData;
+  const enrollmentPackageDetails = enrollmentData?.enrollmentPackageDetails;
+  const enrolledPlatform = enrollmentPackageDetails?.socialMediaPlatform;
+
+  const filteredPlatforms = analyticsData.platforms
+    .filter((platform) =>
+      enrolledPlatform
+        ? platform.name.toLowerCase() === enrolledPlatform.toLowerCase()
+        : true
+    )
+    .map((platform) => {
+      if (
+        enrolledPlatform &&
+        platform.name.toLowerCase() === enrolledPlatform.toLowerCase() &&
+        enrollmentPackageDetails
+      ) {
+        const subType = enrollmentPackageDetails.packageType.packageSubType;
+
+        const target =
+          subType.noOfFollowers ||
+          subType.noOfLikes ||
+          subType.noOfVideos ||
+          platform.tasks;
+
+        const completed = 0;
+
+        const progress =
+          target > 0 ? Math.round((completed / target) * 100) : 0;
+
+        return {
+          ...platform,
+          tasks: target,
+          completed,
+          progress,
+        };
+      }
+      return platform;
+    });
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -155,46 +196,54 @@ export const AnalyticsView: React.FC = () => {
             Task Completion by Platform
           </h3>
           <div className="space-y-6">
-            {analyticsData.platforms.map((platform, i) => (
-              <motion.div
-                key={platform.name}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: i * 0.1 }}
-                className="relative group"
-              >
-                <div className="flex justify-between items-center mb-2">
-                  <div className="flex items-center gap-3">
-                    <div
-                      className={`p-2 rounded-lg bg-white/5`}
-                      style={{ color: platform.color }}
-                    >
-                      <platform.icon size={20} />
+            {filteredPlatforms.length > 0 ? (
+              filteredPlatforms.map((platform, i) => (
+                <motion.div
+                  key={platform.name}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: i * 0.1 }}
+                  className="relative group"
+                >
+                  <div className="flex justify-between items-center mb-2">
+                    <div className="flex items-center gap-3">
+                      <div
+                        className={`p-2 rounded-lg bg-white/5`}
+                        style={{ color: platform.color }}
+                      >
+                        <platform.icon size={20} />
+                      </div>
+                      <span className="font-medium text-lg">
+                        {platform.name}
+                      </span>
                     </div>
-                    <span className="font-medium text-lg">{platform.name}</span>
+                    <span className="text-sm font-bold text-gray-300">
+                      {platform.completed} / {platform.tasks} Tasks
+                    </span>
                   </div>
-                  <span className="text-sm font-bold text-gray-300">
-                    {platform.completed} / {platform.tasks} Tasks
-                  </span>
-                </div>
-                <div className="h-3 bg-white/5 rounded-full overflow-hidden">
-                  <motion.div
-                    initial={{ width: 0 }}
-                    animate={{ width: `${platform.progress}%` }}
-                    transition={{ duration: 1.5, ease: 'easeOut' }}
-                    className="h-full rounded-full relative"
-                    style={{ backgroundColor: platform.color }}
-                  >
-                    <div className="absolute inset-0 bg-white/20 animate-pulse" />
-                  </motion.div>
-                </div>
-                <div className="text-right mt-1">
-                  <span className="text-xs text-gray-500">
-                    {platform.progress}% Completed
-                  </span>
-                </div>
-              </motion.div>
-            ))}
+                  <div className="h-3 bg-white/5 rounded-full overflow-hidden">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${platform.progress}%` }}
+                      transition={{ duration: 1.5, ease: 'easeOut' }}
+                      className="h-full rounded-full relative"
+                      style={{ backgroundColor: platform.color }}
+                    >
+                      <div className="absolute inset-0 bg-white/20 animate-pulse" />
+                    </motion.div>
+                  </div>
+                  <div className="text-right mt-1">
+                    <span className="text-xs text-gray-500">
+                      {platform.progress}% Completed
+                    </span>
+                  </div>
+                </motion.div>
+              ))
+            ) : (
+              <div className="text-gray-400">
+                No active platform enrollment found.
+              </div>
+            )}
           </div>
         </div>
 

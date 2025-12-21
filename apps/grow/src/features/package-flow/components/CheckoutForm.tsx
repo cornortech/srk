@@ -8,6 +8,7 @@ import {
 } from '../../../lib/types/types';
 import { UseFormReturn } from 'react-hook-form';
 import { TCreateGrowSocialMediaEnrollment } from '@srk/shared/contracts';
+import { formatRupees } from '../../../lib/utils/formatters';
 
 interface CheckoutFormProps {
   selectedPackage: PackageDetails;
@@ -128,15 +129,15 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
                 {discountDetails ? (
                   <>
                     <span className="block text-sm text-gray-500 line-through">
-                      {selectedPackage.amount}
+                      {formatRupees(selectedPackage.amount)}
                     </span>
                     <span className="text-2xl font-bold text-[#b68938]">
-                      {discountDetails.finalAmountAfterDiscount}
+                      {formatRupees(discountDetails.finalAmountAfterDiscount)}
                     </span>
                   </>
                 ) : (
                   <span className="text-2xl font-bold text-[#b68938]">
-                    {selectedPackage.amount}
+                    {formatRupees(selectedPackage.amount)}
                   </span>
                 )}
               </div>
@@ -144,7 +145,7 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
             {selectedPackage.amountBeforeDiscount && (
               <div className="mt-4 px-4 py-2 rounded-lg bg-gradient-to-r from-[#b68938]/20 to-[#e1ba73]/20 border border-[#b68938]/30 text-center">
                 <span className="text-[#e1ba73] font-bold text-sm">
-                  Save {selectedPackage.amountBeforeDiscount}
+                  Save {formatRupees(selectedPackage.amountBeforeDiscount)}
                 </span>
               </div>
             )}

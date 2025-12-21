@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Users, Video, CheckCircle } from 'lucide-react';
 import { EngagementType, PackageDetails } from '../types/types';
+import { formatRupees } from '../utils/formatters';
 
 interface EngagementOptionProps {
   type: EngagementType;
@@ -86,7 +87,7 @@ const EngagementOption: React.FC<EngagementOptionProps> = ({
         </div>
         <div className="text-center pt-4 border-t border-white/10">
           <div className="text-2xl font-bold text-[#b68938] mb-1">
-            {packageData.amount}
+            {formatRupees(packageData.amount)}
           </div>
           <p className="text-sm text-gray-400">{packageData.name} Package</p>
         </div>

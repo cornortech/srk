@@ -11,6 +11,9 @@ export type GrowUser = z.infer<
   paymentMethod?: string | null;
   rejectionReason?: string | null;
   createdAt?: string | null;
+  enrollmentData?: z.infer<
+    typeof getSrkGrowProfileResponseSchema
+  >['enrollmentData'];
 };
 
 interface GrowAuthState {

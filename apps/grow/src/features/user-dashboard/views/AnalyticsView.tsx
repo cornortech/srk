@@ -11,6 +11,10 @@ import {
   Youtube,
   Twitter,
   Music2,
+  Link as LinkIcon,
+  ExternalLink,
+  ThumbsUp,
+  Heart,
 } from 'lucide-react';
 import { PlatformData } from '../../../lib/types/types';
 import useGrowAuthStore from '../../../store/useGrowAuthStore';
@@ -29,41 +33,41 @@ const analyticsData: {
       name: 'Facebook',
       icon: Facebook,
       color: '#1877F2',
-      progress: 85,
-      tasks: 120,
-      completed: 102,
+      progress: 0,
+      tasks: 0,
+      completed: 0,
     },
     {
       name: 'Instagram',
       icon: Instagram,
       color: '#E4405F',
-      progress: 62,
-      tasks: 200,
-      completed: 124,
+      progress: 0,
+      tasks: 0,
+      completed: 0,
     },
     {
       name: 'YouTube',
       icon: Youtube,
       color: '#FF0000',
-      progress: 45,
-      tasks: 50,
-      completed: 22,
+      progress: 0,
+      tasks: 0,
+      completed: 0,
     },
     {
       name: 'Twitter',
       icon: Twitter,
       color: '#1DA1F2',
-      progress: 90,
-      tasks: 80,
-      completed: 72,
+      progress: 0,
+      tasks: 0,
+      completed: 0,
     },
     {
       name: 'TikTok',
       icon: Music2,
       color: '#000000',
-      progress: 30,
-      tasks: 150,
-      completed: 45,
+      progress: 0,
+      tasks: 0,
+      completed: 0,
     },
   ],
   stats: {
@@ -77,8 +81,11 @@ const analyticsData: {
 export const AnalyticsView: React.FC = () => {
   const { user } = useGrowAuthStore();
   const enrollmentData = user?.enrollmentData;
+  const enrollmentPostUrls = user?.enrollmentData?.engagementPostURLs;
   const enrollmentPackageDetails = enrollmentData?.enrollmentPackageDetails;
   const enrolledPlatform = enrollmentPackageDetails?.socialMediaPlatform;
+  const enrolledPackageSubType =
+    enrollmentData?.enrollmentPackageDetails?.packageType?.packageSubType;
 
   const filteredPlatforms = analyticsData.platforms
     .filter((platform) =>
@@ -218,7 +225,11 @@ export const AnalyticsView: React.FC = () => {
                       </span>
                     </div>
                     <span className="text-sm font-bold text-gray-300">
-                      {platform.completed} / {platform.tasks} Tasks
+                      {platform.completed} /{' '}
+                      {enrolledPackageSubType?.noOfFollowers
+                        ? enrolledPackageSubType?.noOfFollowers
+                        : enrolledPackageSubType?.noOfVideos}{' '}
+                      Tasks
                     </span>
                   </div>
                   <div className="h-3 bg-white/5 rounded-full overflow-hidden">
@@ -237,6 +248,99 @@ export const AnalyticsView: React.FC = () => {
                       {platform.progress}% Completed
                     </span>
                   </div>
+                  {/* Post Performance Section - Only for Reach/Engagement packages with Post URLs */}
+                  {enrollmentPostUrls && enrollmentPostUrls.length > 0 && (
+                    <div className="bg-gray-900/5 backdrop-blur-md border border-white/10 rounded-3xl p-8">
+                      <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+                        <Activity size={20} className="text-[#b68938]" />
+                        Post Performance Analytics
+                      </h3>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {enrollmentPostUrls.map(
+                          (url: string, index: number) => {
+                            const target =
+                              enrolledPackageSubType?.noOfLikes || 0;
+                            const completed = 0;
+                            const progress =
+                              target > 0
+                                ? Math.round((completed / target) * 100)
+                                : 0;
+
+                            return (
+                              <motion.div
+                                key={index}
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: index * 0.1 }}
+                                className="bg-white/5 rounded-xl p-4 border border-white/5 hover:border-[#b68938]/30 transition-all group"
+                              >
+                                <div className="flex items-start justify-between mb-3">
+                                  <div className="p-2 bg-[#b68938]/10 text-[#e1ba73] rounded-lg">
+                                    <LinkIcon size={16} />
+                                  </div>
+                                  <a
+                                    href={url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-gray-400 hover:text-white transition-colors"
+                                  >
+                                    <ExternalLink size={16} />
+                                  </a>
+                                </div>
+
+                                <div className="mb-4">
+                                  <p
+                                    className="text-xs text-gray-500 mb-1 truncate block w-full font-mono"
+                                    title={url}
+                                  >
+                                    {url}
+                                  </p>
+                                </div>
+
+                                <div className="flex items-center justify-between mb-2">
+                                  <span className="text-sm text-gray-400 flex items-center gap-1">
+                                    {enrollmentPackageDetails?.socialMediaPlatform?.toLowerCase() ===
+                                      'instagram' ||
+                                    'tiktok' ||
+                                    'twitter' ? (
+                                      <Heart size={14} />
+                                    ) : (
+                                      <ThumbsUp size={14} />
+                                    )}
+                                    Likes Target
+                                  </span>
+                                  <span className="text-sm font-bold text-white">
+                                    {completed} / {target}
+                                  </span>
+                                </div>
+
+                                {/* Progress Bar */}
+                                <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+                                  <motion.div
+                                    initial={{ width: 0 }}
+                                    animate={{ width: `${progress}%` }}
+                                    transition={{
+                                      duration: 1.5,
+                                      ease: 'easeOut',
+                                    }}
+                                    className="h-full rounded-full relative bg-[#b68938]"
+                                  >
+                                    <div className="absolute inset-0 bg-white/20 animate-pulse" />
+                                  </motion.div>
+                                </div>
+                                <div className="text-right mt-1">
+                                  <span className="text-[10px] text-gray-500">
+                                    {progress}% Achieved
+                                  </span>
+                                </div>
+                              </motion.div>
+                            );
+                          }
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </motion.div>
               ))
             ) : (

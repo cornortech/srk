@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   MousePointer2,
@@ -15,9 +15,13 @@ import {
   ExternalLink,
   ThumbsUp,
   Heart,
+  Plus,
+  X,
+  Check,
 } from 'lucide-react';
 import { PlatformData } from '../../../lib/types/types';
 import useGrowAuthStore from '../../../store/useGrowAuthStore';
+import { useToast } from '../../../lib/contexts/ToastContext';
 
 const analyticsData: {
   platforms: PlatformData[];
@@ -79,9 +83,41 @@ const analyticsData: {
 };
 
 export const AnalyticsView: React.FC = () => {
-  const { user } = useGrowAuthStore();
+  const { user, setUser } = useGrowAuthStore();
+  const [isAddingLink, setIsAddingLink] = useState(false);
+  const [newLink, setNewLink] = useState('');
+  const { showToast } = useToast();
+
+  const handleAddLink = () => {
+    if (!newLink) return;
+
+    if (!newLink.startsWith('http')) {
+      showToast(
+        'Please enter a valid URL starting with http:// or https://',
+        'error'
+      );
+      return;
+    }
+
+    if (user && user.enrollmentData) {
+      const updatedUser = {
+        ...user,
+        enrollmentData: {
+          ...user.enrollmentData,
+          engagementPostURLs: [
+            ...(user.enrollmentData.engagementPostURLs || []),
+            newLink,
+          ],
+        },
+      };
+
+      setUser(updatedUser);
+      setNewLink('');
+      setIsAddingLink(false);
+    }
+  };
   const enrollmentData = user?.enrollmentData;
-  const enrollmentPostUrls = user?.enrollmentData?.engagementPostURLs;
+  const enrollmentPostUrls = user?.enrollmentData?.engagementPostURLs || [];
   const enrollmentPackageDetails = enrollmentData?.enrollmentPackageDetails;
   const enrolledPlatform = enrollmentPackageDetails?.socialMediaPlatform;
   const enrolledPackageSubType =
@@ -249,7 +285,10 @@ export const AnalyticsView: React.FC = () => {
                     </span>
                   </div>
                   {/* Post Performance Section - Only for Reach/Engagement packages with Post URLs */}
-                  {enrollmentPostUrls && enrollmentPostUrls.length > 0 && (
+                  {(enrollmentPackageDetails?.packageType?.packageSubType
+                    ?.noOfLikes ||
+                    enrollmentPackageDetails?.packageType?.packageSubType
+                      ?.noOfVideos) && (
                     <div className="bg-gray-900/5 backdrop-blur-md border border-white/10 rounded-3xl p-8">
                       <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
                         <Activity size={20} className="text-[#b68938]" />
@@ -300,10 +339,14 @@ export const AnalyticsView: React.FC = () => {
 
                                 <div className="flex items-center justify-between mb-2">
                                   <span className="text-sm text-gray-400 flex items-center gap-1">
-                                    {enrollmentPackageDetails?.socialMediaPlatform?.toLowerCase() ===
-                                      'instagram' ||
-                                    'tiktok' ||
-                                    'twitter' ? (
+                                    {[
+                                      'instagram',
+                                      'tiktok',
+                                      'twitter',
+                                    ].includes(
+                                      enrollmentPackageDetails?.socialMediaPlatform?.toLowerCase() ||
+                                        ''
+                                    ) ? (
                                       <Heart size={14} />
                                     ) : (
                                       <ThumbsUp size={14} />
@@ -338,6 +381,80 @@ export const AnalyticsView: React.FC = () => {
                             );
                           }
                         )}
+
+                        {/* Add Post Link Button or Input Field */}
+                        {enrollmentPackageDetails?.packageType?.packageSubType
+                          ?.noOfVideos &&
+                          enrollmentPostUrls.length <
+                            enrollmentPackageDetails.packageType.packageSubType
+                              .noOfVideos && (
+                            <>
+                              {!isAddingLink ? (
+                                <motion.button
+                                  layout
+                                  initial={{ opacity: 0, scale: 0.9 }}
+                                  animate={{ opacity: 1, scale: 1 }}
+                                  whileHover={{ scale: 1.02 }}
+                                  whileTap={{ scale: 0.98 }}
+                                  onClick={() => setIsAddingLink(true)}
+                                  className="bg-white/5 rounded-xl p-4 border border-dashed border-white/20 hover:border-[#b68938] hover:bg-[#b68938]/5 transition-all group flex flex-col items-center justify-center min-h-[160px] cursor-pointer"
+                                >
+                                  <div className="p-3 bg-white/5 rounded-full mb-3 group-hover:bg-[#b68938] group-hover:text-black transition-colors text-gray-400">
+                                    <Plus size={24} />
+                                  </div>
+                                  <span className="font-bold text-white mb-1">
+                                    Add Post Link
+                                  </span>
+                                  <span className="text-xs text-gray-500">
+                                    {enrollmentPostUrls.length} /{' '}
+                                    {
+                                      enrollmentPackageDetails.packageType
+                                        .packageSubType.noOfVideos
+                                    }
+                                  </span>
+                                </motion.button>
+                              ) : (
+                                <motion.div
+                                  layout
+                                  initial={{ opacity: 0, scale: 0.95 }}
+                                  animate={{ opacity: 1, scale: 1 }}
+                                  className="bg-white/5 rounded-xl p-6 border border-white/20 flex flex-col justify-center min-h-[160px]"
+                                >
+                                  <h4 className="text-sm font-bold text-white mb-3">
+                                    Add New Post Link
+                                  </h4>
+                                  <input
+                                    type="text"
+                                    value={newLink}
+                                    onChange={(e) => setNewLink(e.target.value)}
+                                    placeholder="https://..."
+                                    className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#b68938] mb-3"
+                                    autoFocus
+                                    onKeyDown={(e) => {
+                                      if (e.key === 'Enter') handleAddLink();
+                                      if (e.key === 'Escape')
+                                        setIsAddingLink(false);
+                                    }}
+                                  />
+                                  <div className="flex gap-2 justify-end">
+                                    <button
+                                      onClick={() => setIsAddingLink(false)}
+                                      className="p-2 rounded-lg bg-white/5 text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
+                                    >
+                                      <X size={18} />
+                                    </button>
+                                    <button
+                                      onClick={handleAddLink}
+                                      disabled={!newLink}
+                                      className="p-2 rounded-lg bg-[#b68938] text-black font-bold hover:bg-[#cca04e] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                      <Check size={18} />
+                                    </button>
+                                  </div>
+                                </motion.div>
+                              )}
+                            </>
+                          )}
                       </div>
                     </div>
                   )}

@@ -105,16 +105,6 @@ const createGrowSocialMediaEnrollment: AppRouteImplementationOrOptions<
       email: userData.email,
     });
 
-    if (!growSocialMediaRefferalUser) {
-      return {
-        status: 400,
-        body: {
-          success: false,
-          message: 'Invalid promo code',
-        },
-      };
-    }
-
     if (existingUser) {
       const activeEnrollment =
         await growSocialMediaPackageEnrollmentModel.findOne({

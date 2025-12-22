@@ -467,10 +467,180 @@ const resubmitGrowVerification: AppRouteImplementationOrOptions<
   }
 };
 
+const createGrowSocialMediaTasks: AppRouteImplementationOrOptions<
+  typeof growContract.createGrowSocialMediaTasks
+> = async ({ body }) => {
+  try {
+    const { growSocialMediaPackageEnrollmentId, profileLinkURLs, postURLs } =
+      body;
+
+    const activeEnrollment =
+      await growSocialMediaPackageEnrollmentModel.findById(
+        growSocialMediaPackageEnrollmentId
+      );
+
+    if (!activeEnrollment) {
+      return {
+        status: 404,
+        body: {
+          success: false,
+          message: 'Enrollment not found',
+        },
+      };
+    }
+
+    if (!activeEnrollment.isActive) {
+      return {
+        status: 400,
+        body: {
+          success: false,
+          message: 'Enrollment is not active',
+        },
+      };
+    }
+
+    const subType = await growSocialMediaPackageSubTypeModel.findById(
+      activeEnrollment.growSocialMediaPackageSubTypeId
+    );
+
+    if (!subType) {
+      return {
+        status: 404,
+        body: {
+          success: false,
+          message: 'Package subtype not found',
+        },
+      };
+    }
+
+    if (subType.taskType === 'follow') {
+      if (postURLs.length) {
+        return {
+          status: 400,
+          body: {
+            success: false,
+            message: 'Engagement URLs are not allowed for follow packages',
+          },
+        };
+      }
+
+      const allowedCount = subType.noOfFollowers ?? 0;
+      const existingURLs = activeEnrollment.profileLinkURL ?? [];
+
+      // remove duplicates from incoming
+      const uniqueIncomingUrlRequest = profileLinkURLs.filter(
+        (url) => !existingURLs.includes(url)
+      );
+
+      if (
+        existingURLs.length + uniqueIncomingUrlRequest.length >
+        allowedCount
+      ) {
+        return {
+          status: 400,
+          body: {
+            success: false,
+            message: `You can add only ${allowedCount} profile links for this package`,
+          },
+        };
+      }
+
+      if (uniqueIncomingUrlRequest) {
+        await growSocialMediaPackageEnrollmentModel.findByIdAndUpdate(
+          activeEnrollment._id,
+          {
+            $addToSet: {
+              profileLinkURL: {
+                $each: uniqueIncomingUrlRequest,
+              },
+            },
+          }
+        );
+      }
+    }
+
+    if (subType.taskType === 'engagement') {
+      if (profileLinkURLs.length) {
+        return {
+          status: 400,
+          body: {
+            success: false,
+            message: 'Follow URLs are not allowed for engagement packages',
+          },
+        };
+      }
+
+      const allowedCount = subType.noOfVideos ?? 0;
+
+      const existingEngagement = await growPackageEngagementPostModel.findOne({
+        growSocialMediaPackageEnrollmentId: activeEnrollment._id,
+      });
+
+      const existingURLs = existingEngagement?.postURLs ?? [];
+
+      // remove duplicates from incoming
+      const uniqueIncomingUrlRequest = postURLs.filter(
+        (url) => !existingURLs.includes(url)
+      );
+
+      if (
+        existingURLs.length + uniqueIncomingUrlRequest.length >
+        allowedCount
+      ) {
+        return {
+          status: 400,
+          body: {
+            success: false,
+            message: `You can add only ${allowedCount} post URLs for this package`,
+          },
+        };
+      }
+
+      if (uniqueIncomingUrlRequest.length) {
+        await growPackageEngagementPostModel.findOneAndUpdate(
+          {
+            growSocialMediaPackageEnrollmentId: activeEnrollment._id,
+          },
+          {
+            $addToSet: {
+              postURLs: {
+                $each: uniqueIncomingUrlRequest,
+              },
+            },
+          },
+          {
+            upsert: true,
+          }
+        );
+      }
+    }
+
+    return {
+      status: 201,
+      body: {
+        success: true,
+        message: 'Social media tasks created successfully',
+      },
+    };
+  } catch (error) {
+    console.error(error);
+    return {
+      status: 500,
+      body: {
+        success: false,
+        message: error.message
+          ? `Internal server error: ${error.message}`
+          : 'Internal server error',
+      },
+    };
+  }
+};
+
 export const growMutationHandler = {
   createGrowSocialMediaEnrollment,
   validateGrowUserPromoCode,
   acceptSocialGrowEnrollmentRequest,
   rejectSocialGrowEnrollmentRequest,
   resubmitGrowVerification,
+  createGrowSocialMediaTasks,
 };

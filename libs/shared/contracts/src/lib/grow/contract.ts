@@ -7,6 +7,7 @@ import {
   validateGrowUserPromoCodeResponseSchema,
   validateGrowUserPromoCodeSchema,
   getSrkGrowProfileResponseSchema,
+  createGrowSocialMediaTasksSchema,
 } from './schema';
 import { ErrorSchema, SuccessSchema } from '../common';
 import { z } from 'zod';
@@ -137,5 +138,18 @@ export const growContract = c.router({
       500: ErrorSchema,
     },
     summary: 'Resubmit verification with new KYC and payment details',
+  },
+
+  createGrowSocialMediaTasks: {
+    method: 'POST',
+    path: '/grow/social-media-tasks',
+    body: createGrowSocialMediaTasksSchema,
+    responses: {
+      201: SuccessSchema,
+      400: ErrorSchema,
+      404: ErrorSchema,
+      500: ErrorSchema,
+    },
+    summary: 'Create grow social media tasks urls'
   },
 });

@@ -181,3 +181,13 @@ export const resubmitGrowVerificationSchema = z.object({
 export type TResubmitGrowVerification = z.infer<
   typeof resubmitGrowVerificationSchema
 >;
+
+export const createGrowSocialMediaTasksSchema = z.object({
+  growSocialMediaPackageEnrollmentId: z.string(),
+  profileLinkURLs: z.array(z.string().url()).optional(),
+  postURLs: z.array(z.string().url()).optional(),
+});
+
+export type TCreateGrowSocialMediaTasks = z.infer<
+  typeof createGrowSocialMediaTasksSchema
+>;

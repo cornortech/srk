@@ -246,6 +246,7 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
         return;
       }
     } else {
+      const profileLinks = [];
       // Filter out empty strings before validation
       const postLinks = watch('postEngagement.postURLs') || [];
       const filteredPostLinks = postLinks.filter(

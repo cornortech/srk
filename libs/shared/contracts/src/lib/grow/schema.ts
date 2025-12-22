@@ -140,6 +140,8 @@ export const getSrkGrowProfileResponseSchema = z.object({
   }),
   enrollmentData: z
     .object({
+      _id: z.string().optional(),
+      isActive: z.boolean().optional(),
       enrollmentPackageDetails: z.object({
         name: z.string(),
         amount: z.number(),

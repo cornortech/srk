@@ -22,6 +22,7 @@ import {
 import { PlatformData } from '../../../lib/types/types';
 import useGrowAuthStore from '../../../store/useGrowAuthStore';
 import { useToast } from '../../../lib/contexts/ToastContext';
+import { api } from '../../../lib/api';
 
 const analyticsData: {
   platforms: PlatformData[];
@@ -88,6 +89,32 @@ export const AnalyticsView: React.FC = () => {
   const [newLink, setNewLink] = useState('');
   const { showToast } = useToast();
 
+  const { mutate: createTasks, isPending } =
+    api.grow.createGrowSocialMediaTasks.useMutation({
+      onSuccess: () => {
+        showToast('Link added successfully', 'success');
+        if (user && user.enrollmentData) {
+          const updatedUser = {
+            ...user,
+            enrollmentData: {
+              ...user.enrollmentData,
+              engagementPostURLs: [
+                ...(user.enrollmentData.engagementPostURLs || []),
+                newLink,
+              ],
+            },
+          };
+
+          setUser(updatedUser);
+          setNewLink('');
+          setIsAddingLink(false);
+        }
+      },
+      onError: (error: any) => {
+        showToast(error.body.message || 'Failed to add link', 'error');
+      },
+    });
+
   const handleAddLink = () => {
     if (!newLink) return;
 
@@ -99,22 +126,31 @@ export const AnalyticsView: React.FC = () => {
       return;
     }
 
-    if (user && user.enrollmentData) {
-      const updatedUser = {
-        ...user,
-        enrollmentData: {
-          ...user.enrollmentData,
-          engagementPostURLs: [
-            ...(user.enrollmentData.engagementPostURLs || []),
-            newLink,
-          ],
-        },
-      };
-
-      setUser(updatedUser);
-      setNewLink('');
-      setIsAddingLink(false);
+    if (!user?.enrollmentData?.isActive) {
+      showToast(
+        'Your enrollment is not active yet. Please wait for approval.',
+        'error'
+      );
+      return;
     }
+
+    const enrollmentId = user?.enrollmentData?._id;
+
+    if (!enrollmentId) {
+      showToast(
+        'Enrollment ID not found. Please reload or contact support.',
+        'error'
+      );
+      return;
+    }
+
+    createTasks({
+      body: {
+        growSocialMediaPackageEnrollmentId: enrollmentId,
+        postURLs: [newLink],
+        profileLinkURLs: [],
+      },
+    });
   };
   const enrollmentData = user?.enrollmentData;
   const enrollmentPostUrls = user?.enrollmentData?.engagementPostURLs || [];
@@ -445,7 +481,7 @@ export const AnalyticsView: React.FC = () => {
                                     </button>
                                     <button
                                       onClick={handleAddLink}
-                                      disabled={!newLink}
+                                      disabled={!newLink || isPending}
                                       className="p-2 rounded-lg bg-[#b68938] text-black font-bold hover:bg-[#cca04e] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
                                       <Check size={18} />

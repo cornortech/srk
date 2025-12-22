@@ -20,6 +20,11 @@ const growSocialMediaPackageSubTypeSchema = new mongoose.Schema(
             type: String,
             required: true,
         },
+        taskType: {
+            type: String,
+            required: true,
+            enum: ["follow", "engagement"],
+        },
         noOfLikes: {
             type: Number,
         },

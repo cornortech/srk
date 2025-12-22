@@ -97,6 +97,8 @@ export const getSrkGrowProfile: AppRouteImplementationOrOptions<
 
         enrollmentData: packageEnrollment
           ? {
+              _id: packageEnrollment._id.toString(),
+              isActive: packageEnrollment.isActive,
               enrollmentPackageDetails: {
                 name: packageEnrollment.growSocialMediaPackageId.name,
                 amount: packageEnrollment.growSocialMediaPackageId.amount,

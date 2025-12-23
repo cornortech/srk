@@ -1,5 +1,5 @@
 import { initServer } from "@ts-rest/express";
-import { tourContract } from "@srk/shared/contracts";
+import { tourContract } from "../../contract/tour/tour.contract";
 import { tourQuery } from "./tour.query";
 const s = initServer();
 

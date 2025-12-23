@@ -1,5 +1,5 @@
 import { initServer } from "@ts-rest/express";
-import { bankContract } from "@srk/shared/contracts";
+import { bankContract } from "../../contract/bank/contract";
 import { bankQueryHandlers } from "./query";
 import { bankMutationHandlers } from "./mutation";
 

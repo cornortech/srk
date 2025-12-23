@@ -1,5 +1,5 @@
 import { AppRouteImplementationOrOptions } from "@ts-rest/express/src/lib/types";
-import { webinarContract } from "@srk/shared/contracts";
+import { webinarContract } from "../../contract/webinar/contract";
 import { WebinarModel } from "../../model/webinarModel";
 
 const getAllWebinar: AppRouteImplementationOrOptions<

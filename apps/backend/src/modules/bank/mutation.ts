@@ -1,6 +1,6 @@
 import mongoose, { mongo } from "mongoose";
 import { AppRouteImplementationOrOptions } from "@ts-rest/express/src/lib/types";
-import { bankContract } from "@srk/shared/contracts";
+import { bankContract } from "../../contract/bank/contract";
 import { UserModel } from "../../model/userModel";
 import { BankDetailsModel } from "../../model/bankDetails";
 import { SrkBankModel } from "../../model/srkBankModel";

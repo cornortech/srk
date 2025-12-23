@@ -10,8 +10,8 @@ import { bankRouter } from './bank/router';
 import { tourRouter } from './tour/router.router';
 import { taskRouter } from './task/router';
 import { growRouter } from './grow/router';
-import { apiContract } from '@srk/shared/contracts';
 import { ssoRouter } from './sso/router';
+import { apiContract } from '../../../../libs/shared/contracts/src/index';
 
 const s = initServer();
 

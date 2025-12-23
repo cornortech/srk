@@ -22,4 +22,4 @@ export * from './lib/tour/tour.contract';
 export * from './lib/tour/tour.schema';
 export * from './lib/task/contract';
 export * from './lib/task/schema';
-export * from './lib/root';
+export * from './lib/index'

@@ -150,6 +150,6 @@ export const growContract = c.router({
       404: ErrorSchema,
       500: ErrorSchema,
     },
-    summary: 'Create grow social media tasks urls'
+    summary: 'Create grow social media tasks urls',
   },
 });

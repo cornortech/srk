@@ -72,7 +72,13 @@ export const affiliateContract = c.router({
       limit: z.string().optional(),
     }),
     responses: {
-      200: getAllAffiliateRequestsByStatusSchema,
+      200: z.object({
+        data: getAllAffiliateRequestsByStatusSchema,
+        page: z.number(),
+        limit: z.number(),
+        totalUsers: z.number(),
+        totalPages: z.number(),
+      }),
       403: ErrorSchema,
       404: ErrorSchema,
       500: ErrorSchema,

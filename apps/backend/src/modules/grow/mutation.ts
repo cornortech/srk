@@ -1,4 +1,3 @@
-import { AppRouteImplementationOrOptions } from '@ts-rest/express/src/lib/types';
 import { growContract } from '@srk/shared/contracts';
 import { growSocialMediaPackageUserModel } from '../../model/growSocialMediaPackageUserModel';
 import { growSocialMediaPackageModel } from '../../model/growSocialMediaPackageModel';
@@ -8,9 +7,12 @@ import { growSocialMediaPackageEnrollmentModel } from '../../model/growSocialMed
 import { growSocialMediaPackagePaymentModel } from '../../model/growSocialMediaPackagePaymentModel';
 import AuthService from '../../services/authService';
 import { growPackageEngagementPostModel } from '../../model/growPackageEngagementPostModel';
+import { IUser, UserModel } from '../../model/userModel';
+import { growSrkAffiliateVerificationModel } from '../../model/growSrkAffiliateVerificationModel';
+import { AppRouteImplementationOrOptions } from '@ts-rest/express/src/lib/types';
 
 const createGrowSocialMediaEnrollment: AppRouteImplementationOrOptions<
-  typeof growContract.createGrowSocialMediaEnrollment
+  typeof growContract.createGrowSocialMediaEnrollement
 > = async ({ body }) => {
   try {
     const { userData, enrollmentData, paymentData, postEngagement } = body;
@@ -468,7 +470,7 @@ const resubmitGrowVerification: AppRouteImplementationOrOptions<
 };
 
 const createGrowSocialMediaTasks: AppRouteImplementationOrOptions<
-  typeof growContract.createGrowSocialMediaTasks
+  typeof growContract.create
 > = async ({ body }) => {
   try {
     const { growSocialMediaPackageEnrollmentId, profileLinkURLs, postURLs } =
@@ -636,6 +638,170 @@ const createGrowSocialMediaTasks: AppRouteImplementationOrOptions<
   }
 };
 
+const srkGrowAffiliateVerificationRequest: AppRouteImplementationOrOptions<
+  typeof growContract.srkGrowAffiliateVerificationRequest
+> = async ({ body }) => {
+  try {
+    const srkUniversityUserExist = await UserModel.findOne({
+      _id: body.srkUniversityUserId,
+    });
+
+    if (!srkUniversityUserExist) {
+      return {
+        status: 500,
+        body: {
+          message: 'Srk University User not found',
+          success: false,
+        },
+      };
+    }
+
+    await growSrkAffiliateVerificationModel.create({
+      srkUniversityUserId: body.srkUniversityUserId,
+      verificationImageUrl: body.verificationImageUrl,
+    });
+
+    return {
+      status: 201,
+      body: {
+        message: 'Srk Grow Affiliate requested successfully',
+        success: true,
+      },
+    };
+  } catch (error) {
+    console.log(error);
+    return {
+      status: 500,
+      body: {
+        message: error.message
+          ? `Internal server error: ${error.message}`
+          : 'Internal server error',
+        success: false,
+      },
+    };
+  }
+};
+
+const approveSrkGrowAffiliateVerificationRequest: AppRouteImplementationOrOptions<
+  typeof growContract.approveSrkGrowAffiliateVerificationRequest
+> = async ({ params }) => {
+  try {
+    const requestExist = await growSrkAffiliateVerificationModel
+      .findOne({ _id: params.srkGrowaffiliateVerificationId })
+      .populate<
+        Pick<
+          IUser,
+          | 'firstName'
+          | 'lastName'
+          | 'email'
+          | 'gender'
+          | 'country'
+          | 'phoneNumber'
+          | 'dob'
+          | 'profilePicture'
+        >
+      >({
+        path: 'srkUniversityUserId',
+        select:
+          'firstName lastName email gender country phoneNumber dob profilePicture ',
+      });
+
+    if (!requestExist) {
+      return {
+        status: 500,
+        body: {
+          message: 'Request not found',
+          success: false,
+        },
+      };
+    }
+
+    await growSrkAffiliateVerificationModel.findOneAndUpdate(
+      { _id: params.srkGrowaffiliateVerificationId },
+      { $set: { status: 'approved' } }
+    );
+    const growUserPromoCode =
+      await AuthService.generateUniquePromoCodeForSrkGrowUser();
+
+    await growSocialMediaPackageUserModel.create({
+      userType: 'affiliate',
+      country: requestExist.country,
+      fullName: `${requestExist.firstName}  ${requestExist.lastName}`,
+      email: requestExist.email,
+      gender: requestExist.gender,
+      phone: requestExist.phoneNumber,
+      status: 'portalActivated',
+      kycURL: requestExist.verificationImageUrl,
+      password: '-',
+      promoCode: growUserPromoCode,
+      srkUniversityUserId: requestExist.srkUniversityUserId,
+    });
+
+    return {
+      status: 201,
+      body: {
+        message: 'Request Approved',
+        success: false,
+      },
+    };
+  } catch (error) {
+    console.log(error);
+    return {
+      status: 500,
+      body: {
+        message: error.message
+          ? `Internal server error: ${error.message}`
+          : 'Internal server error',
+        success: false,
+      },
+    };
+  }
+};
+
+const rejectSrkGrowAffiliateVerificationRequest: AppRouteImplementationOrOptions<
+  typeof growContract.rejectSrkGrowAffiliateVerificationRequest
+> = async ({ params, body }) => {
+  try {
+    const requestExist = await growSrkAffiliateVerificationModel.findOne({
+      _id: params.srkGrowaffiliateVerificationId,
+    });
+    if (!requestExist) {
+      return {
+        status: 500,
+        body: {
+          message: 'Request not found',
+          success: false,
+        },
+      };
+    }
+
+    await growSrkAffiliateVerificationModel.findOneAndUpdate(
+      { _id: params.srkGrowaffiliateVerificationId },
+      { $set: { status: 'rejected', rejectionReason: body.rejectionReason } }
+    );
+
+    return {
+      status: 201,
+      body: {
+        message: 'Request Rejected',
+        rejectionReason: body.rejectionReason,
+        success: false,
+      },
+    };
+  } catch (error) {
+    console.log(error);
+    return {
+      status: 500,
+      body: {
+        message: error.message
+          ? `Internal server error: ${error.message}`
+          : 'Internal server error.',
+        succss: false,
+      },
+    };
+  }
+};
+
 export const growMutationHandler = {
   createGrowSocialMediaEnrollment,
   validateGrowUserPromoCode,
@@ -643,4 +809,7 @@ export const growMutationHandler = {
   rejectSocialGrowEnrollmentRequest,
   resubmitGrowVerification,
   createGrowSocialMediaTasks,
+  srkGrowAffiliateVerificationRequest,
+  approveSrkGrowAffiliateVerificationRequest,
+  rejectSrkGrowAffiliateVerificationRequest,
 };

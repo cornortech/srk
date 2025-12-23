@@ -72,9 +72,9 @@ export const GrowOnlyAdminDashboard = () => {
       case 'global':
         return <GlobalOverviewView data={data} />;
       case 'affiliateverification':
-        return <AffiliateVerificationView data={data} />;
+        return <AffiliateVerificationView />;
       case 'userverification':
-        return <UserVerificationView data={data} />;
+        return <UserVerificationView />;
       case 'paymentverification':
         return <PaymentVerificationView data={data} />;
       case 'taskmonitoring':

@@ -1,7 +1,7 @@
-import { AppRouteImplementationOrOptions } from "@ts-rest/express/src/lib/types";
-import { tourContract } from "../../contract/tour/tour.contract";
-import { balanceModel } from "../../model/balanceModel";
-import { TourTargetModel } from "../../model/TourTargetModel";
+import { AppRouteImplementationOrOptions } from '@ts-rest/express/src/lib/types';
+import { tourContract } from '../../../../../libs/shared/contracts/src/lib/tour/tour.contract';
+import { balanceModel } from '../../model/balanceModel';
+import { TourTargetModel } from '../../model/TourTargetModel';
 
 const getUserTourTargets: AppRouteImplementationOrOptions<
   typeof tourContract.getUserTourTargets
@@ -22,7 +22,7 @@ const getUserTourTargets: AppRouteImplementationOrOptions<
           profilePicture: string;
         };
       }>({
-        path: "userId",
+        path: 'userId',
       });
 
     return {
@@ -39,12 +39,12 @@ const getUserTourTargets: AppRouteImplementationOrOptions<
       })),
     };
   } catch (error) {
-    console.error("Error in GetTour:", error);
+    console.error('Error in GetTour:', error);
     return {
       status: 500,
       body: {
         success: false,
-        message: "Internal server error",
+        message: 'Internal server error',
       },
     };
   }
@@ -77,7 +77,7 @@ const getTourTargets: AppRouteImplementationOrOptions<
       status: 500,
       body: {
         success: false,
-        message: "Internal server error",
+        message: 'Internal server error',
       },
     };
   }

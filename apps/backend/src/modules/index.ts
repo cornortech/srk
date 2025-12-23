@@ -7,7 +7,7 @@ import { financeRouter } from './finance/router';
 import { affiliateRouter } from './affiliate/router';
 import { webinarRouter } from './webinar/router';
 import { bankRouter } from './bank/router';
-import { tourRouter } from './tour/router.router';
+import { tourRouter } from './tour/router';
 import { taskRouter } from './task/router';
 import { growRouter } from './grow/router';
 import { ssoRouter } from './sso/router';
@@ -27,5 +27,5 @@ export const router = s.router(apiContract, {
   tour: tourRouter,
   task: taskRouter,
   grow: growRouter,
-  sso: ssoRouter
+  sso: ssoRouter,
 });

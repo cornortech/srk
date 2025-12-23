@@ -1,7 +1,7 @@
-import { AppRouteImplementationOrOptions } from "@ts-rest/express/src/lib/types";
-import { courseContract } from "../../contract/course/contract";
-import { CourseModel } from "../../model/courseModel";
-import { CourseVideoModel } from "../../model/courseVideo";
+import { AppRouteImplementationOrOptions } from '@ts-rest/express/src/lib/types';
+import { courseContract } from '../../../../../libs/shared/contracts/src/lib/course/contract';
+import { CourseModel } from '../../model/courseModel';
+import { CourseVideoModel } from '../../model/courseVideo';
 
 const getAllCourses: AppRouteImplementationOrOptions<
   typeof courseContract.getAllCourses
@@ -29,7 +29,7 @@ const getAllCourses: AppRouteImplementationOrOptions<
       status: 500,
       body: {
         success: false,
-        message: "Internal server error",
+        message: 'Internal server error',
       },
     };
   }
@@ -46,7 +46,7 @@ const getVideosOfCourse: AppRouteImplementationOrOptions<
         status: 404,
         body: {
           success: false,
-          message: "Course not found",
+          message: 'Course not found',
         },
       };
     }
@@ -59,7 +59,7 @@ const getVideosOfCourse: AppRouteImplementationOrOptions<
       body: courseVideos.map((video) => ({
         _id: video._id.toString(),
         videoUrl: video.videoUrl,
-        thumbnailUrl: video.thumbnailUrl || "",
+        thumbnailUrl: video.thumbnailUrl || '',
         created_at: video.createdAt,
         updatedAt: video.updatedAt,
         name: video.name,
@@ -71,7 +71,7 @@ const getVideosOfCourse: AppRouteImplementationOrOptions<
       status: 500,
       body: {
         success: false,
-        message: "Internal server error",
+        message: 'Internal server error',
       },
     };
   }
@@ -88,7 +88,7 @@ export const getCourseById: AppRouteImplementationOrOptions<
         status: 404,
         body: {
           success: false,
-          message: "Course not found",
+          message: 'Course not found',
         },
       };
     }
@@ -110,7 +110,7 @@ export const getCourseById: AppRouteImplementationOrOptions<
       status: 500,
       body: {
         success: false,
-        message: "Internal server error",
+        message: 'Internal server error',
       },
     };
   }

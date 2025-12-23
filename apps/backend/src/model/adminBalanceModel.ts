@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
 const adminBalanceSchema = new mongoose.Schema(
   {
@@ -26,6 +26,14 @@ const adminBalanceSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    tms: {
+      type: Number,
+      default: 0,
+    },
+    vat: {
+      type: Number,
+      default: 0,
+    },
   },
   {
     timestamps: true,
@@ -33,6 +41,6 @@ const adminBalanceSchema = new mongoose.Schema(
 );
 
 export const adminBalanceModel = mongoose.model(
-  "AdminBalance",
+  'AdminBalance',
   adminBalanceSchema
 );

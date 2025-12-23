@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from 'zod';
 
 export const createBalancePayoutSchema = z.object({
   userId: z.string(),
@@ -7,41 +7,49 @@ export const createBalancePayoutSchema = z.object({
 
 export type TCreateBalancePayout = z.TypeOf<typeof createBalancePayoutSchema>;
 
-export const getBalancePayoutSchema = z.array(
-  z.object({
-    _id: z.string(),
-    username: z.string(),
-    paymentMethod: z.string(),
-    status: z.string(),
-    userId: z.string(),
-    paymentProofUrl: z.string(),
-    tdsAmount: z.number(),
-    qrUrl: z.string(),
-    totalAmount: z.number(),
-    transactionNumber: z.string(),
-    packageTitle: z.string(),
-    amount: z.number(),
-    createdAt: z.date(),
-    updatedAt: z.date(),
-  })
-);
+const balancePayoutItemSchema = z.object({
+  _id: z.string(),
+  username: z.string(),
+  paymentMethod: z.string(),
+  status: z.string(),
+  userId: z.string(),
+  paymentProofUrl: z.string(),
+  tdsAmount: z.number(),
+  qrUrl: z.string(),
+  totalAmount: z.number(),
+  transactionNumber: z.string(),
+  packageTitle: z.string(),
+  amount: z.number(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+export const getBalancePayoutSchema = z.array(balancePayoutItemSchema);
+
+export const getPaginatedBalancePayoutSchema = z.object({
+  data: z.array(balancePayoutItemSchema),
+  page: z.number(),
+  limit: z.number(),
+  totalRequest: z.number(),
+  totalPages: z.number(),
+});
 
 export const upsertBankDetailsSchema = z.object({
-  accountHolderName: z.string().min(1, "Account holder name is required"),
-  accountNumber: z.string().min(1, "Account number is required"),
+  accountHolderName: z.string().min(1, 'Account holder name is required'),
+  accountNumber: z.string().min(1, 'Account number is required'),
   ifscCode: z.string().optional(),
-  bankName: z.string().min(1, "Bank name is required"),
-  branchName: z.string().min(1, "Branch name is required"),
-  accountType: z.string().min(1, "Account type is required"),
-  relationWithAccount: z.string().min(1, "Relation is required"),
+  bankName: z.string().min(1, 'Bank name is required'),
+  branchName: z.string().min(1, 'Branch name is required'),
+  accountType: z.string().min(1, 'Account type is required'),
+  relationWithAccount: z.string().min(1, 'Relation is required'),
   qrUrl: z.string().optional(),
 });
 export const upsertKYCDetailsSchema = z.object({
-  frontImage: z.string().min(1, "Front image is required"),
-  backImage: z.string().min(1, "Back image is required"),
-  documentType: z.string().min(1, "Document type is required"),
-  documentNumber: z.string().min(1, "Document number is required"),
-  verificationImage: z.string().min(1, "Verification image is required"),
+  frontImage: z.string().min(1, 'Front image is required'),
+  backImage: z.string().min(1, 'Back image is required'),
+  documentType: z.string().min(1, 'Document type is required'),
+  documentNumber: z.string().min(1, 'Document number is required'),
+  verificationImage: z.string().min(1, 'Verification image is required'),
 });
 export const getFinanceDetailsOfUserSchema = z.object({
   todayEarnings: z.number(),

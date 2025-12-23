@@ -1,5 +1,5 @@
 import { AppRouteImplementationOrOptions } from "@ts-rest/express/src/lib/types";
-import { userContract } from "@srk/shared/contracts";
+import { userContract } from "../../contract/user/contract";
 import { UserModel } from "../../model/userModel";
 import { BankModel } from "../../model/bankModel";
 import { KYCModel } from "../../model/kycModel";

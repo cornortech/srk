@@ -1,7 +1,7 @@
-import { initServer } from "@ts-rest/express";
-import { userMutationHandler } from "./mutation";
-import { userContract } from "@srk/shared/contracts";
-import { userQueryHandler } from "./query";
+import { initServer } from '@ts-rest/express';
+import { userMutationHandler } from './mutation';
+import { userContract } from '../../../../../libs/shared/contracts/src/index';
+import { userQueryHandler } from './query';
 const s = initServer();
 
 export const userRouter = s.router(userContract, {

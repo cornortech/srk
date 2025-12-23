@@ -1,9 +1,9 @@
-import { AppRouteImplementationOrOptions } from "@ts-rest/express/src/lib/types";
-import { packageContract } from "@srk/shared/contracts";
-import { PackageModel } from "../../model/packageModel";
-import { growSocialMediaPackageModel } from "../../model/growSocialMediaPackageModel";
-import { growSocialMediaPackageTypeModel } from "../../model/growSocialMediaPackageTypeModel";
-import { growSocialMediaPackageSubTypeModel } from "../../model/growSocialMediaPackageSubTypeModel";
+import { AppRouteImplementationOrOptions } from '@ts-rest/express/src/lib/types';
+import { packageContract } from '../../../../../libs/shared/contracts/src/lib/package/contract';
+import { PackageModel } from '../../model/packageModel';
+import { growSocialMediaPackageModel } from '../../model/growSocialMediaPackageModel';
+import { growSocialMediaPackageTypeModel } from '../../model/growSocialMediaPackageTypeModel';
+import { growSocialMediaPackageSubTypeModel } from '../../model/growSocialMediaPackageSubTypeModel';
 
 const getAllPackages: AppRouteImplementationOrOptions<
   typeof packageContract.getAllPackages
@@ -25,7 +25,7 @@ const getAllPackages: AppRouteImplementationOrOptions<
           included: f.included,
         })),
         title: p.title,
-        image: p.image || "",
+        image: p.image || '',
         discountedPrice: p.discountedPrice,
         createdAt: p.createdAt,
         updatedAt: p.updatedAt,
@@ -37,7 +37,7 @@ const getAllPackages: AppRouteImplementationOrOptions<
       status: 500,
       body: {
         success: false,
-        message: "Internal server error",
+        message: 'Internal server error',
       },
     };
   }
@@ -54,7 +54,7 @@ const getPackageById: AppRouteImplementationOrOptions<
         status: 404,
         body: {
           success: false,
-          message: "Package not found",
+          message: 'Package not found',
         },
       };
     }
@@ -71,7 +71,7 @@ const getPackageById: AppRouteImplementationOrOptions<
           included: f.included,
         })),
         title: packageExist.title,
-        image: packageExist.image || "",
+        image: packageExist.image || '',
         discountedPrice: packageExist.discountedPrice,
         created_at: packageExist.createdAt,
         updated_at: packageExist.updatedAt,
@@ -83,7 +83,7 @@ const getPackageById: AppRouteImplementationOrOptions<
       status: 500,
       body: {
         success: false,
-        message: "Internal server error",
+        message: 'Internal server error',
       },
     };
   }
@@ -114,7 +114,8 @@ const getAllSrkGrowPackages: AppRouteImplementationOrOptions<
 
             return {
               _id: type._id.toString(),
-              growSocialMediaPackageId: type.growSocialMediaPackageId.toString(),
+              growSocialMediaPackageId:
+                type.growSocialMediaPackageId.toString(),
               name: type.name,
               description: type.description,
               amount: type.amount,
@@ -122,7 +123,8 @@ const getAllSrkGrowPackages: AppRouteImplementationOrOptions<
               updatedAt: type.updatedAt,
               packageSubTypes: subTypes.map((subType) => ({
                 _id: subType._id.toString(),
-                growSocialMediaPackageTypeId: subType.growSocialMediaPackageTypeId.toString(),
+                growSocialMediaPackageTypeId:
+                  subType.growSocialMediaPackageTypeId.toString(),
                 name: subType.name,
                 description: subType.description,
                 noOfLikes: subType.noOfLikes,
@@ -156,29 +158,31 @@ const getAllSrkGrowPackages: AppRouteImplementationOrOptions<
       body: packagesWithTypes,
     };
   } catch (error) {
-    console.error("Error fetching SRK Grow packages:", error);
+    console.error('Error fetching SRK Grow packages:', error);
     return {
       status: 500,
       body: {
         success: false,
-        message: "Internal server error",
+        message: 'Internal server error',
       },
     };
   }
 };
 
 // SRK Grow Package by Id
-const getSrkGrowPackageById: AppRouteImplementationOrOptions<typeof packageContract.getSrkGrowPackageById> = async ({ params }) => {
+const getSrkGrowPackageById: AppRouteImplementationOrOptions<
+  typeof packageContract.getSrkGrowPackageById
+> = async ({ params }) => {
   try {
     const packageExist = await growSocialMediaPackageModel
       .findById(params.id)
-    .lean();
+      .lean();
 
     if (!packageExist) {
       return {
         status: 404,
         body: {
-          message: "Package doesnot exist!",
+          message: 'Package doesnot exist!',
         },
       };
     }
@@ -237,7 +241,7 @@ const getSrkGrowPackageById: AppRouteImplementationOrOptions<typeof packageContr
       body: {
         message: error.message
           ? `Internal server error: ${error.message}`
-          : "Internal server error",
+          : 'Internal server error',
         success: false,
       },
     };
@@ -248,5 +252,5 @@ export const packageQueryHandler = {
   getAllPackages,
   getPackageById,
   getAllSrkGrowPackages,
-  getSrkGrowPackageById
+  getSrkGrowPackageById,
 };

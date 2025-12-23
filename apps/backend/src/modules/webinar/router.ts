@@ -1,5 +1,5 @@
 import { initServer } from "@ts-rest/express";
-import { webinarContract } from "@srk/shared/contracts";
+import { webinarContract } from "../../contract/webinar/contract";
 import { webinarMutationHandler } from "./mutation";
 import { webinarQueryHandler } from "./query";
 const s = initServer();

@@ -1,5 +1,5 @@
 import { AppRouteImplementationOrOptions } from '@ts-rest/express/src/lib/types';
-import { affiliateContract } from '../../../../../libs/shared/contracts/src/lib/affiliate/contract';
+import { affiliateContract } from '@srk/shared/contracts';
 import { affiliateRequestModel } from '../../model/affiliateRequestModel';
 import { UserModel } from '../../model/userModel';
 import { affiliateBiometricModel } from '../../model/affiliateVerificationModel';

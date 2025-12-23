@@ -8,6 +8,9 @@ import {
   validateGrowUserPromoCodeSchema,
   getSrkGrowProfileResponseSchema,
   createGrowSocialMediaTasksSchema,
+  srkGrowAffiliateVerificationSchema,
+  getAllSrkGrowAffiliateVerificationQueryParams,
+  paginatedGetAllSrkGrowAffiliateVerificationSchema,
 } from './schema';
 import { ErrorSchema, SuccessSchema } from '../common';
 import { z } from 'zod';
@@ -151,5 +154,59 @@ export const growContract = c.router({
       500: ErrorSchema,
     },
     summary: 'Create grow social media tasks urls',
+  },
+
+  srkGrowAffiliateVerificationRequest: {
+    method: 'POST',
+    path: '/grow/affiliate/verification-request',
+    body: srkGrowAffiliateVerificationSchema,
+    responses: {
+      200: SuccessSchema,
+      403: ErrorSchema,
+      404: ErrorSchema,
+      500: ErrorSchema,
+    },
+    summary: 'SRK Grow Affiliate Verification Request',
+  },
+
+  getAllSrkGrowAffiliateVerificationRequest: {
+    method: 'GET',
+    path: '/grow/affiliate/get-all-verification-request',
+    query: getAllSrkGrowAffiliateVerificationQueryParams.optional(),
+    responses: {
+      200: paginatedGetAllSrkGrowAffiliateVerificationSchema,
+      403: ErrorSchema,
+      404: ErrorSchema,
+      500: ErrorSchema,
+    },
+    summary: 'Get All SRK Grow Affiliate Verification Request',
+  },
+
+  approveSrkGrowAffiliateVerificationRequest: {
+    method: 'POST',
+    path: '/grow/affiliate/approve-verification-follow-request/:srkGrowaffiliateVerificationId',
+    body: z.object({}),
+    responses: {
+      200: SuccessSchema,
+      403: ErrorSchema,
+      404: ErrorSchema,
+      500: ErrorSchema,
+    },
+    summary: 'Approve SRK Grow Verification Follow Request by Id',
+  },
+
+  rejectSrkGrowAffiliateVerificationRequest: {
+    method: 'POST',
+    path: '/grow/affiliate/reject-verification-follow-request/:srkGrowaffiliateVerificationId',
+    body: z.object({
+      rejectionReason: z.string(),
+    }),
+    responses: {
+      200: SuccessSchema,
+      403: ErrorSchema,
+      404: ErrorSchema,
+      500: ErrorSchema,
+    },
+    summary: 'Reject SRK Grow Verification Follow Request By Id',
   },
 });

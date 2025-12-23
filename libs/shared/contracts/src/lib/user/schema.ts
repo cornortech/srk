@@ -155,72 +155,66 @@ export const checkPromocodeOfUserSchema = z.object({
   referralCode: z.string(),
 });
 
-export const getAllUsersSchema = z.object({
-  data: z.array(
-    z.object({
+export const getAllUsersSchema = z.array(
+  z.object({
+    _id: z.string(),
+    email: z.string().email('Invalid email address'),
+    firstName: z.string().min(1, 'First name is required'),
+    lastName: z.string().min(1, 'Last name is required'),
+    country: z.string().min(1, 'Country is required'),
+    profilePicture: z.string().nullable().optional(),
+    gender: z.string(),
+    phoneNumber: z.string(),
+    referredAt: z.date(),
+    dob: z.date(),
+    allowedToAddUsers: z.boolean(),
+    status: z.string(),
+    isSelfSignup: z.boolean(),
+    isActive: z.boolean(),
+    courseEnrollAgreementUrl: z.string().optional(),
+    purpose: z.enum(['affiliate', 'study']).optional().nullable(),
+    packageId: z.object({
       _id: z.string(),
-      email: z.string().email('Invalid email address'),
-      firstName: z.string().min(1, 'First name is required'),
-      lastName: z.string().min(1, 'Last name is required'),
-      country: z.string().min(1, 'Country is required'),
-      profilePicture: z.string().nullable().optional(),
-      gender: z.string(),
-      phoneNumber: z.string(),
-      referredAt: z.date(),
-      dob: z.date(),
-      allowedToAddUsers: z.boolean(),
-      status: z.string(),
-      isSelfSignup: z.boolean(),
-      isActive: z.boolean(),
-      courseEnrollAgreementUrl: z.string().optional(),
-      purpose: z.enum(['affiliate', 'study']).optional().nullable(),
-      packageId: z.object({
+      title: z.string(),
+      description: z.string(),
+      price: z.number().nullable(),
+      discountedPrice: z.number().nullable(),
+    }),
+    seniorUser: z
+      .object({
         _id: z.string(),
-        title: z.string(),
-        description: z.string(),
-        price: z.number().nullable(),
-        discountedPrice: z.number().nullable(),
-      }),
-      seniorUser: z
-        .object({
-          _id: z.string(),
-          firstName: z.string(),
-          lastName: z.string(),
-        })
-        .nullable()
-        .optional(),
-      referredBy: z
-        .object({
-          _id: z.string(),
-          firstName: z.string(),
-          lastName: z.string(),
-        })
-        .nullable(),
+        firstName: z.string(),
+        lastName: z.string(),
+      })
+      .nullable()
+      .optional(),
+    referredBy: z
+      .object({
+        _id: z.string(),
+        firstName: z.string(),
+        lastName: z.string(),
+      })
+      .nullable(),
 
-      kycDetails: z
-        .object({
-          _id: z.string(),
-          status: z.string(),
-          rejectionReason: z.string().nullable().optional(),
-          frontImage: z.string(),
-          backImage: z.string(),
-          documentType: z.string(),
-          documentNumber: z.string(),
-          verificationImage: z.string(),
-        })
-        .nullable(),
-      paymentDetails: z
-        .object({
-          paymentProofUrl: z.string(),
-          paymentMethod: z.string(),
-          paymentType: z.string(),
-          transactionId: z.string().optional(),
-        })
-        .nullable(),
-    })
-  ),
-  page: z.number(),
-  limit: z.number(),
-  totalUsers: z.number(),
-  totalPages: z.number(),
-});
+    kycDetails: z
+      .object({
+        _id: z.string(),
+        status: z.string(),
+        rejectionReason: z.string().nullable().optional(),
+        frontImage: z.string(),
+        backImage: z.string(),
+        documentType: z.string(),
+        documentNumber: z.string(),
+        verificationImage: z.string(),
+      })
+      .nullable(),
+    paymentDetails: z
+      .object({
+        paymentProofUrl: z.string(),
+        paymentMethod: z.string(),
+        paymentType: z.string(),
+        transactionId: z.string().optional(),
+      })
+      .nullable(),
+  })
+);

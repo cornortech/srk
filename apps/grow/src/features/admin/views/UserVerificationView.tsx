@@ -15,8 +15,8 @@ import { ExternalLink } from 'lucide-react';
 export const UserVerificationView = () => {
   const [page, setPage] = useState(1);
 
-  const { data: growEnrollementUserData, isLoading } =
-    api.grow.getAllGrowSocialMediaEnrollement.useQuery(
+  const { data: growEnrollmentUserData, isLoading } =
+    api.grow.getAllGrowSocialMediaEnrollment.useQuery(
       ['enrolledUser', page], // queryKey
       {
         query: {
@@ -27,7 +27,7 @@ export const UserVerificationView = () => {
     );
 
   const limit = 10;
-  const totalPage = growEnrollementUserData?.body.totalPages ?? 1;
+  const totalPage = growEnrollmentUserData?.body?.totalPages ?? 1;
 
   const [documentViewerOpen, setDocumentViewerOpen] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState<{
@@ -56,7 +56,7 @@ export const UserVerificationView = () => {
     setSelectedItemId(id);
     acceptEnrollementMutation({
       params: {
-        enrollementId: id,
+        enrollmentId: id,
       },
     });
   };
@@ -79,7 +79,7 @@ export const UserVerificationView = () => {
     if (selectedItemId) {
       rejectEnrollementMutation({
         params: {
-          enrollementId: selectedItemId,
+          enrollmentId: selectedItemId,
         },
         body: {
           rejectionReason: rejectionReason,
@@ -221,7 +221,7 @@ export const UserVerificationView = () => {
                 </tr>
               </thead>
               <tbody>
-                {growEnrollementUserData?.body.data.map((item, index) => (
+                {growEnrollmentUserData?.body.map((item, index) => (
                   <motion.tr
                     key={item._id}
                     initial={{ y: 20, opacity: 0 }}

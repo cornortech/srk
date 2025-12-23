@@ -1,28 +1,22 @@
 import { z } from 'zod';
 
-export const getAllAffiliateRequestsByStatusSchema = z.object({
-  data: z.array(
-    z.object({
-      userId: z.string(),
-      profilePicture: z.string().nullable().optional(),
-      email: z.string(),
-      firstName: z.string(),
-      gender: z.string(),
-      lastName: z.string(),
-      phoneNumber: z.string(),
-      status: z.string(),
-      affiliateAgreementUrl: z.string(),
-      requestedAt: z.date().optional().nullable(),
-      verificationImage: z.string().optional(),
-      leftThumbPrint: z.string().optional(),
-      rightThumbPrint: z.string().optional(),
-    })
-  ),
-  page: z.number(),
-  limit: z.number(),
-  totalRequest: z.number(),
-  totalPages: z.number(),
-});
+export const getAllAffiliateRequestsByStatusSchema = z.array(
+  z.object({
+    userId: z.string(),
+    profilePicture: z.string().nullable().optional(),
+    email: z.string(),
+    firstName: z.string(),
+    gender: z.string(),
+    lastName: z.string(),
+    phoneNumber: z.string(),
+    status: z.string(),
+    affiliateAgreementUrl: z.string(),
+    requestedAt: z.date().optional().nullable(),
+    verificationImage: z.string().optional(),
+    leftThumbPrint: z.string().optional(),
+    rightThumbPrint: z.string().optional(),
+  })
+);
 
 export const getTeamsOfUserSchema = z.array(
   z.object({

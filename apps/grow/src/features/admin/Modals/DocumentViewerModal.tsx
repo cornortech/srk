@@ -3,17 +3,17 @@ import { motion } from 'framer-motion';
 interface DocumentViewerModalProps {
   isOpen: boolean;
   onClose: () => void;
-  title: string;
+  // title: string;
   documentUrl?: string;
-  profilePhoto?: string;
+  // profilePhoto?: string;
 }
 
 export const DocumentViewerModal: React.FC<DocumentViewerModalProps> = ({
   isOpen,
   onClose,
-  title,
+  // title,
   documentUrl,
-  profilePhoto,
+  // profilePhoto,
 }) => {
   if (!isOpen) return null;
 
@@ -33,7 +33,7 @@ export const DocumentViewerModal: React.FC<DocumentViewerModalProps> = ({
         className="max-w-4xl w-full rounded-2xl bg-gradient-to-br from-[#1a1410] to-[#0a0705] border border-white/10 p-6"
       >
         <div className="flex items-center justify-between mb-6">
-          <h3 className="text-xl font-bold text-white">{title}</h3>
+          {/* <h3 className="text-xl font-bold text-white">{title}</h3> */}
           <button
             onClick={onClose}
             className="p-2 hover:bg-white/10 rounded-lg transition-colors"
@@ -43,7 +43,7 @@ export const DocumentViewerModal: React.FC<DocumentViewerModalProps> = ({
         </div>
 
         <div className="space-y-6 max-h-[70vh] overflow-y-auto">
-          {profilePhoto && (
+          {/* {profilePhoto && (
             <div>
               <h4 className="text-sm font-medium text-gray-400 mb-3">
                 Profile Photo
@@ -56,7 +56,7 @@ export const DocumentViewerModal: React.FC<DocumentViewerModalProps> = ({
                 />
               </div>
             </div>
-          )}
+          )} */}
 
           {documentUrl && (
             <div>
@@ -71,14 +71,20 @@ export const DocumentViewerModal: React.FC<DocumentViewerModalProps> = ({
                       Click to view full document
                     </p>
                   </div>
-                  <a
+                  {/* <a
                     href={documentUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="px-4 py-2 bg-[#b68938]/20 text-[#e1ba73] rounded-lg hover:bg-[#b68938]/30 transition-colors"
                   >
                     View Full Document
-                  </a>
+                  </a> */}
+
+                  <img
+                    src={documentUrl}
+                    alt="Profile"
+                    className="w-full h-[100vh] object-cover"
+                  />
                 </div>
                 <div className="border border-white/10 rounded p-4 bg-black/50">
                   <div className="text-center text-gray-500">

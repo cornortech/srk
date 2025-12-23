@@ -10,15 +10,6 @@ import {
   ToastType,
   ViewId,
 } from '../lib/types/dashboard';
-import {
-  BanknoteIcon,
-  HomeIcon,
-  ShareIcon,
-  ShoppingBagIcon,
-  TrendingUpIcon,
-  UserIcon,
-  WalletIcon,
-} from 'lucide-react';
 import { DARK_BG, GOLD_PRIMARY } from '../features/dashboard/constants';
 import {
   MOCK_ANALYTICS_DATA,
@@ -38,6 +29,7 @@ import { BackgroundEffects } from '../features/dashboard/components/ui/Backgroun
 import { MenuIcon } from '../features/dashboard/components/ui/DashboardIcons';
 import { Toast } from '../features/dashboard/components/ui/Toast';
 import { DashboardSidebar } from '../features/dashboard/components/DashboardSidebar';
+import { api } from '../lib/api';
 
 export const initialEarningData: DashboardData = {
   today: 0,
@@ -60,7 +52,6 @@ export const GrowDashboard = () => {
   );
   const [payoutHistory, setPayoutHistory] = useState<Payout[]>([]);
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(
     null
   );
@@ -69,6 +60,13 @@ export const GrowDashboard = () => {
   //     navItems.find((item) => item.id === currentView)?.label || 'Dashboard',
   //   [currentView]
   // );
+
+  const { data: growPackagesRes, isLoading } =
+    api.package.getAllSrkGrowPackages.useQuery(['packages']);
+
+  const dataToSend = growPackagesRes?.body;
+
+  console.log(growPackagesRes?.body);
 
   const showToast = useCallback(
     (message: string, type: ToastType = 'success'): void => {
@@ -93,14 +91,14 @@ export const GrowDashboard = () => {
   );
 
   useEffect(() => {
-    setIsLoading(true);
+    // setIsLoading(true);
     const timer = setTimeout(() => {
       setDashboardData(MOCK_DASHBOARD_DATA);
       setSalesData(MOCK_SALES_DATA);
       setLeaderboardData(MOCK_LEADERBOARD);
       setPayoutHistory(MOCK_PAYOUTS);
       setAnalyticsData(MOCK_ANALYTICS_DATA);
-      setIsLoading(false);
+      // setIsLoading(false);
     }, 800);
 
     return () => clearTimeout(timer);
@@ -145,12 +143,7 @@ export const GrowDashboard = () => {
           </div>
         );
       case 'referral':
-        return (
-          <ReferralView
-            userId={MOCK_USER_PROFILE.userId}
-            showToast={showToast}
-          />
-        );
+        return <ReferralView data={dataToSend ?? []} showToast={showToast} />;
       case 'mysales':
         return <MySalesView salesData={salesData} />;
       case 'leaderboard':

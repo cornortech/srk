@@ -7,14 +7,9 @@ import { BenefitsSection } from '../features/landing/components/BenefitsSection'
 import { FAQSection } from '../features/landing/components/FAQSection';
 import { CTASection } from '../features/landing/components/CTASection';
 import { Footer } from '../components/layout/Footer';
-import {
-  OrderDetails,
-  PackageDetails,
-  UserData,
-  UserDetails,
-} from '../lib/types/types';
-import { useNavigate, useParams } from 'react-router-dom';
-import { useScrollIntent } from '../features/landing/hooks/useScrollIntent';
+import { PackageDetails, UserData } from '../lib/types/types';
+import { useNavigate } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 
 type View =
   | 'landing'
@@ -25,20 +20,31 @@ type View =
 
 export const GrowLandingPage = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [user, setUser] = useState<UserData | null>(null);
   const packagesRef = useRef<HTMLElement>(null);
 
-  const sectionRefs = {
-    packages: packagesRef,
-  };
+  // 1. Capture Referral Data
+  useEffect(() => {
+    const ref = searchParams.get('ref');
+    const pkgId = searchParams.get('package');
 
-  useScrollIntent(sectionRefs);
+    if (ref && pkgId) {
+      // NOTE: You need to find the full package object to pass it to the flow
+      // If you have your MOCK_PACKAGES or API data here:
+      // const targetPkg = ALL_PACKAGES.find(p => p.id === pkgId);
+      
+      // For now, we redirect them to the flow route with the ref code in state
+      navigate('/package-flow', { 
+        state: { 
+          packageId: pkgId, // The ID from URL
+          referralCode: ref   // The 'ref' from URL
+        } 
+      });
+    }
+  }, [searchParams, navigate]);
 
-  const [authMode, _setAuthMode] = useState<'login' | 'register'>('login');
-
-  const [checkoutUser, setCheckoutUser] = useState<UserDetails | null>(null);
-  console.log(checkoutUser);
-
+  // Existing auth check
   useEffect(() => {
     const savedUser = localStorage.getItem('srkgrow-activesession');
     if (savedUser) {
@@ -47,14 +53,16 @@ export const GrowLandingPage = () => {
     }
   }, [navigate]);
 
+  const handlePackageSelect = (pkg: PackageDetails) => {
+    // Normal selection from landing page (no referral code)
+    navigate('/package-flow', { state: { package: pkg } });
+    window.scrollTo(0, 0);
+  };
+
+  // ... rest of your component ...
   const handleUserUpdate = (userData: UserData | null) => {
     setUser(userData);
     localStorage.setItem('srkgrow_loggedInUser', JSON.stringify(userData));
-  };
-
-  const handlePackageSelect = (pkg: PackageDetails) => {
-    navigate('/package-flow', { state: { package: pkg } });
-    window.scrollTo(0, 0);
   };
 
   return (

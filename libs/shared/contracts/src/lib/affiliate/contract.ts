@@ -4,7 +4,7 @@ import { z } from 'zod';
 import {
   getAllAffiliateRequestsByStatusSchema,
   getTeamsOfUserSchema,
-} from '../../../../../../libs/shared/contracts/src/lib/affiliate/schema';
+} from './schema';
 
 const c = initContract();
 
@@ -68,8 +68,8 @@ export const affiliateContract = c.router({
     path: '/affiliate/getAllAffiliateRequestsByStatus',
     query: z.object({
       status: z.array(z.string()).optional(),
-      page: z.string().optional(),
       limit: z.string().optional(),
+      page: z.string().optional(),
     }),
     responses: {
       200: z.object({

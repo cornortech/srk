@@ -20,4 +20,12 @@ export const growRouter = s.router(growContract, {
   getSrkGrowProfile: growQueryHandler.getSrkGrowProfile,
   resubmitGrowVerification: growMutationHandler.resubmitGrowVerification,
   createGrowSocialMediaTasks: growMutationHandler.createGrowSocialMediaTasks,
+  approveSrkGrowAffiliateVerificationRequest:
+    growMutationHandler.approveSrkGrowAffiliateVerificationRequest,
+  rejectSrkGrowAffiliateVerificationRequest:
+    growMutationHandler.rejectSrkGrowAffiliateVerificationRequest,
+  getAllSrkGrowAffiliateVerificationRequest:
+    growQueryHandler.getAllSrkGrowAffiliateVerificationRequest,
+  srkGrowAffiliateVerificationRequest:
+    growMutationHandler.srkGrowAffiliateVerificationRequest,
 });

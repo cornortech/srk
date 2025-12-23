@@ -1,485 +1,249 @@
+import {
+  getAllAffiliateRequestsByStatusSchema,
+  getAllSrkGrowAffiliateVerificationRequestSchema,
+  growContract,
+} from '@srk/shared/contracts';
 import { AppRouteImplementationOrOptions } from '@ts-rest/express/src/lib/types';
-import { growContract } from '@srk/shared/contracts';
-import { growSocialMediaPackageUserModel } from '../../model/growSocialMediaPackageUserModel';
-import { growSocialMediaPackageModel } from '../../model/growSocialMediaPackageModel';
-import { growSocialMediaPackageTypeModel } from '../../model/growSocialMediaPackageTypeModel';
-import { growSocialMediaPackageSubTypeModel } from '../../model/growSocialMediaPackageSubTypeModel';
 import { growSocialMediaPackageEnrollmentModel } from '../../model/growSocialMediaPackageEnrollment';
-import { growSocialMediaPackagePaymentModel } from '../../model/growSocialMediaPackagePaymentModel';
-import AuthService from '../../services/authService';
+import {
+  GrowEnrollmentPopulated,
+  GrowPackageUserPopulated,
+  GrowProfileResponsePopulated,
+} from '../../utils/types/growQuery';
 import { growPackageEngagementPostModel } from '../../model/growPackageEngagementPostModel';
+import { growSocialMediaPackagePaymentModel } from '../../model/growSocialMediaPackagePaymentModel';
+import { growSocialMediaPackageUserModel } from '../../model/growSocialMediaPackageUserModel';
+import { growSrkAffiliateVerificationModel } from '../../model/growSrkAffiliateVerificationModel';
+import { IUser } from '../../model/userModel';
 
-const createGrowSocialMediaEnrollment: AppRouteImplementationOrOptions<
-  typeof growContract.createGrowSocialMediaEnrollment
-> = async ({ body }) => {
-  try {
-    const { userData, enrollmentData, paymentData, postEngagement } = body;
-
-    const postURLs = postEngagement?.postURLs ?? [];
-
-    // 1. Validate promo code and find referredBy user using promocode
-    let growSocialMediaRefferalUser = null;
-    if (userData.usedPromoCode) {
-      growSocialMediaRefferalUser =
-        await growSocialMediaPackageUserModel.findOne({
-          promoCode: userData.usedPromoCode,
-        });
-
-      if (!growSocialMediaRefferalUser) {
-        return {
-          status: 400,
-          body: {
-            success: false,
-            message: 'Invalid promo code',
-          },
-        };
-      }
-    }
-
-    // 2. Validate Package, Type, SubType
-    const packageExists = await growSocialMediaPackageModel.findById(
-      enrollmentData.growSocialMediaPackageId
-    );
-    if (!packageExists) {
-      return {
-        status: 400,
-        body: {
-          success: false,
-          message: 'Package not found',
-        },
-      };
-    }
-
-    const packageTypeExists = await growSocialMediaPackageTypeModel.findById(
-      enrollmentData.growSocialMediaPackageTypeId
-    );
-    if (
-      !packageTypeExists ||
-      String(packageTypeExists.growSocialMediaPackageId) !==
-        enrollmentData.growSocialMediaPackageId
-    ) {
-      return {
-        status: 400,
-        body: {
-          success: false,
-          message: 'Package type invalid or does not belong to package',
-        },
-      };
-    }
-
-    const packageSubTypeExists =
-      await growSocialMediaPackageSubTypeModel.findById(
-        enrollmentData.growSocialMediaPackageSubTypeId
-      );
-    if (
-      !packageSubTypeExists ||
-      String(packageSubTypeExists.growSocialMediaPackageTypeId) !==
-        enrollmentData.growSocialMediaPackageTypeId
-    ) {
-      return {
-        status: 400,
-        body: {
-          success: false,
-          message:
-            'Package sub-type invalid or does not belong to package type',
-        },
-      };
-    }
-
-    if (
-      !enrollmentData?.profileLinkURL?.length &&
-      postURLs.length > packageSubTypeExists.noOfVideos
-    ) {
-      return {
-        status: 400,
-        body: {
-          success: false,
-          message: `You can provide a maximum of ${packageSubTypeExists.noOfVideos} video URLs, but received ${postURLs.length}.`,
-        },
-      };
-    }
-
-    // 3. Check duplicate enrollment (active)
-
-    const existingUser = await growSocialMediaPackageUserModel.findOne({
-      email: userData.email,
-    });
-
-    if (existingUser) {
-      const activeEnrollment =
-        await growSocialMediaPackageEnrollmentModel.findOne({
-          growSocialMediaPackageUserId: existingUser._id,
-          isActive: true,
-        });
-
-      if (activeEnrollment) {
-        return {
-          status: 409,
-          body: {
-            success: false,
-            message: 'User already has an active enrollment',
-          },
-        };
-      }
-    }
-
-    if (enrollmentData?.profileLinkURL?.length && postURLs.length) {
-      return {
-        status: 400,
-        body: {
-          success: false,
-          message:
-            'Cannot provide both profileLinkURL and postURLs at the same time',
-        },
-      };
-    }
-
-    // 4. Create user
-    const hashedPassword = await AuthService.hashPassword(userData.password);
-
-    // Generate a unique promo code for the new user
-    const growUserPromoCode =
-      await AuthService.generateUniquePromoCodeForSrkGrowUser();
-
-    const packageUser = await growSocialMediaPackageUserModel.create({
-      fullName: userData.fullName,
-      email: userData.email,
-      password: hashedPassword,
-      gender: userData.gender,
-      phone: userData.phoneNumber,
-      country: userData.country,
-      kycURL: userData.kycURL,
-      promoCode: growUserPromoCode,
-      userType: 'package',
-      referredBy: growSocialMediaRefferalUser
-        ? growSocialMediaRefferalUser._id
-        : null,
-    });
-
-    // 5. Create enrollment
-    const createSrkGrowPackageEnrollment =
-      await growSocialMediaPackageEnrollmentModel.create({
-        growSocialMediaPackageUserId: packageUser._id,
-        growSocialMediaPackageId: enrollmentData.growSocialMediaPackageId,
-        growSocialMediaPackageTypeId:
-          enrollmentData.growSocialMediaPackageTypeId,
-        growSocialMediaPackageSubTypeId:
-          enrollmentData.growSocialMediaPackageSubTypeId,
-        socialMediaPlatform: enrollmentData.socialMediaPlatform,
-        profileLinkURL: enrollmentData.profileLinkURL,
-      });
-
-    // 6. Create payment record
-    await growSocialMediaPackagePaymentModel.create({
-      growPackageEnrollmentId: createSrkGrowPackageEnrollment._id,
-      paymentURL: paymentData.paymentURL,
-      transactionId: paymentData.transactionId,
-      paymentMethod: paymentData.paymentMethod,
-    });
-
-    if (postURLs.length > 0) {
-      await growPackageEngagementPostModel.create({
-        growSocialMediaPackageEnrollmentId: createSrkGrowPackageEnrollment._id,
-        postURLs: postURLs,
-      });
-    }
-
-    return {
-      status: 201,
-      body: {
-        success: true,
-        message: 'Enrollment submitted successfully',
-      },
-    };
-  } catch (error) {
-    console.error('Error creating grow social media enrollment:', error);
-    return {
-      status: 500,
-      body: {
-        success: false,
-        message: error.message
-          ? `Internal server error: ${error.message}`
-          : 'Internal server error',
-      },
-    };
-  }
-};
-
-export const validateGrowUserPromoCode: AppRouteImplementationOrOptions<
-  typeof growContract.validateGrowUserPromoCode
-> = async ({ body }) => {
-  try {
-    const { promoCode, growSocialMediaPackageId } = body;
-
-    const srkGrowUser = await growSocialMediaPackageUserModel.findOne({
-      promoCode,
-    });
-
-    if (!srkGrowUser) {
-      return {
-        status: 400,
-        body: {
-          success: false,
-          message: 'Invalid promo code',
-        },
-      };
-    }
-
-    if (srkGrowUser.status !== 'portalActivated') {
-      return {
-        status: 400,
-        body: {
-          success: false,
-          message: 'Promo code owner is not active or eligible',
-        },
-      };
-    }
-
-    const growPackage = await growSocialMediaPackageModel.findById(
-      growSocialMediaPackageId
-    );
-    if (!growPackage) {
-      return {
-        status: 400,
-        body: {
-          success: false,
-          message: 'Package not found',
-        },
-      };
-    }
-
-    const packageDiscount: Record<string, number> = {
-      '693bd21b224b9cd931c7cee0': 0.1,
-      '693bd21b224b9cd931c7cef2': 0.15,
-      '693bd21c224b9cd931c7cf04': 0.2,
-    };
-
-    const discountPercentage = packageDiscount[growPackage._id.toString()];
-    const originalAmount = growPackage.amount;
-    const discountAmount = originalAmount * discountPercentage;
-    const finalAmountAfterDiscount = originalAmount - discountAmount;
-
-    return {
-      status: 200,
-      body: {
-        success: true,
-        message: `Promo code valid! You get a discount of ${
-          discountPercentage * 100
-        }% on the ${growPackage.name} package.`,
-        discountDetails: {
-          originalAmount,
-          discountPercentage: discountPercentage * 100,
-          discountAmount,
-          finalAmountAfterDiscount,
-          fullName: srkGrowUser.fullName,
-        },
-      },
-    };
-  } catch (error) {
-    console.error('Error validating promo code:', error);
-    return {
-      status: 500,
-      body: {
-        success: false,
-        message: error.message
-          ? `Internal server error: ${error.message}`
-          : 'Internal server error',
-      },
-    };
-  }
-};
-
-const acceptSocialGrowEnrollmentRequest: AppRouteImplementationOrOptions<
-  typeof growContract.acceptSocialGrowEnrollmentRequest
+export const getSrkGrowProfile: AppRouteImplementationOrOptions<
+  typeof growContract.getSrkGrowProfile
 > = async ({ params }) => {
   try {
-    const enrollmentRequest =
-      await growSocialMediaPackageEnrollmentModel.findById(params.enrollmentId);
+    const { userId } = params;
 
-    if (!enrollmentRequest) {
-      return {
-        status: 500,
-        body: {
-          message: 'No Such Enrollment Found',
-        },
-      };
-    }
+    const packageUser = await growSocialMediaPackageUserModel
+      .findById(userId)
+      .populate<GrowProfileResponsePopulated['growSocialMediaPackageUser']>({
+        path: 'referredBy',
+        select: 'fullName',
+      });
 
-    await growSocialMediaPackageUserModel.findOneAndUpdate(
-      {
-        _id: enrollmentRequest.growSocialMediaPackageUserId,
-      },
-      {
-        $set: {
-          status: 'portalActivated',
-        },
-      },
-      {
-        new: true,
-      }
-    );
-
-    await growSocialMediaPackageEnrollmentModel.findOneAndUpdate(
-      {
-        _id: params.enrollmentId,
-      },
-      {
-        $set: {
-          isActive: true,
-        },
-      }
-    );
-
-    return {
-      status: 200,
-      body: {
-        message: 'Follow Request Approved',
-        success: true,
-      },
-    };
-  } catch (error) {
-    console.log(error);
-    return {
-      status: 500,
-      body: {
-        message: error.message
-          ? `Internal server error: ${error.message}`
-          : 'Internal server error',
-        success: false,
-      },
-    };
-  }
-};
-
-const rejectSocialGrowEnrollmentRequest: AppRouteImplementationOrOptions<
-  typeof growContract.rejectSocialGrowEnrollmentRequest
-> = async ({ params, body }) => {
-  try {
-    const enrollmentRequest =
-      await growSocialMediaPackageEnrollmentModel.findById(params.enrollmentId);
-
-    if (!enrollmentRequest) {
-      return {
-        status: 500,
-        body: {
-          message: 'No Such Enrollment Found',
-        },
-      };
-    }
-
-    await growSocialMediaPackageUserModel.findOneAndUpdate(
-      { _id: enrollmentRequest.growSocialMediaPackageUserId },
-      {
-        $set: {
-          status: 'verificationRejected',
-        },
-      }
-    );
-
-    await growSocialMediaPackagePaymentModel.findOneAndUpdate(
-      {
-        growPackageEnrollmentId: enrollmentRequest._id,
-      },
-      {
-        $set: {
-          status: 'rejected',
-          rejectionReason: body.rejectionReason,
-        },
-      }
-    );
-
-    return {
-      status: 200,
-      body: {
-        message: 'Follow Request Rejected',
-        success: false,
-      },
-    };
-  } catch (error) {
-    console.log(error);
-    return {
-      status: 500,
-      body: {
-        message: error.message
-          ? `Internal server error: ${error.message}`
-          : 'Internal server error',
-        success: false,
-      },
-    };
-  }
-};
-
-const resubmitGrowVerification: AppRouteImplementationOrOptions<
-  typeof growContract.resubmitGrowVerification
-> = async ({ body }) => {
-  try {
-    const { userId, kycURLs, transactionId, paymentURL } = body;
-
-    // 1. Update User Profile
-    const user = await growSocialMediaPackageUserModel.findByIdAndUpdate(
-      userId,
-      {
-        $set: {
-          kycURL: kycURLs,
-          status: 'verificationPending',
-        },
-      },
-      { new: true }
-    );
-
-    if (!user) {
+    if (!packageUser) {
       return {
         status: 404,
-        body: { success: false, message: 'User not found' },
+        body: {
+          message: 'User not found',
+        },
       };
     }
 
-    // 2. Find associated enrollment
-    const enrollment = await growSocialMediaPackageEnrollmentModel.findOne({
-      growSocialMediaPackageUserId: userId,
-    });
-
-    if (enrollment) {
-      // 3. Update Payment record
-      await growSocialMediaPackagePaymentModel.findOneAndUpdate(
-        { growPackageEnrollmentId: enrollment._id },
+    const packageEnrollment = await growSocialMediaPackageEnrollmentModel
+      .findOne({
+        growSocialMediaPackageUserId: packageUser._id,
+      })
+      .populate<
+        GrowProfileResponsePopulated['growSocialMediaPackageEnrollment']
+      >([
         {
-          $set: {
-            transactionId,
-            paymentURL,
-            status: 'pending',
-            rejectionReason: null,
-          },
-        }
-      );
-    }
+          path: 'growSocialMediaPackageId',
+          select: 'name amount',
+        },
+        {
+          path: 'growSocialMediaPackageTypeId',
+          select: 'name',
+        },
+        {
+          path: 'growSocialMediaPackageSubTypeId',
+          select: 'name noOfLikes noOfVideos noOfFollowers',
+        },
+      ]);
+
+    const packagePayment = packageEnrollment
+      ? await growSocialMediaPackagePaymentModel.findOne({
+          growPackageEnrollmentId: packageEnrollment._id,
+        })
+      : null;
+
+    const engagementPosts = packageEnrollment
+      ? await growPackageEngagementPostModel.findOne({
+          growSocialMediaPackageEnrollmentId: packageEnrollment._id,
+        })
+      : null;
 
     return {
       status: 200,
-      body: { success: true, message: 'Verification resubmitted successfully' },
+      body: {
+        userDetails: {
+          _id: packageUser._id.toString(),
+          srkUniversityId: packageUser.srkUniversityUserId?.toString(),
+          fullName: packageUser.fullName,
+          email: packageUser.email,
+          status: packageUser.status,
+          phone: packageUser.phone,
+          kycURL: packageUser.kycURL,
+          country: packageUser.country,
+          gender: packageUser.gender,
+          promoCode: packageUser.promoCode,
+
+          profileLinkURL:
+            packageEnrollment?.profileLinkURL &&
+            packageEnrollment.profileLinkURL.length
+              ? packageEnrollment.profileLinkURL
+              : [],
+          userType: packageUser.userType,
+
+          referredBy: packageUser.referredBy
+            ? {
+                name: packageUser.referredBy.fullName,
+              }
+            : null,
+          createdAt: packageUser.createdAt.toISOString(),
+        },
+
+        enrollmentData: packageEnrollment
+          ? {
+              _id: packageEnrollment._id.toString(),
+              isActive: packageEnrollment.isActive,
+              enrollmentPackageDetails: {
+                name: packageEnrollment.growSocialMediaPackageId.name,
+                amount: packageEnrollment.growSocialMediaPackageId.amount,
+                socialMediaPlatform: packageEnrollment.socialMediaPlatform,
+                packageType: {
+                  name: packageEnrollment.growSocialMediaPackageTypeId.name,
+
+                  packageSubType: {
+                    name: packageEnrollment.growSocialMediaPackageSubTypeId
+                      .name,
+                    noOfLikes:
+                      packageEnrollment.growSocialMediaPackageSubTypeId
+                        .noOfLikes,
+                    noOfVideos:
+                      packageEnrollment.growSocialMediaPackageSubTypeId
+                        .noOfVideos,
+                    noOfFollowers:
+                      packageEnrollment.growSocialMediaPackageSubTypeId
+                        .noOfFollowers,
+                  },
+                },
+              },
+
+              engagementPostURLs: engagementPosts?.postURLs ?? [],
+
+              enrollmentPaymentDetails: packagePayment
+                ? {
+                    paymentUrl: packagePayment.paymentURL,
+                    transactionId: packagePayment.transactionId,
+                    paymentMethod: packagePayment.paymentMethod,
+                    rejectionReason: packagePayment.rejectionReason ?? null,
+                  }
+                : null,
+            }
+          : null,
+      },
     };
   } catch (error) {
-    console.error('Error resubmitting verification:', error);
+    console.error(error);
     return {
       status: 500,
-      body: { success: false, message: 'Internal server error' },
+      body: {
+        message: 'Internal server error',
+      },
     };
   }
 };
 
-const createGrowSocialMediaTasks: AppRouteImplementationOrOptions<
-  typeof growContract.createGrowSocialMediaTasks
-> = async ({ body }) => {
+const getAllSrkGrowEnrollmentUser: AppRouteImplementationOrOptions<
+  typeof growContract.getAllGrowSocialMediaEnrollment
+> = async () => {
   try {
-    const { growSocialMediaPackageEnrollmentId, profileLinkURLs, postURLs } =
-      body;
+    const enrollments = await growSocialMediaPackageEnrollmentModel
+      .find()
+      .populate<GrowEnrollmentPopulated>('growSocialMediaPackageUserId')
+      .populate<GrowEnrollmentPopulated>('growSocialMediaPackageId')
+      .populate<GrowEnrollmentPopulated>('growSocialMediaPackageTypeId')
+      .populate<GrowEnrollmentPopulated>('growSocialMediaPackageSubTypeId')
+      .sort({ createdAt: -1 });
 
-    const activeEnrollment =
-      await growSocialMediaPackageEnrollmentModel.findById(
-        growSocialMediaPackageEnrollmentId
-      );
+    const packageEnrollment = await Promise.all(
+      enrollments.map(async (e) => {
+        const postEngagement = await growPackageEngagementPostModel.findOne({
+          growSocialMediaPackageEnrollmentId: e._id,
+        });
 
-    if (!activeEnrollment) {
+        return {
+          _id: e._id.toString(),
+          userData: {
+            fullName: e.growSocialMediaPackageUserId.fullName,
+            email: e.growSocialMediaPackageUserId.email,
+            gender: e.growSocialMediaPackageUserId.gender,
+            phoneNumber: e.growSocialMediaPackageUserId.phoneNumber,
+            country: e.growSocialMediaPackageUserId.country,
+            kycURL: e.growSocialMediaPackageUserId.kycURL,
+            usedPromoCode:
+              e.growSocialMediaPackageUserId.usedPromoCode ?? undefined,
+            status: e.growSocialMediaPackageUserId.status,
+          },
+
+          enrollmentData: {
+            growSocialMediaPackageId: e.growSocialMediaPackageId._id.toString(),
+            growSocialMediaPackageTypeId:
+              e.growSocialMediaPackageTypeId._id.toString(),
+            growSocialMediaPackageSubTypeId:
+              e.growSocialMediaPackageSubTypeId._id.toString(),
+            profileLinkURL:
+              e.profileLinkURL && e.profileLinkURL[0]
+                ? e.profileLinkURL[0]
+                : undefined,
+            isActive: e.isActive,
+          },
+
+          postEngagement: {
+            postURLs: postEngagement?.postURLs.length
+              ? postEngagement.postURLs
+              : undefined,
+          },
+
+          paymentData: {
+            paymentMethod: 'esewa' as const,
+            paymentURL: '',
+            transactionId: '',
+            rejectionReason: '',
+          },
+          createdAt: e.createdAt,
+          updatedAt: e.updatedAt,
+        };
+      })
+    );
+
+    return {
+      status: 200,
+      body: packageEnrollment,
+    };
+  } catch (error) {
+    console.error(error);
+    return {
+      status: 500,
+      body: {
+        success: false,
+        message: 'Internal server error',
+      },
+    };
+  }
+};
+
+const getSrkGrowEnrollmentUserById: AppRouteImplementationOrOptions<
+  typeof growContract.getGrowSocialMediaEnrollmentById
+> = async ({ params }) => {
+  try {
+    const enrollment = await growSocialMediaPackageEnrollmentModel
+      .findById(params.enrollmentID)
+      .populate<GrowEnrollmentPopulated>('growSocialMediaPackageUserId')
+      .populate<GrowEnrollmentPopulated>('growSocialMediaPackageId')
+      .populate<GrowEnrollmentPopulated>('growSocialMediaPackageTypeId')
+      .populate<GrowEnrollmentPopulated>('growSocialMediaPackageSubTypeId');
+
+    if (!enrollment) {
       return {
         status: 404,
         body: {
@@ -489,138 +253,90 @@ const createGrowSocialMediaTasks: AppRouteImplementationOrOptions<
       };
     }
 
-    if (!activeEnrollment.isActive) {
-      return {
-        status: 400,
-        body: {
-          success: false,
-          message: 'Enrollment is not active',
+    return {
+      status: 200,
+      body: {
+        _id: enrollment._id.toString(),
+        userData: {
+          _id: enrollment.growSocialMediaPackageUserId._id,
+          fullName: enrollment.growSocialMediaPackageUserId.fullName,
+          email: enrollment.growSocialMediaPackageUserId.email,
+          phoneNumber: enrollment.growSocialMediaPackageUserId.phoneNumber,
+          country: enrollment.growSocialMediaPackageUserId.country,
+          gender: enrollment.growSocialMediaPackageUserId.gender,
+          kycURL: enrollment.growSocialMediaPackageUserId.kycURL,
         },
-      };
-    }
 
-    const subType = await growSocialMediaPackageSubTypeModel.findById(
-      activeEnrollment.growSocialMediaPackageSubTypeId
-    );
-
-    if (!subType) {
-      return {
-        status: 404,
-        body: {
-          success: false,
-          message: 'Package subtype not found',
+        enrollmentData: {
+          package: {
+            _id: enrollment.growSocialMediaPackageId._id,
+            title: enrollment.growSocialMediaPackageId.title,
+            price: enrollment.growSocialMediaPackageId.price,
+          },
+          packageType: {
+            _id: enrollment.growSocialMediaPackageTypeId._id,
+            title: enrollment.growSocialMediaPackageTypeId.title,
+          },
+          packageSubType: {
+            _id: enrollment.growSocialMediaPackageSubTypeId._id,
+            title: enrollment.growSocialMediaPackageSubTypeId.title,
+          },
+          profileLinkURL:
+            enrollment.profileLinkURL && enrollment.profileLinkURL[0],
+          isActive: enrollment.isActive,
         },
-      };
-    }
 
-    if (subType.taskType === 'follow') {
-      if (postURLs.length) {
-        return {
-          status: 400,
-          body: {
-            success: false,
-            message: 'Engagement URLs are not allowed for follow packages',
-          },
-        };
-      }
+        createdAt: enrollment.createdAt,
+        updatedAt: enrollment.updatedAt,
+      },
+    };
+  } catch (error) {
+    console.error(error);
+    return {
+      status: 500,
+      body: {
+        success: false,
+        message: error.message
+          ? `Internal sever error: ${error.message}`
+          : 'Internal server error',
+      },
+    };
+  }
+};
 
-      const allowedCount = subType.noOfFollowers ?? 0;
-      const existingURLs = activeEnrollment.profileLinkURL ?? [];
-
-      // remove duplicates from incoming
-      const uniqueIncomingUrlRequest = profileLinkURLs.filter(
-        (url) => !existingURLs.includes(url)
-      );
-
-      if (
-        existingURLs.length + uniqueIncomingUrlRequest.length >
-        allowedCount
-      ) {
-        return {
-          status: 400,
-          body: {
-            success: false,
-            message: `You can add only ${allowedCount} profile links for this package`,
-          },
-        };
-      }
-
-      if (uniqueIncomingUrlRequest) {
-        await growSocialMediaPackageEnrollmentModel.findByIdAndUpdate(
-          activeEnrollment._id,
-          {
-            $addToSet: {
-              profileLinkURL: {
-                $each: uniqueIncomingUrlRequest,
-              },
-            },
-          }
-        );
-      }
-    }
-
-    if (subType.taskType === 'engagement') {
-      if (profileLinkURLs.length) {
-        return {
-          status: 400,
-          body: {
-            success: false,
-            message: 'Follow URLs are not allowed for engagement packages',
-          },
-        };
-      }
-
-      const allowedCount = subType.noOfVideos ?? 0;
-
-      const existingEngagement = await growPackageEngagementPostModel.findOne({
-        growSocialMediaPackageEnrollmentId: activeEnrollment._id,
-      });
-
-      const existingURLs = existingEngagement?.postURLs ?? [];
-
-      // remove duplicates from incoming
-      const uniqueIncomingUrlRequest = postURLs.filter(
-        (url) => !existingURLs.includes(url)
-      );
-
-      if (
-        existingURLs.length + uniqueIncomingUrlRequest.length >
-        allowedCount
-      ) {
-        return {
-          status: 400,
-          body: {
-            success: false,
-            message: `You can add only ${allowedCount} post URLs for this package`,
-          },
-        };
-      }
-
-      if (uniqueIncomingUrlRequest.length) {
-        await growPackageEngagementPostModel.findOneAndUpdate(
-          {
-            growSocialMediaPackageEnrollmentId: activeEnrollment._id,
-          },
-          {
-            $addToSet: {
-              postURLs: {
-                $each: uniqueIncomingUrlRequest,
-              },
-            },
-          },
-          {
-            upsert: true,
-          }
-        );
-      }
-    }
+const getAllSrkGrowUsers: AppRouteImplementationOrOptions<
+  typeof growContract.getAllSrkGrowUsers
+> = async () => {
+  try {
+    const usersLists = await growSocialMediaPackageEnrollmentModel
+      .find({})
+      .populate<GrowPackageUserPopulated>({
+        path: 'growSocialMediaPackageUserId',
+        select: 'fullName referredBy status',
+        populate: {
+          path: 'referredBy',
+          select: 'fullName',
+        },
+      })
+      .populate<GrowPackageUserPopulated>({
+        path: 'growSocialMediaPackageId',
+        select: 'name',
+      })
+      .sort({ createdAt: -1 })
+      .lean();
 
     return {
-      status: 201,
-      body: {
-        success: true,
-        message: 'Social media tasks created successfully',
-      },
+      status: 200,
+      body: usersLists.map((u) => ({
+        _id: u.growSocialMediaPackageUserId._id.toString(),
+        fullName: u.growSocialMediaPackageUserId.fullName,
+        referredBy: u.growSocialMediaPackageUserId.referredBy?.fullName ?? null,
+        status: u.growSocialMediaPackageUserId.status,
+        socialMediaPackage: {
+          _id: u.growSocialMediaPackageId._id.toString(),
+          name: u.growSocialMediaPackageId.name,
+        },
+      })),
     };
   } catch (error) {
     console.error(error);
@@ -636,11 +352,84 @@ const createGrowSocialMediaTasks: AppRouteImplementationOrOptions<
   }
 };
 
-export const growMutationHandler = {
-  createGrowSocialMediaEnrollment,
-  validateGrowUserPromoCode,
-  acceptSocialGrowEnrollmentRequest,
-  rejectSocialGrowEnrollmentRequest,
-  resubmitGrowVerification,
-  createGrowSocialMediaTasks,
+const getAllSrkGrowAffiliateVerificationRequest: AppRouteImplementationOrOptions<
+  typeof growContract.getAllSrkGrowAffiliateVerificationRequest
+> = async ({ query }) => {
+  try {
+    const page = Number(query?.page ?? 1);
+    const limit = Number(query?.limit ?? 10);
+    const status = query?.status;
+
+    const filter: any = {};
+    if (status?.length) {
+      filter.status = { $in: status };
+    }
+
+    const totalUsers = await growSrkAffiliateVerificationModel.countDocuments(
+      filter
+    );
+
+    const totalPages = Math.ceil(totalUsers / limit);
+
+    const data = await growSrkAffiliateVerificationModel
+      .find(filter)
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .populate<{
+        srkUniversityUserId: Pick<
+          IUser,
+          | 'firstName'
+          | 'lastName'
+          | 'email'
+          | 'gender'
+          | 'country'
+          | 'phoneNumber'
+          | 'dob'
+          | 'profilePicture'
+        >;
+      }>({
+        path: 'srkUniversityUserId',
+        select: '-password',
+      })
+      .lean();
+
+    return {
+      status: 200,
+      body: {
+        data: data.map((d) => ({
+          _id: d._id.toString(),
+          username: `${d.srkUniversityUserId.firstName} ${d.srkUniversityUserId.lastName}`,
+          email: d.srkUniversityUserId.email,
+          status: d.status,
+          verificationImageUrl: d.verificationImageUrl,
+          verificationRequestId: d._id.toString(),
+          createdAt: d.createdAt.toLocaleString(),
+        })),
+        page,
+        limit,
+        totalUsers,
+        totalPages,
+      },
+    };
+  } catch (error: any) {
+    console.error(error);
+    return {
+      status: 500,
+      body: {
+        message: error.message
+          ? `Internal server error: ${error.message}`
+          : 'Internal server error',
+      },
+    };
+  }
+};
+
+// SRK Grow Enrollment Users
+export const growQueryHandler = {
+  getSrkGrowProfile,
+  getAllSrkGrowEnrollmentUser,
+  getSrkGrowEnrollmentUserById,
+  getAllSrkGrowUsers,
+  getAllSrkGrowAffiliateVerificationRequest,
 };

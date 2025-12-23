@@ -1,4 +1,8 @@
 import z from 'zod';
+import {
+  commonPaginatedQueryParamsSchema,
+  commonPaginationResponse,
+} from '../common';
 
 export const createGrowSocialMediaEnrollmentSchema = z.object({
   userData: z.object({
@@ -96,6 +100,30 @@ export type TValidateGrowUserPromoCodeResponse = z.infer<
   typeof validateGrowUserPromoCodeResponseSchema
 >;
 
+export const srkGrowAffiliateVerificationRequestSchema = z.object({
+  _id: z.string(),
+  verificationRequestId: z.string(),
+  username: z.string(),
+  email: z.string(),
+  verificationImageUrl: z.string(),
+  createdAt: z.string(),
+  status: z.enum(['pending', 'approved', 'rejected']),
+});
+
+export const getAllSrkGrowAffiliateVerificationRequestSchema = z.array(
+  srkGrowAffiliateVerificationRequestSchema
+);
+
+export const paginatedGetAllSrkGrowAffiliateVerificationSchema =
+  commonPaginationResponse.extend({
+    data: getAllSrkGrowAffiliateVerificationRequestSchema,
+  });
+
+export const getAllSrkGrowAffiliateVerificationQueryParams =
+  commonPaginatedQueryParamsSchema.extend({
+    status: z.enum(['pending', 'approved', 'rejected']).optional(),
+  });
+
 export const srkGrowUsersSchema = z.object({
   _id: z.string(),
   fullName: z.string(),
@@ -109,6 +137,11 @@ export const srkGrowUsersSchema = z.object({
     _id: z.string(),
     name: z.string(),
   }),
+});
+
+export const srkGrowAffiliateVerificationSchema = z.object({
+  srkUniversityUserId: z.string(),
+  verificationImageUrl: z.string(),
 });
 
 export const getAllSrkGrowUsersResponseSchema = z.array(srkGrowUsersSchema);

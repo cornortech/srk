@@ -12,7 +12,7 @@ import { growSrkAffiliateVerificationModel } from '../../model/growSrkAffiliateV
 import { AppRouteImplementationOrOptions } from '@ts-rest/express/src/lib/types';
 
 const createGrowSocialMediaEnrollment: AppRouteImplementationOrOptions<
-  typeof growContract.createGrowSocialMediaEnrollement
+  typeof growContract.createGrowSocialMediaEnrollment
 > = async ({ body }) => {
   try {
     const { userData, enrollmentData, paymentData, postEngagement } = body;
@@ -470,7 +470,7 @@ const resubmitGrowVerification: AppRouteImplementationOrOptions<
 };
 
 const createGrowSocialMediaTasks: AppRouteImplementationOrOptions<
-  typeof growContract.create
+  typeof growContract.createGrowSocialMediaTasks
 > = async ({ body }) => {
   try {
     const { growSocialMediaPackageEnrollmentId, profileLinkURLs, postURLs } =

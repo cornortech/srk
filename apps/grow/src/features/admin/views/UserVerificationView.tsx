@@ -1,4 +1,3 @@
-import { DashboardData } from '../../../lib/types/admin';
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { GradientText } from '../components/ui/GradientText';
@@ -11,12 +10,9 @@ import moment from 'moment';
 import { useSRKAlert } from '@srk/shared/hooks';
 import { PostLinksModal } from '../Modals/PostLinksModal';
 import TablePagination from '../../../lib/ui/TablePagination';
+import { ExternalLink } from 'lucide-react';
 
-interface UserVerificationViewProps {
-  data: DashboardData;
-}
-
-export const UserVerificationView: React.FC<UserVerificationViewProps> = () => {
+export const UserVerificationView = () => {
   const [page, setPage] = useState(1);
 
   const { data: growEnrollementUserData, isLoading } =
@@ -29,7 +25,6 @@ export const UserVerificationView: React.FC<UserVerificationViewProps> = () => {
         },
       }
     );
-
 
   const limit = 10;
   const totalPage = growEnrollementUserData?.body.totalPages ?? 1;
@@ -271,7 +266,30 @@ export const UserVerificationView: React.FC<UserVerificationViewProps> = () => {
                       </button>
                     </td>
 
-                    <td className="py-4 px-6">
+                    <td className="p-3">
+                      <div className="mb-3 relative group rounded-xl overflow-hidden border border-white/10">
+                        <img
+                          src={item.userData.kycURL}
+                          alt="Current Proof"
+                          className="w-full h-16 object-cover opacity-60 group-hover:opacity-100 transition-opacity"
+                        />
+                        <div className="absolute inset-0 flex items-center justify-center gap-2">
+                          <span className="bg-black/60 px-3 py-1 rounded-full text-xs text-white backdrop-blur-sm border border-white/10">
+                            View
+                          </span>
+                          <a
+                            href={item.userData.kycURL}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="p-2 bg-white rounded-full text-black hover:text-white hover:bg-[#b68938] transition-all opacity-0 group-hover:opacity-100"
+                          >
+                            <ExternalLink size={14} />
+                          </a>
+                        </div>
+                      </div>
+                    </td>
+
+                    {/* <td className="py-4 px-6">
                       <button
                         onClick={() => handleViewDocuments(item)}
                         className="flex items-center gap-2 px-3 py-1 bg-white/5 text-white rounded-lg hover:bg-white/10 transition-colors"
@@ -279,7 +297,7 @@ export const UserVerificationView: React.FC<UserVerificationViewProps> = () => {
                         <span>👁️</span>
                         View KYC
                       </button>
-                    </td>
+                    </td> */}
 
                     <td className="py-4 px-6">
                       <code className="text-sm font-mono text-white group-hover:text-[#e1ba73] transition-colors">
@@ -340,7 +358,7 @@ export const UserVerificationView: React.FC<UserVerificationViewProps> = () => {
         />
       )}
 
-      <AnimatePresence>
+      {/* <AnimatePresence>
         {documentViewerOpen && selectedDocument && (
           <DocumentViewerModal
             isOpen={documentViewerOpen}
@@ -349,7 +367,7 @@ export const UserVerificationView: React.FC<UserVerificationViewProps> = () => {
             documentUrl={selectedDocument.url}
           />
         )}
-      </AnimatePresence>
+      </AnimatePresence> */}
 
       <AnimatePresence>
         {postLinksModalOpen && (

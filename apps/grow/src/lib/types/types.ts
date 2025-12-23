@@ -1,9 +1,10 @@
 export type SocialPlatform =
-  | 'youtube'
-  | 'facebook'
-  | 'instagram'
-  | 'twitter'
-  | 'tiktok';
+  | 'YouTube'
+  | 'Facebook'
+  | 'Instagram'
+  | 'Twitter'
+  | 'TikTok';
+
 export type EngagementType = 'follow' | 'reach';
 export type KYCStatus = 'not_started' | 'pending' | 'approved' | 'rejected';
 

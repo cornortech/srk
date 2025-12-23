@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Camera,
   CheckCircle,
@@ -10,42 +10,127 @@ import { useNavigate } from 'react-router-dom';
 import { GradientText } from '../features/verification/components/ui/GradientText';
 import { GlassCard } from '../features/verification/components/ui/GlassCard';
 import { CameraFeature } from '../features/verification/components/CameraFeature';
+import { api } from '../lib/api';
+import { useSRKFileUpload } from '@srk/shared/hooks';
 
 export const GrowVerificationPage = () => {
   const [showCamera, setShowCamera] = useState(false);
-  const [capturedMedia, setCapturedMedia] = useState<string | null>(null);
+  const [capturedMedia, setCapturedMedia] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string>('');
+  const [uploadedImageUrl, setUploadedImageUrl] = useState('');
   const [mediaType, setMediaType] = useState<'photo' | 'video'>('photo');
   const [submissionStatus, setSubmissionStatus] = useState<
     'idle' | 'submitting' | 'success' | 'error'
   >('idle');
 
-  const handleCapture = (data: string) => {
-    setCapturedMedia(data);
-    setShowCamera(false);
+  const { uploadFile, isUploading } = useSRKFileUpload('grow');
+  const navigate = useNavigate();
 
-    // Simulate submission
-    setSubmissionStatus('submitting');
-    setTimeout(() => {
-      setSubmissionStatus('success');
-      // Clear success after 3 seconds
-      setTimeout(() => setSubmissionStatus('idle'), 3000);
-    }, 2000);
+  // Convert base64 string to File object
+  const base64ToFile = (dataUrl: string, filename: string) => {
+    const arr = dataUrl.split(',');
+    const mime = arr[0].match(/:(.*?);/)![1];
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+    while (n--) u8arr[n] = bstr.charCodeAt(n);
+    return new File([u8arr], filename, { type: mime });
   };
 
-  const navigate = useNavigate();
+  useEffect(() => {
+    if (!capturedMedia) {
+      setPreviewUrl('');
+      return;
+    }
+
+    const objectUrl = URL.createObjectURL(capturedMedia);
+    setPreviewUrl(objectUrl);
+
+    return () => {
+      URL.revokeObjectURL(objectUrl);
+    };
+  }, [capturedMedia]);
+
+  const handleCapture = async (data: string | Blob) => {
+    try {
+      setSubmissionStatus('submitting');
+
+      let file: File;
+      if (data instanceof Blob) {
+        file = new File(
+          [data],
+          `capture.${mediaType === 'photo' ? 'jpg' : 'webm'}`,
+          {
+            type: data.type,
+          }
+        );
+      } else {
+        file = base64ToFile(
+          data,
+          `capture.${mediaType === 'photo' ? 'jpg' : 'webm'}`
+        );
+      }
+
+      const uploadedUrl = await uploadFile(
+        file,
+        mediaType === 'photo' ? 'image' : 'video'
+      );
+
+      setCapturedMedia(file);
+      setUploadedImageUrl(uploadedUrl.url);
+      setShowCamera(false);
+      setSubmissionStatus('idle');
+    } catch (err) {
+      console.error(err);
+      setSubmissionStatus('error');
+    }
+  };
+
+  const affiliateVerificationMutation =
+    api.grow.srkGrowAffiliateVerificationRequest.useMutation({
+      onMutate: () => setSubmissionStatus('submitting'),
+      onSuccess: (data) => {
+        if (data.status === 200 || data.status === 201) {
+          setSubmissionStatus('success');
+          navigate('/');
+        } else {
+          setSubmissionStatus('error');
+        }
+      },
+
+      onError: () => setSubmissionStatus('error'),
+    });
+
+  const userId = '69478b0a040f600b2a17212d';
+
+  const handleSubmitVerification = () => {
+    if (!capturedMedia) {
+      alert('Please capture an image first');
+      return;
+    }
+
+    affiliateVerificationMutation.mutate({
+      body: {
+        srkUniversityUserId: userId,
+        verificationImageUrl: uploadedImageUrl,
+      },
+    });
+
+    if (affiliateVerificationMutation.isSuccess) {
+      alert(
+        'Verification is pending, please wait for the approval from the admin'
+      );
+    }
+  };
 
   const openCamera = (type: 'photo' | 'video') => {
     setMediaType(type);
     setShowCamera(true);
   };
 
-  if (submissionStatus === 'success') {
-    setTimeout(() => navigate('/'), 3000);
-  }
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0a0705] to-black text-white">
-      {/* Animated background */}
+      {/* Background Blobs */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-20 left-1/4 w-96 h-96 bg-[#b68938]/10 rounded-full blur-[128px]" />
         <div className="absolute bottom-20 right-1/4 w-96 h-96 bg-[#e1ba73]/10 rounded-full blur-[128px]" />
@@ -53,7 +138,6 @@ export const GrowVerificationPage = () => {
 
       {/* Main content */}
       <div className="relative z-10 max-w-6xl mx-auto px-4 py-12">
-        {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">
             <GradientText>Advanced Camera Verification</GradientText>
@@ -64,9 +148,8 @@ export const GrowVerificationPage = () => {
           </p>
         </div>
 
-        {/* Main grid */}
         <div className="grid lg:grid-cols-2 gap-8">
-          {/* Left side - Options */}
+          {/* Left side */}
           <div className="space-y-8">
             <GlassCard>
               <div className="text-center mb-6">
@@ -78,7 +161,6 @@ export const GrowVerificationPage = () => {
                 </h3>
                 <p className="text-gray-400">Choose your verification method</p>
               </div>
-
               <div className="grid grid-cols-1 gap-4">
                 <button
                   onClick={() => openCamera('photo')}
@@ -123,7 +205,7 @@ export const GrowVerificationPage = () => {
             </GlassCard>
           </div>
 
-          {/* Right side - Preview & Status */}
+          {/* Right side */}
           <div className="space-y-8">
             <GlassCard>
               <div className="text-center mb-6">
@@ -137,18 +219,16 @@ export const GrowVerificationPage = () => {
                 </p>
               </div>
 
-              {/* Preview area */}
               <div className="aspect-video bg-black/30 rounded-xl overflow-hidden mb-6 border-2 border-white/10 flex items-center justify-center">
-                {capturedMedia && mediaType === 'photo' ? (
+                {previewUrl && mediaType === 'photo' ? (
                   <img
-                    src={capturedMedia}
+                    src={previewUrl}
                     alt="Captured"
                     className="w-full h-full object-contain"
                   />
                 ) : null}
               </div>
 
-              {/* Submission status */}
               {submissionStatus !== 'idle' && (
                 <div
                   className={`p-4 rounded-xl mb-4 ${
@@ -189,30 +269,22 @@ export const GrowVerificationPage = () => {
                 </div>
               )}
 
-              {/* Action buttons */}
               <div className="space-y-3">
                 {capturedMedia ? (
                   <div className="grid grid-cols-2 gap-4">
-                    <button
-                      onClick={() => setCapturedMedia(null)}
-                      className="px-6 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-white border border-white/10 transition-colors"
+                    <button className="bg-orange-500 text-white"
+                      onClick={handleSubmitVerification}
+                      disabled={
+                        affiliateVerificationMutation.isPending ||
+                        isUploading ||
+                        !uploadedImageUrl
+                      }
                     >
-                      Clear
-                    </button>
-                    <button
-                      onClick={() => {
-                        setSubmissionStatus('submitting');
-                        setTimeout(() => {
-                          setSubmissionStatus('success');
-                          setTimeout(() => {
-                            setSubmissionStatus('idle');
-                            setCapturedMedia(null);
-                          }, 2000);
-                        }, 1500);
-                      }}
-                      className="px-6 py-3 rounded-xl bg-gradient-to-r from-[#b68938] to-[#e1ba73] text-black font-bold hover:shadow-[0_0_30px_rgba(182,137,56,0.3)] transition-all"
-                    >
-                      Submit Verification
+                      {isUploading
+                        ? 'Uploading...'
+                        : affiliateVerificationMutation.isPending
+                        ? 'Submitting...'
+                        : 'Submit Verification'}
                     </button>
                   </div>
                 ) : (
@@ -245,13 +317,14 @@ export const GrowVerificationPage = () => {
         </div>
       </div>
 
-      {/* Camera Feature Modal */}
+      {/* Camera Modal */}
       {showCamera && (
         <CameraFeature
           onCapture={handleCapture}
           onClose={() => setShowCamera(false)}
           title={`${mediaType === 'photo' ? 'Photo' : 'Video'} Capture`}
           description={`Take a ${mediaType} for verification`}
+          mode={mediaType}
         />
       )}
     </div>

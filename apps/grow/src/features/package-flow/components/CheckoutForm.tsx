@@ -9,7 +9,7 @@ import {
 } from '../../../lib/types/types';
 
 interface CheckoutFormProps {
-  selectedPackage: PackageDetails;
+  selectedPackage: PackageDetails | null;
   selectedPlatform: SocialPlatform;
   engagementType: EngagementType;
   optionDescription: string;
@@ -25,6 +25,7 @@ interface CheckoutFormProps {
   showMultiplePostLinks: boolean;
   numPostLinks: number;
   onValidatePromoCode: () => void;
+  isPromoLocked: boolean;
   isValidatingPromo: boolean;
   promoError: string | null;
   promoSuccessMessage: string | null;
@@ -53,6 +54,7 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
   showMultiplePostLinks,
   numPostLinks,
   onValidatePromoCode,
+  isPromoLocked,
   isValidatingPromo,
   promoError,
   promoSuccessMessage,
@@ -95,7 +97,7 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
             <div className="flex justify-between items-center py-3 border-b border-white/10">
               <span className="text-gray-400">Package</span>
               <span className="font-bold text-white">
-                {selectedPackage.name}
+                {selectedPackage?.name}
               </span>
             </div>
             <div className="flex justify-between items-center py-3 border-b border-white/10">
@@ -124,7 +126,7 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
                 {discountDetails ? (
                   <>
                     <span className="block text-sm text-gray-500 line-through">
-                      {selectedPackage.amount}
+                      {selectedPackage?.amount}
                     </span>
                     <span className="text-2xl font-bold text-[#b68938]">
                       {discountDetails.finalAmountAfterDiscount}
@@ -132,7 +134,7 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
                   </>
                 ) : (
                   <span className="text-2xl font-bold text-[#b68938]">
-                    {selectedPackage.amount}
+                    {selectedPackage?.amount}
                   </span>
                 )}
               </div>
@@ -405,8 +407,9 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
                   type="text"
                   name="promoCode"
                   value={userDetails.promoCode}
+                  readOnly={isPromoLocked} 
                   onChange={handleUserDetailsChange}
-                  className="flex-1 px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-600 focus:outline-none focus:border-[#b68938] focus:ring-1 focus:ring-[#b68938] transition-all"
+                  className={`flex-1 px-4 py-3 rounded-xl bg-white/5 border text-white placeholder-gray-600 focus:outline-none focus:border-[#b68938] focus:ring-1 focus:ring-[#b68938] transition-all ${isPromoLocked ? 'border-[#b68938]/50 text-gray-400' : 'border-white/10'}`}
                   placeholder="Provide promo code if available"
                 />
                 <button
@@ -511,9 +514,9 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
                 I agree to the Terms & Conditions and Privacy Policy. I
                 understand that all engagements come from verified SRK
                 University students and the delivery time is{' '}
-                {selectedPackage._id === 'starter'
+                {selectedPackage?._id === 'starter'
                   ? '7 days'
-                  : selectedPackage._id === 'intermediate'
+                  : selectedPackage?._id === 'intermediate'
                   ? '3 days'
                   : '24 hours'}
                 .

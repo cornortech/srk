@@ -61,7 +61,7 @@ const router = createBrowserRouter([
     element: <ViewerPage />,
   },
     {
-    path: '/affilate/dashboard',
+    path: '/affiliate/dashboard',
     element: <GrowDashboard />,
   },
 ]);

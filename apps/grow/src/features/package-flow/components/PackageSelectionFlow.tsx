@@ -15,13 +15,15 @@ import { api } from '../../../lib/api';
 import { useSRKFileUpload } from '@srk/shared/hooks';
 
 interface PackageSelectionFlowProps {
-  selectedPackage: PackageDetails;
+  selectedPackage: PackageDetails | null;
+  referralCode?: string; // Add this
   onComplete: (userDetails: UserDetails) => void;
   onBack: () => void;
 }
 
 export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
   selectedPackage,
+  referralCode = '',
   onComplete,
   onBack,
 }) => {
@@ -41,14 +43,14 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
     confirmPassword: '',
     country: '',
     gender: '',
-    promoCode: '',
+    promoCode: referralCode || '',
     phone: '',
     socialLink: '',
-    platform: 'youtube' as SocialPlatform,
+    platform: '' as SocialPlatform,
     engagementType: 'follow' as EngagementType,
     selectedOption: 0,
-    packageId: selectedPackage._id,
-    postLinks: ['', '', '', ''],
+    packageId: selectedPackage?._id || '',
+    postLinks: [''],
     additionalInfo: '',
     kyc: [''],
   });
@@ -113,17 +115,17 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
     validatePromo.mutate({
       body: {
         promoCode: userDetails.promoCode,
-        growSocialMediaPackageId: selectedPackage._id,
+        growSocialMediaPackageId: selectedPackage?._id || '',
       },
     });
   };
 
   const socialPlatforms: SocialPlatform[] = [
-    'youtube',
-    'facebook',
-    'instagram',
-    'twitter',
-    'tiktok',
+    'YouTube',
+    'Facebook',
+    'Instagram',
+    'Twitter',
+    'TikTok',
   ];
 
   const handlePlatformSelect = (platform: SocialPlatform) => {
@@ -251,7 +253,7 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
     try {
       const kycUrl = userDetails.kyc?.[0] || '';
 
-      const packageType = selectedPackage.packageTypes[selectedTypeIndex];
+      const packageType = selectedPackage?.packageTypes[selectedTypeIndex];
       const packageSubType =
         packageType?.packageSubTypes?.[selectedSubTypeIndex];
 
@@ -260,14 +262,14 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
       }
 
       // Ensure valid profile link
-      let profileLink = userDetails.socialLink || '';
-      if (!profileLink) {
-        // Fallback to a constructed URL to satisfy schema if user didn't provide one
-        // Ideally this should be validated in the form step, but as a safeguard:
-        profileLink = `https://${selectedPlatform}.com/user`;
-      } else if (!profileLink.startsWith('http')) {
-        profileLink = `https://${profileLink}`;
-      }
+      let profileLink = [userDetails.socialLink];
+      // if (!profileLink) {
+      // Fallback to a constructed URL to satisfy schema if user didn't provide one
+      // Ideally this should be validated in the form step, but as a safeguard:
+      //   profileLink = `https://${selectedPlatform}.com/user`;
+      // } else if (!profileLink.startsWith('http')) {
+      //   profileLink = `https://${profileLink}`;
+      // }
 
       await createEnrollment.mutateAsync({
         body: {
@@ -287,6 +289,7 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
             growSocialMediaPackageTypeId: packageType._id || 'unknown',
             growSocialMediaPackageSubTypeId: packageSubType._id || 'unknown',
             profileLinkURL: profileLink,
+            socialMediaPlatform: selectedPlatform!,
           },
           paymentData: {
             paymentURL: paymentData.paymentProofUrl,
@@ -296,6 +299,17 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
               | 'khalti'
               | 'bankTransfer',
           },
+          // Replace the postEngagement block with this:
+          postEngagement:
+            engagementType === 'reach'
+              ? {
+                  // Filter out empty strings from the array
+                  postURLs:
+                    userDetails.postLinks?.filter(
+                      (link) => link.trim() !== ''
+                    ) || [],
+                }
+              : { postURLs: [] }, // Send an empty array instead of undefined to satisfy the backend
         },
       });
 
@@ -307,7 +321,7 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
   };
 
   const getSelectedOptionDetails = () => {
-    const packageType = selectedPackage.packageTypes[selectedTypeIndex];
+    const packageType = selectedPackage?.packageTypes[selectedTypeIndex];
     if (!packageType || !packageType.packageSubTypes) {
       return { description: 'Select an option' };
     }
@@ -340,13 +354,13 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
 
   const showMultiplePostLinks =
     engagementType === 'reach' &&
-    (selectedPackage.packageTypes[selectedTypeIndex]?.packageSubTypes[
+    (selectedPackage?.packageTypes[selectedTypeIndex]?.packageSubTypes[
       selectedSubTypeIndex
     ]?.noOfVideos || 0) > 1;
 
   const numPostLinks =
     engagementType === 'reach'
-      ? selectedPackage.packageTypes[selectedTypeIndex]?.packageSubTypes[
+      ? selectedPackage?.packageTypes[selectedTypeIndex]?.packageSubTypes[
           selectedSubTypeIndex
         ]?.noOfVideos || 0
       : 0;
@@ -368,8 +382,8 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
             </span>
           </button>
           <h1 className="text-3xl md:text-4xl font-bold text-white">
-            {selectedPackage.name} Package -{' '}
-            <span className="text-[#b68938]">{selectedPackage.amount}</span>
+            {selectedPackage?.name} Package -{' '}
+            <span className="text-[#b68938]">{selectedPackage?.amount}</span>
           </h1>
         </div>
 
@@ -411,6 +425,7 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
               engagementType={engagementType}
               optionDescription={optionDetails.description}
               userDetails={userDetails}
+              isPromoLocked={!!referralCode}
               handleUserDetailsChange={handleUserDetailsChange}
               handlePostLinkChange={handlePostLinkChange}
               handleSubmit={handleSubmit}
@@ -444,9 +459,9 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
           engagementType: engagementType!,
         }}
         packagePrice={String(
-          discountDetails?.finalAmountAfterDiscount || selectedPackage.amount
+          discountDetails?.finalAmountAfterDiscount || selectedPackage?.amount
         )}
-        packageName={selectedPackage.name}
+        packageName={selectedPackage?.name || ''}
         onSubmit={handlePaymentSubmit}
       />
     </div>

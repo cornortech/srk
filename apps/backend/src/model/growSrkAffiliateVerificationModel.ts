@@ -1,9 +1,10 @@
 import mongoose from "mongoose";
 
-const growSrkAffiliateVerificationSchema = new mongoose.Schema(
+const srkGrowAffiliateVerificationSchema = new mongoose.Schema(
     {
-        srkuniversityUserId: {
-            type: String,
+        srkUniversityUserId: {
+            type:mongoose.Schema.Types.ObjectId,
+            ref: "User", 
             required: true,
             unique: true
         },
@@ -13,7 +14,7 @@ const growSrkAffiliateVerificationSchema = new mongoose.Schema(
         },
         status: {
             type: String,
-            enum: ["pending", "approved", "rejected"],
+            enum: ['pending', 'approved', 'rejected'],
             default: "pending"
         },
         rejectionReason: {
@@ -26,6 +27,6 @@ const growSrkAffiliateVerificationSchema = new mongoose.Schema(
 );
 
 export const growSrkAffiliateVerificationModel = mongoose.model(
-    "growSrkAffiliateVerification",
-    growSrkAffiliateVerificationSchema,
+    "srkGrowAffiliateVerification",
+    srkGrowAffiliateVerificationSchema,
 );

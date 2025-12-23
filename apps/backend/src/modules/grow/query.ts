@@ -1,9 +1,12 @@
 import { growContract } from '@srk/shared/contracts';
 import { AppRouteImplementationOrOptions } from '@ts-rest/express/src/lib/types';
 import { growSocialMediaPackageEnrollmentModel } from '../../model/growSocialMediaPackageEnrollement';
-import { GrowEnrollmentPopulated, GrowPackageUserPopulated } from "../../utils/types/growQuery";
-import { growPackageEngagementPostModel } from "../../model/growPackageEngagementPostModel";
-import { growSrkAffiliateVerificationModel } from "../../model/growSrkAffiliateVerificationModel";
+import {
+  GrowEnrollmentPopulated,
+} from '../../utils/types/growQuery';
+import { growPackageEngagementPostModel } from '../../model/growPackageEngagementPostModel';
+import { growSrkAffiliateVerificationModel } from '../../model/growSrkAffiliateVerificationModel';
+import { IUser } from '../../model/userModel';
 
 const getAllSrkGrowEnrollementUser: AppRouteImplementationOrOptions<
   typeof growContract.getAllGrowSocialMediaEnrollement
@@ -48,8 +51,7 @@ const getAllSrkGrowEnrollementUser: AppRouteImplementationOrOptions<
           },
 
           enrollementData: {
-            growSocialMediaPackageId:
-              e.growSocialMediaPackageId._id.toString(),
+            growSocialMediaPackageId: e.growSocialMediaPackageId._id.toString(),
             growSocialMediaPackageTypeId:
               e.growSocialMediaPackageTypeId._id.toString(),
             growSocialMediaPackageSubTypeId:
@@ -59,14 +61,16 @@ const getAllSrkGrowEnrollementUser: AppRouteImplementationOrOptions<
           },
 
           postEngagement: {
-            postURLs: postEngagement?.postURLs.length ? postEngagement.postURLs : undefined,
+            postURLs: postEngagement?.postURLs.length
+              ? postEngagement.postURLs
+              : undefined,
           },
 
           paymentData: {
-            paymentMethod: "esewa" as const,
-            paymentURL: "",
-            transactionId: "",
-            rejectionReason: "",
+            paymentMethod: 'esewa' as const,
+            paymentURL: '',
+            transactionId: '',
+            rejectionReason: '',
           },
           createdAt: e.createdAt,
           updatedAt: e.updatedAt,
@@ -125,7 +129,6 @@ const getAllSrkGrowEnrollementUser: AppRouteImplementationOrOptions<
     };
   }
 };
-
 
 const getSrkGrowEnrollementUserById: AppRouteImplementationOrOptions<
   typeof growContract.getGrowSocialMediaEnrollementById
@@ -197,85 +200,131 @@ const getSrkGrowEnrollementUserById: AppRouteImplementationOrOptions<
   }
 };
 
-const getAllSrkGrowUsers: AppRouteImplementationOrOptions<
-  typeof growContract.getAllSrkGrowUsers
-> = async () => {
-  try {
+// const getAllSrkGrowUsers: AppRouteImplementationOrOptions<
+//   typeof growContract.getAllSrkGrowUsers
+// > = async () => {
+//   try {
+//     const usersLists = await growSocialMediaPackageEnrollmentModel
+//       .find({})
+//       .populate<GrowPackageUserPopulated>({
+//         path: 'growSocialMediaPackageUserId',
+//         select: 'fullName referredBy status',
+//         populate: {
+//           path: 'referredBy',
+//           select: 'fullName',
+//         },
+//       })
+//       .populate<GrowPackageUserPopulated>({
+//         path: 'growSocialMediaPackageId',
+//         select: 'name',
+//       })
+//       .sort({ createdAt: -1 })
+//       .lean();
 
-    const usersLists = await growSocialMediaPackageEnrollmentModel.
-      find({})
-      .populate<GrowPackageUserPopulated>({
-        path: "growSocialMediaPackageUserId",
-        select: "fullName referredBy status",
-        populate: {
-          path: "referredBy",
-          select: "fullName",
-        },
-      })
-      .populate<GrowPackageUserPopulated>({
-        path: "growSocialMediaPackageId",
-        select: "name",
-      })
+//     return {
+//       status: 200,
+//       body: usersLists.map((u) => ({
+//         _id: u.growSocialMediaPackageUserId._id.toString(),
+//         fullName: u.growSocialMediaPackageUserId.fullName,
+//         referredBy: u.growSocialMediaPackageUserId.referredBy?.fullName ?? null,
+//         status: u.growSocialMediaPackageUserId.status,
+//         socialMediaPackage: {
+//           _id: u.growSocialMediaPackageId._id.toString(),
+//           name: u.growSocialMediaPackageId.name,
+//         },
+//       })),
+//     };
+//   } catch (error) {
+//     console.error(error);
+//     return {
+//       status: 500,
+//       body: {
+//         success: false,
+//         message: error.message
+//           ? `Internal server error: ${error.message}`
+//           : 'Internal server error',
+//       },
+//     };
+//   }
+// };
+
+const getAllSrkGrowAffiliateVerificationRequest: AppRouteImplementationOrOptions<
+  typeof growContract.getAllSrkGrowAffiliateVerificationRequest
+> = async ({ query }) => {
+  try {
+    const page = Number(query?.page ?? 1);
+    const limit = Number(query?.limit ?? 10);
+    const status = query?.status;
+
+    const filter: any = {};
+    if (status?.length) {
+      filter.status = { $in: status };
+    }
+
+    const totalUsers = await growSrkAffiliateVerificationModel.countDocuments(
+      filter
+    );
+
+    const totalPages = Math.ceil(totalUsers / limit);
+
+    const data = await growSrkAffiliateVerificationModel
+      .find(filter)
       .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .populate<{
+        srkUniversityUserId: Pick<
+          IUser,
+          | 'firstName'
+          | 'lastName'
+          | 'email'
+          | 'gender'
+          | 'country'
+          | 'phoneNumber'
+          | 'dob'
+          | 'profilePicture'
+        >;
+      }>({
+        path: 'srkUniversityUserId',
+        select: '-password',
+      })
       .lean();
 
     return {
       status: 200,
-      body: usersLists.map((u) => ({
-        _id: u.growSocialMediaPackageUserId._id.toString(),
-        fullName: u.growSocialMediaPackageUserId.fullName,
-        referredBy: u.growSocialMediaPackageUserId.referredBy?.fullName ?? null,
-        status: u.growSocialMediaPackageUserId.status,
-        socialMediaPackage: {
-          _id: u.growSocialMediaPackageId._id.toString(),
-          name: u.growSocialMediaPackageId.name,
-        },
-      })),
-    }
-
-  } catch (error) {
+      body: {
+        data: data.map((d) => ({
+          _id: d._id.toString(),
+          username: `${d.srkUniversityUserId.firstName} ${d.srkUniversityUserId.lastName}`,
+          email: d.srkUniversityUserId.email,
+          status: d.status,
+          verificationImageUrl: d.verificationImageUrl,
+          verificationRequestId: d._id.toString(),
+          createdAt: d.createdAt.toLocaleString(),
+        })),
+        page,
+        limit,
+        totalUsers,
+        totalPages,
+      },
+    };
+  } catch (error: any) {
     console.error(error);
     return {
       status: 500,
       body: {
-        success: false,
-        message: error.message ? `Internal server error: ${error.message}` : "Internal server error",
+        message: error.message
+          ? `Internal server error: ${error.message}`
+          : 'Internal server error',
       },
-
-    }
-  };
+    };
+  }
 };
-
-const getAllSrkGrowAffiliateVerificationRequest: AppRouteImplementationOrOptions<typeof growContract.getAllSrkGrowAffiliateVerificationRequest> = async () => {
-    try {
-        const gorwAffiliations = await growSrkAffiliateVerificationModel.find()
-
-        return {
-            status: 200,
-            body: {
-                result: gorwAffiliations,
-                success: true
-            }
-        }
-
-    } catch (error) {
-        console.log(error);
-        return {
-            status: 500,
-            body: {
-                message: error.message ? `Internal server error: ${error.message}` : "Internal server error",
-                success: false
-
-            }
-        }
-    }
-}
 
 // SRK Grow Enrollment Users
 
 export const growQueryHandler = {
   getAllSrkGrowEnrollementUser,
   getSrkGrowEnrollementUserById,
-  getAllSrkGrowUsers,
-  getAllSrkGrowAffiliateVerificationRequest
+  getAllSrkGrowAffiliateVerificationRequest,
 };

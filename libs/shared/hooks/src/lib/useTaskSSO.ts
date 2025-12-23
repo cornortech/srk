@@ -52,7 +52,6 @@ export const useTaskSSO = ({ backendUrl }: UseTaskSSOOptions): UseTaskSSOReturn 
 
   return {
     redirectToTaskProgram,
-    redirectToSocialMediaProgram,
     isLoading,
     error,
   };

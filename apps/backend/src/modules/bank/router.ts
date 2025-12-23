@@ -1,7 +1,7 @@
-import { initServer } from "@ts-rest/express";
-import { bankContract } from "../../contract/bank/contract";
-import { bankQueryHandlers } from "./query";
-import { bankMutationHandlers } from "./mutation";
+import { initServer } from '@ts-rest/express';
+import { bankContract } from '../../../../../libs/shared/contracts/src/lib/bank/contract';
+import { bankQueryHandlers } from './query';
+import { bankMutationHandlers } from './mutation';
 
 const s = initServer();
 

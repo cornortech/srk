@@ -17,7 +17,6 @@ const c = initContract();
 export const apiContract = c.router({
   auth: authContract,
   grow: growContract,
-  
   user: userContract,
   package: packageContract,
   course: courseContract,
@@ -27,4 +26,5 @@ export const apiContract = c.router({
   bank: bankContract,
   tour: tourContract,
   task: taskContract,
+  sso: ssoContract,
 });

@@ -1,13 +1,13 @@
-import { AppRouteImplementationOrOptions } from "@ts-rest/express/src/lib/types";
-import { webinarContract } from "../../contract/webinar/contract";
-import { WebinarModel } from "../../model/webinarModel";
+import { AppRouteImplementationOrOptions } from '@ts-rest/express/src/lib/types';
+import { webinarContract } from '../../../../../libs/shared/contracts/src/lib/webinar/contract';
+import { WebinarModel } from '../../model/webinarModel';
 
 const createWebinar: AppRouteImplementationOrOptions<
   typeof webinarContract.createWebinar
 > = async ({ req, body }) => {
   try {
     console.log(body.meetUrl);
-    
+
     await WebinarModel.create({
       title: body.title,
       startTime: body.startTime,
@@ -19,7 +19,7 @@ const createWebinar: AppRouteImplementationOrOptions<
       status: 201,
       body: {
         success: true,
-        message: "Webinar created successfully",
+        message: 'Webinar created successfully',
       },
     };
   } catch (error) {
@@ -27,7 +27,7 @@ const createWebinar: AppRouteImplementationOrOptions<
       status: 500,
       body: {
         success: false,
-        message: "Internal Server Error",
+        message: 'Internal Server Error',
       },
     };
   }
@@ -46,7 +46,7 @@ const deleteWebinar: AppRouteImplementationOrOptions<
         status: 404,
         body: {
           success: false,
-          message: "Webinar not found",
+          message: 'Webinar not found',
         },
       };
     }
@@ -55,7 +55,7 @@ const deleteWebinar: AppRouteImplementationOrOptions<
       status: 200,
       body: {
         success: true,
-        message: "Webinar deleted successfully",
+        message: 'Webinar deleted successfully',
       },
     };
   } catch (error) {
@@ -63,7 +63,7 @@ const deleteWebinar: AppRouteImplementationOrOptions<
       status: 500,
       body: {
         success: false,
-        message: "Internal Server Error",
+        message: 'Internal Server Error',
       },
     };
   }
@@ -90,7 +90,7 @@ const updateWebinar: AppRouteImplementationOrOptions<
         status: 404,
         body: {
           success: false,
-          message: "Webinar not found",
+          message: 'Webinar not found',
         },
       };
     }
@@ -99,7 +99,7 @@ const updateWebinar: AppRouteImplementationOrOptions<
       status: 200,
       body: {
         success: true,
-        message: "Webinar updated successfully",
+        message: 'Webinar updated successfully',
       },
     };
   } catch (error) {
@@ -107,7 +107,7 @@ const updateWebinar: AppRouteImplementationOrOptions<
       status: 500,
       body: {
         success: false,
-        message: "Internal Server Error",
+        message: 'Internal Server Error',
       },
     };
   }

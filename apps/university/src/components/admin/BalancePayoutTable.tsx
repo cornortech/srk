@@ -64,6 +64,13 @@ export function BalancePayoutTable() {
 
   const payoutList = payouts?.data || [];
 
+  if (!payouts?.data) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <Spinner />
+      </div>
+    );
+  }
   return (
     <>
       <div className="flex justify-between items-center mb-4">
@@ -140,10 +147,10 @@ export function BalancePayoutTable() {
           ))}
         </TableBody>
       </Table>
-      {payoutList.length >= 10 && (
+      {payouts?.data.length >= 10 && (
         <TablePagination
           page={page}
-          totalPages={payouts?.totalPages || 1}
+          totalPages={payouts?.totalPages}
           onPageChange={(p) => setPage(p)}
         />
       )}

@@ -94,7 +94,13 @@ export const userContract = c.router({
       })
       ?.optional(),
     responses: {
-      200: getAllUsersSchema,
+      200: z.object({
+        data: getAllUsersSchema,
+        page: z.number(),
+        limit: z.number(),
+        totalUsers: z.number(),
+        totalPages: z.number(),
+      }),
       403: ErrorSchema,
       404: ErrorSchema,
       500: ErrorSchema,

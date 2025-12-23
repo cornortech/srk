@@ -1,5 +1,3 @@
-import { MOCK_USER_VERIFICATION_DATA } from '../../../data/adminMock';
-import { DashboardData, VerificationItem } from '../../../lib/types/admin';
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { GradientText } from '../components/ui/GradientText';
@@ -10,14 +8,26 @@ import { RejectionModal } from '../Modals/RejectionModal';
 import { api } from '../../../lib/api';
 import moment from 'moment';
 import { useSRKAlert } from '@srk/shared/hooks';
+import { PostLinksModal } from '../Modals/PostLinksModal';
+import TablePagination from '../../../lib/ui/TablePagination';
+import { ExternalLink } from 'lucide-react';
 
-interface UserVerificationViewProps {
-  data: DashboardData;
-}
+export const UserVerificationView = () => {
+  const [page, setPage] = useState(1);
 
-export const UserVerificationView: React.FC<UserVerificationViewProps> = () => {
-  const { data: growEnrollmentUserData, isLoading } =
-    api.grow.getAllGrowSocialMediaEnrollment.useQuery(['enrolledUser']);
+  const { data: growEnrollementUserData, isLoading } =
+    api.grow.getAllGrowSocialMediaEnrollement.useQuery(
+      ['enrolledUser', page], // queryKey
+      {
+        query: {
+          page: page,
+          limit: 10,
+        },
+      }
+    );
+
+  const limit = 10;
+  const totalPage = growEnrollementUserData?.body.totalPages ?? 1;
 
   const [documentViewerOpen, setDocumentViewerOpen] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState<{
@@ -27,32 +37,35 @@ export const UserVerificationView: React.FC<UserVerificationViewProps> = () => {
   const [rejectionModalOpen, setRejectionModalOpen] = useState(false);
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [postLinksModalOpen, setPostLinksModalOpen] = useState(false);
+  const [selectedPostLinks, setSelectedPostLinks] = useState<string[]>([]);
+  const [selectedUserName, setSelectedUserName] = useState('');
 
   const { show } = useSRKAlert();
 
-  const { mutate: acceptEnrollmentMutation, isPending: approvePending } =
+  const { mutate: acceptEnrollementMutation, isPending: approvePending } =
     api.grow.acceptSocialGrowEnrollmentRequest.useMutation({
       onSuccess: (res) => {
         if (res.status === 200) {
-          show('Enrollment User approved', 'success');
+          show('Enrollement User approved', 'success');
         }
       },
     });
 
   const handleApprove = (id: string) => {
     setSelectedItemId(id);
-    acceptEnrollmentMutation({
+    acceptEnrollementMutation({
       params: {
-        enrollmentId: id,
+        enrollementId: id,
       },
     });
   };
 
-  const { mutate: rejectEnrollmentMutation, isPending: rejectPending } =
+  const { mutate: rejectEnrollementMutation, isPending: rejectPending } =
     api.grow.rejectSocialGrowEnrollmentRequest.useMutation({
       onSuccess: (res) => {
         if (res.status === 200) {
-          show('Enrollment User approved', 'success');
+          show('Enrollement User rejected', 'success');
         }
       },
     });
@@ -64,9 +77,9 @@ export const UserVerificationView: React.FC<UserVerificationViewProps> = () => {
 
   const handleRejectionSubmit = (rejectionReason: string) => {
     if (selectedItemId) {
-      rejectEnrollmentMutation({
+      rejectEnrollementMutation({
         params: {
-          enrollmentId: selectedItemId,
+          enrollementId: selectedItemId,
         },
         body: {
           rejectionReason: rejectionReason,
@@ -75,12 +88,17 @@ export const UserVerificationView: React.FC<UserVerificationViewProps> = () => {
     }
   };
 
-  const handleViewDocuments = (item: VerificationItem) => {
-    setSelectedDocument({
-      url: item.kycDocument,
-      title: `${item.name}'s KYC Document`,
-    });
-    setDocumentViewerOpen(true);
+  const handleViewPostLinks = (item: any) => {
+    setSelectedPostLinks(item.postLinks || []);
+    setSelectedUserName(item.fullName);
+    setPostLinksModalOpen(true);
+  };
+
+  const handleViewDocuments = (item: any) => {
+    const docs = item.userData.kycDocuments || [];
+    const encoded = encodeURIComponent(JSON.stringify(docs));
+
+    window.open(`/admin/view-document?data=${encoded}`, '_blank');
   };
 
   return (
@@ -180,13 +198,19 @@ export const UserVerificationView: React.FC<UserVerificationViewProps> = () => {
                     S.N.
                   </th>
                   <th className="text-left py-4 px-6 text-sm font-medium text-gray-400">
-                    Name & Email
+                    User Details
                   </th>
                   <th className="text-left py-4 px-6 text-sm font-medium text-gray-400">
                     Submitted Date
                   </th>
                   <th className="text-left py-4 px-6 text-sm font-medium text-gray-400">
-                    KYC Document
+                    Social Links
+                  </th>
+                  <th className="text-left py-4 px-6 text-sm font-medium text-gray-400">
+                    View Document
+                  </th>
+                  <th className="text-left py-4 px-6 text-sm font-medium text-gray-400">
+                    Amount
                   </th>
                   <th className="text-left py-4 px-6 text-sm font-medium text-gray-400">
                     Status
@@ -197,7 +221,7 @@ export const UserVerificationView: React.FC<UserVerificationViewProps> = () => {
                 </tr>
               </thead>
               <tbody>
-                {growEnrollmentUserData?.body.map((item, index) => (
+                {growEnrollementUserData?.body.data.map((item, index) => (
                   <motion.tr
                     key={item._id}
                     initial={{ y: 20, opacity: 0 }}
@@ -207,7 +231,7 @@ export const UserVerificationView: React.FC<UserVerificationViewProps> = () => {
                   >
                     <td className="py-4 px-6">
                       <code className="text-sm font-mono text-white group-hover:text-[#e1ba73] transition-colors">
-                        {index + 1}
+                        {index + 1 + (page - 1) * 10}
                       </code>
                     </td>
                     <td className="py-4 px-6">
@@ -234,12 +258,51 @@ export const UserVerificationView: React.FC<UserVerificationViewProps> = () => {
                     </td>
                     <td className="py-4 px-6">
                       <button
-                        // onClick={() => handleViewDocuments(item)}
+                        onClick={() => handleViewPostLinks(item)}
+                        className="flex items-center gap-2 px-3 py-1 bg-white/5 text-white rounded-lg hover:bg-white/10 transition-colors"
+                      >
+                        <span>👁️</span>
+                        View Links ({item.userData.kycURL?.length || 0})
+                      </button>
+                    </td>
+
+                    <td className="p-3">
+                      <div className="mb-3 relative group rounded-xl overflow-hidden border border-white/10">
+                        <img
+                          src={item.userData.kycURL}
+                          alt="Current Proof"
+                          className="w-full h-16 object-cover opacity-60 group-hover:opacity-100 transition-opacity"
+                        />
+                        <div className="absolute inset-0 flex items-center justify-center gap-2">
+                          <span className="bg-black/60 px-3 py-1 rounded-full text-xs text-white backdrop-blur-sm border border-white/10">
+                            View
+                          </span>
+                          <a
+                            href={item.userData.kycURL}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="p-2 bg-white rounded-full text-black hover:text-white hover:bg-[#b68938] transition-all opacity-0 group-hover:opacity-100"
+                          >
+                            <ExternalLink size={14} />
+                          </a>
+                        </div>
+                      </div>
+                    </td>
+
+                    {/* <td className="py-4 px-6">
+                      <button
+                        onClick={() => handleViewDocuments(item)}
                         className="flex items-center gap-2 px-3 py-1 bg-white/5 text-white rounded-lg hover:bg-white/10 transition-colors"
                       >
                         <span>👁️</span>
                         View KYC
                       </button>
+                    </td> */}
+
+                    <td className="py-4 px-6">
+                      <code className="text-sm font-mono text-white group-hover:text-[#e1ba73] transition-colors">
+                        ₹{item.paymentData.transactionId}
+                      </code>
                     </td>
                     <td className="py-4 px-6">
                       <StatusBadge status={item.userData.status} />
@@ -287,13 +350,32 @@ export const UserVerificationView: React.FC<UserVerificationViewProps> = () => {
         </div>
       </GlassCard>
 
-      <AnimatePresence>
+      {totalPage > 1 && (
+        <TablePagination
+          page={page}
+          totalPages={totalPage}
+          onPageChange={setPage}
+        />
+      )}
+
+      {/* <AnimatePresence>
         {documentViewerOpen && selectedDocument && (
           <DocumentViewerModal
             isOpen={documentViewerOpen}
             onClose={() => setDocumentViewerOpen(false)}
             title={selectedDocument.title}
             documentUrl={selectedDocument.url}
+          />
+        )}
+      </AnimatePresence> */}
+
+      <AnimatePresence>
+        {postLinksModalOpen && (
+          <PostLinksModal
+            isOpen={postLinksModalOpen}
+            onClose={() => setPostLinksModalOpen(false)}
+            postLinks={selectedPostLinks}
+            userName={selectedUserName}
           />
         )}
       </AnimatePresence>

@@ -25,13 +25,14 @@ export const AffilateRequestList = () => {
     queryClient.invalidateQueries({ queryKey: ['affiliate-requests'] });
   };
 
-
   const affiliateRequestList = affiliateRequestData?.data || [];
 
   // if (!affiliateRequestData?.data) return <div>Loading...</div>;
 
-
   // if (!affiliateRequestData) return <>...</>;
+  if (!affiliateRequestData?.data) return <div>Loading...</div>;
+
+  if (!affiliateRequestData) return <>...</>;
   return (
     <div className="container mx-auto py-4">
       <Card>

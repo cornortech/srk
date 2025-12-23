@@ -11,6 +11,7 @@ import { PackageFlowPage } from './pages/PackageFlowPage';
 import { OrderConfirmationPage } from './pages/OrderConfirmationPage';
 import { UserDashboardPage } from './pages/UserDashboardPage';
 import { ToastProvider } from './lib/contexts/ToastContext';
+import ViewerPage from './pages/ViewDocumentPage';
 
 const queryClient = new QueryClient();
 
@@ -48,7 +49,11 @@ const router = createBrowserRouter([
     element: <GrowOnlyAdminDashboard />,
   },
   {
-    path: '/affilate/dashboard',
+    path: '/admin/view-document',
+    element: <ViewerPage />,
+  },
+  {
+    path: '/affiliate/dashboard',
     element: <GrowDashboard />,
   },
 ]);

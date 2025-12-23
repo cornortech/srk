@@ -40,17 +40,15 @@ export default function BankRequest() {
     queryKey: ['bank-requests', page],
     queryFn: async () => {
       const data = await getBankRequestApi(
-        [
-          'pending',
-          'approved',
-          'rejected',
-        ],
+        ['pending', 'approved', 'rejected'],
         page,
         10
       );
       return data;
     },
   });
+
+  console.log('bankRequest', bankRequest);
 
   const { mutate: approveMutation } = useMutation({
     mutationFn: async (userId: string) => {
@@ -93,6 +91,9 @@ export default function BankRequest() {
 
   const bankRequestList = bankRequest?.data || [];
 
+  if (!bankRequest?.data) {
+    return <div></div>;
+  }
   return (
     <>
       <Table aria-label="Affiliate Request table">
@@ -108,7 +109,7 @@ export default function BankRequest() {
           <TableColumn>Action</TableColumn>
         </TableHeader>
         <TableBody>
-          {bankRequestList.map((user, index) => (
+          {bankRequest?.data.map((user, index) => (
             <TableRow key={index}>
               <TableCell>{(page - 1) * 10 + index + 1}</TableCell>
               <TableCell>
@@ -144,10 +145,10 @@ export default function BankRequest() {
         </TableBody>
       </Table>
 
-      {bankRequestList.length >= 10 && (
+      {bankRequest.data?.length >= 10 && (
         <TablePagination
-          page={bankRequest?.page || 1}
-          totalPages={bankRequest?.totalPages || 1}
+          page={bankRequest.page}
+          totalPages={bankRequest.totalPages}
           onPageChange={(p) => setPage(p)}
         />
       )}

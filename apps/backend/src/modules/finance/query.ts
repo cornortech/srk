@@ -14,6 +14,8 @@ import { UserModel } from '../../model/userModel';
 import { BankModel } from '../../model/bankModel';
 import { SrkUniversityBankModel } from '../../model/srkUniversityBankModel';
 import { TGetSrkBonusCashFlow } from '../../../../../libs/shared/contracts/src/lib/finance/schema';
+import { Types } from 'mongoose';
+import { EarningStatementModel } from '../../model/earningStatementModel';
 
 const getAllBalancePayoutOfUser: AppRouteImplementationOrOptions<
   typeof financeContract.getAllBalancePayoutOfUser
@@ -784,9 +786,6 @@ const getBankTable: AppRouteImplementationOrOptions<
     };
   }
 };
-
-import { Types } from 'mongoose';
-import { EarningStatementModel } from '../../model/earningStatementModel';
 
 interface PopulatedTransaction {
   _id: Types.ObjectId;

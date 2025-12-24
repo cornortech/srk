@@ -154,11 +154,21 @@ export const getSrkGrowProfile: AppRouteImplementationOrOptions<
 };
 
 const getAllSrkGrowEnrollmentUser: AppRouteImplementationOrOptions<
-  typeof growContract.getAllGrowSocialMediaEnrollment
-> = async () => {
+  typeof growContract.getAllGrowSocialMediaEnrollement
+> = async ({ query }) => {
   try {
+    const page = Number(query?.page ?? 1);
+    const limit = Number(query?.limit ?? 10);
+
+    const queryReq: Record<string, any> = {};
+
+    const totalUsers =
+      await growSocialMediaPackageEnrollmentModel.countDocuments(queryReq);
+
     const enrollments = await growSocialMediaPackageEnrollmentModel
-      .find()
+      .find(queryReq)
+      .skip((page - 1) * limit)
+      .limit(limit)
       .populate<GrowEnrollmentPopulated>('growSocialMediaPackageUserId')
       .populate<GrowEnrollmentPopulated>('growSocialMediaPackageId')
       .populate<GrowEnrollmentPopulated>('growSocialMediaPackageTypeId')
@@ -193,8 +203,8 @@ const getAllSrkGrowEnrollmentUser: AppRouteImplementationOrOptions<
               e.growSocialMediaPackageSubTypeId._id.toString(),
             profileLinkURL:
               e.profileLinkURL && e.profileLinkURL[0]
-                ? e.profileLinkURL[0]
-                : undefined,
+                ? [e.profileLinkURL[0]]
+                : [],
             isActive: e.isActive,
           },
 
@@ -218,7 +228,13 @@ const getAllSrkGrowEnrollmentUser: AppRouteImplementationOrOptions<
 
     return {
       status: 200,
-      body: packageEnrollment,
+      body: {
+        data: packageEnrollment,
+        page,
+        limit,
+        totalUsers,
+        totalPages: Math.ceil(totalUsers / limit),
+      },
     };
   } catch (error) {
     console.error(error);
@@ -267,7 +283,7 @@ const getSrkGrowEnrollmentUserById: AppRouteImplementationOrOptions<
           kycURL: enrollment.growSocialMediaPackageUserId.kycURL,
         },
 
-        enrollmentData: {
+        enrollementData: {
           package: {
             _id: enrollment.growSocialMediaPackageId._id,
             title: enrollment.growSocialMediaPackageId.title,
@@ -281,8 +297,8 @@ const getSrkGrowEnrollmentUserById: AppRouteImplementationOrOptions<
             _id: enrollment.growSocialMediaPackageSubTypeId._id,
             title: enrollment.growSocialMediaPackageSubTypeId.title,
           },
-          profileLinkURL:
-            enrollment.profileLinkURL && enrollment.profileLinkURL[0],
+          // profileLinkURL: enrollment.profileLinkURL && enrollment.profileLinkURL[0],
+          profileLinkURL: enrollment.profileLinkURL,
           isActive: enrollment.isActive,
         },
 
@@ -296,9 +312,7 @@ const getSrkGrowEnrollmentUserById: AppRouteImplementationOrOptions<
       status: 500,
       body: {
         success: false,
-        message: error.message
-          ? `Internal sever error: ${error.message}`
-          : 'Internal server error',
+        message: 'Internal server error',
       },
     };
   }

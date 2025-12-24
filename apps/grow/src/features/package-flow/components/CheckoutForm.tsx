@@ -22,6 +22,7 @@ interface CheckoutFormProps {
   handleBack: () => void;
   showMultiplePostLinks: boolean;
   numPostLinks: number;
+  isPromoLocked: boolean;
   onValidatePromoCode: () => void;
   isValidatingPromo: boolean;
   promoError: string | null;
@@ -47,6 +48,7 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
   setConfirmPassword,
   handleSubmit,
   handleBack,
+  isPromoLocked,
   showMultiplePostLinks,
   numPostLinks,
   onValidatePromoCode,

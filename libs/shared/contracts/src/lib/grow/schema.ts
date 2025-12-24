@@ -55,7 +55,9 @@ export const getGrowSocialMediaEnrollmentByIdSchema = z.object({
     growSocialMediaPackageId: z.string(),
     growSocialMediaPackageTypeId: z.string(),
     growSocialMediaPackageSubTypeId: z.string(),
-    profileLinkURL: z.string().url('Invalid Profile Link URL').optional(),
+    profileLinkURL: z.array(
+      z.string().url('Invalid Profile Link URL').optional()
+    ),
   }),
   paymentData: z.object({
     paymentURL: z.string().url('Invalid payment URL'),

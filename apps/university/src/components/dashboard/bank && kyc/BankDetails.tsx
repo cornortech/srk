@@ -1,24 +1,23 @@
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Input } from "@nextui-org/input";
-import { Button } from "@nextui-org/button";
-import { Select, SelectItem } from "@nextui-org/select";
-import { BankFormData, bankSchema } from "../../../lib/validation";
-import { classNameInput } from "./PancardForm";
-import { TBank } from "../../../lib/types/entities";
-import { useMutation } from "@tanstack/react-query";
-import { upsertBankDetailsApi } from "../../../lib/apiClient";
-import useAuthStore from "../../../store/useAuth";
-import useAlert from "../../../hooks/useAlert";
-import { useRef, useState } from "react";
-import AlertBanner from "../../AlertBanner";
-import useUploadFile from "../../../hooks/useFileUpload";
-// import useUploadFile from "../../../hooks/useFileUpload";
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Input } from '@nextui-org/input';
+import { Button } from '@nextui-org/button';
+import { Select, SelectItem } from '@nextui-org/select';
+import { BankFormData, bankSchema } from '../../../lib/validation';
+import { classNameInput } from './PancardForm';
+import { TBank } from '../../../lib/types/entities';
+import { useMutation } from '@tanstack/react-query';
+import { upsertBankDetailsApi } from '../../../lib/apiClient';
+import useAuthStore from '../../../store/useAuth';
+import useAlert from '../../../hooks/useAlert';
+import { useRef, useState } from 'react';
+import AlertBanner from '../../AlertBanner';
+import { useSRKFileUpload } from '@srk/shared/hooks';
 
 const accountTypes = [
-  { label: "Savings Account", value: "savings" },
-  { label: "Current Account", value: "current" },
-  { label: "Salary Account", value: "salary" },
+  { label: 'Savings Account', value: 'savings' },
+  { label: 'Current Account', value: 'current' },
+  { label: 'Salary Account', value: 'salary' },
 ];
 
 // const documentTypes = [
@@ -28,10 +27,10 @@ const accountTypes = [
 // ];
 
 const relationTypes = [
-  { label: "Self", value: "self" },
-  { label: "Spouse", value: "spouse" },
-  { label: "Parent", value: "parent" },
-  { label: "Child", value: "child" },
+  { label: 'Self', value: 'self' },
+  { label: 'Spouse', value: 'spouse' },
+  { label: 'Parent', value: 'parent' },
+  { label: 'Child', value: 'child' },
 ];
 
 interface BankDetailsFormProps {
@@ -43,7 +42,7 @@ export default function BankDetailsForm({
   handleRefetch,
 }: BankDetailsFormProps) {
   const { userDetails } = useAuthStore();
-  const { uploadFile } = useUploadFile();
+  const { uploadFile } = useSRKFileUpload('university');
   const { show } = useAlert();
   const {
     register,
@@ -51,15 +50,15 @@ export default function BankDetailsForm({
     formState: { errors },
   } = useForm<BankFormData>({
     defaultValues: {
-      accountNumber: bankDetails?.accountNumber || "",
-      holderName: bankDetails?.accountHolderName || "",
-      ifscCode: bankDetails?.ifscCode || "",
-      accountType: bankDetails?.accountType || "",
-      bankName: bankDetails?.bankName || "",
-      branchName: bankDetails?.branchName || "",
-      confirmAccountNumber: bankDetails?.accountNumber || "",
-      relation: bankDetails?.relationWithAccount || "",
-      qrUrl: bankDetails?.qrUrl || "",
+      accountNumber: bankDetails?.accountNumber || '',
+      holderName: bankDetails?.accountHolderName || '',
+      ifscCode: bankDetails?.ifscCode || '',
+      accountType: bankDetails?.accountType || '',
+      bankName: bankDetails?.bankName || '',
+      branchName: bankDetails?.branchName || '',
+      confirmAccountNumber: bankDetails?.accountNumber || '',
+      relation: bankDetails?.relationWithAccount || '',
+      qrUrl: bankDetails?.qrUrl || '',
     },
     resolver: zodResolver(bankSchema),
   });
@@ -77,16 +76,16 @@ export default function BankDetailsForm({
         branchName: data.branchName,
         ifscCode: data.ifscCode,
         relationWithAccount: data.relation,
-        qrUrl: data.qrUrl || "",
+        qrUrl: data.qrUrl || '',
       });
     },
     onSuccess: () => {
       handleRefetch();
-      show("Bank details updated successfully", "success");
+      show('Bank details updated successfully', 'success');
     },
     onError: () => {
       handleRefetch();
-      show("Failed to update bank details", "error");
+      show('Failed to update bank details', 'error');
     },
   });
 
@@ -94,12 +93,12 @@ export default function BankDetailsForm({
     let qrUrl = bankDetails?.qrUrl;
 
     if (qrImage) {
-      const { url } = await uploadFile(qrImage, "image");
+      const { url } = await uploadFile(qrImage, 'image');
       qrUrl = url;
     }
 
     if (!qrUrl) {
-      show("Please upload qr code", "error");
+      show('Please upload qr code', 'error');
       return;
     }
 
@@ -125,23 +124,23 @@ export default function BankDetailsForm({
     }
   };
 
-  const shouldDisableInput = bankDetails?.status === "approved";
+  const shouldDisableInput = bankDetails?.status === 'approved';
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      {bankDetails?.status === "rejected" ? (
+      {bankDetails?.status === 'rejected' ? (
         <AlertBanner
           type="danger"
           message={`Rejection Reason : ${bankDetails?.rejectionReason}`}
         />
       ) : null}
-      {bankDetails?.status === "pending" ? (
+      {bankDetails?.status === 'pending' ? (
         <AlertBanner
           type="warning"
           message="Your bank details are under review"
         />
       ) : null}
-      {bankDetails?.status === "approved" ? (
+      {bankDetails?.status === 'approved' ? (
         <AlertBanner type="success" message="Your bank details are approved" />
       ) : null}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -150,7 +149,7 @@ export default function BankDetailsForm({
             classNames={classNameInput}
             label="Account Holder Name"
             placeholder="Name"
-            {...register("holderName")}
+            {...register('holderName')}
             errorMessage={errors.holderName?.message}
             isInvalid={!!errors.holderName}
             disabled={shouldDisableInput}
@@ -162,7 +161,7 @@ export default function BankDetailsForm({
             classNames={classNameInput}
             label="Account Number"
             placeholder="Account Number"
-            {...register("accountNumber")}
+            {...register('accountNumber')}
             errorMessage={errors.accountNumber?.message}
             isInvalid={!!errors.accountNumber}
             disabled={shouldDisableInput}
@@ -174,7 +173,7 @@ export default function BankDetailsForm({
             classNames={classNameInput}
             label="Confirm Account Number"
             placeholder="Confirm account Number"
-            {...register("confirmAccountNumber")}
+            {...register('confirmAccountNumber')}
             errorMessage={errors.confirmAccountNumber?.message}
             disabled={shouldDisableInput}
             isInvalid={!!errors.confirmAccountNumber}
@@ -186,7 +185,7 @@ export default function BankDetailsForm({
             classNames={classNameInput}
             label="IFSC Code (Optional)"
             placeholder="Ifsc Code"
-            {...register("ifscCode")}
+            {...register('ifscCode')}
             errorMessage={errors.ifscCode?.message}
             isInvalid={!!errors.ifscCode}
             disabled={shouldDisableInput}
@@ -197,7 +196,7 @@ export default function BankDetailsForm({
           <Input
             label="Full Bank Name"
             placeholder="Bank Name"
-            {...register("bankName")}
+            {...register('bankName')}
             errorMessage={errors.bankName?.message}
             isInvalid={!!errors.bankName}
             classNames={classNameInput}
@@ -209,7 +208,7 @@ export default function BankDetailsForm({
           <Input
             label="Bank Branch Name"
             placeholder="Branch Name"
-            {...register("branchName")}
+            {...register('branchName')}
             errorMessage={errors.branchName?.message}
             isInvalid={!!errors.branchName}
             classNames={classNameInput}
@@ -221,12 +220,12 @@ export default function BankDetailsForm({
           <Select
             label="Account Type"
             classNames={{
-              label: "text-white",
-              trigger: "bg-bgSecondary text-white border-gray-600",
-              popoverContent: "bg-bgSecondary text-white",
+              label: 'text-white',
+              trigger: 'bg-bgSecondary text-white border-gray-600',
+              popoverContent: 'bg-bgSecondary text-white',
             }}
             placeholder="Select account type"
-            {...register("accountType")}
+            {...register('accountType')}
             errorMessage={errors.accountType?.message}
             isInvalid={!!errors.accountType}
             aria-disabled={shouldDisableInput}
@@ -265,15 +264,15 @@ export default function BankDetailsForm({
           <Select
             label="Relation With Account"
             placeholder="Relation with account"
-            {...register("relation")}
+            {...register('relation')}
             aria-disabled={shouldDisableInput}
             errorMessage={errors.relation?.message}
             disabled={shouldDisableInput}
             isInvalid={!!errors.relation}
             classNames={{
-              label: "text-white",
-              trigger: "bg-bgSecondary text-white border-gray-600",
-              popoverContent: "bg-bgSecondary text-white",
+              label: 'text-white',
+              trigger: 'bg-bgSecondary text-white border-gray-600',
+              popoverContent: 'bg-bgSecondary text-white',
             }}
           >
             {relationTypes.map((type) => (

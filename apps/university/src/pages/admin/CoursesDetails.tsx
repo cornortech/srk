@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import {
   Input,
   Button,
@@ -7,7 +7,7 @@ import {
   Card,
   CardHeader,
   CardBody,
-} from "@nextui-org/react";
+} from '@nextui-org/react';
 import {
   Modal,
   ModalHeader,
@@ -15,19 +15,19 @@ import {
   ModalFooter,
   useDisclosure,
   ModalContent,
-} from "@nextui-org/modal";
-import { PrimaryButton } from "../../components/ReusableComponents";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+} from '@nextui-org/modal';
+import { PrimaryButton } from '../../components/ReusableComponents';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   getCourseDetailsByIdApi,
   getCourseVideoByCourseId,
   uploadVideoApi,
-} from "../../lib/apiClient";
-import { TCourse, TCourseVideo } from "../../lib/types/entities";
-import { TUploadVideoPayload } from "../../lib/types";
-import useAlert from "../../hooks/useAlert";
-import { AxiosError } from "axios";
-import useUploadFile from "../../hooks/useFileUpload";
+} from '../../lib/apiClient';
+import { TCourse, TCourseVideo } from '../../lib/types/entities';
+import { TUploadVideoPayload } from '../../lib/types';
+import useAlert from '../../hooks/useAlert';
+import { AxiosError } from 'axios';
+import { useSRKFileUpload } from '@srk/shared/hooks';
 
 interface Video {
   url: string;
@@ -41,17 +41,17 @@ interface Chapter {
 function CourseDetail() {
   const { id } = useParams<{ id: string }>();
   const [file, setFile] = useState<File | null>(null);
-  const [chapterName, setChapterName] = useState("");
+  const [chapterName, setChapterName] = useState('');
   const [progress, setProgress] = useState(0);
   const [chapters, setChapters] = useState<Chapter[]>([]);
   const [editableCourse, setEditableCourse] = useState<TCourse | null>(null);
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
-  const { uploadFile } = useUploadFile();
+  const { uploadFile } = useSRKFileUpload('university');
   const { show } = useAlert();
-  console.log("chapters", chapters);
+  console.log('chapters', chapters);
 
   const { data: course } = useQuery<TCourse | undefined>({
-    queryKey: ["courseDetails", id],
+    queryKey: ['courseDetails', id],
     queryFn: () => {
       if (!id) return;
       return getCourseDetailsByIdApi(id);
@@ -61,7 +61,7 @@ function CourseDetail() {
   const { invalidateQueries } = useQueryClient();
 
   const { data: courseVideos } = useQuery<TCourseVideo[] | undefined>({
-    queryKey: ["videosOfCourse", course?._id],
+    queryKey: ['videosOfCourse', course?._id],
     queryFn: () => {
       if (!course) return;
       return getCourseVideoByCourseId(course._id);
@@ -69,21 +69,21 @@ function CourseDetail() {
     enabled: !!course?._id,
   });
   const { mutate: uploadVideoMutation } = useMutation({
-    mutationKey: ["uploadVideo"],
+    mutationKey: ['uploadVideo'],
     mutationFn: async (data: TUploadVideoPayload) => {
       const res = await uploadVideoApi(data);
       return res;
     },
     onSuccess: () => {
       setFile(null);
-      setChapterName("");
+      setChapterName('');
       setProgress(0);
-      invalidateQueries({ queryKey: ["videosOfCourse"] });
-      show("Video uploaded successfully", "success");
+      invalidateQueries({ queryKey: ['videosOfCourse'] });
+      show('Video uploaded successfully', 'success');
     },
     onError: (error: AxiosError<{ message: string }>) => {
       setProgress(0);
-      show(error.response?.data.message || "Failed to upload video", "error");
+      show(error.response?.data.message || 'Failed to upload video', 'error');
     },
   });
   useEffect(() => {
@@ -105,8 +105,8 @@ function CourseDetail() {
 
   const getVideoDuration = (file: File): Promise<number> => {
     return new Promise((resolve, reject) => {
-      const video = document.createElement("video");
-      video.preload = "metadata";
+      const video = document.createElement('video');
+      video.preload = 'metadata';
 
       video.onloadedmetadata = () => {
         URL.revokeObjectURL(video.src); // Clean up
@@ -114,7 +114,7 @@ function CourseDetail() {
       };
 
       video.onerror = () => {
-        reject(new Error("Error loading video metadata"));
+        reject(new Error('Error loading video metadata'));
       };
 
       video.src = URL.createObjectURL(file);
@@ -126,7 +126,7 @@ function CourseDetail() {
     if (!file || !chapterName) return;
     try {
       const duration = await getVideoDuration(file);
-      const { url } = await uploadFile(file, "video", (progress, url) => {
+      const { url } = await uploadFile(file, 'video', (progress, url) => {
         setProgress(progress);
         if (url && progress === 100) {
           setProgress(100);
@@ -134,13 +134,13 @@ function CourseDetail() {
       });
 
       uploadVideoMutation({
-        courseId: course?._id || "",
+        courseId: course?._id || '',
         duration, // Set the actual duration
         name: chapterName,
         videoUrl: url,
       });
     } catch (error) {
-      console.error("Error getting video duration:", error);
+      console.error('Error getting video duration:', error);
     }
   };
 
@@ -213,7 +213,7 @@ function CourseDetail() {
               disabled={progress > 0}
               className="w-full  text-white font-bold py-2 px-4 rounded"
             >
-              {progress > 0 ? `${progress}% Uploading` : "Upload video"}
+              {progress > 0 ? `${progress}% Uploading` : 'Upload video'}
             </Button>
           </form>
         </CardBody>

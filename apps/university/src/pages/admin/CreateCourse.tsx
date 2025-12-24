@@ -1,4 +1,4 @@
-import { useForm, SubmitHandler } from "react-hook-form";
+import { useForm, SubmitHandler } from 'react-hook-form';
 import {
   Input,
   Button,
@@ -6,15 +6,15 @@ import {
   Card,
   Select,
   SelectItem,
-} from "@nextui-org/react";
-import { useNavigate } from "react-router-dom";
-import FileUpload from "../../components/FileUplaod";
-import { useState } from "react";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { createCourseApi, getAllPackagesApi } from "../../lib/apiClient";
-import { TPackage } from "../../lib/types/entities";
-import useAlert from "../../hooks/useAlert";
-import useUploadFile from "../../hooks/useFileUpload";
+} from '@nextui-org/react';
+import { useNavigate } from 'react-router-dom';
+import FileUpload from '../../components/FileUplaod';
+import { useState } from 'react';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { createCourseApi, getAllPackagesApi } from '../../lib/apiClient';
+import { TPackage } from '../../lib/types/entities';
+import useAlert from '../../hooks/useAlert';
+import { useSRKFileUpload } from '@srk/shared/hooks';
 
 // interface Instructor {
 //   name: string;
@@ -31,11 +31,11 @@ interface CourseFormValues {
 export default function CreateCoursePage() {
   const [image, setImage] = useState<File | null>(null);
   const [selectedPackage, setSelectedPackage] = useState<string[]>([]);
-  const { uploadFile } = useUploadFile();
+  const { uploadFile } = useSRKFileUpload('university');
   const { show } = useAlert();
   const [uploadingPercentage, setUploadingPercentage] = useState(0);
   const { data: AllPackages } = useQuery<TPackage[] | undefined>({
-    queryKey: ["packages"],
+    queryKey: ['packages'],
     queryFn: async () => {
       const res = await getAllPackagesApi();
       return res;
@@ -47,9 +47,9 @@ export default function CreateCoursePage() {
     formState: { errors },
   } = useForm<CourseFormValues>({
     defaultValues: {
-      thumbnail: "",
-      description: "",
-      title: "",
+      thumbnail: '',
+      description: '',
+      title: '',
     },
   });
 
@@ -65,11 +65,11 @@ export default function CreateCoursePage() {
       });
     },
     onSuccess: () => {
-      show("Course created successfully", "success");
-      navigate("/admin/courses");
+      show('Course created successfully', 'success');
+      navigate('/admin/courses');
     },
     onError: () => {
-      show("Error creating course", "error");
+      show('Error creating course', 'error');
     },
   });
 
@@ -77,7 +77,7 @@ export default function CreateCoursePage() {
     console.log(data, image);
 
     if (image) {
-      await uploadFile(image, "image", (progress, url) => {
+      await uploadFile(image, 'image', (progress, url) => {
         setUploadingPercentage(progress);
         if (url && progress === 100) {
           createCourse({
@@ -104,21 +104,21 @@ export default function CreateCoursePage() {
           <div className="space-y-4">
             <Input
               label="Title"
-              {...register("title", { required: "Title is required" })}
+              {...register('title', { required: 'Title is required' })}
               placeholder="Enter course title"
               isRequired
               errorMessage={errors.title?.message}
-              classNames={{ inputWrapper: "text-white" }}
+              classNames={{ inputWrapper: 'text-white' }}
             />
             <Textarea
               label="Description"
-              {...register("description", {
-                required: "Description is required",
+              {...register('description', {
+                required: 'Description is required',
               })}
               placeholder="Enter course description"
               isRequired
               errorMessage={errors.description?.message}
-              classNames={{ input: "text-white" }}
+              classNames={{ input: 'text-white' }}
             />
             {AllPackages && (
               <Select
@@ -128,7 +128,7 @@ export default function CreateCoursePage() {
                 label="Select Package"
                 selectedKeys={selectedPackage}
                 onSelectionChange={(keys) => {
-                  console.log("Selected keys:", keys);
+                  console.log('Selected keys:', keys);
                   setSelectedPackage(Array.from(keys) as string[]);
                 }}
                 placeholder="Select an Package"
@@ -154,8 +154,8 @@ export default function CreateCoursePage() {
         <Button type="submit" className="w-full col-span-2 " color="primary">
           {uploadingPercentage > 0 && uploadingPercentage < 100
             ? `${uploadingPercentage}% uploading video`
-            : ""}
-          {isPending ? "Creating course..." : "Create Course"}
+            : ''}
+          {isPending ? 'Creating course...' : 'Create Course'}
         </Button>
       </form>
     </div>

@@ -1,39 +1,38 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { SignupContent } from "../../components/signup/SignupContent";
-import { AuthLayout } from "../AuthLayout";
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { SignupContent } from '../../components/signup/SignupContent';
+import { AuthLayout } from '../AuthLayout';
 import {
   getPackageDetailsApi,
   getUserDetailsApi,
   makeCoursePaymentApi,
-} from "../../lib/apiClient";
-import { TPackage } from "../../lib/types/entities";
-import { useLocation } from "react-router-dom";
-import { getQueryParam } from "../SignUp";
-import { SignupPaymentMethod } from "../../components/signup/SignupPaymentMethod";
-import useAuthStore from "../../store/useAuth";
-import { TUserDataReponseData } from "../../lib/types";
-import { useEffect, useState } from "react";
-import { TPaymentDetails } from "../../components/SignUpComponent";
-import useAlert from "../../hooks/useAlert";
-import AlertBanner from "../../components/AlertBanner";
-import useUploadFile from "../../hooks/useFileUpload";
-
+} from '../../lib/apiClient';
+import { TPackage } from '../../lib/types/entities';
+import { useLocation } from 'react-router-dom';
+import { getQueryParam } from '../SignUp';
+import { SignupPaymentMethod } from '../../components/signup/SignupPaymentMethod';
+import useAuthStore from '../../store/useAuth';
+import { TUserDataReponseData } from '../../lib/types';
+import { useEffect, useState } from 'react';
+import { TPaymentDetails } from '../../components/SignUpComponent';
+import useAlert from '../../hooks/useAlert';
+import AlertBanner from '../../components/AlertBanner';
+import { useSRKFileUpload } from '@srk/shared/hooks';
 
 const PaymentVerificationAuthPage = () => {
   const location = useLocation();
-  const packageId = getQueryParam(location, "packageId");
+  const packageId = getQueryParam(location, 'packageId');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { uploadFile } = useUploadFile();
+  const { uploadFile } = useSRKFileUpload('univeristy');
   const { show } = useAlert();
   const [paymentDetails, setPaymentDetails] = useState<TPaymentDetails>({
     paymentMethod: undefined,
-    transactionId: "",
+    transactionId: '',
     paymentProof: null,
   });
   const { userDetails } = useAuthStore();
 
   const { data: packageDetails } = useQuery<TPackage | null>({
-    queryKey: ["packageById", packageId],
+    queryKey: ['packageById', packageId],
     queryFn: async () => {
       if (!packageId) return null;
       const data = await getPackageDetailsApi(packageId);
@@ -42,7 +41,7 @@ const PaymentVerificationAuthPage = () => {
   });
   const { data: userDetailsData, refetch } =
     useQuery<TUserDataReponseData | null>({
-      queryKey: ["user", userDetails?._id],
+      queryKey: ['user', userDetails?._id],
       queryFn: async () => {
         if (!userDetails?._id) return null;
         const resData = await getUserDetailsApi(userDetails._id);
@@ -53,9 +52,9 @@ const PaymentVerificationAuthPage = () => {
     mutationFn: async (paymentProofUrl: string) => {
       if (!userDetails?._id) return null;
       const data = await makeCoursePaymentApi({
-        userId: userDetails?._id || "",
+        userId: userDetails?._id || '',
         transactionId: paymentDetails.transactionId,
-        paymentMethod: paymentDetails.paymentMethod || "",
+        paymentMethod: paymentDetails.paymentMethod || '',
         paymentProofUrl: paymentProofUrl,
       });
       return data;
@@ -63,12 +62,12 @@ const PaymentVerificationAuthPage = () => {
     onSuccess: () => {
       setIsSubmitting(false);
       refetch();
-      show("Payment details updated successful", "success");
+      show('Payment details updated successful', 'success');
     },
     onError: () => {
       refetch();
       setIsSubmitting(false);
-      show("Payment details update failed", "error");
+      show('Payment details update failed', 'error');
     },
   });
 
@@ -77,22 +76,22 @@ const PaymentVerificationAuthPage = () => {
       setPaymentDetails((prev) => ({
         ...prev,
         paymentMethod: userDetailsData?.paymentDetails?.paymentMethod,
-        transactionId: userDetailsData?.paymentDetails?.transactionId || "",
+        transactionId: userDetailsData?.paymentDetails?.transactionId || '',
       }));
     }
   }, [userDetailsData?.paymentDetails]);
 
   const handleSubmit = async () => {
     if (!paymentDetails.paymentMethod) {
-      show("Please select a payment method", "error");
+      show('Please select a payment method', 'error');
       return;
     }
     setIsSubmitting(true);
     let paymentProofUrl =
-      userDetailsData?.paymentDetails?.paymentProofUrl || "";
+      userDetailsData?.paymentDetails?.paymentProofUrl || '';
     if (paymentDetails.paymentProof) {
       // const { url } = await uploadFile(paymentDetails.paymentProof, "image");
-      const { url } = await uploadFile(paymentDetails.paymentProof, "image");
+      const { url } = await uploadFile(paymentDetails.paymentProof, 'image');
       paymentProofUrl = url;
     }
     makePaymentMutation(paymentProofUrl);
@@ -109,14 +108,14 @@ const PaymentVerificationAuthPage = () => {
       rightChildren={
         <div className="w-[95%] mx-auto  ">
           {userDetailsData?.userDetails?.status ===
-            "PAYMENT_VERIFICATION_PENDING" && (
+            'PAYMENT_VERIFICATION_PENDING' && (
             <AlertBanner
               message="Payment verification pending. Please wait for the system to approve your payment details."
               type="warning"
             />
           )}
           {userDetailsData?.userDetails?.status ===
-            "PAYMENT_VERIFICATION_REJECTED" && (
+            'PAYMENT_VERIFICATION_REJECTED' && (
             <AlertBanner
               message={`Rejected : ${userDetailsData?.paymentDetails?.rejectionReason}. Please update your payment details`}
               type="danger"
@@ -126,7 +125,7 @@ const PaymentVerificationAuthPage = () => {
             isSubmitting={isSubmitting}
             paymentAmount={paymentAmount as number}
             disableInput={
-              userDetails?.status === "PAYMENT_VERIFICATION_PENDING"
+              userDetails?.status === 'PAYMENT_VERIFICATION_PENDING'
             }
             handleSubmit={handleSubmit}
             transactionId={paymentDetails.transactionId}

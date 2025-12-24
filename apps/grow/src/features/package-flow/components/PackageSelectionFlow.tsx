@@ -1,9 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import {
-  CheckoutUserDetails,
   EngagementType,
-  PackageDetails,
   SocialPlatform,
   UserDetails,
 } from '../../../lib/types/types';
@@ -13,20 +11,29 @@ import { CheckoutForm } from './CheckoutForm';
 import { EngagementStep, OptionStep, PlatformStep } from './StepViews';
 import { api } from '../../../lib/api';
 import { useSRKFileUpload } from '@srk/shared/hooks';
+import {
+  createGrowSocialMediaEnrollmentSchema,
+  TCreateGrowSocialMediaEnrollment,
+  TSrkGrowPackagesSchema,
+} from '@srk/shared/contracts';
+import { z } from 'zod';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useToast } from '../../../lib/contexts/ToastContext';
+import { formatRupees } from '../../../lib/utils/formatters';
 
 interface PackageSelectionFlowProps {
-  selectedPackage: PackageDetails | null;
-  referralCode?: string; // Add this
+  selectedPackage: TSrkGrowPackagesSchema;
   onComplete: (userDetails: UserDetails) => void;
   onBack: () => void;
 }
 
 export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
   selectedPackage,
-  referralCode = '',
   onComplete,
   onBack,
 }) => {
+  const toast = useToast();
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
   const [selectedPlatform, setSelectedPlatform] =
     useState<SocialPlatform | null>(null);
@@ -36,25 +43,49 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
   const [selectedTypeIndex, setSelectedTypeIndex] = useState<number>(0);
   const [selectedSubTypeIndex, setSelectedSubTypeIndex] = useState<number>(0);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [userDetails, setUserDetails] = useState<CheckoutUserDetails>({
-    name: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-    country: '',
-    gender: '',
-    promoCode: referralCode || '',
-    phone: '',
-    socialLink: '',
-    platform: '' as SocialPlatform,
-    engagementType: 'follow' as EngagementType,
-    selectedOption: 0,
-    packageId: selectedPackage?._id || '',
-    postLinks: [''],
-    additionalInfo: '',
-    kyc: [''],
+
+  const form = useForm<TCreateGrowSocialMediaEnrollment>({
+    resolver: zodResolver(createGrowSocialMediaEnrollmentSchema),
+    defaultValues: {
+      userData: {
+        fullName: '',
+        email: '',
+        password: '',
+        gender: undefined,
+        phoneNumber: '',
+        country: '',
+        kycURL: [],
+        usedPromoCode: '',
+      },
+      enrollmentData: {
+        growSocialMediaPackageId: selectedPackage._id,
+        growSocialMediaPackageTypeId: '',
+        growSocialMediaPackageSubTypeId: '',
+        socialMediaPlatform: '',
+        profileLinkURL: [],
+      },
+      paymentData: {
+        paymentURL: 'https://placeholder.com', // Placeholder for validation
+        transactionId: 'placeholder',
+        paymentMethod: 'esewa',
+      },
+      postEngagement: {
+        postURLs: [],
+      },
+    },
   });
 
+  const {
+    register,
+    handleSubmit: handleFormSubmit,
+    formState: { errors: zodErrors },
+    setValue,
+    watch,
+    trigger,
+  } = form;
+
+  // We still need confirmPassword and terms for UI
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [promoError, setPromoError] = useState<string | null>(null);
   const [promoSuccessMessage, setPromoSuccessMessage] = useState<string | null>(
     null
@@ -67,28 +98,24 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
   } | null>(null);
 
   const [kycFiles, setKycFiles] = useState<File[]>([]);
-  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const { uploadFile, isUploading: isUploadingKYC } = useSRKFileUpload('grow');
+  const uploadedKycUrlsRef = useRef<string[]>([]);
 
   const validatePromo = api.grow.validateGrowUserPromoCode.useMutation({
     onSuccess: (data) => {
-      console.log('data', data);
       if (data.status === 200) {
         setDiscountDetails(data.body.discountDetails);
-
         setPromoSuccessMessage(
           (data.body as any).message || 'Promo code applied!'
         );
         setPromoError(null);
       } else {
-        // Handle error responses (400, 409, 500)
         setPromoError((data.body as any).message || 'Invalid promo code');
         setDiscountDetails(null);
         setPromoSuccessMessage(null);
       }
     },
     onError: (err) => {
-      // Cast to any to safely access message from error response
       setPromoError(
         (err as any).body?.message || 'Failed to validate promo code'
       );
@@ -97,25 +124,37 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
     },
   });
 
-  const createEnrollment =
-    api.grow.createGrowSocialMediaEnrollement.useMutation({
+  const createEnrollment = api.grow.createGrowSocialMediaEnrollment.useMutation(
+    {
       onSuccess: (data) => {
         // Handle success if needed, e.g. toast?
         // PaymentModel handles the success UI view
       },
       onError: (error) => {
         console.error('Enrollment failed', error);
-        alert('Failed to create enrollment. Please try again.');
-        throw error; // Re-throw to let PaymentModel know
+        toast.error('Failed to create enrollment. Please try again.');
+        throw error;
       },
-    });
+    }
+  );
+
+  const watchedPromoCode = watch('userData.usedPromoCode');
+
+  React.useEffect(() => {
+    if (!watchedPromoCode || watchedPromoCode.trim() === '') {
+      setPromoError(null);
+      setPromoSuccessMessage(null);
+      setDiscountDetails(null);
+    }
+  }, [watchedPromoCode]);
 
   const handleValidatePromoCode = () => {
-    if (!userDetails.promoCode) return;
+    const promoCode = watch('userData.usedPromoCode');
+    if (!promoCode || !promoCode.trim()) return;
     validatePromo.mutate({
       body: {
-        promoCode: userDetails.promoCode,
-        growSocialMediaPackageId: selectedPackage?._id || '',
+        promoCode: promoCode.trim(),
+        growSocialMediaPackageId: selectedPackage._id,
       },
     });
   };
@@ -130,6 +169,7 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
 
   const handlePlatformSelect = (platform: SocialPlatform) => {
     setSelectedPlatform(platform);
+    setValue('enrollmentData.socialMediaPlatform', platform);
     setStep(2);
   };
 
@@ -141,107 +181,129 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
   const handleOptionSelect = (typeIndex: number, subTypeIndex: number) => {
     setSelectedTypeIndex(typeIndex);
     setSelectedSubTypeIndex(subTypeIndex);
+
+    const packageType = selectedPackage.packageTypes[typeIndex];
+    const packageSubType = packageType?.packageSubTypes?.[subTypeIndex];
+
+    setValue(
+      'enrollmentData.growSocialMediaPackageTypeId',
+      packageType?._id || ''
+    );
+    setValue(
+      'enrollmentData.growSocialMediaPackageSubTypeId',
+      packageSubType?._id || ''
+    );
+
     setStep(4);
   };
 
-  const handleUserDetailsChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
-  ) => {
-    const { name, value } = e.target;
-    setUserDetails((prev: CheckoutUserDetails) => ({ ...prev, [name]: value }));
-  };
-
-  const handlePostLinkChange = (index: number, value: string) => {
-    setUserDetails((prev: CheckoutUserDetails) => {
-      const newPostLinks = [...(prev.postLinks || ['', '', '', ''])];
-      newPostLinks[index] = value;
-      return { ...prev, postLinks: newPostLinks };
-    });
-  };
-
-  const validateForm = () => {
-    const errors: Record<string, string> = {};
-
-    if (!userDetails.name) errors.name = 'Full Name is required';
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!userDetails.email || !emailRegex.test(userDetails.email)) {
-      errors.email = 'Valid Email Address is required';
-    }
-
-    if (!userDetails.phone || userDetails.phone.length < 10) {
-      errors.phone = 'Phone number must be at least 10 digits';
-    }
-
-    if (!userDetails.password || userDetails.password.length < 8) {
-      errors.password = 'Password must be at least 8 characters';
-    }
-
-    if (userDetails.password !== userDetails.confirmPassword) {
-      errors.confirmPassword = 'Passwords do not match';
-    }
-
-    if (!userDetails.country) errors.country = 'Country is required';
-    if (!selectedPlatform) errors.platform = 'Platform is required';
-    if (!engagementType) errors.engagementType = 'Engagement Type is required';
-
-    if (kycFiles.length === 0) {
-      errors.kyc = 'At least one KYC document is required';
-    }
-
-    if (showMultiplePostLinks) {
-      (userDetails.postLinks || []).forEach((link, index) => {
-        try {
-          new URL(link);
-        } catch {
-          errors[`postLink_${index}`] =
-            'Please enter a valid URL (e.g., https://example.com)';
-        }
-      });
-      // Check count
-      if (
-        (userDetails.postLinks?.filter((l) => l).length || 0) < numPostLinks
-      ) {
-        errors.postLinks = `Please provide all ${numPostLinks} links`;
-      }
-    } else {
-      // Single link
-      const link = userDetails.socialLink || '';
-      try {
-        new URL(link);
-      } catch {
-        errors.socialLink = `Please enter a valid URL (e.g., https://${selectedPlatform}.com/profile)`;
-      }
-    }
-
-    setFormErrors(errors);
-    return Object.keys(errors).length === 0;
-  };
-
   const handleSubmit = async () => {
-    if (!validateForm()) {
-      // Scroll to top or first error could be good UX, but simple alert or showing errors is start
+    // Validate manually for step 4 specific fields
+    const isStepValid = await trigger([
+      'userData.fullName',
+      'userData.email',
+      'userData.password',
+      'userData.phoneNumber',
+      'userData.country',
+      'userData.gender',
+    ]);
+
+    if (!isStepValid) {
+      toast.error('Please fix the errors in the form');
       return;
     }
 
+    if (watch('userData.password') !== confirmPassword) {
+      form.setError('userData.password', { message: 'Passwords do not match' });
+      toast.error('Passwords do not match');
+      return;
+    }
+
+    if (kycFiles.length === 0) {
+      toast.error('Please upload at least one KYC document');
+      return;
+    }
+
+    // validation for Profile Link or Post URLs
+    if (engagementType === 'follow') {
+      // Filter out empty strings before validation
+      const profileLinks = watch('enrollmentData.profileLinkURL') || [];
+      const filteredProfileLinks = profileLinks.filter(
+        (link: string) => link.trim() !== ''
+      );
+
+      if (filteredProfileLinks.length === 0) {
+        toast.error('Please provide a profile link');
+        return;
+      }
+
+      // Set the filtered values
+      setValue('enrollmentData.profileLinkURL', filteredProfileLinks);
+
+      const profileLinkReady = await trigger('enrollmentData.profileLinkURL');
+      if (!profileLinkReady) {
+        toast.error('Invalid Profile Link');
+        return;
+      }
+    } else {
+      const profileLinks = [];
+      // Filter out empty strings before validation
+      const postLinks = watch('postEngagement.postURLs') || [];
+      const filteredPostLinks = postLinks.filter(
+        (link: string) => link.trim() !== ''
+      );
+
+      if (filteredPostLinks.length === 0) {
+        toast.error('Please provide at least one post URL');
+        return;
+      }
+
+      // Set the filtered values
+      setValue('postEngagement.postURLs', filteredPostLinks);
+
+      const postLinksReady = await trigger('postEngagement.postURLs');
+      if (!postLinksReady) {
+        toast.error('Invalid Post URLs');
+        return;
+      }
+    }
+
+    const promoCode = watch('userData.usedPromoCode');
+    if (promoCode) {
+      try {
+        const result = await validatePromo.mutateAsync({
+          body: {
+            promoCode: promoCode.trim(),
+            growSocialMediaPackageId: selectedPackage._id,
+          },
+        });
+
+        if (result.status !== 200) {
+          setPromoError((result.body as any).message || 'Invalid promo code');
+          toast.error('Invalid promo code');
+          return;
+        }
+      } catch (err) {
+        toast.error('Failed to validate promo code');
+        return;
+      }
+    }
+
     try {
-      // Upload KYC files
       const uploadedUrls: string[] = [];
       if (kycFiles.length > 0) {
-        // Upload sequentially or parallel
         for (const file of kycFiles) {
-          const result = await uploadFile(file, 'image'); // banking on mostly images
+          const result = await uploadFile(file, 'image');
           uploadedUrls.push(result.url);
         }
       }
 
-      setUserDetails((prev) => ({ ...prev, kyc: uploadedUrls }));
+      setValue('userData.kycURL', uploadedUrls);
+      uploadedKycUrlsRef.current = uploadedUrls;
       setShowPaymentModal(true);
     } catch (error) {
       console.error('File upload failed', error);
-      alert('Failed to upload KYC documents. Please try again.');
+      toast.error('Failed to upload KYC documents. Please try again.');
     }
   };
 
@@ -251,9 +313,8 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
     paymentMethod: string;
   }) => {
     try {
-      const kycUrl = userDetails.kyc?.[0] || '';
-
-      const packageType = selectedPackage?.packageTypes[selectedTypeIndex];
+      const kycUrls = uploadedKycUrlsRef.current;
+      const packageType = selectedPackage.packageTypes[selectedTypeIndex];
       const packageSubType =
         packageType?.packageSubTypes?.[selectedSubTypeIndex];
 
@@ -261,67 +322,52 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
         throw new Error('Invalid package option selected');
       }
 
-      // Ensure valid profile link
-      let profileLink = [userDetails.socialLink];
-      // if (!profileLink) {
-      // Fallback to a constructed URL to satisfy schema if user didn't provide one
-      // Ideally this should be validated in the form step, but as a safeguard:
-      //   profileLink = `https://${selectedPlatform}.com/user`;
-      // } else if (!profileLink.startsWith('http')) {
-      //   profileLink = `https://${profileLink}`;
-      // }
+      const profileLinks = watch('enrollmentData.profileLinkURL');
+      const postLinks = watch('postEngagement.postURLs');
 
       await createEnrollment.mutateAsync({
         body: {
           userData: {
-            fullName: userDetails.name,
-            email: userDetails.email,
-            phoneNumber: userDetails.phone,
-            country: userDetails.country,
-            gender: (userDetails.gender.charAt(0).toUpperCase() +
-              userDetails.gender.slice(1)) as 'Male' | 'Female' | 'Other',
-            password: userDetails.password,
-            kycURL: kycUrl,
-            usedPromoCode: userDetails.promoCode || undefined,
+            fullName: watch('userData.fullName'),
+            email: watch('userData.email'),
+            phoneNumber: watch('userData.phoneNumber'),
+            country: watch('userData.country'),
+            gender: watch('userData.gender') as any,
+            password: watch('userData.password'),
+            kycURL: kycUrls,
+            usedPromoCode: watch('userData.usedPromoCode') || undefined,
           },
-          enrollementData: {
+          enrollmentData: {
             growSocialMediaPackageId: selectedPackage._id,
-            growSocialMediaPackageTypeId: packageType._id || 'unknown',
-            growSocialMediaPackageSubTypeId: packageSubType._id || 'unknown',
-            profileLinkURL: profileLink,
+            growSocialMediaPackageTypeId: packageType._id,
+            growSocialMediaPackageSubTypeId: packageSubType._id,
+            profileLinkURL: profileLinks,
             socialMediaPlatform: selectedPlatform!,
           },
           paymentData: {
             paymentURL: paymentData.paymentProofUrl,
             transactionId: paymentData.transactionId,
-            paymentMethod: paymentData.paymentMethod as
-              | 'esewa'
-              | 'khalti'
-              | 'bankTransfer',
+            paymentMethod:
+              paymentData.paymentMethod === 'bank'
+                ? 'bankTransfer'
+                : (paymentData.paymentMethod as any),
           },
-          // Replace the postEngagement block with this:
           postEngagement:
             engagementType === 'reach'
               ? {
-                  // Filter out empty strings from the array
-                  postURLs:
-                    userDetails.postLinks?.filter(
-                      (link) => link.trim() !== ''
-                    ) || [],
+                  postURLs: postLinks?.filter((l: string) => l.trim() !== ''),
                 }
-              : { postURLs: [] }, // Send an empty array instead of undefined to satisfy the backend
+              : undefined,
         },
       });
-
-      // We don't close modal immediately, let PaymentModel show success screen
     } catch (error) {
       console.error('Failed to create enrollment', error);
-      throw error; // Propagate to PaymentModel to show error
+      throw error;
     }
   };
 
   const getSelectedOptionDetails = () => {
-    const packageType = selectedPackage?.packageTypes[selectedTypeIndex];
+    const packageType = selectedPackage.packageTypes[selectedTypeIndex];
     if (!packageType || !packageType.packageSubTypes) {
       return { description: 'Select an option' };
     }
@@ -354,13 +400,13 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
 
   const showMultiplePostLinks =
     engagementType === 'reach' &&
-    (selectedPackage?.packageTypes[selectedTypeIndex]?.packageSubTypes[
+    (selectedPackage.packageTypes[selectedTypeIndex]?.packageSubTypes[
       selectedSubTypeIndex
     ]?.noOfVideos || 0) > 1;
 
   const numPostLinks =
     engagementType === 'reach'
-      ? selectedPackage?.packageTypes[selectedTypeIndex]?.packageSubTypes[
+      ? selectedPackage.packageTypes[selectedTypeIndex]?.packageSubTypes[
           selectedSubTypeIndex
         ]?.noOfVideos || 0
       : 0;
@@ -382,8 +428,10 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
             </span>
           </button>
           <h1 className="text-3xl md:text-4xl font-bold text-white">
-            {selectedPackage?.name} Package -{' '}
-            <span className="text-[#b68938]">{selectedPackage?.amount}</span>
+            {selectedPackage.name} Package -{' '}
+            <span className="text-[#b68938]">
+              {formatRupees(selectedPackage.amount)}
+            </span>
           </h1>
         </div>
 
@@ -424,10 +472,13 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
               selectedPlatform={selectedPlatform}
               engagementType={engagementType}
               optionDescription={optionDetails.description}
-              userDetails={userDetails}
-              isPromoLocked={!!referralCode}
-              handleUserDetailsChange={handleUserDetailsChange}
-              handlePostLinkChange={handlePostLinkChange}
+              form={
+                form as unknown as import('react-hook-form').UseFormReturn<
+                  import('@srk/shared/contracts').TCreateGrowSocialMediaEnrollment
+                >
+              }
+              confirmPassword={confirmPassword}
+              setConfirmPassword={setConfirmPassword}
               handleSubmit={handleSubmit}
               handleBack={() => setStep(3)}
               showMultiplePostLinks={showMultiplePostLinks}
@@ -439,7 +490,6 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
               discountDetails={discountDetails}
               kycFiles={kycFiles}
               setKycFiles={setKycFiles}
-              formErrors={formErrors}
               isUploadingKYC={isUploadingKYC}
             />
           )}
@@ -454,14 +504,27 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
           if (createEnrollment.isSuccess) onBack();
         }}
         userDetails={{
-          ...userDetails,
+          name: watch('userData.fullName'),
+          email: watch('userData.email'),
+          phone: watch('userData.phoneNumber'),
+          socialLink: watch('enrollmentData.profileLinkURL')?.[0] || '',
           platform: selectedPlatform!,
           engagementType: engagementType!,
+          password: watch('userData.password'),
+          confirmPassword: confirmPassword,
+          country: watch('userData.country'),
+          gender: watch('userData.gender'),
+          promoCode: watch('userData.usedPromoCode') || '',
+          postLinks: watch('postEngagement.postURLs'),
+          kyc: watch('userData.kycURL'),
+          selectedOption: selectedSubTypeIndex,
+          userType: 'package' as const,
+          packageId: selectedPackage._id,
         }}
         packagePrice={String(
-          discountDetails?.finalAmountAfterDiscount || selectedPackage?.amount
+          discountDetails?.finalAmountAfterDiscount || selectedPackage.amount
         )}
-        packageName={selectedPackage?.name || ''}
+        packageName={selectedPackage.name}
         onSubmit={handlePaymentSubmit}
       />
     </div>

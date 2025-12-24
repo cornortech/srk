@@ -34,6 +34,7 @@ const PaymentModel: React.FC<PaymentModalProps> = ({
   const [screenshot, setScreenshot] = useState<File | null>(null);
   const [screenshotPreview, setScreenshotPreview] = useState<string>('');
   const [isProcessing, setIsProcessing] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const navigate = useNavigate();
   const { uploadFile } = useSRKFileUpload('grow');
   const paymentMethods = [
@@ -73,8 +74,9 @@ const PaymentModel: React.FC<PaymentModalProps> = ({
   };
 
   const handleSubmit = async () => {
+    setErrorMessage(null);
     if (!selectedMethod || !transactionId || !screenshot) {
-      alert('Please fill in all required fields');
+      setErrorMessage('Please fill in all required fields');
       return;
     }
 
@@ -89,9 +91,13 @@ const PaymentModel: React.FC<PaymentModalProps> = ({
       });
 
       setStep('success');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Payment submission failed', error);
-      alert('Failed to process payment. Please try again.');
+      const msg =
+        error?.body?.message ||
+        error?.message ||
+        'Failed to process payment. Please try again.';
+      setErrorMessage(msg);
     } finally {
       setIsProcessing(false);
     }
@@ -292,7 +298,7 @@ const PaymentModel: React.FC<PaymentModalProps> = ({
                   </div>
 
                   {/* Transaction ID Input */}
-                  <div className="mb-8">
+                  <div className="mb-4">
                     <label className="block text-sm font-bold text-gray-400 mb-3 uppercase tracking-widest">
                       Transaction ID / Reference Number *
                     </label>
@@ -308,6 +314,14 @@ const PaymentModel: React.FC<PaymentModalProps> = ({
                       confirmation message
                     </p>
                   </div>
+
+                  {errorMessage && (
+                    <div className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/30">
+                      <p className="text-sm text-red-500 text-center font-medium">
+                        {errorMessage}
+                      </p>
+                    </div>
+                  )}
 
                   {/* Submit Button */}
                   <motion.button

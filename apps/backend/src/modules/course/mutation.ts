@@ -1,7 +1,7 @@
-import { AppRouteImplementationOrOptions } from "@ts-rest/express/src/lib/types";
-import { courseContract } from "@srk/shared/contracts";
-import { CourseModel } from "../../model/courseModel";
-import { CourseVideoModel } from "../../model/courseVideo";
+import { AppRouteImplementationOrOptions } from '@ts-rest/express/src/lib/types';
+import { courseContract } from '../../../../../libs/shared/contracts/src/lib/course/contract';
+import { CourseModel } from '../../model/courseModel';
+import { CourseVideoModel } from '../../model/courseVideo';
 
 const createCourse: AppRouteImplementationOrOptions<
   typeof courseContract.createCourse
@@ -17,7 +17,7 @@ const createCourse: AppRouteImplementationOrOptions<
     status: 201,
     body: {
       success: true,
-      message: "Course created successfully",
+      message: 'Course created successfully',
     },
   };
 };
@@ -32,7 +32,7 @@ const createVideoInCourse: AppRouteImplementationOrOptions<
       status: 404,
       body: {
         success: false,
-        message: "Course not found",
+        message: 'Course not found',
       },
     };
   }
@@ -42,7 +42,7 @@ const createVideoInCourse: AppRouteImplementationOrOptions<
       status: 400,
       body: {
         success: false,
-        message: "Please provide all the required fields",
+        message: 'Please provide all the required fields',
       },
     };
   }
@@ -58,7 +58,7 @@ const createVideoInCourse: AppRouteImplementationOrOptions<
     status: 201,
     body: {
       success: true,
-      message: "Video added to course successfully",
+      message: 'Video added to course successfully',
     },
   };
 };

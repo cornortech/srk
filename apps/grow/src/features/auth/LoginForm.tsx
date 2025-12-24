@@ -1,52 +1,52 @@
-import React, { useState, type FormEvent } from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Mail, Lock, Loader2, Eye, EyeOff, ArrowRight } from 'lucide-react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { LoginSchema } from '@srk/shared/contracts';
+import { z } from 'zod';
+
+type LoginFormData = z.infer<typeof LoginSchema>;
 
 interface LoginFormProps {
   onLoginSuccess?: (email: string) => void;
   onBuyPackage?: () => void;
+  onSubmit?: (data: LoginFormData) => void;
+  isLoading?: boolean;
+  externalError?: string | null;
 }
 
 export const LoginForm: React.FC<LoginFormProps> = ({
   onLoginSuccess,
   onBuyPackage,
+  onSubmit,
+  isLoading: externalLoading = false,
+  externalError = null,
 }) => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState('');
 
-  const handleLogin = async (e: FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(LoginSchema),
+    defaultValues: {
+      email: '',
+      password: '',
+    },
+  });
 
-    try {
-      await new Promise((r) => setTimeout(r, 1200));
+  const loading = externalLoading;
 
-      if (!email || !password) {
-        setError('Please fill in all fields');
-        setLoading(false);
-        return;
-      }
-
-      console.log('Login attempt:', { email, password });
-
-      if (onLoginSuccess) {
-        onLoginSuccess(email);
-      }
-    } catch (err) {
-      setError('Login failed. Please try again.');
-    } finally {
-      setLoading(false);
+  const onFormSubmit = (data: LoginFormData) => {
+    if (onSubmit) {
+      onSubmit(data);
     }
   };
+
   const navigate = useNavigate();
-  const handleBuyPackage = () => {
-    navigate('/#packages');
-  };
 
   return (
     <motion.div
@@ -64,19 +64,22 @@ export const LoginForm: React.FC<LoginFormProps> = ({
           <p className="text-gray-400">Sign in to continue to your account</p>
         </div>
 
-        {/* Error Message */}
-        {error && (
+        {/* External Error Message */}
+        {externalError && (
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-xl"
           >
-            <p className="text-red-400 text-sm font-medium">{error}</p>
+            <p className="text-red-400 text-sm font-medium">{externalError}</p>
           </motion.div>
         )}
 
         {/* Login Form */}
-        <form onSubmit={handleLogin} className="flex flex-col gap-5">
+        <form
+          onSubmit={handleSubmit(onFormSubmit)}
+          className="flex flex-col gap-5"
+        >
           {/* Email Input */}
           <div className="relative">
             <label className="text-sm text-gray-400 mb-2 block font-medium">
@@ -85,14 +88,19 @@ export const LoginForm: React.FC<LoginFormProps> = ({
             <div className="relative group">
               <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 group-focus-within:text-[#b68938] transition-colors" />
               <input
+                {...register('email')}
                 type="email"
-                className="w-full bg-black/40 text-white pl-12 pr-4 py-4 rounded-xl border border-white/10 focus:border-[#b68938]/50 focus:bg-black/60 transition-all outline-none backdrop-blur-sm"
+                className={`w-full bg-black/40 text-white pl-12 pr-4 py-4 rounded-xl border ${
+                  errors.email ? 'border-red-500' : 'border-white/10'
+                } focus:border-[#b68938]/50 focus:bg-black/60 transition-all outline-none backdrop-blur-sm`}
                 placeholder="you@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
               />
             </div>
+            {errors.email && (
+              <p className="mt-1 text-xs text-red-500">
+                {errors.email.message}
+              </p>
+            )}
           </div>
 
           {/* Password Input */}
@@ -103,13 +111,12 @@ export const LoginForm: React.FC<LoginFormProps> = ({
             <div className="relative group">
               <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 group-focus-within:text-[#b68938] transition-colors" />
               <input
+                {...register('password')}
                 type={showPassword ? 'text' : 'password'}
-                className="w-full bg-black/40 text-white pl-12 pr-12 py-4 rounded-xl border border-white/10 focus:border-[#b68938]/50 focus:bg-black/60 transition-all outline-none backdrop-blur-sm"
+                className={`w-full bg-black/40 text-white pl-12 pr-12 py-4 rounded-xl border ${
+                  errors.password ? 'border-red-500' : 'border-white/10'
+                } focus:border-[#b68938]/50 focus:bg-black/60 transition-all outline-none backdrop-blur-sm`}
                 placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                minLength={6}
               />
               <button
                 type="button"
@@ -123,6 +130,11 @@ export const LoginForm: React.FC<LoginFormProps> = ({
                 )}
               </button>
             </div>
+            {errors.password && (
+              <p className="mt-1 text-xs text-red-500">
+                {errors.password.message}
+              </p>
+            )}
           </div>
 
           {/* Submit Button */}
@@ -162,7 +174,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
           <p> Haven't bought package yet?</p>
           <button
             type="button"
-            className="flex items-center justify-center text-secondary hover:italic"
+            className="flex items-center justify-center text-[#b68938] hover:italic"
             onClick={onBuyPackage}
           >
             Buy Now

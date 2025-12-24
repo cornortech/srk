@@ -1,4 +1,4 @@
-import { apiContract } from "@srk/shared/contracts";
+import { apiContract } from "../../../../libs/shared/contracts/src/index";
 import { generateOpenApi } from "@ts-rest/open-api";
 
 const swaggerApiDocs = generateOpenApi(apiContract, {

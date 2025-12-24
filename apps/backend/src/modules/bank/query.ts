@@ -1,7 +1,7 @@
-import { AppRouteImplementationOrOptions } from "@ts-rest/express/src/lib/types";
-import { bankContract } from "@srk/shared/contracts";
-import { UserModel } from "../../model/userModel";
-import { SrkBankModel } from "../../model/srkBankModel";
+import { AppRouteImplementationOrOptions } from '@ts-rest/express/src/lib/types';
+import { bankContract } from '../../../../../libs/shared/contracts/src/lib/bank/contract';
+import { UserModel } from '../../model/userModel';
+import { SrkBankModel } from '../../model/srkBankModel';
 
 const getBankDetails: AppRouteImplementationOrOptions<
   typeof bankContract.getBankDetails
@@ -13,7 +13,7 @@ const getBankDetails: AppRouteImplementationOrOptions<
         status: 400,
         body: {
           success: false,
-          message: "User ID is required",
+          message: 'User ID is required',
         },
       };
     }
@@ -52,11 +52,11 @@ const getBankDetails: AppRouteImplementationOrOptions<
         };
       };
     }>({
-      path: "srkBankId",
-      model: "SrkBank",
+      path: 'srkBankId',
+      model: 'SrkBank',
       populate: {
-        path: "bankDetailsId",
-        model: "BankDetails",
+        path: 'bankDetailsId',
+        model: 'BankDetails',
       },
     });
 
@@ -65,7 +65,7 @@ const getBankDetails: AppRouteImplementationOrOptions<
         status: 404,
         body: {
           success: false,
-          message: "User not found",
+          message: 'User not found',
         },
       };
     }
@@ -138,7 +138,7 @@ const getBankDetails: AppRouteImplementationOrOptions<
       status: 500,
       body: {
         success: false,
-        message: error instanceof Error ? error.message : "Unknown error",
+        message: error instanceof Error ? error.message : 'Unknown error',
       },
     };
   }
@@ -163,20 +163,20 @@ const getSrkBankRequestByStatus: AppRouteImplementationOrOptions<
         email: string;
         phoneNumber: string;
       };
-    }>("userId");
+    }>('userId');
 
     const formattedRequests = srkBankRequests.map((bank) => ({
+      requestedAt: bank.createdAt,
+      status: bank.status,
+      userId: {
+        _id: bank.userId._id.toString(),
+        firstName: bank.userId.firstName,
+        lastName: bank.userId.lastName,
+        email: bank.userId.email,
+        phoneNumber: bank.userId.phoneNumber,
         requestedAt: bank.createdAt,
-        status: bank.status,
-        userId: {
-          _id: bank.userId._id.toString(),
-          firstName: bank.userId.firstName,
-          lastName: bank.userId.lastName,
-          email: bank.userId.email,
-          phoneNumber: bank.userId.phoneNumber,
-          requestedAt: bank.createdAt,
-        },
-      }));
+      },
+    }));
 
     return {
       status: 200,
@@ -187,7 +187,7 @@ const getSrkBankRequestByStatus: AppRouteImplementationOrOptions<
       status: 500,
       body: {
         success: false,
-        message: error instanceof Error ? error.message : "Unknown error",
+        message: error instanceof Error ? error.message : 'Unknown error',
       },
     };
   }

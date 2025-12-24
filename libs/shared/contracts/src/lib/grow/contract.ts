@@ -1,28 +1,78 @@
 import { initContract } from '@ts-rest/core';
 import {
-  createGrowSocialMediaEnrollementSchema,
-  getAllGrowSocialMediaEnrollementSchema,
-  getGrowSocialMediaEnrollementByIdSchema,
+  createGrowSocialMediaEnrollmentSchema,
+  getAllSrkGrowUsersResponseSchema,
+  getAllGrowSocialMediaEnrollmentSchema,
+  getGrowSocialMediaEnrollmentByIdSchema,
   validateGrowUserPromoCodeResponseSchema,
   validateGrowUserPromoCodeSchema,
+  getSrkGrowProfileResponseSchema,
+  createGrowSocialMediaTasksSchema,
   srkGrowAffiliateVerificationSchema,
-  getAllSrkGrowAffiliateVerificationRequestSchema,
-  paginatedGetAllSrkGrowAffiliateVerificationSchema,
   getAllSrkGrowAffiliateVerificationQueryParams,
+  paginatedGetAllSrkGrowAffiliateVerificationSchema,
 } from './schema';
-import {
-  ErrorSchema,
-  SuccessSchema,
-} from '../common';
+import { ErrorSchema, SuccessSchema } from '../common';
 import { z } from 'zod';
 
 const c = initContract();
 
 export const growContract = c.router({
-  createGrowSocialMediaEnrollement: {
+  getAllGrowSocialMediaEnrollment: {
+    method: 'GET',
+    path: '/get-social-media-enrollment',
+    responses: {
+      200: getAllGrowSocialMediaEnrollmentSchema,
+      400: ErrorSchema,
+      409: ErrorSchema,
+      500: ErrorSchema,
+    },
+    summary:
+      'Get all grow social media enrollment for user with user details and payment details',
+  },
+
+  getGrowSocialMediaEnrollmentById: {
+    method: 'GET',
+    path: '/get-social-media-enrollment-by-id/:enrollmentID',
+    responses: {
+      200: getGrowSocialMediaEnrollmentByIdSchema,
+      400: ErrorSchema,
+      409: ErrorSchema,
+      500: ErrorSchema,
+    },
+    summary:
+      'Get grow social media enrollment for user by ID with user details and payment details',
+  },
+
+  getAllSrkGrowUsers: {
+    method: 'GET',
+    path: '/grow-users',
+    responses: {
+      200: getAllSrkGrowUsersResponseSchema,
+      500: ErrorSchema,
+    },
+    summary: 'Get all srk grow users who is registered',
+  },
+
+  getSrkGrowProfile: {
+    method: 'GET',
+    path: '/get-srk-grow-profile/:userId',
+    pathParams: z.object({
+      userId: z.string(),
+    }),
+    responses: {
+      200: getSrkGrowProfileResponseSchema,
+      403: ErrorSchema,
+      404: ErrorSchema,
+      500: ErrorSchema,
+    },
+    summary: 'Get Srk Grow Profile by Id',
+  },
+
+  createGrowSocialMediaEnrollment: {
     method: 'POST',
-    path: '/social-media-enrollement',
-    body: createGrowSocialMediaEnrollementSchema,
+    path: '/social-media-enrollment',
+    body: createGrowSocialMediaEnrollmentSchema,
     responses: {
       201: SuccessSchema,
       400: ErrorSchema,
@@ -30,45 +80,8 @@ export const growContract = c.router({
       500: ErrorSchema,
     },
     summary:
-      'Create a new grow social media enrollement for user with user details and payment details',
+      'Create a new grow social media enrollment for user with user details and payment details',
   },
-  getAllGrowSocialMediaEnrollement: {
-    method: 'GET',
-    path: '/get-all-social-media-enrollement',
-    query: z
-      .object({
-        limit: z.coerce.number().optional(),
-        page: z.coerce.number().optional(),
-      })
-      ?.optional(),
-    responses: {
-      200: z.object({
-        data: getAllGrowSocialMediaEnrollementSchema,
-        page: z.number(),
-        limit: z.number(),
-        totalUsers: z.number(),
-        totalPages: z.number(),
-      }),
-      400: ErrorSchema,
-      409: ErrorSchema,
-      500: ErrorSchema,
-    },
-    summary:
-      'Get all grow social media enrollement for user with user details and payment details',
-  },
-  getGrowSocialMediaEnrollementById: {
-    method: 'GET',
-    path: '/get-social-media-enrollement-by-id/:enrollmentID',
-    responses: {
-      200: getGrowSocialMediaEnrollementByIdSchema,
-      400: ErrorSchema,
-      409: ErrorSchema,
-      500: ErrorSchema,
-    },
-    summary:
-      'Get grow social media enrollement for user by ID with user details and payment details',
-  },
-
 
   validateGrowUserPromoCode: {
     method: 'POST',
@@ -86,7 +99,7 @@ export const growContract = c.router({
 
   acceptSocialGrowEnrollmentRequest: {
     method: 'PUT',
-    path: '/grow/accept-social-grow-enrollement-request/:enrollementId',
+    path: '/grow/accept-social-grow-enrollment-request/:enrollmentId',
     body: z.object({}),
     responses: {
       200: SuccessSchema,
@@ -94,12 +107,12 @@ export const growContract = c.router({
       404: ErrorSchema,
       500: ErrorSchema,
     },
-    summary: 'Approve Social Grow Enrollement Request by Id',
+    summary: 'Approve Social Grow enrollment Request by Id',
   },
 
   rejectSocialGrowEnrollmentRequest: {
     method: 'PUT',
-    path: '/grow/reject-social-grow-enrollement-request/:enrollementId',
+    path: '/grow/reject-social-grow-enrollment-request/:enrollmentId',
     body: z.object({
       rejectionReason: z.string(),
     }),
@@ -109,7 +122,38 @@ export const growContract = c.router({
       404: ErrorSchema,
       500: ErrorSchema,
     },
-    summary: 'Reject Social Grow Enrollement Request by Id',
+    summary: 'Reject Social Grow Enrollment Request by Id',
+  },
+
+  resubmitGrowVerification: {
+    method: 'POST',
+    path: '/resubmit-verification',
+    body: z.object({
+      userId: z.string(),
+      kycURLs: z.array(z.string()),
+      transactionId: z.string(),
+      paymentURL: z.string(),
+    }),
+    responses: {
+      200: SuccessSchema,
+      400: ErrorSchema,
+      404: ErrorSchema,
+      500: ErrorSchema,
+    },
+    summary: 'Resubmit verification with new KYC and payment details',
+  },
+
+  createGrowSocialMediaTasks: {
+    method: 'POST',
+    path: '/grow/social-media-tasks',
+    body: createGrowSocialMediaTasksSchema,
+    responses: {
+      201: SuccessSchema,
+      400: ErrorSchema,
+      404: ErrorSchema,
+      500: ErrorSchema,
+    },
+    summary: 'Create grow social media tasks urls',
   },
 
   srkGrowAffiliateVerificationRequest: {
@@ -128,7 +172,7 @@ export const growContract = c.router({
   getAllSrkGrowAffiliateVerificationRequest: {
     method: 'GET',
     path: '/grow/affiliate/get-all-verification-request',
-    query:getAllSrkGrowAffiliateVerificationQueryParams.optional(),
+    query: getAllSrkGrowAffiliateVerificationQueryParams.optional(),
     responses: {
       200: paginatedGetAllSrkGrowAffiliateVerificationSchema,
       403: ErrorSchema,

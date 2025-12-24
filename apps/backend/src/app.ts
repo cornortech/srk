@@ -6,23 +6,23 @@ import cookieParser from 'cookie-parser';
 import swaggerApiDocs from './config/swagger';
 import cronJobInit from './utils/cronjob';
 import { router } from './modules';
-import { apiContract } from '@srk/shared/contracts';
+import { apiContract } from '../../../libs/shared/contracts/src/index';
+
 export const app = express();
 
-app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 
 const WHITE_LISTED_ORIGINS = process.env.WHITE_LISTED_ORIGINS
-  ? process.env.WHITE_LISTED_ORIGINS.split(',')
+  ? process.env.WHITE_LISTED_ORIGINS.split(",")
   : [];
 
 // CORS
 
-console.log('*** whitelisted origins ***', WHITE_LISTED_ORIGINS);
+console.log("*** whitelisted origins ***", WHITE_LISTED_ORIGINS);
 
-app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'OK' });
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "OK" });
 });
 
 app.use(

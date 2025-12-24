@@ -12,6 +12,7 @@ import {
   getSrkBankDetailsForAdminSchema,
   getSrkBonusCashFlowForAdminSchema,
   getSrkBonusCashFlowSchema,
+  getPaginatedBalancePayoutSchema,
   upsertBankDetailsSchema,
   upsertKYCDetailsSchema,
 } from './schema';
@@ -58,21 +59,15 @@ export const financeContract = c.router({
     method: 'GET',
     path: '/finance/getAllBalancePayoutsByStatus',
     query: z.object({
-      status: z.string().array().optional(),
-      limit: z.string().optional(),
-      page: z.string().optional(),
+      status: z.union([z.string(), z.array(z.string())]).optional(),
       startDate: z.string().optional(),
       endDate: z.string().optional(),
       globalSearch: z.string().optional(),
+      page: z.string().optional(),
+      limit: z.string().optional(),
     }),
     responses: {
-      200:z.object({
-        data: getBalancePayoutSchema,
-        page: z.number(),
-        limit: z.number(),
-        totalPayouts: z.number(),
-        totalPages: z.number(),
-      }),
+      200: getPaginatedBalancePayoutSchema,
       403: ErrorSchema,
       404: ErrorSchema,
       500: ErrorSchema,
@@ -253,11 +248,6 @@ export const financeContract = c.router({
     method: 'POST',
     path: '/finance/approveBankDetails/:userId',
     body: z.object({}).optional(),
-    query: z.object({
-      status: z.string().optional(),
-      limit: z.string().optional(),
-      page: z.string().optional(),
-    }),
     responses: {
       201: SuccessSchema,
       403: ErrorSchema,
@@ -269,6 +259,11 @@ export const financeContract = c.router({
   getBankTable: {
     method: 'GET',
     path: '/finance/getBankRequest',
+    query: z.object({
+      status: z.union([z.string(), z.string().array()]).optional(),
+      page: z.string().optional(),
+      limit: z.string().optional(),
+    }),
     responses: {
       200: z.object({
         data: z.array(
@@ -289,7 +284,7 @@ export const financeContract = c.router({
         ),
         page: z.number(),
         limit: z.number(),
-        totalUsers: z.number(),
+        totalRequest: z.number(),
         totalPages: z.number(),
       }),
       403: ErrorSchema,

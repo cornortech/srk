@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import SpotlightCard from './SpotlightCards';
 import { TSrkGrowPackagesSchema } from '@srk/shared/contracts';
 import { CheckCircle } from 'lucide-react';
+import { formatRupees } from '../utils/formatters';
 
 interface PackageCardProps {
   pkg: TSrkGrowPackagesSchema;
@@ -54,7 +55,7 @@ const PackageCard: React.FC<PackageCardProps> = ({
             className="text-5xl font-bold text-[#b68938]"
             whileHover={{ scale: 1.1 }}
           >
-            {pkg.amount}
+            {formatRupees(pkg.amount)}
           </motion.span>
           {pkg.amountBeforeDiscount && (
             <span className="text-lg text-gray-500 line-through ml-2">

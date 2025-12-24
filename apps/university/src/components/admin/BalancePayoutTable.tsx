@@ -54,6 +54,16 @@ export function BalancePayoutTable() {
     refetchBalancePayoutQuery();
   };
 
+  // if (!payouts?.data) {
+  //   return (
+  //     <div className="flex justify-center items-center h-screen">
+  //       <Spinner />
+  //     </div>
+  //   );
+  // }
+
+  const payoutList = payouts?.data || [];
+
   if (!payouts?.data) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -107,9 +117,9 @@ export function BalancePayoutTable() {
           <TableColumn>Status</TableColumn>
         </TableHeader>
         <TableBody>
-          {payouts?.data.map((payout, index) => (
+          {payoutList.map((payout, index) => (
             <TableRow key={payout._id}>
-              <TableCell>{(page-1)*10 + index + 1}</TableCell>
+              <TableCell>{(page - 1) * 10 + index + 1}</TableCell>
               <TableCell>{payout.username}</TableCell>
               <TableCell>{payout.packageTitle}</TableCell>
               <TableCell>{payout.amount}</TableCell>

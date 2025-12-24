@@ -53,43 +53,55 @@ export interface GrowPackageUserPopulated {
   };
 }
 
-export interface UniversityAffiliateUserToGrow {
-  _id: Types.ObjectId | string;
+export interface GrowProfileResponsePopulated {
+  growSocialMediaPackageUser: {
+    _id: Types.ObjectId;
+    srkUniversityUserId?: Types.ObjectId | null;
+    fullName: string;
+    email: string;
+    status: string;
+    phone?: string;
+    kycURL: string[];
+    country?: string;
+    gender?: string;
+    promoCode?: string;
 
-  firstName: string;
-  lastName: string;
-  phoneNumber: string;
-  gender: string;
-  dob: Date;
-  country: string;
-  email: string;
+    referredBy?: {
+      _id: Types.ObjectId;
+      fullName: string;
+    } | null;
+  };
 
-  profilePicture?: string;
+  growSocialMediaPackageEnrollment?: {
+    _id: Types.ObjectId;
+    socialMediaPlatform: string;
+    profileLinkURL?: string[];
 
-  affiliateEnabled: boolean;
-  allowedToAddUsers: boolean;
+    growSocialMediaPackageId: {
+      _id: Types.ObjectId;
+      name: string;
+      amount: number;
+    };
 
-  referralCode?: string;
-  referredBy?: Types.ObjectId;
-  packageId?: Types.ObjectId;
+    growSocialMediaPackageTypeId: {
+      _id: Types.ObjectId;
+      name: string;
+    };
 
-  status:
-    | 'REGISTERED'
-    | 'PAYMENT_VERIFICATION_PENDING'
-    | 'PAYMENT_VERIFICATION_REJECTED'
-    | 'PAYMENT_VERIFICATION_APPROVED'
-    | 'KYC_VERIFICATION_PENDING'
-    | 'KYC_VERIFICATION_REJECTED'
-    | 'PORTAL_ACTIVATED'
-    | 'PORTAL_DEACTIVATED';
+    growSocialMediaPackageSubTypeId: {
+      _id: Types.ObjectId;
+      name: string;
+      noOfLikes?: number;
+      noOfVideos?: number;
+      noOfFollowers?: number;
+    };
 
-  hasSrkBonusDeposited: boolean;
-  isSelfSignup: boolean;
-
-  purpose?: 'affiliate' | 'study';
-
-  srkBankId?: Types.ObjectId;
-
-  createdAt?: Date;
-  updatedAt?: Date;
+    payment?: {
+      _id: Types.ObjectId;
+      paymentURL: string;
+      transactionId: string;
+      paymentMethod?: string;
+      rejectionReason?: string | null;
+    };
+  } | null;
 }

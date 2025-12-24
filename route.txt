@@ -1,10 +1,10 @@
-For Packages and enrollements
+For Packages and enrollments
 / create social-task-package >> done
 / get-social-task-packages >> done
 / enroll-in-package >> done
-/ get-all-task-enrollements-by-status >> done
-/ accept-task-enrollement-request >> done
-/ reject-task-enrollement-request >> done
+/ get-all-task-enrollments-by-status >> done
+/ accept-task-enrollment-request >> done
+/ reject-task-enrollment-request >> done
 
 
 For Social Link follow

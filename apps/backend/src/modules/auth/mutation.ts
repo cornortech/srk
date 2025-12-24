@@ -1,5 +1,5 @@
 import { AppRouteImplementationOrOptions } from '@ts-rest/express/src/lib/types';
-import { authContract } from '@srk/shared/contracts';
+import { authContract } from '../../../../../libs/shared/contracts/src/index';
 import { UserModel } from '../../model/userModel';
 import AuthService from '../../services/authService';
 import { SubscriptionModel } from '../../model/subscriptionModel';
@@ -53,12 +53,12 @@ const calculateEarnings = async ({
   try {
     let {
       balance,
-      ceoSalary,
       companyTurnover,
       earning,
-      eventWallet,
       officeManagementCharge,
       srkBonus,
+      tms,
+      vat,
     } = await FinanceService.getFiananceAmountCommission({
       newUserPackageId: packageId,
       referringUserPackageId,
@@ -69,27 +69,29 @@ const calculateEarnings = async ({
     await CustomerBalanceService.depositCustomerBalance({
       userId: referredBy,
       balance,
-      eventWallet,
       totalEarnings: balance,
     });
 
     await AdminBalanceService.depositAdminBalance({
-      ceoSalary,
       officeManagementCharge,
       companyTurnover,
+      tms,
+      vat,
     });
 
     await EarningStatementModel.create({
       userId: new mongoose.Types.ObjectId(referredBy),
       referredTo: new mongoose.Types.ObjectId(referredTo),
       type: 'REFERRAL_EANRING',
-      ceoSalary,
+      ceoSalary: 0,
       companyTurnover,
       officeManagementCharge,
       eventWallet: 0,
       balanceWallet: balance,
       srkBonus,
       earning: balance,
+      tms,
+      vat,
     });
 
     if (seniorId) {
@@ -117,6 +119,8 @@ const calculateEarnings = async ({
         officeManagementCharge: 0,
         balanceWallet: srkBonus,
         companyTurnover: 0,
+        tms: 0,
+        vat: 0,
       });
     }
   } catch (error) {
@@ -741,6 +745,7 @@ const approvePaymentDetails: AppRouteImplementationOrOptions<
       },
     };
   } catch (error) {
+    console.log(`Error in approvePaymentDetails:`, error);
     return {
       status: 500,
       body: { success: false, message: 'Internal server error' },
@@ -811,7 +816,9 @@ const editPaymentDetails: AppRouteImplementationOrOptions<
   }
 };
 
-const loginSrkGrow: AppRouteImplementationOrOptions<typeof authContract.loginSrkGrow> = async ({ res, body }) => {
+const loginSrkGrow: AppRouteImplementationOrOptions<
+  typeof authContract.loginSrkGrow
+> = async ({ res, body }) => {
   try {
     const userExist = await growSocialMediaPackageUserModel.findOne({
       email: body.email,
@@ -822,7 +829,7 @@ const loginSrkGrow: AppRouteImplementationOrOptions<typeof authContract.loginSrk
         status: 404,
         body: {
           success: false,
-          message: "User not found",
+          message: 'User not found',
         },
       };
     }
@@ -837,33 +844,38 @@ const loginSrkGrow: AppRouteImplementationOrOptions<typeof authContract.loginSrk
         status: 401,
         body: {
           success: false,
-          message: "Invalid credentials",
+          message: 'Invalid credentials',
         },
       };
     }
 
-    const redirectionUrl = "/srk-grow/dashboard";
+    const redirectionUrl =
+      userExist.status === 'portalActivated'
+        ? '/dashboard'
+        : '/grow/verification';
 
     const token = await AuthService.generateJwtToken({
       email: userExist.email,
-      userId: userExist._id.toString()
+      userId: userExist._id.toString(),
     });
 
-    res.cookie("x-auth-token", token, {
+    res.cookie('x-auth-token', token, {
       maxAge: 24 * 60 * 60 * 1000,
       httpOnly: true,
-      sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
+      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production',
     });
 
     return {
       status: 200,
       body: {
         success: true,
-        message: "User logged in successfully",
+        message: 'User logged in successfully',
         user: {
           _id: userExist._id.toString(),
           email: userExist.email,
+          fullName: userExist.fullName,
+          status: userExist.status,
           redirectionUrl,
         },
       },
@@ -874,12 +886,11 @@ const loginSrkGrow: AppRouteImplementationOrOptions<typeof authContract.loginSrk
       status: 500,
       body: {
         success: false,
-        message: "Internal server error",
+        message: 'Internal server error',
       },
     };
   }
 };
-
 
 export const authMutationHandler = {
   register,
@@ -889,5 +900,5 @@ export const authMutationHandler = {
   editPaymentDetails,
   rejectPaymentDetails,
   approvePaymentDetails,
-  loginSrkGrow
+  loginSrkGrow,
 };

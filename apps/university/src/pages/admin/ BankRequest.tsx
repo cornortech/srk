@@ -40,11 +40,7 @@ export default function BankRequest() {
     queryKey: ['bank-requests', page],
     queryFn: async () => {
       const data = await getBankRequestApi(
-        [
-          'pending',
-          'approved',
-          'rejected',
-        ],
+        ['pending', 'approved', 'rejected'],
         page,
         10
       );
@@ -89,6 +85,12 @@ export default function BankRequest() {
     console.log(`rejecting ${userId}`);
   };
 
+  // if (!bankRequest?.data) {
+  //   return <div></div>;
+  // }
+
+  const bankRequestList = bankRequest?.data || [];
+
   if (!bankRequest?.data) {
     return <div></div>;
   }
@@ -109,7 +111,7 @@ export default function BankRequest() {
         <TableBody>
           {bankRequest?.data.map((user, index) => (
             <TableRow key={index}>
-              <TableCell>{(page-1)*10 + index + 1}</TableCell>
+              <TableCell>{(page - 1) * 10 + index + 1}</TableCell>
               <TableCell>
                 <Image
                   src={user.profilePicture}

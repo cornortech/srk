@@ -15,8 +15,8 @@ import { ExternalLink } from 'lucide-react';
 export const UserVerificationView = () => {
   const [page, setPage] = useState(1);
 
-  const { data: growEnrollmentUserData, isLoading } =
-    api.grow.getAllGrowSocialMediaEnrollment.useQuery(
+  const { data: growEnrollementUserData, isLoading } =
+    api.grow.getAllGrowSocialMediaEnrollement.useQuery(
       ['enrolledUser', page], // queryKey
       {
         query: {
@@ -27,7 +27,10 @@ export const UserVerificationView = () => {
     );
 
   const limit = 10;
-  const totalPage = growEnrollmentUserData?.body?.totalPages ?? 1;
+  
+  // Update these variables:
+const totalPage = growEnrollementUserData?.body?.totalPages ?? 1;
+const totalUsers = growEnrollementUserData?.body?.totalUsers ?? 0;
 
   const [documentViewerOpen, setDocumentViewerOpen] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState<{
@@ -221,7 +224,7 @@ export const UserVerificationView = () => {
                 </tr>
               </thead>
               <tbody>
-                {growEnrollmentUserData?.body.map((item, index) => (
+                {growEnrollementUserData?.body.data?.map((item, index) => (
                   <motion.tr
                     key={item._id}
                     initial={{ y: 20, opacity: 0 }}
@@ -274,9 +277,6 @@ export const UserVerificationView = () => {
                           className="w-full h-16 object-cover opacity-60 group-hover:opacity-100 transition-opacity"
                         />
                         <div className="absolute inset-0 flex items-center justify-center gap-2">
-                          <span className="bg-black/60 px-3 py-1 rounded-full text-xs text-white backdrop-blur-sm border border-white/10">
-                            View
-                          </span>
                           <a
                             href={item.userData.kycURL}
                             target="_blank"

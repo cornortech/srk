@@ -18,17 +18,29 @@ import { z } from 'zod';
 const c = initContract();
 
 export const growContract = c.router({
-  getAllGrowSocialMediaEnrollment: {
+  getAllGrowSocialMediaEnrollement: {
     method: 'GET',
-    path: '/get-social-media-enrollment',
+    path: '/get-all-social-media-enrollement',
+    query: z
+      .object({
+        limit: z.coerce.number().optional(),
+        page: z.coerce.number().optional(),
+      })
+      ?.optional(),
     responses: {
-      200: getAllGrowSocialMediaEnrollmentSchema,
+      200: z.object({
+        data: getAllGrowSocialMediaEnrollmentSchema,
+        page: z.number(),
+        limit: z.number(),
+        totalUsers: z.number(),
+        totalPages: z.number(),
+      }),
       400: ErrorSchema,
       409: ErrorSchema,
       500: ErrorSchema,
     },
     summary:
-      'Get all grow social media enrollment for user with user details and payment details',
+      'Get all grow social media enrollement for user with user details and payment details',
   },
 
   getGrowSocialMediaEnrollmentById: {

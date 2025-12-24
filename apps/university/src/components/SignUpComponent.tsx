@@ -1,32 +1,32 @@
-import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { SignupFormValues, signupSchema } from "../pages/schema/SignUpSchema";
-import { Button, Checkbox } from "@nextui-org/react";
-import { Link, useNavigate } from "react-router-dom";
-import { Eye, EyeOff } from "lucide-react";
-import { PrimaryButton } from "./ReusableComponents";
-import { useMutation } from "@tanstack/react-query";
-import { applyPromocodeApi, registerApi } from "../lib/apiClient";
-import { AxiosError } from "axios";
+import { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { SignupFormValues, signupSchema } from '../pages/schema/SignUpSchema';
+import { Button, Checkbox } from '@nextui-org/react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Eye, EyeOff } from 'lucide-react';
+import { PrimaryButton } from './ReusableComponents';
+import { useMutation } from '@tanstack/react-query';
+import { applyPromocodeApi, registerApi } from '../lib/apiClient';
+import { AxiosError } from 'axios';
 import {
   TPaymentMethod,
   TPromoCodeDetails,
   TRegisterPayload,
-} from "../lib/types";
-import { TPackage } from "../lib/types/entities";
-import useAlert from "../hooks/useAlert";
-import { SignupPaymentMethod } from "./signup/SignupPaymentMethod";
-import useUploadFile from "../hooks/useFileUpload";
+} from '../lib/types';
+import { TPackage } from '../lib/types/entities';
+import useAlert from '../hooks/useAlert';
+import { SignupPaymentMethod } from './signup/SignupPaymentMethod';
+import { useSRKFileUpload } from '@srk/shared/hooks';
 
 const genderOptions = [
-  { value: "Male", label: "Male" },
-  { value: "Female", label: "Female" },
-  { value: "Other", label: "Other" },
+  { value: 'Male', label: 'Male' },
+  { value: 'Female', label: 'Female' },
+  { value: 'Other', label: 'Other' },
 ];
 export const PurposeOptions = [
-  { value: "study", label: "Study" },
-  { value: "affiliate", label: "Affiliate" },
+  { value: 'study', label: 'Study' },
+  { value: 'affiliate', label: 'Affiliate' },
 ];
 
 interface OrderDetails {
@@ -37,10 +37,10 @@ interface OrderDetails {
 }
 
 const inputStyle =
-  "w-full bg-bgPrimary text-textPrimary px-4 py-4 text-xs rounded-md outline-none border border-slate-50 border-opacity-50 focus:border-primary focus:ring-0 focus:ring-primary";
+  'w-full bg-bgPrimary text-textPrimary px-4 py-4 text-xs rounded-md outline-none border border-slate-50 border-opacity-50 focus:border-primary focus:ring-0 focus:ring-primary';
 
 const labelStyle =
-  "absolute -top-2 left-2 bg-bgSecondary px-1 text-xs text-textPrimary";
+  'absolute -top-2 left-2 bg-bgSecondary px-1 text-xs text-textPrimary';
 
 interface SignupComponentProps {
   packageDetails: TPackage;
@@ -63,7 +63,7 @@ export function SignupComponent({
   const [promocodeError, setPromocodeError] = useState<string | null>(null);
   const [paymentDetails, setPaymentDetails] = useState<TPaymentDetails>({
     paymentProof: null,
-    transactionId: "",
+    transactionId: '',
     paymentMethod: undefined,
   });
   const [isRegisterring, setIsRegisterring] = useState(false);
@@ -77,7 +77,7 @@ export function SignupComponent({
   });
   const { show } = useAlert();
   const navigate = useNavigate();
-  const { uploadFile } = useUploadFile();
+  const { uploadFile } = useSRKFileUpload('university');
 
   const {
     setValue,
@@ -88,19 +88,19 @@ export function SignupComponent({
     formState: { errors },
   } = useForm<SignupFormValues>({
     resolver: zodResolver(signupSchema),
-    mode: "onChange",
+    mode: 'onChange',
     defaultValues: {
-      firstName: "",
-      lastName: "",
-      email: "",
-      password: "",
-      confirmPassword: "",
-      country: "",
-      dateOfBirth: "",
+      firstName: '',
+      lastName: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
+      country: '',
+      dateOfBirth: '',
       gender: undefined,
-      promoCode: "",
+      promoCode: '',
       terms: false,
-      contactDetail: "",
+      contactDetail: '',
     },
   });
 
@@ -115,15 +115,15 @@ export function SignupComponent({
     onSuccess: () => {
       setIsRegisterring(false);
       show(
-        "Registration successful. System will verify your payment details soon.",
-        "success"
+        'Registration successful. System will verify your payment details soon.',
+        'success'
       );
-      navigate("/auth/login");
+      navigate('/auth/login');
     },
     onError: (error: AxiosError<{ message: string }>) => {
       setIsRegisterring(false);
-      show(error.response?.data?.message || "Failed to register", "error");
-      setPromocodeError(error.response?.data?.message || "Failed to register");
+      show(error.response?.data?.message || 'Failed to register', 'error');
+      setPromocodeError(error.response?.data?.message || 'Failed to register');
     },
   });
 
@@ -137,22 +137,22 @@ export function SignupComponent({
       setPromocodeError(null);
     },
     onError: (error: AxiosError<{ message: string }>) => {
-      setPromocodeError(error.response?.data?.message || "Invalid promocode");
+      setPromocodeError(error.response?.data?.message || 'Invalid promocode');
     },
   });
 
   const onSubmit = async (data: SignupFormValues) => {
     if (!paymentDetails.paymentMethod || !paymentDetails.transactionId) {
-      show("Please complete payment details", "error");
+      show('Please complete payment details', 'error');
       return;
     }
 
     if (paymentDetails.paymentProof) {
       setIsRegisterring(true);
       try {
-        const { url } = await uploadFile(paymentDetails.paymentProof, "image");
+        const { url } = await uploadFile(paymentDetails.paymentProof, 'image');
         mutateRegister({
-          paymentType: "qr",
+          paymentType: 'qr',
           email: data.email,
           gender: data.gender,
           paymentProofUrl: url,
@@ -163,7 +163,7 @@ export function SignupComponent({
           firstName: data.firstName,
           referredBy: data.promoCode,
           phoneNumber: data.contactDetail,
-          packageId: packageDetails._id || "",
+          packageId: packageDetails._id || '',
           paymentMethod: paymentDetails.paymentMethod,
           transactionId: paymentDetails.transactionId,
           purpose: data.purpose,
@@ -172,7 +172,7 @@ export function SignupComponent({
         console.log(err);
 
         setIsRegisterring(false);
-        show("Registration failed", "error");
+        show('Registration failed', 'error');
       }
     }
   };
@@ -196,16 +196,16 @@ export function SignupComponent({
 
   const handleProceedToPayment = async () => {
     const isValid = await trigger();
-    const termsAccepted = getValues("terms");
+    const termsAccepted = getValues('terms');
 
     if (!isValid || !termsAccepted) {
-      show("Please fill all required fields and accept terms", "error");
-      console.log("Validation errors:", errors);
+      show('Please fill all required fields and accept terms', 'error');
+      console.log('Validation errors:', errors);
       return;
     }
 
-    if (getValues("password") !== getValues("confirmPassword")) {
-      show("Passwords do not match", "error");
+    if (getValues('password') !== getValues('confirmPassword')) {
+      show('Passwords do not match', 'error');
       return;
     }
 
@@ -226,7 +226,7 @@ export function SignupComponent({
   useEffect(() => {
     if (referralCode) {
       handleApplyPromoCode(referralCode);
-      setValue("promoCode", referralCode);
+      setValue('promoCode', referralCode);
     }
   }, [referralCode]);
 
@@ -264,7 +264,7 @@ export function SignupComponent({
                 First Name
               </label>
               <input
-                {...register("firstName")}
+                {...register('firstName')}
                 id="firstName"
                 className={inputStyle}
                 placeholder="Enter your first name"
@@ -280,7 +280,7 @@ export function SignupComponent({
                 Last Name
               </label>
               <input
-                {...register("lastName")}
+                {...register('lastName')}
                 className={inputStyle}
                 placeholder="Enter your last name"
               />
@@ -297,7 +297,7 @@ export function SignupComponent({
                 Email
               </label>
               <input
-                {...register("email")}
+                {...register('email')}
                 type="email"
                 className={inputStyle}
                 placeholder="Enter your email"
@@ -316,8 +316,8 @@ export function SignupComponent({
                 Password
               </label>
               <input
-                {...register("password")}
-                type={showPassword ? "text" : "password"}
+                {...register('password')}
+                type={showPassword ? 'text' : 'password'}
                 className={inputStyle}
                 placeholder="Enter your password"
               />
@@ -342,8 +342,8 @@ export function SignupComponent({
                 Confirm Password
               </label>
               <input
-                {...register("confirmPassword")}
-                type={showConfirmPassword ? "text" : "password"}
+                {...register('confirmPassword')}
+                type={showConfirmPassword ? 'text' : 'password'}
                 className={inputStyle}
                 placeholder="Confirm your password"
               />
@@ -371,7 +371,7 @@ export function SignupComponent({
                 Country
               </label>
               <input
-                {...register("country")}
+                {...register('country')}
                 className={inputStyle}
                 placeholder="Enter your country"
               />
@@ -386,7 +386,7 @@ export function SignupComponent({
                 Date of Birth
               </label>
               <input
-                {...register("dateOfBirth")}
+                {...register('dateOfBirth')}
                 type="date"
                 className={inputStyle}
               />
@@ -404,7 +404,7 @@ export function SignupComponent({
                 Contact Number
               </label>
               <input
-                {...register("contactDetail")}
+                {...register('contactDetail')}
                 className={inputStyle}
                 placeholder="Enter your contact number"
               />
@@ -418,7 +418,7 @@ export function SignupComponent({
               <label htmlFor="gender" className={labelStyle}>
                 Gender
               </label>
-              <select {...register("gender")} className={inputStyle}>
+              <select {...register('gender')} className={inputStyle}>
                 <option value="" disabled selected>
                   Select Gender
                 </option>
@@ -441,7 +441,7 @@ export function SignupComponent({
               Promo Code
             </label>
             <input
-              {...register("promoCode")}
+              {...register('promoCode')}
               className={inputStyle}
               placeholder="Enter promo code"
             />
@@ -456,11 +456,11 @@ export function SignupComponent({
               className="px-8"
               color="primary"
               onPress={() => {
-                if (!getValues("promoCode")) {
-                  show("Please enter a promo code", "error");
+                if (!getValues('promoCode')) {
+                  show('Please enter a promo code', 'error');
                   return;
                 }
-                handleApplyPromoCode(getValues("promoCode") || "");
+                handleApplyPromoCode(getValues('promoCode') || '');
               }}
             >
               Apply
@@ -470,7 +470,7 @@ export function SignupComponent({
             <label htmlFor="purpose" className={labelStyle}>
               Purpose
             </label>
-            <select {...register("purpose")} className={inputStyle}>
+            <select {...register('purpose')} className={inputStyle}>
               <option value="" disabled selected>
                 Select Purpose
               </option>
@@ -490,12 +490,12 @@ export function SignupComponent({
             <div className="space-y-1 text-gray-300">
               <div className="text-green-500">Code applied successfully!</div>
               <div>
-                Name:{" "}
+                Name:{' '}
                 {`${promoCodeDetails.firstName} ${promoCodeDetails.lastName}`}
               </div>
               <div>
-                Mobile:{" "}
-                {promoCodeDetails.phoneNumber.slice(0, -3).replace(/\d/g, "*") +
+                Mobile:{' '}
+                {promoCodeDetails.phoneNumber.slice(0, -3).replace(/\d/g, '*') +
                   promoCodeDetails.phoneNumber.slice(-3)}
               </div>
             </div>
@@ -530,8 +530,8 @@ export function SignupComponent({
                         <span
                           className={
                             packageDetails
-                              ? "line-through mr-2 text-red-500"
-                              : ""
+                              ? 'line-through mr-2 text-red-500'
+                              : ''
                           }
                         >
                           {packageDetails?.currency}.{packageDetails?.price}
@@ -567,8 +567,8 @@ export function SignupComponent({
           <div>
             <Checkbox
               isRequired
-              {...register("terms")}
-              classNames={{ label: "text-white" }}
+              {...register('terms')}
+              classNames={{ label: 'text-white' }}
             >
               <span className="text-sm">
                 I agree to the terms and conditions
@@ -588,7 +588,7 @@ export function SignupComponent({
         />
 
         <p className="text-textPrimary text-center text-sm">
-          Already have an account?{" "}
+          Already have an account?{' '}
           <Link to="/auth/login">
             <span className="text-primary">Login!</span>
           </Link>

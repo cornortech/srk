@@ -1,31 +1,31 @@
-import { Button, Tab, Tabs } from "@nextui-org/react";
-import WebcamCapture from "../../components/affiliate/PortalActivation/FaceCapture";
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { Button, Tab, Tabs } from '@nextui-org/react';
+import WebcamCapture from '../../components/affiliate/PortalActivation/FaceCapture';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import {
   getUserDetailsApi,
   upsertAffiliateBiometricDataApi,
-} from "../../lib/apiClient";
-import useAuthStore from "../../store/useAuth";
-import useAlert from "../../hooks/useAlert";
-import AlertBanner from "../../components/AlertBanner";
-import { TUserDataReponseData } from "../../lib/types";
-import { methods } from "../../lib/methods";
-import useUploadFile from "../../hooks/useFileUpload";
+} from '../../lib/apiClient';
+import useAuthStore from '../../store/useAuth';
+import useAlert from '../../hooks/useAlert';
+import AlertBanner from '../../components/AlertBanner';
+import { TUserDataReponseData } from '../../lib/types';
+import { methods } from '../../lib/methods';
+import { useSRKFileUpload } from '@srk/shared/hooks';
 
 const AffiliateRequestVerification = () => {
-  const [selectedTab, setSelectedTab] = useState("details");
+  const [selectedTab, setSelectedTab] = useState('details');
   const [verificationImage, setVerficationImage] = useState<string | null>(
     null
   );
   const { show } = useAlert();
   const navigate = useNavigate();
-  const { uploadFile } = useUploadFile();
+  const { uploadFile } = useSRKFileUpload('univeristy');
   const { userDetails } = useAuthStore();
 
   const { data: userData } = useQuery<TUserDataReponseData | null>({
-    queryKey: ["userDetails"],
+    queryKey: ['userDetails'],
     queryFn: async () => {
       if (!userDetails?._id) return null;
       const res = await getUserDetailsApi(userDetails?._id);
@@ -49,11 +49,11 @@ const AffiliateRequestVerification = () => {
       return res;
     },
     onSuccess: () => {
-      navigate("/study/request");
-      show("Affiliate biometric data updated successfully", "success");
+      navigate('/study/request');
+      show('Affiliate biometric data updated successfully', 'success');
     },
     onError: () => {
-      show("Failed to update biometric data", "error");
+      show('Failed to update biometric data', 'error');
     },
   });
 
@@ -66,18 +66,18 @@ const AffiliateRequestVerification = () => {
     if (!userId) return;
 
     let verificationImageUrl =
-      userData?.affiliateBiometricDetails?.verificationImage || "";
+      userData?.affiliateBiometricDetails?.verificationImage || '';
 
     if (verificationImage) {
       // remove whitespaces
-      const firstName = (userDetails?.firstName || "User").replace(/\s/g, "");
+      const firstName = (userDetails?.firstName || 'User').replace(/\s/g, '');
       const { url } = await uploadFile(
         methods.base64ToFile(
           verificationImage,
           `${Date.now()}-${firstName}-v-image.png`,
-          "image/png"
+          'image/png'
         ),
-        "image"
+        'image'
       );
 
       verificationImageUrl = url;
@@ -86,32 +86,33 @@ const AffiliateRequestVerification = () => {
     upsertAffiliateBiometricDataMutation({
       userId: userId,
       verificationImage: verificationImageUrl,
-      leftThumbPrint: "-",
-      rightThumbPrint: "-",
+      leftThumbPrint: '-',
+      rightThumbPrint: '-',
     });
   };
 
   const kycStatus = userData?.affiliateRequestDetails?.status;
 
   const showKycAlertBanner =
-    kycStatus === "pending" || kycStatus === "rejected";
+    kycStatus === 'pending' || kycStatus === 'rejected';
 
   const affiliateRequestReason =
-    userData?.affiliateRequestDetails?.rejectionReason || "";
+    userData?.affiliateRequestDetails?.rejectionReason || '';
 
   return (
     <>
       <div className="relative w-full   bg-cover bg-no-repeat bg-center ">
         {showKycAlertBanner && kycStatus ? (
           <AlertBanner
-            type={kycStatus === "pending" ? "warning" : "danger"}
-            message={` ${kycStatus === "pending"
-              ? "Affiliate request is pending . Admin will verify details soon."
-              : `Affiliate request is rejected . Reason : ${affiliateRequestReason}`
-              } `}
+            type={kycStatus === 'pending' ? 'warning' : 'danger'}
+            message={` ${
+              kycStatus === 'pending'
+                ? 'Affiliate request is pending . Admin will verify details soon.'
+                : `Affiliate request is rejected . Reason : ${affiliateRequestReason}`
+            } `}
           />
         ) : (
-          ""
+          ''
         )}
         <div>
           <Tabs
@@ -121,16 +122,16 @@ const AffiliateRequestVerification = () => {
             size="lg"
             fullWidth
             classNames={{
-              base: "bg-bgSecondary text-white rounded-2xl", // Background and text color for the entire tabs container
-              tabList: "bg-bgSecondary text-white", // Style the tab list container
-              tab: "text-white  hover:bg-gray-800 ", // Style each tab
-              tabContent: "text-white", // Text inside the tab
-              cursor: "bg-white", // Active tab underline or cursor
+              base: 'bg-bgSecondary text-white rounded-2xl', // Background and text color for the entire tabs container
+              tabList: 'bg-bgSecondary text-white', // Style the tab list container
+              tab: 'text-white  hover:bg-gray-800 ', // Style each tab
+              tabContent: 'text-white', // Text inside the tab
+              cursor: 'bg-white', // Active tab underline or cursor
             }}
           >
             <Tab key="details" title="Photo Verification" className="">
               <WebcamCapture
-                disableActions={kycStatus === "pending"}
+                disableActions={kycStatus === 'pending'}
                 // if affiliate biometric details doesnot exist show initial video
                 isInitialVideoOpen={
                   !userData?.affiliateBiometricDetails?.verificationImage &&
@@ -142,7 +143,7 @@ const AffiliateRequestVerification = () => {
                 verificationImage={verificationImage}
                 setVerificationImage={setVerficationImage}
                 handleTabChange={() => {
-                  handleTabChange("FingerPrints");
+                  handleTabChange('FingerPrints');
                 }}
               />
             </Tab>

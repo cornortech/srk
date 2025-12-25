@@ -10,6 +10,9 @@ import { growPackageEngagementPostModel } from '../../model/growPackageEngagemen
 import { IUser, UserModel } from '../../model/userModel';
 import { growSrkAffiliateVerificationModel } from '../../model/grow/growSrkAffiliateVerificationModel';
 import { AppRouteImplementationOrOptions } from '@ts-rest/express/src/lib/types';
+import { growSrkAffiliateEarningStatementModel } from '../../model/grow/growSrkAffiliateEarningStatementModel';
+import { Types } from 'mongoose';
+import { growSrkAffiliateUserBalanceModel } from '../../model/grow/growSrkAffiliateUserBalanceModel';
 
 const createGrowSocialMediaEnrollment: AppRouteImplementationOrOptions<
   typeof growContract.createGrowSocialMediaEnrollment
@@ -58,7 +61,7 @@ const createGrowSocialMediaEnrollment: AppRouteImplementationOrOptions<
     if (
       !packageTypeExists ||
       String(packageTypeExists.growSocialMediaPackageId) !==
-        enrollmentData.growSocialMediaPackageId
+      enrollmentData.growSocialMediaPackageId
     ) {
       return {
         status: 400,
@@ -76,7 +79,7 @@ const createGrowSocialMediaEnrollment: AppRouteImplementationOrOptions<
     if (
       !packageSubTypeExists ||
       String(packageSubTypeExists.growSocialMediaPackageTypeId) !==
-        enrollmentData.growSocialMediaPackageTypeId
+      enrollmentData.growSocialMediaPackageTypeId
     ) {
       return {
         status: 400,
@@ -265,9 +268,8 @@ export const validateGrowUserPromoCode: AppRouteImplementationOrOptions<
       status: 200,
       body: {
         success: true,
-        message: `Promo code valid! You get a discount of ${
-          discountPercentage * 100
-        }% on the ${growPackage.name} package.`,
+        message: `Promo code valid! You get a discount of ${discountPercentage * 100
+          }% on the ${growPackage.name} package.`,
         discountDetails: {
           originalAmount,
           discountPercentage: discountPercentage * 100,
@@ -295,8 +297,19 @@ const acceptSocialGrowEnrollmentRequest: AppRouteImplementationOrOptions<
   typeof growContract.acceptSocialGrowEnrollmentRequest
 > = async ({ params }) => {
   try {
-    const enrollmentRequest =
-      await growSocialMediaPackageEnrollmentModel.findById(params.enrollmentId);
+    const enrollmentRequest = await growSocialMediaPackageEnrollmentModel
+      .findById(params.enrollmentId)
+      .populate<{
+        growSocialMediaPackageUserId: {
+          _id: Types.ObjectId;
+          referredBy?: Types.ObjectId;
+          status: string;
+        };
+        growSocialMediaPackageId: {
+          _id: Types.ObjectId;
+          amount: number;
+        };
+      }>("growSocialMediaPackageUserId growSocialMediaPackageId");
 
     if (!enrollmentRequest) {
       return {
@@ -306,6 +319,9 @@ const acceptSocialGrowEnrollmentRequest: AppRouteImplementationOrOptions<
         },
       };
     }
+
+    const user = enrollmentRequest.growSocialMediaPackageUserId;
+    const packageData = enrollmentRequest.growSocialMediaPackageId;
 
     await growSocialMediaPackageUserModel.findOneAndUpdate(
       {
@@ -332,10 +348,39 @@ const acceptSocialGrowEnrollmentRequest: AppRouteImplementationOrOptions<
       }
     );
 
+    if (user.referredBy) {
+      const affiliateCommissionRate = 0.15;
+      const affiliateCommissionAmount = enrollmentRequest.amount * affiliateCommissionRate;
+
+      // 1️⃣ Create earning statement
+      await growSrkAffiliateEarningStatementModel.create({
+        refferedBY: user.referredBy,
+        refferedTo: user._id,
+        growSocialMediaPackageId: packageData._id,
+        amount: affiliateCommissionAmount,
+      });
+
+      const affiliateBalance = await growSrkAffiliateUserBalanceModel.findOne({
+        growSocialMediaPackageUserId: user.referredBy,
+      });
+
+      if (affiliateBalance) {
+        // increment existing balance
+        affiliateBalance.wallet += affiliateCommissionAmount;
+        await affiliateBalance.save();
+      } else {
+        // create new balance
+        await growSrkAffiliateUserBalanceModel.create({
+          growSocialMediaPackageUserId: user.referredBy,
+          wallet: affiliateCommissionAmount,
+        });
+      }
+    }
+
     return {
       status: 200,
       body: {
-        message: 'Follow Request Approved',
+        message: 'Enrollement Request Accepted',
         success: true,
       },
     };

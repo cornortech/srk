@@ -8,7 +8,7 @@ import { growSocialMediaPackagePaymentModel } from '../../model/growSocialMediaP
 import AuthService from '../../services/authService';
 import { growPackageEngagementPostModel } from '../../model/growPackageEngagementPostModel';
 import { IUser, UserModel } from '../../model/userModel';
-import { growSrkAffiliateVerificationModel } from '../../model/growSrkAffiliateVerificationModel';
+import { growSrkAffiliateVerificationModel } from '../../model/grow/growSrkAffiliateVerificationModel';
 import { AppRouteImplementationOrOptions } from '@ts-rest/express/src/lib/types';
 
 const createGrowSocialMediaEnrollment: AppRouteImplementationOrOptions<

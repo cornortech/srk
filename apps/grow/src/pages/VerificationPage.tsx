@@ -16,22 +16,40 @@ import { GradientText } from '../features/verification/components/ui/GradientTex
 import { GlassCard } from '../features/verification/components/ui/GlassCard';
 import { useSRKFileUpload } from '@srk/shared/hooks';
 import { api } from '../lib/api';
-import useGrowAuthStore, { GrowUser } from '../store/useGrowAuthStore';
+import useGrowAuthStore from '../store/useGrowAuthStore';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { resubmitGrowVerificationSchema } from '@srk/shared/contracts';
+import { z } from 'zod';
+import { useToast } from '../lib/contexts/ToastContext';
+
+type TResubmitForm = z.infer<typeof resubmitGrowVerificationSchema>;
 
 export const GrowVerificationPage = () => {
   const navigate = useNavigate();
   const { user, setUser, logout } = useGrowAuthStore();
+  const toast = useToast();
   const [kycFiles, setKycFiles] = useState<File[]>([]);
   const [currentKycDocs, setCurrentKycDocs] = useState<string[]>([]);
-  const [transactionId, setTransactionId] = useState('');
   const [paymentProof, setPaymentProof] = useState<File | null>(null);
-  const { uploadFile, isUploading } = useSRKFileUpload('grow-resubmission');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { uploadFile, isUploading: isUploadingFiles } =
+    useSRKFileUpload('grow-resubmission');
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors },
+    reset,
+  } = useForm<TResubmitForm>({
+    resolver: zodResolver(resubmitGrowVerificationSchema),
+  });
 
   // API Hooks
   const { data: profileData, refetch } = api.grow.getSrkGrowProfile.useQuery(
-    ['growProfile', user?._id || ''],
-    { params: { id: user?._id || '' } },
+    ['growProfile', user?._id],
+    user?._id ? { params: { userId: user._id } } : ({} as any),
     {
       enabled: !!user?._id,
       refetchOnWindowFocus: true,
@@ -42,49 +60,53 @@ export const GrowVerificationPage = () => {
   const resubmitMutation = api.grow.resubmitGrowVerification.useMutation({
     onSuccess: (data) => {
       if (data.status === 200) {
-        console.log('✅ Resubmission successful');
-        refetch(); // Refresh profile to get updated status
+        toast.success('Resubmission successful!');
+        refetch();
         setKycFiles([]);
         setPaymentProof(null);
+        reset();
       } else {
-        alert(data.body.message || 'Resubmission failed');
+        toast.error(data.body.message || 'Resubmission failed');
       }
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error('Resubmission error:', error);
-      alert('An error occurred during resubmission.');
+      toast.error(
+        error?.body?.message || 'An error occurred during resubmission.'
+      );
     },
   });
 
   // Sync profile data to store and local state
   useEffect(() => {
     if (profileData?.status === 200) {
-      const updatedUser = profileData.body.result;
+      const updatedUser = profileData.body.userDetails;
+      const payment = profileData.body.enrollmentData?.enrollmentPaymentDetails;
       setUser({
         ...user!,
         status: updatedUser.status as any,
-        rejectionReason: updatedUser.rejectionReason,
+        rejectionReason: payment?.rejectionReason ?? null,
         kycURL: updatedUser.kycURL,
         phone: updatedUser.phone,
         country: updatedUser.country,
-        createdAt: updatedUser.createdAt,
-        transactionId: updatedUser.transactionId,
-        paymentURL: updatedUser.paymentURL,
-        paymentMethod: updatedUser.paymentMethod as any,
+        transactionId: payment?.transactionId,
+        paymentURL: payment?.paymentUrl,
+        paymentMethod: payment?.paymentMethod as any,
       });
 
-      // Prefill fields
-      if (updatedUser.transactionId)
-        setTransactionId(updatedUser.transactionId);
+      if (updatedUser._id) setValue('userId', updatedUser._id);
+      if (payment?.transactionId)
+        setValue('transactionId', payment.transactionId);
+      if (payment?.paymentUrl) setValue('paymentURL', payment.paymentUrl);
       if (updatedUser.kycURL) {
-        setCurrentKycDocs(
-          Array.isArray(updatedUser.kycURL)
-            ? updatedUser.kycURL
-            : [updatedUser.kycURL]
-        );
+        const docs = Array.isArray(updatedUser.kycURL)
+          ? updatedUser.kycURL
+          : [updatedUser.kycURL];
+        setCurrentKycDocs(docs);
+        setValue('kycURLs', docs);
       }
     }
-  }, [profileData, setUser]);
+  }, [profileData, setUser, setValue]);
 
   useEffect(() => {
     if (!user) {
@@ -109,7 +131,9 @@ export const GrowVerificationPage = () => {
   };
 
   const removeCurrentDoc = (index: number) => {
-    setCurrentKycDocs((prev) => prev.filter((_, i) => i !== index));
+    const updatedDocs = currentKycDocs.filter((_, i) => i !== index);
+    setCurrentKycDocs(updatedDocs);
+    setValue('kycURLs', updatedDocs);
   };
 
   const handlePaymentProofChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -118,16 +142,14 @@ export const GrowVerificationPage = () => {
     }
   };
 
-  const handleResubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const onFormSubmit = async (data: TResubmitForm) => {
     if (!user) return;
 
     if (currentKycDocs.length === 0 && kycFiles.length === 0) {
-      alert('Please provide at least one KYC document.');
+      toast.error('Please provide at least one KYC document.');
       return;
     }
 
-    setIsSubmitting(true);
     try {
       // 1. Upload new KYC files
       let newKycUrls: string[] = [];
@@ -137,29 +159,27 @@ export const GrowVerificationPage = () => {
       }
 
       // 2. Upload new Payment Proof if changed
-      let finalPaymentUrl = user.paymentURL || '';
+      let finalPaymentUrl = data.paymentURL;
       if (paymentProof) {
         const { url } = await uploadFile(paymentProof, 'image');
         finalPaymentUrl = url;
       }
 
-      // 3. Combine remaining current docs and new ones
+      // 3. Combine
       const totalKycUrls = [...currentKycDocs, ...newKycUrls];
 
-      // 4. Call Backend API
+      // 4. Call Backend
       resubmitMutation.mutate({
         body: {
           userId: user._id,
           kycURLs: totalKycUrls,
-          transactionId,
+          transactionId: data.transactionId,
           paymentURL: finalPaymentUrl,
         },
       });
     } catch (error) {
       console.error('Resubmission failed', error);
-      alert('Failed to upload documents. Please try again.');
-    } finally {
-      setIsSubmitting(false);
+      toast.error('Failed to upload documents. Please try again.');
     }
   };
 
@@ -230,7 +250,8 @@ export const GrowVerificationPage = () => {
                     Reason for Rejection
                   </span>
                   <p className="text-white text-sm">
-                    {user.rejectionReason ||
+                    {profileData?.body.enrollmentData?.enrollmentPaymentDetails
+                      ?.rejectionReason!! ||
                       'One or more documents were blurry or invalid.'}
                   </p>
                 </div>
@@ -269,7 +290,10 @@ export const GrowVerificationPage = () => {
                 <h3 className="text-2xl font-bold text-white mb-6">
                   Update Verification
                 </h3>
-                <form onSubmit={handleResubmit} className="space-y-6">
+                <form
+                  onSubmit={handleSubmit(onFormSubmit)}
+                  className="space-y-6"
+                >
                   <div>
                     <label className="block text-sm font-bold text-gray-400 mb-2 uppercase tracking-widest">
                       Transaction ID
@@ -280,14 +304,22 @@ export const GrowVerificationPage = () => {
                         className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500"
                       />
                       <input
+                        {...register('transactionId')}
                         type="text"
-                        value={transactionId}
-                        onChange={(e) => setTransactionId(e.target.value)}
-                        className="w-full pl-12 pr-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white focus:border-[#b68938] focus:ring-1 focus:ring-[#b68938] transition-all"
+                        className={`w-full pl-12 pr-4 py-3 rounded-xl bg-white/5 border ${
+                          errors.transactionId
+                            ? 'border-red-500'
+                            : 'border-white/10'
+                        } text-white focus:border-[#b68938] focus:ring-1 focus:ring-[#b68938] transition-all`}
                         placeholder="Original: 123XYZ..."
                         required
                       />
                     </div>
+                    {errors.transactionId && (
+                      <p className="mt-1 text-xs text-red-500">
+                        {errors.transactionId.message}
+                      </p>
+                    )}
                   </div>
 
                   <div>
@@ -295,10 +327,10 @@ export const GrowVerificationPage = () => {
                       Payment Screenshot
                     </label>
 
-                    {!paymentProof && user.paymentURL && (
+                    {!paymentProof && watch('paymentURL') && (
                       <div className="mb-3 relative group rounded-xl overflow-hidden border border-white/10">
                         <img
-                          src={user.paymentURL}
+                          src={watch('paymentURL')}
                           alt="Current Proof"
                           className="w-full h-32 object-cover opacity-60 group-hover:opacity-100 transition-opacity"
                         />
@@ -307,7 +339,7 @@ export const GrowVerificationPage = () => {
                             Current Upload
                           </span>
                           <a
-                            href={user.paymentURL}
+                            href={watch('paymentURL')}
                             target="_blank"
                             rel="noreferrer"
                             className="p-2 bg-white/10 rounded-full text-white hover:bg-[#b68938] transition-all opacity-0 group-hover:opacity-100"
@@ -333,7 +365,7 @@ export const GrowVerificationPage = () => {
                         <span className="text-gray-400 truncate">
                           {paymentProof
                             ? paymentProof.name
-                            : user.paymentURL
+                            : watch('paymentURL')
                             ? 'Change screenshot'
                             : 'Select screenshot'}
                         </span>
@@ -347,7 +379,6 @@ export const GrowVerificationPage = () => {
                       KYC Documents
                     </label>
 
-                    {/* Current Documents */}
                     <div className="space-y-2 mb-4">
                       {currentKycDocs.map((url, idx) => (
                         <div
@@ -375,7 +406,6 @@ export const GrowVerificationPage = () => {
                         </div>
                       ))}
 
-                      {/* New Documents */}
                       {kycFiles.map((file, idx) => (
                         <div
                           key={`new-${idx}`}
@@ -421,14 +451,10 @@ export const GrowVerificationPage = () => {
 
                   <button
                     type="submit"
-                    disabled={
-                      isUploading || isSubmitting || resubmitMutation.isPending
-                    }
+                    disabled={isUploadingFiles || resubmitMutation.isPending}
                     className="w-full py-4 rounded-xl font-bold uppercase tracking-widest bg-gradient-to-r from-[#b68938] to-[#e1ba73] text-black hover:shadow-[0_0_20px_rgba(182,137,56,0.4)] disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
                   >
-                    {isUploading ||
-                    isSubmitting ||
-                    resubmitMutation.isPending ? (
+                    {isUploadingFiles || resubmitMutation.isPending ? (
                       <>
                         <Loader2 size={20} className="animate-spin" />
                         Submitting...

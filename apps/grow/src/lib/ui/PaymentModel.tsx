@@ -91,9 +91,13 @@ const PaymentModel: React.FC<PaymentModalProps> = ({
       });
 
       setStep('success');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Payment submission failed', error);
-      setErrorMessage('Failed to process payment. Please try again.');
+      const msg =
+        error?.body?.message ||
+        error?.message ||
+        'Failed to process payment. Please try again.';
+      setErrorMessage(msg);
     } finally {
       setIsProcessing(false);
     }

@@ -6,6 +6,8 @@ const packageCommissionSchema = new mongoose.Schema({
     ref: 'Package', // Linking to PackageModel
     required: true,
   },
+  tms: { type: Number, required: true },
+  vat: { type: Number, required: true },
   affiliateCommission: { type: Number, required: true },
   eventWallet: { type: Number, required: true },
   srkBonus: { type: Number, required: true },

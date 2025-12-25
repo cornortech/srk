@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LoginForm } from '../components/user-components/auth/LoginForm';
 import { api } from '../lib/api';
 import useGrowAuthStore, { GrowUser } from '../store/useGrowAuthStore';
+import { LoginSchema } from '@srk/shared/contracts';
+import { z } from 'zod';
+import { LoginForm } from '../features/auth/LoginForm';
 
 export const LoginPage = () => {
   const navigate = useNavigate();
@@ -22,9 +24,10 @@ export const LoginPage = () => {
   }, [user, navigate]);
 
   // Profile Query
+  // note: passing path param as { userId }
   const { data: profileData } = api.grow.getSrkGrowProfile.useQuery(
     ['growProfile', userIdToFetch!],
-    { params: { id: userIdToFetch! } },
+    { params: { userId: userIdToFetch! } },
     {
       enabled: !!userIdToFetch,
       queryKey: ['growProfile', userIdToFetch!],
@@ -34,8 +37,9 @@ export const LoginPage = () => {
   // Watch for Profile Data
   useEffect(() => {
     if (profileData?.status === 200) {
-      console.log('✅ Profile data received:', profileData.body.result);
-      const userProfile = profileData.body.result;
+      console.log('✅ Profile data received:', profileData.body.userDetails);
+      const userProfile = profileData.body.userDetails;
+      const payment = profileData.body.enrollmentData?.enrollmentPaymentDetails;
       // Map to GrowUser
       const growUser: GrowUser = {
         _id: userProfile._id,
@@ -43,10 +47,17 @@ export const LoginPage = () => {
         fullName: userProfile.fullName,
         status: userProfile.status as any,
         kycURL: userProfile.kycURL,
-        rejectionReason: userProfile.rejectionReason,
+        userType: userProfile.userType,
+        referredBy: userProfile.referredBy ?? null,
+        srkUniversityId: userProfile.srkUniversityId,
+        profileLinkURL: userProfile.profileLinkURL,
+        createdAt: userProfile.createdAt,
+        rejectionReason: payment?.rejectionReason ?? null,
         phone: userProfile.phone,
         country: userProfile.country,
-        createdAt: userProfile.createdAt,
+        transactionId: payment?.transactionId,
+        paymentURL: payment?.paymentUrl,
+        paymentMethod: payment?.paymentMethod,
       };
 
       setUser(growUser);
@@ -72,12 +83,16 @@ export const LoginPage = () => {
         const redirectionUrl = loginUser.redirectionUrl;
         console.log('🎯 Login successful for:', loginUser.email);
 
-        // Set basic user info from login response
+        // Set basic user info from login response (provide minimal defaults required by GrowUser)
         setUser({
           _id: loginUser._id,
           email: loginUser.email,
           fullName: loginUser.fullName || '',
           status: (loginUser.status as any) || 'verificationPending',
+          kycURL: [],
+          userType: ((loginUser as any).userType as any) || 'package',
+          referredBy: null,
+          createdAt: (loginUser as any).createdAt,
         });
 
         // Navigate immediately if redirectionUrl exists
@@ -102,6 +117,15 @@ export const LoginPage = () => {
   const handleLoginSubmit = (formData: { email: string; password: string }) => {
     console.log('🔐 Login attempt:', formData.email);
     setLoginError(null); // Clear previous errors
+
+    try {
+      LoginSchema.parse(formData);
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        setLoginError(err.errors[0]?.message || 'Invalid input');
+        return;
+      }
+    }
 
     loginMutation.mutate({
       body: {

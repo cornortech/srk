@@ -1,5 +1,5 @@
-import { adminBalanceModel } from "../model/adminBalanceModel";
-import { AdminSrkBankModel } from "../model/AdminSrkBankModel";
+import { adminBalanceModel } from '../model/adminBalanceModel';
+import { AdminSrkBankModel } from '../model/AdminSrkBankModel';
 
 interface TUpdateAdminBalance {
   ceoSalary?: number;
@@ -8,6 +8,8 @@ interface TUpdateAdminBalance {
   eventWallet?: number;
   tdsAmount?: number;
   companyWallet?: number;
+  vat?: number;
+  tms?: number;
 }
 
 class AdminBalanceService {
@@ -18,6 +20,8 @@ class AdminBalanceService {
     eventWallet = 0,
     tdsAmount = 0,
     companyWallet = 0,
+    vat = 0,
+    tms = 0,
   }: TUpdateAdminBalance): Promise<void> {
     const adminBalanceExist = await adminBalanceModel.findOne();
 
@@ -30,6 +34,8 @@ class AdminBalanceService {
         eventWallet,
         tdsAmount,
         companyWallet,
+        vat,
+        tms,
       });
       // Update existing admin balance
     } else {
@@ -39,6 +45,8 @@ class AdminBalanceService {
       adminBalanceExist.eventWallet += eventWallet;
       adminBalanceExist.tdsAmount += tdsAmount;
       adminBalanceExist.companyWallet += companyWallet;
+      adminBalanceExist.tms += tms;
+      adminBalanceExist.vat += vat;
       await adminBalanceExist.save();
     }
   }

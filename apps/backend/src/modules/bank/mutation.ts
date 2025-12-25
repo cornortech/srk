@@ -1,9 +1,9 @@
-import mongoose, { mongo } from "mongoose";
-import { AppRouteImplementationOrOptions } from "@ts-rest/express/src/lib/types";
-import { bankContract } from "@srk/shared/contracts";
-import { UserModel } from "../../model/userModel";
-import { BankDetailsModel } from "../../model/bankDetails";
-import { SrkBankModel } from "../../model/srkBankModel";
+import mongoose, { mongo } from 'mongoose';
+import { AppRouteImplementationOrOptions } from '@ts-rest/express/src/lib/types';
+import { bankContract } from '../../../../../libs/shared/contracts/src/lib/bank/contract';
+import { UserModel } from '../../model/userModel';
+import { BankDetailsModel } from '../../model/bankDetails';
+import { SrkBankModel } from '../../model/srkBankModel';
 
 const createBankDetails: AppRouteImplementationOrOptions<
   typeof bankContract.createBankDetails
@@ -19,7 +19,7 @@ const createBankDetails: AppRouteImplementationOrOptions<
       return {
         status: 400,
         body: {
-          message: "Invalid user ID",
+          message: 'Invalid user ID',
           success: false,
         },
       };
@@ -31,7 +31,7 @@ const createBankDetails: AppRouteImplementationOrOptions<
       return {
         status: 404,
         body: {
-          message: "User not found",
+          message: 'User not found',
           success: false,
         },
       };
@@ -42,7 +42,7 @@ const createBankDetails: AppRouteImplementationOrOptions<
     if (!userExist.srkBankId) {
       const newSrkBank = await SrkBankModel.create({
         userId: userExist._id,
-        status: "pending",
+        status: 'pending',
       });
       srkBankId = newSrkBank._id;
       userExist.srkBankId = srkBankId;
@@ -91,16 +91,16 @@ const createBankDetails: AppRouteImplementationOrOptions<
     return {
       status: 200,
       body: {
-        message: "Bank details created successfully",
+        message: 'Bank details created successfully',
         success: true,
       },
     };
   } catch (error) {
-    console.error("Error creating bank details:", error);
+    console.error('Error creating bank details:', error);
     return {
       status: 500,
       body: {
-        message: "Error creating bank details",
+        message: 'Error creating bank details',
         success: false,
       },
     };

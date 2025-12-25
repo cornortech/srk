@@ -1,4 +1,8 @@
 import z from 'zod';
+import {
+  commonPaginatedQueryParamsSchema,
+  commonPaginationResponse,
+} from '../common';
 
 export const createGrowSocialMediaEnrollmentSchema = z.object({
   userData: z.object({
@@ -23,9 +27,11 @@ export const createGrowSocialMediaEnrollmentSchema = z.object({
     transactionId: z.string().min(1, 'Transaction ID is required'),
     paymentMethod: z.enum(['esewa', 'khalti', 'bankTransfer']),
   }),
-  postEngagement: z.object({
-    postURLs: z.array(z.string().url('Invalid Post URL')).optional(),
-  }).optional(),
+  postEngagement: z
+    .object({
+      postURLs: z.array(z.string().url('Invalid Post URL')).optional(),
+    })
+    .optional(),
 });
 
 export type TCreateGrowSocialMediaEnrollment = z.infer<
@@ -49,7 +55,9 @@ export const getGrowSocialMediaEnrollmentByIdSchema = z.object({
     growSocialMediaPackageId: z.string(),
     growSocialMediaPackageTypeId: z.string(),
     growSocialMediaPackageSubTypeId: z.string(),
-    profileLinkURL: z.string().url('Invalid Profile Link URL').optional(),
+    profileLinkURL: z.array(
+      z.string().url('Invalid Profile Link URL').optional()
+    ),
   }),
   paymentData: z.object({
     paymentURL: z.string().url('Invalid payment URL'),
@@ -94,20 +102,55 @@ export type TValidateGrowUserPromoCodeResponse = z.infer<
   typeof validateGrowUserPromoCodeResponseSchema
 >;
 
+export const srkGrowAffiliateVerificationRequestSchema = z.object({
+  _id: z.string(),
+  verificationRequestId: z.string(),
+  username: z.string(),
+  email: z.string(),
+  verificationImageUrl: z.string(),
+  createdAt: z.string(),
+  status: z.enum(['pending', 'approved', 'rejected']),
+});
+
+export const getAllSrkGrowAffiliateVerificationRequestSchema = z.array(
+  srkGrowAffiliateVerificationRequestSchema
+);
+
+export const paginatedGetAllSrkGrowAffiliateVerificationSchema =
+  commonPaginationResponse.extend({
+    data: getAllSrkGrowAffiliateVerificationRequestSchema,
+  });
+
+export const getAllSrkGrowAffiliateVerificationQueryParams =
+  commonPaginatedQueryParamsSchema.extend({
+    status: z.enum(['pending', 'approved', 'rejected']).optional(),
+  });
+
 export const srkGrowUsersSchema = z.object({
   _id: z.string(),
   fullName: z.string(),
   referredBy: z.string().optional(),
-  status: z.enum(['verificationPending', 'portalActivated', 'portalDeactivated']),
+  status: z.enum([
+    'verificationPending',
+    'portalActivated',
+    'portalDeactivated',
+  ]),
   socialMediaPackage: z.object({
     _id: z.string(),
     name: z.string(),
   }),
 });
 
+export const srkGrowAffiliateVerificationSchema = z.object({
+  srkUniversityUserId: z.string(),
+  verificationImageUrl: z.string(),
+});
+
 export const getAllSrkGrowUsersResponseSchema = z.array(srkGrowUsersSchema);
 
-export type TGetAllSrkGrowUsersResponse = z.infer<typeof getAllSrkGrowUsersResponseSchema>;
+export type TGetAllSrkGrowUsersResponse = z.infer<
+  typeof getAllSrkGrowUsersResponseSchema
+>;
 
 export const getSrkGrowProfileResponseSchema = z.object({
   userDetails: z.object({
@@ -123,37 +166,47 @@ export const getSrkGrowProfileResponseSchema = z.object({
     promoCode: z.string().optional(),
     profileLinkURL: z.array(z.string().url()).optional(),
     userType: z.enum(['affiliate', 'package']),
-    referredBy: z.object({
-      name: z.string(),
-    }).nullable(),
+    referredBy: z
+      .object({
+        name: z.string(),
+      })
+      .nullable(),
     createdAt: z.string(),
   }),
-  enrollmentData: z.object({
-    enrollmentPackageDetails: z.object({
-      name: z.string(),
-      amount: z.number(),
-      socialMediaPlatform: z.string(),
-      packageType: z.object({
+  enrollmentData: z
+    .object({
+      _id: z.string().optional(),
+      isActive: z.boolean().optional(),
+      enrollmentPackageDetails: z.object({
         name: z.string(),
-        packageSubType: z.object({
+        amount: z.number(),
+        socialMediaPlatform: z.string(),
+        packageType: z.object({
           name: z.string(),
-          noOfLikes: z.number().optional(),
-          noOfVideos: z.number().optional(),
-          noOfFollowers: z.number().optional(),
+          packageSubType: z.object({
+            name: z.string(),
+            noOfLikes: z.number().optional(),
+            noOfVideos: z.number().optional(),
+            noOfFollowers: z.number().optional(),
+          }),
         }),
       }),
-    }),
-    engagementPostURLs: z.array(z.string().url()).optional(),
-    enrollmentPaymentDetails: z.object({
-      paymentUrl: z.string(),
-      transactionId: z.string(),
-      paymentMethod: z.string().optional(),
-      rejectionReason: z.string().optional(),
-    }).nullable(),
-  }).nullable(),
+      engagementPostURLs: z.array(z.string().url()).optional(),
+      enrollmentPaymentDetails: z
+        .object({
+          paymentUrl: z.string(),
+          transactionId: z.string(),
+          paymentMethod: z.string().optional(),
+          rejectionReason: z.string().optional(),
+        })
+        .nullable(),
+    })
+    .nullable(),
 });
 
-export type TGetSrkGrowProfileResponse = z.infer<typeof getSrkGrowProfileResponseSchema>;
+export type TGetSrkGrowProfileResponse = z.infer<
+  typeof getSrkGrowProfileResponseSchema
+>;
 
 export const resubmitGrowVerificationSchema = z.object({
   userId: z.string(),
@@ -162,7 +215,9 @@ export const resubmitGrowVerificationSchema = z.object({
   paymentURL: z.string(),
 });
 
-export type TResubmitGrowVerification = z.infer<typeof resubmitGrowVerificationSchema>;
+export type TResubmitGrowVerification = z.infer<
+  typeof resubmitGrowVerificationSchema
+>;
 
 export const createGrowSocialMediaTasksSchema = z.object({
   growSocialMediaPackageEnrollmentId: z.string(),
@@ -170,4 +225,6 @@ export const createGrowSocialMediaTasksSchema = z.object({
   postURLs: z.array(z.string().url()).optional(),
 });
 
-export type TCreateGrowSocialMediaTasks = z.infer<typeof createGrowSocialMediaTasksSchema>
+export type TCreateGrowSocialMediaTasks = z.infer<
+  typeof createGrowSocialMediaTasksSchema
+>;

@@ -8,6 +8,9 @@ import {
   validateGrowUserPromoCodeSchema,
   getSrkGrowProfileResponseSchema,
   createGrowSocialMediaTasksSchema,
+  srkGrowAffiliateVerificationSchema,
+  getAllSrkGrowAffiliateVerificationQueryParams,
+  paginatedGetAllSrkGrowAffiliateVerificationSchema,
 } from './schema';
 import { ErrorSchema, SuccessSchema } from '../common';
 import { z } from 'zod';
@@ -15,18 +18,29 @@ import { z } from 'zod';
 const c = initContract();
 
 export const growContract = c.router({
-
-  getAllGrowSocialMediaEnrollment: {
+  getAllGrowSocialMediaEnrollement: {
     method: 'GET',
-    path: '/get-social-media-enrollment',
+    path: '/get-all-social-media-enrollement',
+    query: z
+      .object({
+        limit: z.coerce.number().optional(),
+        page: z.coerce.number().optional(),
+      })
+      ?.optional(),
     responses: {
-      200: getAllGrowSocialMediaEnrollmentSchema,
+      200: z.object({
+        data: getAllGrowSocialMediaEnrollmentSchema,
+        page: z.number(),
+        limit: z.number(),
+        totalUsers: z.number(),
+        totalPages: z.number(),
+      }),
       400: ErrorSchema,
       409: ErrorSchema,
       500: ErrorSchema,
     },
     summary:
-      'Get all grow social media enrollment for user with user details and payment details',
+      'Get all grow social media enrollement for user with user details and payment details',
   },
 
   getGrowSocialMediaEnrollmentById: {
@@ -43,13 +57,13 @@ export const growContract = c.router({
   },
 
   getAllSrkGrowUsers: {
-    method: "GET",
-    path: "/grow-users",
+    method: 'GET',
+    path: '/grow-users',
     responses: {
       200: getAllSrkGrowUsersResponseSchema,
       500: ErrorSchema,
     },
-    summary: "Get all srk grow users who is registered",
+    summary: 'Get all srk grow users who is registered',
   },
 
   getSrkGrowProfile: {
@@ -68,8 +82,8 @@ export const growContract = c.router({
   },
 
   createGrowSocialMediaEnrollment: {
-    method: "POST",
-    path: "/social-media-enrollment",
+    method: 'POST',
+    path: '/social-media-enrollment',
     body: createGrowSocialMediaEnrollmentSchema,
     responses: {
       201: SuccessSchema,
@@ -77,7 +91,8 @@ export const growContract = c.router({
       409: ErrorSchema,
       500: ErrorSchema,
     },
-    summary: "Create a new grow social media enrollment for user with user details and payment details",
+    summary:
+      'Create a new grow social media enrollment for user with user details and payment details',
   },
 
   validateGrowUserPromoCode: {
@@ -150,6 +165,60 @@ export const growContract = c.router({
       404: ErrorSchema,
       500: ErrorSchema,
     },
-    summary: 'Create grow social media tasks urls'
+    summary: 'Create grow social media tasks urls',
+  },
+
+  srkGrowAffiliateVerificationRequest: {
+    method: 'POST',
+    path: '/grow/affiliate/verification-request',
+    body: srkGrowAffiliateVerificationSchema,
+    responses: {
+      200: SuccessSchema,
+      403: ErrorSchema,
+      404: ErrorSchema,
+      500: ErrorSchema,
+    },
+    summary: 'SRK Grow Affiliate Verification Request',
+  },
+
+  getAllSrkGrowAffiliateVerificationRequest: {
+    method: 'GET',
+    path: '/grow/affiliate/get-all-verification-request',
+    query: getAllSrkGrowAffiliateVerificationQueryParams.optional(),
+    responses: {
+      200: paginatedGetAllSrkGrowAffiliateVerificationSchema,
+      403: ErrorSchema,
+      404: ErrorSchema,
+      500: ErrorSchema,
+    },
+    summary: 'Get All SRK Grow Affiliate Verification Request',
+  },
+
+  approveSrkGrowAffiliateVerificationRequest: {
+    method: 'POST',
+    path: '/grow/affiliate/approve-verification-follow-request/:srkGrowaffiliateVerificationId',
+    body: z.object({}),
+    responses: {
+      200: SuccessSchema,
+      403: ErrorSchema,
+      404: ErrorSchema,
+      500: ErrorSchema,
+    },
+    summary: 'Approve SRK Grow Verification Follow Request by Id',
+  },
+
+  rejectSrkGrowAffiliateVerificationRequest: {
+    method: 'POST',
+    path: '/grow/affiliate/reject-verification-follow-request/:srkGrowaffiliateVerificationId',
+    body: z.object({
+      rejectionReason: z.string(),
+    }),
+    responses: {
+      200: SuccessSchema,
+      403: ErrorSchema,
+      404: ErrorSchema,
+      500: ErrorSchema,
+    },
+    summary: 'Reject SRK Grow Verification Follow Request By Id',
   },
 });

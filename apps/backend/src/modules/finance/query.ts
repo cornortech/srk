@@ -1,19 +1,21 @@
 import {
   AppRouteImplementation,
   AppRouteImplementationOrOptions,
-} from "@ts-rest/express/src/lib/types";
-import mongoose from "mongoose";
-import { balancePayoutModel } from "../../model/balancePayoutModel";
-import { financeContract } from "@srk/shared/contracts";
-import { balanceModel } from "../../model/balanceModel";
-import { adminBalanceModel } from "../../model/adminBalanceModel";
-import bankStatement from "../../model/bankStatement";
-import { SrkBankModel } from "../../model/srkBankModel";
-import { AdminSrkBankModel } from "../../model/AdminSrkBankModel";
-import { UserModel } from "../../model/userModel";
-import { BankModel } from "../../model/bankModel";
-import { SrkUniversityBankModel } from "../../model/srkUniversityBankModel";
-import { TGetSrkBonusCashFlow } from "@srk/shared/contracts";
+} from '@ts-rest/express/src/lib/types';
+import mongoose from 'mongoose';
+import { balancePayoutModel } from '../../model/balancePayoutModel';
+import { financeContract } from '../../../../../libs/shared/contracts/src/lib/finance/contract';
+import { balanceModel } from '../../model/balanceModel';
+import { adminBalanceModel } from '../../model/adminBalanceModel';
+import bankStatement from '../../model/bankStatement';
+import { SrkBankModel } from '../../model/srkBankModel';
+import { AdminSrkBankModel } from '../../model/AdminSrkBankModel';
+import { UserModel } from '../../model/userModel';
+import { BankModel } from '../../model/bankModel';
+import { SrkUniversityBankModel } from '../../model/srkUniversityBankModel';
+import { TGetSrkBonusCashFlow } from '../../../../../libs/shared/contracts/src/lib/finance/schema';
+import { Types } from 'mongoose';
+import { EarningStatementModel } from '../../model/earningStatementModel';
 
 const getAllBalancePayoutOfUser: AppRouteImplementationOrOptions<
   typeof financeContract.getAllBalancePayoutOfUser
@@ -37,10 +39,10 @@ const getAllBalancePayoutOfUser: AppRouteImplementationOrOptions<
           };
         };
       }>({
-        path: "userId",
+        path: 'userId',
         populate: {
-          path: "packageId",
-          select: "title",
+          path: 'packageId',
+          select: 'title',
         },
       });
 
@@ -61,11 +63,11 @@ const getAllBalancePayoutOfUser: AppRouteImplementationOrOptions<
             updatedAt: p.updatedAt,
             tdsAmount: p.tdsAmount,
             totalAmount: p.totalAmount,
-            transactionNumber: p.transactionNumber || "-",
-            paymentMethod: p.paymentMethod || "",
-            paymentProofUrl: p.paymentProofUrl || "",
-            qrUrl: bankExist?.qrUrl || "",
-            packageTitle: p.userId?.packageId?.title || "",
+            transactionNumber: p.transactionNumber || '-',
+            paymentMethod: p.paymentMethod || '',
+            paymentProofUrl: p.paymentProofUrl || '',
+            qrUrl: bankExist?.qrUrl || '',
+            packageTitle: p.userId?.packageId?.title || '',
           };
         })
       ),
@@ -76,7 +78,7 @@ const getAllBalancePayoutOfUser: AppRouteImplementationOrOptions<
       status: 500,
       body: {
         success: false,
-        message: "Internal server error",
+        message: 'Internal server error',
       },
     };
   }
@@ -104,7 +106,7 @@ const calculateEarnings = async (userId: string, days: number) => {
     {
       $group: {
         _id: null,
-        totalEarnings: { $sum: "$balanceWallet" },
+        totalEarnings: { $sum: '$balanceWallet' },
       },
     },
   ]);
@@ -124,7 +126,7 @@ const getFinanceDetailsOfUser: AppRouteImplementationOrOptions<
     // use aggregate method
     const bankPayouts = await balancePayoutModel.find({
       userId: userId,
-      status: "pending",
+      status: 'pending',
     });
 
     if (!userBalance) {
@@ -132,7 +134,7 @@ const getFinanceDetailsOfUser: AppRouteImplementationOrOptions<
         status: 404,
         body: {
           success: false,
-          message: "User balance not found",
+          message: 'User balance not found',
         },
       };
     }
@@ -167,32 +169,32 @@ const getFinanceDetailsOfUser: AppRouteImplementationOrOptions<
       },
     };
   } catch (error) {
-    console.error("Error fetching earnings:", error);
+    console.error('Error fetching earnings:', error);
     return {
       status: 500,
       body: {
         success: false,
-        message: "Internal server error",
+        message: 'Internal server error',
       },
     };
   }
 };
 
-const getLeaderboard = async (timeframe: "weekly" | "monthly" | "allTime") => {
+const getLeaderboard = async (timeframe: 'weekly' | 'monthly' | 'allTime') => {
   let startDate = new Date();
 
   switch (timeframe) {
-    case "weekly":
+    case 'weekly':
       startDate.setDate(startDate.getDate() - 7);
       break;
-    case "monthly":
+    case 'monthly':
       startDate.setMonth(startDate.getMonth() - 1);
       break;
-    case "allTime":
+    case 'allTime':
       startDate = new Date(0); // Earliest date possible
       break;
     default:
-      throw new Error("Invalid timeframe");
+      throw new Error('Invalid timeframe');
   }
 
   const leaderboard = await EarningStatementModel.aggregate([
@@ -203,29 +205,29 @@ const getLeaderboard = async (timeframe: "weekly" | "monthly" | "allTime") => {
     },
     {
       $group: {
-        _id: "$userId",
-        totalEarnings: { $sum: "$earning" },
+        _id: '$userId',
+        totalEarnings: { $sum: '$earning' },
       },
     },
     {
       $lookup: {
-        from: "users",
-        localField: "_id",
-        foreignField: "_id",
-        as: "user",
+        from: 'users',
+        localField: '_id',
+        foreignField: '_id',
+        as: 'user',
       },
     },
     {
-      $unwind: "$user",
+      $unwind: '$user',
     },
     {
       $project: {
         _id: 0,
-        userId: "$_id",
-        username: "$user.firstName",
-        lastName: "$user.lastName",
-        profilePicture: "$user.profilePicture",
-        country: "$user.country",
+        userId: '$_id',
+        username: '$user.firstName',
+        lastName: '$user.lastName',
+        profilePicture: '$user.profilePicture',
+        country: '$user.country',
         totalEarnings: 1,
       },
     },
@@ -245,12 +247,12 @@ const getEarningLeaderboard: AppRouteImplementationOrOptions<
   try {
     const { timeFrame } = req.query;
 
-    if (!["weekly", "monthly", "allTime"].includes(timeFrame)) {
+    if (!['weekly', 'monthly', 'allTime'].includes(timeFrame)) {
       return {
         status: 400,
         body: {
           success: false,
-          message: "Invalid time frame",
+          message: 'Invalid time frame',
         },
       };
     }
@@ -269,12 +271,12 @@ const getEarningLeaderboard: AppRouteImplementationOrOptions<
       })),
     };
   } catch (error) {
-    console.error("Error fetching leaderboard:", error);
+    console.error('Error fetching leaderboard:', error);
     return {
       status: 500,
       body: {
         success: false,
-        message: "Internal server error",
+        message: 'Internal server error',
       },
     };
   }
@@ -284,37 +286,64 @@ const getAllBalancePayoutsByStatus: AppRouteImplementationOrOptions<
   typeof financeContract.getAllBalancePayoutsByStatus
 > = async ({ req }) => {
   try {
-    const { status, startDate, endDate, globalSearch } = req.query;
+    const { status, startDate, endDate, globalSearch } = req.query as {
+      status?: string | string[];
+      startDate?: string;
+      endDate?: string;
+      globalSearch?: string;
+      page?: string;
+      limit?: string;
+    };
 
-    // Build the query object
+    // Convert status to array
+    const statusArray = status
+      ? Array.isArray(status)
+        ? status
+        : [status]
+      : [];
+
+    // Pagination
+    const page = req.query.page ? parseInt(req.query.page as string, 10) : 1;
+    const limit = req.query.limit
+      ? parseInt(req.query.limit as string, 10)
+      : 10;
+
+    const skip = (page - 1) * limit;
+
+    // Build query object
     const query: any = {};
 
-    // Filter by status (if provided)
-    if (status) {
-      query.status = { $in: Array.isArray(status) ? status : [status] };
+    // Status filter
+    if (statusArray.length > 0) {
+      query.status = { $in: statusArray };
     }
 
-    // Filter by date range (if provided)
+    // Date filter
     if (startDate && endDate) {
       query.createdAt = {
-        $gte: new Date(startDate as unknown as string),
-        $lte: new Date(endDate as unknown as string),
+        $gte: new Date(startDate),
+        $lte: new Date(endDate),
       };
     }
 
-    // Global search (if provided)
+    // Global search
     if (globalSearch) {
       query.$or = [
-        { payoutId: { $regex: globalSearch, $options: "i" } },
-        { userId: { $regex: globalSearch, $options: "i" } },
-        { status: { $regex: globalSearch, $options: "i" } },
+        { payoutId: { $regex: globalSearch, $options: 'i' } },
+        { status: { $regex: globalSearch, $options: 'i' } },
+        { transactionNumber: { $regex: globalSearch, $options: 'i' } },
       ];
     }
 
-    // Fetch data from the database
+    // Count total
+    const totalRequest = await balancePayoutModel.countDocuments(query);
+
+    // Fetch paginated data
     const payouts = await balancePayoutModel
       .find(query)
       .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
       .populate<{
         userId: {
           _id: string;
@@ -328,50 +357,61 @@ const getAllBalancePayoutsByStatus: AppRouteImplementationOrOptions<
           };
         };
       }>({
-        path: "userId",
+        path: 'userId',
         populate: {
-          path: "packageId",
-          select: "title",
+          path: 'packageId',
+          select: 'title',
         },
       });
 
-    // Return the response
+    // Format records
+    const formatted = await Promise.all(
+      payouts.map(async (p) => {
+        const username = p.isAdmin
+          ? 'Admin'
+          : `${p.userId.firstName} ${p.userId.lastName}`;
+
+        const bankExist = await BankModel.findOne({
+          userId: p.userId,
+        });
+
+        return {
+          _id: p._id.toString(),
+          paymentProofUrl: p.paymentProofUrl || '',
+          username,
+          userId: p.userId?._id,
+          amount: p.amount,
+          status: p.status,
+          tdsAmount: p.tdsAmount,
+          totalAmount: p.totalAmount,
+          transactionNumber: p.transactionNumber || '-',
+          qrUrl: bankExist?.qrUrl || '',
+          createdAt: p.createdAt,
+          updatedAt: p.updatedAt,
+          paymentMethod: p.paymentMethod || '',
+          packageTitle: p.userId?.packageId?.title || '',
+        };
+      })
+    );
+
+    // Return consistent paginated response
     return {
       status: 200,
-      body: await Promise.all(
-        payouts.map(async (p) => {
-          const username = p.isAdmin
-            ? `Admin`
-            : `${p.userId.firstName} ${p.userId.lastName}`;
-          const bankExist = await BankModel.findOne({
-            userId: p.userId,
-          });
-          return {
-            _id: p._id.toString(),
-            paymentProofUrl: p.paymentProofUrl || "",
-            username: username,
-            userId: p.userId?._id,
-            amount: p.amount,
-            status: p.status,
-            tdsAmount: p.tdsAmount,
-            totalAmount: p.totalAmount,
-            transactionNumber: p.transactionNumber || "-",
-            qrUrl: bankExist?.qrUrl || "",
-            createdAt: p.createdAt,
-            updatedAt: p.updatedAt,
-            paymentMethod: p.paymentMethod || "",
-            packageTitle: p.userId?.packageId?.title || "",
-          };
-        })
-      ),
+      body: {
+        data: formatted,
+        limit,
+        page,
+        totalRequest,
+        totalPages: Math.ceil(totalRequest / limit),
+      },
     };
   } catch (error) {
-    console.error("Error fetching balance payouts:", error);
+    console.error('Error fetching balance payouts:', error);
     return {
       status: 500,
       body: {
         success: false,
-        message: "Internal server error",
+        message: 'Internal server error',
       },
     };
   }
@@ -388,7 +428,7 @@ const getAdminEarningDetails: AppRouteImplementationOrOptions<
         status: 404,
         body: {
           success: false,
-          message: "Admin balance not found",
+          message: 'Admin balance not found',
         },
       };
     }
@@ -396,13 +436,13 @@ const getAdminEarningDetails: AppRouteImplementationOrOptions<
     const pendingDistributionResult = await balancePayoutModel.aggregate([
       {
         $match: {
-          status: "pending",
+          status: 'pending',
         },
       },
       {
         $group: {
           _id: null,
-          totalAmount: { $sum: "$amount" },
+          totalAmount: { $sum: '$amount' },
         },
       },
     ]);
@@ -416,7 +456,7 @@ const getAdminEarningDetails: AppRouteImplementationOrOptions<
       {
         $group: {
           _id: null,
-          totalTurnover: { $sum: "$companyTurnover" },
+          totalTurnover: { $sum: '$companyTurnover' },
         },
       },
     ]);
@@ -455,7 +495,7 @@ const getAdminEarningDetails: AppRouteImplementationOrOptions<
       status: 500,
       body: {
         success: false,
-        message: "Internal server error",
+        message: 'Internal server error',
       },
     };
   }
@@ -475,7 +515,7 @@ const getBankStatementOfUser: AppRouteImplementation<
         status: 404,
         body: {
           success: false,
-          message: "Bank details not found",
+          message: 'Bank details not found',
         },
       };
     }
@@ -484,7 +524,7 @@ const getBankStatementOfUser: AppRouteImplementation<
       .find({
         bankId: srkBankExist._id,
         type: {
-          $in: ["deposit", "payout_request", "refunded"],
+          $in: ['deposit', 'payout_request', 'refunded'],
         },
       })
       .sort({
@@ -501,10 +541,10 @@ const getBankStatementOfUser: AppRouteImplementation<
           return {
             _id: statement._id.toString(),
             username: `${userExist?.firstName} ${userExist?.lastName}`,
-            profilePicture: userExist?.profilePicture || "",
+            profilePicture: userExist?.profilePicture || '',
             amount: statement.amount,
-            bankId: statement.bankId?.toString() || "",
-            description: statement.description || "",
+            bankId: statement.bankId?.toString() || '',
+            description: statement.description || '',
             currentAmount: statement.currentAmount,
             type: statement.type,
             createdAt: statement.createdAt,
@@ -518,7 +558,7 @@ const getBankStatementOfUser: AppRouteImplementation<
       status: 500,
       body: {
         success: false,
-        message: "Internal server error",
+        message: 'Internal server error',
       },
     };
   }
@@ -531,7 +571,7 @@ const getBankStatementForAdmin: AppRouteImplementation<
     const bankStatements = await bankStatement
       .find({
         type: {
-          $in: ["deposit", "payout_request", "payout", "refunded"],
+          $in: ['deposit', 'payout_request', 'payout', 'refunded'],
         },
       })
       .sort({
@@ -549,10 +589,10 @@ const getBankStatementForAdmin: AppRouteImplementation<
           return {
             _id: statement._id.toString(),
             username: `${userExist?.firstName} ${userExist?.lastName}`,
-            profilePicture: userExist?.profilePicture || "",
+            profilePicture: userExist?.profilePicture || '',
             amount: statement.amount,
-            bankId: statement.bankId?.toString() || "",
-            description: statement.description || "",
+            bankId: statement.bankId?.toString() || '',
+            description: statement.description || '',
             currentAmount: statement.currentAmount,
             type: statement.type,
             createdAt: statement.createdAt,
@@ -562,12 +602,12 @@ const getBankStatementForAdmin: AppRouteImplementation<
       ),
     };
   } catch (error) {
-    console.error("Error fetching bank statement:", error);
+    console.error('Error fetching bank statement:', error);
     return {
       status: 500,
       body: {
         success: false,
-        message: "Internal server error",
+        message: 'Internal server error',
       },
     };
   }
@@ -583,7 +623,7 @@ const getSrkBankDetailsForAdmin: AppRouteImplementation<
         status: 404,
         body: {
           success: false,
-          message: "Srk Bank details not found",
+          message: 'Srk Bank details not found',
         },
       };
     }
@@ -595,12 +635,12 @@ const getSrkBankDetailsForAdmin: AppRouteImplementation<
       },
     };
   } catch (error) {
-    console.error("Error fetching balance details:", error);
+    console.error('Error fetching balance details:', error);
     return {
       status: 500,
       body: {
         success: false,
-        message: "Internal server error",
+        message: 'Internal server error',
       },
     };
   }
@@ -616,7 +656,7 @@ const getAllSrkUniversityBankStatement: AppRouteImplementationOrOptions<
         status: 404,
         body: {
           success: false,
-          message: "Srk university bank not found",
+          message: 'Srk university bank not found',
         },
       };
     }
@@ -636,8 +676,8 @@ const getAllSrkUniversityBankStatement: AppRouteImplementationOrOptions<
           return {
             _id: statement._id.toString(),
             amount: statement.amount,
-            bankId: statement.bankId?.toString() || "",
-            description: statement.description || "",
+            bankId: statement.bankId?.toString() || '',
+            description: statement.description || '',
             currentAmount: statement.currentAmount,
             type: statement.type,
             createdAt: statement.createdAt,
@@ -647,12 +687,12 @@ const getAllSrkUniversityBankStatement: AppRouteImplementationOrOptions<
       ),
     };
   } catch (error) {
-    console.error("Error fetching balance details:", error);
+    console.error('Error fetching balance details:', error);
     return {
       status: 500,
       body: {
         success: false,
-        message: "Internal server error",
+        message: 'Internal server error',
       },
     };
   }
@@ -661,58 +701,91 @@ const getBankTable: AppRouteImplementationOrOptions<
   typeof financeContract.getBankTable
 > = async ({ req }) => {
   try {
-    const bankTable = await BankModel.find({}).populate<{
-      userId: {
-        _id: string;
-        firstName: string;
-        lastName: string;
-        profilePicture: string;
-        packageId: {
+    const { status } = req.query as { status?: string | string[] };
+
+    const statusArray: string[] = status
+      ? Array.isArray(status)
+        ? status
+        : [status]
+      : [];
+
+    const page = req.query.page ? parseInt(req.query.page as string, 10) : 1;
+    const limit = req.query.limit
+      ? parseInt(req.query.limit as string, 10)
+      : 10;
+
+    const skip = (page - 1) * limit;
+
+    const queryReq: Record<string, any> = {};
+
+    if (statusArray.length > 0) {
+      queryReq.status = { $in: statusArray };
+    }
+
+    const totalRequest = await BankModel.countDocuments(queryReq);
+
+    const bankTable = await BankModel.find(queryReq)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .populate<{
+        userId: {
           _id: string;
-          title: string;
+          firstName: string;
+          lastName: string;
+          profilePicture: string;
+          packageId: {
+            _id: string;
+            title: string;
+          };
         };
-      };
-    }>({
-      path: "userId",
-      populate: {
-        path: "packageId",
-        select: "title",
-      },
-    });
+      }>({
+        path: 'userId',
+        populate: {
+          path: 'packageId',
+          select: 'title',
+        },
+      });
+
+    // Format response
+    const formattedBankTable = bankTable.map((bank) => ({
+      username: `${bank.userId.firstName} ${bank.userId.lastName}`,
+      profilePicture: bank.userId.profilePicture,
+      _id: bank._id.toString(),
+      userId: bank.userId._id.toString(),
+      bankName: bank.bankName,
+      accountHolderName: bank.accountHolderName,
+      accountNumber: bank.accountNumber,
+      ifscCode: bank.ifscCode || '',
+      accountType: bank.accountType,
+      branchName: bank.branchName,
+      relationWithAccount: bank.relationWithAccount,
+      status: bank.status,
+      qrUrl: bank.qrUrl || '',
+      packageTitle: bank.userId.packageId?.title || '',
+    }));
 
     return {
       status: 200,
-      body: bankTable.map((bank) => ({
-        username: `${bank.userId.firstName} ${bank.userId.lastName}`,
-        profilePicture: bank.userId.profilePicture,
-        _id: bank._id.toString(),
-        userId: bank.userId._id.toString(),
-        bankName: bank.bankName,
-        accountHolderName: bank.accountHolderName,
-        accountNumber: bank.accountNumber,
-        ifscCode: bank.ifscCode || "",
-        accountType: bank.accountType,
-        branchName: bank.branchName,
-        relationWithAccount: bank.relationWithAccount,
-        status: bank.status,
-        qrUrl: bank.qrUrl || "",
-        packageTitle: bank.userId.packageId?.title || "",
-      })),
+      body: {
+        data: formattedBankTable,
+        limit,
+        page,
+        totalRequest,
+        totalPages: Math.ceil(totalRequest / limit),
+      },
     };
   } catch (error) {
-    console.error("Error fetching balance details:", error);
+    console.error('Error fetching bank table:', error);
     return {
       status: 500,
       body: {
         success: false,
-        message: "Internal server error",
+        message: 'Internal server error',
       },
     };
   }
 };
-
-import { Types } from "mongoose";
-import { EarningStatementModel } from "../../model/earningStatementModel";
 
 interface PopulatedTransaction {
   _id: Types.ObjectId;
@@ -748,19 +821,19 @@ const getTeamCashflowOfUser: AppRouteImplementation<
     // Step 2: Fetch transactions for those referrals
     const allTransactions = (await EarningStatementModel.find({
       userId: { $in: referralIds },
-      type: "REFERRAL_EANRING",
+      type: 'REFERRAL_EANRING',
     })
       .populate({
-        path: "referredTo",
-        select: "firstName lastName purpose packageId",
+        path: 'referredTo',
+        select: 'firstName lastName purpose packageId',
         populate: {
-          path: "packageId",
-          select: "title",
+          path: 'packageId',
+          select: 'title',
         },
       })
       .populate({
-        path: "userId",
-        select: "firstName lastName",
+        path: 'userId',
+        select: 'firstName lastName',
       })
       .sort({ createdAt: -1 })
       .lean()) as unknown as PopulatedTransaction[];
@@ -768,13 +841,13 @@ const getTeamCashflowOfUser: AppRouteImplementation<
     // Step 3: Map to response format
     const response: TGetSrkBonusCashFlow[] = allTransactions.map((r) => ({
       _id: r._id.toString(),
-      package: r.referredTo?.packageId?.title ?? "N/A",
-      purpose: r.referredTo?.purpose ?? "N/A",
-      username: `${r.userId?.firstName ?? ""} ${
-        r.userId?.lastName ?? ""
+      package: r.referredTo?.packageId?.title ?? 'N/A',
+      purpose: r.referredTo?.purpose ?? 'N/A',
+      username: `${r.userId?.firstName ?? ''} ${
+        r.userId?.lastName ?? ''
       }`.trim(),
-      registeredUser: `${r.referredTo?.firstName ?? ""} ${
-        r.referredTo?.lastName ?? ""
+      registeredUser: `${r.referredTo?.firstName ?? ''} ${
+        r.referredTo?.lastName ?? ''
       }`.trim(),
       bonusAmount: r.srkBonus ?? 0,
       createdAt: r.createdAt ?? new Date(),
@@ -790,7 +863,7 @@ const getTeamCashflowOfUser: AppRouteImplementation<
       status: 500,
       body: {
         success: false,
-        message: "Internal server error",
+        message: 'Internal server error',
       },
     };
   }
@@ -804,8 +877,8 @@ const getSrkBonusFlowForAdmin: AppRouteImplementation<
     const balancesWithSrkBonus = await balanceModel
       .find({ srkBonus: { $gt: 0 } })
       .populate({
-        path: "userId",
-        select: "firstName lastName email createdAt purpose",
+        path: 'userId',
+        select: 'firstName lastName email createdAt purpose',
       })
       .lean();
 
@@ -823,19 +896,19 @@ const getSrkBonusFlowForAdmin: AppRouteImplementation<
         // Step 2: Fetch referral earnings transactions
         const allTransactions = (await EarningStatementModel.find({
           userId: { $in: referralIds },
-          type: "REFERRAL_EANRING",
+          type: 'REFERRAL_EANRING',
         })
           .populate({
-            path: "referredTo",
-            select: "firstName lastName purpose packageId",
+            path: 'referredTo',
+            select: 'firstName lastName purpose packageId',
             populate: {
-              path: "packageId",
-              select: "title",
+              path: 'packageId',
+              select: 'title',
             },
           })
           .populate({
-            path: "userId",
-            select: "firstName lastName",
+            path: 'userId',
+            select: 'firstName lastName',
           })
           .sort({ createdAt: -1 })
           .lean()) as unknown as PopulatedTransaction[];
@@ -861,7 +934,7 @@ const getSrkBonusFlowForAdmin: AppRouteImplementation<
       body: response.map((r) => ({
         _id: r._id.toString(),
         email: r.email,
-        purpose: r.purpose || "",
+        purpose: r.purpose || '',
         storeName: r.storeName,
         registeredAt: r.registeredAt,
         noOfSrkBonus: r.noOfSrkBonus,
@@ -873,7 +946,7 @@ const getSrkBonusFlowForAdmin: AppRouteImplementation<
       status: 500,
       body: {
         success: false,
-        message: "Internal server error",
+        message: 'Internal server error',
       },
     };
   }

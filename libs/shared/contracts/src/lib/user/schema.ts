@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from 'zod';
 
 export const getUserDetailsSchema = z.object({
   userDetails: z.object({
@@ -17,7 +17,7 @@ export const getUserDetailsSchema = z.object({
     status: z.string(),
     isActive: z.boolean(),
     allowedToAddUsers: z.boolean(),
-    purpose: z.enum(["affiliate", "study"]).optional().nullable(),
+    purpose: z.enum(['affiliate', 'study']).optional().nullable(),
     packageId: z.object({
       _id: z.string(),
       title: z.string(),
@@ -33,14 +33,14 @@ export const getUserDetailsSchema = z.object({
   }),
   bankDetails: z
     .object({
-      accountHolderName: z.string().min(1, "Account holder name is required"),
-      accountNumber: z.string().min(1, "Account number is required"),
+      accountHolderName: z.string().min(1, 'Account holder name is required'),
+      accountNumber: z.string().min(1, 'Account number is required'),
       ifscCode: z.string().optional(),
       status: z.string().optional(),
-      bankName: z.string().min(1, "Bank name is required"),
-      branchName: z.string().min(1, "Branch name is required"),
-      accountType: z.string().min(1, "Account type is required"),
-      relationWithAccount: z.string().min(1, "Relation is required"),
+      bankName: z.string().min(1, 'Bank name is required'),
+      branchName: z.string().min(1, 'Branch name is required'),
+      accountType: z.string().min(1, 'Account type is required'),
+      relationWithAccount: z.string().min(1, 'Relation is required'),
       qrUrl: z.string(),
       rejectionReason: z.string().nullable().optional(),
     })
@@ -49,11 +49,11 @@ export const getUserDetailsSchema = z.object({
     .object({
       status: z.string(),
       rejectionReason: z.string().nullable().optional(),
-      frontImage: z.string().min(1, "Front image is required"),
-      backImage: z.string().min(1, "Back image is required"),
-      documentType: z.string().min(1, "Document type is required"),
-      documentNumber: z.string().min(1, "Document number is required"),
-      verificationImage: z.string().min(1, "Verification image is required"),
+      frontImage: z.string().min(1, 'Front image is required'),
+      backImage: z.string().min(1, 'Back image is required'),
+      documentType: z.string().min(1, 'Document type is required'),
+      documentNumber: z.string().min(1, 'Document number is required'),
+      verificationImage: z.string().min(1, 'Verification image is required'),
     })
     .nullable(),
   affiliateBiometricDetails: z
@@ -85,36 +85,39 @@ export const getUserDetailsSchema = z.object({
 export const updateUserDetailsSchema = z.object({
   userDetails: z
     .object({
-      firstName: z.string().min(1, "First name is required"),
-      lastName: z.string().min(1, "Last name is required"),
-      email: z.string().email("Invalid email address"),
-      country: z.string().min(1, "Country is required"),
+      firstName: z.string().min(1, 'First name is required'),
+      lastName: z.string().min(1, 'Last name is required'),
+      email: z.string().email('Invalid email address'),
+      country: z.string().min(1, 'Country is required'),
       allowedToAddUsers: z.boolean().nullable().optional(),
       profilePicture: z.string().optional(),
       phoneNumber: z.string(),
       isActive: z.boolean(),
-      purpose: z.enum(["affiliate", "study"]).optional().nullable(),
-      dob: z.string().refine(
-        (value) => {
-          const date = new Date(value);
-          return !isNaN(date.getTime());
-        },
-        { message: "Invalid date of birth" }
-      ).optional(),
-      gender: z.enum(["Male", "Female", "Other"]).optional(),
+      purpose: z.enum(['affiliate', 'study']).optional().nullable(),
+      dob: z
+        .string()
+        .refine(
+          (value) => {
+            const date = new Date(value);
+            return !isNaN(date.getTime());
+          },
+          { message: 'Invalid date of birth' }
+        )
+        .optional(),
+      gender: z.enum(['Male', 'Female', 'Other']).optional(),
     })
     .partial(),
   bankDetails: z
     .object({
-      holderName: z.string().min(1, "Account holder name is required"),
-      accountNumber: z.string().min(1, "Account number is required"),
+      holderName: z.string().min(1, 'Account holder name is required'),
+      accountNumber: z.string().min(1, 'Account number is required'),
       confirmAccountNumber: z
         .string()
-        .min(1, "Confirm account number is required"),
+        .min(1, 'Confirm account number is required'),
       ifscCode: z.string().optional(),
-      bankName: z.string().min(1, "Bank name is required"),
-      branchName: z.string().min(1, "Branch name is required"),
-      accountType: z.string().min(1, "Account type is required"),
+      bankName: z.string().min(1, 'Bank name is required'),
+      branchName: z.string().min(1, 'Branch name is required'),
+      accountType: z.string().min(1, 'Account type is required'),
       relationWithAccountHolder: z.string().optional(),
       qrUrl: z.string().optional(),
     })
@@ -122,10 +125,10 @@ export const updateUserDetailsSchema = z.object({
   kycDetails: z
     .object({
       status: z.string(),
-      frontImage: z.string().min(1, "Front image is required"),
-      backImage: z.string().min(1, "Back image is required"),
-      documentType: z.string().min(1, "Document type is required"),
-      documentNumber: z.string().min(1, "Document number is required"),
+      frontImage: z.string().min(1, 'Front image is required'),
+      backImage: z.string().min(1, 'Back image is required'),
+      documentType: z.string().min(1, 'Document type is required'),
+      documentNumber: z.string().min(1, 'Document number is required'),
     })
     .nullable(),
 });
@@ -133,10 +136,10 @@ export const updateUserDetailsSchema = z.object({
 export const getReferralTeamSchema = z.array(
   z.object({
     _id: z.string(),
-    email: z.string().email("Invalid email address"),
-    firstName: z.string().min(1, "First name is required"),
-    lastName: z.string().min(1, "Last name is required"),
-    country: z.string().min(1, "Country is required"),
+    email: z.string().email('Invalid email address'),
+    firstName: z.string().min(1, 'First name is required'),
+    lastName: z.string().min(1, 'Last name is required'),
+    country: z.string().min(1, 'Country is required'),
     profilePicture: z.string().nullable().optional(),
     gender: z.string(),
     phoneNumber: z.string(),
@@ -155,10 +158,10 @@ export const checkPromocodeOfUserSchema = z.object({
 export const getAllUsersSchema = z.array(
   z.object({
     _id: z.string(),
-    email: z.string().email("Invalid email address"),
-    firstName: z.string().min(1, "First name is required"),
-    lastName: z.string().min(1, "Last name is required"),
-    country: z.string().min(1, "Country is required"),
+    email: z.string().email('Invalid email address'),
+    firstName: z.string().min(1, 'First name is required'),
+    lastName: z.string().min(1, 'Last name is required'),
+    country: z.string().min(1, 'Country is required'),
     profilePicture: z.string().nullable().optional(),
     gender: z.string(),
     phoneNumber: z.string(),
@@ -169,7 +172,7 @@ export const getAllUsersSchema = z.array(
     isSelfSignup: z.boolean(),
     isActive: z.boolean(),
     courseEnrollAgreementUrl: z.string().optional(),
-    purpose: z.enum(["affiliate", "study"]).optional().nullable(),
+    purpose: z.enum(['affiliate', 'study']).optional().nullable(),
     packageId: z.object({
       _id: z.string(),
       title: z.string(),

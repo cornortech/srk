@@ -17,6 +17,14 @@ export type TAffiliateRequest = {
   rightThumbPrint?: string;
 };
 
+export type TGetAffiliateRequestByStatus = {
+  data: TAffiliateRequest[];
+  page: number;
+  limit: number;
+  totalUsers: number;
+  totalPages: number;
+}
+
 export type TPromoCodeDetails = {
   firstName: string;
   lastName: string;
@@ -158,6 +166,14 @@ export type TBalancePayout = {
   updatedAt: Date;
 };
 
+export type TBalancePayoutResponse = {
+  data: TBalancePayout[];
+  page: number;
+  limit: number;
+  totalPayouts: number;
+  totalPages: number;
+}
+
 export const chipColorsStatusMap = {
   pending: "warning",
   approved: "success",
@@ -205,6 +221,14 @@ export type TBankStatement = {
   createdAt: Date;
   updatedAt: Date;
 };
+
+export type TGetUserByStatusByResponse = {
+  data: TGetAllUsersAdmin[];
+  page: number;
+  limit: number;
+  totalUsers: number;
+  totalPages: number;
+}
 
 export type TGetAllUsersAdmin = {
   _id: string;
@@ -315,6 +339,14 @@ export type TBankRequest = {
   qrUrl: string;
   packageTitle: string;
 };
+
+export type TBankRequestByStatus = {
+  data: TBankRequest[];
+  page: number;
+  limit: number;
+  totalUsers: number;
+  totalPages: number;
+}
 
 export const userStatusColorMap = {
   REGISTERED: "secondary",

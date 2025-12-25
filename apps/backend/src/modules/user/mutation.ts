@@ -1,9 +1,9 @@
-import { AppRouteImplementationOrOptions } from "@ts-rest/express/src/lib/types";
-import { userContract } from "@srk/shared/contracts";
-import { UserModel } from "../../model/userModel";
-import { BankModel } from "../../model/bankModel";
-import { KYCModel } from "../../model/kycModel";
-import AuthService from "../../services/authService";
+import { AppRouteImplementationOrOptions } from '@ts-rest/express/src/lib/types';
+import { userContract } from '../../../../../libs/shared/contracts/src/lib/user/contract';
+import { UserModel } from '../../model/userModel';
+import { BankModel } from '../../model/bankModel';
+import { KYCModel } from '../../model/kycModel';
+import AuthService from '../../services/authService';
 
 const updateUserDetails: AppRouteImplementationOrOptions<
   typeof userContract.updateUserDetails
@@ -17,7 +17,7 @@ const updateUserDetails: AppRouteImplementationOrOptions<
       status: 404,
       body: {
         success: false,
-        message: "User not found",
+        message: 'User not found',
       },
     };
   }
@@ -122,7 +122,7 @@ const updateUserDetails: AppRouteImplementationOrOptions<
       );
     } else {
       await KYCModel.create({
-        status: "pending",
+        status: 'pending',
         frontImage: body.kycDetails.frontImage,
         backImage: body.kycDetails.backImage,
         documentType: body.kycDetails.documentType,
@@ -136,7 +136,7 @@ const updateUserDetails: AppRouteImplementationOrOptions<
     status: 201,
     body: {
       success: true,
-      message: "User details updated successfully",
+      message: 'User details updated successfully',
     },
   };
 };
@@ -152,7 +152,7 @@ const verifyPromocode: AppRouteImplementationOrOptions<
       status: 404,
       body: {
         success: false,
-        message: "Invalid promocode.",
+        message: 'Invalid promocode.',
       },
     };
   }
@@ -161,9 +161,9 @@ const verifyPromocode: AppRouteImplementationOrOptions<
     body: {
       email: UserExist.email,
       firstName: UserExist.firstName,
-      lastName: UserExist.lastName || "",
+      lastName: UserExist.lastName || '',
       phoneNumber: UserExist.phoneNumber,
-      referralCode: UserExist.referralCode || "",
+      referralCode: UserExist.referralCode || '',
     },
   };
 };
@@ -179,7 +179,7 @@ const updatePassword: AppRouteImplementationOrOptions<
         status: 404,
         body: {
           success: false,
-          message: "User not found",
+          message: 'User not found',
         },
       };
     }
@@ -196,7 +196,7 @@ const updatePassword: AppRouteImplementationOrOptions<
       status: 200,
       body: {
         success: true,
-        message: "Password updated successfully",
+        message: 'Password updated successfully',
       },
     };
   } catch (error) {
@@ -204,7 +204,7 @@ const updatePassword: AppRouteImplementationOrOptions<
       status: 500,
       body: {
         success: false,
-        message: "Internal server error",
+        message: 'Internal server error',
       },
     };
   }

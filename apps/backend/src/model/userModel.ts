@@ -1,6 +1,50 @@
 import mongoose from "mongoose";
 
-const userSchema = new mongoose.Schema(
+import { Types, Document } from "mongoose";
+
+export interface IUser extends Document {
+  firstName: string;
+  lastName: string;
+  phoneNumber: string;
+  gender: string;
+  dob: Date;
+  country: string;
+  email: string;
+  password: string;
+
+  affiliateEnabled: boolean;
+  allowedToAddUsers: boolean;
+
+  profilePicture?: string;
+
+  referralCode?: string;
+  referredBy?: Types.ObjectId;
+
+  packageId?: Types.ObjectId;
+
+  status:
+    | "REGISTERED"
+    | "PAYMENT_VERIFICATION_PENDING"
+    | "PAYMENT_VERIFICATION_REJECTED"
+    | "PAYMENT_VERIFICATION_APPROVED"
+    | "KYC_VERIFICATION_PENDING"
+    | "KYC_VERIFICATION_REJECTED"
+    | "PORTAL_ACTIVATED"
+    | "PORTAL_DEACTIVATED";
+
+  hasSrkBonusDeposited: boolean;
+  isSelfSignup: boolean;
+
+  purpose?: "affiliate" | "study";
+
+  srkBankId?: Types.ObjectId;
+
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+
+const userSchema = new mongoose.Schema<IUser>(
   {
     firstName: {
       type: String,

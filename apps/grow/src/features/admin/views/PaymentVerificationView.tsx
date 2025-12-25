@@ -324,14 +324,14 @@ export const PaymentVerificationView: React.FC<
       </AnimatePresence>
 
       <AnimatePresence>
-        {rejectionModalOpen && (
+        {/* {rejectionModalOpen && (
           <RejectionModal
             isOpen={rejectionModalOpen}
             onClose={() => setRejectionModalOpen(false)}
             onSubmit={handleRejectionSubmit}
             title="Reject Payment Verification"
           />
-        )}
+        )} */}
       </AnimatePresence>
     </motion.div>
   );

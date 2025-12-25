@@ -8,19 +8,25 @@ import {
   Button,
   Image,
   Chip,
-} from "@nextui-org/react";
-import { EllipsisVertical } from "lucide-react";
-import { useState } from "react";
-import { chipColorsStatusMap, TBankRequest } from "../../lib/types";
-import { useMutation, useQuery } from "@tanstack/react-query";
+} from '@nextui-org/react';
+import { EllipsisVertical } from 'lucide-react';
+import { useState } from 'react';
+import {
+  chipColorsStatusMap,
+  TBankRequest,
+  TBankRequestByStatus,
+} from '../../lib/types';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import {
   approveBankRequestApi,
   getBankRequestApi,
   rejectBankRequestApi,
-} from "../../lib/apiClient";
-import { VerifyBankRequestModal } from "../../components/admin/modal/BankRequestModal";
+} from '../../lib/apiClient';
+import { VerifyBankRequestModal } from '../../components/admin/modal/BankRequestModal';
+import TablePagination from '../../components/admin/Pagination';
 
 export default function BankRequest() {
+  const [page, setPage] = useState(1);
   const [selectedUser, setSelectedUser] = useState<TBankRequest | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const handleOpenModal = (user: TBankRequest) => {
@@ -28,13 +34,21 @@ export default function BankRequest() {
     setIsModalOpen(true);
   };
 
-  const { data: bankRequest, refetch } = useQuery<TBankRequest[] | undefined>({
-    queryKey: ["bank-requests"],
+  const { data: bankRequest, refetch } = useQuery<
+    TBankRequestByStatus | undefined
+  >({
+    queryKey: ['bank-requests', page],
     queryFn: async () => {
-      const data = await getBankRequestApi();
+      const data = await getBankRequestApi(
+        ['pending', 'approved', 'rejected'],
+        page,
+        10
+      );
       return data;
     },
   });
+
+  console.log('bankRequest', bankRequest);
 
   const { mutate: approveMutation } = useMutation({
     mutationFn: async (userId: string) => {
@@ -71,7 +85,13 @@ export default function BankRequest() {
     console.log(`rejecting ${userId}`);
   };
 
-  if (!bankRequest) {
+  // if (!bankRequest?.data) {
+  //   return <div></div>;
+  // }
+
+  const bankRequestList = bankRequest?.data || [];
+
+  if (!bankRequest?.data) {
     return <div></div>;
   }
   return (
@@ -89,9 +109,9 @@ export default function BankRequest() {
           <TableColumn>Action</TableColumn>
         </TableHeader>
         <TableBody>
-          {bankRequest.map((user, index) => (
+          {bankRequest?.data.map((user, index) => (
             <TableRow key={index}>
-              <TableCell>{index + 1}</TableCell>
+              <TableCell>{(page - 1) * 10 + index + 1}</TableCell>
               <TableCell>
                 <Image
                   src={user.profilePicture}
@@ -101,7 +121,7 @@ export default function BankRequest() {
                 />
               </TableCell>
               <TableCell>{user.username}</TableCell>
-              <TableCell>{user.packageTitle || "-"}</TableCell>
+              <TableCell>{user.packageTitle || '-'}</TableCell>
               <TableCell>{user.bankName}</TableCell>
               <TableCell>{user.branchName}</TableCell>
               <TableCell>{user.accountNumber}</TableCell>
@@ -124,6 +144,14 @@ export default function BankRequest() {
           ))}
         </TableBody>
       </Table>
+
+      {bankRequest.data?.length >= 10 && (
+        <TablePagination
+          page={bankRequest.page}
+          totalPages={bankRequest.totalPages}
+          onPageChange={(p) => setPage(p)}
+        />
+      )}
 
       {selectedUser ? (
         <VerifyBankRequestModal

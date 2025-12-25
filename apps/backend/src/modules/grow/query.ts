@@ -13,7 +13,7 @@ import {
 import { growPackageEngagementPostModel } from '../../model/growPackageEngagementPostModel';
 import { growSocialMediaPackagePaymentModel } from '../../model/growSocialMediaPackagePaymentModel';
 import { growSocialMediaPackageUserModel } from '../../model/growSocialMediaPackageUserModel';
-import { growSrkAffiliateVerificationModel } from '../../model/growSrkAffiliateVerificationModel';
+import { growSrkAffiliateVerificationModel } from '../../model/grow/growSrkAffiliateVerificationModel';
 import { IUser } from '../../model/userModel';
 
 export const getSrkGrowProfile: AppRouteImplementationOrOptions<

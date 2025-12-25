@@ -1,4 +1,5 @@
 export * from './lib/common';
+export * from './lib/index';
 export * from './lib/auth/contract';
 export * from './lib/auth/schema';
 export * from './lib/grow/contract';
@@ -22,4 +23,4 @@ export * from './lib/tour/tour.contract';
 export * from './lib/tour/tour.schema';
 export * from './lib/task/contract';
 export * from './lib/task/schema';
-export * from './lib/index'
+export * from './lib/grow/affiliate/contract';

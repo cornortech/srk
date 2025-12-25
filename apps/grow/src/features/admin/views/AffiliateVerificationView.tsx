@@ -191,9 +191,6 @@ export const AffiliateVerificationView = () => {
                             className="w-full h-16 object-cover opacity-60 group-hover:opacity-100 transition-opacity"
                           />
                           <div className="absolute inset-0 flex items-center justify-center gap-2">
-                            <span className="bg-black/60 px-3 py-1 rounded-full text-xs text-white backdrop-blur-sm border border-white/10">
-                            View
-                          </span>
                             <a
                               href={item.verificationImageUrl}
                               target="_blank"

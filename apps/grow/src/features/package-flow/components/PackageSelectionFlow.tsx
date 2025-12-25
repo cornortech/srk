@@ -24,12 +24,14 @@ import { formatRupees } from '../../../lib/utils/formatters';
 
 interface PackageSelectionFlowProps {
   selectedPackage: TSrkGrowPackagesSchema;
+  referralCode?: string; // Add this
   onComplete: (userDetails: UserDetails) => void;
   onBack: () => void;
 }
 
 export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
   selectedPackage,
+  referralCode = '',
   onComplete,
   onBack,
 }) => {
@@ -55,10 +57,10 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
         phoneNumber: '',
         country: '',
         kycURL: [],
-        usedPromoCode: '',
+        usedPromoCode: referralCode || '',
       },
       enrollmentData: {
-        growSocialMediaPackageId: selectedPackage._id,
+        growSocialMediaPackageId: selectedPackage?._id,
         growSocialMediaPackageTypeId: '',
         growSocialMediaPackageSubTypeId: '',
         socialMediaPlatform: '',
@@ -182,7 +184,7 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
     setSelectedTypeIndex(typeIndex);
     setSelectedSubTypeIndex(subTypeIndex);
 
-    const packageType = selectedPackage.packageTypes[typeIndex];
+    const packageType = selectedPackage?.packageTypes[typeIndex];
     const packageSubType = packageType?.packageSubTypes?.[subTypeIndex];
 
     setValue(
@@ -274,7 +276,7 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
         const result = await validatePromo.mutateAsync({
           body: {
             promoCode: promoCode.trim(),
-            growSocialMediaPackageId: selectedPackage._id,
+            growSocialMediaPackageId: selectedPackage?._id,
           },
         });
 
@@ -314,7 +316,7 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
   }) => {
     try {
       const kycUrls = uploadedKycUrlsRef.current;
-      const packageType = selectedPackage.packageTypes[selectedTypeIndex];
+      const packageType = selectedPackage?.packageTypes[selectedTypeIndex];
       const packageSubType =
         packageType?.packageSubTypes?.[selectedSubTypeIndex];
 
@@ -367,7 +369,7 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
   };
 
   const getSelectedOptionDetails = () => {
-    const packageType = selectedPackage.packageTypes[selectedTypeIndex];
+    const packageType = selectedPackage?.packageTypes[selectedTypeIndex];
     if (!packageType || !packageType.packageSubTypes) {
       return { description: 'Select an option' };
     }
@@ -400,13 +402,13 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
 
   const showMultiplePostLinks =
     engagementType === 'reach' &&
-    (selectedPackage.packageTypes[selectedTypeIndex]?.packageSubTypes[
+    (selectedPackage?.packageTypes[selectedTypeIndex]?.packageSubTypes[
       selectedSubTypeIndex
     ]?.noOfVideos || 0) > 1;
 
   const numPostLinks =
     engagementType === 'reach'
-      ? selectedPackage.packageTypes[selectedTypeIndex]?.packageSubTypes[
+      ? selectedPackage?.packageTypes[selectedTypeIndex]?.packageSubTypes[
           selectedSubTypeIndex
         ]?.noOfVideos || 0
       : 0;
@@ -428,9 +430,9 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
             </span>
           </button>
           <h1 className="text-3xl md:text-4xl font-bold text-white">
-            {selectedPackage.name} Package -{' '}
+            {selectedPackage?.name} Package -{' '}
             <span className="text-[#b68938]">
-              {formatRupees(selectedPackage.amount)}
+              {formatRupees(selectedPackage?.amount)}
             </span>
           </h1>
         </div>
@@ -477,6 +479,7 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
                   import('@srk/shared/contracts').TCreateGrowSocialMediaEnrollment
                 >
               }
+              isPromoLocked={!!referralCode}
               confirmPassword={confirmPassword}
               setConfirmPassword={setConfirmPassword}
               handleSubmit={handleSubmit}
@@ -519,12 +522,12 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
           kyc: watch('userData.kycURL'),
           selectedOption: selectedSubTypeIndex,
           userType: 'package' as const,
-          packageId: selectedPackage._id,
+          packageId: selectedPackage?._id,
         }}
         packagePrice={String(
-          discountDetails?.finalAmountAfterDiscount || selectedPackage.amount
+          discountDetails?.finalAmountAfterDiscount || selectedPackage?.amount
         )}
-        packageName={selectedPackage.name}
+        packageName={selectedPackage?.name}
         onSubmit={handlePaymentSubmit}
       />
     </div>

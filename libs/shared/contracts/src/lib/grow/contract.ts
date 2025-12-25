@@ -123,7 +123,7 @@ export const growContract = c.router({
   },
 
   resubmitGrowVerification: {
-    method: 'POST',
+    method: 'PUT',
     path: '/resubmit-verification',
     body: z.object({
       userId: z.string(),

@@ -6,7 +6,8 @@ import cookieParser from 'cookie-parser';
 import swaggerApiDocs from './config/swagger';
 import cronJobInit from './utils/cronjob';
 import { router } from './modules';
-import { apiContract } from '@srk/shared/contracts';
+import { apiContract } from '../../../libs/shared/contracts/src/index';
+
 export const app = express();
 
 app.use(express.json());

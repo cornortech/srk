@@ -1,11 +1,13 @@
 import React, { forwardRef } from 'react';
 import { motion } from 'framer-motion';
-import { PackageDetails } from '../../../lib/types/types';
 import PackageCard from '../../../lib/ui/PackageCard';
 import { api } from '../../../lib/api';
+import { TSrkGrowPackagesSchema } from '@srk/shared/contracts';
+import { PackageCardSkeleton } from '../../package-flow/components/ui/PackageCardSkeleton';
+import { PackageX } from 'lucide-react';
 
 interface PackagesSectionProps {
-  onPackageSelect: (pkg: PackageDetails) => void;
+  onPackageSelect: (pkg: TSrkGrowPackagesSchema) => void;
 }
 
 const PackagesSection = forwardRef<HTMLElement, PackagesSectionProps>(
@@ -18,13 +20,48 @@ const PackagesSection = forwardRef<HTMLElement, PackagesSectionProps>(
       !growPackagesRes ||
       !growPackagesRes.body
     ) {
-      return <>No data found</>;
+      return (
+        <>
+          {' '}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="md:col-span-3"
+          >
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-16 text-center">
+              <div className="flex justify-center mb-6">
+                <div className="h-16 w-16 rounded-full bg-[#b68938]/10 flex items-center justify-center">
+                  <PackageX size={32} className="text-[#b68938]" />
+                </div>
+              </div>
+
+              <h3 className="text-2xl font-bold text-white mb-3">
+                No Packages Available
+              </h3>
+
+              <p className="text-gray-400 max-w-md mx-auto text-sm leading-relaxed">
+                We couldn’t find any growth packages right now. This might be
+                temporary. Please check back soon or refresh the page.
+              </p>
+            </div>
+          </motion.div>
+        </>
+      );
     }
 
     if (isLoading) {
-      return <>Loading Packages</>;
+      return (
+        <section className="py-32 px-6 bg-gradient-to-b from-[#0a0705] to-black">
+          <div className="max-w-7xl mx-auto">
+            <div className="grid md:grid-cols-3 gap-8">
+              {[1, 2, 3].map((i) => (
+                <PackageCardSkeleton key={i} />
+              ))}
+            </div>
+          </div>
+        </section>
+      );
     }
-
     return (
       <section
         ref={ref}

@@ -10,16 +10,14 @@ import { GrowDashboard } from './pages/GrowDashboard';
 import { PackageFlowPage } from './pages/PackageFlowPage';
 import { OrderConfirmationPage } from './pages/OrderConfirmationPage';
 import { UserDashboardPage } from './pages/UserDashboardPage';
+import { ToastProvider } from './lib/contexts/ToastContext';
+import ViewerPage from './pages/ViewDocumentPage';
 
 const queryClient = new QueryClient();
 
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <GrowLandingPage />,
-  },
-  {
-    path: '/landing/:section',
     element: <GrowLandingPage />,
   },
   {
@@ -51,7 +49,11 @@ const router = createBrowserRouter([
     element: <GrowOnlyAdminDashboard />,
   },
   {
-    path: '/affilate/dashboard',
+    path: '/admin/view-document',
+    element: <ViewerPage />,
+  },
+  {
+    path: '/affiliate/dashboard',
     element: <GrowDashboard />,
   },
 ]);
@@ -59,7 +61,9 @@ const router = createBrowserRouter([
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
+      <ToastProvider>
+        <RouterProvider router={router} />
+      </ToastProvider>
     </QueryClientProvider>
   );
 }

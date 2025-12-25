@@ -1,78 +1,38 @@
+import {
+  TSrkGrowPackagesSchema,
+  TValidateGrowUserPromoCodeResponse,
+  TGetGrowSocialMediaEnrollmentById,
+} from '@srk/shared/contracts';
+
 export type SocialPlatform =
-  | 'youtube'
-  | 'facebook'
-  | 'instagram'
-  | 'twitter'
-  | 'tiktok';
+  | 'YouTube'
+  | 'Facebook'
+  | 'Instagram'
+  | 'Twitter'
+  | 'TikTok';
 export type EngagementType = 'follow' | 'reach';
 export type KYCStatus =
   | 'verificationPending'
   | 'portalActivated'
   | 'verificationRejected';
+export type UserType = 'Affiliate' | 'User';
 
-export interface PackageSubType {
+export type PackageSubType =
+  TSrkGrowPackagesSchema['packageTypes'][0]['packageSubTypes'][0];
+export type PackageType = TSrkGrowPackagesSchema['packageTypes'][0];
+export type PackageDetails = TSrkGrowPackagesSchema;
+
+export type UserData = Omit<
+  TGetGrowSocialMediaEnrollmentById['userData'],
+  'kycURL'
+> & {
   _id: string;
-  growSocialMediaPackageTypeId: string;
-  name: string;
-  description: string;
-  noOfLikes?: number;
-  noOfVideos?: number;
-  noOfFollowers?: number;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-export interface PackageType {
-  _id: string;
-  growSocialMediaPackageId: string;
-  name: string;
-  description: string;
-  amount: number;
-  createdAt: Date;
-  updatedAt: Date;
-  packageSubTypes: PackageSubType[];
-}
-
-export interface PackageDetails {
-  _id: string;
-  name: string;
-  description: string;
-  socialMediaPlatforms: string[];
-  amount: number;
-  isPopular: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-  packageTypes: PackageType[];
-}
-
-export interface UserData {
-  _id: string; // Changed from id to _id
-  fullName: string;
-  email: string;
-  password: string;
-  gender: 'Male' | 'Female' | 'Other';
-  phone: string;
-  country: string;
-  kycURL: string[];
-  status: KYCStatus;
-  promoCode: string;
-  rejectionReason?: string; // Added field
-  srkUniversityUserId: string;
-  referredBy: string;
-  transactionId?: string;
-  paymentProofUrl?: string;
-  kycDocuments?: {
-    id: string;
-    name: string;
-    size: number;
-    type: string;
-    url?: string;
-    status: KYCStatus;
-    submittedAt: string;
-  }[];
+  kycURL?: string[] | string;
+  kycDocuments?: KYCDocument[];
+  enrollmentData?: any;
   createdAt?: string;
-  lastLogin?: string;
-}
+  phone?: string;
+};
 
 export interface kycSchema {
   userId: string;
@@ -96,6 +56,7 @@ export interface KYCDocument {
   name: string;
   status: KYCStatus;
   submittedAt: string;
+  url?: string;
 }
 
 export interface UserDetails {
@@ -109,6 +70,13 @@ export interface UserDetails {
   packageId: string;
   additionalInfo?: string;
   postLinks?: string[];
+  password?: string;
+  confirmPassword?: string;
+  country?: string;
+  gender?: string;
+  promoCode?: string;
+  kyc?: string[];
+  userType: 'affiliate' | 'package';
 }
 
 export interface CheckoutUserDetails extends Omit<UserDetails, 'phone'> {
@@ -157,9 +125,5 @@ export interface PlatformData {
   completed: number;
 }
 
-export interface DiscountDetails {
-  originalAmount: number;
-  discountPercentage: number;
-  discountAmount: number;
-  finalAmountAfterDiscount: number;
-}
+export type DiscountDetails =
+  TValidateGrowUserPromoCodeResponse['discountDetails'];

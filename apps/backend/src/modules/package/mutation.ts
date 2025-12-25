@@ -1,6 +1,6 @@
-import { AppRouteImplementation } from "@ts-rest/express";
-import { packageContract } from "../../contract/package/contract";
-import { PackageModel } from "../../model/packageModel";
+import { AppRouteImplementation } from '@ts-rest/express';
+import { packageContract } from '../../../../../libs/shared/contracts/src/lib/package/contract';
+import { PackageModel } from '../../model/packageModel';
 
 export const createPackage: AppRouteImplementation<
   typeof packageContract.createPackage
@@ -12,14 +12,14 @@ export const createPackage: AppRouteImplementation<
     currency: req.body.currency,
     features: req.body.features,
     title: req.body.title,
-    image: req.body.image || "",
+    image: req.body.image || '',
   });
 
   return {
     status: 201,
     body: {
       success: true,
-      message: "Package created successfully",
+      message: 'Package created successfully',
     },
   };
 };
@@ -35,7 +35,7 @@ export const deletePackageById: AppRouteImplementation<
       status: 404,
       body: {
         success: false,
-        message: "Package not found",
+        message: 'Package not found',
       },
     };
   }
@@ -46,7 +46,7 @@ export const deletePackageById: AppRouteImplementation<
     status: 200,
     body: {
       success: true,
-      message: "Package deleted successfully",
+      message: 'Package deleted successfully',
     },
   };
 };

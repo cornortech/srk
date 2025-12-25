@@ -1,7 +1,7 @@
-import { initServer } from "@ts-rest/express";
-import { packageContract } from "../../contract/package/contract";
-import { packageMutationHandler } from "./mutation";
-import { packageQueryHandler } from "./query";
+import { initServer } from '@ts-rest/express';
+import { packageContract } from '../../../../../libs/shared/contracts/src/lib/package/contract';
+import { packageMutationHandler } from './mutation';
+import { packageQueryHandler } from './query';
 const s = initServer();
 
 export const packageRouter = s.router(packageContract, {
@@ -9,4 +9,6 @@ export const packageRouter = s.router(packageContract, {
   getPackageById: packageQueryHandler.getPackageById,
   createPackage: packageMutationHandler.createPackage,
   deletePackageById: packageMutationHandler.deletePackageById,
+  getAllSrkGrowPackages: packageQueryHandler.getAllSrkGrowPackages,
+  getSrkGrowPackageById: packageQueryHandler.getSrkGrowPackageById,
 });

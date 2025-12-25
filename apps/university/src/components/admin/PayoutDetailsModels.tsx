@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState } from 'react';
 import {
   Button,
   Image,
@@ -9,17 +9,17 @@ import {
   ModalFooter,
   ModalHeader,
   Textarea,
-} from "@nextui-org/react";
-import { TBalancePayout } from "../../lib/types";
-import { useMutation, useQuery } from "@tanstack/react-query";
+} from '@nextui-org/react';
+import { TBalancePayout } from '../../lib/types';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import {
   approveBalancePayoutApi,
   getUserDetailsApi,
   rejectBalancePayoutApi,
-} from "../../lib/apiClient";
-import { AxiosError } from "axios";
-import useAlert from "../../hooks/useAlert";
-import useUploadFile from "../../hooks/useFileUpload";
+} from '../../lib/apiClient';
+import { AxiosError } from 'axios';
+import useAlert from '../../hooks/useAlert';
+import { useSRKFileUpload } from '@srk/shared/hooks';
 
 type PayoutDetailsModalProps = {
   isOpen: boolean;
@@ -35,14 +35,14 @@ export function PayoutDetailsModal({
   handleRefetch,
 }: PayoutDetailsModalProps) {
   const [proofFile, setProofFile] = useState<File | null>(null);
-  const [rejectionReason, setRejectionReason] = useState("");
+  const [rejectionReason, setRejectionReason] = useState('');
   const [isRejecting, setIsRejecting] = useState(false);
-  const { uploadFile } = useUploadFile();
-  const [transactionNumber, setTransactionNumber] = useState("");
+  const { uploadFile } = useSRKFileUpload('university');
+  const [transactionNumber, setTransactionNumber] = useState('');
   const { show } = useAlert();
 
   const { data: payoutUserDetails } = useQuery({
-    queryKey: ["userDetails", payout.userId],
+    queryKey: ['userDetails', payout.userId],
     queryFn: async () => {
       const data = await getUserDetailsApi(payout.userId);
       return data;
@@ -54,20 +54,20 @@ export function PayoutDetailsModal({
       return approveBalancePayoutApi(
         payout._id,
         proofUrl,
-        "bank",
+        'bank',
         transactionNumber
       );
     },
     onSuccess: () => {
       handleRefetch();
-      show("Payout approved successfully", "success");
-      setRejectionReason("");
+      show('Payout approved successfully', 'success');
+      setRejectionReason('');
       setProofFile(null);
       onClose();
     },
     onError: (error: AxiosError<{ message: string }>) => {
       console.log(error);
-      show(error.response?.data?.message || "Failed to approve", "error");
+      show(error.response?.data?.message || 'Failed to approve', 'error');
     },
   });
   const { mutate: rejectMutation } = useMutation({
@@ -76,14 +76,14 @@ export function PayoutDetailsModal({
     },
     onSuccess: () => {
       handleRefetch();
-      show("Payout rejected successfully", "success");
-      setRejectionReason("");
+      show('Payout rejected successfully', 'success');
+      setRejectionReason('');
       setProofFile(null);
       onClose();
     },
     onError: (error: AxiosError<{ message: string }>) => {
       console.log(error);
-      show(error.response?.data?.message || "Failed to reject", "error");
+      show(error.response?.data?.message || 'Failed to reject', 'error');
     },
   });
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -94,16 +94,16 @@ export function PayoutDetailsModal({
 
   const handleCompletePayout = async () => {
     if (!proofFile) {
-      alert("Please upload payment proof");
+      alert('Please upload payment proof');
       return;
     }
-    const { url } = await uploadFile(proofFile, "image");
+    const { url } = await uploadFile(proofFile, 'image');
     await approveMutation(url);
   };
 
   const handleRejectPayout = async () => {
     if (!rejectionReason) {
-      alert("Please provide a reason for rejection");
+      alert('Please provide a reason for rejection');
       return;
     }
     rejectMutation();
@@ -138,7 +138,7 @@ export function PayoutDetailsModal({
 
           {/* Payment Proof Upload */}
           <div>
-            {payout.status === "approved" ? (
+            {payout.status === 'approved' ? (
               <Button
                 onPress={() => window.open(payout.paymentProofUrl)}
                 color="primary"
@@ -146,7 +146,7 @@ export function PayoutDetailsModal({
                 View Payment Proof
               </Button>
             ) : (
-              payout.status === "pending" && (
+              payout.status === 'pending' && (
                 <Input
                   label="Payment Proof"
                   type="file"
@@ -176,7 +176,7 @@ export function PayoutDetailsModal({
             <div className="cursor-pointer">
               <h1 className="font-medium text-medium">QR Code</h1>
               <Image
-                onClick={() => window.open(payout.qrUrl, "_blank")}
+                onClick={() => window.open(payout.qrUrl, '_blank')}
                 width={100}
                 height={100}
                 className="object-cover"
@@ -189,7 +189,7 @@ export function PayoutDetailsModal({
         </ModalBody>
 
         {/* Footer Buttons */}
-        {payout.status === "pending" ? (
+        {payout.status === 'pending' ? (
           <ModalFooter className="flex justify-end gap-2">
             <Button onPress={handleCompletePayout} className="bg-blue-700">
               Complete Payout
@@ -205,11 +205,11 @@ export function PayoutDetailsModal({
                 }
               }}
             >
-              {isRejecting ? "Confirm Rejection" : "Reject Payout"}
+              {isRejecting ? 'Confirm Rejection' : 'Reject Payout'}
             </Button>
           </ModalFooter>
         ) : (
-          ""
+          ''
         )}
       </ModalContent>
     </Modal>

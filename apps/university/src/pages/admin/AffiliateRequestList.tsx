@@ -25,6 +25,11 @@ export const AffilateRequestList = () => {
     queryClient.invalidateQueries({ queryKey: ['affiliate-requests'] });
   };
 
+  const affiliateRequestList = affiliateRequestData?.data || [];
+
+  // if (!affiliateRequestData?.data) return <div>Loading...</div>;
+
+  // if (!affiliateRequestData) return <>...</>;
   if (!affiliateRequestData?.data) return <div>Loading...</div>;
 
   if (!affiliateRequestData) return <>...</>;
@@ -38,9 +43,9 @@ export const AffilateRequestList = () => {
         <div>
           <AffiliateRequestTable
             refetchData={refetchData}
-            users={affiliateRequestData.data}
-            page={affiliateRequestData.page}
-            totalPages={affiliateRequestData.totalPages}
+            users={affiliateRequestList}
+            page={affiliateRequestData?.page || 1}
+            totalPages={affiliateRequestData?.totalPages || 1}
             onPageChange={(p) => setPage(p)}
           />
         </div>

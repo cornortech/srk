@@ -1,14 +1,15 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { getStorage } from "firebase/storage";
+import { env } from "./env";
 
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: "srk-univeristy.firebaseapp.com",
-  projectId: "srk-univeristy",
-  storageBucket: "srk-univeristy.firebasestorage.app",
-  messagingSenderId: "746575375955",
-  appId: "1:746575375955:web:bbb261d549a33cc96860a6",
+  apiKey: env.firebase.apiKey,
+  authDomain: env.firebase.authDomain,
+  projectId: env.firebase.projectId,
+  storageBucket: env.firebase.storageBucket,
+  messagingSenderId: env.firebase.messagingSenderId,
+  appId: env.firebase.appId,
 };
 
 const app = initializeApp(firebaseConfig);

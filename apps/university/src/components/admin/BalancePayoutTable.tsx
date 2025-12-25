@@ -54,6 +54,16 @@ export function BalancePayoutTable() {
     refetchBalancePayoutQuery();
   };
 
+  // if (!payouts?.data) {
+  //   return (
+  //     <div className="flex justify-center items-center h-screen">
+  //       <Spinner />
+  //     </div>
+  //   );
+  // }
+
+  const payoutList = payouts?.data || [];
+
   if (!payouts?.data) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -125,7 +135,33 @@ export function BalancePayoutTable() {
                     {payout.status}
                   </Chip>
                 </TableCell>
-
+      <Table aria-label="Balance Payout table">
+        <TableHeader>
+          <TableColumn>SN</TableColumn>
+          <TableColumn>Username</TableColumn>
+          <TableColumn>Package</TableColumn>
+          <TableColumn>Payout Amount</TableColumn>
+          <TableColumn>Tds Amount</TableColumn>
+          <TableColumn>Total Amount</TableColumn>
+          <TableColumn>Transaction Number</TableColumn>
+          <TableColumn>Action</TableColumn>
+          <TableColumn>Status</TableColumn>
+        </TableHeader>
+        <TableBody>
+          {payoutList.map((payout, index) => (
+            <TableRow key={payout._id}>
+              <TableCell>{(page - 1) * 10 + index + 1}</TableCell>
+              <TableCell>{payout.username}</TableCell>
+              <TableCell>{payout.packageTitle}</TableCell>
+              <TableCell>{payout.amount}</TableCell>
+              <TableCell>{payout.tdsAmount}</TableCell>
+              <TableCell>{payout.totalAmount}</TableCell>
+              <TableCell>{payout.transactionNumber}</TableCell>
+              <TableCell>
+                <Chip color={chipColorsStatusMap[payout.status]} variant="flat">
+                  {payout.status}
+                </Chip>
+              </TableCell>
                 <TableCell>
                   <Button
                     color="primary"

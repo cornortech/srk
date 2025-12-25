@@ -27,7 +27,9 @@ export const ListOfUsers = () => {
 
   if (!users?.data) return <div>Loading...</div>;
 
-  const filteredUsers = users.data.filter((user) => {
+  const userLists = users?.data || [];
+
+  const filteredUsers = userLists.filter((user) => {
     const searchTerm = search.toLowerCase();
     return (
       user.email.toLowerCase().includes(searchTerm) ||

@@ -1,23 +1,23 @@
-import { useState, useRef } from "react";
-import { Card, CardBody } from "@nextui-org/card";
-import { Select, SelectItem } from "@nextui-org/select";
-import { Input } from "@nextui-org/input";
-import { Button } from "@nextui-org/button";
-import { Image } from "@nextui-org/image";
-import useAlert from "../../../hooks/useAlert";
-import { useMutation } from "@tanstack/react-query";
-import useAuthStore from "../../../store/useAuth";
-import { upsertKycDetailsApi } from "../../../lib/apiClient";
-import { TKyc } from "../../../lib/types/entities";
-import useUploadFile from "../../../hooks/useFileUpload";
+import { useState, useRef } from 'react';
+import { Card, CardBody } from '@nextui-org/card';
+import { Select, SelectItem } from '@nextui-org/select';
+import { Input } from '@nextui-org/input';
+import { Button } from '@nextui-org/button';
+import { Image } from '@nextui-org/image';
+import useAlert from '../../../hooks/useAlert';
+import { useMutation } from '@tanstack/react-query';
+import useAuthStore from '../../../store/useAuth';
+import { upsertKycDetailsApi } from '../../../lib/apiClient';
+import { TKyc } from '../../../lib/types/entities';
+import { useSRKFileUpload } from '@srk/shared/hooks';
 
 const documentTypes = [
-  { label: "Citizenship", value: "citizenship" },
-  { label: "Passport", value: "passport" },
-  { label: "Voter Card", value: "voter_card" },
-  { label: "PAN Card", value: "pan_card" },
-  { label: "Birth Certificate", value: "birth_certificate" },
-  { label: "National ID Card", value: "national_id" },
+  { label: 'Citizenship', value: 'citizenship' },
+  { label: 'Passport', value: 'passport' },
+  { label: 'Voter Card', value: 'voter_card' },
+  { label: 'PAN Card', value: 'pan_card' },
+  { label: 'Birth Certificate', value: 'birth_certificate' },
+  { label: 'National ID Card', value: 'national_id' },
 ];
 
 interface KYCFormProps {
@@ -33,10 +33,10 @@ export default function KYCForm({
 }: KYCFormProps) {
   const { userDetails } = useAuthStore();
   const [documentType, setDocumentType] = useState(
-    kycDetails?.documentType || ""
+    kycDetails?.documentType || ''
   );
   const [documentNumber, setDocumentNumber] = useState(
-    kycDetails?.documentNumber || ""
+    kycDetails?.documentNumber || ''
   );
   const [frontImage, setFrontImage] = useState<File | null>(null);
   const [backImage, setBackImage] = useState<File | null>(null);
@@ -47,10 +47,7 @@ export default function KYCForm({
   const [loading, setLoading] = useState(false);
 
   // Enhanced upload hook with progress tracking
-  const {
-    uploadFile,
-    isUploading,
-  } = useUploadFile();
+  const { uploadFile, isUploading } = useSRKFileUpload('university');
 
   const { show } = useAlert();
 
@@ -79,10 +76,10 @@ export default function KYCForm({
       setCompletedUploads(0);
       setTotalUploads(0);
       handleRefetch();
-      show("KYC details updated successfully", "success");
+      show('KYC details updated successfully', 'success');
     },
     onError: () => {
-      show("Failed to update KYC details", "error");
+      show('Failed to update KYC details', 'error');
       setLoading(false);
       setCompletedUploads(0);
       setTotalUploads(0);
@@ -100,9 +97,12 @@ export default function KYCForm({
 
     // Count files that need to be uploaded
     const filesToUpload = [
-      frontImage && { file: frontImage, name: "Front Image" },
-      backImage && { file: backImage, name: "Back Image" },
-      newVerificationImageFile && { file: newVerificationImageFile, name: "Verification Image" }
+      frontImage && { file: frontImage, name: 'Front Image' },
+      backImage && { file: backImage, name: 'Back Image' },
+      newVerificationImageFile && {
+        file: newVerificationImageFile,
+        name: 'Verification Image',
+      },
     ].filter(Boolean);
 
     setTotalUploads(filesToUpload.length);
@@ -111,23 +111,25 @@ export default function KYCForm({
     try {
       // Upload files sequentially with proper tracking
       if (frontImage) {
-        const { url: front } = await uploadFile(frontImage, "image");
+        const { url: front } = await uploadFile(frontImage, 'image');
         frontUrlImage = front;
-        setCompletedUploads(prev => prev + 1);
+        setCompletedUploads((prev) => prev + 1);
       }
 
       if (backImage) {
-        const { url: back } = await uploadFile(backImage, "image");
+        const { url: back } = await uploadFile(backImage, 'image');
         backUrlImage = back;
-        setCompletedUploads(prev => prev + 1);
+        setCompletedUploads((prev) => prev + 1);
       }
 
       if (newVerificationImageFile) {
-        const { url: vImage } = await uploadFile(newVerificationImageFile, "image");
+        const { url: vImage } = await uploadFile(
+          newVerificationImageFile,
+          'image'
+        );
         verifiationImage = vImage;
-        setCompletedUploads(prev => prev + 1);
+        setCompletedUploads((prev) => prev + 1);
       }
-
 
       if (frontUrlImage && backUrlImage && verifiationImage) {
         mutate({
@@ -140,25 +142,25 @@ export default function KYCForm({
         setCompletedUploads(0);
         setTotalUploads(0);
         show(
-          "Please upload all the images verification image, document front and document back",
-          "error"
+          'Please upload all the images verification image, document front and document back',
+          'error'
         );
       }
     } catch (error) {
       setLoading(false);
       setCompletedUploads(0);
       setTotalUploads(0);
-      show("Upload failed. Please try again.", "error");
+      show('Upload failed. Please try again.', 'error');
     }
   };
 
   const handleChangeFileInput = (
-    type: "front" | "back",
+    type: 'front' | 'back',
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     const file = event.target.files?.[0];
     if (file) {
-      if (type === "back") {
+      if (type === 'back') {
         setBackImage(file);
       } else {
         setFrontImage(file);
@@ -167,11 +169,10 @@ export default function KYCForm({
   };
 
   const disableForm =
-    userDetails?.status === "KYC_VERIFICATION_PENDING" ||
-    userDetails?.status === "PORTAL_ACTIVATED";
+    userDetails?.status === 'KYC_VERIFICATION_PENDING' ||
+    userDetails?.status === 'PORTAL_ACTIVATED';
 
   const isFormDisabled = disableForm || isUploading || loading;
-
 
   return (
     <Card className="bg-bgSecondary w-full">
@@ -182,7 +183,7 @@ export default function KYCForm({
           </h2>
 
           {/* Upload Progress Display */}
-    
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Select
               label="Document Type"
@@ -212,11 +213,14 @@ export default function KYCForm({
             {/* Front Side Upload */}
             <div className="space-y-2">
               <div
-                className={`aspect-video bg-default-100 border border-dashed border-white rounded-lg overflow-hidden transition-colors ${isFormDisabled
-                  ? 'cursor-not-allowed opacity-50'
-                  : 'cursor-pointer hover:bg-default-200'
-                  }`}
-                onClick={() => !isFormDisabled && frontInputRef.current?.click()}
+                className={`aspect-video bg-default-100 border border-dashed border-white rounded-lg overflow-hidden transition-colors ${
+                  isFormDisabled
+                    ? 'cursor-not-allowed opacity-50'
+                    : 'cursor-pointer hover:bg-default-200'
+                }`}
+                onClick={() =>
+                  !isFormDisabled && frontInputRef.current?.click()
+                }
               >
                 {frontImage || kycDetails?.frontImage ? (
                   <Image
@@ -255,7 +259,7 @@ export default function KYCForm({
                 ref={frontInputRef}
                 type="file"
                 accept="image/*"
-                onChange={(e) => handleChangeFileInput("front", e)}
+                onChange={(e) => handleChangeFileInput('front', e)}
                 name="front"
                 className="hidden"
                 disabled={isFormDisabled}
@@ -265,10 +269,11 @@ export default function KYCForm({
             {/* Back Side Upload */}
             <div className="space-y-2">
               <div
-                className={`aspect-video bg-default-100 border border-dashed border-white rounded-lg overflow-hidden transition-colors ${isFormDisabled
-                  ? 'cursor-not-allowed opacity-50'
-                  : 'cursor-pointer hover:bg-default-200'
-                  }`}
+                className={`aspect-video bg-default-100 border border-dashed border-white rounded-lg overflow-hidden transition-colors ${
+                  isFormDisabled
+                    ? 'cursor-not-allowed opacity-50'
+                    : 'cursor-pointer hover:bg-default-200'
+                }`}
                 onClick={() => !isFormDisabled && backInputRef.current?.click()}
               >
                 {backImage || kycDetails?.backImage ? (
@@ -309,7 +314,7 @@ export default function KYCForm({
                 type="file"
                 name="back"
                 accept="image/*"
-                onChange={(e) => handleChangeFileInput("back", e)}
+                onChange={(e) => handleChangeFileInput('back', e)}
                 disabled={isFormDisabled}
                 className="hidden"
               />
@@ -328,9 +333,8 @@ export default function KYCForm({
                 {isUploading
                   ? `Uploading... ${completedUploads}/${totalUploads}`
                   : loading
-                    ? "Processing..."
-                    : "Submit Document"
-                }
+                  ? 'Processing...'
+                  : 'Submit Document'}
               </Button>
             </div>
           )}

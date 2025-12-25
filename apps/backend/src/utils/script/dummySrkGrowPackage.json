@@ -1,0 +1,179 @@
+[
+  {
+    "name": "Starter",
+    "description": "Initial commit",
+    "amount": 900,
+    "amountBeforeDiscount": 1500,
+    "isPopular": false,
+    "features": ["Access to basic features", "Email support", "Single user"],
+    "socialMedia": ["Twitter", "Facebook", "YouTube", "TikTok", "Instagram"],
+    "packageType": [
+      {
+        "name": "Follow/subscription",
+        "description": "Initial commit",
+        "packageSubType": [
+          {
+            "name": "500 followers/subscribers",
+            "description": "Get 500 followers/subscribers for your account",
+            "amount": 900,
+            "noOfFollowers": 500
+          },
+          {
+            "name": "2000 followers/subscribers",
+            "description": "Get 2000 followers/subscribers for your account",
+            "amount": 1500,
+            "noOfFollowers": 2000
+          },
+          {
+            "name": "3000 followers/subscribers",
+            "description": "Get 3000 followers/subscribers for your account",
+            "amount": 1500,
+            "noOfFollowers": 3000
+          }
+        ]
+      },
+      {
+        "name": "Engagements",
+        "description": "Initial commit",
+        "packageSubType": [
+          {
+            "name": "1 video",
+            "description": "200 likes per video . Total likes 200",
+            "noOfLikes": 200,
+            "amount": 900
+          },
+          {
+            "name": "3 videos",
+            "description": "200 likes per video . Total likes 600",
+            "noOfLikes": 600,
+            "amount": 1500
+          },
+          {
+            "name": "5 videos",
+            "description": "200 likes per video . Total likes 1000",
+            "noOfLikes": 1000,
+            "amount": 2000
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Most Popular",
+    "description": "Our best-selling package for quick growth",
+    "amount": 1500,
+    "amountBeforeDiscount": 3999,
+    "isPopular": true,
+    "features": ["Access to premium features", "Email support", "Single user"],
+    "socialMedia": ["Twitter", "Facebook", "YouTube", "TikTok", "Instagram"],
+    "packageType": [
+      {
+        "name": "Follow/subscription",
+        "description": "Increase followers/subscribers efficiently",
+        "packageSubType": [
+          {
+            "name": "3000 followers/subscribers",
+            "description": "Get 3000 followers/subscribers for your account",
+            "amount": 1500,
+            "noOfFollowers": 1500
+          },
+          {
+            "name": "6000 followers/subscribers",
+            "description": "Get 6000 followers/subscribers for your account",
+            "amount": 2999,
+            "noOfFollowers": 3000
+          },
+          {
+            "name": "9000 followers/subscribers",
+            "description": "Get 9000 followers/subscribers for your account",
+            "amount": 3999,
+            "noOfFollowers": 3000
+          }
+        ]
+      },
+      {
+        "name": "Engagements",
+        "description": "Boost likes and engagement on your posts",
+        "packageSubType": [
+          {
+            "name": "1 videos",
+            "description": "3000 likes per video. Total likes 600",
+            "noOfLikes": 600,
+            "amount": 1500
+          },
+          {
+            "name": "2 videos",
+            "description": "6000 likes per video. Total likes 1000",
+            "noOfLikes": 1000,
+            "amount": 2999
+          },
+          {
+            "name": "3 videos",
+            "description": "9000 likes per video. Total likes 1000",
+            "noOfLikes": 1000,
+            "amount": 3999
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Pro",
+    "description": "Our best-selling package for quick growth",
+    "amount": 4999,
+    "amountBeforeDiscount": 7999,
+    "isPopular": true,
+    "features": ["Access to premium features", "Email support", "Single user"],
+    "socialMedia": ["Twitter", "Facebook", "YouTube", "TikTok", "Instagram"],
+    "packageType": [
+      {
+        "name": "Follow/subscription",
+        "description": "Increase followers/subscribers efficiently",
+        "packageSubType": [
+          {
+            "name": "6000 followers/subscribers",
+            "description": "Get 6000 followers/subscribers for your account",
+            "amount": 4999,
+            "noOfFollowers": 5000
+          },
+          {
+            "name": "10000 followers/subscribers",
+            "description": "Get 10000 followers/subscribers for your account",
+            "amount": 6999,
+            "noOfFollowers": 10000
+          },
+          {
+            "name": "15000 followers/subscribers",
+            "description": "Get 15000 followers/subscribers for your account",
+            "amount": 7999,
+            "noOfFollowers": 15000
+          }
+        ]
+      },
+      {
+        "name": "Engagements",
+        "description": "Boost likes and engagement on your posts",
+        "packageSubType": [
+          {
+            "name": "1 videos",
+            "description": "6000 likes per video. Total likes 3000",
+            "noOfLikes": 3000,
+            "amount": 4999
+          },
+          {
+            "name": "2 videos",
+            "description": "10000 likes per video. Total likes 6000",
+            "noOfLikes": 6000,
+            "amount": 6999
+          },
+          {
+            "name": "3 videos",
+            "description": "15000 likes per video. Total likes 10000",
+            "noOfLikes": 10000,
+            "amount": 7999
+          }
+        ]
+      }
+    ]
+  }
+]

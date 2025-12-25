@@ -22,17 +22,39 @@ const WebcamCapture: React.FC<FaceCaptureProps> = ({
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+  const animationFrameRef = useRef<number | null>(null);
   const [showVideo, setShowVideo] = React.useState(false);
 
   useEffect(() => {
+    let isMounted = true;
     startWebcam();
     loadModels();
+    return () => {
+      // Cleanup webcam stream
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach((track) => track.stop());
+        streamRef.current = null;
+      }
+      // Cancel animation frame
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = null;
+      }
+      isMounted = false;
+    };
   }, []);
 
   const startWebcam = async () => {
-    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-    if (videoRef.current) {
-      videoRef.current.srcObject = stream;
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      streamRef.current = stream;
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+      }
+    } catch (err) {
+      // Optionally handle error (e.g., user denied camera)
+      console.error("Webcam error:", err);
     }
   };
 
@@ -67,16 +89,25 @@ const WebcamCapture: React.FC<FaceCaptureProps> = ({
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
+    let isActive = true;
     if (ctx) {
       const draw = () => {
+        if (!isActive) return;
         if (videoRef.current) {
           ctx.clearRect(0, 0, canvas.width, canvas.height);
           ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
         }
-        requestAnimationFrame(draw);
+        animationFrameRef.current = requestAnimationFrame(draw);
       };
       draw();
     }
+    return () => {
+      isActive = false;
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = null;
+      }
+    };
   }, [videoRef.current]);
 
   useEffect(() => {

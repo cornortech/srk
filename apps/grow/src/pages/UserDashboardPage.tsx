@@ -42,7 +42,7 @@ export const UserDashboardPage = () => {
     if (!user) {
       navigate('/login');
     } else if (user.status !== 'portalActivated') {
-      navigate('/grow/verification');
+      navigate('/grow/verification-wall');
     }
   }, [user, navigate]);
 

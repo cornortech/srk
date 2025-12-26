@@ -11,6 +11,7 @@ import {
     growAffiliateContract
 } from "@srk/shared/contracts";
 import mongoose from "mongoose";
+import { growSocialMediaPackageUserModel } from "../../../model/growSocialMediaPackageUserModel";
 
 /**
  * Calculate total earnings for a date range
@@ -116,8 +117,8 @@ const getGrowAffiliateUserComissionEarningsDashboard: AppRouteImplementationOrOp
         return {
             status: 500,
             body: {
-                message: error.message || 'Internal server error',
                 success: false,
+                message: error.message ? `Internal server error: ${error.message}` : "Internal server error",
             },
         };
     }
@@ -216,8 +217,8 @@ const getUserAffiliateSalesComissionEarnings: AppRouteImplementationOrOptions<
         return {
             status: 500,
             body: {
-                message: error.message || 'Internal server error',
                 success: false,
+                message: error.message ? `Internal server error: ${error.message}` : "Internal server error",
             },
         };
     }
@@ -342,16 +343,93 @@ const getAllUsersAffiliateComissionLeaderBoard: AppRouteImplementationOrOptions<
         return {
             status: 500,
             body: {
-                message: error.message || 'Internal server error',
                 success: false,
+                message: error.message ? `Internal server error: ${error.message}` : "Internal server error",
             },
         };
     }
 };
+
+const getGrowAffiliateUser: AppRouteImplementationOrOptions<typeof growAffiliateContract.getGrowAffiliateUser> = async ({ params }) => {
+    try {
+        const affiliateUserExist = await growSocialMediaPackageUserModel.findById({ _id: params.id })
+
+        if (!affiliateUserExist) {
+            return {
+                status: 404,
+                body: {
+                    success: false,
+                    message: "Affiliate user not found",
+                },
+            }
+        }
+
+        // 2. Fetch wallet balance
+        await growSrkAffiliateUserBalanceModel.findOne({
+            growSocialMediaPackageUserId: affiliateUserExist._id
+        });
+
+        // 3. Aggregate total earnings
+        const earningsAggregate = await growSrkAffiliateEarningStatementModel.aggregate([
+            {
+                $match:
+                {
+                    refferedBY: affiliateUserExist._id
+
+                }
+            },
+            {
+                $group:
+                {
+                    _id: null,
+                    totalAmount: {
+                        $sum: "$amount"
+                    }
+                }
+            }
+        ]);
+
+        const totalEarnings = earningsAggregate[0]?.totalAmount || 0;
+
+        const totalReferrals = await growSocialMediaPackageUserModel.countDocuments({
+            referredBy: affiliateUserExist._id
+        });
+
+        return {
+            status: 200,
+            body: {
+                    userData: {
+                        id: affiliateUserExist._id.toString(),
+                        fullName: affiliateUserExist.fullName,
+                        email: affiliateUserExist.email,
+                        phone: affiliateUserExist.phone,
+                        userType: affiliateUserExist.userType,
+                        createdAt: affiliateUserExist.createdAt.toLocaleString(),
+                        isEmailNotifications: affiliateUserExist.isEmailNotifications ?? null,
+                        isPushNotifications: affiliateUserExist.isPushNotifications ?? null,
+                    },
+                    affiliateData: {
+                        totalAffiliates: totalReferrals,
+                        totalComissionRevenue: totalEarnings,
+                    },
+            },
+        }
+    } catch (error) {
+        console.error(error);
+        return {
+            status: 500,
+            body: {
+                success: false,
+                message: error.message ? `Internal server error: ${error.message}` : "Internal server error",
+            },
+        }
+    }
+}
 
 
 export const growAffiliateQueryHandler = {
     getGrowAffiliateUserComissionEarningsDashboard,
     getUserAffiliateSalesComissionEarnings,
     getAllUsersAffiliateComissionLeaderBoard,
+    getGrowAffiliateUser,
 };

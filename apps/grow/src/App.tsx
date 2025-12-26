@@ -12,6 +12,7 @@ import { OrderConfirmationPage } from './pages/OrderConfirmationPage';
 import { UserDashboardPage } from './pages/UserDashboardPage';
 import { ToastProvider } from './lib/contexts/ToastContext';
 import ViewerPage from './pages/ViewDocumentPage';
+import { UserVerificationPage } from './pages/UserVerificationPage';
 
 const queryClient = new QueryClient();
 
@@ -44,6 +45,7 @@ const router = createBrowserRouter([
     path: '/grow/verification',
     element: <GrowVerificationPage />,
   },
+  { path: '/grow/verification-wall', element: <UserVerificationPage /> },
   {
     path: '/admin/dashboard',
     element: <GrowOnlyAdminDashboard />,

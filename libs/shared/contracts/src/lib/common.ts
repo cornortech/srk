@@ -15,7 +15,7 @@ export const ErrorSchema = z.object({
 export const commonPaginationResponse = z.object({
   page: z.number(),
   limit: z.number(),
-  totalUsers: z.number(),
+  totalRecords: z.number(),
   totalPages: z.number(),
 });
 

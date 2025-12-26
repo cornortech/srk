@@ -18,7 +18,7 @@ export const LoginPage = () => {
       if (user.status === 'portalActivated') {
         navigate('/dashboard');
       } else {
-        navigate('/grow/verification');
+        navigate('/');
       }
     }
   }, [user, navigate]);

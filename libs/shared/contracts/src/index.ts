@@ -23,3 +23,5 @@ export * from './lib/tour/tour.schema';
 export * from './lib/task/contract';
 export * from './lib/task/schema';
 export * from './lib/index'
+export * from './lib/grow/affiliate/contract'
+export * from './lib/grow/affiliate/schema'

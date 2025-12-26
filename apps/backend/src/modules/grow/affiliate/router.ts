@@ -8,4 +8,5 @@ export const growAffiliateRouter = s.router(growAffiliateContract, {
   getGrowAffiliateUserComissionEarningsDashboard: growAffiliateQueryHandler.getGrowAffiliateUserComissionEarningsDashboard,
   getUserAffiliateSalesComissionEarnings: growAffiliateQueryHandler.getUserAffiliateSalesComissionEarnings,
   getAllUsersAffiliateComissionLeaderBoard: growAffiliateQueryHandler.getAllUsersAffiliateComissionLeaderBoard,
+  getGrowAffiliateUser: growAffiliateQueryHandler.getGrowAffiliateUser
 });

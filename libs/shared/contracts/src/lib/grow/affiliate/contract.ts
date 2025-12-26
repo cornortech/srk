@@ -6,6 +6,7 @@ import {
     getGrowAffiliateUserCommissionEarningsDashboardSchema,
     getUserAffiliateSalesComissionEarningsSchema,
     getAllUsersAffiliateComissionLeaderBoardQueryParams,
+    getAffiliateUsersProfileSchema,
 } from "./schema";
 import { ErrorSchema } from "../../common";
 
@@ -47,4 +48,16 @@ export const growAffiliateContract = c.router({
         },
         summary: 'Get all user affiliate leaderboard with total sales(referrals) and revenue overall',
     },
-})
+
+    getGrowAffiliateUser: {
+        method: "GET",
+        path: "/get-grow-affiliate-user-profile/:id",
+        responses: {
+            200: getAffiliateUsersProfileSchema,
+            403: ErrorSchema,
+            404: ErrorSchema,
+            500: ErrorSchema
+        },
+        summary: "Get Grow Affiliate User Profile by Id"
+    }
+});

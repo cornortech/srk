@@ -39,8 +39,6 @@ const growSocialMediaPackageUserSchema = new mongoose.Schema(
     },
     promoCode: {
       type: String,
-      required: true,
-      unique: true,
     },
     userType: {
       type: String,

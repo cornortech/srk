@@ -8,11 +8,33 @@ import { growSocialMediaPackagePaymentModel } from '../../model/growSocialMediaP
 import AuthService from '../../services/authService';
 import { growPackageEngagementPostModel } from '../../model/growPackageEngagementPostModel';
 import { IUser, UserModel } from '../../model/userModel';
-import { growSrkAffiliateVerificationModel } from '../../model/grow/growSrkAffiliateVerificationModel';
+import { growSrkAffiliateVerificationModel } from '../../model/growSrkAffiliateVerificationModel';
 import { AppRouteImplementationOrOptions } from '@ts-rest/express/src/lib/types';
 import { growSrkAffiliateEarningStatementModel } from '../../model/grow/growSrkAffiliateEarningStatementModel';
 import { Types } from 'mongoose';
 import { growSrkAffiliateUserBalanceModel } from '../../model/grow/growSrkAffiliateUserBalanceModel';
+
+export function calculatePackageDiscount(
+  packageId: string,
+  packageAmount: number
+) {
+  const packageDiscount: Record<string, number> = {
+    '693bd21b224b9cd931c7cee0': 0.1,
+    '693bd21b224b9cd931c7cef2': 0.15,
+    '693bd21c224b9cd931c7cf04': 0.2,
+  };
+
+  const discountPercentage = packageDiscount[packageId] || 0;
+  const discountAmount = packageAmount * discountPercentage;
+  const finalAmountAfterDiscount = packageAmount - discountAmount;
+
+  return {
+    originalAmount: packageAmount,
+    discountPercentage,
+    discountAmount,
+    finalAmountAfterDiscount,
+  };
+}
 
 const createGrowSocialMediaEnrollment: AppRouteImplementationOrOptions<
   typeof growContract.createGrowSocialMediaEnrollment
@@ -142,10 +164,6 @@ const createGrowSocialMediaEnrollment: AppRouteImplementationOrOptions<
     // 4. Create user
     const hashedPassword = await AuthService.hashPassword(userData.password);
 
-    // Generate a unique promo code for the new user
-    const growUserPromoCode =
-      await AuthService.generateUniquePromoCodeForSrkGrowUser();
-
     const packageUser = await growSocialMediaPackageUserModel.create({
       fullName: userData.fullName,
       email: userData.email,
@@ -154,12 +172,22 @@ const createGrowSocialMediaEnrollment: AppRouteImplementationOrOptions<
       phone: userData.phoneNumber,
       country: userData.country,
       kycURL: userData.kycURL,
-      promoCode: growUserPromoCode,
+      promoCode: userData.usedPromoCode,
       userType: 'package',
       referredBy: growSocialMediaRefferalUser
         ? growSocialMediaRefferalUser._id
         : null,
     });
+
+    let amountToStore = packageExists.amount;
+
+    if (userData.usedPromoCode && growSocialMediaRefferalUser) {
+      const discountResult = calculatePackageDiscount(
+        packageExists._id.toString(),
+        packageExists.amount
+      );
+      amountToStore = discountResult.finalAmountAfterDiscount;
+    }
 
     // 5. Create enrollment
     const createSrkGrowPackageEnrollment =
@@ -172,6 +200,7 @@ const createGrowSocialMediaEnrollment: AppRouteImplementationOrOptions<
           enrollmentData.growSocialMediaPackageSubTypeId,
         socialMediaPlatform: enrollmentData.socialMediaPlatform,
         profileLinkURL: enrollmentData.profileLinkURL,
+        amount: amountToStore,
       });
 
     // 6. Create payment record
@@ -253,16 +282,8 @@ export const validateGrowUserPromoCode: AppRouteImplementationOrOptions<
       };
     }
 
-    const packageDiscount: Record<string, number> = {
-      '693bd21b224b9cd931c7cee0': 0.1,
-      '693bd21b224b9cd931c7cef2': 0.15,
-      '693bd21c224b9cd931c7cf04': 0.2,
-    };
-
-    const discountPercentage = packageDiscount[growPackage._id.toString()];
-    const originalAmount = growPackage.amount;
-    const discountAmount = originalAmount * discountPercentage;
-    const finalAmountAfterDiscount = originalAmount - discountAmount;
+    const { originalAmount, discountPercentage, discountAmount, finalAmountAfterDiscount } =
+      calculatePackageDiscount(growPackage._id.toString(), growPackage.amount);
 
     return {
       status: 200,
@@ -352,7 +373,7 @@ const acceptSocialGrowEnrollmentRequest: AppRouteImplementationOrOptions<
       const affiliateCommissionRate = 0.15;
       const affiliateCommissionAmount = enrollmentRequest.amount * affiliateCommissionRate;
 
-      // 1️⃣ Create earning statement
+      // Create earning statement
       await growSrkAffiliateEarningStatementModel.create({
         refferedBY: user.referredBy,
         refferedTo: user._id,

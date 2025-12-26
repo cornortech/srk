@@ -688,9 +688,10 @@ const approveSrkGrowAffiliateVerificationRequest: AppRouteImplementationOrOption
   try {
     const requestExist = await growSrkAffiliateVerificationModel
       .findOne({ _id: params.srkGrowaffiliateVerificationId })
-      .populate<
-        Pick<
+      .populate<{
+        srkUniversityUserId: Pick<
           IUser,
+          '_id'
           | 'firstName'
           | 'lastName'
           | 'email'
@@ -699,8 +700,8 @@ const approveSrkGrowAffiliateVerificationRequest: AppRouteImplementationOrOption
           | 'phoneNumber'
           | 'dob'
           | 'profilePicture'
-        >
-      >({
+        >;
+      }>({
         path: 'srkUniversityUserId',
         select:
           'firstName lastName email gender country phoneNumber dob profilePicture ',
@@ -716,32 +717,43 @@ const approveSrkGrowAffiliateVerificationRequest: AppRouteImplementationOrOption
       };
     }
 
+    if(requestExist.status === 'approved'){
+      return {
+        status: 400,
+        body: {
+          message: 'Request already approved',
+          success: false,
+        },
+      }
+    }
+
     await growSrkAffiliateVerificationModel.findOneAndUpdate(
       { _id: params.srkGrowaffiliateVerificationId },
       { $set: { status: 'approved' } }
     );
+
     const growUserPromoCode =
       await AuthService.generateUniquePromoCodeForSrkGrowUser();
 
     await growSocialMediaPackageUserModel.create({
       userType: 'affiliate',
-      country: requestExist.country,
-      fullName: `${requestExist.firstName}  ${requestExist.lastName}`,
-      email: requestExist.email,
-      gender: requestExist.gender,
-      phone: requestExist.phoneNumber,
+      country: requestExist.srkUniversityUserId.country,
+      fullName: `${requestExist.srkUniversityUserId.firstName}  ${requestExist.srkUniversityUserId.lastName}`,
+      email: requestExist.srkUniversityUserId.email,
+      gender: requestExist.srkUniversityUserId.gender,
+      phone: requestExist.srkUniversityUserId.phoneNumber,
       status: 'portalActivated',
       kycURL: requestExist.verificationImageUrl,
       password: '-',
       promoCode: growUserPromoCode,
-      srkUniversityUserId: requestExist.srkUniversityUserId,
+      srkUniversityUserId: requestExist.srkUniversityUserId._id,
     });
 
     return {
       status: 201,
       body: {
         message: 'Request Approved',
-        success: false,
+        success: true,
       },
     };
   } catch (error) {

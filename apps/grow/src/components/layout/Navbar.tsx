@@ -23,7 +23,7 @@ const Navbar: React.FC<NavbarProps> = () => {
     if (user.status === 'portalActivated') {
       navigate('/dashboard');
     } else {
-      navigate('/grow/verification');
+      navigate('/grow/verification-wall');
     }
     setMobileMenuOpen(false);
   };

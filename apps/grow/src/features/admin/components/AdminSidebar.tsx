@@ -23,7 +23,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         label: 'Affiliate Verification',
         icon: '👥',
       },
-      { id: 'userverification', label: 'Enrollement Verification', icon: '👤' },  
+      { id: 'userverification', label: 'Enrollment Verification', icon: '👤' },
       // { id: 'paymentverification', label: 'Payment Verification', icon: '💰' },
       // { id: 'taskmonitoring', label: 'Task Monitoring', icon: '📊' },
       // { id: 'privatetasks', label: 'Private Tasks', icon: '🎯' },

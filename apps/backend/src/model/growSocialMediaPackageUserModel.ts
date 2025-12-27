@@ -54,6 +54,14 @@ const growSocialMediaPackageUserSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'growSocialMediaPackageUser',
     },
+    isEmailNotifications: {
+      type: Boolean,
+      default: null,
+    },
+    isPushNotifications: {
+      type: Boolean,
+      default: null,
+    },
   },
   {
     timestamps: true,

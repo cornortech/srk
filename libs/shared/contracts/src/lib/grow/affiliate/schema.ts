@@ -53,3 +53,24 @@ export const getAllUsersAffiliateComissionLeaderBoardQueryParams =
     commonPaginatedQueryParamsSchema.extend({
         timeRange: z.enum(['all', 'today', 'week']).optional(),
     });
+
+export const affiliateUsersProfileSchema = z.object({
+    userData: z.object({
+        _id: z.string(),
+        fullName: z.string(),
+        email: z.string(),
+        phone: z.string(),
+        userType: z.string(),
+        isEmailNotifications: z.boolean().optional(),
+        isPushNotifications: z.boolean().optional(),
+        createdAt: z.string(),
+    }),
+    affiliateData: z.object({
+        totalAffiliates: z.number(),
+        totalComissionRevenue: z.number(),
+    })
+});
+
+export const getAffiliateUsersProfileSchema = affiliateUsersProfileSchema;
+
+export type TGetAffiliateUsersProfile = z.infer<typeof getAffiliateUsersProfileSchema>

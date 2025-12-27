@@ -1,5 +1,22 @@
 import mongoose from 'mongoose';
 
+export interface IGrowSocialMediaPackageUser extends mongoose.Document {
+  fullName: string;
+  email: string;
+  password: string;
+  gender: 'Male' | 'Female' | 'Other';
+  phone: string;
+  country: string;
+  kycURL: string[];
+  status: 'verificationPending' | 'portalActivated' | 'verificationRejected';
+  promoCode?: string;
+  userType: 'affiliate' | 'package';
+  srkUniversityUserId?: mongoose.Types.ObjectId;
+  referredBy?: mongoose.Types.ObjectId;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 const growSocialMediaPackageUserSchema = new mongoose.Schema(
   {
     fullName: {

@@ -10,6 +10,31 @@ import { growPackageEngagementPostModel } from '../../model/growPackageEngagemen
 import { IUser, UserModel } from '../../model/userModel';
 import { growSrkAffiliateVerificationModel } from '../../model/growSrkAffiliateVerificationModel';
 import { AppRouteImplementationOrOptions } from '@ts-rest/express/src/lib/types';
+import { growSrkAffiliateEarningStatementModel } from '../../model/grow/growSrkAffiliateEarningStatementModel';
+import { Types } from 'mongoose';
+import { growSrkAffiliateUserBalanceModel } from '../../model/grow/growSrkAffiliateUserBalanceModel';
+
+export function calculatePackageDiscount(
+  packageId: string,
+  packageAmount: number
+) {
+  const packageDiscount: Record<string, number> = {
+    '693bd21b224b9cd931c7cee0': 0.1,
+    '693bd21b224b9cd931c7cef2': 0.15,
+    '693bd21c224b9cd931c7cf04': 0.2,
+  };
+
+  const discountPercentage = packageDiscount[packageId] || 0;
+  const discountAmount = packageAmount * discountPercentage;
+  const finalAmountAfterDiscount = packageAmount - discountAmount;
+
+  return {
+    originalAmount: packageAmount,
+    discountPercentage,
+    discountAmount,
+    finalAmountAfterDiscount,
+  };
+}
 
 const createGrowSocialMediaEnrollment: AppRouteImplementationOrOptions<
   typeof growContract.createGrowSocialMediaEnrollment
@@ -58,7 +83,7 @@ const createGrowSocialMediaEnrollment: AppRouteImplementationOrOptions<
     if (
       !packageTypeExists ||
       String(packageTypeExists.growSocialMediaPackageId) !==
-        enrollmentData.growSocialMediaPackageId
+      enrollmentData.growSocialMediaPackageId
     ) {
       return {
         status: 400,
@@ -76,7 +101,7 @@ const createGrowSocialMediaEnrollment: AppRouteImplementationOrOptions<
     if (
       !packageSubTypeExists ||
       String(packageSubTypeExists.growSocialMediaPackageTypeId) !==
-        enrollmentData.growSocialMediaPackageTypeId
+      enrollmentData.growSocialMediaPackageTypeId
     ) {
       return {
         status: 400,
@@ -139,10 +164,6 @@ const createGrowSocialMediaEnrollment: AppRouteImplementationOrOptions<
     // 4. Create user
     const hashedPassword = await AuthService.hashPassword(userData.password);
 
-    // Generate a unique promo code for the new user
-    const growUserPromoCode =
-      await AuthService.generateUniquePromoCodeForSrkGrowUser();
-
     const packageUser = await growSocialMediaPackageUserModel.create({
       fullName: userData.fullName,
       email: userData.email,
@@ -151,12 +172,22 @@ const createGrowSocialMediaEnrollment: AppRouteImplementationOrOptions<
       phone: userData.phoneNumber,
       country: userData.country,
       kycURL: userData.kycURL,
-      promoCode: growUserPromoCode,
+      promoCode: userData.usedPromoCode,
       userType: 'package',
       referredBy: growSocialMediaRefferalUser
         ? growSocialMediaRefferalUser._id
         : null,
     });
+
+    let amountToStore = packageExists.amount;
+
+    if (userData.usedPromoCode && growSocialMediaRefferalUser) {
+      const discountResult = calculatePackageDiscount(
+        packageExists._id.toString(),
+        packageExists.amount
+      );
+      amountToStore = discountResult.finalAmountAfterDiscount;
+    }
 
     // 5. Create enrollment
     const createSrkGrowPackageEnrollment =
@@ -169,6 +200,7 @@ const createGrowSocialMediaEnrollment: AppRouteImplementationOrOptions<
           enrollmentData.growSocialMediaPackageSubTypeId,
         socialMediaPlatform: enrollmentData.socialMediaPlatform,
         profileLinkURL: enrollmentData.profileLinkURL,
+        amount: amountToStore,
       });
 
     // 6. Create payment record
@@ -250,24 +282,15 @@ export const validateGrowUserPromoCode: AppRouteImplementationOrOptions<
       };
     }
 
-    const packageDiscount: Record<string, number> = {
-      '693bd21b224b9cd931c7cee0': 0.1,
-      '693bd21b224b9cd931c7cef2': 0.15,
-      '693bd21c224b9cd931c7cf04': 0.2,
-    };
-
-    const discountPercentage = packageDiscount[growPackage._id.toString()];
-    const originalAmount = growPackage.amount;
-    const discountAmount = originalAmount * discountPercentage;
-    const finalAmountAfterDiscount = originalAmount - discountAmount;
+    const { originalAmount, discountPercentage, discountAmount, finalAmountAfterDiscount } =
+      calculatePackageDiscount(growPackage._id.toString(), growPackage.amount);
 
     return {
       status: 200,
       body: {
         success: true,
-        message: `Promo code valid! You get a discount of ${
-          discountPercentage * 100
-        }% on the ${growPackage.name} package.`,
+        message: `Promo code valid! You get a discount of ${discountPercentage * 100
+          }% on the ${growPackage.name} package.`,
         discountDetails: {
           originalAmount,
           discountPercentage: discountPercentage * 100,
@@ -295,8 +318,19 @@ const acceptSocialGrowEnrollmentRequest: AppRouteImplementationOrOptions<
   typeof growContract.acceptSocialGrowEnrollmentRequest
 > = async ({ params }) => {
   try {
-    const enrollmentRequest =
-      await growSocialMediaPackageEnrollmentModel.findById(params.enrollmentId);
+    const enrollmentRequest = await growSocialMediaPackageEnrollmentModel
+      .findById(params.enrollmentId)
+      .populate<{
+        growSocialMediaPackageUserId: {
+          _id: Types.ObjectId;
+          referredBy?: Types.ObjectId;
+          status: string;
+        };
+        growSocialMediaPackageId: {
+          _id: Types.ObjectId;
+          amount: number;
+        };
+      }>("growSocialMediaPackageUserId growSocialMediaPackageId");
 
     if (!enrollmentRequest) {
       return {
@@ -306,6 +340,9 @@ const acceptSocialGrowEnrollmentRequest: AppRouteImplementationOrOptions<
         },
       };
     }
+
+    const user = enrollmentRequest.growSocialMediaPackageUserId;
+    const packageData = enrollmentRequest.growSocialMediaPackageId;
 
     await growSocialMediaPackageUserModel.findOneAndUpdate(
       {
@@ -332,10 +369,39 @@ const acceptSocialGrowEnrollmentRequest: AppRouteImplementationOrOptions<
       }
     );
 
+    if (user.referredBy) {
+      const affiliateCommissionRate = 0.15;
+      const affiliateCommissionAmount = enrollmentRequest.amount * affiliateCommissionRate;
+
+      // Create earning statement
+      await growSrkAffiliateEarningStatementModel.create({
+        refferedBY: user.referredBy,
+        refferedTo: user._id,
+        growSocialMediaPackageId: packageData._id,
+        amount: affiliateCommissionAmount,
+      });
+
+      const affiliateBalance = await growSrkAffiliateUserBalanceModel.findOne({
+        growSocialMediaPackageUserId: user.referredBy,
+      });
+
+      if (affiliateBalance) {
+        // increment existing balance
+        affiliateBalance.wallet += affiliateCommissionAmount;
+        await affiliateBalance.save();
+      } else {
+        // create new balance
+        await growSrkAffiliateUserBalanceModel.create({
+          growSocialMediaPackageUserId: user.referredBy,
+          wallet: affiliateCommissionAmount,
+        });
+      }
+    }
+
     return {
       status: 200,
       body: {
-        message: 'Follow Request Approved',
+        message: 'Enrollement Request Accepted',
         success: true,
       },
     };

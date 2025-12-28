@@ -244,6 +244,8 @@ const rejectAffiliateRequest: AppRouteImplementationOrOptions<
   }
 };
 
+
+
 export const affiliateMutationHandler = {
   affiliateRequest,
   addAffiliateBiometricData,

@@ -11,6 +11,7 @@ import { webinarContract } from './webinar/contract';
 import { bankContract } from './bank/contract';
 import { tourContract } from './tour/tour.contract';
 import { taskContract } from './task/contract';
+import { growAffiliateContract } from './grow/affiliate/contract';
 
 const c = initContract();
 
@@ -27,4 +28,5 @@ export const apiContract = c.router({
   tour: tourContract,
   task: taskContract,
   sso: ssoContract,
+  growAffiliate: growAffiliateContract
 });

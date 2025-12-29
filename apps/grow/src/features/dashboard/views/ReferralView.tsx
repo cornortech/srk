@@ -55,7 +55,7 @@ export const ReferralView: React.FC<ReferralViewProps> = ({
 
         <GlassCard variant="violet" padding="sm">
           <div className="text-center">
-            <div className="text-lg font-bold text-violet-400">20%</div>
+            <div className="text-lg font-bold text-violet-400">15%</div>
             <p className="text-xs text-gray-400 mt-1">Max Commission</p>
           </div>
         </GlassCard>

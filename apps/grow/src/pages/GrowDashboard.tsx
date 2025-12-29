@@ -145,14 +145,14 @@ export const GrowDashboard = () => {
       case 'referral':
         return <ReferralView data={dataToSend ?? []} showToast={showToast} />;
       case 'mysales':
-        return <MySalesView salesData={salesData} />;
+        return <MySalesView />;
       case 'leaderboard':
-        return <LeaderboardView leaderboardData={leaderboardData} />;
+        return <LeaderboardView />;
       case 'payout':
         return <PayoutView payouts={payoutHistory} />;
       case 'profile':
         return (
-          <ProfileView profile={MOCK_USER_PROFILE} showToast={showToast} />
+          <ProfileView showToast={showToast} />
         );
       default:
         return <DashboardView data={dashboardData} showToast={showToast} />;

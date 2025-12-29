@@ -389,7 +389,7 @@ const getGrowAffiliateUser: AppRouteImplementationOrOptions<typeof growAffiliate
       status: 200,
       body: {
         userData: {
-          id: affiliateUserExist._id.toString(),
+          _id: affiliateUserExist._id.toString(),
           fullName: affiliateUserExist.fullName,
           email: affiliateUserExist.email,
           phone: affiliateUserExist.phone,

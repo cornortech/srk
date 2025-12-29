@@ -9,6 +9,7 @@ import { WithdrawIcon } from '../components/ui/DashboardIcons';
 import React, { useState } from 'react';
 import { GlassCard } from '../components/ui/GlassCard';
 import { formatRupees } from '../../../lib/utils/formatters';
+import { api } from '../../../lib/api';
 
 interface DashboardViewProps {
   data: DashboardData;
@@ -20,6 +21,20 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   showToast,
 }) => {
   const [isWithdrawing, setIsWithdrawing] = useState(false);
+
+  const userID = '6950abcd1234ef5678901234';
+
+  const { data: getAffiliateUserDashboardStats, isLoading } =
+    api.growAffiliate.getGrowAffiliateUserComissionEarningsDashboard.useQuery(
+      ['affiliatedUserDashboardStats', userID],
+      {
+        params: {
+          affiliateUserId: userID,
+        },
+      }
+    );
+  
+    const balance = getAffiliateUserDashboardStats?.body.currentBalance || 0;
 
   const handleWithdraw = async () => {
     setIsWithdrawing(true);
@@ -37,7 +52,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   const stats = [
     {
       label: 'Today',
-      value: formatRupees(data.today),
+      value: formatRupees(getAffiliateUserDashboardStats?.body.todayEarnings || 0),
       variant: 'gold' as CardVariant,
       change: '+12%',
       icon: <SparklesIcon className="w-4 h-4" />,
@@ -45,15 +60,15 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     },
     {
       label: 'Wallet',
-      value: formatRupees(data.wallet),
+      value: formatRupees(getAffiliateUserDashboardStats?.body.currentBalance || 0),
       variant: 'emerald' as CardVariant,
-      info: 'Available for withdrawal',
+      info: balance > 10 ? 'Available for withdrawal' : 'No funds',
       icon: <WalletIcon className="w-4 h-4" />,
       description: 'Current balance',
     },
     {
       label: '7 Days',
-      value: formatRupees(data.week),
+      value: formatRupees(getAffiliateUserDashboardStats?.body.last7DaysEarnings || 0),
       variant: 'violet' as CardVariant,
       change: '+8%',
       icon: <TrendingUpIcon className="w-4 h-4" />,
@@ -61,7 +76,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     },
     {
       label: 'All Time',
-      value: formatRupees(data.allTime),
+      value: formatRupees(getAffiliateUserDashboardStats?.body.allTimeEarnings || 0),
       variant: 'gold' as CardVariant,
       icon: (
         <svg
@@ -78,7 +93,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     },
     {
       label: '28 Days',
-      value: formatRupees(data.days28),
+      value: formatRupees(getAffiliateUserDashboardStats?.body.last28DaysEarnings || 0),
       variant: 'blue' as CardVariant,
       change: '+5%',
       icon: (
@@ -99,7 +114,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     },
     {
       label: 'Consistency',
-      value: `${data.consistencyDays} Days`,
+      value: `${getAffiliateUserDashboardStats?.body.todayEarnings || 0} Days`,
       variant: 'emerald' as CardVariant,
       info: 'Active streak',
       icon: (

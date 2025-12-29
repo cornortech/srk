@@ -43,7 +43,7 @@ export const growAffiliateContract = c.router({
   getAllUsersAffiliateComissionLeaderBoard: {
     method: 'GET',
     path: '/affiliate/leaderboard',
-    query: getAllUsersAffiliateComissionLeaderBoardQueryParams.optional(),
+    query: getAllUsersAffiliateComissionLeaderBoardQueryParams,
     responses: {
       200: paginatedGetAllUsersAffiliateComissionLeaderBoardSchema,
       500: ErrorSchema,

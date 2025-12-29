@@ -75,7 +75,7 @@ export const growAffiliateContract = c.router({
     },
     summary: 'Create a payout for SRK affiliate earnings',
   },
-  
+
   acceptSrkAffiliateEarningPayout: {
     method: 'POST',
     path: '/affiliate/earning-payout/accept/:payoutId',

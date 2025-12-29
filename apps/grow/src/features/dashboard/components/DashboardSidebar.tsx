@@ -9,7 +9,7 @@ import {
   TrendingUpIcon,
 } from './ui/DashboardIcons';
 import React from 'react';
-import { MOCK_USER_PROFILE } from '../../../data/dashboardMock';
+import { api } from '../../../lib/api';
 
 interface DashboardSidebarProps {
   isMobile: boolean;
@@ -60,6 +60,22 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
       color: 'text-gray-400',
     },
   ];
+
+    const userID = '694e47bf627addce4f643cc5';
+  
+    // Initialize notification states: ON only if 1 or true
+  
+    const { data: getAffiliateUserProfile, isLoading } =
+      api.growAffiliate.getGrowAffiliateUser.useQuery(
+        ['affiliatedUserProfile', userID],
+        {
+          params: { id: userID },
+        }
+      );
+
+      if(isLoading){
+        return <div>Loading...</div>
+      }
 
   return (
     <div
@@ -170,18 +186,18 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
           <div className="relative">
             <div className="absolute inset-0 bg-gradient-to-r from-[#E1BA73] to-[#B68938] rounded-full blur-md opacity-50"></div>
             <div className="relative w-10 h-10 rounded-full flex items-center justify-center text-white font-bold bg-gradient-to-br from-[#E1BA73] to-[#B68938]">
-              {MOCK_USER_PROFILE.name.charAt(0).toUpperCase()}
+              {getAffiliateUserProfile?.body.userData.fullName.charAt(0).toUpperCase()}
             </div>
           </div>
           <div className="text-sm flex-1 min-w-0">
             <p className="font-medium text-white truncate">
-              {MOCK_USER_PROFILE.name}
+              {getAffiliateUserProfile?.body.userData.fullName}
             </p>
             <p
               className="text-gray-500 truncate"
-              title={MOCK_USER_PROFILE.userId}
+              title={userID}
             >
-              {MOCK_USER_PROFILE.userId}
+              {userID}
             </p>
           </div>
         </div>

@@ -6,8 +6,9 @@ import {
   PayoutStatus,
 } from 'apps/grow/src/lib/types/dashboard';
 import { GlassCard } from '../components/ui/GlassCard';
-import { ReactNode } from 'react';
+import { ReactNode, useState } from 'react';
 import { formatRupees } from '../../../lib/utils/formatters';
+import { api } from '../../../lib/api';
 
 interface PayoutViewProps {
   payouts: Payout[];
@@ -77,6 +78,21 @@ export const PayoutView: React.FC<PayoutViewProps> = ({ payouts }) => {
       variant: 'violet' as CardVariant,
     },
   ];
+
+    const userID = '6950abcd1234ef5678901234';
+    const [page, setPage] = useState("1");
+  
+    const { data: getAffiliateUserPayout, isLoading } =
+      api.growAffiliate.getSrkAffiliateEarningPayoutForAdmin.useQuery(
+      ['affiliatedUserPayout', page],
+      {
+        query: {
+          limit: "10",
+          page: page,
+          perPage: "10",
+          status: undefined,
+        },
+      });
 
   return (
     <div className="space-y-6">

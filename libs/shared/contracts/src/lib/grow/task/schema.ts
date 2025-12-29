@@ -1,5 +1,8 @@
-import z from "zod";
-import { commonPaginatedQueryParamsSchema, commonPaginationResponse } from "../../common";
+import z from 'zod';
+import {
+  commonPaginatedQueryParamsSchema,
+  commonPaginationResponse,
+} from '../../common';
 
 export const srkTaskUserSchema = z.object({
   userData: z.object({
@@ -12,18 +15,22 @@ export const srkTaskUserSchema = z.object({
     kycStatus: z.enum(['pending', 'approved', 'rejected']),
     createdAt: z.string(),
   }),
-  taskData: z.object({
-    totalTasksCompleted: z.number(),
-    totalEarnings: z.number(),
-    avgDailyEarn: z.number(),
-    totalCoinsEarned: z.number(),
-    successRate: z.number().min(0).max(100),
-  }).optional(),
+  taskData: z
+    .object({
+      totalTasksCompleted: z.number(),
+      totalEarnings: z.number(),
+      avgDailyEarn: z.number(),
+      totalCoinsEarned: z.number(),
+      successRate: z.number().min(0).max(100),
+    })
+    .optional(),
 });
 
 export const getSrkTaskUserProfileSchema = srkTaskUserSchema;
 
-export type TGetSrkTaskUserProfile = z.infer<typeof getSrkTaskUserProfileSchema>;
+export type TGetSrkTaskUserProfile = z.infer<
+  typeof getSrkTaskUserProfileSchema
+>;
 
 export const srkTaskUserAnalyticsSchema = z.object({
   coinsData: z.object({
@@ -42,7 +49,9 @@ export const srkTaskUserAnalyticsSchema = z.object({
 
 export const getSrkTaskUserAnalyticsSchema = srkTaskUserAnalyticsSchema;
 
-export type TGetSrkTaskUserAnalytics = z.infer<typeof getSrkTaskUserAnalyticsSchema>;
+export type TGetSrkTaskUserAnalytics = z.infer<
+  typeof getSrkTaskUserAnalyticsSchema
+>;
 
 export const srkTaskUserEarningsLeaderboardSchema = z.object({
   rank: z.number(),
@@ -63,7 +72,9 @@ export const paginatedSrkTaskUserEarningsLeaderboardSchema =
     data: getAllSrkTaskUserEarningsLeaderboardSchema,
   });
 
-export type TPagninatedSrkTaskUserEarningsLeaderboard = z.infer<typeof paginatedSrkTaskUserEarningsLeaderboardSchema>;
+export type TPagninatedSrkTaskUserEarningsLeaderboard = z.infer<
+  typeof paginatedSrkTaskUserEarningsLeaderboardSchema
+>;
 
 export const getSrkTaskUserEarningsLeaderboardQueryParams =
   commonPaginatedQueryParamsSchema.extend({
@@ -71,15 +82,40 @@ export const getSrkTaskUserEarningsLeaderboardQueryParams =
     search: z.string().optional(),
   });
 
-  export const acceptSrkTaskUserEarningsPayoutSchema = z.object({
-    transactionId: z.string(),
-    paymentScreenshotUrl: z.string().url(),
-  });
+export const acceptSrkTaskUserEarningsPayoutSchema = z.object({
+  transactionId: z.string(),
+  paymentScreenshotUrl: z.string().url(),
+});
 
-  export type TACeeptSrkTaskUSserEarningsPayout = z.infer<typeof acceptSrkTaskUserEarningsPayoutSchema>;
+export type TACeeptSrkTaskUSserEarningsPayout = z.infer<
+  typeof acceptSrkTaskUserEarningsPayoutSchema
+>;
 
-  export const rejectSrkTaskUserEarningsPayoutSchema = z.object({
-    rejectionReason: z.string(),
-  });
+export const rejectSrkTaskUserEarningsPayoutSchema = z.object({
+  rejectionReason: z.string(),
+});
 
-  export type TRejectSrkTaskUserEarningsPayout = z.infer<typeof rejectSrkTaskUserEarningsPayoutSchema>;
+export type TRejectSrkTaskUserEarningsPayout = z.infer<
+  typeof rejectSrkTaskUserEarningsPayoutSchema
+>;
+
+export const submitTaskOnboardingVerificationSchema = z.object({
+  documentUrl: z.string().url(),
+  signatureUrl: z.string().url(),
+  verificationImageUrl: z.string().url(),
+  fullName: z.string(),
+  dateOfBirth: z.string(),
+});
+
+export type TSubmitTaskOnboardingVerification = z.infer<
+  typeof submitTaskOnboardingVerificationSchema
+>;
+
+export const srkTaskActionSubmissionBodySchema = z.object({
+  srkGrowEnrollmentId: z.string(),
+  srkTaskUserId: z.string(),
+  actionVerificationImageUrl: z.string().url(),
+});
+export type TSrkTaskActionSubmissionBody = z.infer<
+  typeof srkTaskActionSubmissionBodySchema
+>;

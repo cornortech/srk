@@ -1,7 +1,8 @@
 import mongoose from 'mongoose';
+import { IUser } from '../userModel';
 
 export interface ISrkTaskUserModel extends mongoose.Document {
-  srkUniversityUserId: string;
+  srkUniversityUserId: mongoose.Types.ObjectId | IUser;
   fullName: string;
   dob: string;
   isActivated: boolean;
@@ -13,7 +14,7 @@ const srkTaskUserSchema = new mongoose.Schema(
   {
     srkUniversityUserId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'srkUniversityUser',
+      ref: 'User',
       required: true,
     },
     fullName: {

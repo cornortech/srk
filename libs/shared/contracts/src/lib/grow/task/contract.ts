@@ -1,15 +1,30 @@
+import {
+  paginatedSrkTaskActionSubmissionsByStatusForAdminSchema,
+  getSrkTaskActionSubmissionsByStatusForAdminQueryParams,
+  paginatedSrkTaskActionsByPlatformResponseSchema,
+  getSrkTaskActionsByPlatformsQueryParams,
+} from './schema';
+
+import { paginatedSrkTaskEarningRequestsByUserSchema } from './schema';
+
 import { initContract } from '@ts-rest/core';
 import {
   acceptSrkTaskUserEarningsPayoutSchema,
+  getSrkTaskEarningRequestsByAdminQueryParams,
   getSrkTaskUserAnalyticsSchema,
   getSrkTaskUserEarningsLeaderboardQueryParams,
   getSrkTaskUserProfileSchema,
+  paginatedSrkTaskEarningRequestsByAdminSchema,
   paginatedSrkTaskUserEarningsLeaderboardSchema,
   rejectSrkTaskUserEarningsPayoutSchema,
   srkTaskActionSubmissionBodySchema,
   submitTaskOnboardingVerificationSchema,
 } from './schema';
-import { ErrorSchema, SuccessSchema } from '../../common';
+import {
+  commonPaginatedQueryParamsSchema,
+  ErrorSchema,
+  SuccessSchema,
+} from '../../common';
 import z from 'zod';
 
 const c = initContract();
@@ -48,6 +63,23 @@ export const srkTaskContract = c.router({
     summary: 'Get all srk task user earnings Leaderboard',
   },
 
+  srkTaskEarningsPayoutRequest: {
+    method: 'POST',
+    path: '/task/srk-task-user-earnings-payout-request',
+    body: z.object({
+      srkTaskUserId: z.string(),
+      coins: z
+        .number()
+        .min(500, 'Coins must be at least 500')
+        .max(1000, 'Coins must be at most 1000'),
+    }),
+    responses: {
+      201: SuccessSchema,
+      400: ErrorSchema,
+      500: ErrorSchema,
+    },
+    summary: 'Create a payout request for srk task user earnings',
+  },
   acceptSrkTaskUserEarningsPayout: {
     method: 'POST',
     path: '/task/accept-earning-payout/:payoutId',
@@ -71,6 +103,51 @@ export const srkTaskContract = c.router({
     },
     summary: 'Reject payout request for srk task user earnings',
   },
+  getAllSrkTaskEarningPayoutsByAdmin: {
+    method: 'GET',
+    path: '/task/admin/srk-task-earning-payouts',
+    query: getSrkTaskEarningRequestsByAdminQueryParams.optional(),
+    responses: {
+      200: paginatedSrkTaskEarningRequestsByAdminSchema,
+      400: ErrorSchema,
+      500: ErrorSchema,
+    },
+    summary: 'Get all srk task user earnings Payouts for admin',
+  },
+  getSrkTaskUserEarningsPayoutsByUser: {
+    method: 'GET',
+    path: '/task/user/:userId/srk-task-earning-payouts',
+    query: getSrkTaskEarningRequestsByAdminQueryParams.optional(),
+    responses: {
+      200: paginatedSrkTaskEarningRequestsByUserSchema,
+      400: ErrorSchema,
+      500: ErrorSchema,
+    },
+    summary: 'Get srk task user earnings Payouts by user',
+  },
+  getAllSrkTasksActionSubmissionByStatusForAdmin: {
+    method: 'GET',
+    path: '/task/admin/srk-task-action-submissions',
+    query: getSrkTaskActionSubmissionsByStatusForAdminQueryParams.optional(),
+    responses: {
+      200: paginatedSrkTaskActionSubmissionsByStatusForAdminSchema,
+      400: ErrorSchema,
+      500: ErrorSchema,
+    },
+    summary:
+      'Get all srk task action submissions by status for admin (paginated)',
+  },
+  // getSrkTaskActionsByPlatforms: {
+  //   method: 'GET',
+  //   path: '/task/srk-task-actions-by-platforms',
+  //   query: getSrkTaskActionsByPlatformsQueryParams,
+  //   responses: {
+  //     200: paginatedSrkTaskActionsByPlatformResponseSchema,
+  //     400: ErrorSchema,
+  //     500: ErrorSchema,
+  //   },
+  //   summary: 'Get srk task actions grouped by platforms',
+  // },
   submitSrkTaskOnboardingVerification: {
     method: 'POST',
     path: '/task/submit-onboarding-verification/:srkUniversityId',

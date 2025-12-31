@@ -1,6 +1,18 @@
 import mongoose from "mongoose";
+export interface IGrowSocialMediaPackageSubType {
+    growSocialMediaPackageId: mongoose.Types.ObjectId;
+    growSocialMediaPackageTypeId: mongoose.Types.ObjectId;
+    name: string;
+    description: string;
+    taskType: "follow" | "engagement";
+    noOfLikes?: number;
+    noOfVideos?: number;
+    noOfFollowers?: number;
+    createdAt?: Date;
+    updatedAt?: Date;
+}
 
-const growSocialMediaPackageSubTypeSchema = new mongoose.Schema(
+const growSocialMediaPackageSubTypeSchema = new mongoose.Schema<IGrowSocialMediaPackageSubType>(
     {
         growSocialMediaPackageId: {
             type: mongoose.Schema.Types.ObjectId,

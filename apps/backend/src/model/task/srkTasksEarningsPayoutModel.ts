@@ -9,7 +9,6 @@ const srkTasksEarningsPayoutSchema = new mongoose.Schema(
     },
     transactionId: {
       type: String,
-      required: true,
     },
     coinsUsed: {
       type: Number,

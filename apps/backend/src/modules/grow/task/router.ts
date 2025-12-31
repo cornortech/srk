@@ -10,6 +10,14 @@ export const srkTaskRouter = s.router(srkTaskContract, {
   getSrkTaskUserAnalystics: srkTaskQueryHandler.getSrkTaskUserAnalystics,
   getAllSrkTaskUserEarningsLeaderboard:
     srkTaskQueryHandler.getAllSrkTaskUserEarningsLeaderboard,
+  getAllSrkTaskEarningPayoutsByAdmin:
+    srkTaskQueryHandler.getAllSrkTaskEarningPayoutsByAdmin,
+  getAllSrkTasksActionSubmissionByStatusForAdmin:
+    srkTaskQueryHandler.getAllSrkTasksActionSubmissionByStatusForAdmin,
+  getSrkTaskUserEarningsPayoutsByUser:
+    srkTaskQueryHandler.getSrkTaskUserEarningsPayoutsByUser,
+  srkTaskEarningsPayoutRequest:
+    srkTaskMutationHandler.srkTaskEarningsPayoutRequest,
   acceptSrkTaskUserEarningsPayout:
     srkTaskMutationHandler.acceptSrkTaskUserEarningsPayout,
   rejectSrkTaskUserEarningsPayout:

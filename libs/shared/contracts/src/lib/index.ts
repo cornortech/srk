@@ -1,7 +1,6 @@
 import { initContract } from '@ts-rest/core';
 import { authContract } from './auth/contract';
 import { growContract } from './grow/contract';
-import { ssoContract } from './sso/contract';
 import { userContract } from './user/contract';
 import { packageContract } from './package/contract';
 import { courseContract } from './course/contract';
@@ -28,7 +27,6 @@ export const apiContract = c.router({
   bank: bankContract,
   tour: tourContract,
   task: taskContract,
-  sso: ssoContract,
   growAffiliate: growAffiliateContract,
   srkTask: srkTaskContract,
 });

@@ -55,13 +55,8 @@ export const GrowDashboard = () => {
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(
     null
   );
-  // const currentTitle: string = useMemo(
-  //   () =>
-  //     navItems.find((item) => item.id === currentView)?.label || 'Dashboard',
-  //   [currentView]
-  // );
 
-  const { data: growPackagesRes, isLoading } =
+  const { data: growPackagesRes, isLoading: packagesLoading} =
     api.package.getAllSrkGrowPackages.useQuery(['packages']);
 
   const dataToSend = growPackagesRes?.body;
@@ -76,6 +71,18 @@ export const GrowDashboard = () => {
     },
     []
   );
+
+  const userID = '6950abcd1234ef5678901234';
+
+  const { data: affiliatedUserCommission, isLoading: commissionLoading } =
+    api.growAffiliate.getUserAffiliateSalesComissionEarnings.useQuery(
+      ['affiliatedUserCommission', userID],
+      {
+        params: {
+          affiliateUserId: userID,
+        },
+      }
+    );
 
   const handleNavigation = useCallback(
     (item: NavItem) => {
@@ -105,7 +112,7 @@ export const GrowDashboard = () => {
   }, []);
 
   const renderCurrentView = (): ReactNode => {
-    if (isLoading) {
+    if (packagesLoading) {
       return (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
           {[...Array(6)].map((_, i) => (
@@ -145,15 +152,13 @@ export const GrowDashboard = () => {
       case 'referral':
         return <ReferralView data={dataToSend ?? []} showToast={showToast} />;
       case 'mysales':
-        return <MySalesView salesData={salesData} />;
+        return <MySalesView data={affiliatedUserCommission?.body ?? []} isLoading={commissionLoading} />;
       case 'leaderboard':
-        return <LeaderboardView leaderboardData={leaderboardData} />;
+        return <LeaderboardView />;
       case 'payout':
         return <PayoutView payouts={payoutHistory} />;
       case 'profile':
-        return (
-          <ProfileView profile={MOCK_USER_PROFILE} showToast={showToast} />
-        );
+        return <ProfileView data={affiliatedUserCommission?.body} showToast={showToast} />;
       default:
         return <DashboardView data={dashboardData} showToast={showToast} />;
     }
@@ -216,7 +221,7 @@ export const GrowDashboard = () => {
             <h2 className="text-2xl font-bold text-white uppercase">
               {currentView}
             </h2>
-            {isLoading && (
+            {packagesLoading && (
               <div
                 className="flex items-center space-x-2 text-sm"
                 style={{ color: GOLD_PRIMARY }}

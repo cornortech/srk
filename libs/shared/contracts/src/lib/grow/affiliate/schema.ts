@@ -7,10 +7,20 @@ import {
 export const getGrowAffiliateUserCommissionEarningsDashboardSchema = z.object({
   growSocialMediaPackageUserId: z.string(),
   currentBalance: z.number(),
-  todayEarnings: z.number(),
-  last7DaysEarnings: z.number(),
-  last28DaysEarnings: z.number(),
+  todayEarnings: z.object({
+    totalEarnings: z.number(),
+    growthPercentage: z.number().optional(),
+  }),
+  last7DaysEarnings: z.object({
+    totalEarnings: z.number(),
+    growthPercentage: z.number().optional(),
+  }),
+  last28DaysEarnings: z.object({
+    totalEarnings: z.number(),
+    growthPercentage: z.number().optional(),
+  }),
   allTimeEarnings: z.number(),
+  activeDaysStreak: z.number(),
 });
 
 export type TGetGrowAffiliateUserCommissionEarningsDashboard = z.infer<
@@ -32,9 +42,13 @@ export const userAffiliateSalesComissionEarningsSchema = z.object({
   affiliateUsers: z.array(affiliateUsersSchema),
 });
 
-export const getUserAffiliateSalesComissionEarningsSchema = z.array(
-  userAffiliateSalesComissionEarningsSchema
-);
+export const getUserAffiliateSalesComissionEarningsSchema = z.object({
+  totalSales: z.number(),
+  totalRevenue: z.number(),
+  activePackages: z.number(),
+  totalCustomers: z.number(),
+  users: z.array(userAffiliateSalesComissionEarningsSchema),
+});
 
 export type TGetUserAffiliateSalesComissionEarnings = z.infer<
   typeof getUserAffiliateSalesComissionEarningsSchema
@@ -55,6 +69,7 @@ export const getAllUsersAffiliateComissionLeaderBoardSchema = z.array(
 
 export const paginatedGetAllUsersAffiliateComissionLeaderBoardSchema =
   commonPaginationResponse.extend({
+    timeRange: z.enum(['all', 'today', 'week']),
     data: getAllUsersAffiliateComissionLeaderBoardSchema,
   });
 

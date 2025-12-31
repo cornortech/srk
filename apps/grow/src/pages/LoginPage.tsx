@@ -18,7 +18,7 @@ export const LoginPage = () => {
       if (user.status === 'portalActivated') {
         navigate('/dashboard');
       } else {
-        navigate('/grow/verification');
+        navigate('/grow/verification-wall');
       }
     }
   }, [user, navigate]);
@@ -67,7 +67,7 @@ export const LoginPage = () => {
       if (growUser.status === 'portalActivated') {
         navigate('/dashboard');
       } else {
-        navigate('/grow/verification');
+        navigate('/grow/verification-wall');
       }
     }
   }, [profileData, navigate, setUser]);

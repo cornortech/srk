@@ -4,43 +4,7 @@ import { growSrkAffiliateUserBalanceModel } from '../../../model/grow/growSrkAff
 import { growSrkAffiliateEarningStatementModel } from '../../../model/grow/growSrkAffiliateEarningStatementModel';
 import { growAffiliateContract } from '@srk/shared/contracts';
 import { growSrkAffiliateUserEarningsPayoutModel } from '../../../model/grow/growSrkAffiliateUserEarningsPayoutModel';
-import { growSocialMediaPackageUserModel, IGrowSocialMediaPackageUser } from '../../../model/growSocialMediaPackageUserModel';
-
-/**
- * Calculate total earnings for a date range
- */
-const calculateEarningsForPeriod = async (
-  growUserId: string,
-  startDate: Date,
-  endDate: Date
-): Promise<number> => {
-  try {
-    const earnings = await growSrkAffiliateEarningStatementModel.aggregate([
-      {
-        $match: {
-          refferedBY: growUserId,
-          createdAt: {
-            $gte: startDate,
-            $lte: endDate,
-          },
-        },
-      },
-      {
-        $group: {
-          _id: null,
-          total: {
-            $sum: '$amount',
-          },
-        },
-      },
-    ]);
-
-    return earnings.length > 0 ? earnings[0].total : 0;
-  } catch (error) {
-    console.error(`Error calculating earnings for period:`, error);
-    return 0;
-  }
-};
+import { growSocialMediaPackageUserModel, IGrowSocialMediaPackageUser } from '../../../model/growSocialMediaPackageUserModel'
 
 const getGrowAffiliateUserComissionEarningsDashboard: AppRouteImplementationOrOptions<
   typeof growAffiliateContract.getGrowAffiliateUserComissionEarningsDashboard
@@ -58,51 +22,155 @@ const getGrowAffiliateUserComissionEarningsDashboard: AppRouteImplementationOrOp
       };
     }
 
+    const affiliateObjectId = new mongoose.Types.ObjectId(affiliateUserId);
+
     // Fetch current balance
     const userBalance = await growSrkAffiliateUserBalanceModel.findOne({
-      growSocialMediaPackageUserId: affiliateUserId,
+      growSocialMediaPackageUserId: affiliateObjectId,
     });
+    const currentBalance = userBalance?.wallet || 0;
 
-    if (!userBalance) {
-      return {
-        status: 404,
-        body: {
-          message: 'Affiliate balance record not found',
-          success: false,
-        },
-      };
-    }
+    // -----------------------------
+    // Timeframes
+    // -----------------------------
 
-    // Calculate date ranges
     const now = new Date();
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const endOfToday = new Date(today);
-    endOfToday.setDate(endOfToday.getDate() + 1);
-    endOfToday.setMilliseconds(-1);
 
-    const sevenDaysAgo = new Date(today);
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    // Start and end of today in UTC
+    const startOfToday = new Date(Date.UTC(
+      now.getUTCFullYear(),
+      now.getUTCMonth(),
+      now.getUTCDate(),
+      0, 0, 0, 0
+    ));
 
-    const twentyEightDaysAgo = new Date(today);
-    twentyEightDaysAgo.setDate(twentyEightDaysAgo.getDate() - 28);
+    const endOfToday = new Date(Date.UTC(
+      now.getUTCFullYear(),
+      now.getUTCMonth(),
+      now.getUTCDate(),
+      23, 59, 59, 999
+    ));
 
-    // Fetch earnings for all periods in parallel
-    const [todayEarnings, last7DaysEarnings, last28DaysEarnings, allTimeEarnings] = await Promise.all([
-      calculateEarningsForPeriod(affiliateUserId, today, endOfToday),
-      calculateEarningsForPeriod(affiliateUserId, sevenDaysAgo, endOfToday),
-      calculateEarningsForPeriod(affiliateUserId, twentyEightDaysAgo, endOfToday),
-      calculateEarningsForPeriod(affiliateUserId, new Date(''), endOfToday),
+    // Start and end of yesterday in UTC
+    const startOfYesterday = new Date(startOfToday);
+    startOfYesterday.setUTCDate(startOfToday.getUTCDate() - 1);
+
+    const endOfYesterday = new Date(endOfToday);
+    endOfYesterday.setUTCDate(endOfToday.getUTCDate() - 1);
+
+    // Last 7 days
+    const startOf7Days = new Date(startOfToday);
+    startOf7Days.setUTCDate(startOfToday.getUTCDate() - 6);
+
+    // Previous 7 days
+    const startOfPrev7Days = new Date(startOfToday);
+    startOfPrev7Days.setUTCDate(startOfToday.getUTCDate() - 13);
+
+    const endOfPrev7Days = new Date(endOfToday);
+    endOfPrev7Days.setUTCDate(endOfToday.getUTCDate() - 7);
+
+    // Last 28 days
+    const startOf28Days = new Date(startOfToday);
+    startOf28Days.setUTCDate(startOfToday.getUTCDate() - 27);
+
+    // Previous 28 days
+    const startOfPrev28Days = new Date(startOfToday);
+    startOfPrev28Days.setUTCDate(startOfToday.getUTCDate() - 55);
+
+    const endOfPrev28Days = new Date(endOfToday);
+    endOfPrev28Days.setUTCDate(endOfToday.getUTCDate() - 28);
+
+    // -----------------------------
+    // Aggregate earnings
+    // -----------------------------
+    const earnings = await growSrkAffiliateEarningStatementModel.aggregate([
+      { $match: { refferedBY: affiliateObjectId } },
+      {
+        $facet: {
+          today: [
+            { $match: { createdAt: { $gte: startOfToday, $lte: endOfToday } } },
+            { $group: { _id: null, total: { $sum: "$amount" } } },
+          ],
+          yesterday: [
+            { $match: { createdAt: { $gte: startOfYesterday, $lte: endOfYesterday } } },
+            { $group: { _id: null, total: { $sum: "$amount" } } },
+          ],
+          last7Days: [
+            { $match: { createdAt: { $gte: startOf7Days } } },
+            { $group: { _id: null, total: { $sum: "$amount" } } },
+          ],
+          prev7Days: [
+            { $match: { createdAt: { $gte: startOfPrev7Days, $lte: endOfPrev7Days } } },
+            { $group: { _id: null, total: { $sum: "$amount" } } },
+          ],
+          last28Days: [
+            { $match: { createdAt: { $gte: startOf28Days } } },
+            { $group: { _id: null, total: { $sum: "$amount" } } },
+          ],
+          prev28Days: [
+            { $match: { createdAt: { $gte: startOfPrev28Days, $lte: endOfPrev28Days } } },
+            { $group: { _id: null, total: { $sum: "$amount" } } },
+          ],
+          allTime: [
+            { $group: { _id: null, total: { $sum: "$amount" } } },
+          ],
+          activeDates: [
+            { $group: { _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } } } },
+            { $sort: { _id: 1 } },
+          ],
+        },
+      },
     ]);
+
+    const data = earnings[0] || {};
+
+    // -----------------------------
+    // Growth calculation helper
+    // -----------------------------
+    const calcGrowth = (current: number, previous: number) => {
+      if (previous === 0) return 0;
+      return parseFloat(((current - previous) / previous * 100).toFixed(2));
+    };
+
+    const todayTotal = data.today[0]?.total || 0;
+    const yesterdayTotal = data.yesterday[0]?.total || 0;
+    const last7Total = data.last7Days[0]?.total || 0;
+    const prev7Total = data.prev7Days[0]?.total || 0;
+    const last28Total = data.last28Days[0]?.total || 0;
+    const prev28Total = data.prev28Days[0]?.total || 0;
+    const allTimeTotal = data.allTime[0]?.total || 0;
+
+    // -----------------------------
+    // Active streak calculation
+    // -----------------------------
+    const activeDates = data.activeDates.map((d) => d._id).sort();
+    let streak = 0;
+    let maxStreak = 0;
+    let lastDate: Date | null = null;
+
+    for (const dateStr of activeDates) {
+      const date = new Date(dateStr);
+      if (!lastDate) {
+        streak = 1;
+      } else {
+        const diff = (date.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24);
+        if (diff === 1) streak += 1; // consecutive day
+        else streak = 1; // reset streak
+      }
+      lastDate = date;
+      if (streak > maxStreak) maxStreak = streak;
+    }
 
     return {
       status: 200,
       body: {
-        growSocialMediaPackageUserId: userBalance.growSocialMediaPackageUserId.toString(),
-        currentBalance: userBalance.wallet,
-        todayEarnings,
-        last7DaysEarnings,
-        last28DaysEarnings,
-        allTimeEarnings,
+        growSocialMediaPackageUserId: affiliateUserId,
+        currentBalance,
+        todayEarnings: { totalEarnings: todayTotal, growthPercentage: calcGrowth(todayTotal, yesterdayTotal) },
+        last7DaysEarnings: { totalEarnings: last7Total, growthPercentage: calcGrowth(last7Total, prev7Total) },
+        last28DaysEarnings: { totalEarnings: last28Total, growthPercentage: calcGrowth(last28Total, prev28Total) },
+        allTimeEarnings: allTimeTotal,
+        activeDaysStreak: maxStreak,
       },
     };
   } catch (error) {
@@ -187,20 +255,45 @@ const getUserAffiliateSalesComissionEarnings: AppRouteImplementationOrOptions<
         },
       ]);
 
+    // Compute totalRevenue and totalSales
+    const totalRevenue = affiliateSalesComissionResults.reduce(
+      (acc, pkg) => acc + pkg.totalEarnings,
+      0
+    );
+    const totalSales = affiliateSalesComissionResults.reduce(
+      (acc, pkg) => acc + pkg.totalPackageSales,
+      0
+    );
+
+    const activePackages = affiliateSalesComissionResults.length;
+
+    // Total customers = unique referred users across all packages
+    const totalCustomers = new Set(
+      affiliateSalesComissionResults.flatMap((pkg) =>
+        pkg.affiliateUsers.map((u) => u._id)
+      )
+    ).size;
+
     return {
       status: 200,
-      body: affiliateSalesComissionResults.map((pkg) => ({
-        name: pkg.name,
-        price: pkg.price,
-        affiliateSales: {
-          earnings: pkg.totalEarnings,
-          totalPackageSales: pkg.totalPackageSales,
-        },
-        affiliateUsers: pkg.affiliateUsers.map((u) => ({
-          affiliateUserId: u._id,
-          name: u.name,
+      body: {
+        totalSales,
+        totalRevenue,
+        activePackages,
+        totalCustomers,
+        users: affiliateSalesComissionResults.map((pkg) => ({
+          name: pkg.name,
+          price: pkg.price,
+          affiliateSales: {
+            earnings: pkg.totalEarnings,
+            totalPackageSales: pkg.totalPackageSales,
+          },
+          affiliateUsers: pkg.affiliateUsers.map((u) => ({
+            affiliateUserId: u._id,
+            name: u.name,
+          })),
         })),
-      })),
+      }
     };
   } catch (error) {
     console.error(error);
@@ -305,12 +398,13 @@ const getAllUsersAffiliateComissionLeaderBoard: AppRouteImplementationOrOptions<
         }
       ]);
 
-    const totalUsers = affiliateLeaderboardResults[0].totalCount[0]?.count || 0;
-    const totalPages = Math.ceil(totalUsers / limit);
+    const totalRecords = affiliateLeaderboardResults[0].totalCount[0]?.count || 0;
+    const totalPages = Math.ceil(totalRecords / limit);
 
     return {
       status: 200,
       body: {
+        timeRange,
         data: affiliateLeaderboardResults[0].paginatedResults.map((affiliate, index) => ({
           rank: skip + index + 1,
           affiliateUsersStats: {
@@ -324,7 +418,7 @@ const getAllUsersAffiliateComissionLeaderBoard: AppRouteImplementationOrOptions<
         })),
         page,
         limit,
-        totalUsers,
+        totalRecords,
         totalPages,
       },
     };
@@ -389,7 +483,7 @@ const getGrowAffiliateUser: AppRouteImplementationOrOptions<typeof growAffiliate
       status: 200,
       body: {
         userData: {
-          id: affiliateUserExist._id.toString(),
+          _id: affiliateUserExist._id.toString(),
           fullName: affiliateUserExist.fullName,
           email: affiliateUserExist.email,
           phone: affiliateUserExist.phone,

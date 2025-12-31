@@ -12,6 +12,21 @@ import {
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { SignaturePad } from './SignaturePad';
 import DashboardGradientText from '../ui/DashboardGradientText';
+import { useSRKFileUpload } from '../../../../../../../libs/shared/hooks/src/lib/useSRKFileUpload';
+import { api } from '../../../../lib/api';
+import useTaskAuthStore from '../../../../store/useTaskAuthStore';
+
+const dataURLtoFile = (dataurl: string, filename: string): File => {
+  const arr = dataurl.split(',');
+  const mime = arr[0].match(/:(.*?);/)?.[1] || 'image/png';
+  const bstr = atob(arr[1]);
+  let n = bstr.length;
+  const u8arr = new Uint8Array(n);
+  while (n--) {
+    u8arr[n] = bstr.charCodeAt(n);
+  }
+  return new File([u8arr], filename, { type: mime });
+};
 
 interface VerificationModalProps {
   onClose: () => void;
@@ -22,7 +37,10 @@ export const VerificationModal: React.FC<VerificationModalProps> = ({
   onClose,
   onSuccess,
 }) => {
+  const { user } = useTaskAuthStore();
   const [currentStep, setCurrentStep] = useState(1);
+  const { mutateAsync: submitVerification } =
+    api.srkTask.submitSrkTaskOnboardingVerification.useMutation();
   const [formData, setFormData] = useState({
     documentFile: null as File | null,
     selfieImage: null as string | null,
@@ -34,6 +52,7 @@ export const VerificationModal: React.FC<VerificationModalProps> = ({
   const [submissionStatus, setSubmissionStatus] = useState<
     'success' | 'error' | null
   >(null);
+  const { uploadFile } = useSRKFileUpload('task');
 
   // Camera state
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -152,23 +171,57 @@ export const VerificationModal: React.FC<VerificationModalProps> = ({
   };
 
   const handleSubmit = async () => {
+    // Fallback ID for testing if user is not logged in
+    const effectiveUserId = user?._id || '692d5b88a8f7bb228f363bfc';
+
+    if (!effectiveUserId) {
+      console.error('No User ID available for submission');
+      return;
+    }
+
     setIsSubmitting(true);
     setSubmissionStatus(null);
 
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    try {
+      // 1. Upload files
+      const [docRes, selfieRes, sigRes] = await Promise.all([
+        uploadFile(formData.documentFile!, 'image'),
+        uploadFile(dataURLtoFile(formData.selfieImage!, 'selfie.png'), 'image'),
+        uploadFile(
+          dataURLtoFile(formData.signature!, 'signature.png'),
+          'image'
+        ),
+      ]);
 
-    if (Math.random() > 0.1) {
-      setSubmissionStatus('success');
-      setCurrentStep(totalSteps);
-      setTimeout(() => {
-        onSuccess();
-        onClose();
-      }, 2000);
-    } else {
+      // 2. Submit to backend
+      const response = await submitVerification({
+        params: { srkUniversityId: effectiveUserId },
+        body: {
+          documentUrl: docRes.url,
+          verificationImageUrl: selfieRes.url,
+          signatureUrl: sigRes.url,
+          fullName: formData.fullName,
+          dateOfBirth: formData.dob,
+        },
+      });
+
+      if (response.status === 201) {
+        setSubmissionStatus('success');
+        setCurrentStep(totalSteps);
+        setTimeout(() => {
+          onSuccess();
+          onClose();
+        }, 2000);
+      } else {
+        throw new Error('Submission failed');
+      }
+    } catch (error) {
+      console.error('Verification submission failed:', error);
       setSubmissionStatus('error');
       setCurrentStep(totalSteps);
+    } finally {
+      setIsSubmitting(false);
     }
-    setIsSubmitting(false);
   };
 
   const renderStepContent = () => {
@@ -367,7 +420,8 @@ export const VerificationModal: React.FC<VerificationModalProps> = ({
                 placeholder="Date of Birth"
                 value={formData.dob}
                 onChange={handleInputChange}
-                className="w-full p-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-400 focus:ring-amber-500/50 focus:border-amber-500/50"
+                onClick={(e) => e.currentTarget.showPicker?.()}
+                className="w-full p-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-400 focus:ring-amber-500/50 focus:border-amber-500/50 cursor-pointer"
               />
 
               {/* Signature Preview */}
@@ -407,58 +461,67 @@ export const VerificationModal: React.FC<VerificationModalProps> = ({
       case 5:
         return (
           <div className="space-y-6">
-            <h2 className="text-xl font-semibold text-white">
-              5. Review and Submit
-            </h2>
-            <div className="space-y-3 p-4 bg-white/5 rounded-lg">
-              <div className="text-sm">
-                <span className="font-semibold text-gray-400">Document:</span>{' '}
-                <span className="text-white ml-2">
-                  {formData.documentFile?.name || 'Missing'}
-                </span>
-              </div>
-              <div className="text-sm">
-                <span className="font-semibold text-gray-400">Selfie:</span>
-                <span className="text-white ml-2">
-                  {formData.selfieImage ? 'Captured' : 'Missing'}
-                </span>
-                {formData.selfieImage && (
-                  <img
-                    src={formData.selfieImage}
-                    alt="Selfie"
-                    className="w-16 h-auto mt-2 rounded-md border border-amber-500"
-                  />
-                )}
-              </div>
-              <div className="text-sm">
-                <span className="font-semibold text-gray-400">Signature:</span>
-                <span className="text-white ml-2">
-                  {formData.signature ? 'Provided' : 'Missing'}
-                </span>
-                {formData.signature && (
-                  <img
-                    src={formData.signature}
-                    alt="Signature"
-                    className="w-32 h-auto mt-2 rounded-md border border-amber-500"
-                  />
-                )}
-              </div>
-              <div className="text-sm">
-                <span className="font-semibold text-gray-400">Name:</span>{' '}
-                <span className="text-white ml-2">
-                  {formData.fullName || 'Missing'}
-                </span>
-              </div>
-              <div className="text-sm">
-                <span className="font-semibold text-gray-400">DOB:</span>{' '}
-                <span className="text-white ml-2">
-                  {formData.dob || 'Missing'}
-                </span>
-              </div>
-              <div className="text-sm text-amber-400 pt-3 italic">
-                I confirm that all information provided is accurate and true.
-              </div>
-            </div>
+            {!submissionStatus && (
+              <>
+                <h2 className="text-xl font-semibold text-white">
+                  5. Review and Submit
+                </h2>
+                <div className="space-y-3 p-4 bg-white/5 rounded-lg">
+                  <div className="text-sm">
+                    <span className="font-semibold text-gray-400">
+                      Document:
+                    </span>{' '}
+                    <span className="text-white ml-2">
+                      {formData.documentFile?.name || 'Missing'}
+                    </span>
+                  </div>
+                  <div className="text-sm">
+                    <span className="font-semibold text-gray-400">Selfie:</span>
+                    <span className="text-white ml-2">
+                      {formData.selfieImage ? 'Captured' : 'Missing'}
+                    </span>
+                    {formData.selfieImage && (
+                      <img
+                        src={formData.selfieImage}
+                        alt="Selfie"
+                        className="w-16 h-auto mt-2 rounded-md border border-amber-500"
+                      />
+                    )}
+                  </div>
+                  <div className="text-sm">
+                    <span className="font-semibold text-gray-400">
+                      Signature:
+                    </span>
+                    <span className="text-white ml-2">
+                      {formData.signature ? 'Provided' : 'Missing'}
+                    </span>
+                    {formData.signature && (
+                      <img
+                        src={formData.signature}
+                        alt="Signature"
+                        className="w-32 h-auto mt-2 rounded-md border border-amber-500"
+                      />
+                    )}
+                  </div>
+                  <div className="text-sm">
+                    <span className="font-semibold text-gray-400">Name:</span>{' '}
+                    <span className="text-white ml-2">
+                      {formData.fullName || 'Missing'}
+                    </span>
+                  </div>
+                  <div className="text-sm">
+                    <span className="font-semibold text-gray-400">DOB:</span>{' '}
+                    <span className="text-white ml-2">
+                      {formData.dob || 'Missing'}
+                    </span>
+                  </div>
+                  <div className="text-sm text-amber-400 pt-3 italic">
+                    I confirm that all information provided is accurate and
+                    true.
+                  </div>
+                </div>
+              </>
+            )}
 
             {submissionStatus === 'success' ? (
               <div className="text-center p-6 bg-linear-to-r from-emerald-500/10 to-green-500/10 border border-emerald-500/20 rounded-xl">
@@ -480,14 +543,23 @@ export const VerificationModal: React.FC<VerificationModalProps> = ({
                 <h3 className="text-xl font-bold text-white mb-2">
                   Submission Failed
                 </h3>
-                <p className="text-gray-400">
+                <p className="text-gray-400 mb-6">
                   An error occurred. Please check your connection and try again.
                 </p>
                 <button
-                  onClick={() => setCurrentStep(4)}
-                  className="mt-4 px-6 py-2 bg-linear-to-r from-amber-500 to-yellow-500 text-black font-medium rounded-lg hover:opacity-90 transition"
+                  onClick={() => setSubmissionStatus(null)}
+                  className="px-6 py-2 bg-linear-to-r from-amber-500 to-yellow-500 text-black font-medium rounded-lg hover:opacity-90 transition"
                 >
                   Try Again
+                </button>
+                <button
+                  onClick={() => {
+                    setSubmissionStatus(null);
+                    setCurrentStep(4);
+                  }}
+                  className="px-6 py-2 bg-white/10 text-white font-medium rounded-lg hover:bg-white/20 transition"
+                >
+                  Go Back to Edit
                 </button>
               </div>
             ) : (
@@ -531,11 +603,11 @@ export const VerificationModal: React.FC<VerificationModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm overflow-y-auto">
-      <div className="w-full max-w-2xl bg-linear-to-br from-[#1a1410]/90 to-[#0a0a0a]/90 border border-amber-500/20 rounded-2xl shadow-2xl">
-        <div className="p-6 sm:p-8">
-          <div className="flex items-center justify-between mb-8">
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-white">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/90 backdrop-blur-sm overflow-y-auto cursor-default">
+      <div className="w-full max-w-2xl bg-linear-to-br from-[#1a1410]/95 to-[#0a0a0a]/95 border border-amber-500/20 rounded-2xl shadow-2xl overflow-hidden">
+        <div className="p-4 sm:p-8 max-h-[95vh] flex flex-col">
+          <div className="flex items-center justify-between mb-6 shrink-0">
+            <h1 className="text-xl sm:text-2xl font-extrabold text-white">
               <span className="bg-linear-to-r from-[#ac9976] to-[#e1ba73] bg-clip-text text-transparent">
                 <DashboardGradientText>
                   Identity Verification
@@ -551,21 +623,29 @@ export const VerificationModal: React.FC<VerificationModalProps> = ({
           </div>
 
           {/* Progress Bar */}
-          <div className="mb-8 p-4 bg-white/5 rounded-xl border border-white/10">
-            <h2 className="text-lg font-semibold from-[#ac9976] to-[#e1ba73] text-center mb-2">
-              Step {currentStep} of {totalSteps - (submissionStatus ? 1 : 0)}
-            </h2>
-            <div className="w-full bg-white/10 rounded-full h-2.5">
-              <div
-                className="bg-gradient-to-r from-[#ac9976] to-[#e1ba73] h-2.5 rounded-full transition-all duration-500"
-                style={{
-                  width: `${Math.min(100, (currentStep / totalSteps) * 100)}%`,
-                }}
-              />
+          {!submissionStatus && (
+            <div className="mb-6 p-3 bg-white/5 rounded-xl border border-white/10 shrink-0">
+              <h2 className="text-sm font-semibold from-[#ac9976] to-[#e1ba73] text-center mb-2 text-white">
+                Step {currentStep} of {totalSteps}
+              </h2>
+              <div className="w-full bg-white/10 rounded-full h-1.5">
+                <div
+                  className="bg-gradient-to-r from-[#ac9976] to-[#e1ba73] h-1.5 rounded-full transition-all duration-500"
+                  style={{
+                    width: `${Math.min(
+                      100,
+                      (currentStep / totalSteps) * 100
+                    )}%`,
+                  }}
+                />
+              </div>
             </div>
-          </div>
+          )}
 
-          {renderStepContent()}
+          {/* Content Area - Scrollable */}
+          <div className="overflow-y-auto pr-1 -mr-1 custom-scrollbar">
+            {renderStepContent()}
+          </div>
         </div>
       </div>
     </div>

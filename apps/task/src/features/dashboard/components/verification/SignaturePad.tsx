@@ -1,7 +1,7 @@
 import MagneticButton from '../ui/DashboardMagneticButton';
-import DashboardGlassCard from '../ui/DashboardGlassCard';
 import { Check, PenTool, Trash2, Type } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import { DashboardGlassCard } from '../ui';
 
 interface SignaturePadProps {
   onSave: (signature: string) => void;
@@ -18,6 +18,7 @@ export const SignaturePad: React.FC<SignaturePadProps> = ({
   const [isDrawing, setIsDrawing] = useState(false);
   const [lineColor, setLineColor] = useState('#FFFFFF');
   const [lineWidth, setLineWidth] = useState(2);
+  const [isSaved, setIsSaved] = useState(false);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -55,8 +56,8 @@ export const SignaturePad: React.FC<SignaturePadProps> = ({
     }
 
     return {
-      x: clientX - rect.left,
-      y: clientY - rect.top,
+      x: (clientX - rect.left) * (canvas.width / rect.width),
+      y: (clientY - rect.top) * (canvas.height / rect.height),
     };
   };
 
@@ -113,28 +114,42 @@ export const SignaturePad: React.FC<SignaturePadProps> = ({
 
     const signature = canvas.toDataURL('image/png');
     onSave(signature);
+    setIsSaved(true);
+    setTimeout(() => setIsSaved(false), 2000);
   };
 
   return (
     <DashboardGlassCard>
       <div className="p-6">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-12 h-12 rounded-xl bg-linear-to-r from-blue-500/20 to-cyan-500/20 flex items-center justify-center">
-            <PenTool size={24} className="text-blue-400" />
+        <div className="flex items-center justify-between mb-6 shrink-0">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-linear-to-r from-blue-500/20 to-cyan-500/20 flex items-center justify-center">
+              <PenTool size={20} className="text-blue-400 sm:size-24" />
+            </div>
+            <div>
+              <h3 className="text-lg sm:text-xl font-bold text-white leading-tight">
+                Digital Signature
+              </h3>
+              <p className="text-[10px] sm:text-xs text-zinc-400">
+                Draw your signature in the box below
+              </p>
+            </div>
           </div>
-          <div>
-            <h3 className="text-xl font-bold text-white">Digital Signature</h3>
-            <p className="text-zinc-400">
-              Draw your signature in the box below
-            </p>
-          </div>
+          {isSaved && (
+            <div className="flex items-center gap-1.5 px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full animate-in fade-in zoom-in duration-300">
+              <Check size={14} className="text-emerald-400" />
+              <span className="text-xs font-medium text-emerald-400 uppercase tracking-wider">
+                Saved
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Canvas Container */}
-        <div className="relative mb-6">
+        <div className="relative mb-4">
           <canvas
             ref={canvasRef}
-            className="w-full h-48 rounded-lg border-2 border-white/10 cursor-crosshair touch-none"
+            className="w-full h-32 sm:h-40 rounded-lg border-2 border-white/10 cursor-crosshair touch-none bg-black/20"
             onMouseDown={startDrawing}
             onMouseMove={draw}
             onMouseUp={stopDrawing}
@@ -145,7 +160,7 @@ export const SignaturePad: React.FC<SignaturePadProps> = ({
           />
 
           {/* Drawing Guide */}
-          <div className="absolute top-2 left-2 text-xs text-zinc-500 bg-black/60 px-2 py-1 rounded">
+          <div className="absolute top-2 left-2 text-sm text-zinc-500 bg-black/60 px-2 py-1 rounded">
             Draw here
           </div>
         </div>
@@ -154,7 +169,7 @@ export const SignaturePad: React.FC<SignaturePadProps> = ({
         <div className="space-y-6">
           {/* Brush Size */}
           <div>
-            <label className="block text-sm font-medium text-zinc-400 mb-3">
+            <label className="block text-[10px] uppercase tracking-wider font-bold text-zinc-400 mb-3">
               Brush Size: {lineWidth}px
             </label>
             <div className="flex items-center gap-4">
@@ -164,14 +179,14 @@ export const SignaturePad: React.FC<SignaturePadProps> = ({
                 max="10"
                 value={lineWidth}
                 onChange={(e) => setLineWidth(parseInt(e.target.value))}
-                className="flex-1 h-2 bg-zinc-800 rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white"
+                className="flex-1 h-1 bg-zinc-800 rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white"
               />
               <div className="flex gap-2">
                 {[1, 3, 5, 8, 10].map((size) => (
                   <button
                     key={size}
                     onClick={() => setLineWidth(size)}
-                    className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                    className={`w-6 h-6 rounded-md flex items-center justify-center transition-colors ${
                       lineWidth === size
                         ? 'bg-amber-500/20 border border-amber-500/30'
                         : 'bg-white/5 hover:bg-white/10'
@@ -189,10 +204,10 @@ export const SignaturePad: React.FC<SignaturePadProps> = ({
 
           {/* Color Picker */}
           <div>
-            <label className="block text-sm font-medium text-zinc-400 mb-3">
+            <label className="block text-[10px] uppercase tracking-wider font-bold text-zinc-400 mb-3">
               Pen Color
             </label>
-            <div className="flex gap-3">
+            <div className="flex gap-3 overflow-x-auto pb-0.5 scrollbar-hide">
               {[
                 { color: '#FFFFFF', name: 'White' },
                 { color: '#000000', name: 'Black' },
@@ -212,7 +227,7 @@ export const SignaturePad: React.FC<SignaturePadProps> = ({
                   title={name}
                 >
                   <div
-                    className="w-6 h-6 rounded-full border border-white/20"
+                    className="w-5 h-5 rounded-full border border-white/20"
                     style={{ backgroundColor: color }}
                   />
                   <span className="text-xs text-zinc-400">{name}</span>
@@ -220,67 +235,70 @@ export const SignaturePad: React.FC<SignaturePadProps> = ({
               ))}
             </div>
           </div>
+        </div>
 
-          {/* Action Buttons */}
-          <div className="flex gap-4">
-            <button
-              onClick={clearSignature}
-              className="flex-1 px-6 py-3 bg-red-500/10 text-red-400 hover:bg-red-500/20 rounded-xl font-medium transition-colors flex items-center justify-center gap-2"
-            >
-              <Trash2 size={18} />
-              Clear
-            </button>
+        {/* Action Buttons */}
+        <div className="flex gap-3">
+          <button
+            onClick={clearSignature}
+            className="flex-1 px-4 py-2 text-sm bg-red-500/10 text-red-400 hover:bg-red-500/20 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+          >
+            <Trash2 size={16} />
+            Clear
+          </button>
 
-            <button
-              onClick={() => {
-                clearSignature();
-                // Add sample signature
-                const canvas = canvasRef.current;
-                const ctx = canvas?.getContext('2d');
-                if (!canvas || !ctx) return;
+          <button
+            onClick={() => {
+              clearSignature();
+              // Add sample signature
+              const canvas = canvasRef.current;
+              const ctx = canvas?.getContext('2d');
+              if (!canvas || !ctx) return;
 
-                const name = 'John Doe';
-                ctx.font = 'italic 28px Arial';
-                ctx.fillStyle = lineColor;
-                ctx.textAlign = 'center';
-                ctx.fillText(name, canvas.width / 2, canvas.height / 2);
-              }}
-              className="flex-1 px-6 py-3 bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 rounded-xl font-medium transition-colors flex items-center justify-center gap-2"
-            >
-              <Type size={18} />
-              Sample
-            </button>
+              const name = 'John Doe';
+              ctx.font = 'italic 28px Arial';
+              ctx.fillStyle = lineColor;
+              ctx.textAlign = 'center';
+              ctx.fillText(name, canvas.width / 2, canvas.height / 2);
+            }}
+            className="flex-1 px-6 py-3 bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 rounded-xl font-medium transition-colors flex items-center justify-center gap-2"
+          >
+            <Type size={18} />
+            Sample
+          </button>
 
-            <MagneticButton onClick={saveSignature} className="flex-1">
-              <Check size={18} />
-              Save Signature
-            </MagneticButton>
-          </div>
+          <MagneticButton
+            onClick={saveSignature}
+            className={`flex-1 transition-all duration-300`}
+          >
+            <Check size={16} />
+            Save Signature
+          </MagneticButton>
+        </div>
 
-          {/* Instructions */}
-          <div className="p-4 bg-white/5 rounded-xl">
-            <h4 className="font-medium text-white mb-2">
-              Tips for best results:
-            </h4>
-            <ul className="text-sm text-zinc-400 space-y-1">
-              <li className="flex items-center gap-2">
-                <Check size={12} className="text-green-400" />
-                Sign naturally as you would on paper
-              </li>
-              <li className="flex items-center gap-2">
-                <Check size={12} className="text-green-400" />
-                Use a stylus or your finger for better control
-              </li>
-              <li className="flex items-center gap-2">
-                <Check size={12} className="text-green-400" />
-                Make sure your signature is clear and readable
-              </li>
-              <li className="flex items-center gap-2">
-                <Check size={12} className="text-green-400" />
-                Keep it within the drawing area
-              </li>
-            </ul>
-          </div>
+        {/* Instructions - Smaller and less prominent */}
+        <div className="p-3 bg-white/5 rounded-lg">
+          <h4 className="text-[10px] uppercase tracking-wider font-bold text-zinc-500 mb-2">
+            Tips for best results:
+          </h4>
+          <ul className="text-sm text-zinc-400 space-y-1">
+            <li className="flex items-center gap-2">
+              <Check size={12} className="text-green-400" />
+              Sign naturally as you would on paper
+            </li>
+            <li className="flex items-center gap-2">
+              <Check size={12} className="text-green-400" />
+              Use a stylus or your finger for better control
+            </li>
+            <li className="flex items-center gap-2">
+              <Check size={12} className="text-green-400" />
+              Make sure your signature is clear and readable
+            </li>
+            <li className="flex items-center gap-2">
+              <Check size={12} className="text-green-400" />
+              Keep it within the drawing area
+            </li>
+          </ul>
         </div>
       </div>
     </DashboardGlassCard>

@@ -7,6 +7,7 @@ import swaggerApiDocs from './config/swagger';
 import cronJobInit from './utils/cronjob';
 import { router } from './modules';
 import { apiContract } from '../../../libs/shared/contracts/src/index';
+import ssoRouter from './modules/sso/router';
 
 export const app = express();
 
@@ -40,6 +41,8 @@ app.use(
 );
 
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerApiDocs));
+
+app.use(ssoRouter);
 
 createExpressEndpoints(apiContract, router, app);
 cronJobInit();

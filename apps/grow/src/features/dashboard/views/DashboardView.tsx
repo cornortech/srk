@@ -33,8 +33,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         },
       }
     );
-  
-    const balance = getAffiliateUserDashboardStats?.body.currentBalance || 0;
+
+  const balance = getAffiliateUserDashboardStats?.body.currentBalance || 0;
 
   const handleWithdraw = async () => {
     setIsWithdrawing(true);
@@ -49,18 +49,27 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     }
   };
 
+  const consistencyDays = getAffiliateUserDashboardStats?.body.activeDaysStreak ?? 0;
+
   const stats = [
     {
       label: 'Today',
-      value: formatRupees(getAffiliateUserDashboardStats?.body.todayEarnings || 0),
+      value: formatRupees(
+        getAffiliateUserDashboardStats?.body.todayEarnings?.totalEarnings ?? 0
+      ),
       variant: 'gold' as CardVariant,
-      change: '+12%',
+      change: `+${
+        getAffiliateUserDashboardStats?.body.todayEarnings?.growthPercentage ??
+        0
+      }%`,
       icon: <SparklesIcon className="w-4 h-4" />,
       description: 'Earnings today',
     },
     {
       label: 'Wallet',
-      value: formatRupees(getAffiliateUserDashboardStats?.body.currentBalance || 0),
+      value: formatRupees(
+        getAffiliateUserDashboardStats?.body.currentBalance ?? 0
+      ),
       variant: 'emerald' as CardVariant,
       info: balance > 10 ? 'Available for withdrawal' : 'No funds',
       icon: <WalletIcon className="w-4 h-4" />,
@@ -68,15 +77,23 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     },
     {
       label: '7 Days',
-      value: formatRupees(getAffiliateUserDashboardStats?.body.last7DaysEarnings || 0),
+      value: formatRupees(
+        getAffiliateUserDashboardStats?.body.last7DaysEarnings?.totalEarnings ??
+          0
+      ),
       variant: 'violet' as CardVariant,
-      change: '+8%',
+      change: `+${
+        getAffiliateUserDashboardStats?.body.last7DaysEarnings
+          ?.growthPercentage ?? 0
+      }%`,
       icon: <TrendingUpIcon className="w-4 h-4" />,
       description: 'Weekly earnings',
     },
     {
       label: 'All Time',
-      value: formatRupees(getAffiliateUserDashboardStats?.body.allTimeEarnings || 0),
+      value: formatRupees(
+        getAffiliateUserDashboardStats?.body.allTimeEarnings ?? 0
+      ),
       variant: 'gold' as CardVariant,
       icon: (
         <svg
@@ -93,9 +110,15 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     },
     {
       label: '28 Days',
-      value: formatRupees(getAffiliateUserDashboardStats?.body.last28DaysEarnings || 0),
+      value: formatRupees(
+        getAffiliateUserDashboardStats?.body.last28DaysEarnings
+          ?.totalEarnings ?? 0
+      ),
       variant: 'blue' as CardVariant,
-      change: '+5%',
+      change: `+${
+        getAffiliateUserDashboardStats?.body.last28DaysEarnings
+          ?.growthPercentage ?? 0
+      }%`,
       icon: (
         <svg
           className="w-4 h-4"
@@ -114,7 +137,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     },
     {
       label: 'Consistency',
-      value: `${getAffiliateUserDashboardStats?.body.todayEarnings || 0} Days`,
+      value: `${
+        consistencyDays
+      } Days`,
       variant: 'emerald' as CardVariant,
       info: 'Active streak',
       icon: (
@@ -319,7 +344,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                   className="text-2xl font-bold"
                   style={{ color: GOLD_PRIMARY }}
                 >
-                  {data.consistencyDays}
+                  {consistencyDays}
                 </div>
               </div>
             </div>
@@ -335,7 +360,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                   className="h-full rounded-full transition-all duration-1000"
                   style={{
                     width: `${Math.min(
-                      (data.consistencyDays / 30) * 100,
+                      (consistencyDays / 30) * 100,
                       100
                     )}%`,
                     background: `linear-gradient(90deg, ${GOLD_PRIMARY}, ${GOLD_ACCENT})`,

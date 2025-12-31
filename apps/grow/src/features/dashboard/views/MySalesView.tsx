@@ -4,28 +4,20 @@ import { ChevronDownIcon } from 'lucide-react';
 import { GlassCard } from '../components/ui/GlassCard';
 import { formatRupees } from '../../../lib/utils/formatters';
 import { api } from '../../../lib/api';
+import { PackageDataTypes } from 'apps/grow/src/lib/types/package';
 
-export const MySalesView = () => {
+interface ReferralViewProps {
+  data: any;
+  isLoading: Boolean;
+}
+
+export const MySalesView:  React.FC<ReferralViewProps> = ({
+  data = [],
+  isLoading,
+}) => {
   const [detailsOpen, setDetailsOpen] = useState<number | null>(null);
 
   const userID = '6950abcd1234ef5678901234';
-
-  const { data: affiliatedUserCommission, isLoading } =
-    api.growAffiliate.getUserAffiliateSalesComissionEarnings.useQuery(
-      ['affiliatedUserCommission', userID],
-      {
-        params: {
-          affiliateUserId: userID,
-        },
-      }
-    );
-
-    console.log('User Commission   Stats:', affiliatedUserCommission);
-
-  const stats = affiliatedUserCommission?.body ?? [];
-  const activePackages = stats.filter((pkg) => pkg.name === 'Starter').length;
-  const allCustomers = stats.flatMap((pkg) => pkg.affiliateUsers ?? []);
-  const totalCustomers = allCustomers.length;
 
   const getAvatarText = (name: string = ''): string => {
     const parts = name.trim().split(' ');
@@ -39,14 +31,6 @@ export const MySalesView = () => {
     );
   }
 
-  if (!stats.length) {
-    return (
-      <div className="p-6 text-center text-gray-400">
-        ❎ No sales data available.
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-6">
       {/* Summary Cards */}
@@ -54,7 +38,7 @@ export const MySalesView = () => {
         <GlassCard variant="gold" padding="sm">
           <div className="text-center">
             <div className="text-lg font-bold" style={{ color: GOLD_PRIMARY }}>
-              {/* {totalSales} */}0
+              {data.totalSales ?? 0}
             </div>
             <p className="text-xs text-gray-400 mt-1">Total Sales</p>
           </div>
@@ -63,7 +47,7 @@ export const MySalesView = () => {
         <GlassCard variant="emerald" padding="sm">
           <div className="text-center">
             <div className="text-lg font-bold text-emerald-400">
-              {/* {formatRupees(totalRevenue)} */}0
+              {formatRupees(data.totalRevenue ?? 0)}
             </div>
             <p className="text-xs text-gray-400 mt-1">Total Revenue</p>
           </div>
@@ -72,7 +56,7 @@ export const MySalesView = () => {
         <GlassCard variant="violet" padding="sm">
           <div className="text-center">
             <div className="text-lg font-bold text-violet-400">
-              {activePackages}
+              {data.activePackages ?? 0}
             </div>
             <p className="text-xs text-gray-400 mt-1">Active Packages</p>
           </div>
@@ -81,7 +65,7 @@ export const MySalesView = () => {
         <GlassCard variant="blue" padding="sm">
           <div className="text-center">
             <div className="text-lg font-bold text-blue-400">
-              {totalCustomers}
+              {data.totalCustomers ?? 0}
             </div>
             <p className="text-xs text-gray-400 mt-1">Total Customers</p>
           </div>
@@ -90,7 +74,7 @@ export const MySalesView = () => {
 
       {/* Sales Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {stats.map((pkg: any, idx: number) => (
+        {data.users.map((pkg: any, idx: number) => (
           <GlassCard key={idx} variant="neutral" className="min-h-[200px]">
             <div className="h-full flex flex-col">
               {/* Header */}

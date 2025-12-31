@@ -30,7 +30,7 @@ export const srkTaskContract = c.router({
     getAllSrkTaskUserEarningsLeaderboard: {
         method: 'GET',
         path: '/task/srk-task-user-earnings-leaderboard',
-        query: getSrkTaskUserEarningsLeaderboardQueryParams.optional(),
+        query: getSrkTaskUserEarningsLeaderboardQueryParams,
         responses: {
             200: paginatedSrkTaskUserEarningsLeaderboardSchema,
             500: ErrorSchema,

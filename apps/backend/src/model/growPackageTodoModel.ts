@@ -1,0 +1,44 @@
+import mongoose from 'mongoose';
+
+export interface IGrowPackageEngagementPost {
+  growSocialMediaPackageEnrollmentId: mongoose.Types.ObjectId;
+  postUrl: string;
+  profileUrl: string;
+  type: 'follow' | 'like';
+  followCounts: number;
+  likeCounts: number;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+const growPackageTodoSchema = new mongoose.Schema(
+  {
+    growSocialMediaPackageEnrollmentId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'growSocialMediaPackageEnrollment',
+      required: true,
+    },
+    postUrl: { type: String, required: true },
+    profileUrl: { type: String, required: true },
+    type: {
+      type: String,
+      enum: ['follow', 'like'],
+      required: true,
+    },
+    platform: {
+      type: String,
+      enum: ['Instagram', 'TikTok', 'YouTube', 'Twitter', 'Facebook'],
+      required: true,
+    },
+    followCounts: { type: Number, default: 0 },
+    likeCounts: { type: Number, default: 0 },
+  },
+  {
+    timestamps: true,
+  }
+);
+
+export const growPackageTodoModel = mongoose.model(
+  'growPackageTodo',
+  growPackageTodoSchema
+);

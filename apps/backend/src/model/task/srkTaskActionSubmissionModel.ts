@@ -7,9 +7,9 @@ const srkTaskActionSubmissionSchema = new mongoose.Schema(
       ref: 'taskUser',
       required: true,
     },
-    growEnrollmentId: {
+    growPackageTodoId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'growSocialMediaPackageEnrollment',
+      ref: 'growPackageTodo',
       required: true,
     },
     screenshotUrl: {

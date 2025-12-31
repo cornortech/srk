@@ -8,19 +8,30 @@ import {
   formatRupees,
 } from '../../../lib/utils/formatters';
 import { PackageDataTypes } from '../../../lib/types/package';
+import { api } from '../../../lib/api';
 
 interface ReferralViewProps {
   data: PackageDataTypes[];
   showToast: (message: string, type?: ToastType) => void;
 }
 
-const userId = 123456;
-
 export const ReferralView: React.FC<ReferralViewProps> = ({
   data = [],
   showToast,
 }) => {
   const [copiedPackage, setCopiedPackage] = useState<string | null>(null);
+
+  const userID = '6950abcd1234ef5678901234';
+
+  const { data: affiliatedUserCommission, isLoading } =
+    api.growAffiliate.getUserAffiliateSalesComissionEarnings.useQuery(
+      ['affiliatedUserCommission', userID],
+      {
+        params: {
+          affiliateUserId: userID,
+        },
+      }
+    );
 
   const handleCopy = async (
     referralLink: string,
@@ -36,7 +47,10 @@ export const ReferralView: React.FC<ReferralViewProps> = ({
     }
   };
 
-  const generateReferralLink = (packageId: string, promoCode: string): string => {
+  const generateReferralLink = (
+    packageId: string,
+    promoCode: string
+  ): string => {
     return `http://localhost:4500/package-flow?ref=${promoCode}&package=${packageId}`;
   };
 
@@ -55,7 +69,7 @@ export const ReferralView: React.FC<ReferralViewProps> = ({
 
         <GlassCard variant="violet" padding="sm">
           <div className="text-center">
-            <div className="text-lg font-bold text-violet-400">20%</div>
+            <div className="text-lg font-bold text-violet-400">15%</div>
             <p className="text-xs text-gray-400 mt-1">Max Commission</p>
           </div>
         </GlassCard>
@@ -63,7 +77,7 @@ export const ReferralView: React.FC<ReferralViewProps> = ({
         <GlassCard variant="emerald" padding="sm">
           <div className="text-center">
             <div className="text-lg font-bold text-emerald-400">
-              {formatRupees(12500)}
+              {formatRupees(affiliatedUserCommission?.body.totalRevenue ?? 0)}
             </div>
             <p className="text-xs text-gray-400 mt-1">Total Earned</p>
           </div>
@@ -71,7 +85,9 @@ export const ReferralView: React.FC<ReferralViewProps> = ({
 
         <GlassCard variant="blue" padding="sm">
           <div className="text-center">
-            <div className="text-lg font-bold text-blue-400">42</div>
+            <div className="text-lg font-bold text-blue-400">
+              {affiliatedUserCommission?.body.totalSales ?? 0}
+            </div>
             <p className="text-xs text-gray-400 mt-1">Total Referrals</p>
           </div>
         </GlassCard>
@@ -80,7 +96,7 @@ export const ReferralView: React.FC<ReferralViewProps> = ({
       {/* Package Cards in Compact Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {data.map((pkg: PackageDataTypes) => {
-          const promoCode = "12345678";
+          const promoCode = '12345678';
           const referralLink: string = generateReferralLink(pkg._id, promoCode);
 
           const getPackageStyles = () => {

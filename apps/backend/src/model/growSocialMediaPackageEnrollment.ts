@@ -1,6 +1,19 @@
 import mongoose from "mongoose"
 
-const growSocialMediaPackageEnrollmentSchema = new mongoose.Schema(
+export interface IGrowSocialMediaPackageEnrollment {
+    growSocialMediaPackageUserId: mongoose.Types.ObjectId;
+    growSocialMediaPackageId: mongoose.Types.ObjectId;
+    growSocialMediaPackageTypeId: mongoose.Types.ObjectId;
+    growSocialMediaPackageSubTypeId: mongoose.Types.ObjectId;
+    socialMediaPlatform: "Instagram" | "TikTok" | "YouTube" | "Twitter" | "Facebook";
+    profileLinkURL?: string[];
+    amount: number;
+    isActive?: boolean;
+    createdAt?: Date;
+    updatedAt?: Date;
+}
+
+const growSocialMediaPackageEnrollmentSchema = new mongoose.Schema<IGrowSocialMediaPackageEnrollment>(
     {
         growSocialMediaPackageUserId: {
             type: mongoose.Schema.Types.ObjectId,

@@ -10,7 +10,7 @@ import {
   GrowPackageUserPopulated,
   GrowProfileResponsePopulated,
 } from '../../utils/types/growQuery';
-import { growPackageEngagementPostModel } from '../../model/growPackageEngagementPostModel';
+import { growPackageTodoModel } from '../../model/growPackageTodoModel';
 import { growSocialMediaPackagePaymentModel } from '../../model/growSocialMediaPackagePaymentModel';
 import { growSocialMediaPackageUserModel } from '../../model/growSocialMediaPackageUserModel';
 import { growSrkAffiliateVerificationModel } from '../../model/growSrkAffiliateVerificationModel';
@@ -66,8 +66,18 @@ export const getSrkGrowProfile: AppRouteImplementationOrOptions<
       : null;
 
     const engagementPosts = packageEnrollment
-      ? await growPackageEngagementPostModel.findOne({
+      ? await growPackageTodoModel
+          .find({
+            growSocialMediaPackageEnrollmentId: packageEnrollment._id,
+            type: 'like',
+          })
+          .lean()
+      : null;
+
+    const profileLinkURLs = packageEnrollment
+      ? await growPackageTodoModel.find({
           growSocialMediaPackageEnrollmentId: packageEnrollment._id,
+          type: 'follow',
         })
       : null;
 
@@ -87,10 +97,7 @@ export const getSrkGrowProfile: AppRouteImplementationOrOptions<
           promoCode: packageUser.promoCode,
 
           profileLinkURL:
-            packageEnrollment?.profileLinkURL &&
-            packageEnrollment.profileLinkURL.length
-              ? packageEnrollment.profileLinkURL
-              : [],
+            profileLinkURLs?.map((profile) => profile.profileUrl) ?? [],
           userType: packageUser.userType,
 
           referredBy: packageUser.referredBy
@@ -128,7 +135,8 @@ export const getSrkGrowProfile: AppRouteImplementationOrOptions<
                 },
               },
 
-              engagementPostURLs: engagementPosts?.postURLs ?? [],
+              engagementPostURLs:
+                engagementPosts?.map((post) => post.postUrl) ?? [],
 
               enrollmentPaymentDetails: packagePayment
                 ? {
@@ -177,9 +185,18 @@ const getAllSrkGrowEnrollmentUser: AppRouteImplementationOrOptions<
 
     const packageEnrollment = await Promise.all(
       enrollments.map(async (e) => {
-        const postEngagement = await growPackageEngagementPostModel.findOne({
+        const postEngagement = await growPackageTodoModel.find({
           growSocialMediaPackageEnrollmentId: e._id,
+          type: 'like',
         });
+
+        const growPackageTodos = await growPackageTodoModel.find({
+          growSocialMediaPackageEnrollmentId: e._id,
+          type: 'follow',
+        });
+
+        const profileLinkURLs =
+          growPackageTodos?.map((profile) => profile.profileUrl) ?? undefined;
 
         return {
           _id: e._id.toString(),
@@ -201,17 +218,12 @@ const getAllSrkGrowEnrollmentUser: AppRouteImplementationOrOptions<
               e.growSocialMediaPackageTypeId._id.toString(),
             growSocialMediaPackageSubTypeId:
               e.growSocialMediaPackageSubTypeId._id.toString(),
-            profileLinkURL:
-              e.profileLinkURL && e.profileLinkURL[0]
-                ? [e.profileLinkURL[0]]
-                : [],
+            profileLinkURL: profileLinkURLs ? profileLinkURLs : [],
             isActive: e.isActive,
           },
 
           postEngagement: {
-            postURLs: postEngagement?.postURLs.length
-              ? postEngagement.postURLs
-              : undefined,
+            postURLs: postEngagement?.map((post) => post.postUrl) ?? [],
           },
 
           paymentData: {

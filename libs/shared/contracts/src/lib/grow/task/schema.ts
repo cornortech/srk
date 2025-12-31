@@ -4,7 +4,6 @@ import {
   commonPaginationResponse,
 } from '../../common';
 
-
 // Action Submission details for admin
 export const srkTaskActionSubmissionDetailsSchema = z.object({
   _id: z.string(),
@@ -276,7 +275,7 @@ export const getSrkTaskActionsByPlatformResponseSchema = z.object({
   socialMediaPlatform: z.string(),
   username: z.string(),
   profileLinkURL: z.string().nullable(),
-  taskType: z.enum(['follow', 'engagement']),
+  taskType: z.enum(['follow', 'like']),
   postUrl: z.string().nullable(),
 });
 
@@ -292,6 +291,7 @@ export type TPaginatedSrkTaskActionsByPlatformResponse = z.infer<
 export const getSrkTaskActionsByPlatformsQueryParams =
   commonPaginatedQueryParamsSchema.extend({
     platform: z.enum(['instagram', 'twitter', 'facebook', 'linkedin']),
+    type: z.enum(['follow', 'like']).optional(),
   });
 
 export type TGetSrkTaskActionsByPlatformsQueryParams = z.infer<

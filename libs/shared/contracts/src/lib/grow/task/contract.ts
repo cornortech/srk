@@ -137,17 +137,17 @@ export const srkTaskContract = c.router({
     summary:
       'Get all srk task action submissions by status for admin (paginated)',
   },
-  // getSrkTaskActionsByPlatforms: {
-  //   method: 'GET',
-  //   path: '/task/srk-task-actions-by-platforms',
-  //   query: getSrkTaskActionsByPlatformsQueryParams,
-  //   responses: {
-  //     200: paginatedSrkTaskActionsByPlatformResponseSchema,
-  //     400: ErrorSchema,
-  //     500: ErrorSchema,
-  //   },
-  //   summary: 'Get srk task actions grouped by platforms',
-  // },
+  getSrkTaskActionsByPlatforms: {
+    method: 'GET',
+    path: '/task/srk-task-actions-by-platforms',
+    query: getSrkTaskActionsByPlatformsQueryParams,
+    responses: {
+      200: paginatedSrkTaskActionsByPlatformResponseSchema,
+      400: ErrorSchema,
+      500: ErrorSchema,
+    },
+    summary: 'Get srk task actions grouped by platforms',
+  },
   submitSrkTaskOnboardingVerification: {
     method: 'POST',
     path: '/task/submit-onboarding-verification/:srkUniversityId',

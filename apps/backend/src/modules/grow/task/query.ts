@@ -8,6 +8,8 @@ import { srkTasksEarningsPayoutModel } from '../../../model/task/srkTasksEarning
 import { srkTaskOnboardingVerificationRequestModel } from '../../../model/task/srkTaskOnboardingVerificationRequestModel';
 import { IUser } from '../../../model/userModel';
 import { srkTaskUserBalanceModel } from '../../../model/task/srkTaskUserBalanceModel';
+import { growPackageTodoModel } from 'apps/backend/src/model/growPackageTodoModel';
+import { growSocialMediaPackageEnrollmentModel } from 'apps/backend/src/model/growSocialMediaPackageEnrollment';
 
 const getAllSrkTasksActionSubmissionByStatusForAdmin: AppRouteImplementationOrOptions<
   typeof srkTaskContract.getAllSrkTasksActionSubmissionByStatusForAdmin
@@ -28,13 +30,12 @@ const getAllSrkTasksActionSubmissionByStatusForAdmin: AppRouteImplementationOrOp
         .skip(skip)
         .limit(limit)
         .populate<{
-
-            growEnrollmentId: any;
-            // growEnrollmentId:{
-                //  growSocialMediaPackageId : Pick<IGrowSocialMediaPackage,"_id"|"name"|"description"|"socialMediaPlatforms"|"amount">;
-                // growSocialMediaPackageTypeId : Pick<IGrowSocialMediaPackageType,"_id"|"name"|"description"|"amount">;
-                //  growSocialMediaPackageSubTypeId : Pick<IGrowSocialMediaPackageSubType,"_id"|"name"|"description"|"taskType"|"noOfLikes"|"noOfVideos"|"noOfFollowers">;
-            // }
+          growEnrollmentId: any;
+          // growEnrollmentId:{
+          //  growSocialMediaPackageId : Pick<IGrowSocialMediaPackage,"_id"|"name"|"description"|"socialMediaPlatforms"|"amount">;
+          // growSocialMediaPackageTypeId : Pick<IGrowSocialMediaPackageType,"_id"|"name"|"description"|"amount">;
+          //  growSocialMediaPackageSubTypeId : Pick<IGrowSocialMediaPackageSubType,"_id"|"name"|"description"|"taskType"|"noOfLikes"|"noOfVideos"|"noOfFollowers">;
+          // }
         }>({
           path: 'growEnrollmentId',
           populate: [
@@ -766,9 +767,89 @@ const getSrkTaskUserEarningsPayoutsByUser: AppRouteImplementationOrOptions<
   }
 };
 
+const getSrkTaskActionsByPlatforms: AppRouteImplementationOrOptions<
+  typeof srkTaskContract.getSrkTaskActionsByPlatforms
+> = async ({ query }) => {
+  try {
+    const { platform, type } = query;
 
+    // add here paginations
+
+    const page = Number(query?.page ?? 1);
+    const limit = Number(query?.limit ?? 10);
+    const skip = (page - 1) * limit;
+
+    const queryFilter: any = {};
+    if (platform) {
+      queryFilter['platform'] = platform;
+    }
+    if (type) {
+      queryFilter['type'] = type;
+    }
+
+    const growPackageEnrollments =
+      await growSocialMediaPackageEnrollmentModel.find({
+        isActive: true,
+        type,
+        socialMediaPlatform: platform,
+      });
+
+    const enrollmentIds = growPackageEnrollments.map((e) => e._id);
+
+    const srkTaskTodos = await growPackageTodoModel
+      .find({
+        growSocialMediaPackageEnrollmentId: { $in: enrollmentIds },
+      })
+      .populate<{
+        growSocialMediaPackageEnrollmentId: {
+          growSocialMediaPackageUserId: { fullName: string };
+        };
+      }>({
+        path: 'growSocialMediaPackageEnrollmentId',
+        populate: { path: 'growSocialMediaPackageUserId', select: 'fullName' },
+      })
+      .skip(skip)
+      .limit(limit)
+      .lean();
+
+    const totalSrkTodos = await growPackageTodoModel.countDocuments({
+      growSocialMediaPackageEnrollmentId: { $in: enrollmentIds },
+    });
+
+    return {
+      status: 200,
+      body: {
+        data: srkTaskTodos.map((action) => ({
+          enrollmentId:
+            action.growSocialMediaPackageEnrollmentId._id.toString(),
+          socialMediaPlatform: action.platform,
+          username:
+            action.growSocialMediaPackageEnrollmentId
+              .growSocialMediaPackageUserId.fullName,
+          profileLinkURL: action.profileUrl,
+          taskType: action.type,
+          postUrl: action.postUrl,
+        })),
+        totalRecords: totalSrkTodos,
+        limit,
+        page,
+        totalPages: Math.ceil(totalSrkTodos / limit),
+      },
+    };
+  } catch (error) {
+    console.error(error);
+    return {
+      status: 500,
+      body: {
+        success: false,
+        message: error.message || 'Internal server error',
+      },
+    };
+  }
+};
 
 export const srkTaskQueryHandler = {
+  getSrkTaskActionsByPlatforms,
   getSrkTaskUserProfile,
   getSrkTaskUserAnalystics,
   getAllSrkTaskUserEarningsLeaderboard,
@@ -776,4 +857,3 @@ export const srkTaskQueryHandler = {
   getSrkTaskUserEarningsPayoutsByUser,
   getAllSrkTasksActionSubmissionByStatusForAdmin,
 };
-

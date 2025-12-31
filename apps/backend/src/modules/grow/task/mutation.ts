@@ -5,6 +5,8 @@ import { srkTaskOnboardingVerificationRequestModel } from '../../../model/task/s
 import { UserModel } from '../../../model/userModel';
 import { srkTaskUserModel } from '../../../model/task/srkTaskUserModel';
 import { srkTaskActionSubmissionModel } from '../../../model/task/srkTaskActionSubmissionModel';
+import { growPackageTodoModel } from '../../../model/growPackageTodoModel';
+import { growSocialMediaPackageEnrollmentModel } from 'apps/backend/src/model/growSocialMediaPackageEnrollment';
 
 const acceptSrkTaskUserEarningsPayout: AppRouteImplementationOrOptions<
   typeof srkTaskContract.acceptSrkTaskUserEarningsPayout
@@ -387,8 +389,38 @@ const approveSrkTaskActionByAdmin: AppRouteImplementationOrOptions<
       };
     }
 
+    const srkGrowTodoExist = await growPackageTodoModel.findById(
+      actionSubmission.growPackageTodoId
+    );
+
+    const packageEnrollmentExist =
+      await growSocialMediaPackageEnrollmentModel.findById(
+        srkGrowTodoExist.growSocialMediaPackageEnrollmentId
+      );
+
+    if (!srkGrowTodoExist) {
+      return {
+        status: 404,
+        body: {
+          success: false,
+          message: 'Grow Package Todo not found',
+        },
+      };
+    }
+
     actionSubmission.status = 'approved';
     await actionSubmission.save();
+
+    const isFollowType = packageEnrollmentExist.type === 'follow';
+
+    await growPackageTodoModel.findByIdAndUpdate(
+      actionSubmission.growPackageTodoId,
+      {
+        ...(isFollowType
+          ? { $inc: { followCounts: 1 } }
+          : { $inc: { likeCounts: 1 } }),
+      }
+    );
 
     return {
       status: 200,
@@ -506,7 +538,6 @@ const srkTaskEarningsPayoutRequest: AppRouteImplementationOrOptions<
     };
   }
 };
-
 
 export const srkTaskMutationHandler = {
   srkTaskEarningsPayoutRequest,

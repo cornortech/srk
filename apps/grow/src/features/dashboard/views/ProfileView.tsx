@@ -13,10 +13,12 @@ import { api } from '../../../lib/api';
 import moment from 'moment';
 
 interface ProfileViewProps {
+  data: any;
   showToast: (message: string, type?: ToastType) => void;
 }
 
 export const ProfileView: React.FC<ProfileViewProps> = ({
+  data = [],
   showToast,
 }) => {
   const userID = '694e47bf627addce4f643cc5';
@@ -102,10 +104,10 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                   <div className="bg-white/5 rounded-xl px-4 py-3 min-w-[140px]">
                     <div className="flex items-center gap-2 text-gray-400 mb-1">
                       <CoinIcon className="w-4 h-4" />
-                      <span className="text-sm">Affiliate</span>
+                      <span className="text-sm">Total Refferals</span>
                     </div>
                     <div className="text-2xl font-bold text-white">
-                      {affiliateData?.totalAffiliates.toLocaleString() ?? 0}
+                      {data.totalSales.toLocaleString() ?? 0}
                     </div>
                   </div>
 
@@ -115,8 +117,8 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                       <span className="text-sm">Commission Revenue</span>
                     </div>
                     <div className="text-2xl font-bold text-white">
-                      {affiliateData?.totalComissionRevenue.toLocaleString() ??
-                        0}
+                      Rs. <span className="text-xl italic">{data.totalRevenue.toLocaleString() ??
+                        0}</span>
                     </div>
                   </div>
                 </div>

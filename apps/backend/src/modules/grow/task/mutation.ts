@@ -1,10 +1,10 @@
 import { srkTaskContract } from '@srk/shared/contracts';
 import { AppRouteImplementationOrOptions } from '@ts-rest/express/src/lib/types';
 import { srkTasksEarningsPayoutModel } from '../../../model/task/srkTasksEarningsPayoutModel';
-import { srkTaskOnboardingVerificationRequestModel } from 'apps/backend/src/model/task/srkTaskOnboardingVerificationRequestModel';
-import { UserModel } from 'apps/backend/src/model/userModel';
-import { srkTaskUserModel } from 'apps/backend/src/model/task/srkTaskUserModel';
-import { srkTaskActionSubmissionModel } from 'apps/backend/src/model/task/srkTaskActionSubmissionModel';
+import { srkTaskOnboardingVerificationRequestModel } from '../../../model/task/srkTaskOnboardingVerificationRequestModel';
+import { UserModel } from '../../../model/userModel';
+import { srkTaskUserModel } from '../../../model/task/srkTaskUserModel';
+import { srkTaskActionSubmissionModel } from '../../../model/task/srkTaskActionSubmissionModel';
 
 const acceptSrkTaskUserEarningsPayout: AppRouteImplementationOrOptions<
   typeof srkTaskContract.acceptSrkTaskUserEarningsPayout
@@ -454,7 +454,62 @@ const rejectSrkTaskActionByAdmin: AppRouteImplementationOrOptions<
   }
 };
 
+const getMoneytaryValueFromCoins = (coins: number): number => {
+  return coins / 100;
+};
+
+const srkTaskEarningsPayoutRequest: AppRouteImplementationOrOptions<
+  typeof srkTaskContract.srkTaskEarningsPayoutRequest
+> = async ({ body }) => {
+  try {
+    const srkTaskUserExist = await srkTaskUserModel.findById(
+      body.srkTaskUserId
+    );
+
+    if (!srkTaskUserExist) {
+      return {
+        status: 404,
+        body: {
+          success: false,
+          message: 'SRK Task User does not exist',
+        },
+      };
+    }
+
+    const amount = getMoneytaryValueFromCoins(body.coins);
+
+    await srkTasksEarningsPayoutModel.create({
+      taskUserId: srkTaskUserExist._id,
+      status: 'pending',
+      amount,
+      coinsUsed: body.coins,
+      tds: amount * 0.1,
+    });
+
+    return {
+      status: 201,
+      body: {
+        success: true,
+        message: 'SRK Task Earnings Payout request submitted successfully',
+      },
+    };
+  } catch (error) {
+    console.error(error);
+    return {
+      status: 500,
+      body: {
+        success: false,
+        message: error.message
+          ? `Internal server error: ${error.message}`
+          : 'Internal server error',
+      },
+    };
+  }
+};
+
+
 export const srkTaskMutationHandler = {
+  srkTaskEarningsPayoutRequest,
   acceptSrkTaskUserEarningsPayout,
   rejectSrkTaskUserEarningsPayout,
   submitSrkTaskOnboardingVerification,

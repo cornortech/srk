@@ -93,7 +93,7 @@ const getSrkTaskUserProfile: AppRouteImplementationOrOptions<
             body: {
                 userData: {
                     _id: profile._id.toString(),
-                    srkUniversityUserId: profile.srkUniversityUserId.toString(),
+                    srkUniversityUserId: profile.srkUniversityUserId._id.toString(),
                     fullName: profile.fullName,
                     email: profile.srkUniversityUserId.email,
                     isActivated: profile.isActivated,
@@ -104,7 +104,7 @@ const getSrkTaskUserProfile: AppRouteImplementationOrOptions<
                     totalTasksCompleted,
                     totalCoinsEarned,
                     totalEarnings,
-                    avgDailyEarn: totalEarnings / daysSinceJoin,
+                    avgDailyEarn: totalCoinsEarned / daysSinceJoin,
                     successRate,
                 },
             },
@@ -196,7 +196,37 @@ const getSrkTaskUserAnalystics: AppRouteImplementationOrOptions<
         ]);
 
         const coinStats = coinEarningStats[0] ?? {};
-        const peakDayCoins = coinStats.peakCoins?.[0]?.peakDayCoins ?? 0;
+
+        const peakDayCoinsAgg = await srkTaskEarningStatementModel.aggregate([
+            {
+                $match: {
+                    taskUserId,
+                    type: 'credit'
+                }
+            },
+            {
+                $group: {
+                    _id: {
+                        year: {
+                            $year: '$createdAt'
+                        },
+                        month: {
+                            $month: '$createdAt'
+                        },
+                        day: {
+                            $dayOfMonth: '$createdAt'
+                        }
+                    },
+                    dailyCoins: {
+                        $sum: '$coin'
+                    }
+                }
+            },
+            { $sort: { dailyCoins: -1 } },
+            { $limit: 1 }
+        ]);
+
+        const peakDayCoins = peakDayCoinsAgg[0]?.dailyCoins ?? 0;
 
         // Task stats aggregation
         const taskStatsAgg = await srkTaskActionSubmissionModel.aggregate([
@@ -286,7 +316,7 @@ const getAllSrkTaskUserEarningsLeaderboard: AppRouteImplementationOrOptions<
         const skip = (page - 1) * limit;
         const search = query?.search?.trim();
 
-        const currentUserId = "";
+        const currentUserId = query?.currentUserId;
 
         const timeRange = query?.timeRange ?? 'all';
 
@@ -304,8 +334,12 @@ const getAllSrkTaskUserEarningsLeaderboard: AppRouteImplementationOrOptions<
             {
                 $group: {
                     _id: '$taskUserId',
-                    coins: { $sum: '$coin' },
-                    firstActivity: { $min: '$createdAt' },
+                    coins: {
+                        $sum: '$coin'
+                    },
+                    firstActivity: {
+                        $min: '$createdAt'
+                    },
                 },
             },
             {
@@ -316,14 +350,19 @@ const getAllSrkTaskUserEarningsLeaderboard: AppRouteImplementationOrOptions<
                     as: 'user',
                 },
             },
-            { $unwind: '$user' },
+            {
+                $unwind: '$user'
+            },
 
             // Add search filter if search query exists
             ...(search
                 ? [
                     {
                         $match: {
-                            'user.fullName': { $regex: search, $options: 'i' }, // case-insensitive
+                            'user.fullName': {
+                                $regex: search,
+                                $options: 'i'
+                            }, // case-insensitive
                         },
                     },
                 ]
@@ -334,20 +373,37 @@ const getAllSrkTaskUserEarningsLeaderboard: AppRouteImplementationOrOptions<
                     fullName: '$user.fullName',
                     consistencyDays: {
                         $floor: {
-                            $divide: [{ $subtract: [new Date(), '$firstActivity'] }, 1000 * 60 * 60 * 24],
+                            $divide: [{
+                                $subtract: [new Date(), '$firstActivity']
+                            },
+                            1000 * 60 * 60 * 24],
                         },
                     },
                 },
             },
-            { $sort: { coins: -1 } },
+            {
+                $sort: {
+                    coins: -1
+                }
+            },
             {
                 $setWindowFields: {
-                    sortBy: { coins: -1 },
-                    output: { rank: { $rank: {} } },
+                    sortBy: {
+                        coins: -1
+                    },
+                    output: {
+                        rank: {
+                            $rank: {}
+                        }
+                    },
                 },
             },
-            { $skip: skip },
-            { $limit: limit },
+            {
+                $skip: skip
+            },
+            {
+                $limit: limit
+            },
             {
                 $project: {
                     _id: 0,
@@ -355,16 +411,29 @@ const getAllSrkTaskUserEarningsLeaderboard: AppRouteImplementationOrOptions<
                     fullName: 1,
                     coins: 1,
                     consistencyDays: 1,
-                    change: { $literal: 0 },
+                    change: {
+                        $literal: 0
+                    },
                 },
             },
         ]);
 
         // Total users for pagination
         const totalRecordsAgg = await srkTaskEarningStatementModel.aggregate([
-            { $match: { type: 'credit', ...dateFilter } },
-            { $group: { _id: '$taskUserId' } },
-            { $count: 'totalUsers' },
+            {
+                $match: {
+                    type: 'credit',
+                    ...dateFilter
+                }
+            },
+            {
+                $group: {
+                    _id: '$taskUserId'
+                }
+            },
+            {
+                $count: 'totalUsers'
+            },
         ]);
 
         const totalRecords = totalRecordsAgg[0]?.totalUsers ?? 0;
@@ -374,8 +443,24 @@ const getAllSrkTaskUserEarningsLeaderboard: AppRouteImplementationOrOptions<
         let currentUser = null;
         if (currentUserId) {
             const userAgg = await srkTaskEarningStatementModel.aggregate([
-                { $match: { taskUserId: new mongoose.Types.ObjectId(currentUserId), type: 'credit', ...dateFilter } },
-                { $group: { _id: '$taskUserId', coins: { $sum: '$coin' }, firstActivity: { $min: '$createdAt' } } },
+                {
+                    $match: {
+                        taskUserId: new mongoose.Types.ObjectId(currentUserId),
+                        type: 'credit',
+                        ...dateFilter
+                    }
+                },
+                {
+                    $group: {
+                        _id: '$taskUserId',
+                        coins: {
+                            $sum: '$coin'
+                        },
+                        firstActivity: {
+                            $min: '$createdAt'
+                        }
+                    }
+                },
                 {
                     $lookup: {
                         from: 'srktaskusers',
@@ -384,19 +469,33 @@ const getAllSrkTaskUserEarningsLeaderboard: AppRouteImplementationOrOptions<
                         as: 'user',
                     },
                 },
-                { $unwind: '$user' },
+                {
+                    $unwind: '$user'
+                },
                 {
                     $addFields: {
                         fullName: '$user.fullName',
                         consistencyDays: {
                             $floor: {
-                                $divide: [{ $subtract: [new Date(), '$firstActivity'] }, 1000 * 60 * 60 * 24],
+                                $divide: [{
+                                    $subtract: [new Date(),
+                                        '$firstActivity']
+                                }, 1000 * 60 * 60 * 24],
                             },
                         },
                         change: 0,
                     },
                 },
-                { $project: { _id: 0, fullName: 1, coins: 1, consistencyDays: 1, change: 1 } },
+                {
+                    $project: {
+                        _id: 0,
+                        rank: 1,
+                        fullName: 1,
+                        coins: 1,
+                        consistencyDays: 1,
+                        change: 1
+                    }
+                },
             ]);
             currentUser = userAgg[0] || null;
         };

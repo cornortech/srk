@@ -54,7 +54,7 @@ export const srkTaskUserEarningsLeaderboardSchema = z.object({
 
 export const getAllSrkTaskUserEarningsLeaderboardSchema = z.object({
   leaderboard: z.array(srkTaskUserEarningsLeaderboardSchema),
-  currentUser: srkTaskUserEarningsLeaderboardSchema,
+  currentUser: srkTaskUserEarningsLeaderboardSchema.nullable(),
   timeRange: z.enum(['weekly', 'monthly', 'all']),
 });
 
@@ -69,6 +69,7 @@ export const getSrkTaskUserEarningsLeaderboardQueryParams =
   commonPaginatedQueryParamsSchema.extend({
     timeRange: z.enum(['weekly', 'monthly', 'all']).optional(),
     search: z.string().optional(),
+    currentUserId: z.string().optional(),
   });
 
   export const acceptSrkTaskUserEarningsPayoutSchema = z.object({

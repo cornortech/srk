@@ -8,8 +8,8 @@ const s = initServer();
 export const srkTaskRouter = s.router(srkTaskContract, {
     getSrkTaskUserProfile:
         srkTaskQueryHandler.getSrkTaskUserProfile,
-    getSrkTaskUserAnalystics:
-        srkTaskQueryHandler.getSrkTaskUserAnalystics,
+    getSrkTaskUserAnalytics:
+        srkTaskQueryHandler.getSrkTaskUserAnalytics,
     getAllSrkTaskUserEarningsLeaderboard:
         srkTaskQueryHandler.getAllSrkTaskUserEarningsLeaderboard,
     acceptSrkTaskUserEarningsPayout:

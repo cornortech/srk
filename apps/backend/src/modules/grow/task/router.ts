@@ -15,8 +15,11 @@ export const srkTaskRouter = s.router(srkTaskContract, {
     srkTaskQueryHandler.getAllSrkTaskEarningPayoutsByAdmin,
   getAllSrkTasksActionSubmissionByStatusForAdmin:
     srkTaskQueryHandler.getAllSrkTasksActionSubmissionByStatusForAdmin,
+  getAllSrkTasksActionSubmissionsByUser:
+    srkTaskQueryHandler.getAllSrkTasksActionSubmissionsByUser,
   getSrkTaskUserEarningsPayoutsByUser:
     srkTaskQueryHandler.getSrkTaskUserEarningsPayoutsByUser,
+  getAllSrkTaskUserFinanceStatement: srkTaskQueryHandler.getAllSrkTaskUserFinanceStatement,
   srkTaskEarningsPayoutRequest:
     srkTaskMutationHandler.srkTaskEarningsPayoutRequest,
   acceptSrkTaskUserEarningsPayout:
@@ -29,8 +32,11 @@ export const srkTaskRouter = s.router(srkTaskContract, {
     srkTaskMutationHandler.approveSrkTaskOnboardingVerificationByAdmin,
   rejectSrkTaskOnboardingVerificationByAdmin:
     srkTaskMutationHandler.rejectSrkTaskOnboardingVerificationByAdmin,
-  approveSrkTaskActionByAdmin:
-    srkTaskMutationHandler.approveSrkTaskActionByAdmin,
-  rejectSrkTaskActionByAdmin: srkTaskMutationHandler.rejectSrkTaskActionByAdmin,
+  approveSrkTaskActionSubmissionByAdmin:
+    srkTaskMutationHandler.approveSrkTaskActionSubmissionByAdmin,
+  rejectSrkTaskActionSubmissionByAdmin:
+    srkTaskMutationHandler.rejectSrkTaskActionSubmissionByAdmin,
   srkTaskActionSubmission: srkTaskMutationHandler.srkTaskActionSubmission,
+  getSrkTaskActionsByPlatforms:
+    srkTaskQueryHandler.getSrkTaskActionsByPlatforms,
 });

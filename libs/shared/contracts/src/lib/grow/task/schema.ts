@@ -4,7 +4,6 @@ import {
   commonPaginationResponse,
 } from '../../common';
 
-
 // Action Submission details for admin
 export const srkTaskActionSubmissionDetailsSchema = z.object({
   _id: z.string(),
@@ -42,6 +41,7 @@ export const srkTaskActionSubmissionDetailsSchema = z.object({
       }),
     })
     .optional(),
+  description: z.string(),
   screenshotUrl: z.string(),
   status: z.enum(['pending', 'approved', 'rejected']),
   rejectionReason: z.string().nullable(),
@@ -72,6 +72,24 @@ export const getSrkTaskActionSubmissionsByStatusForUserQueryParams =
   });
 export type TGetSrkTaskActionSubmissionsByStatusForUserQueryParams = z.infer<
   typeof getSrkTaskActionSubmissionsByStatusForUserQueryParams
+>;
+
+export const paginatedSrkTaskActionSubmissionsByUserSchema =
+  commonPaginationResponse.extend({
+    data: z.array(srkTaskActionSubmissionDetailsSchema),
+  });
+
+export type TPaginatedSrkTaskActionSubmissionsByUser = z.infer<
+  typeof paginatedSrkTaskActionSubmissionsByUserSchema
+>;
+
+export const getSrkTaskActionSubmissionByStatusByUserQueryParams =
+  commonPaginatedQueryParamsSchema.extend({
+    status: z.enum(['pending', 'approved', 'rejected']).optional(),
+  });
+
+export type TGetSrkTaskActionSubmissionByStatusByUserQueryParams = z.infer<
+  typeof getSrkTaskActionSubmissionByStatusByUserQueryParams
 >;
 
 export const srkTaskUserSchema = z.object({
@@ -183,7 +201,7 @@ export type TSubmitTaskOnboardingVerification = z.infer<
 >;
 
 export const srkTaskActionSubmissionBodySchema = z.object({
-  srkGrowEnrollmentId: z.string(),
+  actionTodoId: z.string(),
   srkTaskUserId: z.string(),
   actionVerificationImageUrl: z.string().url(),
 });
@@ -234,7 +252,6 @@ export const growSocialMediaPackageEnrollmentDetailsSchema = z.object({
 export const srkTaskEarningRequestResponseSchema = z.object({
   _id: z.string(),
   taskUserId: z.string(),
-  taskDetails: growSocialMediaPackageEnrollmentDetailsSchema.optional(),
   transactionId: z.string().nullable(),
   coinsUsed: z.number(),
   tds: z.number(),
@@ -273,11 +290,11 @@ export type TGetSrkTaskEarningRequestsByAdminQueryParams = z.infer<
 >;
 
 export const getSrkTaskActionsByPlatformResponseSchema = z.object({
-  enrollmentId: z.string(),
+  actionId: z.string(),
   socialMediaPlatform: z.string(),
   username: z.string(),
   profileLinkURL: z.string().nullable(),
-  taskType: z.enum(['follow', 'engagement']),
+  taskType: z.enum(['follow', 'like']),
   postUrl: z.string().nullable(),
 });
 
@@ -292,9 +309,42 @@ export type TPaginatedSrkTaskActionsByPlatformResponse = z.infer<
 
 export const getSrkTaskActionsByPlatformsQueryParams =
   commonPaginatedQueryParamsSchema.extend({
-    platform: z.enum(['instagram', 'twitter', 'facebook', 'linkedin']),
+    platform: z.enum(['Instagram', 'TikTok', 'YouTube', 'Twitter', 'Facebook']),
+    type: z.enum(['follow', 'like']),
+    srkTaskUserId: z.string(),
   });
 
 export type TGetSrkTaskActionsByPlatformsQueryParams = z.infer<
   typeof getSrkTaskActionsByPlatformsQueryParams
+>;
+
+// Earnings Statement Schema
+export const srkTaskEarningStatementSchema = z.object({
+  _id: z.string(),
+  taskUserId: z.string(),
+  growPackageTodoId: z.string(),
+  description: z.string(),
+  type: z.enum(['credit', 'debit']),
+  coin: z.number(),
+  coinAfterTransaction: z.number(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
+export const paginatedSrkTaskUserFinanceStatementSchema =
+  commonPaginationResponse.extend({
+    data: z.array(srkTaskEarningStatementSchema),
+  });
+
+export type TPaginatedSrkTaskUserFinanceStatement = z.infer<
+  typeof paginatedSrkTaskUserFinanceStatementSchema
+>;
+
+export const getAllSrkTaskUserFinanceStatementQueryParams =
+  commonPaginatedQueryParamsSchema.extend({
+    type: z.enum(['credit', 'debit']).optional(),
+  });
+
+export type TGetAllSrkTaskUserFinanceStatementQueryParams = z.infer<
+  typeof getAllSrkTaskUserFinanceStatementQueryParams
 >;

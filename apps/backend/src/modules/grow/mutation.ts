@@ -1,3 +1,4 @@
+import { Types } from 'mongoose';
 import { growContract } from '@srk/shared/contracts';
 import { growSocialMediaPackageUserModel } from '../../model/growSocialMediaPackageUserModel';
 import { growSocialMediaPackageModel } from '../../model/growSocialMediaPackageModel';
@@ -6,12 +7,11 @@ import { growSocialMediaPackageSubTypeModel } from '../../model/growSocialMediaP
 import { growSocialMediaPackageEnrollmentModel } from '../../model/growSocialMediaPackageEnrollment';
 import { growSocialMediaPackagePaymentModel } from '../../model/growSocialMediaPackagePaymentModel';
 import AuthService from '../../services/authService';
-import { growPackageEngagementPostModel } from '../../model/growPackageEngagementPostModel';
+import { growPackageTodoModel } from '../../model/growPackageTodoModel';
 import { IUser, UserModel } from '../../model/userModel';
 import { growSrkAffiliateVerificationModel } from '../../model/growSrkAffiliateVerificationModel';
 import { AppRouteImplementationOrOptions } from '@ts-rest/express/src/lib/types';
 import { growSrkAffiliateEarningStatementModel } from '../../model/grow/growSrkAffiliateEarningStatementModel';
-import { Types } from 'mongoose';
 import { growSrkAffiliateUserBalanceModel } from '../../model/grow/growSrkAffiliateUserBalanceModel';
 
 export function calculatePackageDiscount(
@@ -83,7 +83,7 @@ const createGrowSocialMediaEnrollment: AppRouteImplementationOrOptions<
     if (
       !packageTypeExists ||
       String(packageTypeExists.growSocialMediaPackageId) !==
-      enrollmentData.growSocialMediaPackageId
+        enrollmentData.growSocialMediaPackageId
     ) {
       return {
         status: 400,
@@ -101,7 +101,7 @@ const createGrowSocialMediaEnrollment: AppRouteImplementationOrOptions<
     if (
       !packageSubTypeExists ||
       String(packageSubTypeExists.growSocialMediaPackageTypeId) !==
-      enrollmentData.growSocialMediaPackageTypeId
+        enrollmentData.growSocialMediaPackageTypeId
     ) {
       return {
         status: 400,
@@ -189,6 +189,7 @@ const createGrowSocialMediaEnrollment: AppRouteImplementationOrOptions<
       amountToStore = discountResult.finalAmountAfterDiscount;
     }
 
+    const taskType = postURLs.length > 0 ? 'like' : 'follow';
     // 5. Create enrollment
     const createSrkGrowPackageEnrollment =
       await growSocialMediaPackageEnrollmentModel.create({
@@ -201,6 +202,7 @@ const createGrowSocialMediaEnrollment: AppRouteImplementationOrOptions<
         socialMediaPlatform: enrollmentData.socialMediaPlatform,
         profileLinkURL: enrollmentData.profileLinkURL,
         amount: amountToStore,
+        type: taskType,
       });
 
     // 6. Create payment record
@@ -212,9 +214,19 @@ const createGrowSocialMediaEnrollment: AppRouteImplementationOrOptions<
     });
 
     if (postURLs.length > 0) {
-      await growPackageEngagementPostModel.create({
+      await growPackageTodoModel.insertMany(
+        postURLs.map((url) => ({
+          growSocialMediaPackageEnrollmentId:
+            createSrkGrowPackageEnrollment._id,
+          postUrl: url,
+          type: 'like',
+        }))
+      );
+    } else {
+      await growPackageTodoModel.create({
         growSocialMediaPackageEnrollmentId: createSrkGrowPackageEnrollment._id,
-        postURLs: postURLs,
+        type: 'follow',
+        profileUrl: enrollmentData.profileLinkURL![0],
       });
     }
 
@@ -282,15 +294,23 @@ export const validateGrowUserPromoCode: AppRouteImplementationOrOptions<
       };
     }
 
-    const { originalAmount, discountPercentage, discountAmount, finalAmountAfterDiscount } =
-      calculatePackageDiscount(growPackage._id.toString(), growPackage.amount);
+    const {
+      originalAmount,
+      discountPercentage,
+      discountAmount,
+      finalAmountAfterDiscount,
+    } = calculatePackageDiscount(
+      growPackage._id.toString(),
+      growPackage.amount
+    );
 
     return {
       status: 200,
       body: {
         success: true,
-        message: `Promo code valid! You get a discount of ${discountPercentage * 100
-          }% on the ${growPackage.name} package.`,
+        message: `Promo code valid! You get a discount of ${
+          discountPercentage * 100
+        }% on the ${growPackage.name} package.`,
         discountDetails: {
           originalAmount,
           discountPercentage: discountPercentage * 100,
@@ -330,7 +350,7 @@ const acceptSocialGrowEnrollmentRequest: AppRouteImplementationOrOptions<
           _id: Types.ObjectId;
           amount: number;
         };
-      }>("growSocialMediaPackageUserId growSocialMediaPackageId");
+      }>('growSocialMediaPackageUserId growSocialMediaPackageId');
 
     if (!enrollmentRequest) {
       return {
@@ -371,7 +391,8 @@ const acceptSocialGrowEnrollmentRequest: AppRouteImplementationOrOptions<
 
     if (user.referredBy) {
       const affiliateCommissionRate = 0.15;
-      const affiliateCommissionAmount = enrollmentRequest.amount * affiliateCommissionRate;
+      const affiliateCommissionAmount =
+        enrollmentRequest.amount * affiliateCommissionRate;
 
       // Create earning statement
       await growSrkAffiliateEarningStatementModel.create({
@@ -640,11 +661,12 @@ const createGrowSocialMediaTasks: AppRouteImplementationOrOptions<
 
       const allowedCount = subType.noOfVideos ?? 0;
 
-      const existingEngagement = await growPackageEngagementPostModel.findOne({
+      const existingEngagement = await growPackageTodoModel.find({
         growSocialMediaPackageEnrollmentId: activeEnrollment._id,
+        type: 'like',
       });
 
-      const existingURLs = existingEngagement?.postURLs ?? [];
+      const existingURLs = existingEngagement.map((post) => post.postUrl);
 
       // remove duplicates from incoming
       const uniqueIncomingUrlRequest = postURLs.filter(
@@ -665,20 +687,12 @@ const createGrowSocialMediaTasks: AppRouteImplementationOrOptions<
       }
 
       if (uniqueIncomingUrlRequest.length) {
-        await growPackageEngagementPostModel.findOneAndUpdate(
-          {
+        await growPackageTodoModel.insertMany(
+          uniqueIncomingUrlRequest.map((url) => ({
             growSocialMediaPackageEnrollmentId: activeEnrollment._id,
-          },
-          {
-            $addToSet: {
-              postURLs: {
-                $each: uniqueIncomingUrlRequest,
-              },
-            },
-          },
-          {
-            upsert: true,
-          }
+            postUrl: url,
+            type: 'like',
+          }))
         );
       }
     }

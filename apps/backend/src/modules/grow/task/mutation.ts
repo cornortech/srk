@@ -6,7 +6,9 @@ import { UserModel } from '../../../model/userModel';
 import { srkTaskUserModel } from '../../../model/task/srkTaskUserModel';
 import { srkTaskActionSubmissionModel } from '../../../model/task/srkTaskActionSubmissionModel';
 import { growPackageTodoModel } from '../../../model/growPackageTodoModel';
-import { growSocialMediaPackageEnrollmentModel } from 'apps/backend/src/model/growSocialMediaPackageEnrollment';
+import { growSocialMediaPackageEnrollmentModel } from '../../../model/growSocialMediaPackageEnrollment';
+import { srkTaskUserBalanceModel } from '../../../model/task/srkTaskUserBalanceModel';
+import { srkTaskEarningStatementModel } from '../../../model/task/srkTaskEarningStatementModel';
 
 const acceptSrkTaskUserEarningsPayout: AppRouteImplementationOrOptions<
   typeof srkTaskContract.acceptSrkTaskUserEarningsPayout
@@ -15,6 +17,20 @@ const acceptSrkTaskUserEarningsPayout: AppRouteImplementationOrOptions<
     const srkTaskUserPayoutExists = await srkTasksEarningsPayoutModel.findById(
       params.payoutId
     );
+
+    const srkTaskUserBalanceExist = await srkTaskUserBalanceModel.findOne({
+      taskUserId: srkTaskUserPayoutExists.taskUserId,
+    });
+
+    if (!srkTaskUserBalanceExist) {
+      return {
+        status: 400,
+        body: {
+          success: false,
+          message: 'SRK Task User Balance does not exist',
+        },
+      };
+    }
 
     if (!srkTaskUserPayoutExists) {
       return {
@@ -41,6 +57,10 @@ const acceptSrkTaskUserEarningsPayout: AppRouteImplementationOrOptions<
     srkTaskUserPayoutExists.paymentScreenshotUrl = body.paymentScreenshotUrl;
 
     await srkTaskUserPayoutExists.save();
+
+    srkTaskUserBalanceExist.totalEarnings += srkTaskUserPayoutExists.amount;
+
+    await srkTaskUserBalanceExist.save();
 
     return {
       status: 200,
@@ -70,6 +90,20 @@ const rejectSrkTaskUserEarningsPayout: AppRouteImplementationOrOptions<
     const srkTaksUserEarningPayoutExists =
       await srkTasksEarningsPayoutModel.findById(params.payoutId);
 
+    const srkTaskUserBalanceExist = await srkTaskUserBalanceModel.findOne({
+      taskUserId: srkTaksUserEarningPayoutExists.taskUserId,
+    });
+
+    if (!srkTaskUserBalanceExist) {
+      return {
+        status: 400,
+        body: {
+          success: false,
+          message: 'SRK Task User Balance does not exist',
+        },
+      };
+    }
+
     if (!srkTaksUserEarningPayoutExists) {
       return {
         status: 400,
@@ -94,6 +128,11 @@ const rejectSrkTaskUserEarningsPayout: AppRouteImplementationOrOptions<
     srkTaksUserEarningPayoutExists.rejectionReason = body.rejectionReason;
 
     await srkTaksUserEarningPayoutExists.save();
+
+    srkTaskUserBalanceExist.currentCoins +=
+      srkTaksUserEarningPayoutExists.coinsUsed;
+
+    await srkTaskUserBalanceExist.save();
 
     return {
       status: 200,
@@ -231,6 +270,13 @@ const approveSrkTaskOnboardingVerificationByAdmin: AppRouteImplementationOrOptio
     srkTaskUser.isActivated = true;
     await srkTaskUser.save();
 
+    await srkTaskUserBalanceModel.create({
+      taskUserId: srkTaskUser._id,
+      totalCoinsEarned: 0,
+      currentCoins: 0,
+      totalEarnings: 0,
+    });
+
     return {
       status: 200,
       body: {
@@ -320,7 +366,7 @@ const srkTaskActionSubmission: AppRouteImplementationOrOptions<
     }
 
     const existingSubmissionExist = await srkTaskActionSubmissionModel.findOne({
-      growEnrollmentId: body.srkGrowEnrollmentId,
+      growPackageTodoId: body.actionTodoId,
       taskUserId: body.srkTaskUserId,
     });
     if (
@@ -336,17 +382,68 @@ const srkTaskActionSubmission: AppRouteImplementationOrOptions<
       };
     }
 
+    if (
+      existingSubmissionExist &&
+      existingSubmissionExist.status === 'pending'
+    ) {
+      return {
+        status: 400,
+        body: {
+          success: false,
+          message: 'Action submission is already pending.',
+        },
+      };
+    }
+
+    const srkGrowTodoExist = await growPackageTodoModel
+      .findById(body.actionTodoId)
+      .populate<{
+        growSocialMediaPackageEnrollmentId: {
+          type: 'follow' | 'like';
+          growSocialMediaPackageUserId: {
+            fullName: string;
+          };
+        };
+      }>({
+        path: 'growSocialMediaPackageEnrollmentId',
+        populate: { path: 'growSocialMediaPackageUserId' },
+      });
+
+    if (!srkGrowTodoExist) {
+      return {
+        status: 404,
+        body: {
+          success: false,
+          message: 'Grow Package Todo does not exist',
+        },
+      };
+    }
+
+    const enrollment = srkGrowTodoExist.growSocialMediaPackageEnrollmentId;
+    const taskType = enrollment.type;
+    const isFollowType = taskType === 'follow';
+    const actionType = isFollowType ? 'following' : 'liking';
+    const targetType = isFollowType ? 'profile' : 'post';
+    const userName =
+      enrollment.growSocialMediaPackageUserId?.fullName || 'Unknown User';
+
+    const actionSubmissionDescription = `Task action submission for ${actionType} a ${targetType} of ${userName}`;
+
     if (existingSubmissionExist) {
+      existingSubmissionExist.description = actionSubmissionDescription;
+      existingSubmissionExist.type = taskType;
       existingSubmissionExist.screenshotUrl = body.actionVerificationImageUrl;
       existingSubmissionExist.status = 'pending';
       existingSubmissionExist.rejectionReason = undefined;
       await existingSubmissionExist.save();
     } else {
       await srkTaskActionSubmissionModel.create({
-        growEnrollmentId: body.srkGrowEnrollmentId,
+        growPackageTodoId: body.actionTodoId,
+        type: taskType,
         taskUserId: body.srkTaskUserId,
         screenshotUrl: body.actionVerificationImageUrl,
         status: 'pending',
+        description: actionSubmissionDescription,
       });
     }
 
@@ -371,8 +468,8 @@ const srkTaskActionSubmission: AppRouteImplementationOrOptions<
   }
 };
 
-const approveSrkTaskActionByAdmin: AppRouteImplementationOrOptions<
-  typeof srkTaskContract.approveSrkTaskActionByAdmin
+const approveSrkTaskActionSubmissionByAdmin: AppRouteImplementationOrOptions<
+  typeof srkTaskContract.approveSrkTaskActionSubmissionByAdmin
 > = async ({ params }) => {
   try {
     const actionSubmission = await srkTaskActionSubmissionModel.findById(
@@ -393,11 +490,6 @@ const approveSrkTaskActionByAdmin: AppRouteImplementationOrOptions<
       actionSubmission.growPackageTodoId
     );
 
-    const packageEnrollmentExist =
-      await growSocialMediaPackageEnrollmentModel.findById(
-        srkGrowTodoExist.growSocialMediaPackageEnrollmentId
-      );
-
     if (!srkGrowTodoExist) {
       return {
         status: 404,
@@ -408,10 +500,32 @@ const approveSrkTaskActionByAdmin: AppRouteImplementationOrOptions<
       };
     }
 
+    const packageEnrollmentExist = await growSocialMediaPackageEnrollmentModel
+      .findById(srkGrowTodoExist.growSocialMediaPackageEnrollmentId)
+      .populate<{
+        growSocialMediaPackageUserId: { fullName: string };
+      }>('growSocialMediaPackageUserId')
+      .lean();
+
+    if (!packageEnrollmentExist) {
+      return {
+        status: 404,
+        body: {
+          success: false,
+          message: 'Package enrollment not found',
+        },
+      };
+    }
+
     actionSubmission.status = 'approved';
     await actionSubmission.save();
 
     const isFollowType = packageEnrollmentExist.type === 'follow';
+    const actionType = isFollowType ? 'following' : 'liking';
+    const targetType = isFollowType ? 'profile' : 'post';
+    const userName =
+      packageEnrollmentExist.growSocialMediaPackageUserId?.fullName ||
+      'Unknown User';
 
     await growPackageTodoModel.findByIdAndUpdate(
       actionSubmission.growPackageTodoId,
@@ -421,6 +535,26 @@ const approveSrkTaskActionByAdmin: AppRouteImplementationOrOptions<
           : { $inc: { likeCounts: 1 } }),
       }
     );
+
+    const updatedBalance = await srkTaskUserBalanceModel.findOneAndUpdate(
+      { taskUserId: actionSubmission.taskUserId },
+      {
+        $inc: {
+          totalCoinsEarned: 100,
+          currentCoins: 100,
+        },
+      },
+      { new: true }
+    );
+
+    await srkTaskEarningStatementModel.create({
+      taskUserId: actionSubmission.taskUserId,
+      growPackageTodoId: actionSubmission.growPackageTodoId,
+      description: `Earning from task action submission from ${actionType} a ${targetType} of ${userName}`,
+      type: 'credit',
+      coin: 100,
+      coinAfterTransaction: updatedBalance.currentCoins,
+    });
 
     return {
       status: 200,
@@ -443,8 +577,8 @@ const approveSrkTaskActionByAdmin: AppRouteImplementationOrOptions<
   }
 };
 
-const rejectSrkTaskActionByAdmin: AppRouteImplementationOrOptions<
-  typeof srkTaskContract.rejectSrkTaskActionByAdmin
+const rejectSrkTaskActionSubmissionByAdmin: AppRouteImplementationOrOptions<
+  typeof srkTaskContract.rejectSrkTaskActionSubmissionByAdmin
 > = async ({ params, body }) => {
   try {
     const actionSubmission = await srkTaskActionSubmissionModel.findById(
@@ -498,12 +632,36 @@ const srkTaskEarningsPayoutRequest: AppRouteImplementationOrOptions<
       body.srkTaskUserId
     );
 
+    const srkTaskUserBalanceExist = await srkTaskUserBalanceModel.findOne({
+      taskUserId: body.srkTaskUserId,
+    });
+
+    if (!srkTaskUserBalanceExist) {
+      return {
+        status: 400,
+        body: {
+          success: false,
+          message: 'SRK Task User Balance does not exist',
+        },
+      };
+    }
+
     if (!srkTaskUserExist) {
       return {
         status: 404,
         body: {
           success: false,
           message: 'SRK Task User does not exist',
+        },
+      };
+    }
+
+    if (srkTaskUserBalanceExist.currentCoins < body.coins) {
+      return {
+        status: 400,
+        body: {
+          success: false,
+          message: 'Insufficient coins for payout request',
         },
       };
     }
@@ -517,6 +675,10 @@ const srkTaskEarningsPayoutRequest: AppRouteImplementationOrOptions<
       coinsUsed: body.coins,
       tds: amount * 0.1,
     });
+
+    srkTaskUserBalanceExist.currentCoins -= body.coins;
+
+    await srkTaskUserBalanceExist.save();
 
     return {
       status: 201,
@@ -547,6 +709,6 @@ export const srkTaskMutationHandler = {
   approveSrkTaskOnboardingVerificationByAdmin,
   rejectSrkTaskOnboardingVerificationByAdmin,
   srkTaskActionSubmission,
-  approveSrkTaskActionByAdmin,
-  rejectSrkTaskActionByAdmin,
+  approveSrkTaskActionSubmissionByAdmin,
+  rejectSrkTaskActionSubmissionByAdmin,
 };

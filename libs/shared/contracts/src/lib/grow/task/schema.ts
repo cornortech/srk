@@ -73,6 +73,24 @@ export type TGetSrkTaskActionSubmissionsByStatusForUserQueryParams = z.infer<
   typeof getSrkTaskActionSubmissionsByStatusForUserQueryParams
 >;
 
+export const paginatedSrkTaskActionSubmissionsByUserSchema =
+  commonPaginationResponse.extend({
+    data: z.array(srkTaskActionSubmissionDetailsSchema),
+  });
+
+export type TPaginatedSrkTaskActionSubmissionsByUser = z.infer<
+  typeof paginatedSrkTaskActionSubmissionsByUserSchema
+>;
+
+export const getSrkTaskActionSubmissionByStatusByUserQueryParams =
+  commonPaginatedQueryParamsSchema.extend({
+    status: z.enum(['pending', 'approved', 'rejected']).optional(),
+  });
+
+export type TGetSrkTaskActionSubmissionByStatusByUserQueryParams = z.infer<
+  typeof getSrkTaskActionSubmissionByStatusByUserQueryParams
+>;
+
 export const srkTaskUserSchema = z.object({
   userData: z.object({
     _id: z.string(),
@@ -181,7 +199,7 @@ export type TSubmitTaskOnboardingVerification = z.infer<
 >;
 
 export const srkTaskActionSubmissionBodySchema = z.object({
-  srkGrowEnrollmentId: z.string(),
+  actionTodoId: z.string(),
   srkTaskUserId: z.string(),
   actionVerificationImageUrl: z.string().url(),
 });
@@ -232,7 +250,6 @@ export const growSocialMediaPackageEnrollmentDetailsSchema = z.object({
 export const srkTaskEarningRequestResponseSchema = z.object({
   _id: z.string(),
   taskUserId: z.string(),
-  taskDetails: growSocialMediaPackageEnrollmentDetailsSchema.optional(),
   transactionId: z.string().nullable(),
   coinsUsed: z.number(),
   tds: z.number(),
@@ -271,7 +288,7 @@ export type TGetSrkTaskEarningRequestsByAdminQueryParams = z.infer<
 >;
 
 export const getSrkTaskActionsByPlatformResponseSchema = z.object({
-  enrollmentId: z.string(),
+  actionId: z.string(),
   socialMediaPlatform: z.string(),
   username: z.string(),
   profileLinkURL: z.string().nullable(),

@@ -12,6 +12,15 @@ const srkTaskActionSubmissionSchema = new mongoose.Schema(
       ref: 'growPackageTodo',
       required: true,
     },
+    type: {
+      type: String,
+      enum: ['follow', 'like'],
+      required: true,
+    },
+    description: {
+      type: String,
+      required: true,
+    },
     screenshotUrl: {
       type: String,
       required: true,

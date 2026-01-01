@@ -7,9 +7,18 @@ const srkTaskActionSubmissionSchema = new mongoose.Schema(
       ref: 'taskUser',
       required: true,
     },
-    growEnrollmentId: {
+    growPackageTodoId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'growSocialMediaPackageEnrollment',
+      ref: 'growPackageTodo',
+      required: true,
+    },
+    type: {
+      type: String,
+      enum: ['follow', 'like'],
+      required: true,
+    },
+    description: {
+      type: String,
       required: true,
     },
     screenshotUrl: {

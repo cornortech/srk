@@ -7,7 +7,17 @@ const srkTaskUserBalanceSchema = new mongoose.Schema(
       ref: 'srkTaskUser',
       required: true,
     },
-    totalCoins: {
+    totalCoinsEarned: {
+      type: Number,
+      required: true,
+      default: 0,
+    },
+    currentCoins: {
+      type: Number,
+      required: true,
+      default: 0,
+    },
+    totalEarnings: {
       type: Number,
       required: true,
       default: 0,

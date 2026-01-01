@@ -7,6 +7,11 @@ const srkTaskEarningStatementSchema = new mongoose.Schema(
       ref: 'srkTaskUser',
       required: true,
     },
+    growPackageTodoId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'growPackageTodo',
+      required: true,
+    },
     description: {
       type: String,
       required: true,

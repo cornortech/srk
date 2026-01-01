@@ -1,13 +1,15 @@
+import mongoose from 'mongoose';
 import { srkTaskContract } from '@srk/shared/contracts';
 import { AppRouteImplementationOrOptions } from '@ts-rest/express/src/lib/types';
 import { srkTaskUserModel } from '../../../model/task/srkTaskUserModel';
-import mongoose from 'mongoose';
 import { srkTaskActionSubmissionModel } from '../../../model/task/srkTaskActionSubmissionModel';
 import { srkTaskEarningStatementModel } from '../../../model/task/srkTaskEarningStatementModel';
 import { srkTasksEarningsPayoutModel } from '../../../model/task/srkTasksEarningsPayoutModel';
 import { srkTaskOnboardingVerificationRequestModel } from '../../../model/task/srkTaskOnboardingVerificationRequestModel';
 import { IUser } from '../../../model/userModel';
 import { srkTaskUserBalanceModel } from '../../../model/task/srkTaskUserBalanceModel';
+import { growPackageTodoModel } from '../../../model/growPackageTodoModel';
+import { growSocialMediaPackageEnrollmentModel } from '../../../model/growSocialMediaPackageEnrollment';
 
 const getAllSrkTasksActionSubmissionByStatusForAdmin: AppRouteImplementationOrOptions<
   typeof srkTaskContract.getAllSrkTasksActionSubmissionByStatusForAdmin
@@ -49,6 +51,7 @@ const getAllSrkTasksActionSubmissionByStatusForAdmin: AppRouteImplementationOrOp
       const e = submission.growEnrollmentId;
       return {
         _id: submission._id.toString(),
+        description: submission.description,
         taskUserId: submission.taskUserId.toString(),
         growEnrollmentId: e
           ? {
@@ -487,7 +490,7 @@ const getSrkTaskUserAnalytics: AppRouteImplementationOrOptions<
       status: 200,
       body: {
         coinsData: {
-          walletCoins: profileBalance?.totalCoins ?? 0,
+          walletCoins: profileBalance?.currentCoins ?? 0,
           today: coinStats.today ?? 0,
           todayChange: percentageChanges.today,
           last7Days: coinStats.last7Days ?? 0,
@@ -735,31 +738,20 @@ const getAllSrkTaskEarningPayoutsByAdmin: AppRouteImplementationOrOptions<
         }),
     ]);
 
-    // For each payout, find the latest approved action submission and populate growEnrollmentId
-    const payoutData = await Promise.all(
-      payouts.map(async (payout) => {
-        // Find the latest approved action submission for this user
-        const actionSubmission = await srkTaskActionSubmissionModel
-          .findOne({
-            taskUserId: payout.taskUserId._id,
-            status: 'approved',
-          })
-          .sort({ createdAt: -1 })
-          .populate({
-            path: 'growEnrollmentId',
-            populate: [
-              { path: 'growSocialMediaPackageUserId' },
-              { path: 'growSocialMediaPackageId' },
-              { path: 'growSocialMediaPackageTypeId' },
-              { path: 'growSocialMediaPackageSubTypeId' },
-            ],
-          })
-          .lean();
-
-        return {
+    return {
+      status: 200,
+      body: {
+        page,
+        limit,
+        totalRecords,
+        totalPages: Math.ceil(totalRecords / limit),
+        data: payouts.map((payout) => ({
           _id: payout._id.toString(),
-          taskUserId: payout.taskUserId._id.toString(),
-          taskDetails: actionSubmission?.growEnrollmentId || {},
+          taskUserId: payout.taskUserId?._id.toString() || '',
+          taskUserName: (payout.taskUserId as any)?.fullName || 'Unknown User',
+          taskUserEmail:
+            ((payout.taskUserId as any)?.srkUniversityUserId as any)?.email ||
+            'Unknown Email',
           transactionId: payout.transactionId || null,
           coinsUsed: payout.coinsUsed,
           tds: payout.tds,
@@ -769,18 +761,7 @@ const getAllSrkTaskEarningPayoutsByAdmin: AppRouteImplementationOrOptions<
           rejectionReason: payout.rejectionReason || null,
           createdAt: payout.createdAt.toISOString(),
           updatedAt: payout.updatedAt.toISOString(),
-        };
-      })
-    );
-
-    return {
-      status: 200,
-      body: {
-        page,
-        limit,
-        totalRecords,
-        totalPages: Math.ceil(totalRecords / limit),
-        data: payoutData,
+        })),
       },
     };
   } catch (error) {
@@ -824,41 +805,66 @@ const getSrkTaskUserEarningsPayoutsByUser: AppRouteImplementationOrOptions<
         .limit(limit),
     ]);
 
-    const payoutData = await Promise.all(
-      payouts.map(async (payout) => {
-        const actionSubmission = await srkTaskActionSubmissionModel
-          .findOne({
-            taskUserId: payout.taskUserId,
-            status: 'approved',
-          })
-          .sort({ createdAt: -1 })
-          .populate({
-            path: 'growEnrollmentId',
-            populate: [
-              { path: 'growSocialMediaPackageUserId' },
-              { path: 'growSocialMediaPackageId' },
-              { path: 'growSocialMediaPackageTypeId' },
-              { path: 'growSocialMediaPackageSubTypeId' },
-            ],
-          })
-          .lean();
-
-        return {
+    return {
+      status: 200,
+      body: {
+        page,
+        limit,
+        totalRecords,
+        totalPages: Math.ceil(totalRecords / limit),
+        data: payouts.map((payout) => ({
           _id: payout._id.toString(),
           taskUserId: payout.taskUserId.toString(),
-          taskDetails: actionSubmission?.growEnrollmentId || {},
-          transactionId: payout.transactionId || null,
+          amount: payout.amount,
           coinsUsed: payout.coinsUsed,
           tds: payout.tds,
-          amount: payout.amount,
+          transactionId: payout.transactionId || null,
           status: payout.status,
           paymentScreenshotUrl: payout.paymentScreenshotUrl || null,
           rejectionReason: payout.rejectionReason || null,
           createdAt: payout.createdAt.toISOString(),
           updatedAt: payout.updatedAt.toISOString(),
-        };
-      })
-    );
+        })),
+      },
+    };
+  } catch (error) {
+    console.error(error);
+    return {
+      status: 500,
+      body: {
+        success: false,
+        message: error.message || 'Internal server error',
+      },
+    };
+  }
+};
+
+const getAllSrkTaskUserFinanceStatement: AppRouteImplementationOrOptions<
+  typeof srkTaskContract.getAllSrkTaskUserFinanceStatement
+> = async ({ params, query }) => {
+  try {
+    const { userId } = params;
+    const taskUserId = new mongoose.Types.ObjectId(userId);
+
+    const page = Number(query?.page ?? 1);
+    const limit = Number(query?.limit ?? 10);
+    const skip = (page - 1) * limit;
+    const type = query?.type;
+
+    const filter: any = { taskUserId };
+    if (type) {
+      filter.type = type;
+    }
+
+    const [totalRecords, earnings] = await Promise.all([
+      srkTaskEarningStatementModel.countDocuments(filter),
+      srkTaskEarningStatementModel
+        .find(filter)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+    ]);
 
     return {
       status: 200,
@@ -867,7 +873,227 @@ const getSrkTaskUserEarningsPayoutsByUser: AppRouteImplementationOrOptions<
         limit,
         totalRecords,
         totalPages: Math.ceil(totalRecords / limit),
-        data: payoutData,
+        data: earnings.map((earning) => ({
+          _id: earning._id.toString(),
+          taskUserId: earning.taskUserId.toString(),
+          growPackageTodoId: earning.growPackageTodoId.toString(),
+          description: earning.description,
+          type: earning.type,
+          coin: earning.coin,
+          coinAfterTransaction: earning.coinAfterTransaction,
+          createdAt: earning.createdAt.toISOString(),
+          updatedAt: earning.updatedAt.toISOString(),
+        })),
+      },
+    };
+  } catch (error) {
+    console.error(error);
+    return {
+      status: 500,
+      body: {
+        success: false,
+        message: error.message || 'Internal server error',
+      },
+    };
+  }
+};
+
+const getAllSrkTasksActionSubmissionsByUser: AppRouteImplementationOrOptions<
+  typeof srkTaskContract.getAllSrkTasksActionSubmissionsByUser
+> = async ({ params, query }) => {
+  try {
+    const { userId } = params;
+    const taskUserId = new mongoose.Types.ObjectId(userId);
+
+    const page = Number(query?.page ?? 1);
+    const limit = Number(query?.limit ?? 10);
+    const skip = (page - 1) * limit;
+    const status = query?.status;
+
+    const filter: any = { taskUserId };
+    if (status) {
+      filter.status = status;
+    }
+
+    const [totalRecords, submissions] = await Promise.all([
+      srkTaskActionSubmissionModel.countDocuments(filter),
+      srkTaskActionSubmissionModel
+        .find(filter)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .populate<{
+          growEnrollmentId: any;
+        }>({
+          path: 'growEnrollmentId',
+          populate: [
+            { path: 'growSocialMediaPackageId' },
+            { path: 'growSocialMediaPackageTypeId' },
+            { path: 'growSocialMediaPackageSubTypeId' },
+          ],
+        })
+        .lean(),
+    ]);
+
+    const data = submissions.map((submission) => {
+      const e = submission.growEnrollmentId;
+      return {
+        _id: submission._id.toString(),
+        taskUserId: submission.taskUserId.toString(),
+        description: submission.description,
+        growEnrollmentId: e
+          ? {
+              _id: e._id.toString(),
+              socialMediaPlatform: e.socialMediaPlatform,
+              profileLinkURL: e.profileLinkURL || [],
+              amount: e.amount,
+              isActive: e.isActive,
+              createdAt: e.createdAt?.toISOString?.() || '',
+              updatedAt: e.updatedAt?.toISOString?.() || '',
+              growSocialMediaPackageId: e.growSocialMediaPackageId
+                ? {
+                    _id: e.growSocialMediaPackageId._id?.toString?.() || '',
+                    name: e.growSocialMediaPackageId.name,
+                    description: e.growSocialMediaPackageId.description,
+                    socialMediaPlatforms:
+                      e.growSocialMediaPackageId.socialMediaPlatforms || [],
+                    amount: e.growSocialMediaPackageId.amount,
+                  }
+                : undefined,
+              growSocialMediaPackageTypeId: e.growSocialMediaPackageTypeId
+                ? {
+                    _id: e.growSocialMediaPackageTypeId._id?.toString?.() || '',
+                    name: e.growSocialMediaPackageTypeId.name,
+                    description: e.growSocialMediaPackageTypeId.description,
+                    amount: e.growSocialMediaPackageTypeId.amount,
+                  }
+                : undefined,
+              growSocialMediaPackageSubTypeId: e.growSocialMediaPackageSubTypeId
+                ? {
+                    _id:
+                      e.growSocialMediaPackageSubTypeId._id?.toString?.() || '',
+                    name: e.growSocialMediaPackageSubTypeId.name,
+                    description: e.growSocialMediaPackageSubTypeId.description,
+                    taskType: e.growSocialMediaPackageSubTypeId.taskType,
+                    noOfLikes: e.growSocialMediaPackageSubTypeId.noOfLikes,
+                    noOfVideos: e.growSocialMediaPackageSubTypeId.noOfVideos,
+                    noOfFollowers:
+                      e.growSocialMediaPackageSubTypeId.noOfFollowers,
+                  }
+                : undefined,
+            }
+          : undefined,
+        screenshotUrl: submission.screenshotUrl,
+        status: submission.status,
+        rejectionReason: submission.rejectionReason || null,
+        createdAt: submission.createdAt?.toISOString?.() || '',
+        updatedAt: submission.updatedAt?.toISOString?.() || '',
+      };
+    });
+
+    return {
+      status: 200,
+      body: {
+        page,
+        limit,
+        totalRecords,
+        totalPages: Math.ceil(totalRecords / limit),
+        data,
+      },
+    };
+  } catch (error) {
+    console.error(error);
+    return {
+      status: 500,
+      body: {
+        success: false,
+        message: error.message || 'Internal server error',
+      },
+    };
+  }
+};
+
+const getSrkTaskActionsByPlatforms: AppRouteImplementationOrOptions<
+  typeof srkTaskContract.getSrkTaskActionsByPlatforms
+> = async ({ query }) => {
+  try {
+    const { platform, type, srkTaskUserId } = query;
+
+    // add here paginations
+
+    const page = Number(query?.page ?? 1);
+    const limit = Number(query?.limit ?? 10);
+    const skip = (page - 1) * limit;
+
+    const queryFilter: any = {};
+    if (platform) {
+      queryFilter['platform'] = platform;
+    }
+    if (type) {
+      queryFilter['type'] = type;
+    }
+
+    const growPackageEnrollments =
+      await growSocialMediaPackageEnrollmentModel.find({
+        isActive: true,
+        type,
+        socialMediaPlatform: platform,
+      });
+
+    const enrollmentIds = growPackageEnrollments.map((e) => e._id);
+
+    // Get todos that have already been submitted by the user
+    let submittedTodoIds: any[] = [];
+    if (srkTaskUserId) {
+      const taskUserId = new mongoose.Types.ObjectId(srkTaskUserId);
+      const submissions = await srkTaskActionSubmissionModel
+        .find({ taskUserId })
+        .select('growPackageTodoId')
+        .lean();
+      submittedTodoIds = submissions.map((s) => s.growPackageTodoId);
+    }
+
+    // Build filter to exclude already submitted todos
+    const todoFilter: any = {
+      growSocialMediaPackageEnrollmentId: { $in: enrollmentIds },
+    };
+    if (submittedTodoIds.length > 0) {
+      todoFilter._id = { $nin: submittedTodoIds };
+    }
+
+    const srkTaskTodos = await growPackageTodoModel
+      .find(todoFilter)
+      .populate<{
+        growSocialMediaPackageEnrollmentId: {
+          growSocialMediaPackageUserId: { fullName: string };
+        };
+      }>({
+        path: 'growSocialMediaPackageEnrollmentId',
+        populate: { path: 'growSocialMediaPackageUserId', select: 'fullName' },
+      })
+      .skip(skip)
+      .limit(limit)
+      .lean();
+
+    const totalSrkTodos = await growPackageTodoModel.countDocuments(todoFilter);
+
+    return {
+      status: 200,
+      body: {
+        data: srkTaskTodos.map((action) => ({
+          actionId: action._id.toString(),
+          socialMediaPlatform: action.platform,
+          username:
+            action.growSocialMediaPackageEnrollmentId
+              .growSocialMediaPackageUserId.fullName,
+          profileLinkURL: action.profileUrl,
+          taskType: action.type,
+          postUrl: action.postUrl,
+        })),
+        totalRecords: totalSrkTodos,
+        limit,
+        page,
+        totalPages: Math.ceil(totalSrkTodos / limit),
       },
     };
   } catch (error) {
@@ -883,10 +1109,13 @@ const getSrkTaskUserEarningsPayoutsByUser: AppRouteImplementationOrOptions<
 };
 
 export const srkTaskQueryHandler = {
+  getSrkTaskActionsByPlatforms,
   getSrkTaskUserProfile,
   getSrkTaskUserAnalytics,
   getAllSrkTaskUserEarningsLeaderboard,
   getAllSrkTaskEarningPayoutsByAdmin,
   getSrkTaskUserEarningsPayoutsByUser,
   getAllSrkTasksActionSubmissionByStatusForAdmin,
+  getAllSrkTasksActionSubmissionsByUser,
+  getAllSrkTaskUserFinanceStatement,
 };

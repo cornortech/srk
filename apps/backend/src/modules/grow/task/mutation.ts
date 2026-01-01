@@ -365,10 +365,25 @@ const srkTaskActionSubmission: AppRouteImplementationOrOptions<
       };
     }
 
+    const srkTaskUserBalanceExist = await srkTaskUserBalanceModel.findOne({
+      taskUserId: body.srkTaskUserId,
+    });
+
+    if (!srkTaskUserBalanceExist) {
+      return {
+        status: 400,
+        body: {
+          success: false,
+          message: 'SRK Task User Balance does not exist',
+        },
+      };
+    }
+
     const existingSubmissionExist = await srkTaskActionSubmissionModel.findOne({
       growPackageTodoId: body.actionTodoId,
       taskUserId: body.srkTaskUserId,
     });
+
     if (
       existingSubmissionExist &&
       existingSubmissionExist.status === 'approved'

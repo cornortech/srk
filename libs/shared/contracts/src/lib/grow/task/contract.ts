@@ -5,6 +5,8 @@ import {
   getSrkTaskActionsByPlatformsQueryParams,
   getSrkTaskActionSubmissionByStatusByUserQueryParams,
   paginatedSrkTaskActionSubmissionsByUserSchema,
+  paginatedSrkTaskUserFinanceStatementSchema,
+  getAllSrkTaskUserFinanceStatementQueryParams,
 } from './schema';
 
 import { paginatedSrkTaskEarningRequestsByUserSchema } from './schema';
@@ -122,6 +124,17 @@ export const srkTaskContract = c.router({
     },
     summary: 'Get all srk task action submissions by user (paginated)',
   },
+  getAllSrkTaskUserFinanceStatement: {
+    method: 'GET',
+    path: '/task/user/:userId/srk-task-finance-statement',
+    query: getAllSrkTaskUserFinanceStatementQueryParams.optional(),
+    responses: {
+      200: paginatedSrkTaskUserFinanceStatementSchema,
+      400: ErrorSchema,
+      500: ErrorSchema,
+    },
+    summary: 'Get all finance statements for a srk task user (paginated)',
+  },
 
   srkTaskEarningsPayoutRequest: {
     method: 'POST',
@@ -234,4 +247,5 @@ export const srkTaskContract = c.router({
     },
     summary: 'Approve an action submission for srk task user by admin',
   },
+
 });

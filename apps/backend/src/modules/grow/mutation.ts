@@ -1,3 +1,4 @@
+import { Types } from 'mongoose';
 import { growContract } from '@srk/shared/contracts';
 import { growSocialMediaPackageUserModel } from '../../model/growSocialMediaPackageUserModel';
 import { growSocialMediaPackageModel } from '../../model/growSocialMediaPackageModel';
@@ -11,7 +12,6 @@ import { IUser, UserModel } from '../../model/userModel';
 import { growSrkAffiliateVerificationModel } from '../../model/growSrkAffiliateVerificationModel';
 import { AppRouteImplementationOrOptions } from '@ts-rest/express/src/lib/types';
 import { growSrkAffiliateEarningStatementModel } from '../../model/grow/growSrkAffiliateEarningStatementModel';
-import { Types } from 'mongoose';
 import { growSrkAffiliateUserBalanceModel } from '../../model/grow/growSrkAffiliateUserBalanceModel';
 
 export function calculatePackageDiscount(
@@ -189,6 +189,7 @@ const createGrowSocialMediaEnrollment: AppRouteImplementationOrOptions<
       amountToStore = discountResult.finalAmountAfterDiscount;
     }
 
+    const taskType = postURLs.length > 0 ? 'like' : 'follow';
     // 5. Create enrollment
     const createSrkGrowPackageEnrollment =
       await growSocialMediaPackageEnrollmentModel.create({
@@ -201,6 +202,7 @@ const createGrowSocialMediaEnrollment: AppRouteImplementationOrOptions<
         socialMediaPlatform: enrollmentData.socialMediaPlatform,
         profileLinkURL: enrollmentData.profileLinkURL,
         amount: amountToStore,
+        type: taskType,
       });
 
     // 6. Create payment record

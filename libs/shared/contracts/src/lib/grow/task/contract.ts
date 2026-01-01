@@ -41,7 +41,7 @@ export const srkTaskContract = c.router({
     summary: 'Get SRK Task User Profile details by Id',
   },
 
-  getSrkTaskUserAnalystics: {
+  getSrkTaskUserAnalytics: {
     method: 'GET',
     path: '/task/srk-task-user-analytics/:userId',
     responses: {

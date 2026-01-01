@@ -51,6 +51,7 @@ const getAllSrkTasksActionSubmissionByStatusForAdmin: AppRouteImplementationOrOp
       const e = submission.growEnrollmentId;
       return {
         _id: submission._id.toString(),
+        description: submission.description,
         taskUserId: submission.taskUserId.toString(),
         growEnrollmentId: e
           ? {
@@ -721,6 +722,65 @@ const getSrkTaskUserEarningsPayoutsByUser: AppRouteImplementationOrOptions<
   }
 };
 
+const getAllSrkTaskUserFinanceStatement: AppRouteImplementationOrOptions<
+  typeof srkTaskContract.getAllSrkTaskUserFinanceStatement
+> = async ({ params, query }) => {
+  try {
+    const { userId } = params;
+    const taskUserId = new mongoose.Types.ObjectId(userId);
+
+    const page = Number(query?.page ?? 1);
+    const limit = Number(query?.limit ?? 10);
+    const skip = (page - 1) * limit;
+    const type = query?.type;
+
+    const filter: any = { taskUserId };
+    if (type) {
+      filter.type = type;
+    }
+
+    const [totalRecords, earnings] = await Promise.all([
+      srkTaskEarningStatementModel.countDocuments(filter),
+      srkTaskEarningStatementModel
+        .find(filter)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+    ]);
+
+    return {
+      status: 200,
+      body: {
+        page,
+        limit,
+        totalRecords,
+        totalPages: Math.ceil(totalRecords / limit),
+        data: earnings.map((earning) => ({
+          _id: earning._id.toString(),
+          taskUserId: earning.taskUserId.toString(),
+          growPackageTodoId: earning.growPackageTodoId.toString(),
+          description: earning.description,
+          type: earning.type,
+          coin: earning.coin,
+          coinAfterTransaction: earning.coinAfterTransaction,
+          createdAt: earning.createdAt.toISOString(),
+          updatedAt: earning.updatedAt.toISOString(),
+        })),
+      },
+    };
+  } catch (error) {
+    console.error(error);
+    return {
+      status: 500,
+      body: {
+        success: false,
+        message: error.message || 'Internal server error',
+      },
+    };
+  }
+};
+
 const getAllSrkTasksActionSubmissionsByUser: AppRouteImplementationOrOptions<
   typeof srkTaskContract.getAllSrkTasksActionSubmissionsByUser
 > = async ({ params, query }) => {
@@ -763,6 +823,7 @@ const getAllSrkTasksActionSubmissionsByUser: AppRouteImplementationOrOptions<
       return {
         _id: submission._id.toString(),
         taskUserId: submission.taskUserId.toString(),
+        description: submission.description,
         growEnrollmentId: e
           ? {
               _id: e._id.toString(),
@@ -839,7 +900,7 @@ const getSrkTaskActionsByPlatforms: AppRouteImplementationOrOptions<
   typeof srkTaskContract.getSrkTaskActionsByPlatforms
 > = async ({ query }) => {
   try {
-    const { platform, type } = query;
+    const { platform, type, srkTaskUserId } = query;
 
     // add here paginations
 
@@ -864,10 +925,27 @@ const getSrkTaskActionsByPlatforms: AppRouteImplementationOrOptions<
 
     const enrollmentIds = growPackageEnrollments.map((e) => e._id);
 
+    // Get todos that have already been submitted by the user
+    let submittedTodoIds: any[] = [];
+    if (srkTaskUserId) {
+      const taskUserId = new mongoose.Types.ObjectId(srkTaskUserId);
+      const submissions = await srkTaskActionSubmissionModel
+        .find({ taskUserId })
+        .select('growPackageTodoId')
+        .lean();
+      submittedTodoIds = submissions.map((s) => s.growPackageTodoId);
+    }
+
+    // Build filter to exclude already submitted todos
+    const todoFilter: any = {
+      growSocialMediaPackageEnrollmentId: { $in: enrollmentIds },
+    };
+    if (submittedTodoIds.length > 0) {
+      todoFilter._id = { $nin: submittedTodoIds };
+    }
+
     const srkTaskTodos = await growPackageTodoModel
-      .find({
-        growSocialMediaPackageEnrollmentId: { $in: enrollmentIds },
-      })
+      .find(todoFilter)
       .populate<{
         growSocialMediaPackageEnrollmentId: {
           growSocialMediaPackageUserId: { fullName: string };
@@ -880,9 +958,7 @@ const getSrkTaskActionsByPlatforms: AppRouteImplementationOrOptions<
       .limit(limit)
       .lean();
 
-    const totalSrkTodos = await growPackageTodoModel.countDocuments({
-      growSocialMediaPackageEnrollmentId: { $in: enrollmentIds },
-    });
+    const totalSrkTodos = await growPackageTodoModel.countDocuments(todoFilter);
 
     return {
       status: 200,
@@ -924,4 +1000,5 @@ export const srkTaskQueryHandler = {
   getSrkTaskUserEarningsPayoutsByUser,
   getAllSrkTasksActionSubmissionByStatusForAdmin,
   getAllSrkTasksActionSubmissionsByUser,
+  getAllSrkTaskUserFinanceStatement,
 };

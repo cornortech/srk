@@ -41,6 +41,7 @@ export const srkTaskActionSubmissionDetailsSchema = z.object({
       }),
     })
     .optional(),
+  description: z.string(),
   screenshotUrl: z.string(),
   status: z.enum(['pending', 'approved', 'rejected']),
   rejectionReason: z.string().nullable(),
@@ -307,10 +308,42 @@ export type TPaginatedSrkTaskActionsByPlatformResponse = z.infer<
 
 export const getSrkTaskActionsByPlatformsQueryParams =
   commonPaginatedQueryParamsSchema.extend({
-    platform: z.enum(['instagram', 'twitter', 'facebook', 'linkedin']),
-    type: z.enum(['follow', 'like']).optional(),
+    platform: z.enum(['Instagram', 'TikTok', 'YouTube', 'Twitter', 'Facebook']),
+    type: z.enum(['follow', 'like']),
+    srkTaskUserId: z.string(),
   });
 
 export type TGetSrkTaskActionsByPlatformsQueryParams = z.infer<
   typeof getSrkTaskActionsByPlatformsQueryParams
+>;
+
+// Earnings Statement Schema
+export const srkTaskEarningStatementSchema = z.object({
+  _id: z.string(),
+  taskUserId: z.string(),
+  growPackageTodoId: z.string(),
+  description: z.string(),
+  type: z.enum(['credit', 'debit']),
+  coin: z.number(),
+  coinAfterTransaction: z.number(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
+export const paginatedSrkTaskUserFinanceStatementSchema =
+  commonPaginationResponse.extend({
+    data: z.array(srkTaskEarningStatementSchema),
+  });
+
+export type TPaginatedSrkTaskUserFinanceStatement = z.infer<
+  typeof paginatedSrkTaskUserFinanceStatementSchema
+>;
+
+export const getAllSrkTaskUserFinanceStatementQueryParams =
+  commonPaginatedQueryParamsSchema.extend({
+    type: z.enum(['credit', 'debit']).optional(),
+  });
+
+export type TGetAllSrkTaskUserFinanceStatementQueryParams = z.infer<
+  typeof getAllSrkTaskUserFinanceStatementQueryParams
 >;

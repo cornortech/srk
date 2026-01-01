@@ -95,6 +95,7 @@ const getSrkTaskUserProfile: AppRouteImplementationOrOptions<
                     _id: profile._id.toString(),
                     srkUniversityUserId: profile.srkUniversityUserId._id.toString(),
                     fullName: profile.fullName,
+                    phone: profile.srkUniversityUserId.phoneNumber,
                     email: profile.srkUniversityUserId.email,
                     isActivated: profile.isActivated,
                     kycStatus: latestKyc?.status,
@@ -123,8 +124,8 @@ const getSrkTaskUserProfile: AppRouteImplementationOrOptions<
     }
 };
 
-const getSrkTaskUserAnalystics: AppRouteImplementationOrOptions<
-    typeof srkTaskContract.getSrkTaskUserAnalystics
+const getSrkTaskUserAnalytics: AppRouteImplementationOrOptions<
+    typeof srkTaskContract.getSrkTaskUserAnalytics
 > = async ({ params }) => {
     try {
         const {
@@ -144,6 +145,9 @@ const getSrkTaskUserAnalystics: AppRouteImplementationOrOptions<
             };
         }
 
+        const now = new Date();
+        const startOfToday = new Date(now.setHours(0, 0, 0, 0));
+
         const coinEarningStats = await srkTaskEarningStatementModel.aggregate([
             {
                 $match: {
@@ -162,7 +166,22 @@ const getSrkTaskUserAnalystics: AppRouteImplementationOrOptions<
                         $sum: {
                             $cond: [
                                 {
-                                    $gte: ['$createdAt', new Date(new Date().setHours(0, 0, 0, 0))]
+                                    $gte: ['$createdAt',
+                                        startOfToday]
+                                },
+                                '$coin',
+                                0,
+                            ],
+                        },
+                    },
+                    yesterday: {
+                        $sum: {
+                            $cond: [
+                                {
+                                    $and: [
+                                        { $gte: ['$createdAt', new Date(startOfToday.getTime() - 24 * 60 * 60 * 1000)] },
+                                        { $lt: ['$createdAt', startOfToday] },
+                                    ],
                                 },
                                 '$coin',
                                 0,
@@ -180,11 +199,39 @@ const getSrkTaskUserAnalystics: AppRouteImplementationOrOptions<
                             ],
                         },
                     },
+                    prev7Days: {
+                        $sum: {
+                            $cond: [
+                                {
+                                    $and: [
+                                        { $gte: ['$createdAt', new Date(Date.now() - 14 * 24 * 60 * 60 * 1000)] },
+                                        { $lt: ['$createdAt', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)] },
+                                    ],
+                                },
+                                '$coin',
+                                0,
+                            ],
+                        },
+                    },
                     last28Days: {
                         $sum: {
                             $cond: [
                                 {
                                     $gte: ['$createdAt', new Date(Date.now() - 28 * 24 * 60 * 60 * 1000)]
+                                },
+                                '$coin',
+                                0,
+                            ],
+                        },
+                    },
+                    prev28Days: {
+                        $sum: {
+                            $cond: [
+                                {
+                                    $and: [
+                                        { $gte: ['$createdAt', new Date(Date.now() - 56 * 24 * 60 * 60 * 1000)] },
+                                        { $lt: ['$createdAt', new Date(Date.now() - 28 * 24 * 60 * 60 * 1000)] },
+                                    ],
                                 },
                                 '$coin',
                                 0,
@@ -264,14 +311,30 @@ const getSrkTaskUserAnalystics: AppRouteImplementationOrOptions<
         // Wallet coins
         const profileBalance = await srkTaskUserBalanceModel.findOne({ taskUserId }).lean();
 
+        const getPercentageChange = (current = 0, previous = 0) => {
+            if (previous === 0) {
+                return current > 0 ? 100 : 0;
+            }
+            return Number((((current - previous) / previous) * 100).toFixed(2));
+        };
+
+        const percentageChanges = {
+            today: getPercentageChange(coinStats.today, coinStats.yesterday),
+            last7Days: getPercentageChange(coinStats.last7Days, coinStats.prev7Days),
+            last28Days: getPercentageChange(coinStats.last28Days, coinStats.prev28Days),
+        };
+
         return {
             status: 200,
             body: {
                 coinsData: {
                     walletCoins: profileBalance?.totalCoins ?? 0,
                     today: coinStats.today ?? 0,
+                    todayChange: percentageChanges.today,
                     last7Days: coinStats.last7Days ?? 0,
+                    last7DaysChange: percentageChanges.last7Days,
                     last28Days: coinStats.last28Days ?? 0,
+                    last28DaysChange: percentageChanges.last28Days,
                     allTimeCoins: coinStats.allTimeCoins ?? 0,
                 },
                 tasksData: {
@@ -530,6 +593,6 @@ const getAllSrkTaskUserEarningsLeaderboard: AppRouteImplementationOrOptions<
 
 export const srkTaskQueryHandler = {
     getSrkTaskUserProfile,
-    getSrkTaskUserAnalystics,
+    getSrkTaskUserAnalytics,
     getAllSrkTaskUserEarningsLeaderboard,
 }

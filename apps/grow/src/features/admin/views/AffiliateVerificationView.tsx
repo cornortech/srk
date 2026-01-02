@@ -7,9 +7,9 @@ import { StatusBadge } from '../components/ui/StatusBadge';
 import { RejectionModal } from '../Modals/RejectionModal';
 
 import { api } from '../../../lib/api';
-import { useSRKAlert } from '@srk/shared/hooks';
 import TablePagination from '../../../lib/ui/TablePagination';
 import { ExternalLink } from 'lucide-react';
+import { useSRKAlert } from '@srk/shared/hooks';
 
 export const AffiliateVerificationView = () => {
   const [page, setPage] = useState(1);
@@ -20,9 +20,10 @@ export const AffiliateVerificationView = () => {
   const [rejectionModalOpen, setRejectionModalOpen] = useState(false);
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
 
-  const { show } = useSRKAlert();
 
   const limit = 10;
+
+  const { show } = useSRKAlert();
 
   const {
     data: growAffiliateUser,
@@ -54,16 +55,20 @@ export const AffiliateVerificationView = () => {
 
   const { mutate: approveAffiliate, isPending: isApproving } =
     api.grow.approveSrkGrowAffiliateVerificationRequest.useMutation({
-      onSuccess: () => {
-        show('Affiliate approved', 'success');
+      onSuccess: (res) => {
+        if (res.status === 200) {
+          show('Affiliate User approved', 'success');
+        }
         refetch();
       },
     });
 
   const { mutate: rejectAffiliate, isPending: isRejecting } =
     api.grow.rejectSrkGrowAffiliateVerificationRequest.useMutation({
-      onSuccess: () => {
-        show('Affiliate rejected', 'success');
+      onSuccess: (res) => {
+        if (res.status === 200) {
+          show('Affiliate rejected', 'success');
+        }
         refetch();
       },
     });
@@ -184,23 +189,23 @@ export const AffiliateVerificationView = () => {
                     </td>
                     <td className="p-3">{item.createdAt}</td>
                     <td className="p-3">
-                        <div className="mb-3 relative group rounded-xl overflow-hidden border border-white/10">
-                          <img
-                            src={item.verificationImageUrl}
-                            alt="Current Proof"
-                            className="w-full h-16 object-cover opacity-60 group-hover:opacity-100 transition-opacity"
-                          />
-                          <div className="absolute inset-0 flex items-center justify-center gap-2">
-                            <a
-                              href={item.verificationImageUrl}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="p-2 bg-white rounded-full text-black hover:text-white hover:bg-[#b68938] transition-all opacity-0 group-hover:opacity-100"
-                            >
-                              <ExternalLink size={14} />
-                            </a>
-                          </div>
+                      <div className="mb-3 relative group rounded-xl overflow-hidden border border-white/10">
+                        <img
+                          src={item.verificationImageUrl}
+                          alt="Current Proof"
+                          className="w-full h-16 object-cover opacity-60 group-hover:opacity-100 transition-opacity"
+                        />
+                        <div className="absolute inset-0 flex items-center justify-center gap-2">
+                          <a
+                            href={item.verificationImageUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="p-2 bg-white rounded-full text-black hover:text-white hover:bg-[#b68938] transition-all opacity-0 group-hover:opacity-100"
+                          >
+                            <ExternalLink size={14} />
+                          </a>
                         </div>
+                      </div>
                     </td>
                     <td className="p-3">
                       <StatusBadge status={item.status} />

@@ -11,10 +11,11 @@ import { formatRupees } from '../../../lib/utils/formatters';
 import { api } from '../../../lib/api';
 
 interface PayoutViewProps {
+  userID: string;
   payouts: Payout[];
 }
 
-export const PayoutView: React.FC<PayoutViewProps> = ({ payouts }) => {
+export const PayoutView: React.FC<PayoutViewProps> = ({ userID, payouts }) => {
   const getStatusStyle = (
     status: PayoutStatus
   ): { bg: string; text: string; icon: ReactNode } => {
@@ -79,7 +80,6 @@ export const PayoutView: React.FC<PayoutViewProps> = ({ payouts }) => {
     },
   ];
 
-    const userID = '6950abcd1234ef5678901234';
     const [page, setPage] = useState("1");
   
     const { data: getAffiliateUserPayout, isLoading } =

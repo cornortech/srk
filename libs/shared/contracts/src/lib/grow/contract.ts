@@ -22,7 +22,6 @@ const GrowAffiliateApprovedResponseSchema = z.object({
   relatedUserData: z.array(z.any()),
 });
 
-
 const c = initContract();
 
 export const growContract = c.router({

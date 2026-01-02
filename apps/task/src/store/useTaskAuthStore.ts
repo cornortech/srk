@@ -1,5 +1,7 @@
 import { create } from 'zustand';
 import { TaskUser } from '../lib/types';
+import { persist, createJSONStorage } from 'zustand/middleware';
+
 
 interface TaskAuthState {
   user: TaskUser | null;
@@ -10,26 +12,35 @@ interface TaskAuthState {
   logout: () => void;
 }
 
-export const useTaskAuthStore = create<TaskAuthState>((set) => ({
-  user: null,
-  isAuthenticated: false,
-  isLoading: true,
-
-  setUser: (user) =>
-    set({
-      user,
-      isAuthenticated: !!user,
-      isLoading: false,
-    }),
-
-  setLoading: (isLoading) => set({ isLoading }),
-
-  logout: () =>
-    set({
+export const useTaskAuthStore = create<TaskAuthState>()(
+ persist(
+    (set) => ({
       user: null,
       isAuthenticated: false,
-      isLoading: false,
+      isLoading: false, // Default to false, hydration handles true state if needed
+
+      setUser: (user) =>
+        set({
+          user,
+          isAuthenticated: !!user,
+          isLoading: false,
+        }),
+
+      setLoading: (isLoading) => set({ isLoading }),
+
+      logout: () =>
+        set({
+          user: null,
+          isAuthenticated: false,
+          isLoading: false,
+        }),
     }),
-}));
+    {
+      name: 'srktask-auth-storage',
+      storage: createJSONStorage(() => localStorage),
+    }
+  )
+);
 
 export default useTaskAuthStore;
+

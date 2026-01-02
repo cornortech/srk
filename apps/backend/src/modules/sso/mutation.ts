@@ -168,7 +168,7 @@ const exchangeCode: AppRouteImplementationOrOptions<
     // Set redirection URL based on target app
     let redirectionUrl = '/dashboard';
     if (autoCode.targetApp === 'task') {
-      redirectionUrl = '/task/verification';
+      redirectionUrl = '/task/dashboard';
     } else if (autoCode.targetApp === 'growaffiliate') {
       redirectionUrl = '/grow/verification';
     } else if (autoCode.targetApp === 'growsocialmedia'){

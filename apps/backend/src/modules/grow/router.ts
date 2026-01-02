@@ -28,4 +28,6 @@ export const growRouter = s.router(growContract, {
     growQueryHandler.getAllSrkGrowAffiliateVerificationRequest,
   srkGrowAffiliateVerificationRequest:
     growMutationHandler.srkGrowAffiliateVerificationRequest,
+    getApprovedSrkGrowAffiliateVerificationRequest:
+    growQueryHandler.getApprovedSrkGrowAffiliateVerificationRequest,
 });

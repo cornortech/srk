@@ -451,6 +451,70 @@ const getAllSrkGrowAffiliateVerificationRequest: AppRouteImplementationOrOptions
   }
 };
 
+const getApprovedSrkGrowAffiliateVerificationRequest: AppRouteImplementationOrOptions<
+  typeof growContract.getApprovedSrkGrowAffiliateVerificationRequest
+> = async ({ query }) => {
+  try {
+    const srkUniversityUserId = query.srkUniversityUserId;
+
+    // 1️⃣ Look for verification request
+    const verificationRecord = await growSrkAffiliateVerificationModel.findOne({
+      srkUniversityUserId,
+    });
+
+    // 2️⃣ Not found → pending
+    if (!verificationRecord) {
+      return {
+        status: 200,
+        body: {
+          success: false,
+          message: 'Not verified yet',
+          verificationRequests: [],
+          relatedUserData: [],
+        },
+      };
+    }
+
+    // 3️⃣ If found but not approved
+    if (verificationRecord.status !== 'approved') {
+      return {
+        status: 200,
+        body: {
+          success: false,
+          message: `Verification status: ${verificationRecord.status}`,
+          verificationRequests: [verificationRecord],
+          relatedUserData: [],
+        },
+      };
+    }
+
+    // 4️⃣ Approved → fetch related user data
+    const userData = await growSocialMediaPackageUserModel.findOne({
+      srkUniversityUserId,
+    });
+
+    return {
+      status: 200,
+      body: {
+        success: true,
+        message: 'Affiliate approved',
+        verificationRequests: [verificationRecord],
+        relatedUserData: userData ? [userData] : [],
+      },
+    };
+  } catch (error: any) {
+    return {
+      status: 500,
+      body: {
+        success: false,
+        message: error.message ?? 'Internal server error',
+        verificationRequests: [],
+        relatedUserData: [],
+      },
+    };
+  }
+};
+
 // SRK Grow Enrollment Users
 export const growQueryHandler = {
   getSrkGrowProfile,
@@ -458,4 +522,5 @@ export const growQueryHandler = {
   getSrkGrowEnrollmentUserById,
   getAllSrkGrowUsers,
   getAllSrkGrowAffiliateVerificationRequest,
+  getApprovedSrkGrowAffiliateVerificationRequest,
 };

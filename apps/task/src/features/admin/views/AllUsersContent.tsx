@@ -114,17 +114,16 @@ export const AllUsersContent: React.FC = () => {
                 setIsActivatedFilter(filter);
                 setPage(1);
               }}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold uppercase transition-colors ${
-                isActivatedFilter === filter
-                  ? 'bg-[#E1BA73] text-black'
-                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-              }`}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold uppercase transition-colors ${isActivatedFilter === filter
+                ? 'bg-[#E1BA73] text-black'
+                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                }`}
             >
               {filter === 'all'
                 ? 'All'
                 : filter === 'true'
-                ? 'Activated'
-                : 'Inactive'}
+                  ? 'Activated'
+                  : 'Inactive'}
             </button>
           ))}
         </div>
@@ -250,18 +249,17 @@ export const AllUsersContent: React.FC = () => {
                           user.successRate >= 70
                             ? 'text-green-400'
                             : user.successRate >= 40
-                            ? 'text-yellow-400'
-                            : 'text-red-400'
+                              ? 'text-yellow-400'
+                              : 'text-red-400'
                         }
                       />
                       <span
-                        className={`text-sm font-bold ${
-                          user.successRate >= 70
-                            ? 'text-green-400'
-                            : user.successRate >= 40
+                        className={`text-sm font-bold ${user.successRate >= 70
+                          ? 'text-green-400'
+                          : user.successRate >= 40
                             ? 'text-yellow-400'
                             : 'text-red-400'
-                        }`}
+                          }`}
                       >
                         {user.successRate.toFixed(1)}%
                       </span>

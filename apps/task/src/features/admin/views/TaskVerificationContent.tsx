@@ -35,12 +35,33 @@ export const TaskVerificationContent: React.FC = () => {
 
   const { data, isLoading, error, refetch } = queryResult;
 
+  // Approve mutation
+  const approveMutation = api.srkTask.approveSrkTaskActionSubmissionByAdmin.useMutation({
+    onSuccess: () => {
+      refetch();
+    },
+  });
+
+  // Reject mutation
+  const rejectMutation = api.srkTask.rejectSrkTaskActionSubmissionByAdmin.useMutation({
+    onSuccess: () => {
+      refetch();
+      setRejectionModal({
+        isOpen: false,
+        submissionId: null,
+        taskName: '',
+        username: '',
+      });
+    },
+  });
+
   const handleVerify = useCallback(
     (submissionId: string, status: 'approved' | 'rejected', taskName: string, username: string) => {
       if (status === 'approved') {
-        // TODO: Call API to approve submission
-        console.log(`Submission ID ${submissionId} Approved.`);
-        refetch();
+        approveMutation.mutate({
+          params: { submissionId },
+          body: {},
+        });
       } else {
         setRejectionModal({
           isOpen: true,
@@ -50,27 +71,19 @@ export const TaskVerificationContent: React.FC = () => {
         });
       }
     },
-    [refetch]
+    [approveMutation]
   );
 
   const handleConfirmRejection = useCallback(
     (reason: string) => {
       if (rejectionModal.submissionId) {
-        // TODO: Call API to reject submission with reason
-        console.log(
-          `Submission ID ${rejectionModal.submissionId} Rejected. Reason: ${reason}`
-        );
-        refetch();
+        rejectMutation.mutate({
+          params: { submissionId: rejectionModal.submissionId },
+          body: { rejectionReason: reason },
+        });
       }
-
-      setRejectionModal({
-        isOpen: false,
-        submissionId: null,
-        taskName: '',
-        username: '',
-      });
     },
-    [rejectionModal.submissionId, refetch]
+    [rejectionModal.submissionId, rejectMutation]
   );
 
   const handleCloseRejectionModal = useCallback(() => {
@@ -119,13 +132,13 @@ export const TaskVerificationContent: React.FC = () => {
             {data?.body?.totalRecords || 0})
           </h2>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {submissions.map((submission) => {
             const taskUser = submission.taskUserId;
             const todo = submission.growPackageTodoId;
             const enrollment = todo?.enrollment;
-            
+
             return (
               <div
                 key={submission._id}
@@ -206,7 +219,7 @@ export const TaskVerificationContent: React.FC = () => {
                     <span>Status: <span className="text-yellow-400 font-semibold uppercase">{submission.status}</span></span>
                     <span>{new Date(submission.createdAt).toLocaleDateString()}</span>
                   </div>
-                  
+
                   <div className="flex gap-4 mt-4">
                     <GoldButton
                       onClick={() => handleVerify(

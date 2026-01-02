@@ -2,11 +2,240 @@ import React, { useState, useCallback } from 'react';
 import { GoldButton } from '../components/ui/GoldButton';
 import { CARD_BG, GOLD_PRIMARY } from '../constants/theme';
 import { api } from '../../../lib/api';
-import { Loader2 } from 'lucide-react';
+import { Loader2, X, Check } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
+interface ApprovalModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: (transactionId: string, paymentScreenshotUrl: string) => void;
+  payoutAmount: number;
+  username: string;
+}
+
+const ApprovalModal: React.FC<ApprovalModalProps> = ({
+  isOpen,
+  onClose,
+  onConfirm,
+  payoutAmount,
+  username,
+}) => {
+  const [transactionId, setTransactionId] = useState('');
+  const [paymentScreenshotUrl, setPaymentScreenshotUrl] = useState('');
+
+  const handleSubmit = () => {
+    if (transactionId.trim() && paymentScreenshotUrl.trim()) {
+      onConfirm(transactionId, paymentScreenshotUrl);
+      setTransactionId('');
+      setPaymentScreenshotUrl('');
+    }
+  };
+
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4"
+          onClick={onClose}
+        >
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.9, opacity: 0 }}
+            className="bg-[#1a1a1a] rounded-2xl p-6 max-w-md w-full border border-[#E1BA73]/30"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-bold text-white">Approve Payout</h3>
+              <button
+                onClick={onClose}
+                className="text-gray-400 hover:text-white transition-colors"
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            <div className="mb-6">
+              <p className="text-gray-300 mb-2">
+                Approving payout for: <span className="text-[#E1BA73] font-semibold">{username}</span>
+              </p>
+              <p className="text-gray-300">
+                Amount: <span className="text-green-400 font-bold">₹{payoutAmount.toFixed(2)}</span>
+              </p>
+            </div>
+
+            <div className="space-y-4 mb-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Transaction ID *
+                </label>
+                <input
+                  type="text"
+                  value={transactionId}
+                  onChange={(e) => setTransactionId(e.target.value)}
+                  placeholder="Enter transaction ID"
+                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-[#E1BA73] transition-colors"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Payment Screenshot URL *
+                </label>
+                <input
+                  type="url"
+                  value={paymentScreenshotUrl}
+                  onChange={(e) => setPaymentScreenshotUrl(e.target.value)}
+                  placeholder="Enter payment screenshot URL"
+                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-[#E1BA73] transition-colors"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={onClose}
+                className="flex-1 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSubmit}
+                disabled={!transactionId.trim() || !paymentScreenshotUrl.trim()}
+                className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded-lg transition-colors font-semibold"
+              >
+                <Check size={16} className="inline mr-1" /> Confirm Approval
+              </button>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+};
+
+interface RejectionModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: (reason: string) => void;
+  payoutAmount: number;
+  username: string;
+}
+
+const RejectionModal: React.FC<RejectionModalProps> = ({
+  isOpen,
+  onClose,
+  onConfirm,
+  payoutAmount,
+  username,
+}) => {
+  const [reason, setReason] = useState('');
+
+  const handleSubmit = () => {
+    if (reason.trim()) {
+      onConfirm(reason);
+      setReason('');
+    }
+  };
+
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4"
+          onClick={onClose}
+        >
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.9, opacity: 0 }}
+            className="bg-[#1a1a1a] rounded-2xl p-6 max-w-md w-full border border-red-500/30"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-bold text-white">Reject Payout</h3>
+              <button
+                onClick={onClose}
+                className="text-gray-400 hover:text-white transition-colors"
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            <div className="mb-6">
+              <p className="text-gray-300 mb-2">
+                Rejecting payout for: <span className="text-[#E1BA73] font-semibold">{username}</span>
+              </p>
+              <p className="text-gray-300">
+                Amount: <span className="text-red-400 font-bold">₹{payoutAmount.toFixed(2)}</span>
+              </p>
+            </div>
+
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Rejection Reason *
+              </label>
+              <textarea
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+                placeholder="Enter reason for rejection..."
+                rows={4}
+                className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-red-500 transition-colors resize-none"
+              />
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={onClose}
+                className="flex-1 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSubmit}
+                disabled={!reason.trim()}
+                className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded-lg transition-colors font-semibold"
+              >
+                <X size={16} className="inline mr-1" /> Confirm Rejection
+              </button>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+};
 
 export const PayoutRequestsContent: React.FC = React.memo(() => {
   const [page, setPage] = useState(1);
+  const [approvalModal, setApprovalModal] = useState<{
+    isOpen: boolean;
+    payoutId: string | null;
+    amount: number;
+    username: string;
+  }>({
+    isOpen: false,
+    payoutId: null,
+    amount: 0,
+    username: '',
+  });
+  const [rejectionModal, setRejectionModal] = useState<{
+    isOpen: boolean;
+    payoutId: string | null;
+    amount: number;
+    username: string;
+  }>({
+    isOpen: false,
+    payoutId: null,
+    amount: 0,
+    username: '',
+  });
 
   const { data: payoutData, isLoading, error: queryError, refetch } =
     api.srkTask.getAllSrkTaskEarningPayoutsByAdmin.useQuery(
@@ -20,12 +249,96 @@ export const PayoutRequestsContent: React.FC = React.memo(() => {
       }
     );
 
-  const handlePayout = useCallback(async (payoutId: string) => {
-    console.log(`Processing payout for ID: ${payoutId}`);
-    // TODO: Implement approve payout API call
-    // After success, refetch the data
-    await refetch();
-  }, [refetch]);
+  // Approve mutation
+  const approveMutation = api.srkTask.acceptSrkTaskUserEarningsPayout.useMutation({
+    onSuccess: () => {
+      refetch();
+      setApprovalModal({
+        isOpen: false,
+        payoutId: null,
+        amount: 0,
+        username: '',
+      });
+    },
+  });
+
+  // Reject mutation
+  const rejectMutation = api.srkTask.rejectSrkTaskUserEarningsPayout.useMutation({
+    onSuccess: () => {
+      refetch();
+      setRejectionModal({
+        isOpen: false,
+        payoutId: null,
+        amount: 0,
+        username: '',
+      });
+    },
+  });
+
+  const handleApproveClick = useCallback((payoutId: string, amount: number, username: string) => {
+    setApprovalModal({
+      isOpen: true,
+      payoutId,
+      amount,
+      username,
+    });
+  }, []);
+
+  const handleRejectClick = useCallback((payoutId: string, amount: number, username: string) => {
+    setRejectionModal({
+      isOpen: true,
+      payoutId,
+      amount,
+      username,
+    });
+  }, []);
+
+  const handleConfirmApproval = useCallback(
+    (transactionId: string, paymentScreenshotUrl: string) => {
+      if (approvalModal.payoutId) {
+        approveMutation.mutate({
+          params: { payoutId: approvalModal.payoutId },
+          body: {
+            transactionId,
+            paymentScreenshotUrl,
+          },
+        });
+      }
+    },
+    [approvalModal.payoutId, approveMutation]
+  );
+
+  const handleConfirmRejection = useCallback(
+    (reason: string) => {
+      if (rejectionModal.payoutId) {
+        rejectMutation.mutate({
+          params: { payoutId: rejectionModal.payoutId },
+          body: {
+            rejectionReason: reason,
+          },
+        });
+      }
+    },
+    [rejectionModal.payoutId, rejectMutation]
+  );
+
+  const handleCloseApprovalModal = useCallback(() => {
+    setApprovalModal({
+      isOpen: false,
+      payoutId: null,
+      amount: 0,
+      username: '',
+    });
+  }, []);
+
+  const handleCloseRejectionModal = useCallback(() => {
+    setRejectionModal({
+      isOpen: false,
+      payoutId: null,
+      amount: 0,
+      username: '',
+    });
+  }, []);
 
   if (isLoading) {
     return (
@@ -117,12 +430,34 @@ export const PayoutRequestsContent: React.FC = React.memo(() => {
                 </div>
               )}
 
-              <GoldButton
-                onClick={() => handlePayout(payout._id)}
-                className="h-10 text-sm px-5 w-full sm:w-auto"
-              >
-                Process Payout
-              </GoldButton>
+              <div className="flex gap-2">
+                <GoldButton
+                  onClick={() => handleApproveClick(payout._id, payout.amount, payout.taskUserId.fullName)}
+                  className="h-10 text-sm px-5 w-full sm:w-auto"
+                  disabled={approveMutation.isPending}
+                >
+                  {approveMutation.isPending ? (
+                    <Loader2 className="animate-spin" size={16} />
+                  ) : (
+                    <Check size={16} className="inline mr-1" />
+                  )}
+                  Approve
+                </GoldButton>
+                <motion.button
+                  onClick={() => handleRejectClick(payout._id, payout.amount, payout.taskUserId.fullName)}
+                  disabled={rejectMutation.isPending}
+                  className="h-10 text-sm px-5 w-full sm:w-auto rounded-xl bg-red-800/50 text-red-400 font-bold hover:bg-red-800/70 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  {rejectMutation.isPending ? (
+                    <Loader2 className="animate-spin" size={16} />
+                  ) : (
+                    <X size={16} />
+                  )}
+                  Reject
+                </motion.button>
+              </div>
             </div>
           </div>
         ))}
@@ -150,6 +485,22 @@ export const PayoutRequestsContent: React.FC = React.memo(() => {
           </button>
         </div>
       )}
+
+      <ApprovalModal
+        isOpen={approvalModal.isOpen}
+        onClose={handleCloseApprovalModal}
+        onConfirm={handleConfirmApproval}
+        payoutAmount={approvalModal.amount}
+        username={approvalModal.username}
+      />
+
+      <RejectionModal
+        isOpen={rejectionModal.isOpen}
+        onClose={handleCloseRejectionModal}
+        onConfirm={handleConfirmRejection}
+        payoutAmount={rejectionModal.amount}
+        username={rejectionModal.username}
+      />
     </div>
   );
 });

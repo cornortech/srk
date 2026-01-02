@@ -15,6 +15,7 @@ import { growSocialMediaPackagePaymentModel } from '../../model/growSocialMediaP
 import { growSocialMediaPackageUserModel } from '../../model/growSocialMediaPackageUserModel';
 import { growSrkAffiliateVerificationModel } from '../../model/growSrkAffiliateVerificationModel';
 import { IUser } from '../../model/userModel';
+import { GrowSrkAffiliateEarningPayoutModel } from '../../model/grow/growSrkAffiliateEarningPayoutModel';
 
 export const getSrkGrowProfile: AppRouteImplementationOrOptions<
   typeof growContract.getSrkGrowProfile
@@ -332,10 +333,37 @@ const getSrkGrowEnrollmentUserById: AppRouteImplementationOrOptions<
 
 const getAllSrkGrowUsers: AppRouteImplementationOrOptions<
   typeof growContract.getAllSrkGrowUsers
-> = async () => {
+> = async ({ query }) => {
   try {
+    const { userType } = query || {};
+
+    // Build enrollment filter based on userType
+    let enrollmentFilter: any = {};
+
+    if (userType) {
+      // First, get users matching the filter
+      const users = await growSocialMediaPackageUserModel
+        .find({ userType })
+        .select('_id')
+        .lean();
+
+      const userIds = users.map((u) => u._id);
+
+      // If no users found, return empty array
+      if (userIds.length === 0) {
+        return {
+          status: 200,
+          body: [],
+        };
+      }
+
+      enrollmentFilter = {
+        growSocialMediaPackageUserId: { $in: userIds },
+      };
+    }
+
     const usersLists = await growSocialMediaPackageEnrollmentModel
-      .find({})
+      .find(enrollmentFilter)
       .populate<GrowPackageUserPopulated>({
         path: 'growSocialMediaPackageUserId',
         select: 'fullName referredBy status',
@@ -451,11 +479,168 @@ const getAllSrkGrowAffiliateVerificationRequest: AppRouteImplementationOrOptions
   }
 };
 
-// SRK Grow Enrollment Users
+// Affiliate Earning Payout Query Handlers
+const getSrkGrowAffiliateEarningPayoutRequestByAdmin: AppRouteImplementationOrOptions<
+  typeof growContract.getSrkGrowAffiliateEarningPayoutRequestByAdmin
+> = async ({ query }) => {
+  try {
+    const { page = 1, limit = 10, status } = query;
+    const pageNum = Number(page);
+    const limitNum = Number(limit);
+    const skip = (pageNum - 1) * limitNum;
+
+    // Build filter
+    const filter: any = {};
+    if (status) {
+      filter.status = status;
+    }
+
+    // Get payouts with pagination
+    const [payouts, total] = await Promise.all([
+      GrowSrkAffiliateEarningPayoutModel.find(filter)
+        .populate({
+          path: 'srkGrowUserId',
+          select: '_id fullName email phoneNumber',
+        })
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limitNum)
+        .lean(),
+      GrowSrkAffiliateEarningPayoutModel.countDocuments(filter),
+    ]);
+
+    // Format response
+    const formattedPayouts = payouts.map((payout: any) => ({
+      _id: payout._id.toString(),
+      srkGrowUser: payout.srkGrowUserId
+        ? {
+            _id: payout.srkGrowUserId._id.toString(),
+            fullName: payout.srkGrowUserId.fullName,
+            email: payout.srkGrowUserId.email,
+            phoneNumber: payout.srkGrowUserId.phoneNumber,
+          }
+        : null,
+      amount: payout.amount,
+      status: payout.status,
+      transactionId: payout.transactionId,
+      paymentUrl: payout.paymentUrl,
+      rejectionReason: payout.rejectionReason,
+      paidAt: payout.paidAt,
+      createdAt: payout.createdAt,
+      updatedAt: payout.updatedAt,
+    }));
+
+    return {
+      status: 200,
+      body: {
+        data: formattedPayouts,
+        pagination: {
+          currentPage: pageNum,
+          totalPages: Math.ceil(total / limitNum),
+          totalItems: total,
+          itemsPerPage: limitNum,
+        },
+      },
+    };
+  } catch (error: any) {
+    console.error('Error fetching payout requests by admin:', error);
+    return {
+      status: 500,
+      body: {
+        message: 'Failed to fetch payout requests',
+      },
+    };
+  }
+};
+
+const getSrkGrowAffiliateEarningPayoutRequestByUser: AppRouteImplementationOrOptions<
+  typeof growContract.getSrkGrowAffiliateEarningPayoutRequestByUser
+> = async ({ params, query }) => {
+  try {
+    const { userId } = params;
+    const { page = 1, limit = 10 } = query;
+    const pageNum = Number(page);
+    const limitNum = Number(limit);
+    const skip = (pageNum - 1) * limitNum;
+
+    // Validate user exists
+    const growUser = await growSocialMediaPackageUserModel.findById(userId);
+
+    if (!growUser) {
+      return {
+        status: 404,
+        body: {
+          message: 'User not found',
+        },
+      };
+    }
+
+    // Get payouts with pagination
+    const [payouts, total] = await Promise.all([
+      GrowSrkAffiliateEarningPayoutModel.find({ srkGrowUserId: userId })
+        .populate({
+          path: 'srkGrowUserId',
+          select: '_id fullName email phoneNumber',
+        })
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limitNum)
+        .lean(),
+      GrowSrkAffiliateEarningPayoutModel.countDocuments({
+        srkGrowUserId: userId,
+      }),
+    ]);
+
+    // Format response
+    const formattedPayouts = payouts.map((payout: any) => ({
+      _id: payout._id.toString(),
+      srkGrowUser: payout.srkGrowUserId
+        ? {
+            _id: payout.srkGrowUserId._id.toString(),
+            fullName: payout.srkGrowUserId.fullName,
+            email: payout.srkGrowUserId.email,
+            phoneNumber: payout.srkGrowUserId.phoneNumber,
+          }
+        : null,
+      amount: payout.amount,
+      status: payout.status,
+      transactionId: payout.transactionId,
+      paymentUrl: payout.paymentUrl,
+      rejectionReason: payout.rejectionReason,
+      paidAt: payout.paidAt,
+      createdAt: payout.createdAt,
+      updatedAt: payout.updatedAt,
+    }));
+
+    return {
+      status: 200,
+      body: {
+        data: formattedPayouts,
+        pagination: {
+          currentPage: pageNum,
+          totalPages: Math.ceil(total / limitNum),
+          totalItems: total,
+          itemsPerPage: limitNum,
+        },
+      },
+    };
+  } catch (error: any) {
+    console.error('Error fetching payout requests by user:', error);
+    return {
+      status: 500,
+      body: {
+        message: 'Failed to fetch payout requests',
+      },
+    };
+  }
+};
+
 export const growQueryHandler = {
   getSrkGrowProfile,
   getAllSrkGrowEnrollmentUser,
   getSrkGrowEnrollmentUserById,
   getAllSrkGrowUsers,
   getAllSrkGrowAffiliateVerificationRequest,
+  getSrkGrowAffiliateEarningPayoutRequestByAdmin,
+  getSrkGrowAffiliateEarningPayoutRequestByUser,
 };

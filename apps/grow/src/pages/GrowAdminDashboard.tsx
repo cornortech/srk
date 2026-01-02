@@ -20,10 +20,8 @@ import { UserVerificationView } from '../features/admin/views/UserVerificationVi
 import { PaymentVerificationView } from '../features/admin/views/PaymentVerificationView';
 import { TaskMonitoringView } from '../features/admin/views/TaskMonitoringView';
 import { PrivateTasksView } from '../features/admin/views/PrivateTasksView';
-import {
-  AffiliateListView,
-  UserListView,
-} from '../features/admin/views/UserListView';
+import { AffiliateUsersView } from '../features/admin/views/AffiliateUsersView';
+import { PackageUsersView } from '../features/admin/views/PackageUsersView';
 import { CreateUserView } from '../features/admin/views/CreateUserView';
 import { PayoutQueueView } from '../features/admin/views/PayoutQueueView';
 import { PerformanceTrendView } from '../features/admin/views/PerformanceTrendView';
@@ -72,19 +70,19 @@ export const GrowOnlyAdminDashboard = () => {
       case 'global':
         return <GlobalOverviewView data={data} />;
       case 'affiliateverification':
+        // srk grow affiliate verification request view
         return <AffiliateVerificationView />;
       case 'userverification':
+        // srk grow package enrollment request view
         return <UserVerificationView />;
-      case 'paymentverification':
-        return <PaymentVerificationView data={data} />;
       case 'taskmonitoring':
         return <TaskMonitoringView data={data} />;
       case 'privatetasks':
         return <PrivateTasksView data={data} />;
-      case 'userlist':
-        return <UserListView data={data} />;
       case 'affiliatelist':
-        return <AffiliateListView data={data} />;
+        return <AffiliateUsersView />;
+      case 'packagelist':
+        return <PackageUsersView />;
       case 'createuser':
         return <CreateUserView />;
       case 'payoutqueue':
@@ -126,10 +124,10 @@ export const GrowOnlyAdminDashboard = () => {
         return 'Task Monitoring';
       case 'privatetasks':
         return 'Private Tasks';
-      case 'userlist':
-        return 'All Users';
       case 'affiliatelist':
-        return 'Affiliates Only';
+        return 'Affiliate Users';
+      case 'packagelist':
+        return 'Package Users';
       case 'createuser':
         return 'Create User';
       case 'payoutqueue':

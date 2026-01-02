@@ -146,6 +146,10 @@ export const srkGrowAffiliateVerificationSchema = z.object({
   verificationImageUrl: z.string(),
 });
 
+export const getAllSrkGrowUsersQueryParams = z.object({
+  userType: z.enum(['affiliate', 'package']).optional(),
+});
+
 export const getAllSrkGrowUsersResponseSchema = z.array(srkGrowUsersSchema);
 
 export type TGetAllSrkGrowUsersResponse = z.infer<
@@ -227,4 +231,71 @@ export const createGrowSocialMediaTasksSchema = z.object({
 
 export type TCreateGrowSocialMediaTasks = z.infer<
   typeof createGrowSocialMediaTasksSchema
+>;
+
+// Affiliate Earning Payout Schemas
+export const createGrowSrkAffiliateEarningPayoutRequestSchema = z.object({
+  srkGrowUserId: z.string(),
+  amount: z.number().positive(),
+});
+
+export type TCreateGrowSrkAffiliateEarningPayoutRequest = z.infer<
+  typeof createGrowSrkAffiliateEarningPayoutRequestSchema
+>;
+
+export const acceptGrowSrkAffiliateEarningPayoutRequestSchema = z.object({
+  transactionId: z.string(),
+  paymentUrl: z.string().url().optional(),
+});
+
+export type TAcceptGrowSrkAffiliateEarningPayoutRequest = z.infer<
+  typeof acceptGrowSrkAffiliateEarningPayoutRequestSchema
+>;
+
+export const rejectGrowSrkAffiliateEarningPayoutRequestSchema = z.object({
+  rejectionReason: z.string(),
+});
+
+export type TRejectGrowSrkAffiliateEarningPayoutRequest = z.infer<
+  typeof rejectGrowSrkAffiliateEarningPayoutRequestSchema
+>;
+
+export const growSrkAffiliateEarningPayoutSchema = z.object({
+  _id: z.string(),
+  srkGrowUser: z.object({
+    _id: z.string(),
+    fullName: z.string(),
+    email: z.string(),
+    phoneNumber: z.string().optional(),
+  }),
+  amount: z.number(),
+  status: z.enum(['pending', 'approved', 'rejected']),
+  transactionId: z.string().optional(),
+  paymentUrl: z.string().optional(),
+  rejectionReason: z.string().optional(),
+  paidAt: z.string().optional(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
+export type TGrowSrkAffiliateEarningPayout = z.infer<
+  typeof growSrkAffiliateEarningPayoutSchema
+>;
+
+export const paginatedGrowSrkAffiliateEarningPayoutsSchema =
+  commonPaginationResponse.extend({
+    data: z.array(growSrkAffiliateEarningPayoutSchema),
+  });
+
+export type TPaginatedGrowSrkAffiliateEarningPayouts = z.infer<
+  typeof paginatedGrowSrkAffiliateEarningPayoutsSchema
+>;
+
+export const getSrkGrowAffiliateEarningPayoutQueryParamsSchema =
+  commonPaginatedQueryParamsSchema.extend({
+    status: z.enum(['pending', 'approved', 'rejected']).optional(),
+  });
+
+export type TGetSrkGrowAffiliateEarningPayoutQueryParams = z.infer<
+  typeof getSrkGrowAffiliateEarningPayoutQueryParamsSchema
 >;

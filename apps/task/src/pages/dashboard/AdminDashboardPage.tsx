@@ -16,7 +16,6 @@ import {
   DUMMY_LEADERBOARD,
   DUMMY_TASK_VERIFICATIONS,
   DUMMY_USERS,
-  DUMMY_VERIFICATIONS,
   initialPayouts,
 } from '../../data/dummyAdminDashboardMockData';
 import { VerificationContent } from '../../features/admin/views/VerificationContent';
@@ -70,7 +69,7 @@ export const AdminDashboard: React.FC = () => {
       {
         name: 'Verification',
         icon: ShieldCheck,
-        content: <VerificationContent data={DUMMY_VERIFICATIONS} />,
+        content: <VerificationContent  />,
       },
       {
         name: 'Payout Requests',

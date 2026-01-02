@@ -1,14 +1,114 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { GoldButton } from '../components/ui/GoldButton';
 import { CARD_BG } from '../constants/theme';
 import { api } from '../../../lib/api';
-import { Loader2 } from 'lucide-react';
+import { Loader2, X, Check } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
+interface RejectionModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: (reason: string) => void;
+  username: string;
+}
+
+const RejectionModal: React.FC<RejectionModalProps> = ({
+  isOpen,
+  onClose,
+  onConfirm,
+  username,
+}) => {
+  const [reason, setReason] = useState('');
+
+  const handleSubmit = () => {
+    if (reason.trim()) {
+      onConfirm(reason);
+      setReason('');
+    }
+  };
+
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4"
+          onClick={onClose}
+        >
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.9, opacity: 0 }}
+            className="bg-[#1a1a1a] rounded-2xl p-6 max-w-md w-full border border-red-500/30"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-bold text-white">Reject Verification</h3>
+              <button
+                onClick={onClose}
+                className="text-gray-400 hover:text-white transition-colors"
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            <div className="mb-6">
+              <p className="text-gray-300 mb-2">
+                Rejecting verification for:{' '}
+                <span className="text-[#E1BA73] font-semibold">{username}</span>
+              </p>
+            </div>
+
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Rejection Reason *
+              </label>
+              <textarea
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+                placeholder="Enter reason for rejection..."
+                rows={4}
+                className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-red-500 transition-colors resize-none"
+              />
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={onClose}
+                className="flex-1 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSubmit}
+                disabled={!reason.trim()}
+                className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded-lg transition-colors font-semibold"
+              >
+                <X size={16} className="inline mr-1" /> Confirm Rejection
+              </button>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+};
 
 export const VerificationContent: React.FC = React.memo(() => {
   const [page, setPage] = useState(1);
+  const [rejectionModal, setRejectionModal] = useState<{
+    isOpen: boolean;
+    userId: string | null;
+    username: string;
+  }>({
+    isOpen: false,
+    userId: null,
+    username: '',
+  });
 
-  const { data: verificationData, isLoading, error: queryError } =
+  const { data: verificationData, isLoading, error: queryError, refetch } =
     api.srkTask.getSrkTaskOnboardingVerificationRequestForAdmin.useQuery(
       ['getSrkTaskOnboardingVerificationRequestForAdmin', page],
       {
@@ -20,14 +120,60 @@ export const VerificationContent: React.FC = React.memo(() => {
       }
     );
 
-  const handleApprove = useCallback((userId: string) => {
-    console.log(`Approving user: ${userId}. Granting dashboard access.`);
-    // TODO: Implement approve API call
+  // Approve mutation
+  const approveMutation = api.srkTask.approveSrkTaskOnboardingVerificationByAdmin.useMutation({
+    onSuccess: () => {
+      refetch();
+    },
+  });
+
+  // Reject mutation
+  const rejectMutation = api.srkTask.rejectSrkTaskOnboardingVerificationByAdmin.useMutation({
+    onSuccess: () => {
+      refetch();
+      setRejectionModal({
+        isOpen: false,
+        userId: null,
+        username: '',
+      });
+    },
+  });
+
+  const handleApprove = useCallback(
+    (userId: string) => {
+      approveMutation.mutate({
+        params: { srkTaskUserId: userId },
+      });
+    },
+    [approveMutation]
+  );
+
+  const handleReject = useCallback((userId: string, username: string) => {
+    setRejectionModal({
+      isOpen: true,
+      userId,
+      username,
+    });
   }, []);
 
-  const handleReject = useCallback((userId: string) => {
-    console.log(`Rejecting user: ${userId}`);
-    // TODO: Implement reject API call
+  const handleConfirmRejection = useCallback(
+    (reason: string) => {
+      if (rejectionModal.userId) {
+        rejectMutation.mutate({
+          params: { srkTaskUserId: rejectionModal.userId },
+          body: { rejectionReason: reason },
+        });
+      }
+    },
+    [rejectionModal.userId, rejectMutation]
+  );
+
+  const handleCloseRejectionModal = useCallback(() => {
+    setRejectionModal({
+      isOpen: false,
+      userId: null,
+      username: '',
+    });
   }, []);
 
   if (isLoading) {
@@ -142,13 +288,25 @@ export const VerificationContent: React.FC = React.memo(() => {
               <GoldButton
                 onClick={() => handleApprove(request.taskUserId._id)}
                 className="flex-1"
+                disabled={approveMutation.isPending}
               >
+                {approveMutation.isPending ? (
+                  <Loader2 className="animate-spin" size={16} />
+                ) : (
+                  <Check size={16} className="inline mr-1" />
+                )}
                 Approve
               </GoldButton>
               <button
-                onClick={() => handleReject(request.taskUserId._id)}
-                className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
+                onClick={() => handleReject(request.taskUserId._id, request.taskUserId.fullName)}
+                disabled={rejectMutation.isPending}
+                className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg transition-colors flex items-center justify-center gap-1"
               >
+                {rejectMutation.isPending ? (
+                  <Loader2 className="animate-spin" size={16} />
+                ) : (
+                  <X size={16} />
+                )}
                 Reject
               </button>
             </div>
@@ -178,6 +336,13 @@ export const VerificationContent: React.FC = React.memo(() => {
           </button>
         </div>
       )}
+
+      <RejectionModal
+        isOpen={rejectionModal.isOpen}
+        onClose={handleCloseRejectionModal}
+        onConfirm={handleConfirmRejection}
+        username={rejectionModal.username}
+      />
     </div>
   );
 });

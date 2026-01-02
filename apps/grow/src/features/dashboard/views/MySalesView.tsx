@@ -7,17 +7,17 @@ import { api } from '../../../lib/api';
 import { PackageDataTypes } from 'apps/grow/src/lib/types/package';
 
 interface ReferralViewProps {
+  userID: string;
   data: any;
   isLoading: Boolean;
 }
 
 export const MySalesView:  React.FC<ReferralViewProps> = ({
+  userID,
   data = [],
   isLoading,
 }) => {
   const [detailsOpen, setDetailsOpen] = useState<number | null>(null);
-
-  const userID = '6950abcd1234ef5678901234';
 
   const getAvatarText = (name: string = ''): string => {
     const parts = name.trim().split(' ');

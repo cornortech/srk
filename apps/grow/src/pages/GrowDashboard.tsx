@@ -30,6 +30,8 @@ import { MenuIcon } from '../features/dashboard/components/ui/DashboardIcons';
 import { Toast } from '../features/dashboard/components/ui/Toast';
 import { DashboardSidebar } from '../features/dashboard/components/DashboardSidebar';
 import { api } from '../lib/api';
+import { useAuthGrowAffiliate } from '../hooks/getUser';
+import { Navigate } from 'react-router-dom';
 
 export const initialEarningData: DashboardData = {
   today: 0,
@@ -55,8 +57,13 @@ export const GrowDashboard = () => {
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(
     null
   );
+  const {
+    user,
+    isAuthenticated,
+    isLoading: userLoading,
+  } = useAuthGrowAffiliate();
 
-  const { data: growPackagesRes, isLoading: packagesLoading} =
+  const { data: growPackagesRes, isLoading: packagesLoading } =
     api.package.getAllSrkGrowPackages.useQuery(['packages']);
 
   const dataToSend = growPackagesRes?.body;
@@ -72,14 +79,12 @@ export const GrowDashboard = () => {
     []
   );
 
-  const userID = '6950abcd1234ef5678901234';
-
   const { data: affiliatedUserCommission, isLoading: commissionLoading } =
     api.growAffiliate.getUserAffiliateSalesComissionEarnings.useQuery(
-      ['affiliatedUserCommission', userID],
+      ['affiliatedUserCommission', user?._id],
       {
         params: {
-          affiliateUserId: userID,
+          affiliateUserId: user?._id || '',
         },
       }
     );
@@ -110,6 +115,15 @@ export const GrowDashboard = () => {
 
     return () => clearTimeout(timer);
   }, []);
+
+  // --- AUTH / LOADING UI MUST BE CHECKED ONLY AFTER HOOKS EXECUTED ---
+  if (userLoading) {
+    return <div className="text-white p-10 text-center">Loading...</div>;
+  }
+
+  if (!isAuthenticated || !user) {
+    return <Navigate to="/login" replace />;
+  }
 
   const renderCurrentView = (): ReactNode => {
     if (packagesLoading) {
@@ -152,13 +166,24 @@ export const GrowDashboard = () => {
       case 'referral':
         return <ReferralView data={dataToSend ?? []} showToast={showToast} />;
       case 'mysales':
-        return <MySalesView data={affiliatedUserCommission?.body ?? []} isLoading={commissionLoading} />;
+        return (
+          <MySalesView
+            data={affiliatedUserCommission?.body ?? []}
+            isLoading={commissionLoading}
+          />
+        );
       case 'leaderboard':
         return <LeaderboardView />;
       case 'payout':
         return <PayoutView payouts={payoutHistory} />;
       case 'profile':
-        return <ProfileView data={affiliatedUserCommission?.body} showToast={showToast} />;
+        return (
+          <ProfileView
+          userID={user?._id || ''}
+            data={affiliatedUserCommission?.body}
+            showToast={showToast}
+          />
+        );
       default:
         return <DashboardView data={dashboardData} showToast={showToast} />;
     }
@@ -181,6 +206,7 @@ export const GrowDashboard = () => {
 
       {/* Sidebars */}
       <DashboardSidebar
+      userID={user?._id || ''}
         isMobile={false}
         currentView={currentView}
         isOpen={isSidebarOpen}
@@ -188,6 +214,7 @@ export const GrowDashboard = () => {
         onNavigate={handleNavigation}
       />
       <DashboardSidebar
+      userID={user?._id || ''}
         isMobile={true}
         currentView={currentView}
         isOpen={isSidebarOpen}

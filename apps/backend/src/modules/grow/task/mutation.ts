@@ -177,7 +177,7 @@ const submitSrkTaskOnboardingVerification: AppRouteImplementationOrOptions<
       srkUniversityUserId: srkUniversityUserExist._id,
     });
 
-    if (srkTaskUserExist.isActivated) {
+    if (srkTaskUserExist?.isActivated) {
       return {
         status: 400,
         body: {

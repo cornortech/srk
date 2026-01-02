@@ -34,7 +34,7 @@ export const FinanceHistoryView: React.FC = () => {
     );
 
   const transactions = financeRes?.status === 200 ? financeRes.body.data : [];
-  // Assuming API doesn't return total pages yet, we check if we got a full page
+  // Pagination logic: if we received a full page of items, assume there is a next page
   const hasNextPage = transactions.length === LIMIT;
 
   return (

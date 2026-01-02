@@ -3,6 +3,7 @@ import {
   commonPaginatedQueryParamsSchema,
   commonPaginationResponse,
 } from '../../common';
+import { Types } from 'mongoose';
 
 // Action Submission details for admin
 export const srkTaskActionSubmissionDetailsSchema = z.object({
@@ -347,4 +348,22 @@ export const getAllSrkTaskUserFinanceStatementQueryParams =
 
 export type TGetAllSrkTaskUserFinanceStatementQueryParams = z.infer<
   typeof getAllSrkTaskUserFinanceStatementQueryParams
+>;
+
+export const getAllTaskAffiliateResponseSchema = z.object({
+  _id: z
+    .union([z.string(), z.instanceof(Types.ObjectId)])
+    .transform((val: any) =>
+      val instanceof Types.ObjectId ? val.toHexString() : val
+    ),
+  srkUniversityUserId: z.string(),
+  fullName: z.string(),
+  dob: z.string(),
+  isActivated: z.boolean(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
+export type TGetAllTaskAffiliateResponseSchema = z.infer<
+  typeof getAllTaskAffiliateResponseSchema
 >;

@@ -46,7 +46,7 @@ export const RejectedTaskReviewModal: React.FC<
   };
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/90 backdrop-blur-sm">
-      <DashboardGlassCard className="w-full max-w-2xl p-8 relative">
+      <DashboardGlassCard className="w-full max-w-2xl p-8 relative h-[90vh] overflow-y-auto overflow-x-hidden">
         <button
           onClick={onClose}
           className="absolute top-6 right-6 p-2 hover:bg-white/10 rounded-lg"

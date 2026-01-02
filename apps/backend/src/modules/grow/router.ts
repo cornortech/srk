@@ -28,4 +28,16 @@ export const growRouter = s.router(growContract, {
     growQueryHandler.getAllSrkGrowAffiliateVerificationRequest,
   srkGrowAffiliateVerificationRequest:
     growMutationHandler.srkGrowAffiliateVerificationRequest,
+  
+  // Affiliate Earning Payout Endpoints
+  createGrowSrkAffiliateEarningPayoutRequest:
+    growMutationHandler.createGrowSrkAffiliateEarningPayoutRequest,
+  acceptGrowSrkAffiliateEarningPayoutRequestByAdmin:
+    growMutationHandler.acceptGrowSrkAffiliateEarningPayoutRequestByAdmin,
+  rejectGrowSrkAffiliateEarningPayoutRequestByAdmin:
+    growMutationHandler.rejectGrowSrkAffiliateEarningPayoutRequestByAdmin,
+  getSrkGrowAffiliateEarningPayoutRequestByAdmin:
+    growQueryHandler.getSrkGrowAffiliateEarningPayoutRequestByAdmin,
+  getSrkGrowAffiliateEarningPayoutRequestByUser:
+    growQueryHandler.getSrkGrowAffiliateEarningPayoutRequestByUser,
 });

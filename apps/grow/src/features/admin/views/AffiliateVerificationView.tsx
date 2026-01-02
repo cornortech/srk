@@ -1,11 +1,9 @@
-import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
-
+import { motion, AnimatePresence } from 'framer-motion';
 import { GradientText } from '../components/ui/GradientText';
 import { GlassCard } from '../components/ui/GlassCard';
 import { StatusBadge } from '../components/ui/StatusBadge';
 import { RejectionModal } from '../Modals/RejectionModal';
-
 import { api } from '../../../lib/api';
 import { useSRKAlert } from '@srk/shared/hooks';
 import TablePagination from '../../../lib/ui/TablePagination';
@@ -184,23 +182,23 @@ export const AffiliateVerificationView = () => {
                     </td>
                     <td className="p-3">{item.createdAt}</td>
                     <td className="p-3">
-                        <div className="mb-3 relative group rounded-xl overflow-hidden border border-white/10">
-                          <img
-                            src={item.verificationImageUrl}
-                            alt="Current Proof"
-                            className="w-full h-16 object-cover opacity-60 group-hover:opacity-100 transition-opacity"
-                          />
-                          <div className="absolute inset-0 flex items-center justify-center gap-2">
-                            <a
-                              href={item.verificationImageUrl}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="p-2 bg-white rounded-full text-black hover:text-white hover:bg-[#b68938] transition-all opacity-0 group-hover:opacity-100"
-                            >
-                              <ExternalLink size={14} />
-                            </a>
-                          </div>
+                      <div className="mb-3 relative group rounded-xl overflow-hidden border border-white/10">
+                        <img
+                          src={item.verificationImageUrl}
+                          alt="Current Proof"
+                          className="w-full h-16 object-cover opacity-60 group-hover:opacity-100 transition-opacity"
+                        />
+                        <div className="absolute inset-0 flex items-center justify-center gap-2">
+                          <a
+                            href={item.verificationImageUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="p-2 bg-white rounded-full text-black hover:text-white hover:bg-[#b68938] transition-all opacity-0 group-hover:opacity-100"
+                          >
+                            <ExternalLink size={14} />
+                          </a>
                         </div>
+                      </div>
                     </td>
                     <td className="p-3">
                       <StatusBadge status={item.status} />

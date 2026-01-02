@@ -3,13 +3,21 @@ import { motion } from 'framer-motion';
 import { Activity, Award, Calendar, TrendingUp, Wallet } from 'lucide-react';
 import { DashboardGlassCard } from '../components/ui/DashboardGlassCard';
 import DashboardGradientText from '../components/ui/DashboardGradientText';
-import { analyticsData } from '../../../data/dummyDashboardMockData';
+import { api } from '../../../lib/api';
+import { useTaskAuthStore } from '../../../store/useTaskAuthStore';
 
 export const AnalyticsView: React.FC = () => {
   const [timeRange, setTimeRange] = useState<'day' | 'week' | 'month' | 'all'>(
     'week'
   );
   const [hoveredBar, setHoveredBar] = useState<number | null>(null);
+  const { taskUserID } = useTaskAuthStore();
+
+  const { data: analyticsDataRes } =
+    api.srkTask.getSrkTaskUserAnalytics.useQuery(
+      ['getSrkTaskUserAnalytics', taskUserID],
+      { params: { userId: taskUserID || '' } }
+    );
 
   const StatCard = ({ title, value, icon: Icon, change, gradient }: any) => (
     <DashboardGlassCard hover gradient={gradient}>
@@ -22,13 +30,15 @@ export const AnalyticsView: React.FC = () => {
           >
             <Icon size={24} className="text-amber-400" />
           </motion.div>
-          <div
-            className={`flex items-center gap-1 text-sm ${
-              change >= 0 ? 'text-emerald-400' : 'text-red-400'
-            }`}
-          >
-            {change >= 0 ? '↑' : '↓'} {Math.abs(change)}%
-          </div>
+          {change && (
+            <div
+              className={`flex items-center gap-1 text-sm ${
+                change >= 0 ? 'text-emerald-400' : 'text-red-400'
+              }`}
+            >
+              {change >= 0 ? '↑' : '↓'} {Math.abs(change)}%
+            </div>
+          )}
         </div>
         <p className="text-sm text-zinc-400 mb-2">{title}</p>
         <motion.p
@@ -76,54 +86,54 @@ export const AnalyticsView: React.FC = () => {
         <div className="md:col-span-2">
           <StatCard
             title="Wallet Coins"
-            value={analyticsData.totalCoins}
+            value={analyticsDataRes?.body?.coinsData?.walletCoins}
             icon={Wallet}
-            change={12.5}
+            change={null}
             gradient="gold"
           />
         </div>
         <div>
           <StatCard
             title="Today"
-            value={analyticsData.today}
+            value={analyticsDataRes?.body?.coinsData?.today}
             icon={Activity}
-            change={8.2}
+            change={analyticsDataRes?.body?.coinsData?.todayChange}
             gradient="blue"
           />
         </div>
         <div>
           <StatCard
             title="7 Days"
-            value={analyticsData.last7Days}
+            value={analyticsDataRes?.body?.coinsData?.last7Days}
             icon={TrendingUp}
-            change={15.3}
+            change={analyticsDataRes?.body?.coinsData?.last7DaysChange}
             gradient="green"
           />
         </div>
         <div className="md:col-span-2">
           <StatCard
             title="28 Days"
-            value={analyticsData.last28Days}
+            value={analyticsDataRes?.body?.coinsData?.last28Days}
             icon={Calendar}
-            change={22.7}
+            change={analyticsDataRes?.body?.coinsData?.last28DaysChange}
             gradient="purple"
           />
         </div>
         <div className="md:col-span-2">
           <StatCard
             title="All Time"
-            value={analyticsData.allTime}
+            value={analyticsDataRes?.body?.coinsData?.allTimeCoins}
             icon={Award}
-            change={45.8}
+            change={null}
             gradient="gold"
           />
         </div>
       </div>
 
       {/* Detailed Analytics Grid */}
-      <div className="grid lg:grid-cols-3 gap-8">
-        {/* Activity Graph */}
-        <DashboardGlassCard className="lg:col-span-2">
+      {/* <div className="grid lg:grid-cols-3 gap-8"> */}
+      {/* Activity Graph */}
+      {/* <DashboardGlassCard className="lg:col-span-2">
           <div className="p-6">
             <h3 className="text-lg font-bold text-white mb-6">
               Activity Graph
@@ -146,10 +156,10 @@ export const AnalyticsView: React.FC = () => {
                     style={{ height: `${value}%` }}
                   >
                     <div className="absolute inset-0 bg-div-to-b from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                  </div>
+                  </div> */}
 
-                  {/* Tooltip on hover */}
-                  {hoveredBar === index && (
+      {/* Tooltip on hover */}
+      {/* {hoveredBar === index && (
                     <motion.div
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
@@ -169,78 +179,78 @@ export const AnalyticsView: React.FC = () => {
               <span>Day 12</span>
             </div>
           </div>
+        </DashboardGlassCard> */}
+
+      {/* Stats & History */}
+      <div className="space-y-6">
+        <DashboardGlassCard>
+          <div className="p-6">
+            <h3 className="text-lg font-bold text-white mb-6">Quick Stats</h3>
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <span className="text-zinc-400">Completion Rate</span>
+                <div className="flex items-center gap-2">
+                  <div className="w-16 h-2 bg-zinc-800 rounded-full overflow-hidden">
+                    <motion.div
+                      className="h-full bg-green-500"
+                      initial={{ width: 0 }}
+                      animate={{
+                        width: `${analyticsDataRes?.body?.tasksData?.taskCompletionRate}%`,
+                      }}
+                      transition={{ duration: 1, delay: 0.2 }}
+                    />
+                  </div>
+                  <span className="text-white font-medium">
+                    {analyticsDataRes?.body?.tasksData?.taskCompletionRate}%
+                  </span>
+                </div>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-zinc-400">Average Daily</span>
+                <span className="text-white font-medium">
+                  {analyticsDataRes?.body?.tasksData?.averageDailyCoins} Coins
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-zinc-400">Peak Day</span>
+                <span className="text-amber-400 font-medium">
+                  {analyticsDataRes?.body?.tasksData?.peakDayCoins} Coins
+                </span>
+              </div>
+            </div>
+          </div>
         </DashboardGlassCard>
 
-        {/* Stats & History */}
-        <div className="space-y-6">
-          <DashboardGlassCard>
-            <div className="p-6">
-              <h3 className="text-lg font-bold text-white mb-6">Quick Stats</h3>
-              <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <span className="text-zinc-400">Completion Rate</span>
-                  <div className="flex items-center gap-2">
-                    <div className="w-16 h-2 bg-zinc-800 rounded-full overflow-hidden">
-                      <motion.div
-                        className="h-full bg-green-500"
-                        initial={{ width: 0 }}
-                        animate={{
-                          width: `${analyticsData.completionRate}%`,
-                        }}
-                        transition={{ duration: 1, delay: 0.2 }}
-                      />
+        {/* <DashboardGlassCard>
+          <div className="p-6">
+            <h3 className="text-lg font-bold text-white mb-6">
+              Recent History
+            </h3>
+            <div className="space-y-4 max-h-48 overflow-y-auto">
+              {analyticsDataRes?.body?.coinsData?.history.map((day, index) => (
+                <motion.div
+                  key={index}
+                  className="flex items-center justify-between"
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-div-to-r from-amber-500/20 to-yellow-500/20 flex items-center justify-center">
+                      <Calendar size={14} className="text-amber-400" />
                     </div>
-                    <span className="text-white font-medium">
-                      {analyticsData.completionRate}%
-                    </span>
+                    <span className="text-zinc-400">{day.date}</span>
                   </div>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-zinc-400">Average Daily</span>
                   <span className="text-white font-medium">
-                    {analyticsData.averageDaily} Coins
+                    +{day.coins} Coins
                   </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-zinc-400">Peak Day</span>
-                  <span className="text-amber-400 font-medium">
-                    {analyticsData.peakDay.coins} Coins
-                  </span>
-                </div>
-              </div>
+                </motion.div>
+              ))}
             </div>
-          </DashboardGlassCard>
-
-          <DashboardGlassCard>
-            <div className="p-6">
-              <h3 className="text-lg font-bold text-white mb-6">
-                Recent History
-              </h3>
-              <div className="space-y-4 max-h-48 overflow-y-auto">
-                {analyticsData.history.map((day, index) => (
-                  <motion.div
-                    key={index}
-                    className="flex items-center justify-between"
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-div-to-r from-amber-500/20 to-yellow-500/20 flex items-center justify-center">
-                        <Calendar size={14} className="text-amber-400" />
-                      </div>
-                      <span className="text-zinc-400">{day.date}</span>
-                    </div>
-                    <span className="text-white font-medium">
-                      +{day.coins} Coins
-                    </span>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-          </DashboardGlassCard>
-        </div>
+          </div>
+        </DashboardGlassCard> */}
       </div>
+      {/* </div> */}
     </div>
   );
 };

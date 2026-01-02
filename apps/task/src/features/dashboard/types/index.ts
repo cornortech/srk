@@ -1,22 +1,24 @@
 import React from 'react';
 
 export type SocialPlatform =
-  | 'youtube'
-  | 'instagram'
-  | 'tiktok'
-  | 'facebook'
-  | 'twitter';
-export type TaskType = 'follow' | 'watch' | 'post' | 'like' | 'share';
+  | 'YouTube'
+  | 'Instagram'
+  | 'TikTok'
+  | 'Facebook'
+  | 'Twitter';
+export type TaskType = 'follow' | 'like';
 export type DashboardView =
   | 'verification'
   | 'analytics'
   | 'tasks'
+  | 'taskHistory'
   | 'leaderboard'
   | 'coinExchange'
   | 'profile'
   | 'payout'
+  | 'finance'
   | 'logout';
-export type TaskStatus = 'pending' | 'completed' | 'rejected' | 'in_review';
+export type TaskStatus = 'pending' | 'approved' | 'rejected';
 
 export interface Task {
   id: string;
@@ -72,7 +74,10 @@ export interface AnalyticsData {
   activityGraph: number[];
   completionRate: number;
   averageDaily: number;
-  peakDay: { date: string; coins: number };
+  peakDay: {
+    // date: string;
+    coins: number;
+  };
 }
 
 export interface UserProfile {

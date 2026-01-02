@@ -171,8 +171,6 @@ export const VerificationModal: React.FC<VerificationModalProps> = ({
   };
 
   const handleSubmit = async () => {
-    // Fallback ID for testing if user is not logged in
-
     if (!universityID) {
       console.error('No User ID available for submission');
       return;

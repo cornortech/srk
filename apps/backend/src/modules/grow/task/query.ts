@@ -1,5 +1,9 @@
 import mongoose from 'mongoose';
-import { srkTaskContract } from '@srk/shared/contracts';
+import {
+  getAllTaskAffiliateResponseSchema,
+  srkTaskContract,
+  taskContract,
+} from '@srk/shared/contracts';
 import { AppRouteImplementationOrOptions } from '@ts-rest/express/src/lib/types';
 import { srkTaskUserModel } from '../../../model/task/srkTaskUserModel';
 import { srkTaskActionSubmissionModel } from '../../../model/task/srkTaskActionSubmissionModel';
@@ -874,15 +878,19 @@ const getAllSrkTaskUserFinanceStatement: AppRouteImplementationOrOptions<
         totalRecords,
         totalPages: Math.ceil(totalRecords / limit),
         data: earnings.map((earning) => ({
-          _id: earning._id.toString(),
-          taskUserId: earning.taskUserId.toString(),
-          growPackageTodoId: earning.growPackageTodoId.toString(),
+          _id: earning._id?.toString() || '',
+          taskUserId: earning.taskUserId?.toString() || '',
+          growPackageTodoId: earning.growPackageTodoId?.toString() || '',
           description: earning.description,
           type: earning.type,
           coin: earning.coin,
           coinAfterTransaction: earning.coinAfterTransaction,
-          createdAt: earning.createdAt.toISOString(),
-          updatedAt: earning.updatedAt.toISOString(),
+          createdAt: earning.createdAt
+            ? new Date(earning.createdAt).toISOString()
+            : '',
+          updatedAt: earning.updatedAt
+            ? new Date(earning.updatedAt).toISOString()
+            : '',
         })),
       },
     };
@@ -1108,6 +1116,60 @@ const getSrkTaskActionsByPlatforms: AppRouteImplementationOrOptions<
   }
 };
 
+const getApprovedSrkTaskAffiliateVerificationRequest: AppRouteImplementationOrOptions<
+  typeof srkTaskContract.getAllSrkTaskAffiliateVerificationRequest
+> = async ({ query }) => {
+  try {
+    const srkUniversityUserId = query.srkUniversityUserId;
+
+    // 1️⃣ Look for verification request
+    const verificationRecord = await srkTaskUserModel
+      .findOne({
+        srkUniversityUserId,
+      })
+      .lean();
+
+    // 2️⃣ Not found → pending
+    if (!verificationRecord) {
+      return {
+        status: 200,
+        body: {
+          success: false,
+          message: 'Not verified yet',
+        },
+      };
+    }
+
+    // 3️⃣ If found but not approved
+    if (verificationRecord.isActivated) {
+      return {
+        status: 200,
+        body: {
+          success: false,
+          message: `Verification status: ${verificationRecord.isActivated}`,
+        },
+      };
+    }
+
+    return {
+      status: 200,
+      body: {
+        success: true,
+        message: 'Affiliate request found',
+        data: getAllTaskAffiliateResponseSchema.parse(verificationRecord),
+      },
+    };
+  } catch (error: any) {
+    return {
+      status: 500,
+      body: {
+        success: false,
+        message: error.message ?? 'Internal server error',
+      },
+    };
+  }
+};
+
 export const srkTaskQueryHandler = {
   getSrkTaskActionsByPlatforms,
   getSrkTaskUserProfile,
@@ -1118,4 +1180,5 @@ export const srkTaskQueryHandler = {
   getAllSrkTasksActionSubmissionByStatusForAdmin,
   getAllSrkTasksActionSubmissionsByUser,
   getAllSrkTaskUserFinanceStatement,
+  getApprovedSrkTaskAffiliateVerificationRequest,
 };

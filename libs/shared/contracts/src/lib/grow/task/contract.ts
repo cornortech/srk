@@ -7,6 +7,7 @@ import {
   paginatedSrkTaskActionSubmissionsByUserSchema,
   paginatedSrkTaskUserFinanceStatementSchema,
   getAllSrkTaskUserFinanceStatementQueryParams,
+  getAllTaskAffiliateResponseSchema,
 } from './schema';
 
 import { paginatedSrkTaskEarningRequestsByUserSchema } from './schema';
@@ -247,5 +248,22 @@ export const srkTaskContract = c.router({
     },
     summary: 'Approve an action submission for srk task user by admin',
   },
-
+  getAllSrkTaskAffiliateVerificationRequest: {
+    method: 'GET',
+    path: '/task/affiliate/get-approved-verification-request',
+    query: z.object({
+      srkUniversityUserId: z.string(), // required
+    }),
+    responses: {
+      200: z.object({
+        success: z.boolean(),
+        message: z.string(),
+        data: getAllTaskAffiliateResponseSchema,
+      }),
+      403: ErrorSchema,
+      404: ErrorSchema,
+      500: ErrorSchema,
+    },
+    summary: 'Get approved SRK Task Affiliate Verification Request for a user',
+  },
 });

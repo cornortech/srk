@@ -8,7 +8,6 @@ const s = initServer();
 export const srkTaskRouter = s.router(srkTaskContract, {
   getSrkTaskUserProfile: srkTaskQueryHandler.getSrkTaskUserProfile,
   getSrkTaskUserAnalytics: srkTaskQueryHandler.getSrkTaskUserAnalytics,
-
   getAllSrkTaskUserEarningsLeaderboard:
     srkTaskQueryHandler.getAllSrkTaskUserEarningsLeaderboard,
   getAllSrkTaskEarningPayoutsByAdmin:
@@ -19,7 +18,8 @@ export const srkTaskRouter = s.router(srkTaskContract, {
     srkTaskQueryHandler.getAllSrkTasksActionSubmissionsByUser,
   getSrkTaskUserEarningsPayoutsByUser:
     srkTaskQueryHandler.getSrkTaskUserEarningsPayoutsByUser,
-  getAllSrkTaskUserFinanceStatement: srkTaskQueryHandler.getAllSrkTaskUserFinanceStatement,
+  getAllSrkTaskUserFinanceStatement:
+    srkTaskQueryHandler.getAllSrkTaskUserFinanceStatement,
   srkTaskEarningsPayoutRequest:
     srkTaskMutationHandler.srkTaskEarningsPayoutRequest,
   acceptSrkTaskUserEarningsPayout:
@@ -39,4 +39,6 @@ export const srkTaskRouter = s.router(srkTaskContract, {
   srkTaskActionSubmission: srkTaskMutationHandler.srkTaskActionSubmission,
   getSrkTaskActionsByPlatforms:
     srkTaskQueryHandler.getSrkTaskActionsByPlatforms,
+  getAllSrkTaskAffiliateVerificationRequest:
+    srkTaskQueryHandler.getApprovedSrkTaskAffiliateVerificationRequest,
 });

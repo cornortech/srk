@@ -35,12 +35,15 @@ import { api } from '../../lib/api';
 import { useTaskAuthStore } from '../../store/useTaskAuthStore';
 import { FinanceHistoryView } from '../../features/dashboard/views/FinanceHistoryView';
 import { TaskHistoryView } from '../../features/dashboard/views/TaskHistoryView';
+import { useAuthAffiliateVerification } from '../../../../../libs/shared/hooks/src/lib/useAuthAffiliate';
 
 export const AfterVerifiedDashboardPage: React.FC = () => {
-  const [view, setView] = useState<'landing' | 'dashboard'>('dashboard');
+  const { user, isAuthenticated, isLoading } = useAuthAffiliateVerification();
+
+  const [view, setView] = useState<'landing' | 'dashboard'>('landing');
   const [dashView, setDashView] = useState<DashboardView>('verification');
   const [showVerification, setShowVerification] = useState(false);
-  const [isApproved, setIsApproved] = useState(true);
+  const [isApproved, setIsApproved] = useState(false);
   const [hasPurchased, setHasPurchased] = useState(false);
   const [payoutRequested, setPayoutRequested] = useState(false);
   const [taskCategory, setTaskCategory] = useState<TaskType | null>(null);
@@ -71,7 +74,7 @@ export const AfterVerifiedDashboardPage: React.FC = () => {
   //     : 0;
   const balance = 1250;
 
-  const eligible = balance;
+  const eligible = Math.max(0, balance - 250);
 
   if (userProfileData?.body.userData.kycStatus === 'approved') {
     if (!isApproved) setIsApproved(true);
@@ -255,6 +258,10 @@ export const AfterVerifiedDashboardPage: React.FC = () => {
         return null;
     }
   };
+
+  if (!user || !isAuthenticated) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-black text-white overflow-x-hidden">

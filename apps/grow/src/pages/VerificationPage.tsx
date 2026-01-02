@@ -18,7 +18,7 @@ export const GrowVerificationPage = () => {
   const { uploadFile, isUploading } = useSRKFileUpload('grow');
   const navigate = useNavigate();
   const {
-    user, 
+    user,
     isAuthenticated,
     isLoading: userLoading,
   } = useAuthGrowAffiliate();
@@ -38,7 +38,7 @@ export const GrowVerificationPage = () => {
       ['approvedAffiliatedUser', user?._id],
       {
         query: {
-          srkUniversityUserId: user?._id || "",
+          srkUniversityUserId: user?._id || '',
         },
       }
     );
@@ -132,10 +132,18 @@ export const GrowVerificationPage = () => {
     return <Navigate to="/login" replace />;
   }
 
-  // // Extract backend response
-  // if (!checkLoading && approvedResp?.body?.success === true) {
-  //   return <Navigate to="/affiliate/dashboard" replace />;
-  // }
+  // Extract backend response
+  if (!checkLoading && approvedResp?.body?.success === true) {
+    const affiliateUserId = approvedResp?.body?.relatedUserData?.[0]?._id;
+
+    if (affiliateUserId) {
+      localStorage.setItem('affiliateGrowUserId', affiliateUserId);
+
+      return <Navigate to="/affiliate/dashboard" replace />;
+    }
+  } else if (!checkLoading && approvedResp?.body?.success === false) {
+    return <Navigate to="/login" replace />;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0a0705] to-black text-white">
@@ -338,5 +346,5 @@ export const GrowVerificationPage = () => {
         />
       )}
     </div>
-  );
-};
+  )
+}

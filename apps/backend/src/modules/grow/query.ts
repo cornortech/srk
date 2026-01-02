@@ -457,28 +457,26 @@ const getApprovedSrkGrowAffiliateVerificationRequest: AppRouteImplementationOrOp
   try {
     const srkUniversityUserId = query.srkUniversityUserId;
 
-    // 1️⃣ Look for verification request
-    const verificationRecord = await growSrkAffiliateVerificationModel.findOne({
-      srkUniversityUserId,
-    });
+    const verificationRecord =
+      await growSrkAffiliateVerificationModel.findOne({
+        srkUniversityUserId,
+      });
 
-    // 2️⃣ Not found → pending
     if (!verificationRecord) {
       return {
-        status: 200,
+        status: 403,
         body: {
           success: false,
-          message: 'Not verified yet',
+          message: 'Affiliate Verification not found',
           verificationRequests: [],
           relatedUserData: [],
         },
       };
     }
 
-    // 3️⃣ If found but not approved
     if (verificationRecord.status !== 'approved') {
       return {
-        status: 200,
+        status: 203,
         body: {
           success: false,
           message: `Verification status: ${verificationRecord.status}`,
@@ -488,10 +486,11 @@ const getApprovedSrkGrowAffiliateVerificationRequest: AppRouteImplementationOrOp
       };
     }
 
-    // 4️⃣ Approved → fetch related user data
-    const userData = await growSocialMediaPackageUserModel.findOne({
-      srkUniversityUserId,
-    });
+    // ✅ Only required fields returned
+    const userData = await growSocialMediaPackageUserModel.findOne(
+      { srkUniversityUserId },
+      { _id: 1, status: 1, userType: 1 }
+    );
 
     return {
       status: 200,
@@ -514,6 +513,7 @@ const getApprovedSrkGrowAffiliateVerificationRequest: AppRouteImplementationOrOp
     };
   }
 };
+
 
 // SRK Grow Enrollment Users
 export const growQueryHandler = {

@@ -37,7 +37,7 @@ export const VerificationModal: React.FC<VerificationModalProps> = ({
   onClose,
   onSuccess,
 }) => {
-  const { user } = useTaskAuthStore();
+  const { universityID } = useTaskAuthStore();
   const [currentStep, setCurrentStep] = useState(1);
   const { mutateAsync: submitVerification } =
     api.srkTask.submitSrkTaskOnboardingVerification.useMutation();
@@ -172,9 +172,8 @@ export const VerificationModal: React.FC<VerificationModalProps> = ({
 
   const handleSubmit = async () => {
     // Fallback ID for testing if user is not logged in
-    const effectiveUserId = user?._id || '692d5b88a8f7bb228f363bfc';
 
-    if (!effectiveUserId) {
+    if (!universityID) {
       console.error('No User ID available for submission');
       return;
     }
@@ -195,7 +194,7 @@ export const VerificationModal: React.FC<VerificationModalProps> = ({
 
       // 2. Submit to backend
       const response = await submitVerification({
-        params: { srkUniversityId: effectiveUserId },
+        params: { srkUniversityId: universityID },
         body: {
           documentUrl: docRes.url,
           verificationImageUrl: selfieRes.url,

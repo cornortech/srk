@@ -5,6 +5,9 @@ import { allPlatforms } from '../../../../data/dummyDashboardMockData';
 import { Task } from '../../types';
 import { DashboardGlassCard } from '../ui/DashboardGlassCard';
 import MagneticButton from '../ui/DashboardMagneticButton';
+import { api } from '../../../../lib/api';
+import { useTaskAuthStore } from '../../../../store/useTaskAuthStore';
+import useSRKFileUpload from '../../../../../../../libs/shared/hooks/src/lib/useSRKFileUpload';
 
 interface VerificationUploadModalProps {
   task: Task;
@@ -22,7 +25,9 @@ export const VerificationUploadModal: React.FC<
   const [screenshot, setScreenshot] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
+  const { uploadFile, overallProgress } = useSRKFileUpload('task');
+  const { taskUserID } = useTaskAuthStore();
+  const submitAction = api.srkTask.srkTaskActionSubmission.useMutation();
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -36,27 +41,45 @@ export const VerificationUploadModal: React.FC<
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!screenshot) {
       addNotification('Please upload a screenshot first', 'error');
       return;
     }
 
     setIsUploading(true);
-    // Simulate upload progress
-    const interval = setInterval(() => {
-      setUploadProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          setIsUploading(false);
-          completeTask(task.id);
-          addNotification(`Proof submitted for ${task.title}`, 'success');
-          setTimeout(() => onClose(), 1000);
-          return 100;
+
+    try {
+      const { url } = await uploadFile(screenshot, 'image');
+
+      submitAction.mutate(
+        {
+          body: {
+            actionTodoId: task.id,
+            srkTaskUserId: taskUserID || '',
+            actionVerificationImageUrl: url,
+          },
+        },
+        {
+          onSuccess: () => {
+            setIsUploading(false);
+            completeTask(task.id);
+            addNotification(`Proof submitted for ${task.title}`, 'success');
+            setTimeout(() => onClose(), 1000);
+          },
+          onError: (error: any) => {
+            setIsUploading(false);
+            addNotification(
+              `Submission failed: ${error.body?.message || 'Unknown error'}`,
+              'error'
+            );
+          },
         }
-        return prev + 10;
-      });
-    }, 200);
+      );
+    } catch (error: any) {
+      setIsUploading(false);
+      addNotification(`Upload failed: ${error.message}`, 'error');
+    }
   };
 
   const platformInfo = allPlatforms.find((p) => p.platform === task.platform);
@@ -169,13 +192,13 @@ export const VerificationUploadModal: React.FC<
             <div className="space-y-2">
               <div className="flex justify-between text-sm text-zinc-400">
                 <span>Uploading...</span>
-                <span>{uploadProgress}%</span>
+                <span>{overallProgress}%</span>
               </div>
               <div className="w-full h-2 bg-zinc-800 rounded-full overflow-hidden">
                 <motion.div
                   className="h-full bg-div-to-r from-amber-500 to-yellow-500"
                   initial={{ width: '0%' }}
-                  animate={{ width: `${uploadProgress}%` }}
+                  animate={{ width: `${overallProgress}%` }}
                   transition={{ duration: 0.3 }}
                 />
               </div>

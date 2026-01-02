@@ -1,19 +1,65 @@
-import { useState } from 'react';
-import { leaderboardData } from '../../../data/dummyDashboardMockData';
+import React, { useState } from 'react';
+import { leaderboardData as leaderboardDataMock } from '../../../data/dummyDashboardMockData';
 import DashboardGradientText from '../components/ui/DashboardGradientText';
 import { Award, Clock, Coins, Search, TrendingUp, Trophy } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { DashboardGlassCard } from '../components/ui/DashboardGlassCard';
+import { api } from '../../../lib/api';
+import { LeaderboardEntry } from '../types';
+import { useTaskAuthStore } from '../../../store/useTaskAuthStore';
 
 export const LeaderboardView: React.FC = () => {
   const [timeRange, setTimeRange] = useState<'weekly' | 'monthly' | 'allTime'>(
     'weekly'
   );
+  const { taskUserID } = useTaskAuthStore();
   const [searchQuery, setSearchQuery] = useState('');
 
-  const filteredData = leaderboardData.filter((user) =>
-    user.user.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const { data: leaderboardRes } =
+    api.srkTask.getAllSrkTaskUserEarningsLeaderboard.useQuery(
+      ['getTaskUserLeaderboard', timeRange, searchQuery, taskUserID],
+      {
+        query: {
+          timeRange: timeRange === 'allTime' ? 'all' : timeRange,
+          search: searchQuery || undefined,
+          currentUserId: taskUserID || undefined,
+        },
+      }
+    );
+
+  const currentLeaderboard: LeaderboardEntry[] =
+    leaderboardRes?.status === 200 && leaderboardRes.body.data
+      ? leaderboardRes.body.data.leaderboard.map((entry) => ({
+          rank: entry.rank,
+          user: entry.fullName,
+          score: entry.coins,
+          consistencyDays: entry.consistencyDays,
+          isSelf: !!(
+            leaderboardRes.body.data.currentUser &&
+            entry.rank === leaderboardRes.body.data.currentUser.rank
+          ),
+          avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(
+            entry.fullName
+          )}&background=random&color=fff`,
+          change:
+            entry.change > 0
+              ? 'up'
+              : entry.change < 0
+              ? 'down'
+              : ('stable' as 'up' | 'down' | 'stable'),
+          changeAmount: Math.abs(entry.change),
+        }))
+      : leaderboardDataMock.filter((user) =>
+          user.user.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+
+  const currentUserStats =
+    leaderboardRes?.status === 200
+      ? leaderboardRes.body.data.currentUser
+      : null;
+  // fallback for self stats if using mock data
+  const selfInMock = leaderboardDataMock.find((u) => u.isSelf);
+
   return (
     <div className="space-y-8">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -59,7 +105,7 @@ export const LeaderboardView: React.FC = () => {
 
       {/* Top 3 Podium */}
       <div className="grid grid-cols-3 gap-6 mb-8">
-        {filteredData.slice(0, 3).map((user, index) => (
+        {currentLeaderboard.slice(0, 3).map((user, index) => (
           <motion.div
             key={user.rank}
             initial={{ y: 50, opacity: 0 }}
@@ -177,7 +223,7 @@ export const LeaderboardView: React.FC = () => {
                 </tr>
               </thead>
               <tbody>
-                {filteredData.slice(3).map((user) => (
+                {currentLeaderboard.slice(3).map((user) => (
                   <motion.tr
                     key={user.rank}
                     initial={{ opacity: 0, y: 10 }}
@@ -271,7 +317,7 @@ export const LeaderboardView: React.FC = () => {
           </div>
 
           {/* Your Position */}
-          {leaderboardData.find((u) => u.isSelf) && (
+          {(currentUserStats || selfInMock) && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -289,12 +335,14 @@ export const LeaderboardView: React.FC = () => {
                 </div>
                 <div className="text-right">
                   <p className="text-2xl font-bold text-purple-400">
-                    #{leaderboardData.find((u) => u.isSelf)?.rank}
+                    #{currentUserStats?.rank ?? selfInMock?.rank}
                   </p>
                   <p className="text-sm text-zinc-400">
-                    {leaderboardData
-                      .find((u) => u.isSelf)
-                      ?.score.toLocaleString()}{' '}
+                    {(
+                      currentUserStats?.coins ??
+                      selfInMock?.score ??
+                      0
+                    ).toLocaleString()}{' '}
                     points
                   </p>
                 </div>

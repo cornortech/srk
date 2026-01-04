@@ -58,10 +58,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         getAffiliateUserDashboardStats?.body.todayEarnings?.totalEarnings ?? 0
       ),
       variant: 'gold' as CardVariant,
-      change: `+${
-        getAffiliateUserDashboardStats?.body.todayEarnings?.growthPercentage ??
+      change: `+${getAffiliateUserDashboardStats?.body.todayEarnings?.growthPercentage ??
         0
-      }%`,
+        }%`,
       icon: <SparklesIcon className="w-4 h-4" />,
       description: 'Earnings today',
     },
@@ -79,13 +78,12 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       label: '7 Days',
       value: formatRupees(
         getAffiliateUserDashboardStats?.body.last7DaysEarnings?.totalEarnings ??
-          0
+        0
       ),
       variant: 'violet' as CardVariant,
-      change: `+${
-        getAffiliateUserDashboardStats?.body.last7DaysEarnings
-          ?.growthPercentage ?? 0
-      }%`,
+      change: `+${getAffiliateUserDashboardStats?.body.last7DaysEarnings
+        ?.growthPercentage ?? 0
+        }%`,
       icon: <TrendingUpIcon className="w-4 h-4" />,
       description: 'Weekly earnings',
     },
@@ -115,10 +113,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           ?.totalEarnings ?? 0
       ),
       variant: 'blue' as CardVariant,
-      change: `+${
-        getAffiliateUserDashboardStats?.body.last28DaysEarnings
-          ?.growthPercentage ?? 0
-      }%`,
+      change: `+${getAffiliateUserDashboardStats?.body.last28DaysEarnings
+        ?.growthPercentage ?? 0
+        }%`,
       icon: (
         <svg
           className="w-4 h-4"
@@ -137,9 +134,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     },
     {
       label: 'Consistency',
-      value: `${
-        consistencyDays
-      } Days`,
+      value: `${consistencyDays
+        } Days`,
       variant: 'emerald' as CardVariant,
       info: 'Active streak',
       icon: (
@@ -176,10 +172,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             font-bold text-sm
             transition-all duration-300
             flex items-center justify-center gap-2
-            ${
-              data.wallet <= 0
-                ? 'opacity-50 cursor-not-allowed'
-                : 'hover:scale-105'
+            ${data.wallet <= 0
+              ? 'opacity-50 cursor-not-allowed'
+              : 'hover:scale-105'
             }
           `}
           style={{
@@ -228,43 +223,41 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                       stat.variant === 'gold'
                         ? `${GOLD_PRIMARY}20`
                         : stat.variant === 'emerald'
-                        ? `${SUCCESS}20`
-                        : stat.variant === 'violet'
-                        ? `rgba(139, 92, 246, 0.2)`
-                        : stat.variant === 'blue'
-                        ? `${INFO}20`
-                        : 'rgba(255, 255, 255, 0.1)',
+                          ? `${SUCCESS}20`
+                          : stat.variant === 'violet'
+                            ? `rgba(139, 92, 246, 0.2)`
+                            : stat.variant === 'blue'
+                              ? `${INFO}20`
+                              : 'rgba(255, 255, 255, 0.1)',
                   }}
                 >
                   {React.cloneElement(stat.icon, {
-                    className: `${stat.icon.props.className} ${
-                      stat.variant === 'gold'
-                        ? `text-[${GOLD_PRIMARY}]`
-                        : stat.variant === 'emerald'
+                    className: `${stat.icon.props.className} ${stat.variant === 'gold'
+                      ? `text-[${GOLD_PRIMARY}]`
+                      : stat.variant === 'emerald'
                         ? `text-[${SUCCESS}]`
                         : stat.variant === 'violet'
-                        ? 'text-[#8B5CF6]'
-                        : stat.variant === 'blue'
-                        ? `text-[${INFO}]`
-                        : 'text-gray-400'
-                    }`,
+                          ? 'text-[#8B5CF6]'
+                          : stat.variant === 'blue'
+                            ? `text-[${INFO}]`
+                            : 'text-gray-400'
+                      }`,
                   })}
                 </div>
               </div>
 
               <div className="mt-auto">
                 <div
-                  className={`text-xl font-bold ${
-                    stat.variant === 'gold'
-                      ? 'text-[#E1BA73]'
-                      : stat.variant === 'emerald'
+                  className={`text-xl font-bold ${stat.variant === 'gold'
+                    ? 'text-[#E1BA73]'
+                    : stat.variant === 'emerald'
                       ? 'text-emerald-400'
                       : stat.variant === 'violet'
-                      ? 'text-violet-400'
-                      : stat.variant === 'blue'
-                      ? 'text-blue-400'
-                      : 'text-white'
-                  }`}
+                        ? 'text-violet-400'
+                        : stat.variant === 'blue'
+                          ? 'text-blue-400'
+                          : 'text-white'
+                    }`}
                 >
                   {stat.value}
                 </div>
@@ -272,11 +265,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 <div className="flex items-center justify-between mt-2 pt-2 border-t border-white/5">
                   {stat.change && (
                     <span
-                      className={`text-xs font-medium ${
-                        stat.change.startsWith('+')
-                          ? 'text-emerald-400'
-                          : 'text-rose-400'
-                      }`}
+                      className={`text-xs font-medium ${stat.change.startsWith('+')
+                        ? 'text-emerald-400'
+                        : 'text-rose-400'
+                        }`}
                     >
                       {stat.change}
                     </span>

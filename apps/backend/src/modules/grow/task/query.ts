@@ -930,21 +930,23 @@ const getAllSrkTasksActionSubmissionsByUser: AppRouteImplementationOrOptions<
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
-        .populate<{
-          growEnrollmentId: any;
-        }>({
-          path: 'growEnrollmentId',
-          populate: [
-            { path: 'growSocialMediaPackageId' },
-            { path: 'growSocialMediaPackageTypeId' },
-            { path: 'growSocialMediaPackageSubTypeId' },
-          ],
+        .populate({
+          path: 'growPackageTodoId',
+          populate: {
+            path: 'growSocialMediaPackageEnrollmentId',
+            populate: [
+              { path: 'growSocialMediaPackageId' },
+              { path: 'growSocialMediaPackageTypeId' },
+              { path: 'growSocialMediaPackageSubTypeId' },
+            ],
+          },
         })
         .lean(),
     ]);
 
-    const data = submissions.map((submission) => {
-      const e = submission.growEnrollmentId;
+    const data = submissions.map((submission: any) => {
+      const e =
+        submission.growPackageTodoId?.growSocialMediaPackageEnrollmentId;
       return {
         _id: submission._id.toString(),
         taskUserId: submission.taskUserId.toString(),
@@ -1121,7 +1123,16 @@ const getApprovedSrkTaskAffiliateVerificationRequest: AppRouteImplementationOrOp
 > = async ({ query }) => {
   try {
     const srkUniversityUserId = query.srkUniversityUserId;
-
+    if (!mongoose.isValidObjectId(srkUniversityUserId)) {
+      return {
+        status: 404,
+        body: {
+          success: false,
+          message: 'Invalid University User ID',
+        },
+      };
+    }
+    console.log('srk university Id', srkUniversityUserId);
     // 1️⃣ Look for verification request
     const verificationRecord = await srkTaskUserModel
       .findOne({
@@ -1139,27 +1150,31 @@ const getApprovedSrkTaskAffiliateVerificationRequest: AppRouteImplementationOrOp
         },
       };
     }
+    const srkTaskOnboardingVerificationRequestExists =
+      await srkTaskOnboardingVerificationRequestModel.findOne({
+        taskUserId: verificationRecord._id,
+      });
 
-    // 3️⃣ If found but not approved
-    if (verificationRecord.isActivated) {
-      return {
-        status: 200,
-        body: {
-          success: false,
-          message: `Verification status: ${verificationRecord.isActivated}`,
-        },
-      };
-    }
-
+    console.log('TaskUserId', verificationRecord._id);
     return {
       status: 200,
       body: {
         success: true,
         message: 'Affiliate request found',
-        data: getAllTaskAffiliateResponseSchema.parse(verificationRecord),
+        data: getAllTaskAffiliateResponseSchema.parse({
+          ...verificationRecord,
+          _id: verificationRecord._id.toString(),
+          srkUniversityUserId:
+            verificationRecord.srkUniversityUserId.toString(),
+          isActivated: verificationRecord.isActivated,
+          status: srkTaskOnboardingVerificationRequestExists.status,
+          createdAt: verificationRecord.createdAt.toISOString(),
+          updatedAt: verificationRecord.updatedAt.toISOString(),
+        }),
       },
     };
   } catch (error: any) {
+    console.log(error);
     return {
       status: 500,
       body: {

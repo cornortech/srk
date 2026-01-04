@@ -125,8 +125,11 @@ export const srkTaskUserAnalyticsSchema = z.object({
   coinsData: z.object({
     walletCoins: z.number(),
     today: z.number(),
+    todayChange: z.number(),
     last7Days: z.number(),
+    last7DaysChange: z.number(),
     last28Days: z.number(),
+    last28DaysChange: z.number(),
     allTimeCoins: z.number(),
   }),
   tasksData: z.object({

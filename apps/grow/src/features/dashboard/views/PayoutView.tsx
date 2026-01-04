@@ -138,12 +138,12 @@ export const PayoutView: React.FC<PayoutViewProps> = ({ userID }) => {
             <div className="text-center">
               <div
                 className={`text-lg font-bold ${stat.variant === 'gold'
-                    ? 'text-[#E1BA73]'
-                    : stat.variant === 'emerald'
-                      ? 'text-emerald-400'
-                      : stat.variant === 'blue'
-                        ? 'text-blue-400'
-                        : 'text-violet-400'
+                  ? 'text-[#E1BA73]'
+                  : stat.variant === 'emerald'
+                    ? 'text-emerald-400'
+                    : stat.variant === 'blue'
+                      ? 'text-blue-400'
+                      : 'text-violet-400'
                   }`}
               >
                 {stat.value}

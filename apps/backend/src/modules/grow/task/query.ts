@@ -1089,18 +1089,7 @@ const getAllSrkTasksActionSubmissionsByUser: AppRouteImplementationOrOptions<
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
-        .populate<{
-          taskUserId: any;
-        }>({
-          path: 'taskUserId',
-          populate: {
-            path: 'srkUniversityUserId',
-            select: 'fullName email phoneNumber',
-          },
-        })
-        .populate<{
-          growPackageTodoId: any;
-        }>({
+        .populate({
           path: 'growPackageTodoId',
           populate: {
             path: 'growSocialMediaPackageEnrollmentId',
@@ -1114,89 +1103,51 @@ const getAllSrkTasksActionSubmissionsByUser: AppRouteImplementationOrOptions<
         .lean(),
     ]);
 
-    const data = submissions.map((submission) => {
-      const taskUser = submission.taskUserId;
-      const todo = submission.growPackageTodoId;
-      const enrollment = todo?.growSocialMediaPackageEnrollmentId;
-
+    const data = submissions.map((submission: any) => {
+      const e =
+        submission.growPackageTodoId?.growSocialMediaPackageEnrollmentId;
       return {
         _id: submission._id.toString(),
-        type: submission.type,
+        taskUserId: submission.taskUserId.toString(),
         description: submission.description,
-        taskUserId: taskUser
+        growEnrollmentId: e
           ? {
-              _id: taskUser._id.toString(),
-              fullName: taskUser.fullName || 'N/A',
-              email: taskUser.srkUniversityUserId?.email || 'N/A',
-              phoneNumber: taskUser.srkUniversityUserId?.phoneNumber || 'N/A',
-            }
-          : undefined,
-        growPackageTodoId: todo
-          ? {
-              _id: todo._id.toString(),
-              postUrl: todo.postUrl,
-              profileUrl: todo.profileUrl,
-              type: todo.type,
-              platform: todo.platform,
-              followCounts: todo.followCounts || 0,
-              likeCounts: todo.likeCounts || 0,
-              enrollment: enrollment
+              _id: e._id.toString(),
+              socialMediaPlatform: e.socialMediaPlatform,
+              profileLinkURL: e.profileLinkURL || [],
+              amount: e.amount,
+              isActive: e.isActive,
+              createdAt: e.createdAt?.toISOString?.() || '',
+              updatedAt: e.updatedAt?.toISOString?.() || '',
+              growSocialMediaPackageId: e.growSocialMediaPackageId
                 ? {
-                    _id: enrollment._id.toString(),
-                    socialMediaPlatform: enrollment.socialMediaPlatform,
-                    profileLinkURL: enrollment.profileLinkURL || [],
-                    amount: enrollment.amount,
-                    isActive: enrollment.isActive,
-                    growSocialMediaPackageId: enrollment.growSocialMediaPackageId
-                      ? {
-                          _id:
-                            enrollment.growSocialMediaPackageId._id?.toString?.() ||
-                            '',
-                          name: enrollment.growSocialMediaPackageId.name,
-                          description:
-                            enrollment.growSocialMediaPackageId.description,
-                          socialMediaPlatforms:
-                            enrollment.growSocialMediaPackageId
-                              .socialMediaPlatforms || [],
-                          amount: enrollment.growSocialMediaPackageId.amount,
-                        }
-                      : undefined,
-                    growSocialMediaPackageTypeId: enrollment.growSocialMediaPackageTypeId
-                      ? {
-                          _id:
-                            enrollment.growSocialMediaPackageTypeId._id?.toString?.() ||
-                            '',
-                          name: enrollment.growSocialMediaPackageTypeId.name,
-                          description:
-                            enrollment.growSocialMediaPackageTypeId.description,
-                          amount: enrollment.growSocialMediaPackageTypeId.amount,
-                        }
-                      : undefined,
-                    growSocialMediaPackageSubTypeId:
-                      enrollment.growSocialMediaPackageSubTypeId
-                        ? {
-                            _id:
-                              enrollment.growSocialMediaPackageSubTypeId._id?.toString?.() ||
-                              '',
-                            name: enrollment.growSocialMediaPackageSubTypeId
-                              .name,
-                            description:
-                              enrollment.growSocialMediaPackageSubTypeId
-                                .description,
-                            taskType:
-                              enrollment.growSocialMediaPackageSubTypeId
-                                .taskType,
-                            noOfLikes:
-                              enrollment.growSocialMediaPackageSubTypeId
-                                .noOfLikes,
-                            noOfVideos:
-                              enrollment.growSocialMediaPackageSubTypeId
-                                .noOfVideos,
-                            noOfFollowers:
-                              enrollment.growSocialMediaPackageSubTypeId
-                                .noOfFollowers,
-                          }
-                        : undefined,
+                    _id: e.growSocialMediaPackageId._id?.toString?.() || '',
+                    name: e.growSocialMediaPackageId.name,
+                    description: e.growSocialMediaPackageId.description,
+                    socialMediaPlatforms:
+                      e.growSocialMediaPackageId.socialMediaPlatforms || [],
+                    amount: e.growSocialMediaPackageId.amount,
+                  }
+                : undefined,
+              growSocialMediaPackageTypeId: e.growSocialMediaPackageTypeId
+                ? {
+                    _id: e.growSocialMediaPackageTypeId._id?.toString?.() || '',
+                    name: e.growSocialMediaPackageTypeId.name,
+                    description: e.growSocialMediaPackageTypeId.description,
+                    amount: e.growSocialMediaPackageTypeId.amount,
+                  }
+                : undefined,
+              growSocialMediaPackageSubTypeId: e.growSocialMediaPackageSubTypeId
+                ? {
+                    _id:
+                      e.growSocialMediaPackageSubTypeId._id?.toString?.() || '',
+                    name: e.growSocialMediaPackageSubTypeId.name,
+                    description: e.growSocialMediaPackageSubTypeId.description,
+                    taskType: e.growSocialMediaPackageSubTypeId.taskType,
+                    noOfLikes: e.growSocialMediaPackageSubTypeId.noOfLikes,
+                    noOfVideos: e.growSocialMediaPackageSubTypeId.noOfVideos,
+                    noOfFollowers:
+                      e.growSocialMediaPackageSubTypeId.noOfFollowers,
                   }
                 : undefined,
             }
@@ -1230,6 +1181,7 @@ const getAllSrkTasksActionSubmissionsByUser: AppRouteImplementationOrOptions<
     };
   }
 };
+
 
 const getSrkTaskActionsByPlatforms: AppRouteImplementationOrOptions<
   typeof srkTaskContract.getSrkTaskActionsByPlatforms

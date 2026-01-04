@@ -4,7 +4,7 @@ const srkTaskActionSubmissionSchema = new mongoose.Schema(
   {
     taskUserId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'taskUser',
+      ref: 'srkTaskUser',
       required: true,
     },
     growPackageTodoId: {

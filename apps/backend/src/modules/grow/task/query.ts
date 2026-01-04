@@ -1,5 +1,9 @@
 import mongoose from 'mongoose';
-import { srkTaskContract } from '@srk/shared/contracts';
+import {
+  getAllTaskAffiliateResponseSchema,
+  srkTaskContract,
+  taskContract,
+} from '@srk/shared/contracts';
 import { AppRouteImplementationOrOptions } from '@ts-rest/express/src/lib/types';
 import { srkTaskUserModel } from '../../../model/task/srkTaskUserModel';
 import { srkTaskActionSubmissionModel } from '../../../model/task/srkTaskActionSubmissionModel';
@@ -30,67 +34,117 @@ const getAllSrkTasksActionSubmissionByStatusForAdmin: AppRouteImplementationOrOp
         .skip(skip)
         .limit(limit)
         .populate<{
-          growEnrollmentId: any;
-          // growEnrollmentId:{
-          //  growSocialMediaPackageId : Pick<IGrowSocialMediaPackage,"_id"|"name"|"description"|"socialMediaPlatforms"|"amount">;
-          // growSocialMediaPackageTypeId : Pick<IGrowSocialMediaPackageType,"_id"|"name"|"description"|"amount">;
-          //  growSocialMediaPackageSubTypeId : Pick<IGrowSocialMediaPackageSubType,"_id"|"name"|"description"|"taskType"|"noOfLikes"|"noOfVideos"|"noOfFollowers">;
-          // }
+          taskUserId: any;
         }>({
-          path: 'growEnrollmentId',
-          populate: [
-            { path: 'growSocialMediaPackageId' },
-            { path: 'growSocialMediaPackageTypeId' },
-            { path: 'growSocialMediaPackageSubTypeId' },
-          ],
+          path: 'taskUserId',
+          populate: {
+            path: 'srkUniversityUserId',
+            select: 'fullName email phoneNumber',
+          },
+        })
+        .populate<{
+          growPackageTodoId: any;
+        }>({
+          path: 'growPackageTodoId',
+          populate: {
+            path: 'growSocialMediaPackageEnrollmentId',
+            populate: [
+              { path: 'growSocialMediaPackageId' },
+              { path: 'growSocialMediaPackageTypeId' },
+              { path: 'growSocialMediaPackageSubTypeId' },
+            ],
+          },
         })
         .lean(),
     ]);
 
     const data = submissions.map((submission) => {
-      const e = submission.growEnrollmentId;
+      const taskUser = submission.taskUserId;
+      const todo = submission.growPackageTodoId;
+      const enrollment = todo?.growSocialMediaPackageEnrollmentId;
+
       return {
         _id: submission._id.toString(),
+        type: submission.type,
         description: submission.description,
-        taskUserId: submission.taskUserId.toString(),
-        growEnrollmentId: e
+        taskUserId: taskUser
           ? {
-              _id: e._id.toString(),
-              socialMediaPlatform: e.socialMediaPlatform,
-              profileLinkURL: e.profileLinkURL || [],
-              amount: e.amount,
-              isActive: e.isActive,
-              createdAt: e.createdAt?.toISOString?.() || '',
-              updatedAt: e.updatedAt?.toISOString?.() || '',
-              growSocialMediaPackageId: e.growSocialMediaPackageId
+              _id: taskUser._id.toString(),
+              fullName: taskUser.fullName || 'N/A',
+              email: taskUser.srkUniversityUserId?.email || 'N/A',
+              phoneNumber: taskUser.srkUniversityUserId?.phoneNumber || 'N/A',
+            }
+          : undefined,
+        growPackageTodoId: todo
+          ? {
+              _id: todo._id.toString(),
+              postUrl: todo.postUrl,
+              profileUrl: todo.profileUrl,
+              type: todo.type,
+              platform: todo.platform,
+              followCounts: todo.followCounts || 0,
+              likeCounts: todo.likeCounts || 0,
+              enrollment: enrollment
                 ? {
-                    _id: e.growSocialMediaPackageId._id?.toString?.() || '',
-                    name: e.growSocialMediaPackageId.name,
-                    description: e.growSocialMediaPackageId.description,
-                    socialMediaPlatforms:
-                      e.growSocialMediaPackageId.socialMediaPlatforms || [],
-                    amount: e.growSocialMediaPackageId.amount,
-                  }
-                : undefined,
-              growSocialMediaPackageTypeId: e.growSocialMediaPackageTypeId
-                ? {
-                    _id: e.growSocialMediaPackageTypeId._id?.toString?.() || '',
-                    name: e.growSocialMediaPackageTypeId.name,
-                    description: e.growSocialMediaPackageTypeId.description,
-                    amount: e.growSocialMediaPackageTypeId.amount,
-                  }
-                : undefined,
-              growSocialMediaPackageSubTypeId: e.growSocialMediaPackageSubTypeId
-                ? {
-                    _id:
-                      e.growSocialMediaPackageSubTypeId._id?.toString?.() || '',
-                    name: e.growSocialMediaPackageSubTypeId.name,
-                    description: e.growSocialMediaPackageSubTypeId.description,
-                    taskType: e.growSocialMediaPackageSubTypeId.taskType,
-                    noOfLikes: e.growSocialMediaPackageSubTypeId.noOfLikes,
-                    noOfVideos: e.growSocialMediaPackageSubTypeId.noOfVideos,
-                    noOfFollowers:
-                      e.growSocialMediaPackageSubTypeId.noOfFollowers,
+                    _id: enrollment._id.toString(),
+                    socialMediaPlatform: enrollment.socialMediaPlatform,
+                    profileLinkURL: enrollment.profileLinkURL || [],
+                    amount: enrollment.amount,
+                    isActive: enrollment.isActive,
+                    growSocialMediaPackageId:
+                      enrollment.growSocialMediaPackageId
+                        ? {
+                            _id:
+                              enrollment.growSocialMediaPackageId._id?.toString?.() ||
+                              '',
+                            name: enrollment.growSocialMediaPackageId.name,
+                            description:
+                              enrollment.growSocialMediaPackageId.description,
+                            socialMediaPlatforms:
+                              enrollment.growSocialMediaPackageId
+                                .socialMediaPlatforms || [],
+                            amount: enrollment.growSocialMediaPackageId.amount,
+                          }
+                        : undefined,
+                    growSocialMediaPackageTypeId:
+                      enrollment.growSocialMediaPackageTypeId
+                        ? {
+                            _id:
+                              enrollment.growSocialMediaPackageTypeId._id?.toString?.() ||
+                              '',
+                            name: enrollment.growSocialMediaPackageTypeId.name,
+                            description:
+                              enrollment.growSocialMediaPackageTypeId
+                                .description,
+                            amount:
+                              enrollment.growSocialMediaPackageTypeId.amount,
+                          }
+                        : undefined,
+                    growSocialMediaPackageSubTypeId:
+                      enrollment.growSocialMediaPackageSubTypeId
+                        ? {
+                            _id:
+                              enrollment.growSocialMediaPackageSubTypeId._id?.toString?.() ||
+                              '',
+                            name: enrollment.growSocialMediaPackageSubTypeId
+                              .name,
+                            description:
+                              enrollment.growSocialMediaPackageSubTypeId
+                                .description,
+                            taskType:
+                              enrollment.growSocialMediaPackageSubTypeId
+                                .taskType,
+                            noOfLikes:
+                              enrollment.growSocialMediaPackageSubTypeId
+                                .noOfLikes,
+                            noOfVideos:
+                              enrollment.growSocialMediaPackageSubTypeId
+                                .noOfVideos,
+                            noOfFollowers:
+                              enrollment.growSocialMediaPackageSubTypeId
+                                .noOfFollowers,
+                          }
+                        : undefined,
                   }
                 : undefined,
             }
@@ -575,6 +629,20 @@ const getAllSrkTaskUserEarningsLeaderboard: AppRouteImplementationOrOptions<
           },
         },
         { $unwind: '$user' },
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'user.srkUniversityUserId',
+            foreignField: '_id',
+            as: 'universityUser',
+          },
+        },
+        {
+          $unwind: {
+            path: '$universityUser',
+            preserveNullAndEmptyArrays: true,
+          },
+        },
 
         // Add search filter if search query exists
         ...(search
@@ -589,7 +657,11 @@ const getAllSrkTaskUserEarningsLeaderboard: AppRouteImplementationOrOptions<
 
         {
           $addFields: {
+            userId: { $toString: '$_id' },
             fullName: '$user.fullName',
+            email: '$universityUser.email',
+            phone: '$universityUser.phoneNumber',
+            isActivated: '$user.isActivated',
             consistencyDays: {
               $floor: {
                 $divide: [
@@ -613,7 +685,11 @@ const getAllSrkTaskUserEarningsLeaderboard: AppRouteImplementationOrOptions<
           $project: {
             _id: 0,
             rank: 1,
+            userId: 1,
             fullName: 1,
+            email: 1,
+            phone: 1,
+            isActivated: 1,
             coins: 1,
             consistencyDays: 1,
             change: { $literal: 0 },
@@ -735,6 +811,10 @@ const getAllSrkTaskEarningPayoutsByAdmin: AppRouteImplementationOrOptions<
         .populate({
           path: 'taskUserId',
           select: 'fullName srkUniversityUserId',
+          populate: {
+            path: 'srkUniversityUserId',
+            select: 'email',
+          },
         }),
     ]);
 
@@ -745,23 +825,100 @@ const getAllSrkTaskEarningPayoutsByAdmin: AppRouteImplementationOrOptions<
         limit,
         totalRecords,
         totalPages: Math.ceil(totalRecords / limit),
-        data: payouts.map((payout) => ({
-          _id: payout._id.toString(),
-          taskUserId: payout.taskUserId?._id.toString() || '',
-          taskUserName: (payout.taskUserId as any)?.fullName || 'Unknown User',
-          taskUserEmail:
-            ((payout.taskUserId as any)?.srkUniversityUserId as any)?.email ||
-            'Unknown Email',
-          transactionId: payout.transactionId || null,
-          coinsUsed: payout.coinsUsed,
-          tds: payout.tds,
-          amount: payout.amount,
-          status: payout.status,
-          paymentScreenshotUrl: payout.paymentScreenshotUrl || null,
-          rejectionReason: payout.rejectionReason || null,
-          createdAt: payout.createdAt.toISOString(),
-          updatedAt: payout.updatedAt.toISOString(),
-        })),
+        data: payouts.map((payout) => {
+          const taskUser = payout.taskUserId as any;
+          return {
+            _id: payout._id.toString(),
+            taskUserId: {
+              _id: taskUser?._id?.toString() || '',
+              fullName: taskUser?.fullName || 'Unknown User',
+              email: taskUser?.srkUniversityUserId?.email || 'Unknown Email',
+            },
+            transactionId: payout.transactionId || null,
+            coinsUsed: payout.coinsUsed,
+            tds: payout.tds,
+            amount: payout.amount,
+            status: payout.status,
+            paymentScreenshotUrl: payout.paymentScreenshotUrl || null,
+            rejectionReason: payout.rejectionReason || null,
+            createdAt: payout.createdAt.toISOString(),
+            updatedAt: payout.updatedAt.toISOString(),
+          };
+        }),
+      },
+    };
+  } catch (error) {
+    console.error(error);
+    return {
+      status: 500,
+      body: {
+        success: false,
+        message: error.message || 'Internal server error',
+      },
+    };
+  }
+};
+
+const getSrkTaskOnboardingVerificationRequestForAdmin: AppRouteImplementationOrOptions<
+  typeof srkTaskContract.getSrkTaskOnboardingVerificationRequestForAdmin
+> = async ({ query }) => {
+  try {
+    const page = Number(query?.page ?? 1);
+    const limit = Number(query?.limit ?? 10);
+    const skip = (page - 1) * limit;
+    const status = query?.status;
+
+    const filter = status ? { status } : {};
+
+    const [totalRecords, verificationRequests] = await Promise.all([
+      srkTaskOnboardingVerificationRequestModel.countDocuments(filter),
+      srkTaskOnboardingVerificationRequestModel
+        .find(filter)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .populate({
+          path: 'taskUserId',
+          select: 'fullName dob isActivated srkUniversityUserId',
+          populate: {
+            path: 'srkUniversityUserId',
+            select: 'email phoneNumber',
+          },
+        })
+        .lean(),
+    ]);
+
+    return {
+      status: 200,
+      body: {
+        page,
+        limit,
+        totalRecords,
+        totalPages: Math.ceil(totalRecords / limit),
+        data: verificationRequests.map((request) => {
+          const taskUser = request.taskUserId as any;
+          return {
+            _id: request._id.toString(),
+            taskUserId: {
+              _id: taskUser._id.toString(),
+              fullName: taskUser.fullName,
+              dob: taskUser.dob,
+              isActivated: taskUser.isActivated,
+              srkUniversityUserId: {
+                _id: taskUser.srkUniversityUserId._id.toString(),
+                email: taskUser.srkUniversityUserId.email,
+                phoneNumber: taskUser.srkUniversityUserId.phoneNumber,
+              },
+            },
+            kycDocumentUrl: request.kycDocumentUrl,
+            imageUrl: request.imageUrl,
+            signatureUrl: request.signatureUrl,
+            status: request.status,
+            rejectionReason: request.rejectionReason || null,
+            createdAt: request.createdAt.toISOString(),
+            updatedAt: request.updatedAt.toISOString(),
+          };
+        }),
       },
     };
   } catch (error) {
@@ -802,7 +959,15 @@ const getSrkTaskUserEarningsPayoutsByUser: AppRouteImplementationOrOptions<
         .find(filter)
         .sort({ createdAt: -1 })
         .skip(skip)
-        .limit(limit),
+        .limit(limit)
+        .populate({
+          path: 'taskUserId',
+          select: 'fullName srkUniversityUserId',
+          populate: {
+            path: 'srkUniversityUserId',
+            select: 'email',
+          },
+        }),
     ]);
 
     return {
@@ -812,19 +977,26 @@ const getSrkTaskUserEarningsPayoutsByUser: AppRouteImplementationOrOptions<
         limit,
         totalRecords,
         totalPages: Math.ceil(totalRecords / limit),
-        data: payouts.map((payout) => ({
-          _id: payout._id.toString(),
-          taskUserId: payout.taskUserId.toString(),
-          amount: payout.amount,
-          coinsUsed: payout.coinsUsed,
-          tds: payout.tds,
-          transactionId: payout.transactionId || null,
-          status: payout.status,
-          paymentScreenshotUrl: payout.paymentScreenshotUrl || null,
-          rejectionReason: payout.rejectionReason || null,
-          createdAt: payout.createdAt.toISOString(),
-          updatedAt: payout.updatedAt.toISOString(),
-        })),
+        data: payouts.map((payout) => {
+          const taskUser = payout.taskUserId as any;
+          return {
+            _id: payout._id.toString(),
+            taskUserId: {
+              _id: taskUser?._id?.toString() || '',
+              fullName: taskUser?.fullName || 'Unknown User',
+              email: taskUser?.srkUniversityUserId?.email || 'Unknown Email',
+            },
+            amount: payout.amount,
+            coinsUsed: payout.coinsUsed,
+            tds: payout.tds,
+            transactionId: payout.transactionId || null,
+            status: payout.status,
+            paymentScreenshotUrl: payout.paymentScreenshotUrl || null,
+            rejectionReason: payout.rejectionReason || null,
+            createdAt: payout.createdAt.toISOString(),
+            updatedAt: payout.updatedAt.toISOString(),
+          };
+        }),
       },
     };
   } catch (error) {
@@ -874,15 +1046,19 @@ const getAllSrkTaskUserFinanceStatement: AppRouteImplementationOrOptions<
         totalRecords,
         totalPages: Math.ceil(totalRecords / limit),
         data: earnings.map((earning) => ({
-          _id: earning._id.toString(),
-          taskUserId: earning.taskUserId.toString(),
-          growPackageTodoId: earning.growPackageTodoId.toString(),
+          _id: earning._id?.toString() || '',
+          taskUserId: earning.taskUserId?.toString() || '',
+          growPackageTodoId: earning.growPackageTodoId?.toString() || '',
           description: earning.description,
           type: earning.type,
           coin: earning.coin,
           coinAfterTransaction: earning.coinAfterTransaction,
-          createdAt: earning.createdAt.toISOString(),
-          updatedAt: earning.updatedAt.toISOString(),
+          createdAt: earning.createdAt
+            ? new Date(earning.createdAt).toISOString()
+            : '',
+          updatedAt: earning.updatedAt
+            ? new Date(earning.updatedAt).toISOString()
+            : '',
         })),
       },
     };
@@ -922,21 +1098,23 @@ const getAllSrkTasksActionSubmissionsByUser: AppRouteImplementationOrOptions<
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
-        .populate<{
-          growEnrollmentId: any;
-        }>({
-          path: 'growEnrollmentId',
-          populate: [
-            { path: 'growSocialMediaPackageId' },
-            { path: 'growSocialMediaPackageTypeId' },
-            { path: 'growSocialMediaPackageSubTypeId' },
-          ],
+        .populate({
+          path: 'growPackageTodoId',
+          populate: {
+            path: 'growSocialMediaPackageEnrollmentId',
+            populate: [
+              { path: 'growSocialMediaPackageId' },
+              { path: 'growSocialMediaPackageTypeId' },
+              { path: 'growSocialMediaPackageSubTypeId' },
+            ],
+          },
         })
         .lean(),
     ]);
 
-    const data = submissions.map((submission) => {
-      const e = submission.growEnrollmentId;
+    const data = submissions.map((submission: any) => {
+      const e =
+        submission.growPackageTodoId?.growSocialMediaPackageEnrollmentId;
       return {
         _id: submission._id.toString(),
         taskUserId: submission.taskUserId.toString(),
@@ -1108,14 +1286,350 @@ const getSrkTaskActionsByPlatforms: AppRouteImplementationOrOptions<
   }
 };
 
+const getAllSrkTaskUsersForAdmin: AppRouteImplementationOrOptions<
+  typeof srkTaskContract.getAllSrkTaskUsersForAdmin
+> = async ({ query }) => {
+  try {
+    const page = Number(query?.page ?? 1);
+    const limit = Number(query?.limit ?? 10);
+    const skip = (page - 1) * limit;
+    const search = query?.search?.trim();
+    const isActivated = query?.isActivated;
+
+    // Build filter
+    const filter: any = {};
+    if (search) {
+      filter.$or = [
+        { fullName: { $regex: search, $options: 'i' } },
+        { 'srkUniversityUserId.email': { $regex: search, $options: 'i' } },
+      ];
+    }
+    if (isActivated !== undefined) {
+      filter.isActivated = isActivated === 'true';
+    }
+
+    const [totalRecords, users] = await Promise.all([
+      srkTaskUserModel.countDocuments(filter),
+      srkTaskUserModel
+        .find(filter)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .populate({
+          path: 'srkUniversityUserId',
+          select: 'email phoneNumber',
+        })
+        .lean(),
+    ]);
+
+    // Get additional stats for each user
+    const userIds = users.map((u) => u._id);
+
+    // Get coins earned for each user
+    const coinsAgg = await srkTaskEarningStatementModel.aggregate([
+      {
+        $match: {
+          taskUserId: { $in: userIds },
+          type: 'credit',
+        },
+      },
+      {
+        $group: {
+          _id: '$taskUserId',
+          totalCoins: { $sum: '$coin' },
+        },
+      },
+    ]);
+
+    // Get tasks completed for each user
+    const tasksAgg = await srkTaskActionSubmissionModel.aggregate([
+      {
+        $match: {
+          taskUserId: { $in: userIds },
+        },
+      },
+      {
+        $group: {
+          _id: '$taskUserId',
+          totalTasks: { $sum: 1 },
+          completedTasks: {
+            $sum: {
+              $cond: [{ $eq: ['$status', 'approved'] }, 1, 0],
+            },
+          },
+        },
+      },
+    ]);
+
+    // Get KYC status for each user
+    const kycAgg = await srkTaskOnboardingVerificationRequestModel.aggregate([
+      {
+        $match: {
+          taskUserId: { $in: userIds },
+        },
+      },
+      {
+        $sort: { createdAt: -1 },
+      },
+      {
+        $group: {
+          _id: '$taskUserId',
+          latestStatus: { $first: '$status' },
+        },
+      },
+    ]);
+
+    // Create lookup maps
+    const coinsMap = new Map(
+      coinsAgg.map((c) => [c._id.toString(), c.totalCoins])
+    );
+    const tasksMap = new Map(
+      tasksAgg.map((t) => [
+        t._id.toString(),
+        { total: t.totalTasks, completed: t.completedTasks },
+      ])
+    );
+    const kycMap = new Map(
+      kycAgg.map((k) => [k._id.toString(), k.latestStatus])
+    );
+
+    const data = users.map((user) => {
+      const userId = user._id.toString();
+      const universityUser = user.srkUniversityUserId as any;
+      const coins = coinsMap.get(userId) || 0;
+      const tasks = tasksMap.get(userId) || { total: 0, completed: 0 };
+      const kycStatus = kycMap.get(userId) || null;
+
+      return {
+        _id: userId,
+        fullName: user.fullName,
+        email: universityUser?.email || 'N/A',
+        phone: universityUser?.phoneNumber || 'N/A',
+        dob: user.dob,
+        isActivated: user.isActivated,
+        kycStatus,
+        totalCoins: coins,
+        totalTasks: tasks.total,
+        completedTasks: tasks.completed,
+        successRate:
+          tasks.total > 0 ? (tasks.completed / tasks.total) * 100 : 0,
+        joinedAt: user.createdAt.toISOString(),
+        updatedAt: user.updatedAt.toISOString(),
+      };
+    });
+
+    return {
+      status: 200,
+      body: {
+        page,
+        limit,
+        totalRecords,
+        totalPages: Math.ceil(totalRecords / limit),
+        data,
+      },
+    };
+  } catch (error) {
+    console.error(error);
+    return {
+      status: 500,
+      body: {
+        success: false,
+        message: error.message || 'Internal server error',
+      },
+    };
+  }
+};
+
+const getAllCompletedSrkTaskSubmissionsForAdmin: AppRouteImplementationOrOptions<
+  typeof srkTaskContract.getAllCompletedSrkTaskSubmissionsForAdmin
+> = async ({ query }) => {
+  try {
+    const page = Number(query?.page ?? 1);
+    const limit = Number(query?.limit ?? 20);
+    const skip = (page - 1) * limit;
+    const type = query?.type; // 'follow' or 'like'
+    const platform = query?.platform; // 'Instagram', 'YouTube', etc.
+
+    // Build filter - only approved submissions
+    const filter: any = { status: 'approved' };
+    if (type) {
+      filter.type = type;
+    }
+
+    const [totalRecords, submissions] = await Promise.all([
+      srkTaskActionSubmissionModel.countDocuments(filter),
+      srkTaskActionSubmissionModel
+        .find(filter)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .populate({
+          path: 'taskUserId',
+          select: 'fullName srkUniversityUserId',
+          populate: {
+            path: 'srkUniversityUserId',
+            select: 'email phoneNumber',
+          },
+        })
+        .populate({
+          path: 'growPackageTodoId',
+          populate: {
+            path: 'growSocialMediaPackageEnrollmentId',
+            populate: {
+              path: 'growSocialMediaPackageUserId',
+              select: 'fullName email phoneNumber',
+            },
+          },
+        })
+        .lean(),
+    ]);
+
+    // Filter by platform if specified and map data
+    const filteredData = submissions
+      .filter((submission) => {
+        const todo = submission.growPackageTodoId as any;
+        if (!platform) return true;
+        return todo?.platform === platform;
+      })
+      .map((submission) => {
+        const taskUser = submission.taskUserId as any;
+        const todo = submission.growPackageTodoId as any;
+        const enrollment = todo?.growSocialMediaPackageEnrollmentId;
+        const taskOwner = enrollment?.growSocialMediaPackageUserId;
+
+        return {
+          _id: submission._id.toString(),
+          type: submission.type,
+          platform: todo?.platform || 'Unknown',
+          description: submission.description,
+          screenshotUrl: submission.screenshotUrl,
+          postUrl: todo?.postUrl || null,
+          profileUrl: todo?.profileUrl || null,
+          completedBy: {
+            _id: taskUser?._id?.toString() || '',
+            fullName: taskUser?.fullName || 'Unknown User',
+            email: taskUser?.srkUniversityUserId?.email || 'N/A',
+            phone: taskUser?.srkUniversityUserId?.phoneNumber || 'N/A',
+          },
+          taskOwner: taskOwner
+            ? {
+                fullName: taskOwner.fullName || 'Unknown Owner',
+                email: taskOwner.email || 'N/A',
+                phone: taskOwner.phoneNumber || 'N/A',
+              }
+            : null,
+          coinEarned: todo?.type === 'follow' ? 10 : 5, // You can adjust this based on your business logic
+          completedAt: submission.createdAt.toISOString(),
+          updatedAt: submission.updatedAt.toISOString(),
+        };
+      });
+
+    // Recalculate total after platform filtering
+    const filteredTotal = filteredData.length;
+
+    return {
+      status: 200,
+      body: {
+        page,
+        limit,
+        totalRecords: platform ? filteredTotal : totalRecords,
+        totalPages: Math.ceil(
+          (platform ? filteredTotal : totalRecords) / limit
+        ),
+        data: filteredData,
+      },
+    };
+  } catch (error) {
+    console.error(error);
+    return {
+      status: 500,
+      body: {
+        success: false,
+        message: error.message || 'Internal server error',
+      },
+    };
+  }
+};
+
+const getApprovedSrkTaskAffiliateVerificationRequest: AppRouteImplementationOrOptions<
+  typeof srkTaskContract.getAllSrkTaskAffiliateVerificationRequest
+> = async ({ query }) => {
+  try {
+    const srkUniversityUserId = query.srkUniversityUserId;
+    if (!mongoose.isValidObjectId(srkUniversityUserId)) {
+      return {
+        status: 404,
+        body: {
+          success: false,
+          message: 'Invalid University User ID',
+        },
+      };
+    }
+    console.log('srk university Id', srkUniversityUserId);
+    // 1️⃣ Look for verification request
+    const verificationRecord = await srkTaskUserModel
+      .findOne({
+        srkUniversityUserId,
+      })
+      .lean();
+
+    // 2️⃣ Not found → pending
+    if (!verificationRecord) {
+      return {
+        status: 200,
+        body: {
+          success: false,
+          message: 'Not verified yet',
+        },
+      };
+    }
+    const srkTaskOnboardingVerificationRequestExists =
+      await srkTaskOnboardingVerificationRequestModel.findOne({
+        taskUserId: verificationRecord._id,
+      });
+
+    console.log('TaskUserId', verificationRecord._id);
+    return {
+      status: 200,
+      body: {
+        success: true,
+        message: 'Affiliate request found',
+        data: getAllTaskAffiliateResponseSchema.parse({
+          ...verificationRecord,
+          _id: verificationRecord._id.toString(),
+          srkUniversityUserId:
+            verificationRecord.srkUniversityUserId.toString(),
+          isActivated: verificationRecord.isActivated,
+          status: srkTaskOnboardingVerificationRequestExists.status,
+          createdAt: verificationRecord.createdAt.toISOString(),
+          updatedAt: verificationRecord.updatedAt.toISOString(),
+        }),
+      },
+    };
+  } catch (error: any) {
+    console.log(error);
+    return {
+      status: 500,
+      body: {
+        success: false,
+        message: error.message ?? 'Internal server error',
+      },
+    };
+  }
+};
+
 export const srkTaskQueryHandler = {
   getSrkTaskActionsByPlatforms,
   getSrkTaskUserProfile,
   getSrkTaskUserAnalytics,
   getAllSrkTaskUserEarningsLeaderboard,
   getAllSrkTaskEarningPayoutsByAdmin,
+  getSrkTaskOnboardingVerificationRequestForAdmin,
   getSrkTaskUserEarningsPayoutsByUser,
   getAllSrkTasksActionSubmissionByStatusForAdmin,
   getAllSrkTasksActionSubmissionsByUser,
   getAllSrkTaskUserFinanceStatement,
+  getApprovedSrkTaskAffiliateVerificationRequest,
+  getAllSrkTaskUsersForAdmin,
+  getAllCompletedSrkTaskSubmissionsForAdmin,
 };

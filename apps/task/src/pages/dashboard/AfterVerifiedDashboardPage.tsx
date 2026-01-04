@@ -35,12 +35,15 @@ import { api } from '../../lib/api';
 import { useTaskAuthStore } from '../../store/useTaskAuthStore';
 import { FinanceHistoryView } from '../../features/dashboard/views/FinanceHistoryView';
 import { TaskHistoryView } from '../../features/dashboard/views/TaskHistoryView';
+import { useAuthAffiliateVerification } from '../../../../../libs/shared/hooks/src/lib/useAuthAffiliate';
 
 export const AfterVerifiedDashboardPage: React.FC = () => {
-  const [view, setView] = useState<'landing' | 'dashboard'>('dashboard');
+  const { user, isAuthenticated, isLoading } = useAuthAffiliateVerification();
+
+  const [view, setView] = useState<'landing' | 'dashboard'>('landing');
   const [dashView, setDashView] = useState<DashboardView>('verification');
   const [showVerification, setShowVerification] = useState(false);
-  const [isApproved, setIsApproved] = useState(true);
+  const [isApproved, setIsApproved] = useState(false);
   const [hasPurchased, setHasPurchased] = useState(false);
   const [payoutRequested, setPayoutRequested] = useState(false);
   const [taskCategory, setTaskCategory] = useState<TaskType | null>(null);
@@ -52,26 +55,59 @@ export const AfterVerifiedDashboardPage: React.FC = () => {
   const [showRequestModal, setShowRequestModal] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  const { taskUserID } = useTaskAuthStore();
+  const { taskUserID, setTaskUserID } = useTaskAuthStore();
+
+  const { data: verificationRequest } =
+    api.srkTask.getAllSrkTaskAffiliateVerificationRequest.useQuery(
+      ['getAllSrkTaskAffiliateVerificationRequest', user?._id],
+      { query: { srkUniversityUserId: user?._id || '' } },
+      {
+        enabled: !!user?._id && !taskUserID,
+        queryKey: [
+          'getAllSrkTaskAffiliateVerificationRequest',
+          user?._id || '',
+        ],
+      }
+    );
+
+  React.useEffect(() => {
+    if (
+      verificationRequest?.status === 200 &&
+      verificationRequest.body.success &&
+      verificationRequest.body.data
+    ) {
+      if (typeof verificationRequest.body.data._id === 'string') {
+        setTaskUserID(verificationRequest.body.data._id);
+      }
+    }
+  }, [verificationRequest, setTaskUserID]);
 
   const { data: userProfileData } = api.srkTask.getSrkTaskUserProfile.useQuery(
     ['getSrkTaskUserProfile', taskUserID],
-    { params: { userId: taskUserID || '' } }
+    { params: { userId: taskUserID || '' } },
+    {
+      enabled: !!taskUserID,
+      queryKey: ['getSrkTaskUserProfile', taskUserID || ''],
+    }
   );
 
   const { data: analyticsData, refetch: refetchAnalytics } =
     api.srkTask.getSrkTaskUserAnalytics.useQuery(
       ['getSrkTaskUserAnalytics', taskUserID],
-      { params: { userId: taskUserID || '' } }
+      { params: { userId: taskUserID || '' } },
+      {
+        enabled: !!taskUserID,
+        queryKey: ['getSrkTaskUserAnalytics', taskUserID || ''],
+      }
     );
 
-  // const balance =
-  //   analyticsData?.status === 200
-  //     ? analyticsData.body.coinsData.walletCoins
-  //     : 0;
-  const balance = 1250;
+  const balance =
+    analyticsData?.status === 200
+      ? analyticsData.body.coinsData.walletCoins
+      : 0;
+  // const balance = 1250;
 
-  const eligible = balance;
+  const eligible = Math.max(0, balance - 100);
 
   if (userProfileData?.body.userData.kycStatus === 'approved') {
     if (!isApproved) setIsApproved(true);
@@ -187,18 +223,18 @@ export const AfterVerifiedDashboardPage: React.FC = () => {
     );
   };
 
-  const viewsConfig: Record<DashboardView, { title: string; desc: string }> = {
-    verification: { title: 'Verification', desc: 'Verify your account' },
-    analytics: { title: 'Analytics', desc: 'View your earnings' },
-    tasks: { title: 'Tasks', desc: 'Complete earning tasks' },
-    leaderboard: { title: 'Leaderboard', desc: 'Top performers' },
-    coinExchange: { title: 'Coin Exchange', desc: 'Convert coins to cash' },
-    profile: { title: 'Profile', desc: 'Manage your account' },
-    payout: { title: 'Legacy Payout', desc: 'Deprecated system' },
-    logout: { title: '', desc: '' },
-    finance: { title: 'Financial History', desc: 'View all your transactions' },
-    taskHistory: { title: 'Task History', desc: 'View your submitted tasks' },
-  };
+  // const viewsConfig: Record<DashboardView, { title: string; desc: string }> = {
+  //   verification: { title: 'Verification', desc: 'Verify your account' },
+  //   analytics: { title: 'Analytics', desc: 'View your earnings' },
+  //   tasks: { title: 'Tasks', desc: 'Complete earning tasks' },
+  //   leaderboard: { title: 'Leaderboard', desc: 'Top performers' },
+  //   coinExchange: { title: 'Coin Exchange', desc: 'Convert coins to cash' },
+  //   profile: { title: 'Profile', desc: 'Manage your account' },
+  //   payout: { title: 'Legacy Payout', desc: 'Deprecated system' },
+  //   logout: { title: '', desc: '' },
+  //   finance: { title: 'Financial History', desc: 'View all your transactions' },
+  //   taskHistory: { title: 'Task History', desc: 'View your submitted tasks' },
+  // };
 
   const renderView = () => {
     switch (dashView) {
@@ -255,6 +291,10 @@ export const AfterVerifiedDashboardPage: React.FC = () => {
         return null;
     }
   };
+
+  if (!user || !isAuthenticated) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-black text-white overflow-x-hidden">
@@ -354,8 +394,8 @@ export const AfterVerifiedDashboardPage: React.FC = () => {
           isMenuOpen={isMenuOpen}
           setIsMenuOpen={setIsMenuOpen}
           addNotification={addNotification}
-          title={viewsConfig[dashView].title}
-          desc={viewsConfig[dashView].desc}
+          // title={viewsConfig[dashView].title}
+          // desc={viewsConfig[dashView].desc}
         >
           <AnimatedBackground />
           {renderView()}

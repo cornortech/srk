@@ -3,45 +3,69 @@ import {
   commonPaginatedQueryParamsSchema,
   commonPaginationResponse,
 } from '../../common';
+import { Types } from 'mongoose';
 
 // Action Submission details for admin
 export const srkTaskActionSubmissionDetailsSchema = z.object({
   _id: z.string(),
-  taskUserId: z.string(),
-  growEnrollmentId: z
+  type: z.enum(['follow', 'like']),
+  description: z.string(),
+  taskUserId: z
     .object({
       _id: z.string(),
-      socialMediaPlatform: z.string(),
-      profileLinkURL: z.array(z.string()),
-      amount: z.number(),
-      isActive: z.boolean(),
-      createdAt: z.string(),
-      updatedAt: z.string(),
-      growSocialMediaPackageId: z.object({
-        _id: z.string(),
-        name: z.string(),
-        description: z.string(),
-        socialMediaPlatforms: z.array(z.string()),
-        amount: z.number(),
-      }),
-      growSocialMediaPackageTypeId: z.object({
-        _id: z.string(),
-        name: z.string(),
-        description: z.string(),
-        amount: z.number(),
-      }),
-      growSocialMediaPackageSubTypeId: z.object({
-        _id: z.string(),
-        name: z.string(),
-        description: z.string(),
-        taskType: z.string(),
-        noOfLikes: z.number().optional(),
-        noOfVideos: z.number().optional(),
-        noOfFollowers: z.number().optional(),
-      }),
+      fullName: z.string(),
+      email: z.string(),
+      phoneNumber: z.string(),
     })
     .optional(),
-  description: z.string(),
+  growPackageTodoId: z
+    .object({
+      _id: z.string(),
+      postUrl: z.string(),
+      profileUrl: z.string(),
+      type: z.enum(['follow', 'like']),
+      platform: z.string(),
+      followCounts: z.number(),
+      likeCounts: z.number(),
+      enrollment: z
+        .object({
+          _id: z.string(),
+          socialMediaPlatform: z.string(),
+          profileLinkURL: z.array(z.string()),
+          amount: z.number(),
+          isActive: z.boolean(),
+          growSocialMediaPackageId: z
+            .object({
+              _id: z.string(),
+              name: z.string(),
+              description: z.string(),
+              socialMediaPlatforms: z.array(z.string()),
+              amount: z.number(),
+            })
+            .optional(),
+          growSocialMediaPackageTypeId: z
+            .object({
+              _id: z.string(),
+              name: z.string(),
+              description: z.string(),
+              amount: z.number(),
+            })
+            .optional(),
+          growSocialMediaPackageSubTypeId: z
+            .object({
+              _id: z.string(),
+              name: z.string(),
+              description: z.string(),
+              taskType: z.string(),
+              noOfLikes: z.number().optional(),
+              noOfVideos: z.number().optional(),
+              noOfFollowers: z.number().optional(),
+            })
+            .optional(),
+        })
+        .optional(),
+    })
+    .optional(),
   screenshotUrl: z.string(),
   status: z.enum(['pending', 'approved', 'rejected']),
   rejectionReason: z.string().nullable(),
@@ -124,8 +148,11 @@ export const srkTaskUserAnalyticsSchema = z.object({
   coinsData: z.object({
     walletCoins: z.number(),
     today: z.number(),
+    todayChange: z.number(),
     last7Days: z.number(),
+    last7DaysChange: z.number(),
     last28Days: z.number(),
+    last28DaysChange: z.number(),
     allTimeCoins: z.number(),
   }),
   tasksData: z.object({
@@ -143,7 +170,11 @@ export type TGetSrkTaskUserAnalytics = z.infer<
 
 export const srkTaskUserEarningsLeaderboardSchema = z.object({
   rank: z.number(),
+  userId: z.string(),
   fullName: z.string(),
+  email: z.string().optional(),
+  phone: z.string().optional(),
+  isActivated: z.boolean(),
   coins: z.number(),
   consistencyDays: z.number(),
   change: z.number(),
@@ -170,6 +201,88 @@ export const getSrkTaskUserEarningsLeaderboardQueryParams =
     search: z.string().optional(),
     currentUserId: z.string().optional(),
   });
+
+// All Users for Admin
+export const srkTaskUserForAdminSchema = z.object({
+  _id: z.string(),
+  fullName: z.string(),
+  email: z.string(),
+  phone: z.string(),
+  dob: z.string(),
+  isActivated: z.boolean(),
+  kycStatus: z.enum(['pending', 'approved', 'rejected']).nullable(),
+  totalCoins: z.number(),
+  totalTasks: z.number(),
+  completedTasks: z.number(),
+  successRate: z.number(),
+  joinedAt: z.string(),
+  updatedAt: z.string(),
+});
+
+export const paginatedSrkTaskUsersForAdminSchema =
+  commonPaginationResponse.extend({
+    data: z.array(srkTaskUserForAdminSchema),
+  });
+
+export type TPaginatedSrkTaskUsersForAdmin = z.infer<
+  typeof paginatedSrkTaskUsersForAdminSchema
+>;
+
+export const getAllSrkTaskUsersForAdminQueryParams =
+  commonPaginatedQueryParamsSchema.extend({
+    search: z.string().optional(),
+    isActivated: z.string().optional(), // 'true' or 'false'
+  });
+
+export type TGetAllSrkTaskUsersForAdminQueryParams = z.infer<
+  typeof getAllSrkTaskUsersForAdminQueryParams
+>;
+
+// Completed Task Submissions for Admin
+export const completedSrkTaskSubmissionSchema = z.object({
+  _id: z.string(),
+  type: z.enum(['follow', 'like']),
+  platform: z.string(),
+  description: z.string(),
+  screenshotUrl: z.string(),
+  postUrl: z.string().nullable(),
+  profileUrl: z.string().nullable(),
+  completedBy: z.object({
+    _id: z.string(),
+    fullName: z.string(),
+    email: z.string(),
+    phone: z.string(),
+  }),
+  taskOwner: z
+    .object({
+      fullName: z.string(),
+      email: z.string(),
+      phone: z.string(),
+    })
+    .nullable(),
+  coinEarned: z.number(),
+  completedAt: z.string(),
+  updatedAt: z.string(),
+});
+
+export const paginatedCompletedSrkTaskSubmissionsSchema =
+  commonPaginationResponse.extend({
+    data: z.array(completedSrkTaskSubmissionSchema),
+  });
+
+export type TPaginatedCompletedSrkTaskSubmissions = z.infer<
+  typeof paginatedCompletedSrkTaskSubmissionsSchema
+>;
+
+export const getAllCompletedSrkTaskSubmissionsQueryParams =
+  commonPaginatedQueryParamsSchema.extend({
+    type: z.enum(['follow', 'like']).optional(),
+    platform: z.string().optional(), // 'Instagram', 'YouTube', 'Facebook', 'Twitter', 'TikTok'
+  });
+
+export type TGetAllCompletedSrkTaskSubmissionsQueryParams = z.infer<
+  typeof getAllCompletedSrkTaskSubmissionsQueryParams
+>;
 
 export const acceptSrkTaskUserEarningsPayoutSchema = z.object({
   transactionId: z.string(),
@@ -251,7 +364,11 @@ export const growSocialMediaPackageEnrollmentDetailsSchema = z.object({
 
 export const srkTaskEarningRequestResponseSchema = z.object({
   _id: z.string(),
-  taskUserId: z.string(),
+  taskUserId: z.object({
+    _id: z.string(),
+    fullName: z.string(),
+    email: z.string(),
+  }),
   transactionId: z.string().nullable(),
   coinsUsed: z.number(),
   tds: z.number(),
@@ -347,4 +464,63 @@ export const getAllSrkTaskUserFinanceStatementQueryParams =
 
 export type TGetAllSrkTaskUserFinanceStatementQueryParams = z.infer<
   typeof getAllSrkTaskUserFinanceStatementQueryParams
+>;
+
+export const getAllTaskAffiliateResponseSchema = z.object({
+  _id: z
+    .union([z.string(), z.instanceof(Types.ObjectId)])
+    .transform((val: any) =>
+      val instanceof Types.ObjectId ? val.toHexString() : val
+    ),
+  srkUniversityUserId: z.string(),
+  fullName: z.string(),
+  dob: z.string(),
+  isActivated: z.boolean(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
+// Onboarding Verification Request Schema
+export const srkTaskOnboardingVerificationRequestSchema = z.object({
+  _id: z.string(),
+  taskUserId: z.object({
+    _id: z.string(),
+    fullName: z.string(),
+    dob: z.string(),
+    isActivated: z.boolean(),
+    srkUniversityUserId: z.object({
+      _id: z.string(),
+      email: z.string(),
+      phoneNumber: z.string(),
+    }),
+  }),
+  kycDocumentUrl: z.string(),
+  imageUrl: z.string(),
+  signatureUrl: z.string(),
+  status: z.enum(['pending', 'approved', 'rejected']),
+  rejectionReason: z.string().nullable(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
+export type TGetAllTaskAffiliateResponseSchema = z.infer<
+  typeof getAllTaskAffiliateResponseSchema
+>;
+
+export const paginatedSrkTaskOnboardingVerificationRequestSchema =
+  commonPaginationResponse.extend({
+    data: z.array(srkTaskOnboardingVerificationRequestSchema),
+  });
+
+export type TPaginatedSrkTaskOnboardingVerificationRequest = z.infer<
+  typeof paginatedSrkTaskOnboardingVerificationRequestSchema
+>;
+
+export const getSrkTaskOnboardingVerificationRequestQueryParams =
+  commonPaginatedQueryParamsSchema.extend({
+    status: z.enum(['pending', 'approved', 'rejected']).optional(),
+  });
+
+export type TGetSrkTaskOnboardingVerificationRequestQueryParams = z.infer<
+  typeof getSrkTaskOnboardingVerificationRequestQueryParams
 >;

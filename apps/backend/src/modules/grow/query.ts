@@ -635,6 +635,68 @@ const getSrkGrowAffiliateEarningPayoutRequestByUser: AppRouteImplementationOrOpt
   }
 };
 
+const getApprovedSrkGrowAffiliateVerificationRequest: AppRouteImplementationOrOptions<
+  typeof growContract.getApprovedSrkGrowAffiliateVerificationRequest
+> = async ({ query }) => {
+  try {
+    const srkUniversityUserId = query.srkUniversityUserId;
+
+    const verificationRecord = await growSrkAffiliateVerificationModel.findOne({
+      srkUniversityUserId,
+    });
+
+    if (!verificationRecord) {
+      return {
+        status: 403,
+        body: {
+          success: false,
+          message: 'Affiliate Verification not found',
+          verificationRequests: [],
+          relatedUserData: [],
+        },
+      };
+    }
+
+    if (verificationRecord.status !== 'approved') {
+      return {
+        status: 203,
+        body: {
+          success: false,
+          message: `Verification status: ${verificationRecord.status}`,
+          verificationRequests: [verificationRecord],
+          relatedUserData: [],
+        },
+      };
+    }
+
+    // ✅ Only required fields returned
+    const userData = await growSocialMediaPackageUserModel.findOne(
+      { srkUniversityUserId },
+      { _id: 1, status: 1, userType: 1 }
+    );
+
+    return {
+      status: 200,
+      body: {
+        success: true,
+        message: 'Affiliate approved',
+        verificationRequests: [verificationRecord],
+        relatedUserData: userData ? [userData] : [],
+      },
+    };
+  } catch (error: any) {
+    return {
+      status: 500,
+      body: {
+        success: false,
+        message: error.message ?? 'Internal server error',
+        verificationRequests: [],
+        relatedUserData: [],
+      },
+    };
+  }
+};
+
 export const growQueryHandler = {
   getSrkGrowProfile,
   getAllSrkGrowEnrollmentUser,

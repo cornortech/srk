@@ -21,6 +21,13 @@ import {
 import { ErrorSchema, SuccessSchema } from '../common';
 import { z } from 'zod';
 
+const GrowAffiliateApprovedResponseSchema = z.object({
+  success: z.boolean(),
+  message: z.string(),
+  verificationRequests: z.array(z.any()),
+  relatedUserData: z.array(z.any()),
+});
+
 const c = initContract();
 
 export const growContract = c.router({
@@ -296,13 +303,29 @@ export const growContract = c.router({
     pathParams: z.object({
       userId: z.string(),
     }),
-    query: getSrkGrowAffiliateEarningPayoutQueryParamsSchema.omit({ status: true }),
+    query: getSrkGrowAffiliateEarningPayoutQueryParamsSchema.omit({
+      status: true,
+    }),
     responses: {
       200: paginatedGrowSrkAffiliateEarningPayoutsSchema,
       403: ErrorSchema,
       404: ErrorSchema,
       500: ErrorSchema,
     },
-    summary: 'Get SRK Grow Affiliate Earning Payout Requests By User',
+    summary: 'Get approved SRK Grow Affiliate Verification Request for a user',
+  },
+  getApprovedSrkGrowAffiliateVerificationRequest: {
+    method: 'GET',
+    path: '/grow/affiliate/get-approved-verification-request',
+    query: z.object({
+      srkUniversityUserId: z.string(), // required
+    }),
+    responses: {
+      200: GrowAffiliateApprovedResponseSchema,
+      403: ErrorSchema,
+      404: ErrorSchema,
+      500: ErrorSchema,
+    },
+    summary: 'Get approved SRK Grow Affiliate Verification Request for a user',
   },
 });

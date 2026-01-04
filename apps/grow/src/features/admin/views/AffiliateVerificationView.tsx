@@ -5,9 +5,9 @@ import { GlassCard } from '../components/ui/GlassCard';
 import { StatusBadge } from '../components/ui/StatusBadge';
 import { RejectionModal } from '../Modals/RejectionModal';
 import { api } from '../../../lib/api';
-import { useSRKAlert } from '@srk/shared/hooks';
 import TablePagination from '../../../lib/ui/TablePagination';
 import { ExternalLink } from 'lucide-react';
+import { useSRKAlert } from '@srk/shared/hooks';
 
 export const AffiliateVerificationView = () => {
   const [page, setPage] = useState(1);
@@ -18,9 +18,10 @@ export const AffiliateVerificationView = () => {
   const [rejectionModalOpen, setRejectionModalOpen] = useState(false);
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
 
-  const { show } = useSRKAlert();
 
   const limit = 10;
+
+  const { show } = useSRKAlert();
 
   const {
     data: growAffiliateUser,
@@ -52,16 +53,20 @@ export const AffiliateVerificationView = () => {
 
   const { mutate: approveAffiliate, isPending: isApproving } =
     api.grow.approveSrkGrowAffiliateVerificationRequest.useMutation({
-      onSuccess: () => {
-        show('Affiliate approved', 'success');
+      onSuccess: (res) => {
+        if (res.status === 200) {
+          show('Affiliate User approved', 'success');
+        }
         refetch();
       },
     });
 
   const { mutate: rejectAffiliate, isPending: isRejecting } =
     api.grow.rejectSrkGrowAffiliateVerificationRequest.useMutation({
-      onSuccess: () => {
-        show('Affiliate rejected', 'success');
+      onSuccess: (res) => {
+        if (res.status === 200) {
+          show('Affiliate rejected', 'success');
+        }
         refetch();
       },
     });

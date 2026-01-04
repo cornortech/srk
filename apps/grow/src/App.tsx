@@ -45,7 +45,10 @@ const router = createBrowserRouter([
     path: '/grow/verification',
     element: <GrowVerificationPage />,
   },
-  { path: '/grow/verification-wall', element: <UserVerificationPage /> },
+  {
+    path: '/grow/verification-wall',
+    element: <UserVerificationPage />
+  },
   {
     path: '/admin/dashboard',
     element: <GrowOnlyAdminDashboard />,

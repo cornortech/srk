@@ -8,6 +8,12 @@ import {
   paginatedSrkTaskUserFinanceStatementSchema,
   getAllSrkTaskUserFinanceStatementQueryParams,
   getAllTaskAffiliateResponseSchema,
+  paginatedSrkTaskOnboardingVerificationRequestSchema,
+  getSrkTaskOnboardingVerificationRequestQueryParams,
+  paginatedSrkTaskUsersForAdminSchema,
+  getAllSrkTaskUsersForAdminQueryParams,
+  paginatedCompletedSrkTaskSubmissionsSchema,
+  getAllCompletedSrkTaskSubmissionsQueryParams,
 } from './schema';
 
 import { paginatedSrkTaskEarningRequestsByUserSchema } from './schema';
@@ -80,6 +86,19 @@ export const srkTaskContract = c.router({
     summary: 'Get all srk task user earnings Payouts for admin',
   },
 
+  getSrkTaskOnboardingVerificationRequestForAdmin: {
+    method: 'GET',
+    path: '/task/admin/srk-task-onboarding-verification-requests',
+    query: getSrkTaskOnboardingVerificationRequestQueryParams.optional(),
+    responses: {
+      200: paginatedSrkTaskOnboardingVerificationRequestSchema,
+      400: ErrorSchema,
+      500: ErrorSchema,
+    },
+    summary:
+      'Get all srk task onboarding verification requests for admin (paginated)',
+  },
+
   getAllSrkTasksActionSubmissionByStatusForAdmin: {
     method: 'GET',
     path: '/task/admin/srk-task-action-submissions',
@@ -135,6 +154,18 @@ export const srkTaskContract = c.router({
       500: ErrorSchema,
     },
     summary: 'Get all finance statements for a srk task user (paginated)',
+  },
+
+  getAllSrkTaskUsersForAdmin: {
+    method: 'GET',
+    path: '/task/admin/srk-task-users',
+    query: getAllSrkTaskUsersForAdminQueryParams.optional(),
+    responses: {
+      200: paginatedSrkTaskUsersForAdminSchema,
+      400: ErrorSchema,
+      500: ErrorSchema,
+    },
+    summary: 'Get all srk task users for admin with comprehensive details (paginated)',
   },
 
   srkTaskEarningsPayoutRequest: {
@@ -265,5 +296,16 @@ export const srkTaskContract = c.router({
       500: ErrorSchema,
     },
     summary: 'Get approved SRK Task Affiliate Verification Request for a user',
+  },
+  getAllCompletedSrkTaskSubmissionsForAdmin: {
+    method: 'GET',
+    path: '/task/completed-submissions-for-admin',
+    query: getAllCompletedSrkTaskSubmissionsQueryParams,
+    responses: {
+      200: paginatedCompletedSrkTaskSubmissionsSchema,
+      400: ErrorSchema,
+      500: ErrorSchema,
+    },
+    summary: 'Get all completed (approved) task submissions for admin',
   },
 });

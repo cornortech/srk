@@ -190,7 +190,7 @@ const submitSrkTaskOnboardingVerification: AppRouteImplementationOrOptions<
           message: 'There is already a pending onboarding verification request',
         },
       };
-    }
+    } 
 
     if (srkTaskUserExist?.isActivated) {
       return {

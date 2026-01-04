@@ -2,6 +2,7 @@ import { initContract } from '@ts-rest/core';
 import {
   createGrowSocialMediaEnrollmentSchema,
   getAllSrkGrowUsersResponseSchema,
+  getAllSrkGrowUsersQueryParams,
   getAllGrowSocialMediaEnrollmentSchema,
   getGrowSocialMediaEnrollmentByIdSchema,
   validateGrowUserPromoCodeResponseSchema,
@@ -11,6 +12,11 @@ import {
   srkGrowAffiliateVerificationSchema,
   getAllSrkGrowAffiliateVerificationQueryParams,
   paginatedGetAllSrkGrowAffiliateVerificationSchema,
+  createGrowSrkAffiliateEarningPayoutRequestSchema,
+  acceptGrowSrkAffiliateEarningPayoutRequestSchema,
+  rejectGrowSrkAffiliateEarningPayoutRequestSchema,
+  paginatedGrowSrkAffiliateEarningPayoutsSchema,
+  getSrkGrowAffiliateEarningPayoutQueryParamsSchema,
 } from './schema';
 import { ErrorSchema, SuccessSchema } from '../common';
 import { z } from 'zod';
@@ -33,7 +39,7 @@ export const growContract = c.router({
         limit: z.coerce.number().optional(),
         page: z.coerce.number().optional(),
       })
-      ?.optional(),
+      .optional(),
     responses: {
       200: z.object({
         data: getAllGrowSocialMediaEnrollmentSchema,
@@ -66,6 +72,7 @@ export const growContract = c.router({
   getAllSrkGrowUsers: {
     method: 'GET',
     path: '/grow-users',
+    query: getAllSrkGrowUsersQueryParams,
     responses: {
       200: getAllSrkGrowUsersResponseSchema,
       500: ErrorSchema,
@@ -229,6 +236,84 @@ export const growContract = c.router({
     summary: 'Reject SRK Grow Verification Follow Request By Id',
   },
 
+  // Affiliate Earning Payout Endpoints
+  createGrowSrkAffiliateEarningPayoutRequest: {
+    method: 'POST',
+    path: '/grow/affiliate/earning/payout/request',
+    body: createGrowSrkAffiliateEarningPayoutRequestSchema,
+    responses: {
+      201: SuccessSchema,
+      400: ErrorSchema,
+      403: ErrorSchema,
+      404: ErrorSchema,
+      500: ErrorSchema,
+    },
+    summary: 'Create SRK Grow Affiliate Earning Payout Request',
+  },
+
+  acceptGrowSrkAffiliateEarningPayoutRequestByAdmin: {
+    method: 'POST',
+    path: '/grow/affiliate/earning/payout/request/:id/accept',
+    pathParams: z.object({
+      id: z.string(),
+    }),
+    body: acceptGrowSrkAffiliateEarningPayoutRequestSchema,
+    responses: {
+      200: SuccessSchema,
+      400: ErrorSchema,
+      403: ErrorSchema,
+      404: ErrorSchema,
+      500: ErrorSchema,
+    },
+    summary: 'Accept SRK Grow Affiliate Earning Payout Request By Admin',
+  },
+
+  rejectGrowSrkAffiliateEarningPayoutRequestByAdmin: {
+    method: 'POST',
+    path: '/grow/affiliate/earning/payout/request/:id/reject',
+    pathParams: z.object({
+      id: z.string(),
+    }),
+    body: rejectGrowSrkAffiliateEarningPayoutRequestSchema,
+    responses: {
+      200: SuccessSchema,
+      400: ErrorSchema,
+      403: ErrorSchema,
+      404: ErrorSchema,
+      500: ErrorSchema,
+    },
+    summary: 'Reject SRK Grow Affiliate Earning Payout Request By Admin',
+  },
+
+  getSrkGrowAffiliateEarningPayoutRequestByAdmin: {
+    method: 'GET',
+    path: '/grow/affiliate/earning/payout/request/admin',
+    query: getSrkGrowAffiliateEarningPayoutQueryParamsSchema,
+    responses: {
+      200: paginatedGrowSrkAffiliateEarningPayoutsSchema,
+      403: ErrorSchema,
+      500: ErrorSchema,
+    },
+    summary: 'Get SRK Grow Affiliate Earning Payout Requests By Admin',
+  },
+
+  getSrkGrowAffiliateEarningPayoutRequestByUser: {
+    method: 'GET',
+    path: '/grow/affiliate/earning/payout/request/user/:userId',
+    pathParams: z.object({
+      userId: z.string(),
+    }),
+    query: getSrkGrowAffiliateEarningPayoutQueryParamsSchema.omit({
+      status: true,
+    }),
+    responses: {
+      200: paginatedGrowSrkAffiliateEarningPayoutsSchema,
+      403: ErrorSchema,
+      404: ErrorSchema,
+      500: ErrorSchema,
+    },
+    summary: 'Get approved SRK Grow Affiliate Verification Request for a user',
+  },
   getApprovedSrkGrowAffiliateVerificationRequest: {
     method: 'GET',
     path: '/grow/affiliate/get-approved-verification-request',

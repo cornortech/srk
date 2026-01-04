@@ -61,7 +61,7 @@ export const AdminDashboard: React.FC = () => {
       {
         name: 'Task Done',
         icon: ListChecks,
-        content: <TaskDoneContent />
+        content: <TaskDoneContent />,
       },
       {
         name: 'Task Verification',

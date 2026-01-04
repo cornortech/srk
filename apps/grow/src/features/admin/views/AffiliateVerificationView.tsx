@@ -1,11 +1,9 @@
-import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
-
+import { motion, AnimatePresence } from 'framer-motion';
 import { GradientText } from '../components/ui/GradientText';
 import { GlassCard } from '../components/ui/GlassCard';
 import { StatusBadge } from '../components/ui/StatusBadge';
 import { RejectionModal } from '../Modals/RejectionModal';
-
 import { api } from '../../../lib/api';
 import TablePagination from '../../../lib/ui/TablePagination';
 import { ExternalLink } from 'lucide-react';

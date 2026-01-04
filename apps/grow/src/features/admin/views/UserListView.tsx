@@ -160,11 +160,10 @@ export const UserListView: React.FC<UserListViewProps> = ({
                     </td>
                     <td className="py-4 px-6">
                       <span
-                        className={`px-3 py-1 rounded-full text-xs font-medium ${
-                          user.role === 'Affiliate'
-                            ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
-                            : 'bg-gray-500/10 text-gray-400 border border-gray-500/20'
-                        }`}
+                        className={`px-3 py-1 rounded-full text-xs font-medium ${user.role === 'Affiliate'
+                          ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
+                          : 'bg-gray-500/10 text-gray-400 border border-gray-500/20'
+                          }`}
                       >
                         {user.role}
                       </span>
@@ -188,11 +187,10 @@ export const UserListView: React.FC<UserListViewProps> = ({
                     </td>
                     <td className="py-4 px-6">
                       <span
-                        className={`px-3 py-1 rounded-full text-xs font-medium ${
-                          user.referer === 'Self'
-                            ? 'bg-gray-500/10 text-gray-300 border border-gray-500/20'
-                            : 'bg-purple-500/10 text-purple-300 border border-purple-500/20'
-                        }`}
+                        className={`px-3 py-1 rounded-full text-xs font-medium ${user.referer === 'Self'
+                          ? 'bg-gray-500/10 text-gray-300 border border-gray-500/20'
+                          : 'bg-purple-500/10 text-purple-300 border border-purple-500/20'
+                          }`}
                       >
                         {user.referer}
                       </span>

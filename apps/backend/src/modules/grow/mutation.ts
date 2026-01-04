@@ -13,6 +13,7 @@ import { growSrkAffiliateVerificationModel } from '../../model/growSrkAffiliateV
 import { AppRouteImplementationOrOptions } from '@ts-rest/express/src/lib/types';
 import { growSrkAffiliateEarningStatementModel } from '../../model/grow/growSrkAffiliateEarningStatementModel';
 import { growSrkAffiliateUserBalanceModel } from '../../model/grow/growSrkAffiliateUserBalanceModel';
+import { GrowSrkAffiliateEarningPayoutModel } from '../../model/grow/growSrkAffiliateEarningPayoutModel';
 
 export function calculatePackageDiscount(
   packageId: string,
@@ -859,6 +860,7 @@ const rejectSrkGrowAffiliateVerificationRequest: AppRouteImplementationOrOptions
     const requestExist = await growSrkAffiliateVerificationModel.findOne({
       _id: params.srkGrowaffiliateVerificationId,
     });
+
     if (!requestExist) {
       return {
         status: 500,
@@ -896,6 +898,211 @@ const rejectSrkGrowAffiliateVerificationRequest: AppRouteImplementationOrOptions
   }
 };
 
+// Affiliate Earning Payout Request Handlers
+const createGrowSrkAffiliateEarningPayoutRequest: AppRouteImplementationOrOptions<
+  typeof growContract.createGrowSrkAffiliateEarningPayoutRequest
+> = async ({ body }) => {
+  try {
+    const { srkGrowUserId, amount } = body;
+
+    // Validate user exists
+    const growUser = await growSocialMediaPackageUserModel.findById(
+      srkGrowUserId
+    );
+    if (!growUser) {
+      return {
+        status: 404,
+        body: {
+          success: false,
+          message: 'Grow user not found',
+        },
+      };
+    }
+
+    // Check user balance
+    const userBalance = await growSrkAffiliateUserBalanceModel.findOne({
+      srkGrowUserId,
+    });
+
+    if (!userBalance || userBalance.wallet < amount) {
+      return {
+        status: 400,
+        body: {
+          success: false,
+          message: 'Insufficient balance for payout request',
+        },
+      };
+    }
+
+    // Check for pending payout requests
+    const pendingPayout = await GrowSrkAffiliateEarningPayoutModel.findOne({
+      srkGrowUserId,
+      status: 'pending',
+    });
+
+    if (pendingPayout) {
+      return {
+        status: 400,
+        body: {
+          success: false,
+          message: 'You already have a pending payout request',
+        },
+      };
+    }
+
+    // Create payout request
+    const payoutRequest = await GrowSrkAffiliateEarningPayoutModel.create({
+      srkGrowUserId,
+      amount,
+      status: 'pending',
+    });
+
+    return {
+      status: 201,
+      body: {
+        success: true,
+        message: 'Payout request created successfully',
+      },
+    };
+  } catch (error: any) {
+    console.error('Error creating payout request:', error);
+    return {
+      status: 500,
+      body: {
+        success: false,
+        message: 'Failed to create payout request',
+      },
+    };
+  }
+};
+
+const acceptGrowSrkAffiliateEarningPayoutRequestByAdmin: AppRouteImplementationOrOptions<
+  typeof growContract.acceptGrowSrkAffiliateEarningPayoutRequestByAdmin
+> = async ({ params, body }) => {
+  try {
+    const { id } = params;
+    const { transactionId, paymentUrl } = body;
+
+    // Find payout request
+    const payoutRequest = await GrowSrkAffiliateEarningPayoutModel.findById(id);
+    if (!payoutRequest) {
+      return {
+        status: 404,
+        body: {
+          success: false,
+          message: 'Payout request not found',
+        },
+      };
+    }
+
+    if (payoutRequest.status !== 'pending') {
+      return {
+        status: 400,
+        body: {
+          success: false,
+          message: 'Payout request is not pending',
+        },
+      };
+    }
+
+    // Update user balance
+    const userBalance = await growSrkAffiliateUserBalanceModel.findOne({
+      srkGrowUserId: payoutRequest.srkGrowUserId,
+    });
+
+    if (!userBalance || userBalance.wallet < payoutRequest.amount) {
+      return {
+        status: 400,
+        body: {
+          success: false,
+          message: 'Insufficient user balance',
+        },
+      };
+    }
+
+    // Deduct balance
+    userBalance.wallet -= payoutRequest.amount;
+    await userBalance.save();
+
+    // Update payout request
+    payoutRequest.status = 'approved';
+    payoutRequest.transactionId = transactionId;
+    payoutRequest.paymentUrl = paymentUrl;
+    payoutRequest.paidAt = new Date();
+    await payoutRequest.save();
+
+    return {
+      status: 200,
+      body: {
+        success: true,
+        message: 'Payout request approved successfully',
+      },
+    };
+  } catch (error: any) {
+    console.error('Error approving payout request:', error);
+    return {
+      status: 500,
+      body: {
+        success: false,
+        message: 'Failed to approve payout request',
+      },
+    };
+  }
+};
+
+const rejectGrowSrkAffiliateEarningPayoutRequestByAdmin: AppRouteImplementationOrOptions<
+  typeof growContract.rejectGrowSrkAffiliateEarningPayoutRequestByAdmin
+> = async ({ params, body }) => {
+  try {
+    const { id } = params;
+    const { rejectionReason } = body;
+
+    // Find payout request
+    const payoutRequest = await GrowSrkAffiliateEarningPayoutModel.findById(id);
+    if (!payoutRequest) {
+      return {
+        status: 404,
+        body: {
+          success: false,
+          message: 'Payout request not found',
+        },
+      };
+    }
+
+    if (payoutRequest.status !== 'pending') {
+      return {
+        status: 400,
+        body: {
+          success: false,
+          message: 'Payout request is not pending',
+        },
+      };
+    }
+
+    // Update payout request
+    payoutRequest.status = 'rejected';
+    payoutRequest.rejectionReason = rejectionReason;
+    await payoutRequest.save();
+
+    return {
+      status: 200,
+      body: {
+        success: true,
+        message: 'Payout request rejected successfully',
+      },
+    };
+  } catch (error: any) {
+    console.error('Error rejecting payout request:', error);
+    return {
+      status: 500,
+      body: {
+        success: false,
+        message: 'Failed to reject payout request',
+      },
+    };
+  }
+};
+
 export const growMutationHandler = {
   createGrowSocialMediaEnrollment,
   validateGrowUserPromoCode,
@@ -906,4 +1113,7 @@ export const growMutationHandler = {
   srkGrowAffiliateVerificationRequest,
   approveSrkGrowAffiliateVerificationRequest,
   rejectSrkGrowAffiliateVerificationRequest,
+  createGrowSrkAffiliateEarningPayoutRequest,
+  acceptGrowSrkAffiliateEarningPayoutRequestByAdmin,
+  rejectGrowSrkAffiliateEarningPayoutRequestByAdmin,
 };

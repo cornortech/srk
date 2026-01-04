@@ -2,7 +2,7 @@ import {
   CardVariant,
   DashboardData,
   ToastType,
-} from 'apps/grow/src/lib/types/dashboard';
+} from '../../../lib/types/dashboard';
 import { SparklesIcon, TrendingUpIcon, WalletIcon } from 'lucide-react';
 import { GOLD_ACCENT, GOLD_PRIMARY, INFO, SUCCESS } from '../constants';
 import { WithdrawIcon } from '../components/ui/DashboardIcons';

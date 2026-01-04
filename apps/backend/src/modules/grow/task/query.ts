@@ -91,31 +91,35 @@ const getAllSrkTasksActionSubmissionByStatusForAdmin: AppRouteImplementationOrOp
                     profileLinkURL: enrollment.profileLinkURL || [],
                     amount: enrollment.amount,
                     isActive: enrollment.isActive,
-                    growSocialMediaPackageId: enrollment.growSocialMediaPackageId
-                      ? {
-                          _id:
-                            enrollment.growSocialMediaPackageId._id?.toString?.() ||
-                            '',
-                          name: enrollment.growSocialMediaPackageId.name,
-                          description:
-                            enrollment.growSocialMediaPackageId.description,
-                          socialMediaPlatforms:
-                            enrollment.growSocialMediaPackageId
-                              .socialMediaPlatforms || [],
-                          amount: enrollment.growSocialMediaPackageId.amount,
-                        }
-                      : undefined,
-                    growSocialMediaPackageTypeId: enrollment.growSocialMediaPackageTypeId
-                      ? {
-                          _id:
-                            enrollment.growSocialMediaPackageTypeId._id?.toString?.() ||
-                            '',
-                          name: enrollment.growSocialMediaPackageTypeId.name,
-                          description:
-                            enrollment.growSocialMediaPackageTypeId.description,
-                          amount: enrollment.growSocialMediaPackageTypeId.amount,
-                        }
-                      : undefined,
+                    growSocialMediaPackageId:
+                      enrollment.growSocialMediaPackageId
+                        ? {
+                            _id:
+                              enrollment.growSocialMediaPackageId._id?.toString?.() ||
+                              '',
+                            name: enrollment.growSocialMediaPackageId.name,
+                            description:
+                              enrollment.growSocialMediaPackageId.description,
+                            socialMediaPlatforms:
+                              enrollment.growSocialMediaPackageId
+                                .socialMediaPlatforms || [],
+                            amount: enrollment.growSocialMediaPackageId.amount,
+                          }
+                        : undefined,
+                    growSocialMediaPackageTypeId:
+                      enrollment.growSocialMediaPackageTypeId
+                        ? {
+                            _id:
+                              enrollment.growSocialMediaPackageTypeId._id?.toString?.() ||
+                              '',
+                            name: enrollment.growSocialMediaPackageTypeId.name,
+                            description:
+                              enrollment.growSocialMediaPackageTypeId
+                                .description,
+                            amount:
+                              enrollment.growSocialMediaPackageTypeId.amount,
+                          }
+                        : undefined,
                     growSocialMediaPackageSubTypeId:
                       enrollment.growSocialMediaPackageSubTypeId
                         ? {
@@ -633,7 +637,12 @@ const getAllSrkTaskUserEarningsLeaderboard: AppRouteImplementationOrOptions<
             as: 'universityUser',
           },
         },
-        { $unwind: { path: '$universityUser', preserveNullAndEmptyArrays: true } },
+        {
+          $unwind: {
+            path: '$universityUser',
+            preserveNullAndEmptyArrays: true,
+          },
+        },
 
         // Add search filter if search query exists
         ...(search
@@ -1182,7 +1191,6 @@ const getAllSrkTasksActionSubmissionsByUser: AppRouteImplementationOrOptions<
   }
 };
 
-
 const getSrkTaskActionsByPlatforms: AppRouteImplementationOrOptions<
   typeof srkTaskContract.getSrkTaskActionsByPlatforms
 > = async ({ query }) => {
@@ -1477,7 +1485,7 @@ const getAllCompletedSrkTaskSubmissionsForAdmin: AppRouteImplementationOrOptions
     ]);
 
     // Filter by platform if specified and map data
-    const  filteredData = submissions
+    const filteredData = submissions
       .filter((submission) => {
         const todo = submission.growPackageTodoId as any;
         if (!platform) return true;
@@ -1518,14 +1526,16 @@ const getAllCompletedSrkTaskSubmissionsForAdmin: AppRouteImplementationOrOptions
 
     // Recalculate total after platform filtering
     const filteredTotal = filteredData.length;
-    
+
     return {
       status: 200,
       body: {
         page,
         limit,
         totalRecords: platform ? filteredTotal : totalRecords,
-        totalPages: Math.ceil((platform ? filteredTotal : totalRecords) / limit),
+        totalPages: Math.ceil(
+          (platform ? filteredTotal : totalRecords) / limit
+        ),
         data: filteredData,
       },
     };
@@ -1607,7 +1617,6 @@ const getApprovedSrkTaskAffiliateVerificationRequest: AppRouteImplementationOrOp
     };
   }
 };
-
 
 export const srkTaskQueryHandler = {
   getSrkTaskActionsByPlatforms,

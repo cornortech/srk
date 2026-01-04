@@ -107,7 +107,7 @@ export const AfterVerifiedDashboardPage: React.FC = () => {
       : 0;
   // const balance = 1250;
 
-  const eligible = Math.max(0, balance - 250);
+  const eligible = Math.max(0, balance - 100);
 
   if (userProfileData?.body.userData.kycStatus === 'approved') {
     if (!isApproved) setIsApproved(true);
@@ -223,18 +223,18 @@ export const AfterVerifiedDashboardPage: React.FC = () => {
     );
   };
 
-  const viewsConfig: Record<DashboardView, { title: string; desc: string }> = {
-    verification: { title: 'Verification', desc: 'Verify your account' },
-    analytics: { title: 'Analytics', desc: 'View your earnings' },
-    tasks: { title: 'Tasks', desc: 'Complete earning tasks' },
-    leaderboard: { title: 'Leaderboard', desc: 'Top performers' },
-    coinExchange: { title: 'Coin Exchange', desc: 'Convert coins to cash' },
-    profile: { title: 'Profile', desc: 'Manage your account' },
-    payout: { title: 'Legacy Payout', desc: 'Deprecated system' },
-    logout: { title: '', desc: '' },
-    finance: { title: 'Financial History', desc: 'View all your transactions' },
-    taskHistory: { title: 'Task History', desc: 'View your submitted tasks' },
-  };
+  // const viewsConfig: Record<DashboardView, { title: string; desc: string }> = {
+  //   verification: { title: 'Verification', desc: 'Verify your account' },
+  //   analytics: { title: 'Analytics', desc: 'View your earnings' },
+  //   tasks: { title: 'Tasks', desc: 'Complete earning tasks' },
+  //   leaderboard: { title: 'Leaderboard', desc: 'Top performers' },
+  //   coinExchange: { title: 'Coin Exchange', desc: 'Convert coins to cash' },
+  //   profile: { title: 'Profile', desc: 'Manage your account' },
+  //   payout: { title: 'Legacy Payout', desc: 'Deprecated system' },
+  //   logout: { title: '', desc: '' },
+  //   finance: { title: 'Financial History', desc: 'View all your transactions' },
+  //   taskHistory: { title: 'Task History', desc: 'View your submitted tasks' },
+  // };
 
   const renderView = () => {
     switch (dashView) {
@@ -394,8 +394,8 @@ export const AfterVerifiedDashboardPage: React.FC = () => {
           isMenuOpen={isMenuOpen}
           setIsMenuOpen={setIsMenuOpen}
           addNotification={addNotification}
-          title={viewsConfig[dashView].title}
-          desc={viewsConfig[dashView].desc}
+          // title={viewsConfig[dashView].title}
+          // desc={viewsConfig[dashView].desc}
         >
           <AnimatedBackground />
           {renderView()}

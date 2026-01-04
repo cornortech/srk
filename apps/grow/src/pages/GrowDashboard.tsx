@@ -15,7 +15,6 @@ import {
   MOCK_ANALYTICS_DATA,
   MOCK_DASHBOARD_DATA,
   MOCK_LEADERBOARD,
-  MOCK_PAYOUTS,
   MOCK_SALES_DATA,
   MOCK_USER_PROFILE,
 } from '../data/dashboardMock';
@@ -57,7 +56,7 @@ export const GrowDashboard = () => {
   const [leaderboardData, setLeaderboardData] = useState<LeaderboardEntry[]>(
     []
   );
-  const [payoutHistory, setPayoutHistory] = useState<Payout[]>([]);
+
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(
     null
@@ -108,7 +107,7 @@ export const GrowDashboard = () => {
       setDashboardData(MOCK_DASHBOARD_DATA);
       setSalesData(MOCK_SALES_DATA);
       setLeaderboardData(MOCK_LEADERBOARD);
-      setPayoutHistory(MOCK_PAYOUTS);
+
       setAnalyticsData(MOCK_ANALYTICS_DATA);
       // setIsLoading(false);
     }, 800);
@@ -167,7 +166,7 @@ export const GrowDashboard = () => {
       case 'leaderboard':
         return <LeaderboardView userID={affiliateUserId} />;
       case 'payout':
-        return <PayoutView userID={affiliateUserId} payouts={payoutHistory} />;
+        return <PayoutView userID={affiliateUserId} />;
       case 'profile':
         return (
           <ProfileView

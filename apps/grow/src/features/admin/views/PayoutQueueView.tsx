@@ -13,7 +13,9 @@ import TablePagination from '../../../lib/ui/TablePagination';
 
 export const PayoutQueueView: React.FC = () => {
   const [page, setPage] = useState(1);
-  const [statusFilter, setStatusFilter] = useState<'pending' | 'approved' | 'rejected' | undefined>('pending');
+  const [statusFilter, setStatusFilter] = useState<
+    'pending' | 'approved' | 'rejected' | undefined
+  >('pending');
   const [selected, setSelected] = useState<string[]>([]);
   const [approvalModalOpen, setApprovalModalOpen] = useState(false);
   const [rejectionModalOpen, setRejectionModalOpen] = useState(false);
@@ -23,7 +25,11 @@ export const PayoutQueueView: React.FC = () => {
   const { showToast } = useToast();
 
   // Fetch payouts
-  const { data: payoutsData, isLoading, refetch } = api.grow.getSrkGrowAffiliateEarningPayoutRequestByAdmin.useQuery(
+  const {
+    data: payoutsData,
+    isLoading,
+    refetch,
+  } = api.grow.getSrkGrowAffiliateEarningPayoutRequestByAdmin.useQuery(
     ['grow-affiliate-payouts', page, statusFilter],
     {
       query: {
@@ -73,23 +79,29 @@ export const PayoutQueueView: React.FC = () => {
     setRejectionModalOpen(true);
   }, []);
 
-  const handleApprovalSubmit = useCallback((transactionId: string, paymentUrl?: string) => {
-    if (selectedPayoutId) {
-      approveMutation({
-        params: { id: selectedPayoutId },
-        body: { transactionId, paymentUrl },
-      });
-    }
-  }, [selectedPayoutId, approveMutation]);
+  const handleApprovalSubmit = useCallback(
+    (transactionId: string, paymentUrl?: string) => {
+      if (selectedPayoutId) {
+        approveMutation({
+          params: { id: selectedPayoutId },
+          body: { transactionId, paymentUrl },
+        });
+      }
+    },
+    [selectedPayoutId, approveMutation]
+  );
 
-  const handleRejectionSubmit = useCallback((rejectionReason: string) => {
-    if (selectedPayoutId) {
-      rejectMutation({
-        params: { id: selectedPayoutId },
-        body: { rejectionReason },
-      });
-    }
-  }, [selectedPayoutId, rejectMutation]);
+  const handleRejectionSubmit = useCallback(
+    (rejectionReason: string) => {
+      if (selectedPayoutId) {
+        rejectMutation({
+          params: { id: selectedPayoutId },
+          body: { rejectionReason },
+        });
+      }
+    },
+    [selectedPayoutId, rejectMutation]
+  );
 
   const handleSelectAll = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -112,7 +124,10 @@ export const PayoutQueueView: React.FC = () => {
 
   const handleBulkProcess = useCallback(() => {
     if (selected.length > 0) {
-      showToast(`Bulk processing is not yet implemented for ${selected.length} payouts`, 'info');
+      showToast(
+        `Bulk processing is not yet implemented for ${selected.length} payouts`,
+        'info'
+      );
     }
     setSelected([]);
   }, [selected.length, showToast]);
@@ -122,7 +137,6 @@ export const PayoutQueueView: React.FC = () => {
   const totalPages = payoutsData?.body?.totalPages || 1;
   const currentPage = page;
   const totalAmount = payouts.reduce((sum, p) => sum + p.amount, 0);
-
 
   return (
     <motion.div
@@ -145,7 +159,7 @@ export const PayoutQueueView: React.FC = () => {
             value={statusFilter || 'all'}
             onChange={(e) => {
               const value = e.target.value;
-              setStatusFilter(value === 'all' ? undefined : value as any);
+              setStatusFilter(value === 'all' ? undefined : (value as any));
               setPage(1);
             }}
             className="bg-black/30 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-[#b68938]/50"
@@ -188,7 +202,10 @@ export const PayoutQueueView: React.FC = () => {
                           type="checkbox"
                           className="rounded border-white/20 bg-black/30 checked:bg-[#b68938]"
                           onChange={handleSelectAll}
-                          checked={selected.length > 0 && selected.length === payouts.length}
+                          checked={
+                            selected.length > 0 &&
+                            selected.length === payouts.length
+                          }
                         />
                       </th>
                       <th className="text-left py-4 px-6 text-sm font-medium text-gray-400">
@@ -275,7 +292,9 @@ export const PayoutQueueView: React.FC = () => {
                                 <motion.button
                                   whileHover={{ scale: 1.05 }}
                                   whileTap={{ scale: 0.95 }}
-                                  onClick={() => handleApprove(payout._id, payout.amount)}
+                                  onClick={() =>
+                                    handleApprove(payout._id, payout.amount)
+                                  }
                                   className="px-4 py-2 bg-emerald-600/20 text-emerald-300 rounded-lg hover:bg-emerald-600/30 transition-colors text-sm"
                                 >
                                   Approve
@@ -290,18 +309,24 @@ export const PayoutQueueView: React.FC = () => {
                                 </motion.button>
                               </>
                             )}
-                            {payout.status === 'approved' && payout.transactionId && (
-                              <div className="text-sm">
-                                <p className="text-emerald-400">Paid</p>
-                                <p className="text-xs text-gray-500">TXN: {payout.transactionId}</p>
-                              </div>
-                            )}
-                            {payout.status === 'rejected' && payout.rejectionReason && (
-                              <div className="text-sm">
-                                <p className="text-rose-400">Rejected</p>
-                                <p className="text-xs text-gray-500">{payout.rejectionReason}</p>
-                              </div>
-                            )}
+                            {payout.status === 'approved' &&
+                              payout.transactionId && (
+                                <div className="text-sm">
+                                  <p className="text-emerald-400">Paid</p>
+                                  <p className="text-xs text-gray-500">
+                                    TXN: {payout.transactionId}
+                                  </p>
+                                </div>
+                              )}
+                            {payout.status === 'rejected' &&
+                              payout.rejectionReason && (
+                                <div className="text-sm">
+                                  <p className="text-rose-400">Rejected</p>
+                                  <p className="text-xs text-gray-500">
+                                    {payout.rejectionReason}
+                                  </p>
+                                </div>
+                              )}
                           </div>
                         </td>
                       </motion.tr>
@@ -310,7 +335,7 @@ export const PayoutQueueView: React.FC = () => {
                 </table>
               </div>
 
-              { totalPages > 1 && (
+              {totalPages > 1 && (
                 <div className="mt-6 pt-6 border-t border-white/10">
                   <TablePagination
                     page={currentPage}

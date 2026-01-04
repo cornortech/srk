@@ -1,5 +1,5 @@
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
-import { storage } from '../../../firebase/src';
+import { storage } from '@srk/shared/firebase';
 import { v4 as uuidv4 } from 'uuid';
 import { useState } from 'react';
 
@@ -57,7 +57,8 @@ export const useSRKFileUpload = (appName: string) => {
       const uniqueFileName = `${fileType}-${uniqueSuffix}.${extension}`;
 
       // Dynamic path: /prod/appName or /dev/appName
-      const envPrefix = import.meta.env.PROD ? 'prod' : 'dev';
+      const envPrefix =
+        import.meta.env.VITE_FIREBASE_ENV === 'prod' ? 'prod' : 'dev';
       const storageRef = ref(
         storage,
         `/${envPrefix}/${appName}/${fileType}/${uniqueFileName}`

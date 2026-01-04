@@ -23,8 +23,8 @@ interface DashboardLayoutProps {
     message: string,
     type: 'success' | 'error' | 'info'
   ) => void;
-  title: string;
-  desc: string;
+  // title: string;
+  // desc: string;
 }
 
 export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
@@ -39,8 +39,8 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   isMenuOpen,
   setIsMenuOpen,
   addNotification,
-  title,
-  desc,
+  // title,
+  // desc,
 }) => {
   return (
     <div className="min-h-screen">
@@ -131,7 +131,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 
             {/* Main Content */}
             <main className="flex-1 min-w-0">
-              <div className="mb-8">
+              {/* <div className="mb-8">
                 <motion.div
                   key={dashView}
                   initial={{ opacity: 0, y: 20 }}
@@ -142,7 +142,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                   </h1>
                   <p className="text-zinc-400">{desc}</p>
                 </motion.div>
-              </div>
+              </div> */}
               {children}
             </main>
           </div>

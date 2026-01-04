@@ -18,8 +18,8 @@ const growPackageTodoSchema = new mongoose.Schema(
       ref: 'growSocialMediaPackageEnrollment',
       required: true,
     },
-    postUrl: { type: String, required: true },
-    profileUrl: { type: String, required: true },
+    postUrl: { type: String },
+    profileUrl: { type: String },
     type: {
       type: String,
       enum: ['follow', 'like'],

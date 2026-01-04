@@ -221,6 +221,7 @@ const createGrowSocialMediaEnrollment: AppRouteImplementationOrOptions<
             createSrkGrowPackageEnrollment._id,
           postUrl: url,
           type: 'like',
+          platform: enrollmentData.socialMediaPlatform,
         }))
       );
     } else {
@@ -228,6 +229,7 @@ const createGrowSocialMediaEnrollment: AppRouteImplementationOrOptions<
         growSocialMediaPackageEnrollmentId: createSrkGrowPackageEnrollment._id,
         type: 'follow',
         profileUrl: enrollmentData.profileLinkURL![0],
+        platform: enrollmentData.socialMediaPlatform,
       });
     }
 

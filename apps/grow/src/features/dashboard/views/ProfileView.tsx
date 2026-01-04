@@ -13,15 +13,16 @@ import { api } from '../../../lib/api';
 import moment from 'moment';
 
 interface ProfileViewProps {
+  userID: string;
   data: any;
   showToast: (message: string, type?: ToastType) => void;
 }
 
 export const ProfileView: React.FC<ProfileViewProps> = ({
+  userID,
   data = [],
   showToast,
 }) => {
-  const userID = '694e47bf627addce4f643cc5';
 
   // Initialize notification states: ON only if 1 or true
 

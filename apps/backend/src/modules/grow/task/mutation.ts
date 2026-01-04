@@ -177,7 +177,22 @@ const submitSrkTaskOnboardingVerification: AppRouteImplementationOrOptions<
       srkUniversityUserId: srkUniversityUserExist._id,
     });
 
-    if (srkTaskUserExist.isActivated) {
+    const srkTaskOnboardingRequestExist =
+      await srkTaskOnboardingVerificationRequestModel.findOne({
+        taskUserId: srkTaskUserExist?._id,
+      });
+
+    if (srkTaskOnboardingRequestExist?.status === 'pending') {
+      return {
+        status: 400,
+        body: {
+          success: false,
+          message: 'There is already a pending onboarding verification request',
+        },
+      };
+    }
+
+    if (srkTaskUserExist?.isActivated) {
       return {
         status: 400,
         body: {
@@ -682,18 +697,34 @@ const srkTaskEarningsPayoutRequest: AppRouteImplementationOrOptions<
     }
 
     const amount = getMoneytaryValueFromCoins(body.coins);
+    const amountAfterTds = amount - amount * 0.1;
 
     await srkTasksEarningsPayoutModel.create({
       taskUserId: srkTaskUserExist._id,
       status: 'pending',
-      amount,
+      amount: amountAfterTds,
       coinsUsed: body.coins,
       tds: amount * 0.1,
     });
 
-    srkTaskUserBalanceExist.currentCoins -= body.coins;
+    const updatedBalance: any = await srkTaskUserBalanceModel.findOneAndUpdate(
+      { taskUserId: body.srkTaskUserId },
+      {
+        $inc: {
+          currentCoins: -body.coins,
+        },
+      },
+      { new: true }
+    );
 
-    await srkTaskUserBalanceExist.save();
+    await srkTaskEarningStatementModel.create({
+      taskUserId: srkTaskUserExist._id,
+      growPackageTodoId: null,
+      description: `Exchanged ${body.coins} coins for ${amountAfterTds} amount`,
+      type: 'debit',
+      coin: body.coins,
+      coinAfterTransaction: updatedBalance.currentCoins,
+    });
 
     return {
       status: 201,

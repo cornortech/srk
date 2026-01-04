@@ -9,12 +9,14 @@ import { api } from '../../../lib/api';
 
 interface LeaderboardViewProps {
   leaderboardData?: LeaderboardEntry[]; // not used anymore but kept for prop compatibility
+  userID: string;
 }
 
-export const LeaderboardView: React.FC<LeaderboardViewProps> = () => {
+export const LeaderboardView: React.FC<LeaderboardViewProps> = (
+  userID,
+) => {
   const [timeFilter, setTimeFilter] = useState<'today' | 'week' | 'all'>('all');
   const [page, setPage] = useState('1');
-  const userID = '6950abcd1234ef5678901234'; // logged in user ID (TODO: use auth)
 
   const { data: commissionResponse, isLoading } =
     api.growAffiliate.getAllUsersAffiliateComissionLeaderBoard.useQuery(

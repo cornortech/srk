@@ -12,6 +12,7 @@ import React from 'react';
 import { api } from '../../../lib/api';
 
 interface DashboardSidebarProps {
+  userID: string;
   isMobile: boolean;
   currentView: ViewId;
   isOpen: boolean;
@@ -19,6 +20,7 @@ interface DashboardSidebarProps {
   onNavigate: (item: NavItem) => void;
 }
 export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
+  userID,
   isMobile,
   currentView,
   isOpen,
@@ -61,8 +63,6 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
     },
   ];
 
-    const userID = '694e47bf627addce4f643cc5';
-  
     // Initialize notification states: ON only if 1 or true
   
     const { data: getAffiliateUserProfile, isLoading } =

@@ -30,6 +30,7 @@ import { MenuIcon } from '../features/dashboard/components/ui/DashboardIcons';
 import { Toast } from '../features/dashboard/components/ui/Toast';
 import { DashboardSidebar } from '../features/dashboard/components/DashboardSidebar';
 import { api } from '../lib/api';
+import { Navigate } from 'react-router-dom';
 
 export const initialEarningData: DashboardData = {
   today: 0,
@@ -41,6 +42,12 @@ export const initialEarningData: DashboardData = {
 };
 
 export const GrowDashboard = () => {
+  const affiliateUserId = localStorage.getItem('affiliateGrowUserId');
+
+  if (!affiliateUserId) {
+    return <Navigate to="/login" replace />;
+  }
+
   const [currentView, setCurrentView] = useState<ViewId>('dashboard');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [toastType, setToastType] = useState<ToastType>('success');
@@ -56,7 +63,7 @@ export const GrowDashboard = () => {
     null
   );
 
-  const { data: growPackagesRes, isLoading: packagesLoading} =
+  const { data: growPackagesRes, isLoading: packagesLoading } =
     api.package.getAllSrkGrowPackages.useQuery(['packages']);
 
   const dataToSend = growPackagesRes?.body;
@@ -72,14 +79,12 @@ export const GrowDashboard = () => {
     []
   );
 
-  const userID = '6950abcd1234ef5678901234';
-
   const { data: affiliatedUserCommission, isLoading: commissionLoading } =
     api.growAffiliate.getUserAffiliateSalesComissionEarnings.useQuery(
-      ['affiliatedUserCommission', userID],
+      ['affiliatedUserCommission', affiliateUserId],
       {
         params: {
-          affiliateUserId: userID,
+          affiliateUserId: affiliateUserId,
         },
       }
     );
@@ -131,7 +136,7 @@ export const GrowDashboard = () => {
 
     switch (currentView) {
       case 'dashboard':
-        return <DashboardView data={dashboardData} showToast={showToast} />;
+        return <DashboardView userID={affiliateUserId} data={dashboardData} showToast={showToast} />;
       case 'analytics':
         return analyticsData ? (
           'null'
@@ -150,17 +155,29 @@ export const GrowDashboard = () => {
           </div>
         );
       case 'referral':
-        return <ReferralView data={dataToSend ?? []} showToast={showToast} />;
+        return <ReferralView userID={affiliateUserId} data={dataToSend ?? []} showToast={showToast} />;
       case 'mysales':
-        return <MySalesView data={affiliatedUserCommission?.body ?? []} isLoading={commissionLoading} />;
+        return (
+          <MySalesView
+            userID={affiliateUserId}
+            data={affiliatedUserCommission?.body ?? []}
+            isLoading={commissionLoading}
+          />
+        );
       case 'leaderboard':
-        return <LeaderboardView />;
+        return <LeaderboardView userID={affiliateUserId} />;
       case 'payout':
-        return <PayoutView payouts={payoutHistory} />;
+        return <PayoutView userID={affiliateUserId} payouts={payoutHistory} />;
       case 'profile':
-        return <ProfileView data={affiliatedUserCommission?.body} showToast={showToast} />;
+        return (
+          <ProfileView
+            userID={affiliateUserId}
+            data={affiliatedUserCommission?.body}
+            showToast={showToast}
+          />
+        );
       default:
-        return <DashboardView data={dashboardData} showToast={showToast} />;
+        return <DashboardView userID={affiliateUserId} data={dashboardData} showToast={showToast} />;
     }
   };
 
@@ -181,6 +198,7 @@ export const GrowDashboard = () => {
 
       {/* Sidebars */}
       <DashboardSidebar
+        userID={affiliateUserId}
         isMobile={false}
         currentView={currentView}
         isOpen={isSidebarOpen}
@@ -188,6 +206,7 @@ export const GrowDashboard = () => {
         onNavigate={handleNavigation}
       />
       <DashboardSidebar
+        userID={affiliateUserId}
         isMobile={true}
         currentView={currentView}
         isOpen={isSidebarOpen}

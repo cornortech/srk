@@ -12,17 +12,17 @@ import { formatRupees } from '../../../lib/utils/formatters';
 import { api } from '../../../lib/api';
 
 interface DashboardViewProps {
+  userID: string;
   data: DashboardData;
   showToast: (message: string, type?: ToastType) => void;
 }
 
 export const DashboardView: React.FC<DashboardViewProps> = ({
+  userID,
   data,
   showToast,
 }) => {
   const [isWithdrawing, setIsWithdrawing] = useState(false);
-
-  const userID = '6950abcd1234ef5678901234';
 
   const { data: getAffiliateUserDashboardStats, isLoading } =
     api.growAffiliate.getGrowAffiliateUserComissionEarningsDashboard.useQuery(

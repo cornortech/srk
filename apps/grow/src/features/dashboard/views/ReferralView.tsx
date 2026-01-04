@@ -11,17 +11,17 @@ import { PackageDataTypes } from '../../../lib/types/package';
 import { api } from '../../../lib/api';
 
 interface ReferralViewProps {
+  userID: string;
   data: PackageDataTypes[];
   showToast: (message: string, type?: ToastType) => void;
 }
 
 export const ReferralView: React.FC<ReferralViewProps> = ({
+  userID,
   data = [],
   showToast,
 }) => {
   const [copiedPackage, setCopiedPackage] = useState<string | null>(null);
-
-  const userID = '6950abcd1234ef5678901234';
 
   const { data: affiliatedUserCommission, isLoading } =
     api.growAffiliate.getUserAffiliateSalesComissionEarnings.useQuery(
@@ -29,6 +29,16 @@ export const ReferralView: React.FC<ReferralViewProps> = ({
       {
         params: {
           affiliateUserId: userID,
+        },
+      }
+    );
+
+  const { data: getPromocode, isLoading: checkLoading } =
+    api.grow.getSrkGrowProfile.useQuery(
+      ['affiliatedUserPromocode', userID],
+      {
+        params: {
+          userId: userID,
         },
       }
     );
@@ -51,7 +61,7 @@ export const ReferralView: React.FC<ReferralViewProps> = ({
     packageId: string,
     promoCode: string
   ): string => {
-    return `http://localhost:4500/package-flow?ref=${promoCode}&package=${packageId}`;
+    return `http://localhost:4500/package-flow?ref=${getPromocode?.body?.userDetails?.promoCode}&package=${packageId}`;
   };
 
   return (

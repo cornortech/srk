@@ -45,7 +45,9 @@ const RejectionModal: React.FC<RejectionModalProps> = ({
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-bold text-white">Reject Verification</h3>
+              <h3 className="text-xl font-bold text-white">
+                Reject Verification
+              </h3>
               <button
                 onClick={onClose}
                 className="text-gray-400 hover:text-white transition-colors"
@@ -56,7 +58,7 @@ const RejectionModal: React.FC<RejectionModalProps> = ({
 
             <div className="mb-6">
               <p className="text-gray-300 mb-2">
-                Rejecting affiliate verification for:{' '}
+                Rejecting verification for:{' '}
                 <span className="text-[#E1BA73] font-semibold">{username}</span>
               </p>
             </div>
@@ -100,68 +102,84 @@ export const VerificationContent: React.FC = React.memo(() => {
   const [page, setPage] = useState(1);
   const [rejectionModal, setRejectionModal] = useState<{
     isOpen: boolean;
-    verificationId: string | null;
+    userId: string | null;
     username: string;
   }>({
     isOpen: false,
-    verificationId: null,
+    userId: null,
     username: '',
   });
 
-  const { data: verificationData, isLoading, error: queryError, refetch } =
-    api.grow.getAllSrkGrowAffiliateVerificationRequest.useQuery(
-      ['getAllSrkGrowAffiliateVerificationRequest', page],
-      {
-        query: {
-          page: page.toString(),
-          limit: '10',
-          status: 'pending',
-        },
-      }
-    );
-
-  const handleApprove = useCallback(
-    (verificationId: string) => {
-      // TODO: Implement approve mutation once contract is created
-      console.log('Approving verification:', verificationId);
-      // approveMutation.mutate({
-      //   params: { verificationRequestId: verificationId },
-      // });
-    },
-    []
+  const {
+    data: verificationData,
+    isLoading,
+    error: queryError,
+    refetch,
+  } = api.srkTask.getSrkTaskOnboardingVerificationRequestForAdmin.useQuery(
+    ['getSrkTaskOnboardingVerificationRequestForAdmin', page],
+    {
+      query: {
+        page: page.toString(),
+        limit: '10',
+        status: 'pending',
+      },
+    }
   );
 
-  const handleReject = useCallback((verificationId: string, username: string) => {
+  // Approve mutation
+  const approveMutation =
+    api.srkTask.approveSrkTaskOnboardingVerificationByAdmin.useMutation({
+      onSuccess: () => {
+        refetch();
+      },
+    });
+
+  // Reject mutation
+  const rejectMutation =
+    api.srkTask.rejectSrkTaskOnboardingVerificationByAdmin.useMutation({
+      onSuccess: () => {
+        refetch();
+        setRejectionModal({
+          isOpen: false,
+          userId: null,
+          username: '',
+        });
+      },
+    });
+
+  const handleApprove = useCallback(
+    (userId: string) => {
+      approveMutation.mutate({
+        params: { srkTaskUserId: userId },
+      });
+    },
+    [approveMutation]
+  );
+
+  const handleReject = useCallback((userId: string, username: string) => {
     setRejectionModal({
       isOpen: true,
-      verificationId,
+      userId,
       username,
     });
   }, []);
 
   const handleConfirmRejection = useCallback(
     (reason: string) => {
-      if (rejectionModal.verificationId) {
-        // TODO: Implement reject mutation once contract is created
-        console.log('Rejecting verification:', rejectionModal.verificationId, 'Reason:', reason);
-        // rejectMutation.mutate({
-        //   params: { verificationRequestId: rejectionModal.verificationId },
-        //   body: { rejectionReason: reason },
-        // });
-        setRejectionModal({
-          isOpen: false,
-          verificationId: null,
-          username: '',
+      if (rejectionModal.userId) {
+        rejectMutation.mutate({
+          params: { srkTaskUserId: rejectionModal.userId },
+          body: { rejectionReason: reason },
         });
       }
     },
-    [rejectionModal.verificationId]
+    [rejectionModal.userId, rejectMutation]
   );
 
   const handleCloseRejectionModal = useCallback(() => {
     setRejectionModal({
       isOpen: false,
-      verificationId: null,
+      userId: null,
       username: '',
     });
   }, []);
@@ -170,7 +188,9 @@ export const VerificationContent: React.FC = React.memo(() => {
     return (
       <div className="flex items-center justify-center p-10">
         <Loader2 className="w-8 h-8 animate-spin text-[#E1BA73]" />
-        <span className="ml-3 text-gray-400">Loading verification requests...</span>
+        <span className="ml-3 text-gray-400">
+          Loading verification requests...
+        </span>
       </div>
     );
   }
@@ -178,15 +198,18 @@ export const VerificationContent: React.FC = React.memo(() => {
   if (queryError) {
     return (
       <div className="text-center p-10 text-red-500">
-        An error occurred while fetching verification requests
+        An error occurred while fetching data
       </div>
     );
   }
 
-  if (!verificationData?.body?.data || verificationData.body.data.length === 0) {
+  if (
+    !verificationData?.body?.data ||
+    verificationData.body.data.length === 0
+  ) {
     return (
       <div className="text-center p-10 text-gray-500">
-        No pending affiliate verification requests.
+        No pending verification requests.
       </div>
     );
   }
@@ -205,27 +228,37 @@ export const VerificationContent: React.FC = React.memo(() => {
           >
             <div className="flex flex-col sm:flex-row items-start sm:items-center mb-4 gap-4">
               <img
-                src={request.verificationImageUrl}
-                alt={request.username}
+                src={request.imageUrl}
+                alt={request.taskUserId.fullName}
                 className="w-12 h-12 sm:w-16 sm:h-16 rounded-full object-cover border-2 border-[#E1BA73] flex-shrink-0"
                 onError={(e) => {
-                  (e.target as HTMLImageElement).src = 'https://via.placeholder.com/150';
+                  (e.target as HTMLImageElement).src =
+                    'https://via.placeholder.com/150';
                 }}
               />
               <div className="min-w-0 flex-1">
                 <h3 className="text-base sm:text-lg font-bold text-white truncate">
-                  {request.username}
+                  {request.taskUserId.fullName}
                 </h3>
                 <p className="text-xs sm:text-sm text-gray-400 truncate">
-                  {request.email}
+                  {request.taskUserId.srkUniversityUserId.email}
+                </p>
+                <p className="text-xs text-gray-500">
+                  {request.taskUserId.srkUniversityUserId.phoneNumber}
                 </p>
               </div>
             </div>
 
             <div className="text-xs sm:text-sm text-gray-400 mb-4 space-y-2">
               <p>
+                <span className="text-gray-500">DOB:</span>{' '}
+                <span className="text-white">{request.taskUserId.dob}</span>
+              </p>
+              <p>
                 <span className="text-gray-500">Requested:</span>{' '}
-                <span className="text-white">{request.createdAt}</span>
+                <span className="text-white">
+                  {new Date(request.createdAt).toLocaleDateString()}
+                </span>
               </p>
               <p>
                 <span className="text-gray-500">Status:</span>{' '}
@@ -242,31 +275,62 @@ export const VerificationContent: React.FC = React.memo(() => {
                 </span>
               </p>
 
-              <div className="pt-2">
+              <div className="pt-2 space-y-1">
                 <a
-                  href={request.verificationImageUrl}
+                  href={request.kycDocumentUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block text-green-400 cursor-pointer hover:underline"
+                >
+                  📄 View KYC Document
+                </a>
+                <a
+                  href={request.imageUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="block text-blue-400 cursor-pointer hover:underline"
                 >
-                  🖼️ View Verification Image
+                  🖼️ View Photo
+                </a>
+                <a
+                  href={request.signatureUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block text-purple-400 cursor-pointer hover:underline"
+                >
+                  ✍️ View Signature
                 </a>
               </div>
             </div>
 
             <div className="flex gap-2 mt-4">
               <GoldButton
-                onClick={() => handleApprove(request.verificationRequestId)}
+                onClick={() => handleApprove(request.taskUserId._id)}
                 className="flex-1"
+                disabled={approveMutation.isPending}
               >
-                <Check size={16} className="inline mr-1" />
+                {approveMutation.isPending ? (
+                  <Loader2 className="animate-spin" size={16} />
+                ) : (
+                  <Check size={16} className="inline mr-1" />
+                )}
                 Approve
               </GoldButton>
               <button
-                onClick={() => handleReject(request.verificationRequestId, request.username)}
-                className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors flex items-center justify-center gap-1"
+                onClick={() =>
+                  handleReject(
+                    request.taskUserId._id,
+                    request.taskUserId.fullName
+                  )
+                }
+                disabled={rejectMutation.isPending}
+                className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg transition-colors flex items-center justify-center gap-1"
               >
-                <X size={16} />
+                {rejectMutation.isPending ? (
+                  <Loader2 className="animate-spin" size={16} />
+                ) : (
+                  <X size={16} />
+                )}
                 Reject
               </button>
             </div>

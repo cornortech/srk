@@ -8,18 +8,23 @@ const s = initServer();
 export const srkTaskRouter = s.router(srkTaskContract, {
   getSrkTaskUserProfile: srkTaskQueryHandler.getSrkTaskUserProfile,
   getSrkTaskUserAnalytics: srkTaskQueryHandler.getSrkTaskUserAnalytics,
-
   getAllSrkTaskUserEarningsLeaderboard:
     srkTaskQueryHandler.getAllSrkTaskUserEarningsLeaderboard,
   getAllSrkTaskEarningPayoutsByAdmin:
     srkTaskQueryHandler.getAllSrkTaskEarningPayoutsByAdmin,
+  getSrkTaskOnboardingVerificationRequestForAdmin:
+    srkTaskQueryHandler.getSrkTaskOnboardingVerificationRequestForAdmin,
   getAllSrkTasksActionSubmissionByStatusForAdmin:
     srkTaskQueryHandler.getAllSrkTasksActionSubmissionByStatusForAdmin,
   getAllSrkTasksActionSubmissionsByUser:
     srkTaskQueryHandler.getAllSrkTasksActionSubmissionsByUser,
   getSrkTaskUserEarningsPayoutsByUser:
     srkTaskQueryHandler.getSrkTaskUserEarningsPayoutsByUser,
-  getAllSrkTaskUserFinanceStatement: srkTaskQueryHandler.getAllSrkTaskUserFinanceStatement,
+  getAllSrkTaskUserFinanceStatement:
+    srkTaskQueryHandler.getAllSrkTaskUserFinanceStatement,
+  getAllSrkTaskUsersForAdmin: srkTaskQueryHandler.getAllSrkTaskUsersForAdmin,
+  getAllCompletedSrkTaskSubmissionsForAdmin:
+    srkTaskQueryHandler.getAllCompletedSrkTaskSubmissionsForAdmin,
   srkTaskEarningsPayoutRequest:
     srkTaskMutationHandler.srkTaskEarningsPayoutRequest,
   acceptSrkTaskUserEarningsPayout:
@@ -39,4 +44,6 @@ export const srkTaskRouter = s.router(srkTaskContract, {
   srkTaskActionSubmission: srkTaskMutationHandler.srkTaskActionSubmission,
   getSrkTaskActionsByPlatforms:
     srkTaskQueryHandler.getSrkTaskActionsByPlatforms,
+  getAllSrkTaskAffiliateVerificationRequest:
+    srkTaskQueryHandler.getApprovedSrkTaskAffiliateVerificationRequest,
 });

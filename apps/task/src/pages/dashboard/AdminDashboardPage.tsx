@@ -12,12 +12,6 @@ import {
 } from 'lucide-react';
 import { useIsDesktop } from '../../features/admin/hooks/useIsDesktop';
 import { NavLink, Payout } from '../../features/admin/types';
-import {
-  DUMMY_LEADERBOARD,
-  DUMMY_TASK_VERIFICATIONS,
-  DUMMY_USERS,
-  initialPayouts,
-} from '../../data/dummyAdminDashboardMockData';
 import { VerificationContent } from '../../features/admin/views/VerificationContent';
 import { PayoutRequestsContent } from '../../features/admin/views/PayoutRequestsContent';
 import { TransactionsContent } from '../../features/admin/views/TransactionsContent';
@@ -37,27 +31,10 @@ export const AdminDashboard: React.FC = () => {
   const [selectedSection, setSelectedSection] =
     useState<string>('Payout Requests');
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(isDesktop);
-  const [payoutsData, setPayoutsData] = useState<Payout[]>(initialPayouts);
 
   useEffect(() => {
     setIsSidebarOpen(isDesktop);
   }, [isDesktop]);
-
-  const handlePayout = useCallback((payoutId: number) => {
-    setPayoutsData((prevData) =>
-      prevData.map((payout) => {
-        if (payout.id === payoutId) {
-          return {
-            ...payout,
-            status: 'Paid',
-            paidAt: new Date().toLocaleString('en-US', { hour12: false }),
-          };
-        }
-        return payout;
-      })
-    );
-    console.log(`Payout ID ${payoutId} marked as Paid.`);
-  }, []);
 
   const handleSrkBankClick = useCallback(() => {
     console.log('Redirecting to SRK Bank...');
@@ -69,43 +46,40 @@ export const AdminDashboard: React.FC = () => {
       {
         name: 'Verification',
         icon: ShieldCheck,
-        content: <VerificationContent  />,
+        content: <VerificationContent />,
       },
       {
         name: 'Payout Requests',
         icon: Wallet,
-        content: (
-          <PayoutRequestsContent
-            initialData={payoutsData}
-            onPayout={handlePayout}
-          />
-        ),
+        content: <PayoutRequestsContent />,
       },
       {
         name: 'Transactions',
         icon: Repeat2,
-        content: <TransactionsContent initialData={payoutsData} />,
+        content: <TransactionsContent />,
       },
-      { name: 'Task Done', icon: ListChecks, content: <TaskDoneContent /> },
+      {
+        name: 'Task Done',
+        icon: ListChecks,
+        content: <TaskDoneContent />,
+      },
       {
         name: 'Task Verification',
         icon: CheckCircle,
-        content: (
-          <TaskVerificationContent initialData={DUMMY_TASK_VERIFICATIONS} />
-        ),
+        content: <TaskVerificationContent />,
       },
       {
         name: 'All Users',
         icon: Users,
-        content: <AllUsersContent data={DUMMY_USERS} />,
+        content: <AllUsersContent />,
       },
       {
         name: 'Leaderboard',
         icon: Trophy,
-        content: <LeaderboardContent data={DUMMY_LEADERBOARD} />,
+        content: <LeaderboardContent />,
       },
     ],
-    [payoutsData, handlePayout]
+    []
   );
 
   const currentContent = useMemo(

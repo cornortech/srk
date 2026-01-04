@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { leaderboardData as leaderboardDataMock } from '../../../data/dummyDashboardMockData';
 import DashboardGradientText from '../components/ui/DashboardGradientText';
 import { Award, Clock, Coins, Search, TrendingUp, Trophy } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -49,16 +48,12 @@ export const LeaderboardView: React.FC = () => {
               : ('stable' as 'up' | 'down' | 'stable'),
           changeAmount: Math.abs(entry.change),
         }))
-      : leaderboardDataMock.filter((user) =>
-          user.user.toLowerCase().includes(searchQuery.toLowerCase())
-        );
+      : [];
 
   const currentUserStats =
     leaderboardRes?.status === 200
       ? leaderboardRes.body.data.currentUser
       : null;
-  // fallback for self stats if using mock data
-  const selfInMock = leaderboardDataMock.find((u) => u.isSelf);
 
   return (
     <div className="space-y-8">
@@ -317,7 +312,7 @@ export const LeaderboardView: React.FC = () => {
           </div>
 
           {/* Your Position */}
-          {(currentUserStats || selfInMock) && (
+          {currentUserStats && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -335,15 +330,10 @@ export const LeaderboardView: React.FC = () => {
                 </div>
                 <div className="text-right">
                   <p className="text-2xl font-bold text-purple-400">
-                    #{currentUserStats?.rank ?? selfInMock?.rank}
+                    #{currentUserStats.rank}
                   </p>
                   <p className="text-sm text-zinc-400">
-                    {(
-                      currentUserStats?.coins ??
-                      selfInMock?.score ??
-                      0
-                    ).toLocaleString()}{' '}
-                    points
+                    {currentUserStats.coins.toLocaleString()} points
                   </p>
                 </div>
               </div>

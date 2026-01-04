@@ -160,7 +160,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                 <div className="flex justify-between">
                   <span className="text-zinc-400">Success Rate:</span>
                   <span className="text-green-400 font-bold">
-                    {userProfileData?.body?.taskData?.successRate}%
+                    {Math.round(userProfileData?.body?.taskData?.successRate)}%
                   </span>
                 </div>
                 <div className="flex justify-between">

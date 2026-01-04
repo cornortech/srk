@@ -6,7 +6,8 @@ import { growQueryHandler } from './query';
 const s = initServer();
 
 export const growRouter = s.router(growContract, {
-  getAllGrowSocialMediaEnrollement: growQueryHandler.getAllSrkGrowEnrollmentUser,
+  getAllGrowSocialMediaEnrollement:
+    growQueryHandler.getAllSrkGrowEnrollmentUser,
   getGrowSocialMediaEnrollmentById:
     growQueryHandler.getSrkGrowEnrollmentUserById,
   getAllSrkGrowUsers: growQueryHandler.getAllSrkGrowUsers,
@@ -28,7 +29,7 @@ export const growRouter = s.router(growContract, {
     growQueryHandler.getAllSrkGrowAffiliateVerificationRequest,
   srkGrowAffiliateVerificationRequest:
     growMutationHandler.srkGrowAffiliateVerificationRequest,
-  
+
   // Affiliate Earning Payout Endpoints
   createGrowSrkAffiliateEarningPayoutRequest:
     growMutationHandler.createGrowSrkAffiliateEarningPayoutRequest,
@@ -40,4 +41,6 @@ export const growRouter = s.router(growContract, {
     growQueryHandler.getSrkGrowAffiliateEarningPayoutRequestByAdmin,
   getSrkGrowAffiliateEarningPayoutRequestByUser:
     growQueryHandler.getSrkGrowAffiliateEarningPayoutRequestByUser,
+  getApprovedSrkGrowAffiliateVerificationRequest:
+    growQueryHandler.getApprovedSrkGrowAffiliateVerificationRequest,
 });

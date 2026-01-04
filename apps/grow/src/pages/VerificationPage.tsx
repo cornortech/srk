@@ -6,14 +6,24 @@ import {
   Loader2,
   AlertCircle,
 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { GradientText } from '../features/verification/components/ui/GradientText';
 import { GlassCard } from '../features/verification/components/ui/GlassCard';
 import { CameraFeature } from '../features/verification/components/CameraFeature';
 import { api } from '../lib/api';
 import { useSRKFileUpload } from '@srk/shared/hooks';
+import { useAuthGrowAffiliate } from '../hooks/getUser';
 
 export const GrowVerificationPage = () => {
+  const { uploadFile, isUploading } = useSRKFileUpload('grow');
+  const navigate = useNavigate();
+  const {
+    user,
+    isAuthenticated,
+    isLoading: userLoading,
+  } = useAuthGrowAffiliate();
+
+  // --- ALL HOOKS MUST STAY ABOVE ANY CONDITIONAL RETURN ---
   const [showCamera, setShowCamera] = useState(false);
   const [capturedMedia, setCapturedMedia] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>('');
@@ -23,53 +33,55 @@ export const GrowVerificationPage = () => {
     'idle' | 'submitting' | 'success' | 'error'
   >('idle');
 
-  const { uploadFile, isUploading } = useSRKFileUpload('grow');
-  const navigate = useNavigate();
+  const { data: approvedResp, isLoading: checkLoading } =
+    api.grow.getApprovedSrkGrowAffiliateVerificationRequest.useQuery(
+      ['approvedAffiliatedUser', user?._id],
+      {
+        query: {
+          srkUniversityUserId: user?._id || '',
+        },
+      }
+    );
 
-  // Convert base64 string to File object
-  const base64ToFile = (dataUrl: string, filename: string) => {
-    const arr = dataUrl.split(',');
-    const mime = arr[0].match(/:(.*?);/)![1];
-    const bstr = atob(arr[1]);
-    let n = bstr.length;
-    const u8arr = new Uint8Array(n);
-    while (n--) u8arr[n] = bstr.charCodeAt(n);
-    return new File([u8arr], filename, { type: mime });
-  };
+  const affiliateVerificationMutation =
+    api.grow.srkGrowAffiliateVerificationRequest.useMutation({
+      onMutate: () => setSubmissionStatus('submitting'),
+      onSuccess: (data) => {
+        setSubmissionStatus('success');
+        navigate('/login');
+      },
+      onError: () => setSubmissionStatus('error'),
+    });
 
-  useEffect(() => {
+  const handleSubmitVerification = () => {
     if (!capturedMedia) {
-      setPreviewUrl('');
+      alert('Please capture an image first');
       return;
     }
 
-    const objectUrl = URL.createObjectURL(capturedMedia);
-    setPreviewUrl(objectUrl);
-
-    return () => {
-      URL.revokeObjectURL(objectUrl);
-    };
-  }, [capturedMedia]);
+    affiliateVerificationMutation.mutate({
+      body: {
+        srkUniversityUserId: user?._id || '',
+        verificationImageUrl: uploadedImageUrl,
+      },
+    });
+  };
 
   const handleCapture = async (data: string | Blob) => {
     try {
       setSubmissionStatus('submitting');
 
-      let file: File;
-      if (data instanceof Blob) {
-        file = new File(
-          [data],
-          `capture.${mediaType === 'photo' ? 'jpg' : 'webm'}`,
-          {
-            type: data.type,
-          }
-        );
-      } else {
-        file = base64ToFile(
-          data,
-          `capture.${mediaType === 'photo' ? 'jpg' : 'webm'}`
-        );
-      }
+      let file: File =
+        data instanceof Blob
+          ? new File(
+              [data],
+              `capture.${mediaType === 'photo' ? 'jpg' : 'webm'}`,
+              { type: data.type }
+            )
+          : base64ToFile(
+              data,
+              `capture.${mediaType === 'photo' ? 'jpg' : 'webm'}`
+            );
 
       const uploadedUrl = await uploadFile(
         file,
@@ -86,47 +98,52 @@ export const GrowVerificationPage = () => {
     }
   };
 
-  const affiliateVerificationMutation =
-    api.grow.srkGrowAffiliateVerificationRequest.useMutation({
-      onMutate: () => setSubmissionStatus('submitting'),
-      onSuccess: (data) => {
-        if (data.status === 200 || data.status === 201) {
-          setSubmissionStatus('success');
-          navigate('/');
-        } else {
-          setSubmissionStatus('error');
-        }
-      },
+  // Convert base64 → File
+  const base64ToFile = (dataUrl: string, filename: string) => {
+    const arr = dataUrl.split(',');
+    const mime = arr[0].match(/:(.*?);/)![1];
+    const bstr = atob(arr[1]);
+    const u8arr = new Uint8Array(bstr.length);
+    for (let i = 0; i < bstr.length; i++) u8arr[i] = bstr.charCodeAt(i);
+    return new File([u8arr], filename, { type: mime });
+  };
 
-      onError: () => setSubmissionStatus('error'),
-    });
-
-  const userId = '69478b0a040f600b2a17212d';
-
-  const handleSubmitVerification = () => {
+  useEffect(() => {
     if (!capturedMedia) {
-      alert('Please capture an image first');
+      setPreviewUrl('');
       return;
     }
-
-    affiliateVerificationMutation.mutate({
-      body: {
-        srkUniversityUserId: userId,
-        verificationImageUrl: uploadedImageUrl,
-      },
-    });
-
-    if (affiliateVerificationMutation.isSuccess) {
-      alert(
-        'Verification is pending, please wait for the approval from the admin'
-      );
-    }
-  };
+    const objectUrl = URL.createObjectURL(capturedMedia);
+    setPreviewUrl(objectUrl);
+    return () => URL.revokeObjectURL(objectUrl);
+  }, [capturedMedia]);
 
   const openCamera = (type: 'photo' | 'video') => {
     setMediaType(type);
     setShowCamera(true);
   };
+
+  // --- AUTH / LOADING UI MUST BE CHECKED ONLY AFTER HOOKS EXECUTED ---
+  if (userLoading) {
+    return <div className="text-white p-10 text-center">Loading...</div>;
+  }
+
+  if (!isAuthenticated || !user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  // Extract backend response
+  if (!checkLoading && approvedResp?.body?.success === true) {
+    const affiliateUserId = approvedResp?.body?.relatedUserData?.[0]?._id;
+
+    if (affiliateUserId) {
+      localStorage.setItem('affiliateGrowUserId', affiliateUserId);
+
+      return <Navigate to="/affiliate/dashboard" replace />;
+    }
+  } else if (!checkLoading && approvedResp?.body?.success === false) {
+    return <Navigate to="/login" replace />;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0a0705] to-black text-white">
@@ -272,7 +289,8 @@ export const GrowVerificationPage = () => {
               <div className="space-y-3">
                 {capturedMedia ? (
                   <div className="grid grid-cols-2 gap-4">
-                    <button className="bg-orange-500 text-white"
+                    <button
+                      className="bg-orange-500 text-white"
                       onClick={handleSubmitVerification}
                       disabled={
                         affiliateVerificationMutation.isPending ||
@@ -328,5 +346,5 @@ export const GrowVerificationPage = () => {
         />
       )}
     </div>
-  );
-};
+  )
+}

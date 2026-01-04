@@ -45,7 +45,9 @@ const RejectionModal: React.FC<RejectionModalProps> = ({
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-bold text-white">Reject Verification</h3>
+              <h3 className="text-xl font-bold text-white">
+                Reject Verification
+              </h3>
               <button
                 onClick={onClose}
                 className="text-gray-400 hover:text-white transition-colors"
@@ -108,36 +110,42 @@ export const VerificationContent: React.FC = React.memo(() => {
     username: '',
   });
 
-  const { data: verificationData, isLoading, error: queryError, refetch } =
-    api.srkTask.getSrkTaskOnboardingVerificationRequestForAdmin.useQuery(
-      ['getSrkTaskOnboardingVerificationRequestForAdmin', page],
-      {
-        query: {
-          page: page.toString(),
-          limit: "10",
-          status: 'pending',
-        },
-      }
-    );
+  const {
+    data: verificationData,
+    isLoading,
+    error: queryError,
+    refetch,
+  } = api.srkTask.getSrkTaskOnboardingVerificationRequestForAdmin.useQuery(
+    ['getSrkTaskOnboardingVerificationRequestForAdmin', page],
+    {
+      query: {
+        page: page.toString(),
+        limit: '10',
+        status: 'pending',
+      },
+    }
+  );
 
   // Approve mutation
-  const approveMutation = api.srkTask.approveSrkTaskOnboardingVerificationByAdmin.useMutation({
-    onSuccess: () => {
-      refetch();
-    },
-  });
+  const approveMutation =
+    api.srkTask.approveSrkTaskOnboardingVerificationByAdmin.useMutation({
+      onSuccess: () => {
+        refetch();
+      },
+    });
 
   // Reject mutation
-  const rejectMutation = api.srkTask.rejectSrkTaskOnboardingVerificationByAdmin.useMutation({
-    onSuccess: () => {
-      refetch();
-      setRejectionModal({
-        isOpen: false,
-        userId: null,
-        username: '',
-      });
-    },
-  });
+  const rejectMutation =
+    api.srkTask.rejectSrkTaskOnboardingVerificationByAdmin.useMutation({
+      onSuccess: () => {
+        refetch();
+        setRejectionModal({
+          isOpen: false,
+          userId: null,
+          username: '',
+        });
+      },
+    });
 
   const handleApprove = useCallback(
     (userId: string) => {
@@ -180,7 +188,9 @@ export const VerificationContent: React.FC = React.memo(() => {
     return (
       <div className="flex items-center justify-center p-10">
         <Loader2 className="w-8 h-8 animate-spin text-[#E1BA73]" />
-        <span className="ml-3 text-gray-400">Loading verification requests...</span>
+        <span className="ml-3 text-gray-400">
+          Loading verification requests...
+        </span>
       </div>
     );
   }
@@ -193,7 +203,10 @@ export const VerificationContent: React.FC = React.memo(() => {
     );
   }
 
-  if (!verificationData?.body?.data || verificationData.body.data.length === 0) {
+  if (
+    !verificationData?.body?.data ||
+    verificationData.body.data.length === 0
+  ) {
     return (
       <div className="text-center p-10 text-gray-500">
         No pending verification requests.
@@ -219,7 +232,8 @@ export const VerificationContent: React.FC = React.memo(() => {
                 alt={request.taskUserId.fullName}
                 className="w-12 h-12 sm:w-16 sm:h-16 rounded-full object-cover border-2 border-[#E1BA73] flex-shrink-0"
                 onError={(e) => {
-                  (e.target as HTMLImageElement).src = 'https://via.placeholder.com/150';
+                  (e.target as HTMLImageElement).src =
+                    'https://via.placeholder.com/150';
                 }}
               />
               <div className="min-w-0 flex-1">
@@ -248,10 +262,15 @@ export const VerificationContent: React.FC = React.memo(() => {
               </p>
               <p>
                 <span className="text-gray-500">Status:</span>{' '}
-                <span className={`font-semibold ${request.status === 'pending' ? 'text-yellow-400' :
-                  request.status === 'approved' ? 'text-green-400' :
-                    'text-red-400'
-                  }`}>
+                <span
+                  className={`font-semibold ${
+                    request.status === 'pending'
+                      ? 'text-yellow-400'
+                      : request.status === 'approved'
+                      ? 'text-green-400'
+                      : 'text-red-400'
+                  }`}
+                >
                   {request.status.toUpperCase()}
                 </span>
               </p>
@@ -298,7 +317,12 @@ export const VerificationContent: React.FC = React.memo(() => {
                 Approve
               </GoldButton>
               <button
-                onClick={() => handleReject(request.taskUserId._id, request.taskUserId.fullName)}
+                onClick={() =>
+                  handleReject(
+                    request.taskUserId._id,
+                    request.taskUserId.fullName
+                  )
+                }
                 disabled={rejectMutation.isPending}
                 className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg transition-colors flex items-center justify-center gap-1"
               >

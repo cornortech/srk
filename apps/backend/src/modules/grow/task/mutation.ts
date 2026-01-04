@@ -177,6 +177,21 @@ const submitSrkTaskOnboardingVerification: AppRouteImplementationOrOptions<
       srkUniversityUserId: srkUniversityUserExist._id,
     });
 
+    const srkTaskOnboardingRequestExist =
+      await srkTaskOnboardingVerificationRequestModel.findOne({
+        taskUserId: srkTaskUserExist?._id,
+      });
+
+    if (srkTaskOnboardingRequestExist?.status === 'pending') {
+      return {
+        status: 400,
+        body: {
+          success: false,
+          message: 'There is already a pending onboarding verification request',
+        },
+      };
+    }
+
     if (srkTaskUserExist?.isActivated) {
       return {
         status: 400,

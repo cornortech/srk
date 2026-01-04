@@ -220,6 +220,7 @@ const createGrowSocialMediaEnrollment: AppRouteImplementationOrOptions<
             createSrkGrowPackageEnrollment._id,
           postUrl: url,
           type: 'like',
+          platform: enrollmentData.socialMediaPlatform,
         }))
       );
     } else {
@@ -227,6 +228,7 @@ const createGrowSocialMediaEnrollment: AppRouteImplementationOrOptions<
         growSocialMediaPackageEnrollmentId: createSrkGrowPackageEnrollment._id,
         type: 'follow',
         profileUrl: enrollmentData.profileLinkURL![0],
+        platform: enrollmentData.socialMediaPlatform,
       });
     }
 
@@ -771,7 +773,7 @@ const approveSrkGrowAffiliateVerificationRequest: AppRouteImplementationOrOption
       .populate<{
         srkUniversityUserId: Pick<
           IUser,
-          '_id'
+          | '_id'
           | 'firstName'
           | 'lastName'
           | 'email'
@@ -797,14 +799,14 @@ const approveSrkGrowAffiliateVerificationRequest: AppRouteImplementationOrOption
       };
     }
 
-    if(requestExist.status === 'approved'){
+    if (requestExist.status === 'approved') {
       return {
         status: 400,
         body: {
           message: 'Request already approved',
           success: false,
         },
-      }
+      };
     }
 
     await growSrkAffiliateVerificationModel.findOneAndUpdate(

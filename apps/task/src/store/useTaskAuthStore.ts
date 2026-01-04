@@ -8,6 +8,7 @@ interface TaskAuthState {
   taskUserID: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  setTaskUserID: (id: string) => void;
   setUser: (user: TaskUser | null) => void;
   setLoading: (loading: boolean) => void;
   logout: () => void;
@@ -21,6 +22,8 @@ export const useTaskAuthStore = create<TaskAuthState>()(
       isLoading: false, // Default to false, hydration handles true state if needed
       universityID: null,
       taskUserID: null,
+
+      setTaskUserID: (id) => set({ taskUserID: id }),
 
       setUser: (user) =>
         set({
@@ -51,4 +54,3 @@ export const useTaskAuthStore = create<TaskAuthState>()(
 );
 
 export default useTaskAuthStore;
-

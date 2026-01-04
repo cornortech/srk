@@ -180,6 +180,13 @@ export const VerificationModal: React.FC<VerificationModalProps> = ({
     setSubmissionStatus(null);
 
     try {
+      if (
+        !formData.documentFile ||
+        !formData.selfieImage ||
+        !formData.signature
+      ) {
+        throw new Error('Missing required files');
+      }
       // 1. Upload files
       const [docRes, selfieRes, sigRes] = await Promise.all([
         uploadFile(formData.documentFile!, 'image'),

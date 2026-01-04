@@ -16,7 +16,11 @@ export const AnalyticsView: React.FC = () => {
   const { data: analyticsDataRes } =
     api.srkTask.getSrkTaskUserAnalytics.useQuery(
       ['getSrkTaskUserAnalytics', taskUserID],
-      { params: { userId: taskUserID || '' } }
+      { params: { userId: taskUserID || '' } },
+      {
+        enabled: !!taskUserID,
+        queryKey: ['getSrkTaskUserAnalytics', taskUserID || ''],
+      }
     );
 
   const StatCard = ({ title, value, icon: Icon, change, gradient }: any) => (
@@ -47,7 +51,7 @@ export const AnalyticsView: React.FC = () => {
           animate={{ scale: 1, opacity: 1 }}
           className="text-3xl font-bold text-white"
         >
-          {value.toLocaleString()} Coins
+          {value?.toLocaleString()} Coins
         </motion.p>
       </div>
     </DashboardGlassCard>

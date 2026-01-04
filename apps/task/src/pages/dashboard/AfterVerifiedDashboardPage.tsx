@@ -55,24 +55,57 @@ export const AfterVerifiedDashboardPage: React.FC = () => {
   const [showRequestModal, setShowRequestModal] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  const { taskUserID } = useTaskAuthStore();
+  const { taskUserID, setTaskUserID } = useTaskAuthStore();
+
+  const { data: verificationRequest } =
+    api.srkTask.getAllSrkTaskAffiliateVerificationRequest.useQuery(
+      ['getAllSrkTaskAffiliateVerificationRequest', user?._id],
+      { query: { srkUniversityUserId: user?._id || '' } },
+      {
+        enabled: !!user?._id && !taskUserID,
+        queryKey: [
+          'getAllSrkTaskAffiliateVerificationRequest',
+          user?._id || '',
+        ],
+      }
+    );
+
+  React.useEffect(() => {
+    if (
+      verificationRequest?.status === 200 &&
+      verificationRequest.body.success &&
+      verificationRequest.body.data
+    ) {
+      if (typeof verificationRequest.body.data._id === 'string') {
+        setTaskUserID(verificationRequest.body.data._id);
+      }
+    }
+  }, [verificationRequest, setTaskUserID]);
 
   const { data: userProfileData } = api.srkTask.getSrkTaskUserProfile.useQuery(
     ['getSrkTaskUserProfile', taskUserID],
-    { params: { userId: taskUserID || '' } }
+    { params: { userId: taskUserID || '' } },
+    {
+      enabled: !!taskUserID,
+      queryKey: ['getSrkTaskUserProfile', taskUserID || ''],
+    }
   );
 
   const { data: analyticsData, refetch: refetchAnalytics } =
     api.srkTask.getSrkTaskUserAnalytics.useQuery(
       ['getSrkTaskUserAnalytics', taskUserID],
-      { params: { userId: taskUserID || '' } }
+      { params: { userId: taskUserID || '' } },
+      {
+        enabled: !!taskUserID,
+        queryKey: ['getSrkTaskUserAnalytics', taskUserID || ''],
+      }
     );
 
-  // const balance =
-  //   analyticsData?.status === 200
-  //     ? analyticsData.body.coinsData.walletCoins
-  //     : 0;
-  const balance = 1250;
+  const balance =
+    analyticsData?.status === 200
+      ? analyticsData.body.coinsData.walletCoins
+      : 0;
+  // const balance = 1250;
 
   const eligible = Math.max(0, balance - 250);
 

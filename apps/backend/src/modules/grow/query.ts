@@ -705,4 +705,5 @@ export const growQueryHandler = {
   getAllSrkGrowAffiliateVerificationRequest,
   getSrkGrowAffiliateEarningPayoutRequestByAdmin,
   getSrkGrowAffiliateEarningPayoutRequestByUser,
+  getApprovedSrkGrowAffiliateVerificationRequest,
 };

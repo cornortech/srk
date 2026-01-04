@@ -17,39 +17,68 @@ interface DashboardViewProps {
   showToast: (message: string, type?: ToastType) => void;
 }
 
+import { WithdrawalModal } from '../components/WithdrawalModal';
+
 export const DashboardView: React.FC<DashboardViewProps> = ({
   userID,
   data,
   showToast,
 }) => {
-  const [isWithdrawing, setIsWithdrawing] = useState(false);
+  const [showWithdrawModal, setShowWithdrawModal] = useState(false);
 
-  const { data: getAffiliateUserDashboardStats, isLoading } =
-    api.growAffiliate.getGrowAffiliateUserComissionEarningsDashboard.useQuery(
-      ['affiliatedUserDashboardStats', userID],
-      {
-        params: {
-          affiliateUserId: userID,
-        },
-      }
-    );
+  const {
+    data: getAffiliateUserDashboardStats,
+    isLoading,
+    refetch,
+  } = api.growAffiliate.getGrowAffiliateUserComissionEarningsDashboard.useQuery(
+    ['affiliatedUserDashboardStats', userID],
+    {
+      params: {
+        affiliateUserId: userID,
+      },
+    }
+  );
+
+  const withdrawMutation =
+    api.grow.createGrowSrkAffiliateEarningPayoutRequest.useMutation({
+      onSuccess: (response) => {
+        if (response.status === 201) {
+          showToast('Withdrawal request submitted successfully!', 'success');
+          setShowWithdrawModal(false);
+          refetch(); // Refresh stats to reflect pending requests if any
+        } else {
+          showToast(
+            (response.body as any)?.message || 'Withdrawal failed',
+            'error'
+          );
+        }
+      },
+      onError: () => {
+        showToast('Something went wrong. Please try again later.', 'error');
+      },
+    });
 
   const balance = getAffiliateUserDashboardStats?.body.currentBalance || 0;
 
-  const handleWithdraw = async () => {
-    setIsWithdrawing(true);
-    // Simulate API call to SRK Bank
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      showToast('Withdrawal request sent to SRK Bank!', 'success');
-    } catch (error) {
-      showToast('Withdrawal failed. Please try again.', 'error');
-    } finally {
-      setIsWithdrawing(false);
+  const handleWithdrawClick = () => {
+    if (balance <= 0) {
+      showToast('No funds available for withdrawal', 'error');
+      return;
     }
+    setShowWithdrawModal(true);
   };
 
-  const consistencyDays = getAffiliateUserDashboardStats?.body.activeDaysStreak ?? 0;
+  const handleWithdrawSubmit = (amount: number) => {
+    withdrawMutation.mutate({
+      body: {
+        srkGrowUserId: userID,
+        amount: amount,
+      },
+    });
+  };
+
+  const consistencyDays =
+    getAffiliateUserDashboardStats?.body.activeDaysStreak ?? 0;
 
   const stats = [
     {
@@ -134,8 +163,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     },
     {
       label: 'Consistency',
-      value: `${consistencyDays
-        } Days`,
+      value: `${consistencyDays} Days`,
       variant: 'emerald' as CardVariant,
       info: 'Active streak',
       icon: (
@@ -164,17 +192,15 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           </p>
         </div>
         <button
-          onClick={handleWithdraw}
-          disabled={isWithdrawing || data.wallet <= 0}
+          onClick={handleWithdrawClick}
+          disabled={withdrawMutation.isPending || balance <= 0}
           className={`
             relative overflow-hidden group
             px-6 py-3 rounded-xl
             font-bold text-sm
             transition-all duration-300
             flex items-center justify-center gap-2
-            ${data.wallet <= 0
-              ? 'opacity-50 cursor-not-allowed'
-              : 'hover:scale-105'
+            ${balance <= 0 ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105'
             }
           `}
           style={{
@@ -182,7 +208,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             boxShadow: `0 4px 20px ${GOLD_PRIMARY}40`,
           }}
         >
-          {isWithdrawing ? (
+          {withdrawMutation.isPending ? (
             <>
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
               Processing...
@@ -190,12 +216,20 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           ) : (
             <>
               <WithdrawIcon className="w-4 h-4" />
-              Withdraw {formatRupees(data.wallet)}
+              Withdraw {formatRupees(balance)}
             </>
           )}
           <div className="absolute inset-0 bg-white/0 group-hover:bg-white/10 transition-colors duration-300" />
         </button>
       </div>
+
+      <WithdrawalModal
+        isOpen={showWithdrawModal}
+        onClose={() => setShowWithdrawModal(false)}
+        onSubmit={handleWithdrawSubmit}
+        isSubmitting={withdrawMutation.isPending}
+        currentBalance={balance}
+      />
 
       {/* Small Tile Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
@@ -351,10 +385,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 <div
                   className="h-full rounded-full transition-all duration-1000"
                   style={{
-                    width: `${Math.min(
-                      (consistencyDays / 30) * 100,
-                      100
-                    )}%`,
+                    width: `${Math.min((consistencyDays / 30) * 100, 100)}%`,
                     background: `linear-gradient(90deg, ${GOLD_PRIMARY}, ${GOLD_ACCENT})`,
                     boxShadow: `0 0 20px ${GOLD_PRIMARY}40`,
                   }}

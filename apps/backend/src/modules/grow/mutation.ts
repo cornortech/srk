@@ -921,7 +921,7 @@ const createGrowSrkAffiliateEarningPayoutRequest: AppRouteImplementationOrOption
 
     // Check user balance
     const userBalance = await growSrkAffiliateUserBalanceModel.findOne({
-      srkGrowUserId,
+      growSocialMediaPackageUserId: srkGrowUserId,
     });
 
     if (!userBalance || userBalance.wallet < amount) {
@@ -1007,7 +1007,7 @@ const acceptGrowSrkAffiliateEarningPayoutRequestByAdmin: AppRouteImplementationO
 
     // Update user balance
     const userBalance = await growSrkAffiliateUserBalanceModel.findOne({
-      srkGrowUserId: payoutRequest.srkGrowUserId,
+      growSocialMediaPackageUserId: payoutRequest.srkGrowUserId,
     });
 
     if (!userBalance || userBalance.wallet < payoutRequest.amount) {

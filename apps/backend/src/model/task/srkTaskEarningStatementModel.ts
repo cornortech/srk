@@ -10,7 +10,6 @@ const srkTaskEarningStatementSchema = new mongoose.Schema(
     growPackageTodoId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'growPackageTodo',
-      required: true,
     },
     description: {
       type: String,

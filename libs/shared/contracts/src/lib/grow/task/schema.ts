@@ -476,7 +476,7 @@ export const getAllTaskAffiliateResponseSchema = z.object({
   fullName: z.string(),
   dob: z.string(),
   isActivated: z.boolean(),
-    createdAt: z.string(),
+  createdAt: z.string(),
   updatedAt: z.string(),
 });
 
@@ -504,8 +504,8 @@ export const srkTaskOnboardingVerificationRequestSchema = z.object({
 });
 
 export type TGetAllTaskAffiliateResponseSchema = z.infer<
-  typeof getAllTaskAffiliateResponseSchema>
-;
+  typeof getAllTaskAffiliateResponseSchema
+>;
 
 export const paginatedSrkTaskOnboardingVerificationRequestSchema =
   commonPaginationResponse.extend({

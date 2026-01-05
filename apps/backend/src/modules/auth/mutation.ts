@@ -391,12 +391,19 @@ const login: AppRouteImplementationOrOptions<
   });
 
   // Set cookie
-  res.cookie('x-auth-token', token, {
+  const isProduction = process.env.NODE_ENV === 'production';
+  const cookieOptions: any = {
     maxAge: 24 * 60 * 60 * 1000,
     httpOnly: true,
-    sameSite: 'lax',
-    secure: process.env.NODE_ENV === 'production',
-  });
+    sameSite: isProduction ? 'none' : 'lax',
+    secure: isProduction,
+  };
+
+  if (process.env.COOKIE_DOMAIN) {
+    cookieOptions.domain = process.env.COOKIE_DOMAIN;
+  }
+
+  res.cookie('x-auth-token', token, cookieOptions);
 
   return {
     status: 200,

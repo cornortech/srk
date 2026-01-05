@@ -187,11 +187,13 @@ const exchangeCode: AppRouteImplementationOrOptions<
     });
 
     // Set HTTP-only cookie for the new domain
+    const isProduction = process.env.NODE_ENV === 'production';
+
     res.cookie('x-auth-token', token, {
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
       httpOnly: true,
-      secure: process.env['NODE_ENV'] === 'production',
-      sameSite: 'lax',
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax',
       domain: process.env['COOKIE_DOMAIN'] || undefined,
     });
 

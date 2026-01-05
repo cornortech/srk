@@ -392,14 +392,18 @@ const login: AppRouteImplementationOrOptions<
 
   // Set cookie
   const isProduction = process.env.NODE_ENV === 'production';
-
-  res.cookie('x-auth-token', token, {
+  const cookieOptions: any = {
     maxAge: 24 * 60 * 60 * 1000,
     httpOnly: true,
     sameSite: isProduction ? 'none' : 'lax',
     secure: isProduction,
-    domain: process.env.COOKIE_DOMAIN || undefined,
-  });
+  };
+
+  if (process.env.COOKIE_DOMAIN) {
+    cookieOptions.domain = process.env.COOKIE_DOMAIN;
+  }
+
+  res.cookie('x-auth-token', token, cookieOptions);
 
   return {
     status: 200,

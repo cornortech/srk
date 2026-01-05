@@ -43,4 +43,8 @@ export const growRouter = s.router(growContract, {
     growQueryHandler.getSrkGrowAffiliateEarningPayoutRequestByUser,
   getApprovedSrkGrowAffiliateVerificationRequest:
     growQueryHandler.getApprovedSrkGrowAffiliateVerificationRequest,
+  getTaskMonitoring: growQueryHandler.getTaskMonitoring,
+  toggleEnrollmentActiveStatus:
+    growMutationHandler.toggleEnrollmentActiveStatus,
+  getGlobalOverview: growQueryHandler.getGlobalOverview,
 });

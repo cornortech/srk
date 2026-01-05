@@ -58,6 +58,14 @@ export const getGrowSocialMediaEnrollmentByIdSchema = z.object({
     profileLinkURL: z.array(
       z.string().url('Invalid Profile Link URL').optional()
     ),
+    isActive: z.boolean().optional(),
+    packageName: z.string().optional(),
+    packageTypeName: z.string().optional(),
+    packageSubTypeName: z.string().optional(),
+    socialMediaPlatform: z.string().optional(),
+    noOfFollowers: z.number().optional(),
+    noOfLikes: z.number().optional(),
+    noOfVideos: z.number().optional(),
   }),
   paymentData: z.object({
     paymentURL: z.string().url('Invalid payment URL'),
@@ -148,6 +156,7 @@ export const srkGrowAffiliateVerificationSchema = z.object({
 
 export const getAllSrkGrowUsersQueryParams = z.object({
   userType: z.enum(['affiliate', 'package']).optional(),
+  search: z.string().optional(),
 });
 
 export const getAllSrkGrowUsersResponseSchema = z.array(srkGrowUsersSchema);
@@ -299,3 +308,83 @@ export const getSrkGrowAffiliateEarningPayoutQueryParamsSchema =
 export type TGetSrkGrowAffiliateEarningPayoutQueryParams = z.infer<
   typeof getSrkGrowAffiliateEarningPayoutQueryParamsSchema
 >;
+
+// Task Monitoring Schemas
+export const taskCompletionSchema = z.object({
+  total: z.number(),
+  completed: z.number(),
+  percentage: z.number(),
+});
+
+export const followProfileSchema = z.object({
+  profileUrl: z.string(),
+  followCounts: z.number(),
+  totalRequired: z.number(),
+  percentage: z.number(),
+});
+
+export const videoTaskSchema = z.object({
+  postUrl: z.string(),
+  profileUrl: z.string(),
+  likeCounts: z.number(),
+  totalRequired: z.number(),
+  percentage: z.number(),
+});
+
+export const platformTasksSchema = z.object({
+  follow: taskCompletionSchema,
+  like: taskCompletionSchema,
+  videos: z.array(videoTaskSchema).optional(),
+  profiles: z.array(followProfileSchema).optional(),
+});
+
+export const taskMonitoringUserSchema = z.object({
+  _id: z.string(),
+  fullName: z.string(),
+  email: z.string(),
+  status: z.enum(['verificationPending', 'portalActivated', 'portalDeactivated', 'verificationRejected']),
+  enrollmentId: z.string(),
+  platform: z.enum(['Instagram', 'TikTok', 'YouTube', 'Twitter', 'Facebook']),
+  packageName: z.string(),
+  packageSubTypeName: z.string(),
+  tasks: platformTasksSchema,
+  overallCompletionPercentage: z.number(),
+  isActive: z.boolean(),
+  createdAt: z.string(),
+});
+
+export const taskMonitoringResponseSchema = z.array(taskMonitoringUserSchema);
+
+export type TTaskMonitoringUser = z.infer<typeof taskMonitoringUserSchema>;
+export type TTaskMonitoringResponse = z.infer<typeof taskMonitoringResponseSchema>;
+
+export const toggleEnrollmentActiveStatusSchema = z.object({
+  enrollmentId: z.string().min(1, 'Enrollment ID is required'),
+});
+
+export type TToggleEnrollmentActiveStatus = z.infer<
+  typeof toggleEnrollmentActiveStatusSchema
+>;
+
+export const globalOverviewResponseSchema = z.object({
+  totalRevenue: z.number(),
+  totalLiability: z.number(),
+  affiliateCount: z.number(),
+  trends: z.array(
+    z.object({
+      month: z.string(),
+      revenue: z.number(),
+      users: z.number(),
+    })
+  ),
+});
+
+export type TGlobalOverviewResponse = z.infer<
+  typeof globalOverviewResponseSchema
+>;
+
+export const globalOverviewQuerySchema = z.object({
+  timeRange: z.enum(['6months', '1year', 'all']).optional().default('6months'),
+});
+
+export type TGlobalOverviewQuery = z.infer<typeof globalOverviewQuerySchema>;

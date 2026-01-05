@@ -11,4 +11,15 @@ export const packageRouter = s.router(packageContract, {
   deletePackageById: packageMutationHandler.deletePackageById,
   getAllSrkGrowPackages: packageQueryHandler.getAllSrkGrowPackages,
   getSrkGrowPackageById: packageQueryHandler.getSrkGrowPackageById,
+  
+  // Grow Package CRUD
+  createGrowSocialMediaPackage: packageMutationHandler.createGrowSocialMediaPackage,
+  createGrowPackageType: packageMutationHandler.createGrowPackageType,
+  createGrowPackageSubType: packageMutationHandler.createGrowPackageSubType,
+  updateGrowSocialMediaPackage: packageMutationHandler.updateGrowSocialMediaPackage,
+  updateGrowPackageType: packageMutationHandler.updateGrowPackageType,
+  updateGrowPackageSubType: packageMutationHandler.updateGrowPackageSubType,
+  deleteGrowSocialMediaPackage: packageMutationHandler.deleteGrowSocialMediaPackage,
+  deleteGrowPackageType: packageMutationHandler.deleteGrowPackageType,
+  deleteGrowPackageSubType: packageMutationHandler.deleteGrowPackageSubType,
 });

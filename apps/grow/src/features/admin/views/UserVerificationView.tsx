@@ -3,19 +3,18 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { GradientText } from '../components/ui/GradientText';
 import { GlassCard } from '../components/ui/GlassCard';
 import { StatusBadge } from '../components/ui/StatusBadge';
-import { DocumentViewerModal } from '../Modals/DocumentViewerModal';
 import { RejectionModal } from '../Modals/RejectionModal';
+import { UserDetailsModal } from '../Modals/UserDetailsModal';
 import { api } from '../../../lib/api';
 import moment from 'moment';
 import { useSRKAlert } from '@srk/shared/hooks';
-import { PostLinksModal } from '../Modals/PostLinksModal';
 import TablePagination from '../../../lib/ui/TablePagination';
-import { ExternalLink } from 'lucide-react';
+import { Eye } from 'lucide-react';
 
 export const UserVerificationView = () => {
   const [page, setPage] = useState(1);
 
-  const { data: growEnrollementUserData, isLoading } =
+  const { data: growEnrollementUserData } =
     api.grow.getAllGrowSocialMediaEnrollement.useQuery(
       ['enrolledUser', page], // queryKey
       {
@@ -25,24 +24,15 @@ export const UserVerificationView = () => {
         },
       }
     );
-
-  const limit = 10;
   
   // Update these variables:
 const totalPage = growEnrollementUserData?.body?.totalPages ?? 1;
-const totalUsers = growEnrollementUserData?.body?.totalUsers ?? 0;
 
-  const [documentViewerOpen, setDocumentViewerOpen] = useState(false);
-  const [selectedDocument, setSelectedDocument] = useState<{
-    url?: string;
-    title: string;
-  } | null>(null);
   const [rejectionModalOpen, setRejectionModalOpen] = useState(false);
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const [filterStatus, setFilterStatus] = useState<string>('all');
-  const [postLinksModalOpen, setPostLinksModalOpen] = useState(false);
-  const [selectedPostLinks, setSelectedPostLinks] = useState<string[]>([]);
-  const [selectedUserName, setSelectedUserName] = useState('');
+  const [userDetailsModalOpen, setUserDetailsModalOpen] = useState(false);
+  const [selectedUserData, setSelectedUserData] = useState<typeof growEnrollementUserData extends { body: { data: Array<infer T> } } ? T : never | null>(null);
 
   const { show } = useSRKAlert();
 
@@ -91,17 +81,9 @@ const totalUsers = growEnrollementUserData?.body?.totalUsers ?? 0;
     }
   };
 
-  const handleViewPostLinks = (item: any) => {
-    setSelectedPostLinks(item.postLinks || []);
-    setSelectedUserName(item.fullName);
-    setPostLinksModalOpen(true);
-  };
-
-  const handleViewDocuments = (item: any) => {
-    const docs = item.userData.kycDocuments || [];
-    const encoded = encodeURIComponent(JSON.stringify(docs));
-
-    window.open(`/admin/view-document?data=${encoded}`, '_blank');
+  const handleViewDetails = (item: NonNullable<typeof growEnrollementUserData>['body']['data'][number]) => {
+    setSelectedUserData(item);
+    setUserDetailsModalOpen(true);
   };
 
   return (
@@ -197,28 +179,22 @@ const totalUsers = growEnrollementUserData?.body?.totalUsers ?? 0;
             <table className="w-full">
               <thead>
                 <tr className="border-b border-white/10">
-                  <th className="text-left py-4 px-6 text-sm font-medium text-gray-400">
+                  <th className="text-left py-4 px-4 text-sm font-medium text-gray-400">
                     S.N.
                   </th>
-                  <th className="text-left py-4 px-6 text-sm font-medium text-gray-400">
+                  <th className="text-left py-4 px-4 text-sm font-medium text-gray-400">
                     User Details
                   </th>
-                  <th className="text-left py-4 px-6 text-sm font-medium text-gray-400">
+                  <th className="text-left py-4 px-4 text-sm font-medium text-gray-400">
+                    Package
+                  </th>
+                  <th className="text-left py-4 px-4 text-sm font-medium text-gray-400">
                     Submitted Date
                   </th>
-                  <th className="text-left py-4 px-6 text-sm font-medium text-gray-400">
-                    Social Links
-                  </th>
-                  <th className="text-left py-4 px-6 text-sm font-medium text-gray-400">
-                    View Document
-                  </th>
-                  <th className="text-left py-4 px-6 text-sm font-medium text-gray-400">
-                    Amount
-                  </th>
-                  <th className="text-left py-4 px-6 text-sm font-medium text-gray-400">
+                  <th className="text-left py-4 px-4 text-sm font-medium text-gray-400">
                     Status
                   </th>
-                  <th className="text-left py-4 px-6 text-sm font-medium text-gray-400">
+                  <th className="text-left py-4 px-4 text-sm font-medium text-gray-400">
                     Actions
                   </th>
                 </tr>
@@ -232,12 +208,12 @@ const totalUsers = growEnrollementUserData?.body?.totalUsers ?? 0;
                     transition={{ duration: 0.3, delay: index * 0.1 }}
                     className="border-b border-white/5 hover:bg-white/5 transition-colors group"
                   >
-                    <td className="py-4 px-6">
+                    <td className="py-4 px-4">
                       <code className="text-sm font-mono text-white group-hover:text-[#e1ba73] transition-colors">
                         {index + 1 + (page - 1) * 10}
                       </code>
                     </td>
-                    <td className="py-4 px-6">
+                    <td className="py-4 px-4">
                       <div>
                         <p className="font-medium text-white">
                           {item.userData.fullName}
@@ -247,73 +223,38 @@ const totalUsers = growEnrollementUserData?.body?.totalUsers ?? 0;
                         </p>
                       </div>
                     </td>
-                    <td className="py-4 px-6">
+                    <td className="py-4 px-4">
                       <div>
-                        <p className="text-white">
-                          {moment(item.createdAt).format('lll')}
+                        <p className="text-white font-medium text-sm">
+                          {item.enrollmentData.packageName}
                         </p>
-                        {/* {item.reviewedAt && (
-                          <p className="text-xs text-gray-400">
-                            Reviewed: {item.reviewedAt}
-                          </p>
-                        )} */}
+                        <p className="text-xs text-gray-400">
+                          {item.enrollmentData.socialMediaPlatform}
+                        </p>
                       </div>
                     </td>
-                    <td className="py-4 px-6">
-                      <button
-                        onClick={() => handleViewPostLinks(item)}
-                        className="flex items-center gap-2 px-3 py-1 bg-white/5 text-white rounded-lg hover:bg-white/10 transition-colors"
-                      >
-                        <span>👁️</span>
-                        View Links ({item.userData.kycURL?.length || 0})
-                      </button>
+                    <td className="py-4 px-4">
+                      <p className="text-white text-sm">
+                        {moment(item.createdAt).format('ll')}
+                      </p>
+                      <p className="text-xs text-gray-400">
+                        {moment(item.createdAt).format('LT')}
+                      </p>
                     </td>
-
-                    <td className="p-3">
-                      <div className="mb-3 relative group rounded-xl overflow-hidden border border-white/10">
-                        <img
-                          src={item.userData.kycURL}
-                          alt="Current Proof"
-                          className="w-full h-16 object-cover opacity-60 group-hover:opacity-100 transition-opacity"
-                        />
-                        <div className="absolute inset-0 flex items-center justify-center gap-2">
-                          <a
-                            href={item.userData.kycURL}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="p-2 bg-white rounded-full text-black hover:text-white hover:bg-[#b68938] transition-all opacity-0 group-hover:opacity-100"
-                          >
-                            <ExternalLink size={14} />
-                          </a>
-                        </div>
-                      </div>
-                    </td>
-
-                    {/* <td className="py-4 px-6">
-                      <button
-                        onClick={() => handleViewDocuments(item)}
-                        className="flex items-center gap-2 px-3 py-1 bg-white/5 text-white rounded-lg hover:bg-white/10 transition-colors"
-                      >
-                        <span>👁️</span>
-                        View KYC
-                      </button>
-                    </td> */}
-
-                    <td className="py-4 px-6">
-                      <code className="text-sm font-mono text-white group-hover:text-[#e1ba73] transition-colors">
-                        ₹{item.paymentData.transactionId}
-                      </code>
-                    </td>
-                    <td className="py-4 px-6">
+                    <td className="py-4 px-4">
                       <StatusBadge status={item.userData.status} />
-                      {item.paymentData.rejectionReason && (
-                        <p className="text-xs text-rose-400 mt-1 max-w-xs">
-                          {item.paymentData.rejectionReason}
-                        </p>
-                      )}
                     </td>
-                    <td className="py-4 px-6">
+                    <td className="py-4 px-4">
                       <div className="flex gap-2">
+                        <motion.button
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={() => handleViewDetails(item)}
+                          className="p-2 bg-blue-600/20 text-blue-300 rounded-lg hover:bg-blue-600/30 transition-colors"
+                          title="View Details"
+                        >
+                          <Eye size={16} />
+                        </motion.button>
                         {item.userData.status === 'verificationPending' && (
                           <>
                             <motion.button
@@ -321,24 +262,19 @@ const totalUsers = growEnrollementUserData?.body?.totalUsers ?? 0;
                               whileTap={{ scale: 0.95 }}
                               onClick={() => handleApprove(item._id)}
                               disabled={approvePending}
-                              className="px-3 py-1 bg-emerald-600/20 text-emerald-300 rounded-lg hover:bg-emerald-600/30 transition-colors text-sm"
+                              className="px-3 py-1 bg-emerald-600/20 text-emerald-300 rounded-lg hover:bg-emerald-600/30 transition-colors text-xs font-medium disabled:opacity-50"
                             >
-                              {approvePending ? 'Approving' : 'Approve'}
+                              {approvePending && selectedItemId === item._id ? '...' : '✓'}
                             </motion.button>
                             <motion.button
                               whileHover={{ scale: 1.05 }}
                               whileTap={{ scale: 0.95 }}
                               onClick={() => handleReject(item._id)}
-                              className="px-3 py-1 bg-rose-600/20 text-rose-300 rounded-lg hover:bg-rose-600/30 transition-colors text-sm"
+                              className="px-3 py-1 bg-rose-600/20 text-rose-300 rounded-lg hover:bg-rose-600/30 transition-colors text-xs font-medium"
                             >
-                              Reject
+                              ✕
                             </motion.button>
                           </>
-                        )}
-                        {item.userData.status !== 'verificationPending' && (
-                          <span className="text-sm text-gray-400">
-                            Reviewed
-                          </span>
                         )}
                       </div>
                     </td>
@@ -358,24 +294,12 @@ const totalUsers = growEnrollementUserData?.body?.totalUsers ?? 0;
         />
       )}
 
-      {/* <AnimatePresence>
-        {documentViewerOpen && selectedDocument && (
-          <DocumentViewerModal
-            isOpen={documentViewerOpen}
-            onClose={() => setDocumentViewerOpen(false)}
-            title={selectedDocument.title}
-            documentUrl={selectedDocument.url}
-          />
-        )}
-      </AnimatePresence> */}
-
       <AnimatePresence>
-        {postLinksModalOpen && (
-          <PostLinksModal
-            isOpen={postLinksModalOpen}
-            onClose={() => setPostLinksModalOpen(false)}
-            postLinks={selectedPostLinks}
-            userName={selectedUserName}
+        {userDetailsModalOpen && (
+          <UserDetailsModal
+            isOpen={userDetailsModalOpen}
+            onClose={() => setUserDetailsModalOpen(false)}
+            userData={selectedUserData}
           />
         )}
       </AnimatePresence>

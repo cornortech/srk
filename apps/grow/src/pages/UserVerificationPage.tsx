@@ -29,7 +29,7 @@ export const UserVerificationPage = () => {
   const navigate = useNavigate();
   const { user, setUser, logout } = useGrowAuthStore();
   const toast = useToast();
-  const [kycFiles, setKycFiles] = useState<File[]>([]);
+  // const [kycFiles, setKycFiles] = useState<File[]>([]);
   const [currentKycDocs, setCurrentKycDocs] = useState<string[]>([]);
   const [paymentProof, setPaymentProof] = useState<File | null>(null);
   const { uploadFile, isUploading: isUploadingFiles } =
@@ -62,7 +62,7 @@ export const UserVerificationPage = () => {
       if (data.status === 200) {
         toast.success('Resubmission successful!');
         refetch();
-        setKycFiles([]);
+        // setKycFiles([]);
         setPaymentProof(null);
         reset();
       } else {
@@ -86,7 +86,7 @@ export const UserVerificationPage = () => {
         ...user!,
         status: updatedUser.status as any,
         rejectionReason: payment?.rejectionReason ?? null,
-        kycURL: updatedUser.kycURL,
+        // kycURL: updatedUser.kycURL,
         phone: updatedUser.phone,
         country: updatedUser.country,
         transactionId: payment?.transactionId,
@@ -98,13 +98,13 @@ export const UserVerificationPage = () => {
       if (payment?.transactionId)
         setValue('transactionId', payment.transactionId);
       if (payment?.paymentUrl) setValue('paymentURL', payment.paymentUrl);
-      if (updatedUser.kycURL) {
-        const docs = Array.isArray(updatedUser.kycURL)
-          ? updatedUser.kycURL
-          : [updatedUser.kycURL];
-        setCurrentKycDocs(docs);
-        setValue('kycURLs', docs);
-      }
+      // if (updatedUser.kycURL) {
+      //   const docs = Array.isArray(updatedUser.kycURL)
+      //     ? updatedUser.kycURL
+      //     : [updatedUser.kycURL];
+      //   setCurrentKycDocs(docs);
+      //   setValue('kycURLs', docs);
+      // }
     }
   }, [profileData, setUser, setValue]);
 
@@ -119,22 +119,22 @@ export const UserVerificationPage = () => {
     }
   }, [user, navigate]);
 
-  const handleKycFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      const newFiles = Array.from(e.target.files);
-      setKycFiles((prev) => [...prev, ...newFiles]);
-    }
-  };
+  // const handleKycFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   if (e.target.files && e.target.files.length > 0) {
+  //     const newFiles = Array.from(e.target.files);
+  //     setKycFiles((prev) => [...prev, ...newFiles]);
+  //   }
+  // };
 
-  const removeNewFile = (index: number) => {
-    setKycFiles((prev) => prev.filter((_, i) => i !== index));
-  };
+  // const removeNewFile = (index: number) => {
+  //   setKycFiles((prev) => prev.filter((_, i) => i !== index));
+  // };
 
-  const removeCurrentDoc = (index: number) => {
-    const updatedDocs = currentKycDocs.filter((_, i) => i !== index);
-    setCurrentKycDocs(updatedDocs);
-    setValue('kycURLs', updatedDocs);
-  };
+  // const removeCurrentDoc = (index: number) => {
+  //   const updatedDocs = currentKycDocs.filter((_, i) => i !== index);
+  //   setCurrentKycDocs(updatedDocs);
+  //   setValue('kycURLs', updatedDocs);
+  // };
 
   const handlePaymentProofChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -145,18 +145,18 @@ export const UserVerificationPage = () => {
   const onFormSubmit = async (data: TResubmitForm) => {
     if (!user) return;
 
-    if (currentKycDocs.length === 0 && kycFiles.length === 0) {
-      toast.error('Please provide at least one KYC document.');
-      return;
-    }
+    // if (currentKycDocs.length === 0 && kycFiles.length === 0) {
+    //   toast.error('Please provide at least one KYC document.');
+    //   return;
+    // }
 
     try {
       // 1. Upload new KYC files
-      let newKycUrls: string[] = [];
-      for (const file of kycFiles) {
-        const { url } = await uploadFile(file, 'image');
-        newKycUrls.push(url);
-      }
+      // let newKycUrls: string[] = [];
+      // for (const file of kycFiles) {
+      //   const { url } = await uploadFile(file, 'image');
+      //   newKycUrls.push(url);
+      // }
 
       // 2. Upload new Payment Proof if changed
       let finalPaymentUrl = data.paymentURL;
@@ -166,13 +166,13 @@ export const UserVerificationPage = () => {
       }
 
       // 3. Combine
-      const totalKycUrls = [...currentKycDocs, ...newKycUrls];
+      // const totalKycUrls = [...currentKycDocs, ...newKycUrls];
 
       // 4. Call Backend
       resubmitMutation.mutate({
         body: {
           userId: user._id,
-          kycURLs: totalKycUrls,
+          // kycURLs: totalKycUrls,
           transactionId: data.transactionId,
           paymentURL: finalPaymentUrl,
         },
@@ -374,7 +374,7 @@ export const UserVerificationPage = () => {
                     </div>
                   </div>
 
-                  <div>
+                  {/* <div>
                     <label className="block text-sm font-bold text-gray-400 mb-2 uppercase tracking-widest">
                       KYC Documents
                     </label>
@@ -447,7 +447,7 @@ export const UserVerificationPage = () => {
                         <Upload size={18} className="text-gray-500" />
                       </label>
                     </div>
-                  </div>
+                  </div> */}
 
                   <button
                     type="submit"

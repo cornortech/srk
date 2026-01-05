@@ -223,7 +223,7 @@ export type TGetSrkGrowProfileResponse = z.infer<
 
 export const resubmitGrowVerificationSchema = z.object({
   userId: z.string(),
-  kycURLs: z.array(z.string()),
+  kycURLs: z.array(z.string()).optional(),
   transactionId: z.string(),
   paymentURL: z.string(),
 });
@@ -342,7 +342,12 @@ export const taskMonitoringUserSchema = z.object({
   _id: z.string(),
   fullName: z.string(),
   email: z.string(),
-  status: z.enum(['verificationPending', 'portalActivated', 'portalDeactivated', 'verificationRejected']),
+  status: z.enum([
+    'verificationPending',
+    'portalActivated',
+    'portalDeactivated',
+    'verificationRejected',
+  ]),
   enrollmentId: z.string(),
   platform: z.enum(['Instagram', 'TikTok', 'YouTube', 'Twitter', 'Facebook']),
   packageName: z.string(),
@@ -356,7 +361,9 @@ export const taskMonitoringUserSchema = z.object({
 export const taskMonitoringResponseSchema = z.array(taskMonitoringUserSchema);
 
 export type TTaskMonitoringUser = z.infer<typeof taskMonitoringUserSchema>;
-export type TTaskMonitoringResponse = z.infer<typeof taskMonitoringResponseSchema>;
+export type TTaskMonitoringResponse = z.infer<
+  typeof taskMonitoringResponseSchema
+>;
 
 export const toggleEnrollmentActiveStatusSchema = z.object({
   enrollmentId: z.string().min(1, 'Enrollment ID is required'),

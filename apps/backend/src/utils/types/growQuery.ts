@@ -21,17 +21,31 @@ export interface GrowPackagePopulated {
 export interface GrowEnrollmentPopulated {
   _id: string;
   growSocialMediaPackageUserId: GrowUserPopulated;
-  growSocialMediaPackageId: GrowPackagePopulated;
+  growSocialMediaPackageId: {
+    _id: Types.ObjectId;
+    title?: string;
+    name?: string;
+    price?: number;
+    amount?: number;
+    amountBeforeDiscount?: number;
+  };
   growSocialMediaPackageTypeId: {
     _id: Types.ObjectId;
-    title: string;
+    title?: string;
+    name?: string;
   };
   growSocialMediaPackageSubTypeId: {
     _id: Types.ObjectId;
-    title: string;
-    amount: string;
+    title?: string;
+    name?: string;
+    amount?: string;
+    noOfFollowers?: number;
+    noOfLikes?: number;
+    noOfVideos?: number;
   };
-
+  socialMediaPlatform?: string;
+  isActive?: boolean;
+  noOfVideos?: number;
   createdAt: string;
   updatedAt: string;
 }

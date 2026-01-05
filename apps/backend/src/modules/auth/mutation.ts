@@ -391,11 +391,14 @@ const login: AppRouteImplementationOrOptions<
   });
 
   // Set cookie
+  const isProduction = process.env.NODE_ENV === 'production';
+
   res.cookie('x-auth-token', token, {
     maxAge: 24 * 60 * 60 * 1000,
     httpOnly: true,
-    sameSite: 'lax',
-    secure: process.env.NODE_ENV === 'production',
+    sameSite: isProduction ? 'none' : 'lax',
+    secure: isProduction,
+    domain: process.env.COOKIE_DOMAIN || undefined,
   });
 
   return {

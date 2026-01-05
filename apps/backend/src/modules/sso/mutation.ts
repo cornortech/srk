@@ -188,14 +188,18 @@ const exchangeCode: AppRouteImplementationOrOptions<
 
     // Set HTTP-only cookie for the new domain
     const isProduction = process.env.NODE_ENV === 'production';
-
-    res.cookie('x-auth-token', token, {
+    const cookieOptions: any = {
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
       httpOnly: true,
       secure: isProduction,
       sameSite: isProduction ? 'none' : 'lax',
-      domain: process.env['COOKIE_DOMAIN'] || undefined,
-    });
+    };
+
+    if (process.env.COOKIE_DOMAIN) {
+      cookieOptions.domain = process.env.COOKIE_DOMAIN;
+    }
+
+    res.cookie('x-auth-token', token, cookieOptions);
 
     // Clean up - delete the used code
     await AutoCodeModel.deleteOne({ _id: autoCode._id });

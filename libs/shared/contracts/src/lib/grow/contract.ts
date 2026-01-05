@@ -17,6 +17,10 @@ import {
   rejectGrowSrkAffiliateEarningPayoutRequestSchema,
   paginatedGrowSrkAffiliateEarningPayoutsSchema,
   getSrkGrowAffiliateEarningPayoutQueryParamsSchema,
+  taskMonitoringResponseSchema,
+  toggleEnrollmentActiveStatusSchema,
+  globalOverviewResponseSchema,
+  globalOverviewQuerySchema,
 } from './schema';
 import { ErrorSchema, SuccessSchema } from '../common';
 import { z } from 'zod';
@@ -100,7 +104,11 @@ export const growContract = c.router({
     path: '/social-media-enrollment',
     body: createGrowSocialMediaEnrollmentSchema,
     responses: {
-      201: SuccessSchema,
+      201: z.object({
+        success: z.boolean(),
+        message: z.string(),
+        enrollmentId: z.string(),
+      }),
       400: ErrorSchema,
       409: ErrorSchema,
       500: ErrorSchema,
@@ -327,5 +335,49 @@ export const growContract = c.router({
       500: ErrorSchema,
     },
     summary: 'Get approved SRK Grow Affiliate Verification Request for a user',
+  },
+
+  getTaskMonitoring: {
+    method: 'GET',
+    path: '/grow/task-monitoring',
+    query: z.object({
+      search: z.string().optional(),
+    }).optional(),
+    responses: {
+      200: taskMonitoringResponseSchema,
+      500: ErrorSchema,
+    },
+    summary: 'Get task monitoring analytics for all grow package users',
+  },
+
+  toggleEnrollmentActiveStatus: {
+    method: 'PATCH',
+    path: '/grow/toggle-enrollment-active/:enrollmentId',
+    pathParams: z.object({
+      enrollmentId: z.string(),
+    }),
+    body: z.object({}),
+    responses: {
+      200: z.object({
+        success: z.boolean(),
+        message: z.string(),
+        isActive: z.boolean(),
+      }),
+      400: ErrorSchema,
+      404: ErrorSchema,
+      500: ErrorSchema,
+    },
+    summary: 'Toggle enrollment active status (timeout)',
+  },
+
+  getGlobalOverview: {
+    method: 'GET',
+    path: '/grow/global-overview',
+    query: globalOverviewQuerySchema,
+    responses: {
+      200: globalOverviewResponseSchema,
+      500: ErrorSchema,
+    },
+    summary: 'Get global overview dashboard statistics',
   },
 });

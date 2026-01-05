@@ -48,13 +48,13 @@ const CallbackPage = () => {
           setMessage('Authentication successful! Redirecting...');
 
           // Set user in store
-          setUser({
-            _id: response.user._id,
-            email: response.user.email,
-            firstName: response.user.firstName,
-            lastName: response.user.lastName,
-            role: response.user.role,
-          });
+          // setUser({
+          //   _id: response.user._id,
+          //   email: response.user.email,
+          //   firstName: response.user.firstName,
+          //   lastName: response.user.lastName,
+          //   role: response.user.role,
+          // });
 
           // Redirect to dashboard
           setTimeout(() => {

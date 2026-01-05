@@ -6,6 +6,13 @@ import {
   getAllSrkGrowPackagesSchema,
   getPackageByIdSchema,
   srkGrowPackageSchema,
+  createGrowSocialMediaPackageSchema,
+  createGrowPackageTypeSchema,
+  createGrowPackageSubTypeSchema,
+  updateGrowSocialMediaPackageSchema,
+  updateGrowPackageTypeSchema,
+  updateGrowPackageSubTypeSchema,
+  deletePackageSchema,
 } from "./schema";
 import { z } from "zod";
 
@@ -80,5 +87,143 @@ export const packageContract = c.router({
       500: ErrorSchema,
     },
     summary: "Get SRK Grow package by ID",
+  },
+
+  // Create Grow Package
+  createGrowSocialMediaPackage: {
+    method: "POST",
+    path: "/grow/package/create",
+    body: createGrowSocialMediaPackageSchema,
+    responses: {
+      201: z.object({
+        success: z.boolean(),
+        message: z.string(),
+        packageId: z.string(),
+      }),
+      400: ErrorSchema,
+      500: ErrorSchema,
+    },
+    summary: "Create a new SRK Grow package",
+  },
+
+  // Create Package Type
+  createGrowPackageType: {
+    method: "POST",
+    path: "/grow/package/type/create",
+    body: createGrowPackageTypeSchema,
+    responses: {
+      201: z.object({
+        success: z.boolean(),
+        message: z.string(),
+        typeId: z.string(),
+      }),
+      400: ErrorSchema,
+      500: ErrorSchema,
+    },
+    summary: "Create a new package type",
+  },
+
+  // Create Package SubType
+  createGrowPackageSubType: {
+    method: "POST",
+    path: "/grow/package/subtype/create",
+    body: createGrowPackageSubTypeSchema,
+    responses: {
+      201: z.object({
+        success: z.boolean(),
+        message: z.string(),
+        subTypeId: z.string(),
+      }),
+      400: ErrorSchema,
+      500: ErrorSchema,
+    },
+    summary: "Create a new package subtype",
+  },
+
+  // Update Grow Package
+  updateGrowSocialMediaPackage: {
+    method: "PATCH",
+    path: "/grow/package/:id",
+    pathParams: z.object({ id: z.string() }),
+    body: updateGrowSocialMediaPackageSchema,
+    responses: {
+      200: SuccessSchema,
+      400: ErrorSchema,
+      404: ErrorSchema,
+      500: ErrorSchema,
+    },
+    summary: "Update SRK Grow package",
+  },
+
+  // Update Package Type
+  updateGrowPackageType: {
+    method: "PATCH",
+    path: "/grow/package/type/:id",
+    pathParams: z.object({ id: z.string() }),
+    body: updateGrowPackageTypeSchema,
+    responses: {
+      200: SuccessSchema,
+      400: ErrorSchema,
+      404: ErrorSchema,
+      500: ErrorSchema,
+    },
+    summary: "Update package type",
+  },
+
+  // Update Package SubType
+  updateGrowPackageSubType: {
+    method: "PATCH",
+    path: "/grow/package/subtype/:id",
+    pathParams: z.object({ id: z.string() }),
+    body: updateGrowPackageSubTypeSchema,
+    responses: {
+      200: SuccessSchema,
+      400: ErrorSchema,
+      404: ErrorSchema,
+      500: ErrorSchema,
+    },
+    summary: "Update package subtype",
+  },
+
+  // Delete Grow Package
+  deleteGrowSocialMediaPackage: {
+    method: "DELETE",
+    path: "/grow/package/:id",
+    pathParams: z.object({ id: z.string() }),
+    body: z.object({}),
+    responses: {
+      200: SuccessSchema,
+      404: ErrorSchema,
+      500: ErrorSchema,
+    },
+    summary: "Delete SRK Grow package",
+  },
+
+  // Delete Package Type
+  deleteGrowPackageType: {
+    method: "DELETE",
+    path: "/grow/package/type/:id",
+    pathParams: z.object({ id: z.string() }),
+    body: z.object({}),
+    responses: {
+      200: SuccessSchema,
+      404: ErrorSchema,
+      500: ErrorSchema,
+    },
+    summary: "Delete package type",
+  },
+
+  // Delete Package SubType
+  deleteGrowPackageSubType: {
+    method: "DELETE",
+    path: "/grow/package/subtype/:id",
+    pathParams: z.object({ id: z.string() }),
+    body: z.object({}),
+    responses: {
+      200: SuccessSchema,
+      404: ErrorSchema,
+      500: ErrorSchema,
+    },
+    summary: "Delete package subtype",
   },
 });

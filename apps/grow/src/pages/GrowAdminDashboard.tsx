@@ -18,11 +18,12 @@ import { GlobalOverviewView } from '../features/admin/views/GlobalOverviewView';
 import { AffiliateVerificationView } from '../features/admin/views/AffiliateVerificationView';
 import { UserVerificationView } from '../features/admin/views/UserVerificationView';
 import { PaymentVerificationView } from '../features/admin/views/PaymentVerificationView';
-import { TaskMonitoringView } from '../features/admin/views/TaskMonitoringView';
+import { TaskMonitoringView } from '../features/admin/views/TaskMonitoringViewNew';
 import { PrivateTasksView } from '../features/admin/views/PrivateTasksView';
 import { AffiliateUsersView } from '../features/admin/views/AffiliateUsersView';
 import { PackageUsersView } from '../features/admin/views/PackageUsersView';
 import { CreateUserView } from '../features/admin/views/CreateUserView';
+import { PackageManagementView } from '../features/admin/views/PackageManagementView';
 import { PayoutQueueView } from '../features/admin/views/PayoutQueueView';
 import { PerformanceTrendView } from '../features/admin/views/PerformanceTrendView';
 import { FloatingParticles } from '../features/admin/components/ui/FloatingParticles';
@@ -68,7 +69,7 @@ export const GrowOnlyAdminDashboard = () => {
   const renderView = useCallback(() => {
     switch (activeView) {
       case 'global':
-        return <GlobalOverviewView data={data} />;
+        return <GlobalOverviewView />;
       case 'affiliateverification':
         // srk grow affiliate verification request view
         return <AffiliateVerificationView />;
@@ -76,7 +77,7 @@ export const GrowOnlyAdminDashboard = () => {
         // srk grow package enrollment request view
         return <UserVerificationView />;
       case 'taskmonitoring':
-        return <TaskMonitoringView data={data} />;
+        return <TaskMonitoringView />;
       case 'privatetasks':
         return <PrivateTasksView data={data} />;
       case 'affiliatelist':
@@ -85,12 +86,14 @@ export const GrowOnlyAdminDashboard = () => {
         return <PackageUsersView />;
       case 'createuser':
         return <CreateUserView />;
+      case 'packagemanagement':
+        return <PackageManagementView />;
       case 'payoutqueue':
         return <PayoutQueueView />;
       case 'trend':
         return <PerformanceTrendView data={data} />;
       default:
-        return <GlobalOverviewView data={data} />;
+        return <GlobalOverviewView />;
     }
   }, [activeView, data]);
 

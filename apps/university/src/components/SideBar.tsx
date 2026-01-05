@@ -5,6 +5,7 @@ import {
   Menu,
   AlignLeftIcon,
   LayoutDashboardIcon,
+  WorkflowIcon,
 } from "lucide-react";
 import { useState } from "react";
 import {
@@ -19,6 +20,7 @@ import useAlert from "../hooks/useAlert";
 import { Button } from "@nextui-org/react";
 import { useMutation } from "@tanstack/react-query";
 import { updateUserDetailsApi } from "../lib/apiClient";
+import { useTaskSSO } from "@srk/shared/hooks";
 
 interface Tsidebar {
   sideBarName: string;
@@ -43,6 +45,11 @@ export const Sidebar = ({
     setIsOpen(!isOpen);
   };
 
+  const backendUrl = import.meta.env.VITE_BACKEND_ROOT_URL || 'http://localhost:4000';
+
+  const { redirectToTaskProgram, isLoading: isRedirectingToTaskProgram, error: redirectToTaskProgramError } = useTaskSSO({
+    backendUrl,
+  });
   const { mutate: updateUserPermission } = useMutation({
     mutationFn: async () => {
       if (!userDetails?._id) return;
@@ -105,6 +112,12 @@ export const Sidebar = ({
     updateUserPermission();
   };
 
+
+
+  const handleRedirectToTaskProgram = () => {
+    redirectToTaskProgram();
+  }
+
   return (
     <div
       className="relative min-h-screen hidden md:flex"
@@ -157,6 +170,20 @@ export const Sidebar = ({
               </li>
             );
           })}
+
+
+          {
+            sidebarType === "study" &&
+            <div
+              className="flex cursor-pointer items-center gap-x-3 w-full justify-start text-textPrimary bg-bgSecondary p-2 rounded-md transition-all duration-300 ease-in-out"
+              color="primary"
+              onClick={handleRedirectToTaskProgram}
+            >
+              <WorkflowIcon />
+              {isRedirectingToTaskProgram ? "Redirecting..." : "SRK Task Program"}
+            </div>
+          }
+
           {showInMobileView && sidebarType === "visitor" && (
             <div
               className="flex cursor-pointer items-center gap-x-3 w-full justify-start text-textPrimary bg-bgSecondary p-2 rounded-md transition-all duration-300 ease-in-out"

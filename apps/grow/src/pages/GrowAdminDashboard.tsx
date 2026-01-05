@@ -28,7 +28,6 @@ import { PayoutQueueView } from '../features/admin/views/PayoutQueueView';
 import { PerformanceTrendView } from '../features/admin/views/PerformanceTrendView';
 import { FloatingParticles } from '../features/admin/components/ui/FloatingParticles';
 import { Sidebar } from '../features/admin/components/AdminSidebar';
-import { FloatingNavBar } from '../features/admin/components/FloatingNavBar';
 import { MagneticButton } from '../lib/ui/MagneticButton';
 
 export const GrowOnlyAdminDashboard = () => {

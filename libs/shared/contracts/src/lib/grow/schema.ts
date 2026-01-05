@@ -12,7 +12,7 @@ export const createGrowSocialMediaEnrollmentSchema = z.object({
     gender: z.enum(['Male', 'Female', 'Other']),
     phoneNumber: z.string().min(10, 'Phone number must be at least 10 digits'),
     country: z.string().min(1, 'Country is required'),
-    kycURL: z.array(z.string()),
+    kycURL: z.array(z.string()).optional(),
     usedPromoCode: z.string().optional(),
   }),
   enrollmentData: z.object({

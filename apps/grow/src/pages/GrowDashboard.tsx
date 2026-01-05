@@ -1,12 +1,9 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import type { ReactNode } from 'react';
 import {
   AnalyticsData,
   DashboardData,
-  LeaderboardEntry,
   NavItem,
-  Payout,
-  SalesData,
   ToastType,
   ViewId,
 } from '../lib/types/dashboard';
@@ -14,9 +11,6 @@ import { DARK_BG, GOLD_PRIMARY } from '../features/dashboard/constants';
 import {
   MOCK_ANALYTICS_DATA,
   MOCK_DASHBOARD_DATA,
-  MOCK_LEADERBOARD,
-  MOCK_SALES_DATA,
-  MOCK_USER_PROFILE,
 } from '../data/dashboardMock';
 import { DashboardView } from '../features/dashboard/views/DashboardView';
 import { ReferralView } from '../features/dashboard/views/ReferralView';
@@ -52,12 +46,8 @@ export const GrowDashboard = () => {
   const [toastType, setToastType] = useState<ToastType>('success');
   const [dashboardData, setDashboardData] =
     useState<DashboardData>(initialEarningData);
-  const [salesData, setSalesData] = useState<SalesData[]>([]);
-  const [leaderboardData, setLeaderboardData] = useState<LeaderboardEntry[]>(
-    []
-  );
 
-  const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
+    const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(
     null
   );
@@ -105,9 +95,6 @@ export const GrowDashboard = () => {
     // setIsLoading(true);
     const timer = setTimeout(() => {
       setDashboardData(MOCK_DASHBOARD_DATA);
-      setSalesData(MOCK_SALES_DATA);
-      setLeaderboardData(MOCK_LEADERBOARD);
-
       setAnalyticsData(MOCK_ANALYTICS_DATA);
       // setIsLoading(false);
     }, 800);

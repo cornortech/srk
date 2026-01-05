@@ -17,10 +17,10 @@ export type GrowUser = z.infer<
 };
 
 interface GrowAuthState {
-  user: GrowUser | null;
+  user: Partial<GrowUser> | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  setUser: (user: GrowUser | null) => void;
+  setUser: (user: Partial<GrowUser> | null) => void;
   setLoading: (loading: boolean) => void;
   logout: () => void;
 }

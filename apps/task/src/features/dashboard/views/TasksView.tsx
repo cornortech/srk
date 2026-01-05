@@ -42,9 +42,7 @@ export const TasksView: React.FC<TasksViewProps> = ({
   setReviewingRejectedTask,
 }) => {
   const [showVideoFeature, setShowVideoFeature] = useState(false);
-  if (false) {
-    setShowVideoFeature(false);
-  }
+
 
   if (!isApproved) {
     return (
@@ -121,8 +119,8 @@ export const TasksView: React.FC<TasksViewProps> = ({
                 category.type === 'follow'
                   ? 'green'
                   : // : category.type === 'watch'
-                    // ? 'blue'
-                    'purple'
+                  // ? 'blue'
+                  'purple'
               }
               onClick={() => setTaskCategory(category.type)}
               className="cursor-pointer"
@@ -138,8 +136,8 @@ export const TasksView: React.FC<TasksViewProps> = ({
                         category.type === 'follow'
                           ? 'text-emerald-400'
                           : // : category.type === 'watch'
-                            // ? 'text-blue-400'
-                            'text-purple-400'
+                          // ? 'text-blue-400'
+                          'text-purple-400'
                       }
                     />
                   </div>
@@ -157,12 +155,13 @@ export const TasksView: React.FC<TasksViewProps> = ({
                   <div className="flex items-center gap-2">
                     <Coins size={20} className="text-amber-400" />
                     <span className="text-lg font-bold text-amber-400">
-                      {category.type === 'follow'
+                      {/* {category.type === 'follow'
                         ? '150+'
                         : // : category.type === 'watch'
-                          // ? '200+'
-                          '120+'}{' '}
-                      Coins
+                        // ? '200+'
+                        '120+'}{' '}
+                      Coins */}
+                      100+
                     </span>
                   </div>
 

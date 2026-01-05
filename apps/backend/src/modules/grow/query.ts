@@ -65,6 +65,7 @@ export const getSrkGrowProfile: AppRouteImplementationOrOptions<
         })
       : null;
 
+    // Get engagement posts (like tasks) with their acquired counts
     const engagementPosts = packageEnrollment
       ? await growPackageTodoModel
           .find({
@@ -72,14 +73,98 @@ export const getSrkGrowProfile: AppRouteImplementationOrOptions<
             type: 'like',
           })
           .lean()
-      : null;
+      : [];
 
-    const profileLinkURLs = packageEnrollment
-      ? await growPackageTodoModel.find({
-          growSocialMediaPackageEnrollmentId: packageEnrollment._id,
-          type: 'follow',
-        })
-      : null;
+    // Get profile links (follow tasks) with their acquired counts
+    const profileLinkTodos = packageEnrollment
+      ? await growPackageTodoModel
+          .find({
+            growSocialMediaPackageEnrollmentId: packageEnrollment._id,
+            type: 'follow',
+          })
+          .lean()
+      : [];
+
+    // Calculate referral statistics
+    const totalReferrals = await growSocialMediaPackageUserModel.countDocuments(
+      {
+        referredBy: packageUser._id,
+      }
+    );
+
+    const activeReferrals = await growSocialMediaPackageUserModel.countDocuments(
+      {
+        referredBy: packageUser._id,
+        status: 'portalActivated',
+      }
+    );
+
+    // Calculate analytics for engagement posts (likes)
+    const likesTarget =
+      packageEnrollment?.growSocialMediaPackageSubTypeId?.noOfLikes || 0;
+    const numberOfVideos =
+      packageEnrollment?.growSocialMediaPackageSubTypeId?.noOfVideos || 0;
+
+    const engagementPostsWithAnalytics = engagementPosts.map((post) => {
+      const likesAcquired = post.likeCounts || 0;
+      const progress =
+        likesTarget > 0 ? Math.round((likesAcquired / likesTarget) * 100) : 0;
+      return {
+        url: post.postUrl || '',
+        likesAcquired,
+        likesTarget,
+        progress,
+      };
+    });
+
+    // Calculate analytics for profile links (followers)
+    const followersTarget =
+      packageEnrollment?.growSocialMediaPackageSubTypeId?.noOfFollowers || 0;
+
+    const profileLinksWithAnalytics = profileLinkTodos.map((profile) => {
+      const followersAcquired = profile.followCounts || 0;
+      const progress =
+        followersTarget > 0
+          ? Math.round((followersAcquired / followersTarget) * 100)
+          : 0;
+      return {
+        url: profile.profileUrl || '',
+        followersAcquired,
+        followersTarget,
+        progress,
+      };
+    });
+
+    // Calculate overall analytics summary
+    const totalLikesAcquired = engagementPosts.reduce(
+      (sum, post) => sum + (post.likeCounts || 0),
+      0
+    );
+    const totalLikesTarget = likesTarget * numberOfVideos;
+    const likesProgress =
+      totalLikesTarget > 0
+        ? Math.round((totalLikesAcquired / totalLikesTarget) * 100)
+        : 0;
+
+    const totalFollowersAcquired = profileLinkTodos.reduce(
+      (sum, profile) => sum + (profile.followCounts || 0),
+      0
+    );
+    const totalFollowersTarget = followersTarget * profileLinkTodos.length;
+    const followersProgress =
+      totalFollowersTarget > 0
+        ? Math.round((totalFollowersAcquired / totalFollowersTarget) * 100)
+        : 0;
+
+    // Calculate overall progress (weighted average)
+    const overallProgress =
+      totalLikesTarget > 0 || totalFollowersTarget > 0
+        ? Math.round(
+            ((totalLikesAcquired + totalFollowersAcquired) /
+              (totalLikesTarget + totalFollowersTarget)) *
+              100
+          )
+        : 0;
 
     return {
       status: 200,
@@ -97,8 +182,12 @@ export const getSrkGrowProfile: AppRouteImplementationOrOptions<
           promoCode: packageUser.promoCode,
 
           profileLinkURL:
-            profileLinkURLs?.map((profile) => profile.profileUrl) ?? [],
+            profileLinkTodos?.map((profile) => profile.profileUrl) ?? [],
           userType: packageUser.userType,
+
+          // Enhanced profile details
+          totalReferrals,
+          activeReferrals,
 
           referredBy: packageUser.referredBy
             ? {
@@ -135,8 +224,22 @@ export const getSrkGrowProfile: AppRouteImplementationOrOptions<
                 },
               },
 
-              engagementPostURLs:
-                engagementPosts?.map((post) => post.postUrl) ?? [],
+              // Enhanced engagement data with acquired/total counts
+              engagementPostURLs: engagementPostsWithAnalytics,
+
+              // Enhanced profile links data
+              profileLinks: profileLinksWithAnalytics,
+
+              // Overall analytics summary
+              analytics: {
+                totalFollowersAcquired,
+                totalFollowersTarget,
+                followersProgress,
+                totalLikesAcquired,
+                totalLikesTarget,
+                likesProgress,
+                overallProgress,
+              },
 
               enrollmentPaymentDetails: packagePayment
                 ? {
@@ -659,6 +762,7 @@ const getApprovedSrkGrowAffiliateVerificationRequest: AppRouteImplementationOrOp
   try {
     const srkUniversityUserId = query.srkUniversityUserId;
 
+    
     const verificationRecord = await growSrkAffiliateVerificationModel.findOne({
       srkUniversityUserId,
     });
@@ -703,6 +807,7 @@ const getApprovedSrkGrowAffiliateVerificationRequest: AppRouteImplementationOrOp
       },
     };
   } catch (error: any) {
+    console.log('Error in affiliate verification check:', error);
     return {
       status: 500,
       body: {

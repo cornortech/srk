@@ -1191,6 +1191,150 @@ const getAllSrkTasksActionSubmissionsByUser: AppRouteImplementationOrOptions<
   }
 };
 
+const getRejectedSrkTaskActionSubmissionsByUser: AppRouteImplementationOrOptions<
+  typeof srkTaskContract.getRejectedSrkTaskActionSubmissionsByUser
+> = async ({ params, query }) => {
+  try {
+    const { userId } = params;
+    const taskUserId = new mongoose.Types.ObjectId(userId);
+
+    const page = Number(query?.page ?? 1);
+    const limit = Number(query?.limit ?? 10);
+    const skip = (page - 1) * limit;
+
+    // Filter for rejected submissions only
+    const filter: any = { 
+      taskUserId, 
+      status: 'rejected' 
+    };
+
+    const [totalRecords, submissions] = await Promise.all([
+      srkTaskActionSubmissionModel.countDocuments(filter),
+      srkTaskActionSubmissionModel
+        .find(filter)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .populate({
+          path: 'growPackageTodoId',
+          populate: {
+            path: 'growSocialMediaPackageEnrollmentId',
+            populate: [
+              { path: 'growSocialMediaPackageId' },
+              { path: 'growSocialMediaPackageTypeId' },
+              { path: 'growSocialMediaPackageSubTypeId' },
+            ],
+          },
+        })
+        .lean(),
+    ]);
+
+    const data = submissions.map((submission: any) => {
+      const enrollment =
+        submission.growPackageTodoId?.growSocialMediaPackageEnrollmentId;
+      return {
+        _id: submission._id.toString(),
+        type: submission.type,
+        description: submission.description,
+        screenshotUrl: submission.screenshotUrl,
+        status: submission.status,
+        rejectionReason: submission.rejectionReason || null,
+        createdAt: new Date(submission.createdAt).toISOString(),
+        updatedAt: new Date(submission.updatedAt).toISOString(),
+        growPackageTodoId: submission.growPackageTodoId
+          ? {
+              _id: submission.growPackageTodoId._id.toString(),
+              postUrl: submission.growPackageTodoId.postUrl || '',
+              profileUrl: submission.growPackageTodoId.profileUrl || '',
+              type: submission.growPackageTodoId.type,
+              platform: submission.growPackageTodoId.platform || '',
+              followCounts: submission.growPackageTodoId.followCounts || 0,
+              likeCounts: submission.growPackageTodoId.likeCounts || 0,
+              enrollment: enrollment
+                ? {
+                    _id: enrollment._id.toString(),
+                    socialMediaPlatform: enrollment.socialMediaPlatform || '',
+                    profileLinkURL: enrollment.profileLinkURL || [],
+                    amount: enrollment.amount || 0,
+                    isActive: enrollment.isActive || false,
+                    growSocialMediaPackageId: enrollment.growSocialMediaPackageId
+                      ? {
+                          _id: enrollment.growSocialMediaPackageId._id.toString(),
+                          name: enrollment.growSocialMediaPackageId.name || '',
+                          description:
+                            enrollment.growSocialMediaPackageId.description || '',
+                          socialMediaPlatforms:
+                            enrollment.growSocialMediaPackageId
+                              .socialMediaPlatforms || [],
+                          amount: enrollment.growSocialMediaPackageId.amount || 0,
+                        }
+                      : undefined,
+                    growSocialMediaPackageTypeId:
+                      enrollment.growSocialMediaPackageTypeId
+                        ? {
+                            _id: enrollment.growSocialMediaPackageTypeId._id.toString(),
+                            name:
+                              enrollment.growSocialMediaPackageTypeId.name || '',
+                            description:
+                              enrollment.growSocialMediaPackageTypeId
+                                .description || '',
+                            amount:
+                              enrollment.growSocialMediaPackageTypeId.amount || 0,
+                          }
+                        : undefined,
+                    growSocialMediaPackageSubTypeId:
+                      enrollment.growSocialMediaPackageSubTypeId
+                        ? {
+                            _id: enrollment.growSocialMediaPackageSubTypeId._id.toString(),
+                            name:
+                              enrollment.growSocialMediaPackageSubTypeId.name ||
+                              '',
+                            description:
+                              enrollment.growSocialMediaPackageSubTypeId
+                                .description || '',
+                            taskType:
+                              enrollment.growSocialMediaPackageSubTypeId
+                                .taskType || '',
+                            noOfLikes:
+                              enrollment.growSocialMediaPackageSubTypeId
+                                .noOfLikes,
+                            noOfVideos:
+                              enrollment.growSocialMediaPackageSubTypeId
+                                .noOfVideos,
+                            noOfFollowers:
+                              enrollment.growSocialMediaPackageSubTypeId
+                                .noOfFollowers,
+                          }
+                        : undefined,
+                  }
+                : undefined,
+            }
+          : undefined,
+      };
+    });
+
+    return {
+      status: 200,
+      body: {
+        page,
+        limit,
+        totalRecords,
+        totalPages: Math.ceil(totalRecords / limit),
+        data,
+      },
+    };
+  } catch (error) {
+    console.error(error);
+    return {
+      status: 500,
+      body: {
+        success: false,
+        message: error.message || 'Internal server error',
+      },
+    };
+  }
+};
+
 const getSrkTaskActionsByPlatforms: AppRouteImplementationOrOptions<
   typeof srkTaskContract.getSrkTaskActionsByPlatforms
 > = async ({ query }) => {
@@ -1628,6 +1772,7 @@ export const srkTaskQueryHandler = {
   getSrkTaskUserEarningsPayoutsByUser,
   getAllSrkTasksActionSubmissionByStatusForAdmin,
   getAllSrkTasksActionSubmissionsByUser,
+  getRejectedSrkTaskActionSubmissionsByUser,
   getAllSrkTaskUserFinanceStatement,
   getApprovedSrkTaskAffiliateVerificationRequest,
   getAllSrkTaskUsersForAdmin,

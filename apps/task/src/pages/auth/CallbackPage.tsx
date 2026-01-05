@@ -3,7 +3,8 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useTaskAuthStore } from '../../store/useTaskAuthStore';
 import { env } from '../../lib/env';
 import '../../App.css';
-import { exchangeCode } from '../../../../../libs/shared/api/src/lib/ssoClient';
+import { exchangeCode } from '@srk/shared/api';
+// import { exchangeCode } from '../../../../../libs/shared/api/src/lib/ssoClient';
 
 /**
  * SSO Callback Page

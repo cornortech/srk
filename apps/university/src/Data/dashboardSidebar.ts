@@ -39,13 +39,13 @@ export const getStudySidebarItems = (
   isAffiliateUser: boolean,
   purpose?: 'affiliate' | 'study'
 ): TSidebarItem[] => {
+
   const AffiliateProgramHref = isAffiliateUser
     ? '/affiliate'
     : '/study/affiliate-landing';
 
   const sidebarItem = [
     { title: 'Courses', icon: Book, href: '/study/courses' },
-    { title: 'SRK-Grow', icon: Group, href: '/srkgrowportal' },
     { title: 'Invoice', icon: Receipt, href: '/study/invoice' },
     { title: 'Edit Profile', icon: Edit, href: '/study/edit-profile' },
     {
@@ -53,6 +53,7 @@ export const getStudySidebarItems = (
       icon: Gift,
       href: AffiliateProgramHref,
     },
+    { title: 'SRK Grow Program', icon: Group, href: '/srkgrowportal' },
   ];
 
   if (purpose === 'study') {

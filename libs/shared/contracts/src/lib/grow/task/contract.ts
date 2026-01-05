@@ -14,6 +14,8 @@ import {
   getAllSrkTaskUsersForAdminQueryParams,
   paginatedCompletedSrkTaskSubmissionsSchema,
   getAllCompletedSrkTaskSubmissionsQueryParams,
+  getRejectedSrkTaskActionSubmissionsByUserQueryParams,
+  paginatedRejectedSrkTaskActionSubmissionsByUserSchema,
 } from './schema';
 
 import { paginatedSrkTaskEarningRequestsByUserSchema } from './schema';
@@ -143,6 +145,17 @@ export const srkTaskContract = c.router({
       500: ErrorSchema,
     },
     summary: 'Get all srk task action submissions by user (paginated)',
+  },
+  getRejectedSrkTaskActionSubmissionsByUser: {
+    method: 'GET',
+    path: '/task/user/:userId/rejected-submissions',
+    query: getRejectedSrkTaskActionSubmissionsByUserQueryParams.optional(),
+    responses: {
+      200: paginatedRejectedSrkTaskActionSubmissionsByUserSchema,
+      400: ErrorSchema,
+      500: ErrorSchema,
+    },
+    summary: 'Get rejected srk task action submissions by user (attention needed)',
   },
   getAllSrkTaskUserFinanceStatement: {
     method: 'GET',

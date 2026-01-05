@@ -18,10 +18,11 @@ import {
   paginatedGrowSrkAffiliateEarningPayoutsSchema,
   getSrkGrowAffiliateEarningPayoutQueryParamsSchema,
   taskMonitoringResponseSchema,
-  toggleEnrollmentActiveStatusSchema,
   globalOverviewResponseSchema,
   globalOverviewQuerySchema,
-  resubmitGrowVerificationSchema,
+  getGrowAffiliateUserResponseSchema,
+  getAllSrkGrowAffiliateUsersQueryParams,
+  getAllSrkGrowAffiliateUsersResponseSchema,
 } from './schema';
 import { ErrorSchema, SuccessSchema } from '../common';
 import { z } from 'zod';
@@ -82,7 +83,18 @@ export const growContract = c.router({
       200: getAllSrkGrowUsersResponseSchema,
       500: ErrorSchema,
     },
-    summary: 'Get all srk grow users who is registered',
+    summary: 'Get all srk grow package users who are registered',
+  },
+
+  getAllSrkGrowAffiliateUsers: {
+    method: 'GET',
+    path: '/grow-affiliate-users',
+    query: getAllSrkGrowAffiliateUsersQueryParams,
+    responses: {
+      200: getAllSrkGrowAffiliateUsersResponseSchema,
+      500: ErrorSchema,
+    },
+    summary: 'Get all srk grow affiliate users',
   },
 
   getSrkGrowProfile: {
@@ -98,6 +110,20 @@ export const growContract = c.router({
       500: ErrorSchema,
     },
     summary: 'Get Srk Grow Profile by Id',
+  },
+
+  getGrowAffiliateUser: {
+    method: 'GET',
+    path: '/grow-affiliate-user/:userId',
+    pathParams: z.object({
+      userId: z.string(),
+    }),
+    responses: {
+      200: getGrowAffiliateUserResponseSchema,
+      404: ErrorSchema,
+      500: ErrorSchema,
+    },
+    summary: 'Get Grow Affiliate User details by ID',
   },
 
   createGrowSocialMediaEnrollment: {
@@ -163,7 +189,12 @@ export const growContract = c.router({
   resubmitGrowVerification: {
     method: 'PUT',
     path: '/resubmit-verification',
-    body: resubmitGrowVerificationSchema,
+    body: z.object({
+      userId: z.string(),
+      kycURLs: z.array(z.string()),
+      transactionId: z.string(),
+      paymentURL: z.string(),
+    }),
     responses: {
       200: SuccessSchema,
       400: ErrorSchema,
@@ -336,11 +367,9 @@ export const growContract = c.router({
   getTaskMonitoring: {
     method: 'GET',
     path: '/grow/task-monitoring',
-    query: z
-      .object({
-        search: z.string().optional(),
-      })
-      .optional(),
+    query: z.object({
+      search: z.string().optional(),
+    }).optional(),
     responses: {
       200: taskMonitoringResponseSchema,
       500: ErrorSchema,

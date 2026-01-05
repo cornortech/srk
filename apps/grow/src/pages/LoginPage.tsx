@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../lib/api';
-import useGrowAuthStore, { GrowUser } from '../store/useGrowAuthStore';
+import useGrowAuthStore from '../store/useGrowAuthStore';
 import { LoginSchema } from '@srk/shared/contracts';
 import { z } from 'zod';
 import { LoginForm } from '../features/auth/LoginForm';
@@ -34,37 +34,24 @@ export const LoginPage = () => {
     }
   );
 
-  // Watch for Profile Data
+  // Watch for Profile Data - Only store minimal auth data
   useEffect(() => {
     if (profileData?.status === 200) {
       console.log('✅ Profile data received:', profileData.body.userDetails);
       const userProfile = profileData.body.userDetails;
-      const payment = profileData.body.enrollmentData?.enrollmentPaymentDetails;
-      // Map to GrowUser
-      const growUser: GrowUser = {
+      
+      // Store only minimal auth data
+      setUser({
         _id: userProfile._id,
         email: userProfile.email,
         fullName: userProfile.fullName,
         status: userProfile.status as any,
-        kycURL: userProfile.kycURL,
-        userType: userProfile.userType,
-        referredBy: userProfile.referredBy ?? null,
-        srkUniversityId: userProfile.srkUniversityId,
-        profileLinkURL: userProfile.profileLinkURL,
-        createdAt: userProfile.createdAt,
-        rejectionReason: payment?.rejectionReason ?? null,
-        phone: userProfile.phone,
-        country: userProfile.country,
-        transactionId: payment?.transactionId,
-        paymentURL: payment?.paymentUrl,
-        paymentMethod: payment?.paymentMethod,
-      };
+      });
+      
+      console.log('👤 User status synced:', userProfile.status);
 
-      setUser(growUser);
-      console.log('👤 User status synced:', growUser.status);
-
-      // Redirect Logic based on synced status
-      if (growUser.status === 'portalActivated') {
+      // Redirect Logic based on status
+      if (userProfile.status === 'portalActivated') {
         navigate('/dashboard');
       } else {
         navigate('/grow/verification-wall');
@@ -83,16 +70,12 @@ export const LoginPage = () => {
         const redirectionUrl = loginUser.redirectionUrl;
         console.log('🎯 Login successful for:', loginUser.email);
 
-        // Set basic user info from login response (provide minimal defaults required by GrowUser)
+        // Set only minimal auth info from login response
         setUser({
           _id: loginUser._id,
           email: loginUser.email,
           fullName: loginUser.fullName || '',
           status: (loginUser.status as any) || 'verificationPending',
-          kycURL: [],
-          userType: ((loginUser as any).userType as any) || 'package',
-          referredBy: null,
-          createdAt: (loginUser as any).createdAt,
         });
 
         // Navigate immediately if redirectionUrl exists

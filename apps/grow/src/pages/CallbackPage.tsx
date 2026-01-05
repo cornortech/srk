@@ -16,6 +16,7 @@ import useGrowAuthStore from '../store/useGrowAuthStore';
  * 4. On success, sets user in store and redirects to dashboard
  * 5. On failure, shows error and redirects to login
  */
+
 const CallbackPage = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();

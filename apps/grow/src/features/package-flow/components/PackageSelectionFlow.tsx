@@ -56,7 +56,7 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
         gender: undefined,
         phoneNumber: '',
         country: '',
-        kycURL: [],
+        // kycURL: [],
         usedPromoCode: referralCode || '',
       },
       enrollmentData: {
@@ -99,7 +99,7 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
     finalAmountAfterDiscount: number;
   } | null>(null);
 
-  const [kycFiles, setKycFiles] = useState<File[]>([]);
+  // const [kycFiles, setKycFiles] = useState<File[]>([]);
   const { uploadFile, isUploading: isUploadingKYC } = useSRKFileUpload('grow');
   const uploadedKycUrlsRef = useRef<string[]>([]);
 
@@ -221,10 +221,10 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
       return;
     }
 
-    if (kycFiles.length === 0) {
-      toast.error('Please upload at least one KYC document');
-      return;
-    }
+    // if (kycFiles.length === 0) {
+    //   toast.error('Please upload at least one KYC document');
+    //   return;
+    // }
 
     // validation for Profile Link or Post URLs
     if (engagementType === 'follow') {
@@ -291,22 +291,22 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
       }
     }
 
-    try {
-      const uploadedUrls: string[] = [];
-      if (kycFiles.length > 0) {
-        for (const file of kycFiles) {
-          const result = await uploadFile(file, 'image');
-          uploadedUrls.push(result.url);
-        }
-      }
+    // try {
+    //   const uploadedUrls: string[] = [];
+    //   if (kycFiles.length > 0) {
+    //     for (const file of kycFiles) {
+    //       const result = await uploadFile(file, 'image');
+    //       uploadedUrls.push(result.url);
+    //     }
+    //   }
 
-      setValue('userData.kycURL', uploadedUrls);
-      uploadedKycUrlsRef.current = uploadedUrls;
-      setShowPaymentModal(true);
-    } catch (error) {
-      console.error('File upload failed', error);
-      toast.error('Failed to upload KYC documents. Please try again.');
-    }
+    //   setValue('userData.kycURL', uploadedUrls);
+    //   uploadedKycUrlsRef.current = uploadedUrls;
+    // } catch (error) {
+    //   console.error('File upload failed', error);
+    //   toast.error('Failed to upload KYC documents. Please try again.');
+    // }
+    setShowPaymentModal(true);
   };
 
   const handlePaymentSubmit = async (paymentData: {
@@ -491,8 +491,8 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
               promoError={promoError}
               promoSuccessMessage={promoSuccessMessage}
               discountDetails={discountDetails}
-              kycFiles={kycFiles}
-              setKycFiles={setKycFiles}
+              // kycFiles={kycFiles}
+              // setKycFiles={setKycFiles}
               isUploadingKYC={isUploadingKYC}
             />
           )}

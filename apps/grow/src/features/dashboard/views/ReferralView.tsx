@@ -23,7 +23,7 @@ export const ReferralView: React.FC<ReferralViewProps> = ({
 }) => {
   const [copiedPackage, setCopiedPackage] = useState<string | null>(null);
 
-  const { data: affiliatedUserCommission, isLoading } =
+  const { data: affiliatedUserCommission } =
     api.growAffiliate.getUserAffiliateSalesComissionEarnings.useQuery(
       ['affiliatedUserCommission', userID],
       {
@@ -33,7 +33,7 @@ export const ReferralView: React.FC<ReferralViewProps> = ({
       }
     );
 
-  const { data: getPromocode, isLoading: checkLoading } =
+  const { data: getPromocode } =
     api.grow.getSrkGrowProfile.useQuery(
       ['affiliatedUserPromocode', userID],
       {
@@ -59,9 +59,10 @@ export const ReferralView: React.FC<ReferralViewProps> = ({
 
   const generateReferralLink = (
     packageId: string,
-    promoCode: string
   ): string => {
-    return `http://localhost:4500/package-flow?ref=${getPromocode?.body?.userDetails?.promoCode}&package=${packageId}`;
+    const growBaseUrl = process.env.VITE_FRONTEND_ROOT_URL || 'http://localhost:3000';
+    console.log(process.env.VITE_FRONTEND_ROOT_URL);
+    return `${growBaseUrl}/package-flow?ref=${getPromocode?.body?.userDetails?.promoCode}&package=${packageId}`;
   };
 
   return (
@@ -106,8 +107,7 @@ export const ReferralView: React.FC<ReferralViewProps> = ({
       {/* Package Cards in Compact Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {data.map((pkg: PackageDataTypes) => {
-          const promoCode = '12345678';
-          const referralLink: string = generateReferralLink(pkg._id, promoCode);
+          const referralLink: string = generateReferralLink(pkg._id);
 
           const getPackageStyles = () => {
             switch (pkg.variant) {
@@ -198,9 +198,8 @@ export const ReferralView: React.FC<ReferralViewProps> = ({
 
                   <button
                     onClick={() => handleCopy(referralLink, pkg._id)}
-                    className={`relative overflow-h_idden group w-full py-2.5 rounded-lg font-bold text-sm text-white transition-all duration-300 flex items-center justify-center gap-2 ${
-                      styles.button
-                    } ${copiedPackage === pkg._id ? 'scale-95' : ''}`}
+                    className={`relative overflow-h_idden group w-full py-2.5 rounded-lg font-bold text-sm text-white transition-all duration-300 flex items-center justify-center gap-2 ${styles.button
+                      } ${copiedPackage === pkg._id ? 'scale-95' : ''}`}
                   >
                     {copiedPackage === pkg._id ? (
                       <>

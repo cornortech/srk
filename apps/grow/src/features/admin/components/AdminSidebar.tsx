@@ -29,6 +29,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       { id: 'affiliatelist', label: 'Affiliate Users', icon: '🌟' },
       { id: 'packagelist', label: 'Package Users', icon: '👥' },
       { id: 'createuser', label: 'Create User', icon: '➕' },
+      { id: 'packagemanagement', label: 'Manage Packages', icon: '📦' },
       { id: 'payoutqueue', label: 'Payout Queue', icon: '💰' },
       // { id: 'trend', label: 'Performance Trends', icon: '📈' },
     ],

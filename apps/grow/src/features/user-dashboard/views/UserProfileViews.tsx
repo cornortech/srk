@@ -69,15 +69,15 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ user }) => {
         </div>
 
         {/* KYC Documents Section */}
-        {((user.kycDocuments && user.kycDocuments.length > 0) ||
+        {/* {((user.kycDocuments && user.kycDocuments.length > 0) ||
           (user.kycURL && user.kycURL.length > 0)) && (
           <div className="mt-8 pt-8 border-t border-white/10">
             <h3 className="text-xl font-bold mb-6 flex items-center gap-2 text-white">
               KYC Documents
             </h3>
-            <div className="grid md:grid-cols-2 gap-4">
-              {/* Prioritize kycDocuments if available, else use kycURL array */}
-              {user.kycDocuments && user.kycDocuments.length > 0
+            <div className="grid md:grid-cols-2 gap-4"> */}
+        {/* Prioritize kycDocuments if available, else use kycURL array */}
+        {/* {user.kycDocuments && user.kycDocuments.length > 0
                 ? user.kycDocuments.map((doc) => (
                     <div
                       key={doc.id}
@@ -149,7 +149,7 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ user }) => {
                     ))}
             </div>
           </div>
-        )}
+        )} */}
       </div>
     </motion.div>
   );

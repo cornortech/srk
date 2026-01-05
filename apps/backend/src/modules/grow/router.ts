@@ -11,6 +11,7 @@ export const growRouter = s.router(growContract, {
   getGrowSocialMediaEnrollmentById:
     growQueryHandler.getSrkGrowEnrollmentUserById,
   getAllSrkGrowUsers: growQueryHandler.getAllSrkGrowUsers,
+  getAllSrkGrowAffiliateUsers: growQueryHandler.getAllSrkGrowAffiliateUsers,
   createGrowSocialMediaEnrollment:
     growMutationHandler.createGrowSocialMediaEnrollment,
   validateGrowUserPromoCode: growMutationHandler.validateGrowUserPromoCode,
@@ -19,6 +20,7 @@ export const growRouter = s.router(growContract, {
   rejectSocialGrowEnrollmentRequest:
     growMutationHandler.rejectSocialGrowEnrollmentRequest,
   getSrkGrowProfile: growQueryHandler.getSrkGrowProfile,
+  getGrowAffiliateUser: growQueryHandler.getGrowAffiliateUser,
   resubmitGrowVerification: growMutationHandler.resubmitGrowVerification,
   createGrowSocialMediaTasks: growMutationHandler.createGrowSocialMediaTasks,
   approveSrkGrowAffiliateVerificationRequest:

@@ -4,7 +4,6 @@ import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
 import { TaskLandingPage } from './pages/landing/LandingPage';
 import { LoginPage } from './pages/auth/LoginPage';
 import { CallbackPage } from './pages/auth/CallbackPage';
-import { TaskVerificationPage } from './pages/tasks/verification/TaskVerificationPage';
 import {
   AdminDashboard,
   AfterVerifiedDashboardPage,

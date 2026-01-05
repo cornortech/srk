@@ -1,20 +1,23 @@
 import {
   growContract,
 } from '@srk/shared/contracts';
+import mongoose from 'mongoose';
 import { AppRouteImplementationOrOptions } from '@ts-rest/express/src/lib/types';
 import { growSocialMediaPackageEnrollmentModel } from '../../model/growSocialMediaPackageEnrollment';
 import {
   GrowEnrollmentPopulated,
-  GrowPackageUserPopulated,
   GrowProfileResponsePopulated,
 } from '../../utils/types/growQuery';
 import { growPackageTodoModel } from '../../model/growPackageTodoModel';
 import { growSocialMediaPackagePaymentModel } from '../../model/growSocialMediaPackagePaymentModel';
-import { growSocialMediaPackageUserModel } from '../../model/growSocialMediaPackageUserModel';
+import { growSocialMediaPackageUserModel, IGrowSocialMediaPackageUser } from '../../model/growSocialMediaPackageUserModel';
 import { growSrkAffiliateVerificationModel } from '../../model/growSrkAffiliateVerificationModel';
+import { IGrowSocialMediaPackage } from '../../model/growSocialMediaPackageModel';
 import { IUser } from '../../model/userModel';
 import { GrowSrkAffiliateEarningPayoutModel } from '../../model/grow/growSrkAffiliateEarningPayoutModel';
 import { growSrkAffiliateEarningStatementModel } from '../../model/grow/growSrkAffiliateEarningStatementModel';
+import GrowAffiliateUserModel from '../../model/grow/growAffiliateUserModel';
+import { growSrkAffiliateUserBalanceModel } from '../../model/grow/growSrkAffiliateUserBalanceModel';
 
 export const getSrkGrowProfile: AppRouteImplementationOrOptions<
   typeof growContract.getSrkGrowProfile
@@ -183,7 +186,6 @@ export const getSrkGrowProfile: AppRouteImplementationOrOptions<
 
           profileLinkURL:
             profileLinkTodos?.map((profile) => profile.profileUrl) ?? [],
-          userType: packageUser.userType,
 
           // Enhanced profile details
           totalReferrals,
@@ -444,37 +446,37 @@ const getAllSrkGrowUsers: AppRouteImplementationOrOptions<
   typeof growContract.getAllSrkGrowUsers
 > = async ({ query }) => {
   try {
-    const { userType, search } = query || {};
+    const { search, page: pageStr, limit: limitStr } = query || {};
+    const page = Number(pageStr ?? 1);
+    const limit = Number(limitStr ?? 10);
 
-    // Build enrollment filter based on userType and search
-    let enrollmentFilter: any = {};
-    const userFilter: any = {};
-
-    if (userType) {
-      userFilter.userType = userType;
-    }
+    let enrollmentFilter: Record<string, unknown> = {};
 
     if (search) {
-      userFilter.$or = [
-        { fullName: { $regex: search, $options: 'i' } },
-        { email: { $regex: search, $options: 'i' } },
-      ];
-    }
-
-    if (userType || search) {
-      // First, get users matching the filter
+      // First, get users matching the search
       const users = await growSocialMediaPackageUserModel
-        .find(userFilter)
+        .find({
+          $or: [
+            { fullName: { $regex: search, $options: 'i' } },
+            { email: { $regex: search, $options: 'i' } },
+          ],
+        })
         .select('_id')
         .lean();
 
       const userIds = users.map((u) => u._id);
 
-      // If no users found, return empty array
+      // If no users found, return empty with pagination
       if (userIds.length === 0) {
         return {
           status: 200,
-          body: [],
+          body: {
+            data: [],
+            page,
+            limit,
+            total: 0,
+            totalPages: 0,
+          },
         };
       }
 
@@ -483,35 +485,66 @@ const getAllSrkGrowUsers: AppRouteImplementationOrOptions<
       };
     }
 
+    const total = await growSocialMediaPackageEnrollmentModel.countDocuments(
+      enrollmentFilter
+    );
+    const totalPages = Math.ceil(total / limit);
+
+    type PopulatedUser = Pick<IGrowSocialMediaPackageUser, 'fullName' | 'email' | 'status' | 'createdAt'> & {
+      _id: mongoose.Types.ObjectId;
+      referredBy?: Pick<IGrowSocialMediaPackageUser, 'fullName'> & { _id: mongoose.Types.ObjectId };
+    };
+    
+    type PopulatedPackage = Pick<IGrowSocialMediaPackage, 'name'> & { _id: mongoose.Types.ObjectId };
+    
+    type PopulatedEnrollment = {
+      _id: mongoose.Types.ObjectId;
+      growSocialMediaPackageUserId: PopulatedUser;
+      growSocialMediaPackageId: PopulatedPackage;
+      type: string;
+      createdAt: Date;
+    };
+
     const usersLists = await growSocialMediaPackageEnrollmentModel
       .find(enrollmentFilter)
-      .populate<GrowPackageUserPopulated>({
+      .populate<{ growSocialMediaPackageUserId: PopulatedUser }>({
         path: 'growSocialMediaPackageUserId',
-        select: 'fullName referredBy status',
+        select: 'fullName email referredBy status createdAt',
         populate: {
           path: 'referredBy',
           select: 'fullName',
         },
       })
-      .populate<GrowPackageUserPopulated>({
+      .populate<{ growSocialMediaPackageId: PopulatedPackage }>({
         path: 'growSocialMediaPackageId',
         select: 'name',
       })
       .sort({ createdAt: -1 })
-      .lean();
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .lean() as unknown as PopulatedEnrollment[];
 
     return {
       status: 200,
-      body: usersLists.map((u) => ({
-        _id: u.growSocialMediaPackageUserId._id.toString(),
-        fullName: u.growSocialMediaPackageUserId.fullName,
-        referredBy: u.growSocialMediaPackageUserId.referredBy?.fullName ?? null,
-        status: u.growSocialMediaPackageUserId.status,
-        socialMediaPackage: {
-          _id: u.growSocialMediaPackageId._id.toString(),
-          name: u.growSocialMediaPackageId.name,
-        },
-      })),
+      body: {
+        data: usersLists.map((u) => ({
+          _id: u.growSocialMediaPackageUserId._id.toString(),
+          fullName: u.growSocialMediaPackageUserId.fullName,
+          email: u.growSocialMediaPackageUserId.email,
+          referredBy: u.growSocialMediaPackageUserId.referredBy?.fullName ?? null,
+          status: u.growSocialMediaPackageUserId.status,
+          enrollmentType: u.type,
+          createdAt: u.createdAt.toISOString(),
+          socialMediaPackage: {
+            _id: u.growSocialMediaPackageId._id.toString(),
+            name: u.growSocialMediaPackageId.name,
+          },
+        })),
+        page,
+        limit,
+        total,
+        totalPages,
+      },
     };
   } catch (error) {
     console.error(error);
@@ -595,6 +628,81 @@ const getAllSrkGrowAffiliateVerificationRequest: AppRouteImplementationOrOptions
         message: error.message
           ? `Internal server error: ${error.message}`
           : 'Internal server error',
+      },
+    };
+  }
+};
+
+const getAllSrkGrowAffiliateUsers: AppRouteImplementationOrOptions<
+  typeof growContract.getAllSrkGrowAffiliateUsers
+> = async ({ query }) => {
+  try {
+    const { search, page: pageStr, limit: limitStr } = query || {};
+    const page = Number(pageStr ?? 1);
+    const limit = Number(limitStr ?? 10);
+
+    const affiliateFilter: Record<string, unknown> = {};
+    
+    if (search) {
+      affiliateFilter.$or = [
+        { fullName: { $regex: search, $options: 'i' } },
+        { email: { $regex: search, $options: 'i' } },
+      ];
+    }
+
+    const total = await GrowAffiliateUserModel.countDocuments(affiliateFilter);
+    const totalPages = Math.ceil(total / limit);
+
+    const affiliateUsers = await GrowAffiliateUserModel
+      .find(affiliateFilter)
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .lean();
+
+    // Get wallet balance and referral counts for each affiliate
+    const affiliateUsersWithData = await Promise.all(
+      affiliateUsers.map(async (affiliate) => {
+        // Get wallet balance
+        const walletBalance = await growSrkAffiliateUserBalanceModel
+          .findOne({ growAffiliateUserId: affiliate._id })
+          .select('wallet')
+          .lean();
+
+        // Count total referrals (from earning statements)
+        const totalReferrals = await growSrkAffiliateEarningStatementModel.countDocuments({
+          refferedBy: affiliate._id,
+        });
+
+        return {
+          _id: affiliate._id.toString(),
+          fullName: affiliate.fullName,
+          email: affiliate.email,
+          status: 'portalActivated', // Default status for affiliates
+          createdAt: affiliate.createdAt.toISOString(),
+          walletBalance: walletBalance?.wallet ?? 0,
+          totalReferrals: totalReferrals,
+        };
+      })
+    );
+
+    return {
+      status: 200,
+      body: {
+        data: affiliateUsersWithData,
+        page,
+        limit,
+        total,
+        totalPages,
+      },
+    };
+  } catch (error) {
+    console.error(error);
+    return {
+      status: 500,
+      body: {
+        success: false,
+        message: error instanceof Error ? error.message : 'Internal server error',
       },
     };
   }
@@ -1146,15 +1254,108 @@ export const getGlobalOverview: AppRouteImplementationOrOptions<
   }
 };
 
+const getGrowAffiliateUser: AppRouteImplementationOrOptions<
+  typeof growContract.getGrowAffiliateUser
+> = async ({ params }) => {
+  try {
+    const { userId } = params;
+
+    // Get affiliate user details
+    const affiliateUser = await GrowAffiliateUserModel.findById(userId).lean();
+
+    if (!affiliateUser) {
+      return {
+        status: 404,
+        body: {
+          message: 'Affiliate user not found',
+        },
+      };
+    }
+
+    // Get wallet balance
+    const walletData = await growSrkAffiliateUserBalanceModel
+      .findOne({ growAffiliateUserId: affiliateUser._id })
+      .lean();
+
+    const walletBalance = walletData?.wallet || 0;
+
+    // Get total earnings
+    const totalEarnings = await growSrkAffiliateEarningStatementModel.aggregate([
+      { $match: { refferedBY: affiliateUser._id } },
+      { $group: { _id: null, total: { $sum: '$amount' } } },
+    ]);
+
+    // Get referral statistics
+    const totalReferrals = await growSocialMediaPackageUserModel.countDocuments({
+      referredBy: affiliateUser._id,
+    });
+
+    const activeReferrals = await growSocialMediaPackageUserModel.countDocuments({
+      referredBy: affiliateUser._id,
+      status: 'portalActivated',
+    });
+
+    const totalPayouts = await GrowSrkAffiliateEarningPayoutModel.aggregate([
+      {
+        $match: {
+          growAffiliateUserId: affiliateUser._id,
+          status: 'approved',
+        },
+      },
+      { $group: { _id: null, total: { $sum: '$amount' } } },
+    ]);
+
+    const pendingPayouts = await GrowSrkAffiliateEarningPayoutModel.aggregate([
+      {
+        $match: {
+          growAffiliateUserId: affiliateUser._id,
+          status: 'pending',
+        },
+      },
+      { $group: { _id: null, total: { $sum: '$amount' } } },
+    ]);
+
+    return {
+      status: 200,
+      body: {
+        _id: affiliateUser._id.toString(),
+        fullName: affiliateUser.fullName,
+        email: affiliateUser.email,
+        gender: affiliateUser.gender,
+        promocode: affiliateUser.promocode,
+        srkUniversityUserId: affiliateUser.srkUniversityUserId?.toString(),
+        walletBalance,
+        totalEarnings: totalEarnings[0]?.total || 0,
+        totalReferrals,
+        activeReferrals,
+        totalPayouts: totalPayouts[0]?.total || 0,
+        pendingPayouts: pendingPayouts[0]?.total || 0,
+        createdAt: affiliateUser.createdAt.toISOString(),
+        updatedAt: affiliateUser.updatedAt.toISOString(),
+      },
+    };
+  } catch (error: any) {
+    console.error('Error in getGrowAffiliateUser:', error);
+    return {
+      status: 500,
+      body: {
+        message: error.message || 'Internal server error',
+      },
+    };
+  }
+};
+
 export const growQueryHandler = {
   getSrkGrowProfile,
   getAllSrkGrowEnrollmentUser,
   getSrkGrowEnrollmentUserById,
   getAllSrkGrowUsers,
+  getAllSrkGrowAffiliateUsers,
   getAllSrkGrowAffiliateVerificationRequest,
   getSrkGrowAffiliateEarningPayoutRequestByAdmin,
   getSrkGrowAffiliateEarningPayoutRequestByUser,
   getApprovedSrkGrowAffiliateVerificationRequest,
   getTaskMonitoring,
+  getGrowAffiliateUser,
   getGlobalOverview,
 };

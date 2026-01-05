@@ -187,13 +187,19 @@ const exchangeCode: AppRouteImplementationOrOptions<
     });
 
     // Set HTTP-only cookie for the new domain
-    res.cookie('x-auth-token', token, {
+    const isProduction = process.env.NODE_ENV === 'production';
+    const cookieOptions: any = {
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
       httpOnly: true,
-      secure: process.env['NODE_ENV'] === 'production',
-      sameSite: 'lax',
-      domain: process.env['COOKIE_DOMAIN'] || undefined,
-    });
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax',
+    };
+
+    if (process.env.COOKIE_DOMAIN) {
+      cookieOptions.domain = process.env.COOKIE_DOMAIN;
+    }
+
+    res.cookie('x-auth-token', token, cookieOptions);
 
     // Clean up - delete the used code
     await AutoCodeModel.deleteOne({ _id: autoCode._id });

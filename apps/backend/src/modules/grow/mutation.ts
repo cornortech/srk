@@ -238,6 +238,7 @@ const createGrowSocialMediaEnrollment: AppRouteImplementationOrOptions<
       body: {
         success: true,
         message: 'Enrollment submitted successfully',
+        enrollmentId: createSrkGrowPackageEnrollment._id.toString(),
       },
     };
   } catch (error) {
@@ -1103,6 +1104,51 @@ const rejectGrowSrkAffiliateEarningPayoutRequestByAdmin: AppRouteImplementationO
   }
 };
 
+const toggleEnrollmentActiveStatus: AppRouteImplementationOrOptions<
+  typeof growContract.toggleEnrollmentActiveStatus
+> = async ({ params }) => {
+  try {
+    const { enrollmentId } = params;
+
+    // Find the enrollment
+    const enrollment = await growSocialMediaPackageEnrollmentModel.findById(
+      enrollmentId
+    );
+
+    if (!enrollment) {
+      return {
+        status: 404,
+        body: {
+          success: false,
+          message: 'Enrollment not found',
+        },
+      };
+    }
+
+    // Toggle the isActive status
+    enrollment.isActive = !enrollment.isActive;
+    await enrollment.save();
+
+    return {
+      status: 200,
+      body: {
+        success: true,
+        message: `Enrollment ${enrollment.isActive ? 'activated' : 'deactivated'} successfully`,
+        isActive: enrollment.isActive,
+      },
+    };
+  } catch (error: any) {
+    console.error('Error toggling enrollment active status:', error);
+    return {
+      status: 500,
+      body: {
+        success: false,
+        message: error.message || 'Internal server error',
+      },
+    };
+  }
+};
+
 export const growMutationHandler = {
   createGrowSocialMediaEnrollment,
   validateGrowUserPromoCode,
@@ -1116,4 +1162,5 @@ export const growMutationHandler = {
   createGrowSrkAffiliateEarningPayoutRequest,
   acceptGrowSrkAffiliateEarningPayoutRequestByAdmin,
   rejectGrowSrkAffiliateEarningPayoutRequestByAdmin,
+  toggleEnrollmentActiveStatus,
 };

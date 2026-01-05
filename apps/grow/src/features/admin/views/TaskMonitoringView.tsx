@@ -1,4 +1,4 @@
-import { DashboardData, PlatformTasks } from 'apps/grow/src/lib/types/admin';
+import { DashboardData, PlatformTasks } from '../../../lib/types/admin';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { GradientText } from '../components/ui/GradientText';
@@ -151,7 +151,7 @@ export const TaskMonitoringView: React.FC<TaskMonitoringViewProps> = ({
           <GradientText>Task Monitoring</GradientText>
         </h1>
         <p className="text-gray-400 mt-2">
-          Track and manage affiliate task completion
+          Track and manage grow user's task completion
         </p>
       </div>
 
@@ -162,7 +162,7 @@ export const TaskMonitoringView: React.FC<TaskMonitoringViewProps> = ({
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-400 mb-2">
-                    Search Affiliates
+                    Search Grow Users
                   </label>
                   <div className="relative">
                     <input
@@ -180,7 +180,7 @@ export const TaskMonitoringView: React.FC<TaskMonitoringViewProps> = ({
 
                 <div>
                   <label className="block text-sm font-medium text-gray-400 mb-2">
-                    Select Affiliate ({usersWithTasks.length})
+                    Select Grow User ({usersWithTasks.length})
                   </label>
                   <div className="space-y-2 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
                     {usersWithTasks.map((user, index) => (
@@ -190,11 +190,10 @@ export const TaskMonitoringView: React.FC<TaskMonitoringViewProps> = ({
                         initial={{ x: -20, opacity: 0 }}
                         animate={{ x: 0, opacity: 1 }}
                         transition={{ duration: 0.3, delay: index * 0.05 }}
-                        className={`w-full text-left p-4 rounded-xl transition-all duration-200 group ${
-                          selectedUserId === user.id
-                            ? 'bg-gradient-to-r from-white/10 to-white/5 border border-white/20 shadow-lg'
-                            : 'bg-white/5 hover:bg-white/10 border border-transparent hover:border-white/10'
-                        }`}
+                        className={`w-full text-left p-4 rounded-xl transition-all duration-200 group ${selectedUserId === user.id
+                          ? 'bg-gradient-to-r from-white/10 to-white/5 border border-white/20 shadow-lg'
+                          : 'bg-white/5 hover:bg-white/10 border border-transparent hover:border-white/10'
+                          }`}
                       >
                         <div className="flex items-center justify-between">
                           <div>
@@ -272,11 +271,10 @@ export const TaskMonitoringView: React.FC<TaskMonitoringViewProps> = ({
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                         onClick={() => handlePlatformSelect(platform.id)}
-                        className={`px-4 py-3 rounded-lg flex items-center gap-2 transition-all ${
-                          activePlatform === platform.id
-                            ? 'bg-white/10 text-white shadow-lg'
-                            : 'bg-white/5 text-gray-400 hover:text-white hover:bg-white/10'
-                        }`}
+                        className={`px-4 py-3 rounded-lg flex items-center gap-2 transition-all ${activePlatform === platform.id
+                          ? 'bg-white/10 text-white shadow-lg'
+                          : 'bg-white/5 text-gray-400 hover:text-white hover:bg-white/10'
+                          }`}
                       >
                         <span className="text-lg">{platform.icon}</span>
                         <span className="font-medium">{platform.label}</span>
@@ -353,7 +351,7 @@ export const TaskMonitoringView: React.FC<TaskMonitoringViewProps> = ({
                 <div className="text-center py-12">
                   <div className="text-6xl mb-4">📊</div>
                   <p className="text-gray-400">
-                    Select an affiliate to view task details
+                    Select an grow user to view task details
                   </p>
                 </div>
               )}

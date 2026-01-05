@@ -1,51 +1,93 @@
-import { mockQueueData } from '../../../data/adminMock';
-import { DashboardData } from '../../../lib/types/admin';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { GradientText } from '../components/ui/GradientText';
 import { GlassCard } from '../components/ui/GlassCard';
 import { THEME } from '../constants/theme';
+import { api } from '../../../lib/api';
 
-interface GlobalOverviewViewProps {
-  data: DashboardData;
-}
+export const GlobalOverviewView: React.FC = () => {
+  const [timeRange, setTimeRange] = useState<'6months' | '1year' | 'all'>('6months');
+  
+  const { data, isLoading } = api.grow.getGlobalOverview.useQuery(
+    ['globalOverview', timeRange],
+    {
+      query: { timeRange },
+    }
+  );
 
-export const GlobalOverviewView: React.FC<GlobalOverviewViewProps> = ({
-  data,
-}) => {
-  const stats = useMemo(
-    () => [
+  const stats = useMemo(() => {
+    if (!data?.body) {
+      return [
+        {
+          label: 'Total Revenue',
+          value: '₹0',
+          trend: '+0%',
+          description: 'Monthly growth',
+          icon: '💰',
+        },
+        {
+          label: 'Total Liability',
+          value: '₹0',
+          trend: '-0%',
+          description: 'Outstanding balance',
+          icon: '📊',
+        },
+        {
+          label: 'Active Affiliates',
+          value: '0',
+          trend: '+0',
+          description: 'Active this month',
+          icon: '👥',
+        },
+        {
+          label: 'Pending Payouts',
+          value: '0',
+          trend: '0 New',
+          description: 'Awaiting processing',
+          icon: '⏳',
+        },
+      ];
+    }
+
+    return [
       {
         label: 'Total Revenue',
-        value: `₹${data.totalRevenue.toLocaleString()}`,
+        value: `₹${data.body.totalRevenue.toLocaleString()}`,
         trend: '+12.5%',
         description: 'Monthly growth',
         icon: '💰',
       },
       {
         label: 'Total Liability',
-        value: `₹${data.totalLiability.toLocaleString()}`,
+        value: `₹${data.body.totalLiability.toLocaleString()}`,
         trend: '-3.2%',
         description: 'Outstanding balance',
         icon: '📊',
       },
       {
         label: 'Active Affiliates',
-        value: data.affiliateCount.toString(),
+        value: data.body.affiliateCount.toString(),
         trend: '+8',
         description: 'Active this month',
         icon: '👥',
       },
       {
         label: 'Pending Payouts',
-        value: mockQueueData.payoutQueue.length.toString(),
-        trend: '3 New',
+        value: '0',
+        trend: '0 New',
         description: 'Awaiting processing',
         icon: '⏳',
       },
-    ],
-    [data.totalRevenue, data.totalLiability, data.affiliateCount]
-  );
+    ];
+  }, [data]);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-white text-xl">Loading...</div>
+      </div>
+    );
+  }
 
   return (
     <motion.div
@@ -151,10 +193,14 @@ export const GlobalOverviewView: React.FC<GlobalOverviewViewProps> = ({
                 <p className="text-gray-400 text-sm">Revenue & User Growth</p>
               </div>
               <div className="relative">
-                <select className="bg-black/30 border border-white/10 rounded-lg px-4 py-2 text-white text-sm appearance-none pr-8">
-                  <option>Last 6 months</option>
-                  <option>Last year</option>
-                  <option>All time</option>
+                <select 
+                  className="bg-black/30 border border-white/10 rounded-lg px-4 py-2 text-white text-sm appearance-none pr-8"
+                  value={timeRange}
+                  onChange={(e) => setTimeRange(e.target.value as '6months' | '1year' | 'all')}
+                >
+                  <option value="6months">Last 6 months</option>
+                  <option value="1year">Last year</option>
+                  <option value="all">All time</option>
                 </select>
                 <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
                   <span className="text-gray-400">▼</span>
@@ -163,7 +209,7 @@ export const GlobalOverviewView: React.FC<GlobalOverviewViewProps> = ({
             </div>
 
             <div className="space-y-6">
-              {data.trends.slice(-6).map((trend, index) => (
+              {data?.body?.trends.map((trend, index) => (
                 <motion.div
                   key={trend.month}
                   initial={{ x: -20, opacity: 0 }}
@@ -188,7 +234,7 @@ export const GlobalOverviewView: React.FC<GlobalOverviewViewProps> = ({
                     <div className="h-2 bg-gray-800/50 rounded-full overflow-hidden">
                       <motion.div
                         initial={{ width: 0 }}
-                        animate={{ width: `${(trend.revenue / 420) * 100}%` }}
+                        animate={{ width: `${Math.min((trend.revenue / 420) * 100, 100)}%` }}
                         transition={{ duration: 1, delay: index * 0.2 }}
                         className="h-full rounded-full"
                         style={{ background: THEME.colors.goldGradient }}
@@ -205,7 +251,7 @@ export const GlobalOverviewView: React.FC<GlobalOverviewViewProps> = ({
                     <div className="h-2 bg-gray-800/50 rounded-full overflow-hidden">
                       <motion.div
                         initial={{ width: 0 }}
-                        animate={{ width: `${(trend.users / 200) * 100}%` }}
+                        animate={{ width: `${Math.min((trend.users / 200) * 100, 100)}%` }}
                         transition={{ duration: 1, delay: index * 0.2 + 0.1 }}
                         className="h-full rounded-full"
                         style={{ backgroundColor: THEME.colors.blueInfo }}
@@ -213,7 +259,7 @@ export const GlobalOverviewView: React.FC<GlobalOverviewViewProps> = ({
                     </div>
                   </div>
                 </motion.div>
-              ))}
+              )) || []}
             </div>
           </div>
         </GlassCard>

@@ -26,7 +26,8 @@
     "format": "nx format:write",
     "format:check": "nx format:check",
     "create:admin": "tsx apps/backend/src/scripts/createAdmin.ts",
-    "seed:create-grow-packages": "tsx apps/backend/src/utils/script/createSrkGrowPackage.ts"
+    "seed:create-grow-packages": "tsx apps/backend/src/utils/script/createSrkGrowPackage.ts",
+    "script:get-user": "tsx apps/backend/src/scripts/getSrkUniversityUser.ts"
   },
   "private": true,
   "devDependencies": {

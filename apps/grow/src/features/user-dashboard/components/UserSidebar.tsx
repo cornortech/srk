@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { BarChart3, UserCircle, Upload, LogOut, X } from 'lucide-react';
+import { BarChart3, UserCircle, LogOut, X } from 'lucide-react';
 
 interface UserSidebarProps {
   activeTab: 'analytics' | 'profile' | 'taskuploading';
@@ -42,11 +42,10 @@ export const UserSidebar: React.FC<UserSidebarProps> = ({
             setActiveTab('analytics');
             onCloseMobileMenu?.();
           }}
-          className={`w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all ${
-            activeTab === 'analytics'
-              ? 'bg-[#b68938]/20 text-[#e1ba73] border border-[#b68938]/30 shadow-lg'
-              : 'text-gray-400 hover:bg-white/5'
-          }`}
+          className={`w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all ${activeTab === 'analytics'
+            ? 'bg-[#b68938]/20 text-[#e1ba73] border border-[#b68938]/30 shadow-lg'
+            : 'text-gray-400 hover:bg-white/5'
+            }`}
         >
           <BarChart3 size={24} />
           <span className="font-medium">Analytics</span>
@@ -57,17 +56,16 @@ export const UserSidebar: React.FC<UserSidebarProps> = ({
             setActiveTab('profile');
             onCloseMobileMenu?.();
           }}
-          className={`w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all ${
-            activeTab === 'profile'
-              ? 'bg-[#b68938]/20 text-[#e1ba73] border border-[#b68938]/30 shadow-lg'
-              : 'text-gray-400 hover:bg-white/5'
-          }`}
+          className={`w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all ${activeTab === 'profile'
+            ? 'bg-[#b68938]/20 text-[#e1ba73] border border-[#b68938]/30 shadow-lg'
+            : 'text-gray-400 hover:bg-white/5'
+            }`}
         >
           <UserCircle size={24} />
           <span className="font-medium">Profile</span>
         </button>
 
-        <button
+        {/* <button
           onClick={() => {
             setActiveTab('taskuploading');
             onCloseMobileMenu?.();
@@ -80,7 +78,7 @@ export const UserSidebar: React.FC<UserSidebarProps> = ({
         >
           <Upload size={24} />
           <span className="font-medium">Task Upload</span>
-        </button>
+        </button> */}
       </nav>
 
       <div className="p-4 border-t border-white/10">

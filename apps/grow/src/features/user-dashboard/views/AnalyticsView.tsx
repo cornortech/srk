@@ -333,14 +333,13 @@ export const AnalyticsView: React.FC = () => {
 
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {enrollmentPostUrls.map(
-                          (url: string, index: number) => {
-                            const target =
-                              enrolledPackageSubType?.noOfLikes || 0;
-                            const completed = 0;
-                            const progress =
-                              target > 0
-                                ? Math.round((completed / target) * 100)
-                                : 0;
+                          (postData, index: number) => {
+                            // Handle both old format (string) and new format (object)
+                            const isObject = typeof postData === 'object';
+                            const urlString = isObject ? postData.url : postData;
+                            const likesAcquired = isObject ? postData.likesAcquired : 0;
+                            const likesTarget = isObject ? postData.likesTarget : (enrolledPackageSubType?.noOfLikes || 0);
+                            const progress = isObject ? postData.progress : (likesTarget > 0 ? Math.round((likesAcquired / likesTarget) * 100) : 0);
 
                             return (
                               <motion.div
@@ -355,7 +354,7 @@ export const AnalyticsView: React.FC = () => {
                                     <LinkIcon size={16} />
                                   </div>
                                   <a
-                                    href={url}
+                                    href={urlString}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="text-gray-400 hover:text-white transition-colors"
@@ -367,9 +366,9 @@ export const AnalyticsView: React.FC = () => {
                                 <div className="mb-4">
                                   <p
                                     className="text-xs text-gray-500 mb-1 truncate block w-full font-mono"
-                                    title={url}
+                                    title={urlString}
                                   >
-                                    {url}
+                                    {urlString}
                                   </p>
                                 </div>
 
@@ -390,7 +389,7 @@ export const AnalyticsView: React.FC = () => {
                                     Likes Target
                                   </span>
                                   <span className="text-sm font-bold text-white">
-                                    {completed} / {target}
+                                    {likesAcquired} / {likesTarget}
                                   </span>
                                 </div>
 

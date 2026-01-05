@@ -46,4 +46,6 @@ export const srkTaskRouter = s.router(srkTaskContract, {
     srkTaskQueryHandler.getSrkTaskActionsByPlatforms,
   getAllSrkTaskAffiliateVerificationRequest:
     srkTaskQueryHandler.getApprovedSrkTaskAffiliateVerificationRequest,
+    getRejectedSrkTaskActionSubmissionsByUser:
+    srkTaskQueryHandler.getRejectedSrkTaskActionSubmissionsByUser,
 });

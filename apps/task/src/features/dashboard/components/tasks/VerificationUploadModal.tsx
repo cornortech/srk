@@ -7,7 +7,7 @@ import { DashboardGlassCard } from '../ui/DashboardGlassCard';
 import MagneticButton from '../ui/DashboardMagneticButton';
 import { api } from '../../../../lib/api';
 import { useTaskAuthStore } from '../../../../store/useTaskAuthStore';
-import useSRKFileUpload from '../../../../../../../libs/shared/hooks/src/lib/useSRKFileUpload';
+import {useSRKFileUpload} from '@srk/shared/hooks';
 
 interface VerificationUploadModalProps {
   task: Task;
@@ -129,6 +129,21 @@ export const VerificationUploadModal: React.FC<
             <p className="text-sm text-amber-400 bg-amber-500/10 p-3 rounded-lg">
               📸 {task.required}
             </p>
+            {/* visit link with good ui  */}
+            <div className="mt-4">
+              <label className="block text-sm font-medium text-zinc-400 mb-2">
+                 Link
+              </label>
+              <a
+                href={task.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-yellow-400 underline"
+              >
+                {task.url}
+              </a>
+            </div>
+       
           </DashboardGlassCard>
 
           {/* Upload Area */}

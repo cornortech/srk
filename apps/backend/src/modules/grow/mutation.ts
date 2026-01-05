@@ -696,6 +696,7 @@ const createGrowSocialMediaTasks: AppRouteImplementationOrOptions<
             growSocialMediaPackageEnrollmentId: activeEnrollment._id,
             postUrl: url,
             type: 'like',
+            platform: activeEnrollment.socialMediaPlatform,
           }))
         );
       }
@@ -726,9 +727,11 @@ const srkGrowAffiliateVerificationRequest: AppRouteImplementationOrOptions<
   typeof growContract.srkGrowAffiliateVerificationRequest
 > = async ({ body }) => {
   try {
-    const srkUniversityUserExist = await UserModel.findOne({
-      _id: body.srkUniversityUserId,
-    });
+    console.log('Received affiliate verification request:', body);
+    
+    const srkUniversityUserExist = await UserModel.findById(
+      body.srkUniversityUserId
+    );
 
     if (!srkUniversityUserExist) {
       return {
@@ -1133,7 +1136,9 @@ const toggleEnrollmentActiveStatus: AppRouteImplementationOrOptions<
       status: 200,
       body: {
         success: true,
-        message: `Enrollment ${enrollment.isActive ? 'activated' : 'deactivated'} successfully`,
+        message: `Enrollment ${
+          enrollment.isActive ? 'activated' : 'deactivated'
+        } successfully`,
         isActive: enrollment.isActive,
       },
     };

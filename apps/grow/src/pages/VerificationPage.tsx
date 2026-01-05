@@ -23,6 +23,10 @@ export const GrowVerificationPage = () => {
     isLoading: userLoading,
   } = useAuthGrowAffiliate();
 
+
+
+  console.log('User Info:', { user, isAuthenticated, userLoading });
+  
   // --- ALL HOOKS MUST STAY ABOVE ANY CONDITIONAL RETURN ---
   const [showCamera, setShowCamera] = useState(false);
   const [capturedMedia, setCapturedMedia] = useState<File | null>(null);
@@ -71,7 +75,7 @@ export const GrowVerificationPage = () => {
     try {
       setSubmissionStatus('submitting');
 
-      let file: File =
+      const file: File =
         data instanceof Blob
           ? new File(
               [data],

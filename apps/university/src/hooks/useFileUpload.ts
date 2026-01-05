@@ -59,7 +59,7 @@ const useUploadFile = () => {
 
       const storageRef = ref(
         storage,
-        `/dev/grow/${fileType}/${uniqueFileName}`
+        `/dev/university/${fileType}/${uniqueFileName}`
       );
       const uploadTask = uploadBytesResumable(storageRef, file);
 

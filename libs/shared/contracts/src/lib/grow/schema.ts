@@ -185,6 +185,9 @@ export const getSrkGrowProfileResponseSchema = z.object({
       })
       .nullable(),
     createdAt: z.string(),
+    // Enhanced profile details
+    totalReferrals: z.number().optional(),
+    activeReferrals: z.number().optional(),
   }),
   enrollmentData: z
     .object({
@@ -204,7 +207,40 @@ export const getSrkGrowProfileResponseSchema = z.object({
           }),
         }),
       }),
-      engagementPostURLs: z.array(z.string().url()).optional(),
+      // Enhanced engagement data with acquired/total counts
+      engagementPostURLs: z
+        .array(
+          z.object({
+            url: z.string().url(),
+            likesAcquired: z.number(),
+            likesTarget: z.number(),
+            progress: z.number(), // percentage
+          })
+        )
+        .optional(),
+      // Enhanced profile link data
+      profileLinks: z
+        .array(
+          z.object({
+            url: z.string().url(),
+            followersAcquired: z.number(),
+            followersTarget: z.number(),
+            progress: z.number(), // percentage
+          })
+        )
+        .optional(),
+      // Overall analytics summary
+      analytics: z
+        .object({
+          totalFollowersAcquired: z.number(),
+          totalFollowersTarget: z.number(),
+          followersProgress: z.number(),
+          totalLikesAcquired: z.number(),
+          totalLikesTarget: z.number(),
+          likesProgress: z.number(),
+          overallProgress: z.number(),
+        })
+        .optional(),
       enrollmentPaymentDetails: z
         .object({
           paymentUrl: z.string(),

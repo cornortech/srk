@@ -116,6 +116,23 @@ export type TGetSrkTaskActionSubmissionByStatusByUserQueryParams = z.infer<
   typeof getSrkTaskActionSubmissionByStatusByUserQueryParams
 >;
 
+// Rejected Task Submissions for User (Attention Needed)
+export const getRejectedSrkTaskActionSubmissionsByUserQueryParams =
+  commonPaginatedQueryParamsSchema;
+
+export type TGetRejectedSrkTaskActionSubmissionsByUserQueryParams = z.infer<
+  typeof getRejectedSrkTaskActionSubmissionsByUserQueryParams
+>;
+
+export const paginatedRejectedSrkTaskActionSubmissionsByUserSchema =
+  commonPaginationResponse.extend({
+    data: z.array(srkTaskActionSubmissionDetailsSchema),
+  });
+
+export type TPaginatedRejectedSrkTaskActionSubmissionsByUser = z.infer<
+  typeof paginatedRejectedSrkTaskActionSubmissionsByUserSchema
+>;
+
 export const srkTaskUserSchema = z.object({
   userData: z.object({
     _id: z.string(),

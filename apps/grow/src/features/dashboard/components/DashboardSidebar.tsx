@@ -1,8 +1,6 @@
 import { UserIcon, WalletIcon, XIcon } from 'lucide-react';
 import { GOLD_ACCENT, GOLD_PRIMARY } from '../constants';
-import { NavItem, ViewId } from 'apps/grow/src/lib/types/dashboard';
 import {
-  BanknoteIcon,
   HomeIcon,
   ShareIcon,
   ShoppingBagIcon,
@@ -10,6 +8,7 @@ import {
 } from './ui/DashboardIcons';
 import React from 'react';
 import { api } from '../../../lib/api';
+import { ViewId, NavItem } from '../../../lib/types/dashboard';
 
 interface DashboardSidebarProps {
   userID: string;
@@ -54,44 +53,42 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
     },
     { id: 'payout', label: 'Payout', icon: WalletIcon, color: 'text-cyan-400' },
     { id: 'profile', label: 'Profile', icon: UserIcon, color: 'text-gray-300' },
-    {
-      id: 'srkbank',
-      label: 'SRK Bank',
-      icon: BanknoteIcon,
-      external: true,
-      color: 'text-gray-400',
-    },
+    // {
+    //   id: 'srkbank',
+    //   label: 'SRK Bank',
+    //   icon: BanknoteIcon,
+    //   external: true,
+    //   color: 'text-gray-400',
+    // },
   ];
 
-    // Initialize notification states: ON only if 1 or true
-  
-    const { data: getAffiliateUserProfile, isLoading } =
-      api.growAffiliate.getGrowAffiliateUser.useQuery(
-        ['affiliatedUserProfile', userID],
-        {
-          params: { id: userID },
-        }
-      );
+  // Initialize notification states: ON only if 1 or true
 
-      if(isLoading){
-        return <div>Loading...</div>
+  const { data: getAffiliateUserProfile, isLoading } =
+    api.growAffiliate.getGrowAffiliateUser.useQuery(
+      ['affiliatedUserProfile', userID],
+      {
+        params: { id: userID },
       }
+    );
+
+  if (isLoading) {
+    return <div>Loading...</div>
+  }
 
   return (
     <div
       className={`
-      ${
-        isMobile
+      ${isMobile
           ? 'fixed top-0 left-0 h-full w-64 z-50 transition-transform duration-300'
           : 'hidden md:flex md:fixed md:top-0 md:left-0 md:h-full md:w-64'
-      }
-      ${
-        isMobile && isOpen
+        }
+      ${isMobile && isOpen
           ? 'translate-x-0'
           : isMobile
-          ? '-translate-x-full'
-          : ''
-      }
+            ? '-translate-x-full'
+            : ''
+        }
       flex-col
       shadow-2xl
       backdrop-blur-xl
@@ -150,15 +147,13 @@ export const DashboardSidebar: React.FC<DashboardSidebarProps> = ({
             className={`
               relative overflow-hidden group
               flex items-center space-x-3 p-3 rounded-lg transition-all duration-300 text-left
-              ${
-                currentView === item.id && !item.external
-                  ? `bg-gradient-to-r from-[${GOLD_PRIMARY}]/10 to-[${GOLD_PRIMARY}]/5 text-[${GOLD_PRIMARY}] font-medium border border-[${GOLD_PRIMARY}]/20`
-                  : 'text-gray-400 hover:text-white hover:bg-white/5'
+              ${currentView === item.id && !item.external
+                ? `bg-gradient-to-r from-[${GOLD_PRIMARY}]/10 to-[${GOLD_PRIMARY}]/5 text-[${GOLD_PRIMARY}] font-medium border border-[${GOLD_PRIMARY}]/20`
+                : 'text-gray-400 hover:text-white hover:bg-white/5'
               }
-              ${
-                item.external
-                  ? 'border border-gray-700/50 hover:border-gray-600/50'
-                  : ''
+              ${item.external
+                ? 'border border-gray-700/50 hover:border-gray-600/50'
+                : ''
               }
             `}
           >

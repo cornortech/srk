@@ -1,8 +1,8 @@
 import InvoiceGenerator from '../../components/dashboard/invoice/InvoiceGenerator';
 import { DescriptionBanner } from '../../components/DescriptionBanner';
 import useAuthStore from '../../store/useAuth';
-import TaskProgramButton from '../../components/TaskProgramButton';
-import GrowProgramButton from '../../components/GrowProgramButton';
+// import TaskProgramButton from '../../components/TaskProgramButton';
+// import GrowProgramButton from '../../components/GrowProgramButton';
 
 export const Invoice = () => {
   const { userDetails } = useAuthStore();
@@ -15,7 +15,7 @@ export const Invoice = () => {
       <DescriptionBanner pageDescription="Invoice Download" />
 
       {/* SSO Test Section */}
-      <div className="flex gap-2">
+      {/* <div className="flex gap-2">
         <div className="w-full mb-8 p-6 bg-bgSecondary rounded-xl border border-primary/20">
           <h3 className="text-lg font-semibold mb-2 text-primary">
             🔗 Multi-Domain SSO Test
@@ -29,7 +29,7 @@ export const Invoice = () => {
             <GrowProgramButton size="lg" variant="solid" />
           </div>
         </div>
-      </div>
+      </div> */}
 
       <div className="w-full h-[50vh] flex items-center justify-center">
         <InvoiceGenerator

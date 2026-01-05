@@ -152,7 +152,7 @@ export const UserVerificationPage = () => {
 
     try {
       // 1. Upload new KYC files
-      let newKycUrls: string[] = [];
+      const newKycUrls: string[] = [];
       for (const file of kycFiles) {
         const { url } = await uploadFile(file, 'image');
         newKycUrls.push(url);
@@ -171,7 +171,7 @@ export const UserVerificationPage = () => {
       // 4. Call Backend
       resubmitMutation.mutate({
         body: {
-          userId: user._id,
+          userId: user._id || "",
           kycURLs: totalKycUrls,
           transactionId: data.transactionId,
           paymentURL: finalPaymentUrl,
@@ -251,7 +251,7 @@ export const UserVerificationPage = () => {
                   </span>
                   <p className="text-white text-sm">
                     {profileData?.body.enrollmentData?.enrollmentPaymentDetails
-                      ?.rejectionReason!! ||
+                      ?.rejectionReason ||
                       'One or more documents were blurry or invalid.'}
                   </p>
                 </div>
@@ -306,11 +306,10 @@ export const UserVerificationPage = () => {
                       <input
                         {...register('transactionId')}
                         type="text"
-                        className={`w-full pl-12 pr-4 py-3 rounded-xl bg-white/5 border ${
-                          errors.transactionId
-                            ? 'border-red-500'
-                            : 'border-white/10'
-                        } text-white focus:border-[#b68938] focus:ring-1 focus:ring-[#b68938] transition-all`}
+                        className={`w-full pl-12 pr-4 py-3 rounded-xl bg-white/5 border ${errors.transactionId
+                          ? 'border-red-500'
+                          : 'border-white/10'
+                          } text-white focus:border-[#b68938] focus:ring-1 focus:ring-[#b68938] transition-all`}
                         placeholder="Original: 123XYZ..."
                         required
                       />
@@ -366,8 +365,8 @@ export const UserVerificationPage = () => {
                           {paymentProof
                             ? paymentProof.name
                             : watch('paymentURL')
-                            ? 'Change screenshot'
-                            : 'Select screenshot'}
+                              ? 'Change screenshot'
+                              : 'Select screenshot'}
                         </span>
                         <Upload size={18} className="text-gray-500" />
                       </label>

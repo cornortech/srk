@@ -21,7 +21,7 @@ interface VerificationViewProps {
   hasPurchased: boolean;
   setHasPurchased: (purchased: boolean) => void;
   addNotification: (message: string, type: 'success') => void;
-  kycStatus: 'pending' | 'approved' | 'rejected';
+  kycStatus?: 'pending' | 'approved' | 'rejected';
   rejectionReason?: string;
 }
 

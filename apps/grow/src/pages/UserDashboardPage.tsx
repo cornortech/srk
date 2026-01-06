@@ -24,6 +24,7 @@ export const UserDashboardPage = () => {
     if (!storeUser) {
       navigate('/login');
     } else if (storeUser.status !== 'portalActivated') {
+      console.log('🔄 Redirecting user with status:', storeUser.status);
       navigate('/grow/verification-wall');
     }
   }, [storeUser, navigate]);

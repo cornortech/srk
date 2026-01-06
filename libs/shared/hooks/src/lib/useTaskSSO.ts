@@ -18,13 +18,15 @@ interface UseTaskSSOReturn {
  * const { redirectToTaskProgram, isLoading, error } = useTaskSSO({
  *   backendUrl: 'http://localhost:4000'
  * });
- * 
+ *
  * <Button onClick={redirectToTaskProgram} disabled={isLoading}>
  *   Go to Task Program
  * </Button>
  * ```
  */
-export const useTaskSSO = ({ backendUrl }: UseTaskSSOOptions): UseTaskSSOReturn => {
+export const useTaskSSO = ({
+  backendUrl,
+}: UseTaskSSOOptions): UseTaskSSOReturn => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -42,7 +44,8 @@ export const useTaskSSO = ({ backendUrl }: UseTaskSSOOptions): UseTaskSSOReturn 
         setError(response.message || 'Failed to generate SSO code');
       }
     } catch (err: any) {
-      const errorMessage = err.response?.data?.message || err.message || 'SSO redirect failed';
+      const errorMessage =
+        err.response?.data?.message || err.message || 'SSO redirect failed';
       setError(errorMessage);
       console.error('SSO redirect error:', err);
     } finally {
@@ -56,5 +59,3 @@ export const useTaskSSO = ({ backendUrl }: UseTaskSSOOptions): UseTaskSSOReturn 
     error,
   };
 };
-
-export default useTaskSSO;

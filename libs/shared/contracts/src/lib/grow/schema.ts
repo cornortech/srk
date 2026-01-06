@@ -1,4 +1,4 @@
-import z from 'zod';
+import z, { isAborted } from 'zod';
 import {
   commonPaginatedQueryParamsSchema,
   commonPaginationResponse,
@@ -456,41 +456,55 @@ export const getGrowAffiliateUserResponseSchema = z.object({
   activeReferrals: z.number(),
   totalPayouts: z.number(),
   pendingPayouts: z.number(),
-  referrals: z.array(z.object({
-    _id: z.string(),
-    fullName: z.string(),
-    email: z.string(),
-    status: z.string(),
-    packageName: z.string(),
-    amount: z.number(),
-    createdAt: z.string(),
-  })).optional(),
-  earningStatements: z.array(z.object({
-    _id: z.string(),
-    amount: z.number(),
-    referredTo: z.object({
-      fullName: z.string(),
-      email: z.string(),
-    }),
-    package: z.object({
-      name: z.string(),
-    }),
-    createdAt: z.string(),
-  })).optional(),
-  payoutRequests: z.array(z.object({
-    _id: z.string(),
-    amount: z.number(),
-    status: z.string(),
-    transactionId: z.string().optional(),
-    rejectionReason: z.string().optional(),
-    createdAt: z.string(),
-    paidAt: z.string().optional(),
-  })).optional(),
+  referrals: z
+    .array(
+      z.object({
+        _id: z.string(),
+        fullName: z.string(),
+        email: z.string(),
+        status: z.string(),
+        packageName: z.string(),
+        amount: z.number(),
+        createdAt: z.string(),
+      })
+    )
+    .optional(),
+  earningStatements: z
+    .array(
+      z.object({
+        _id: z.string(),
+        amount: z.number(),
+        referredTo: z.object({
+          fullName: z.string(),
+          email: z.string(),
+        }),
+        package: z.object({
+          name: z.string(),
+        }),
+        createdAt: z.string(),
+      })
+    )
+    .optional(),
+  payoutRequests: z
+    .array(
+      z.object({
+        _id: z.string(),
+        amount: z.number(),
+        status: z.string(),
+        transactionId: z.string().optional(),
+        rejectionReason: z.string().optional(),
+        createdAt: z.string(),
+        paidAt: z.string().optional(),
+      })
+    )
+    .optional(),
   createdAt: z.string(),
   updatedAt: z.string(),
 });
 
-export type TGetGrowAffiliateUserResponse = z.infer<typeof getGrowAffiliateUserResponseSchema>;
+export type TGetGrowAffiliateUserResponse = z.infer<
+  typeof getGrowAffiliateUserResponseSchema
+>;
 
 // Get All Affiliate Users Schema
 export const getAllSrkGrowAffiliateUsersQueryParams = z.object({
@@ -517,4 +531,37 @@ export const getAllSrkGrowAffiliateUsersResponseSchema = z.object({
   totalPages: z.number(),
 });
 
-export type TGetAllSrkGrowAffiliateUsersResponse = z.infer<typeof getAllSrkGrowAffiliateUsersResponseSchema>;
+export type TGetAllSrkGrowAffiliateUsersResponse = z.infer<
+  typeof getAllSrkGrowAffiliateUsersResponseSchema
+>;
+
+export const getGrowAffiliateVerificationResponseSchema = z.object({
+  affiliateVerificationRequest: z
+    .object({
+      _id: z.string(),
+      verificationRequestId: z.string(),
+      username: z.string(),
+      email: z.string(),
+      verificationImageUrl: z.string(),
+      createdAt: z.string(),
+      status: z.enum(['pending', 'approved', 'rejected']),
+    })
+    .optional(),
+  affiliateUser: z
+    .object({
+      _id: z.string(),
+      fullName: z.string(),
+      email: z.string(),
+      gender: z.string().optional(),
+      promocode: z.string(),
+      srkUniversityUserId: z.string().optional(),
+      isActive: z.boolean(),
+      createdAt: z.string(),
+      updatedAt: z.string(),
+    })
+    .nullable(),
+});
+
+export type TGetGrowAffiliateVerificationResponse = z.infer<
+  typeof getGrowAffiliateVerificationResponseSchema
+>;

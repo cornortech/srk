@@ -1,5 +1,5 @@
 import { Button } from '@nextui-org/react';
-import useGrowSSO from '../../../../libs/shared/hooks/src/lib/useGrowSSO'
+import { useGrowSSO } from '@srk/shared/hooks';
 import { toast } from 'sonner';
 
 interface TaskSocialMediaButtonProps {

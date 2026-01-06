@@ -34,9 +34,9 @@ const CallbackPage = () => {
       if (!code) {
         setStatus('error');
         setMessage('No authentication code provided');
-        setTimeout(() => {
-          navigate('/login', { replace: true });
-        }, 2000);
+        // setTimeout(() => {
+        //   navigate('/login', { replace: true });
+        // }, 2000);
         return;
       }
 
@@ -56,18 +56,20 @@ const CallbackPage = () => {
             // lastName: response.user.lastName || "",
           });
 
+
+          console.log("debug 1 response.user?.redirectionUrl:", response.user?.redirectionUrl);
           // Redirect to dashboard
           setTimeout(() => {
-            navigate(response.user?.redirectionUrl || '/grow/verification', {
+            navigate(response.user?.redirectionUrl || '/grow/affiliate/verification', {
               replace: true,
             });
           }, 1000);
         } else {
+          console.error('SSO callback failed:', response);
           setStatus('error');
+          
           setMessage(response.message || 'Authentication failed');
-          setTimeout(() => {
-            navigate('/login', { replace: true });
-          }, 2000);
+
         }
       } catch (err: any) {
         console.error('SSO callback error:', err);
@@ -76,9 +78,7 @@ const CallbackPage = () => {
           err.response?.data?.message ||
           'Authentication failed. Please try again.'
         );
-        setTimeout(() => {
-          navigate('/login', { replace: true });
-        }, 2000);
+
       } finally {
         setLoading(false);
       }

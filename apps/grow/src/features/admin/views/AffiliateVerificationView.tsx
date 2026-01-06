@@ -4,9 +4,10 @@ import { GradientText } from '../components/ui/GradientText';
 import { GlassCard } from '../components/ui/GlassCard';
 import { StatusBadge } from '../components/ui/StatusBadge';
 import { RejectionModal } from '../Modals/RejectionModal';
+import { AffiliateDetailsModal } from '../Modals/AffiliateDetailsModal';
 import { api } from '../../../lib/api';
 import TablePagination from '../../../lib/ui/TablePagination';
-import { ExternalLink } from 'lucide-react';
+import { Eye } from 'lucide-react';
 import { useSRKAlert } from '@srk/shared/hooks';
 
 export const AffiliateVerificationView = () => {
@@ -17,6 +18,8 @@ export const AffiliateVerificationView = () => {
 
   const [rejectionModalOpen, setRejectionModalOpen] = useState(false);
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
+  const [detailsModalOpen, setDetailsModalOpen] = useState(false);
+  const [selectedAffiliate, setSelectedAffiliate] = useState<NonNullable<typeof growAffiliateUser>['body']['data'][number] | null>(null);
 
 
   const limit = 10;
@@ -58,6 +61,7 @@ export const AffiliateVerificationView = () => {
           show('Affiliate User approved', 'success');
         }
         refetch();
+        setDetailsModalOpen(false);
       },
     });
 
@@ -68,6 +72,8 @@ export const AffiliateVerificationView = () => {
           show('Affiliate rejected', 'success');
         }
         refetch();
+        setRejectionModalOpen(false);
+        setDetailsModalOpen(false);
       },
     });
 
@@ -89,8 +95,24 @@ export const AffiliateVerificationView = () => {
       params: { srkGrowaffiliateVerificationId: selectedItemId },
       body: { rejectionReason: reason },
     });
+  };
 
-    setRejectionModalOpen(false);
+  const handleViewDetails = (item: NonNullable<typeof growAffiliateUser>['body']['data'][number]) => {
+    setSelectedAffiliate(item);
+    setDetailsModalOpen(true);
+  };
+
+  const getStatusBackground = (status: string) => {
+    switch (status) {
+      case 'approved':
+        return 'bg-emerald-500/10';
+      case 'rejected':
+        return 'bg-rose-500/10';
+      case 'pending':
+        return 'bg-amber-500/10';
+      default:
+        return 'bg-zinc-500/10';
+    }
   };
 
   return (
@@ -147,7 +169,7 @@ export const AffiliateVerificationView = () => {
               value={filterStatus}
               onChange={(e) => {
                 setPage(1);
-                setFilterStatus(e.target.value as any);
+                setFilterStatus(e.target.value as 'all' | 'pending' | 'approved' | 'rejected');
               }}
               className="bg-black/30 border border-white/10 rounded px-3 py-2 text-white"
             >
@@ -162,21 +184,27 @@ export const AffiliateVerificationView = () => {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-white/10 text-gray-400 text-sm">
-                  <th className="text-left p-3">Affiliate ID</th>
+                  <th className="text-left p-3">S.N.</th>
                   <th className="text-left p-3">Name</th>
                   <th className="text-left p-3">Submitted Date</th>
-                  <th className="text-left p-3">View KYC</th>
                   <th className="text-left p-3">Status</th>
                   <th className="text-left p-3">Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {affiliateList.map((item) => (
-                  <tr
+                {affiliateList.map((item, index) => (
+                  <motion.tr
                     key={item._id}
-                    className="border-b border-white/5 hover:bg-white/5"
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ duration: 0.3, delay: index * 0.05 }}
+                    className="border-b border-white/5 hover:bg-white/5 transition-colors group"
                   >
-                    <td className="p-3">{item._id}</td>
+                    <td className="p-3">
+                      <code className="text-sm font-mono text-white group-hover:text-[#e1ba73] transition-colors">
+                        {index + 1 + (page - 1) * limit}
+                      </code>
+                    </td>
                     <td className="py-4 px-6">
                       <div>
                         <p className="font-medium text-white">
@@ -185,52 +213,24 @@ export const AffiliateVerificationView = () => {
                         <p className="text-sm text-gray-400">{item.email}</p>
                       </div>
                     </td>
-                    <td className="p-3">{item.createdAt}</td>
                     <td className="p-3">
-                      <div className="mb-3 relative group rounded-xl overflow-hidden border border-white/10">
-                        <img
-                          src={item.verificationImageUrl}
-                          alt="Current Proof"
-                          className="w-full h-16 object-cover opacity-60 group-hover:opacity-100 transition-opacity"
-                        />
-                        <div className="absolute inset-0 flex items-center justify-center gap-2">
-                          <a
-                            href={item.verificationImageUrl}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="p-2 bg-white rounded-full text-black hover:text-white hover:bg-[#b68938] transition-all opacity-0 group-hover:opacity-100"
-                          >
-                            <ExternalLink size={14} />
-                          </a>
-                        </div>
-                      </div>
+                      <p className="text-white text-sm">{item.createdAt}</p>
                     </td>
-                    <td className="p-3">
+                    <td className={`p-3 ${getStatusBackground(item.status)}`}>
                       <StatusBadge status={item.status} />
                     </td>
                     <td className="p-3">
-                      {item.status === 'pending' ? (
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => handleApprove(item._id)}
-                            disabled={isApproving}
-                            className="px-3 py-1 bg-emerald-600/20 text-emerald-300 rounded"
-                          >
-                            Approve
-                          </button>
-                          <button
-                            onClick={() => handleReject(item._id)}
-                            disabled={isRejecting}
-                            className="px-3 py-1 bg-rose-600/20 text-rose-300 rounded"
-                          >
-                            Reject
-                          </button>
-                        </div>
-                      ) : (
-                        <span className="text-gray-400">Reviewed</span>
-                      )}
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => handleViewDetails(item)}
+                        className="p-2 bg-blue-600/20 text-blue-300 rounded-lg hover:bg-blue-600/30 transition-colors"
+                        title="View Details"
+                      >
+                        <Eye size={16} />
+                      </motion.button>
                     </td>
-                  </tr>
+                  </motion.tr>
                 ))}
               </tbody>
             </table>
@@ -252,9 +252,22 @@ export const AffiliateVerificationView = () => {
       )}
 
       <AnimatePresence>
+        {detailsModalOpen && (
+          <AffiliateDetailsModal
+            isOpen={detailsModalOpen}
+            onClose={() => setDetailsModalOpen(false)}
+            affiliateData={selectedAffiliate}
+            onApprove={handleApprove}
+            onReject={handleReject}
+            isApproving={isApproving}
+            selectedItemId={selectedItemId}
+          />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
         {rejectionModalOpen && (
           <RejectionModal
-            // isApproving={isApproving}
             isRejecting={isRejecting}
             isOpen={rejectionModalOpen}
             onClose={() => setRejectionModalOpen(false)}

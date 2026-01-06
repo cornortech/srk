@@ -4,10 +4,8 @@ import {
   Clock,
   AlertTriangle,
   Upload,
-  FileText,
   CreditCard,
   Loader2,
-  Trash2,
   ExternalLink,
   X,
 } from 'lucide-react';
@@ -32,7 +30,7 @@ export const UserVerificationPage = () => {
   // const [kycFiles, setKycFiles] = useState<File[]>([]);
   const [paymentProof, setPaymentProof] = useState<File | null>(null);
   const { uploadFile, isUploading: isUploadingFiles } =
-    useSRKFileUpload('grow-resubmission');
+    useSRKFileUpload('grow');
 
   const {
     register,
@@ -45,7 +43,7 @@ export const UserVerificationPage = () => {
     resolver: zodResolver(resubmitGrowVerificationSchema),
   });
 
-  // API Hooks
+  // API Hooks - Check if profile exists
   const { data: profileData, refetch, isLoading } = api.grow.getSrkGrowProfile.useQuery(
     ['growProfile', storeUser?._id],
     storeUser?._id ? { params: { userId: storeUser._id } } : ({} as any),
@@ -166,8 +164,6 @@ export const UserVerificationPage = () => {
     }
   };
 
-  if (!user) return null;
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0a0705] to-black text-white flex items-center justify-center p-4">
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
@@ -185,11 +181,19 @@ export const UserVerificationPage = () => {
 
         {isLoading ? (
           <GlassCard className="max-w-xl mx-auto text-center py-12 px-8">
+            <Loader2 size={48} className="text-blue-400 animate-spin mx-auto mb-4" />
             <div className="text-white">Loading verification status...</div>
           </GlassCard>
         ) : !user ? (
           <GlassCard className="max-w-xl mx-auto text-center py-12 px-8">
-            <div className="text-white">Unable to load user data</div>
+            <AlertTriangle size={48} className="text-red-400 mx-auto mb-4" />
+            <div className="text-white mb-4">Unable to load user data</div>
+            <button
+              onClick={() => navigate('/login')}
+              className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors text-white text-sm"
+            >
+              Back to Login
+            </button>
           </GlassCard>
         ) : user.userDetails.status === 'verificationPending' ? (
           <GlassCard className="max-w-xl mx-auto text-center py-12 px-8">

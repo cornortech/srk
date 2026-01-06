@@ -5,6 +5,7 @@ import { UserModel } from '../../model/userModel';
 import { adminModel } from '../../model/adminModel';
 import AuthService from '../../services/authService';
 import crypto from 'crypto';
+import GrowAffiliateUserModel from '../../model/grow/growAffiliateUserModel';
 
 /**
  * Generate a one-time SSO auto code
@@ -173,7 +174,18 @@ const exchangeCode: AppRouteImplementationOrOptions<
     if (autoCode.targetApp === 'task') {
       redirectionUrl = '/task/dashboard';
     } else if (autoCode.targetApp === 'growaffiliate') {
-      redirectionUrl = '/grow/verification';
+      // Check if affiliate is already approved
+      const existingAffiliate = await GrowAffiliateUserModel.findOne({
+        srkUniversityUserId: loggedInUser._id.toString(),
+        isActive: true,
+      });
+
+      console.log('Existing affiliate:', existingAffiliate);
+
+      // If already approved, go to dashboard, otherwise go to verification
+      redirectionUrl = existingAffiliate
+        ? '/affiliate/dashboard'
+        : '/grow/affiliate/verification';
     } else if (autoCode.targetApp === 'growsocialmedia') {
       redirectionUrl = '/';
     } else if (autoCode.targetApp === 'bank') {

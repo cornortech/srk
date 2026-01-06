@@ -51,9 +51,8 @@ const CallbackPage = () => {
           setUser({
             _id: response.user._id,
             email: response.user.email,
-            firstName: response.user.firstName,
-            lastName: response.user.lastName,
-            role: response.user.role,
+            fullName: response.user.firstName || "",
+            // lastName: response.user.lastName || "",
           });
 
           // Redirect to dashboard
@@ -74,7 +73,7 @@ const CallbackPage = () => {
         setStatus('error');
         setMessage(
           err.response?.data?.message ||
-            'Authentication failed. Please try again.'
+          'Authentication failed. Please try again.'
         );
         setTimeout(() => {
           navigate('/login', { replace: true });
@@ -124,8 +123,8 @@ const CallbackPage = () => {
             status === 'error'
               ? '#ef4444'
               : status === 'success'
-              ? '#22c55e'
-              : '#fff',
+                ? '#22c55e'
+                : '#fff',
           fontSize: '1.1rem',
           marginTop: '1rem',
         }}

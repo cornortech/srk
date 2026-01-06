@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import {
+  AnalyticsData,
   DashboardView,
   RejectedTaskEntry,
   SocialPlatform,
@@ -9,13 +10,7 @@ import {
   TaskType,
   UserProfile,
 } from 'apps/task/src/features/dashboard/types';
-import {
-  analyticsData,
-  followTasks,
-  postTasks,
-  userProfile,
-  watchTasks,
-} from '../../data/dummyDashboardMockData';
+import { followTasks, likeTasks } from '../../data/dummyDashboardMockData';
 import AnimatedBackground from '../../components/ui/AnimatedBackground';
 import FloatingNotification from '../../features/dashboard/components/ui/DashboardFloatingNotification';
 import { VerificationModal } from '../../features/dashboard/components/verification/VerificationModal';
@@ -36,8 +31,15 @@ import { VideoPlayerModal } from '../../features/dashboard/components/tasks/Vide
 import { RejectedTaskReviewModal } from '../../features/dashboard/components/tasks/RejectedTaskReviewModal';
 import { RequestTaskModal } from '../../features/dashboard/components/tasks/RequestTaskModal';
 import { DashboardLayout } from '../../features/dashboard/layout/DashboardLayout';
+import { api } from '../../lib/api';
+import { useTaskAuthStore } from '../../store/useTaskAuthStore';
+import { FinanceHistoryView } from '../../features/dashboard/views/FinanceHistoryView';
+import { TaskHistoryView } from '../../features/dashboard/views/TaskHistoryView';
+import { useAuthAffiliateVerification } from '../../../../../libs/shared/hooks/src/lib/useAuthAffiliate';
 
 export const AfterVerifiedDashboardPage: React.FC = () => {
+  const { user, isAuthenticated, isLoading } = useAuthAffiliateVerification();
+
   const [view, setView] = useState<'landing' | 'dashboard'>('landing');
   const [dashView, setDashView] = useState<DashboardView>('verification');
   const [showVerification, setShowVerification] = useState(false);
@@ -49,17 +51,91 @@ export const AfterVerifiedDashboardPage: React.FC = () => {
     useState<SocialPlatform | null>(null);
   const [playingVideo, setPlayingVideo] = useState<Task | null>(null);
   const [completed, setCompleted] = useState<string[]>([]);
-  const [balance, setBalance] = useState<number>(1250);
-  const [eligible, setEligible] = useState<number>(1000);
   const [verifyingTask, setVerifyingTask] = useState<Task | null>(null);
   const [showRequestModal, setShowRequestModal] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [profile, _setProfile] = useState<UserProfile>(userProfile);
+
+  const { taskUserID, setTaskUserID } = useTaskAuthStore();
+
+  const { data: verificationRequest } =
+    api.srkTask.getAllSrkTaskAffiliateVerificationRequest.useQuery(
+      ['getAllSrkTaskAffiliateVerificationRequest', user?._id],
+      { query: { srkUniversityUserId: user?._id || '' } },
+      {
+        enabled: !!user?._id && !taskUserID,
+        queryKey: [
+          'getAllSrkTaskAffiliateVerificationRequest',
+          user?._id || '',
+        ],
+      }
+    );
+
+  React.useEffect(() => {
+    if (
+      verificationRequest?.status === 200 &&
+      verificationRequest.body.success &&
+      verificationRequest.body.data
+    ) {
+      if (typeof verificationRequest.body.data._id === 'string') {
+        setTaskUserID(verificationRequest.body.data._id);
+      }
+    }
+  }, [verificationRequest, setTaskUserID]);
+
+  const { data: userProfileData } = api.srkTask.getSrkTaskUserProfile.useQuery(
+    ['getSrkTaskUserProfile', taskUserID],
+    { params: { userId: taskUserID || '' } },
+    {
+      enabled: !!taskUserID,
+      queryKey: ['getSrkTaskUserProfile', taskUserID || ''],
+    }
+  );
+
+  const { data: analyticsData, refetch: refetchAnalytics } =
+    api.srkTask.getSrkTaskUserAnalytics.useQuery(
+      ['getSrkTaskUserAnalytics', taskUserID],
+      { params: { userId: taskUserID || '' } },
+      {
+        enabled: !!taskUserID,
+        queryKey: ['getSrkTaskUserAnalytics', taskUserID || ''],
+      }
+    );
+
+  const balance =
+    analyticsData?.status === 200
+      ? analyticsData.body.coinsData.walletCoins
+      : 0;
+  // const balance = 1250;
+
+  const eligible = Math.max(0, balance - 100);
+
+  if (userProfileData?.body.userData.kycStatus === 'approved') {
+    if (!isApproved) setIsApproved(true);
+  }
+
+  let currentProfile: Omit<
+    UserProfile,
+    'avatar' | 'level' | 'xp' | 'nextLevelXP' | 'socialLinks'
+  > | null = null;
+  if (userProfileData?.status === 200)
+    currentProfile = {
+      name: userProfileData.body.userData.fullName,
+      email: userProfileData.body.userData.email,
+      phone: userProfileData.body.userData.phone,
+      joinDate: new Date(
+        userProfileData.body.userData.createdAt
+      ).toLocaleDateString(),
+      documentStatus:
+        userProfileData.body.userData.kycStatus === 'approved'
+          ? 'verified'
+          : userProfileData.body.userData.kycStatus === 'rejected'
+          ? 'rejected'
+          : 'pending',
+    };
 
   const [activeTasks, setActiveTasks] = useState<Task[]>([
     ...followTasks,
-    ...watchTasks,
-    ...postTasks,
+    ...likeTasks,
   ]);
 
   const [rejectedTasks, setRejectedTasks] = useState<RejectedTaskEntry[]>([
@@ -75,19 +151,19 @@ export const AfterVerifiedDashboardPage: React.FC = () => {
         'Please ensure your username is clearly visible in the screenshot',
       canRetry: true,
     },
+    // {
+    //   ...watchTasks[1],
+    //   rejectionReason: 'Incomplete watch time, video paused at 80%.',
+    //   uploadedProofUrl:
+    //     'https://placehold.co/400x300/27272a/FFF?text=Watch+Proof',
+    //   taskId: 'w-ig-1',
+    //   id: 'w-ig-1-rejected',
+    //   date: '2024-01-14',
+    //   adminComment: 'Video must be watched completely. Please try again.',
+    //   canRetry: true,
+    // },
     {
-      ...watchTasks[1],
-      rejectionReason: 'Incomplete watch time, video paused at 80%.',
-      uploadedProofUrl:
-        'https://placehold.co/400x300/27272a/FFF?text=Watch+Proof',
-      taskId: 'w-ig-1',
-      id: 'w-ig-1-rejected',
-      date: '2024-01-14',
-      adminComment: 'Video must be watched completely. Please try again.',
-      canRetry: true,
-    },
-    {
-      ...postTasks[0],
+      ...likeTasks[0],
       rejectionReason: 'Shared post is private. Make it public.',
       uploadedProofUrl:
         'https://placehold.co/400x300/27272a/FFF?text=Share+Proof',
@@ -129,8 +205,7 @@ export const AfterVerifiedDashboardPage: React.FC = () => {
 
     const task = activeTasks.find((t) => t.id === taskId);
     if (task) {
-      setBalance((prev) => prev + task.coins);
-      setEligible((prev) => prev + task.coins);
+      refetchAnalytics();
       addNotification(
         `Task completed! +${task.coins} Coins earned!`,
         'success'
@@ -148,16 +223,18 @@ export const AfterVerifiedDashboardPage: React.FC = () => {
     );
   };
 
-  const viewsConfig: Record<DashboardView, { title: string; desc: string }> = {
-    verification: { title: 'Verification', desc: 'Verify your account' },
-    analytics: { title: 'Analytics', desc: 'View your earnings' },
-    tasks: { title: 'Tasks', desc: 'Complete earning tasks' },
-    leaderboard: { title: 'Leaderboard', desc: 'Top performers' },
-    coinExchange: { title: 'Coin Exchange', desc: 'Convert coins to cash' },
-    profile: { title: 'Profile', desc: 'Manage your account' },
-    payout: { title: 'Legacy Payout', desc: 'Deprecated system' },
-    logout: { title: '', desc: '' },
-  };
+  // const viewsConfig: Record<DashboardView, { title: string; desc: string }> = {
+  //   verification: { title: 'Verification', desc: 'Verify your account' },
+  //   analytics: { title: 'Analytics', desc: 'View your earnings' },
+  //   tasks: { title: 'Tasks', desc: 'Complete earning tasks' },
+  //   leaderboard: { title: 'Leaderboard', desc: 'Top performers' },
+  //   coinExchange: { title: 'Coin Exchange', desc: 'Convert coins to cash' },
+  //   profile: { title: 'Profile', desc: 'Manage your account' },
+  //   payout: { title: 'Legacy Payout', desc: 'Deprecated system' },
+  //   logout: { title: '', desc: '' },
+  //   finance: { title: 'Financial History', desc: 'View all your transactions' },
+  //   taskHistory: { title: 'Task History', desc: 'View your submitted tasks' },
+  // };
 
   const renderView = () => {
     switch (dashView) {
@@ -190,9 +267,8 @@ export const AfterVerifiedDashboardPage: React.FC = () => {
           <CoinExchangeView
             eligible={eligible}
             balance={balance}
-            payoutRequested={payoutRequested}
-            setPayoutRequested={setPayoutRequested}
             addNotification={addNotification}
+            onPayoutSuccess={refetchAnalytics}
           />
         );
       case 'profile':
@@ -200,18 +276,25 @@ export const AfterVerifiedDashboardPage: React.FC = () => {
           <ProfileView
             isApproved={isApproved}
             setDashView={setDashView}
-            profile={profile}
+            profile={currentProfile}
             hasPurchased={hasPurchased}
             completed={completed}
-            analyticsData={analyticsData}
           />
         );
       case 'payout':
         return <LegacyPayoutView setDashView={setDashView} />;
+      case 'finance':
+        return <FinanceHistoryView />;
+      case 'taskHistory':
+        return <TaskHistoryView />;
       default:
         return null;
     }
   };
+
+  if (!user || !isAuthenticated) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-black text-white overflow-x-hidden">
@@ -311,8 +394,8 @@ export const AfterVerifiedDashboardPage: React.FC = () => {
           isMenuOpen={isMenuOpen}
           setIsMenuOpen={setIsMenuOpen}
           addNotification={addNotification}
-          title={viewsConfig[dashView].title}
-          desc={viewsConfig[dashView].desc}
+          // title={viewsConfig[dashView].title}
+          // desc={viewsConfig[dashView].desc}
         >
           <AnimatedBackground />
           {renderView()}

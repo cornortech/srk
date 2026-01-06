@@ -5,6 +5,7 @@ import {
   Menu,
   AlignLeftIcon,
   LayoutDashboardIcon,
+  WorkflowIcon,
 } from "lucide-react";
 import { useState } from "react";
 import {
@@ -19,10 +20,11 @@ import useAlert from "../hooks/useAlert";
 import { Button } from "@nextui-org/react";
 import { useMutation } from "@tanstack/react-query";
 import { updateUserDetailsApi } from "../lib/apiClient";
+import { useTaskSSO } from "@srk/shared/hooks";
 
 interface Tsidebar {
   sideBarName: string;
-  sidebarType: "study" | "affiliate" | "admin" | "visitor";
+  sidebarType: "study" | "srkgrow" | "affiliate" | "admin" | "visitor";
   showInMobileView?: boolean;
   handleCloseMenu?: () => void;
 }
@@ -43,6 +45,11 @@ export const Sidebar = ({
     setIsOpen(!isOpen);
   };
 
+  const backendUrl = import.meta.env.VITE_BACKEND_ROOT_URL || 'http://localhost:4000';
+
+  const { redirectToTaskProgram, isLoading: isRedirectingToTaskProgram, error: redirectToTaskProgramError } = useTaskSSO({
+    backendUrl,
+  });
   const { mutate: updateUserPermission } = useMutation({
     mutationFn: async () => {
       if (!userDetails?._id) return;
@@ -64,6 +71,10 @@ export const Sidebar = ({
   });
   const sidebarFuncMap = {
     affiliate: getAffiliateSidebarItems(!!userDetails?.allowedToAddUsers),
+    srkgrow: getStudySidebarItems(
+      !!userDetails?.affiliateEnabled,
+      userDetails?.purpose
+    ),
     study: getStudySidebarItems(
       !!userDetails?.affiliateEnabled,
       userDetails?.purpose
@@ -101,6 +112,12 @@ export const Sidebar = ({
     updateUserPermission();
   };
 
+
+
+  const handleRedirectToTaskProgram = () => {
+    redirectToTaskProgram();
+  }
+
   return (
     <div
       className="relative min-h-screen hidden md:flex"
@@ -114,7 +131,7 @@ export const Sidebar = ({
           showInMobileView ? "w-full" : isOpen ? "w-64" : "w-20"
         )}
       >
-        <ul className="space-y-2 p-4 mt-8">
+        <ul className="space-y-2 p-4 mt-8 overflow-y-auto h-[93vh]">
           {sidebarFuncMap[sidebarType]?.map((item, index) => {
             if (item.href === "switchToAffiliate") {
               return (
@@ -153,6 +170,20 @@ export const Sidebar = ({
               </li>
             );
           })}
+
+
+          {
+            sidebarType === "study" &&
+            <div
+              className="flex cursor-pointer items-center gap-x-3 w-full justify-start text-textPrimary bg-bgSecondary p-2 rounded-md transition-all duration-300 ease-in-out"
+              color="primary"
+              onClick={handleRedirectToTaskProgram}
+            >
+              <WorkflowIcon />
+              {isRedirectingToTaskProgram ? "Redirecting..." : "SRK Task Program"}
+            </div>
+          }
+
           {showInMobileView && sidebarType === "visitor" && (
             <div
               className="flex cursor-pointer items-center gap-x-3 w-full justify-start text-textPrimary bg-bgSecondary p-2 rounded-md transition-all duration-300 ease-in-out"

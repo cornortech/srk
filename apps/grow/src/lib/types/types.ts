@@ -1,40 +1,49 @@
-export type SocialPlatform = 'youtube' | 'facebook' | 'instagram' | 'twitter' | 'tiktok';
+import {
+  TSrkGrowPackagesSchema,
+  TValidateGrowUserPromoCodeResponse,
+  TGetGrowSocialMediaEnrollmentById,
+} from '@srk/shared/contracts';
+
+export type SocialPlatform =
+  | 'YouTube'
+  | 'Facebook'
+  | 'Instagram'
+  | 'Twitter'
+  | 'TikTok';
 export type EngagementType = 'follow' | 'reach';
-export type PackageType = 'starter' | 'intermediate' | 'pro';
-export type KYCStatus = 'not_started' | 'pending' | 'approved' | 'rejected';
+export type KYCStatus =
+  | 'verificationPending'
+  | 'portalActivated'
+  | 'verificationRejected';
+export type UserType = 'Affiliate' | 'User';
 
-export interface PackageDetails {
-  id: PackageType;
-  name: string;
-  price: string;
-  originalPrice?: string;
-  description: string;
-  features: string[];
-  followerOptions: number[];
-  reachOptions: Array<{ videos: number; likesPerVideo: number }>;
-  period: string;
-  popular?: boolean;
-}
+export type PackageSubType =
+  TSrkGrowPackagesSchema['packageTypes'][0]['packageSubTypes'][0];
+export type PackageType = TSrkGrowPackagesSchema['packageTypes'][0];
+export type PackageDetails = TSrkGrowPackagesSchema;
 
-export interface UserData {
-  id: string;
-  email: string;
-  password: string;
-  name: string;
-  kycStatus: 'pending' | 'approved' | 'rejected';
-  approved: boolean; // Add this line
-  country:string ; 
-  phone:number ; 
-  kycDocuments: {
-    id: string;
-    name: string;
-    size: number;
-    type: string;
-    status: 'pending' | 'approved' | 'rejected';
-    submittedAt: string;
-  }[];
-  createdAt: string;
-  lastLogin: string;
+export type UserData = Omit<
+  TGetGrowSocialMediaEnrollmentById['userData'],
+  'kycURL'
+> & {
+  _id: string;
+  kycURL?: string[] | string;
+  kycDocuments?: KYCDocument[];
+  enrollmentData?: any;
+  createdAt?: string;
+  phone?: string;
+};
+
+export interface kycSchema {
+  userId: string;
+  frontImage: string;
+  backImage: string;
+  documentType: string;
+  verificationImage: string;
+  documentNumber: string;
+  status: 'pending' | 'approved' | 'rejected';
+  courseEnrollAgreement: string;
+  rejectionReason: string;
 }
 
 export interface LoginModalProps {
@@ -45,8 +54,9 @@ export interface LoginModalProps {
 export interface KYCDocument {
   id: string;
   name: string;
-  status: 'pending' | 'approved' | 'rejected';
+  status: KYCStatus;
   submittedAt: string;
+  url?: string;
 }
 
 export interface UserDetails {
@@ -57,9 +67,16 @@ export interface UserDetails {
   platform: SocialPlatform;
   engagementType: EngagementType;
   selectedOption: number;
-  packageType: PackageType;
+  packageId: string;
   additionalInfo?: string;
   postLinks?: string[];
+  password?: string;
+  confirmPassword?: string;
+  country?: string;
+  gender?: string;
+  promoCode?: string;
+  kyc?: string[];
+  userType: 'affiliate' | 'package';
 }
 
 export interface CheckoutUserDetails extends Omit<UserDetails, 'phone'> {
@@ -70,6 +87,7 @@ export interface CheckoutUserDetails extends Omit<UserDetails, 'phone'> {
   gender: string;
   promoCode: string;
   postLinks?: string[];
+  kyc: string[];
 }
 
 export interface StatusModalProps {
@@ -80,23 +98,17 @@ export interface StatusModalProps {
 }
 
 export interface OrderDetails {
-  packageType: PackageType;
   platform: SocialPlatform;
   engagementType: EngagementType;
   selectedOption: number;
-  amount: string;
+  amount: number;
   timestamp: string;
   transactionId: string;
   name: string;
   email: string;
   phone: string;
   socialLink: string;
-}
-
-export interface LoginModalProps {
-  onClose: () => void;
-  onLoginSuccess: (userData: UserData) => void;
-  initialMode: 'login' | 'register';
+  packageType: string;
 }
 
 export interface DashboardProps {
@@ -112,3 +124,6 @@ export interface PlatformData {
   tasks: number;
   completed: number;
 }
+
+export type DiscountDetails =
+  TValidateGrowUserPromoCodeResponse['discountDetails'];

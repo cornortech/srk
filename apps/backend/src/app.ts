@@ -1,29 +1,32 @@
-import express from "express";
-import cors from "cors";
-import { createExpressEndpoints } from "@ts-rest/express";
-import * as swaggerUi from "swagger-ui-express";
-import { contract } from "./contract";
-import { router } from "./modules";
-import ssoRouter from "./modules/sso/router";
-import cookieParser from "cookie-parser";
-import swaggerApiDocs from "./config/swagger";
-import cronJobInit from "./utils/cronjob";
+import express from 'express';
+import cors from 'cors';
+import { createExpressEndpoints } from '@ts-rest/express';
+import * as swaggerUi from 'swagger-ui-express';
+import cookieParser from 'cookie-parser';
+import swaggerApiDocs from './config/swagger';
+import cronJobInit from './utils/cronjob';
+import { router } from './modules';
+import { apiContract } from '../../../libs/shared/contracts/src/index';
+import ssoRouter from './modules/sso/router';
+
 export const app = express();
+
+app.set('trust proxy', 1);
 
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 
 const WHITE_LISTED_ORIGINS = process.env.WHITE_LISTED_ORIGINS
-  ? process.env.WHITE_LISTED_ORIGINS.split(",")
+  ? process.env.WHITE_LISTED_ORIGINS.split(',')
   : [];
 
 // CORS
 
-console.log("*** whitelisted origins ***", WHITE_LISTED_ORIGINS);
+console.log('*** whitelisted origins ***', WHITE_LISTED_ORIGINS);
 
-app.get("/health", (req, res) => {
-  res.status(200).json({ status: "OK" });
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'OK' });
 });
 
 app.use(
@@ -32,19 +35,18 @@ app.use(
       if (!origin || WHITE_LISTED_ORIGINS.indexOf(origin) !== -1) {
         callback(null, true);
       } else {
-        callback(new Error("Not allowed by CORS"));
+        callback(new Error('Not allowed by CORS'));
       }
     },
     credentials: true, // Allow cookies to be sent
   })
 );
 
-app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerApiDocs));
+app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerApiDocs));
 
-// SSO routes
 app.use(ssoRouter);
 
-createExpressEndpoints(contract, router, app);
+createExpressEndpoints(apiContract, router, app);
 cronJobInit();
 
 export default app;

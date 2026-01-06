@@ -14,7 +14,7 @@ const socialTaskFollowRequestSchema = new mongoose.Schema(
     },
     socialMedia: {
       type: String,
-      enum: ["facebook", "instagram", "tiktok", "youtube"],
+      enum: ["Facebook", "Instagram", "TikTok", "YouTube", "Twitter"],
       required: true,
     },
     status: {

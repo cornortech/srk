@@ -5,6 +5,7 @@ interface RejectionModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (reason: string) => void;
+  isRejecting: boolean;
   title: string;
 }
 
@@ -12,6 +13,7 @@ export const RejectionModal: React.FC<RejectionModalProps> = ({
   isOpen,
   onClose,
   onSubmit,
+  isRejecting,
   title,
 }) => {
   const [reason, setReason] = useState('');
@@ -73,14 +75,14 @@ export const RejectionModal: React.FC<RejectionModalProps> = ({
             </button>
             <button
               onClick={handleSubmit}
-              disabled={!reason.trim()}
+              disabled={!reason.trim() || isRejecting}
               className={`px-4 py-2 rounded-lg transition-colors ${
                 reason.trim()
                   ? 'bg-rose-600 text-white hover:bg-rose-700'
                   : 'bg-gray-600 text-gray-400 cursor-not-allowed'
               }`}
             >
-              Submit Rejection
+              {isRejecting ? 'Rejecting' : 'Submit Reject'}
             </button>
           </div>
         </div>

@@ -9,28 +9,35 @@ import {
   // Image,
   Chip,
   // Tab,
-} from "@nextui-org/react";
-import { EllipsisVertical, SquareArrowOutUpRight } from "lucide-react";
-import UserDetailsModal from "./userDetailsModel";
-import { useState } from "react";
-import { chipColorsStatusMap, TAffiliateRequest } from "../../lib/types";
-import { useMutation } from "@tanstack/react-query";
+} from '@nextui-org/react';
+import { EllipsisVertical, SquareArrowOutUpRight } from 'lucide-react';
+import UserDetailsModal from './userDetailsModel';
+import { useState } from 'react';
+import { chipColorsStatusMap, TAffiliateRequest } from '../../lib/types';
+import { useMutation } from '@tanstack/react-query';
 import {
   approveAffiliateRequestApi,
   rejectAffiliateRequestApi,
-} from "../../lib/apiClient";
-import useAlert from "../../hooks/useAlert";
-import { AxiosError } from "axios";
-import moment from "moment";
+} from '../../lib/apiClient';
+import useAlert from '../../hooks/useAlert';
+import { AxiosError } from 'axios';
+import moment from 'moment';
+import TablePagination from './Pagination';
 
 interface UserTableProps {
   users: TAffiliateRequest[];
   refetchData: () => void;
+  page: number; // current page
+  totalPages: number; // total pages
+  onPageChange: (page: number) => void; // callback
 }
 
 export default function AffiliateRequestTable({
   users,
   refetchData,
+  page,
+  totalPages,
+  onPageChange,
 }: UserTableProps) {
   const [selectedUser, setSelectedUser] = useState<TAffiliateRequest | null>(
     null
@@ -54,13 +61,13 @@ export default function AffiliateRequestTable({
       await approveAffiliateRequestApi(userId);
     },
     onSuccess: () => {
-      show("Affiliate request approved successfully", "success");
+      show('Affiliate request approved successfully', 'success');
       handleCloseModal();
       refetchData();
     },
     onError: (error: AxiosError<{ message: string }>) => {
       console.log(error);
-      show(error.response?.data?.message || "Failed to approve", "error");
+      show(error.response?.data?.message || 'Failed to approve', 'error');
     },
   });
   const { mutate: rejectMutation } = useMutation({
@@ -68,13 +75,13 @@ export default function AffiliateRequestTable({
       await rejectAffiliateRequestApi(data.userId, data.reason);
     },
     onSuccess: () => {
-      show("Affiliate request rejected successfully", "success");
+      show('Affiliate request rejected successfully', 'success');
       handleCloseModal();
       refetchData();
     },
     onError: (error: AxiosError<{ message: string }>) => {
       console.log(error);
-      show(error.response?.data?.message || "Failed to reject", "error");
+      show(error.response?.data?.message || 'Failed to reject', 'error');
     },
   });
   const handleAccept = (user: TAffiliateRequest) => {
@@ -105,8 +112,8 @@ export default function AffiliateRequestTable({
         <TableBody>
           {users.map((user, index) => (
             <TableRow key={index}>
-              <TableCell>{index + 1}</TableCell>
-              <TableCell>{moment(user.requestedAt).format("lll")}</TableCell>
+              <TableCell>{(page - 1) * 10 + index + 1}</TableCell>
+              <TableCell>{moment(user.requestedAt).format('lll')}</TableCell>
               {/* <TableCell>
                 <Image
                   src={user.profilePicture}
@@ -143,6 +150,13 @@ export default function AffiliateRequestTable({
           ))}
         </TableBody>
       </Table>
+      {users.length >= 10 && (
+        <TablePagination
+          page={page}
+          totalPages={totalPages}
+          onPageChange={onPageChange}
+        />
+      )}
       <UserDetailsModal
         user={selectedUser}
         isOpen={isModalOpen}

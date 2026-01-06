@@ -18,18 +18,16 @@ import { GlobalOverviewView } from '../features/admin/views/GlobalOverviewView';
 import { AffiliateVerificationView } from '../features/admin/views/AffiliateVerificationView';
 import { UserVerificationView } from '../features/admin/views/UserVerificationView';
 import { PaymentVerificationView } from '../features/admin/views/PaymentVerificationView';
-import { TaskMonitoringView } from '../features/admin/views/TaskMonitoringView';
+import { TaskMonitoringView } from '../features/admin/views/TaskMonitoringViewNew';
 import { PrivateTasksView } from '../features/admin/views/PrivateTasksView';
-import {
-  AffiliateListView,
-  UserListView,
-} from '../features/admin/views/UserListView';
+import { AffiliateUsersView } from '../features/admin/views/AffiliateUsersView';
+import { PackageUsersView } from '../features/admin/views/PackageUsersView';
 import { CreateUserView } from '../features/admin/views/CreateUserView';
+import { PackageManagementView } from '../features/admin/views/PackageManagementView';
 import { PayoutQueueView } from '../features/admin/views/PayoutQueueView';
 import { PerformanceTrendView } from '../features/admin/views/PerformanceTrendView';
 import { FloatingParticles } from '../features/admin/components/ui/FloatingParticles';
 import { Sidebar } from '../features/admin/components/AdminSidebar';
-import { FloatingNavBar } from '../features/admin/components/FloatingNavBar';
 import { MagneticButton } from '../lib/ui/MagneticButton';
 
 export const GrowOnlyAdminDashboard = () => {
@@ -70,29 +68,31 @@ export const GrowOnlyAdminDashboard = () => {
   const renderView = useCallback(() => {
     switch (activeView) {
       case 'global':
-        return <GlobalOverviewView data={data} />;
+        return <GlobalOverviewView />;
       case 'affiliateverification':
-        return <AffiliateVerificationView data={data} />;
+        // srk grow affiliate verification request view
+        return <AffiliateVerificationView />;
       case 'userverification':
-        return <UserVerificationView data={data} />;
-      case 'paymentverification':
-        return <PaymentVerificationView data={data} />;
+        // srk grow package enrollment request view
+        return <UserVerificationView />;
       case 'taskmonitoring':
-        return <TaskMonitoringView data={data} />;
+        return <TaskMonitoringView />;
       case 'privatetasks':
         return <PrivateTasksView data={data} />;
-      case 'userlist':
-        return <UserListView data={data} />;
       case 'affiliatelist':
-        return <AffiliateListView data={data} />;
+        return <AffiliateUsersView />;
+      case 'packagelist':
+        return <PackageUsersView />;
       case 'createuser':
         return <CreateUserView />;
+      case 'packagemanagement':
+        return <PackageManagementView />;
       case 'payoutqueue':
         return <PayoutQueueView />;
       case 'trend':
         return <PerformanceTrendView data={data} />;
       default:
-        return <GlobalOverviewView data={data} />;
+        return <GlobalOverviewView />;
     }
   }, [activeView, data]);
 
@@ -100,9 +100,9 @@ export const GrowOnlyAdminDashboard = () => {
     setActiveView(view);
   }, []);
 
-  const handleSidebarToggle = useCallback(() => {
+  const handleSidebarToggle = () => {
     setIsSidebarOpen((prev) => !prev);
-  }, []);
+  };
 
   const handleSidebarClose = useCallback(() => {
     setIsSidebarOpen(false);
@@ -126,10 +126,10 @@ export const GrowOnlyAdminDashboard = () => {
         return 'Task Monitoring';
       case 'privatetasks':
         return 'Private Tasks';
-      case 'userlist':
-        return 'All Users';
       case 'affiliatelist':
-        return 'Affiliates Only';
+        return 'Affiliate Users';
+      case 'packagelist':
+        return 'Package Users';
       case 'createuser':
         return 'Create User';
       case 'payoutqueue':
@@ -171,18 +171,25 @@ export const GrowOnlyAdminDashboard = () => {
 
       <FloatingParticles />
 
-      <Sidebar activeView={activeView} setActiveView={handleViewChange} />
+      <div className="hidden lg:block">
+        <Sidebar activeView={activeView} setActiveView={handleViewChange} />
+      </div>
 
       <AnimatePresence>
         {isSidebarOpen && (
-          <Sidebar activeView={activeView} setActiveView={handleViewChange} />
+          <Sidebar
+            activeView={activeView}
+            setActiveView={handleViewChange}
+            isMobile={true}
+            onClose={handleSidebarClose}
+          />
         )}
       </AnimatePresence>
 
-      <FloatingNavBar
+      {/* <FloatingNavBar
         activeView={activeView}
         setActiveView={handleViewChange}
-      />
+      /> */}
 
       <main ref={mainRef} className="lg:ml-64 min-h-screen">
         <motion.header

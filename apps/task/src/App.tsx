@@ -27,10 +27,10 @@ const router = createBrowserRouter([
     path: '/callback',
     element: <CallbackPage />,
   },
-  {
-    path: '/task/verification',
-    element: <TaskVerificationPage />,
-  },
+  // {
+  //   path: '/task/verification',
+  //   element: <TaskVerificationPage />,
+  // },
   {
     path: '/task/dashboard',
     element: <AfterVerifiedDashboardPage />,

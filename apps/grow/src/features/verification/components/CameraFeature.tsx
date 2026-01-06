@@ -12,12 +12,14 @@ import {
   Minimize,
 } from 'lucide-react';
 
-import { CameraMode, CaptureStatus } from '../../../lib/types/verification';
+import { CaptureStatus } from '../../../lib/types/verification';
 import { GlassCard } from './ui/GlassCard';
 import { StatusBadge } from './StatusBadge';
 
+export type CameraMode = 'photo' | 'video';
+
 interface CameraFeatureProps {
-  onCapture: (data: string) => void;
+  onCapture: (data: string | Blob) => void;
   onClose: () => void;
   title?: string;
   description?: string;
@@ -175,18 +177,8 @@ export const CameraFeature: React.FC<CameraFeatureProps> = ({
     const imageData = canvas.toDataURL('image/jpeg', 0.95);
     setCapturedData(imageData);
 
-    // Simulate processing
-    setTimeout(() => {
-      setStatus('uploading');
-
-      setTimeout(() => {
-        setStatus('success');
-        // Auto-submit after success
-        setTimeout(() => {
-          onCapture(imageData);
-        }, 1000);
-      }, 1500);
-    }, 800);
+    setCapturedData(imageData);
+    setStatus('success');
   };
 
   // Start recording video
@@ -210,9 +202,10 @@ export const CameraFeature: React.FC<CameraFeatureProps> = ({
         const blob = new Blob(recordedChunksRef.current, {
           type: 'video/webm',
         });
-        const videoURL = URL.createObjectURL(blob);
-        setCapturedData(videoURL);
-        setStatus('capturing');
+        setCapturedData(URL.createObjectURL(blob));
+
+        // Pass the blob instead of the URL
+        onCapture(blob);
       };
 
       mediaRecorder.start(1000); // Collect data every second
@@ -245,11 +238,6 @@ export const CameraFeature: React.FC<CameraFeatureProps> = ({
       setTimeout(() => {
         setStatus('success');
         // Auto-submit video
-        if (capturedData) {
-          setTimeout(() => {
-            onCapture(capturedData);
-          }, 1000);
-        }
       }, 2000);
     }
   };
@@ -419,160 +407,143 @@ export const CameraFeature: React.FC<CameraFeatureProps> = ({
         </div>
 
         {/* Camera Controls */}
-        <div className="space-y-4 overflow-y-auto max-h-[40vh]">
-          {/* Mode Selection */}
-          <div className="flex justify-center gap-3 md:gap-4">
+        {/* Mode Selection */}
+        <div className="flex justify-center gap-3 md:gap-4 mb-4">
+          <button
+            onClick={() => setCameraMode('photo')}
+            className={`px-4 py-2 rounded-lg transition-all ${
+              cameraMode === 'photo'
+                ? 'bg-gradient-to-r from-amber-500/20 to-yellow-500/20 text-white border border-amber-500/30'
+                : 'bg-white/5 text-zinc-400 hover:text-white hover:bg-white/10'
+            }`}
+          >
+            <Camera size={18} className="inline mr-2" />
+            Photo
+          </button>
+          <button
+            onClick={() => setCameraMode('video')}
+            className={`px-4 py-2 rounded-lg transition-all ${
+              cameraMode === 'video'
+                ? 'bg-gradient-to-r from-amber-500/20 to-yellow-500/20 text-white border border-amber-500/30'
+                : 'bg-white/5 text-zinc-400 hover:text-white hover:bg-white/10'
+            }`}
+          >
+            <Video size={18} className="inline mr-2" />
+            Video
+          </button>
+        </div>
+
+        {/* Control Buttons */}
+        <div className="flex flex-wrap items-center justify-between gap-3 md:gap-4">
+          <div className="flex items-center gap-3">
+            {/* Facing Mode Toggle */}
             <button
-              onClick={() => setCameraMode('photo')}
-              className={`px-4 py-2 rounded-lg transition-all ${
-                cameraMode === 'photo'
-                  ? 'bg-gradient-to-r from-amber-500/20 to-yellow-500/20 text-white border border-amber-500/30'
-                  : 'bg-white/5 text-zinc-400 hover:text-white hover:bg-white/10'
-              }`}
+              onClick={() =>
+                _setFacingMode(facingMode === 'user' ? 'environment' : 'user')
+              }
+              className="p-3 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+              title="Switch Camera"
             >
-              <Camera size={18} className="inline mr-2" />
-              Photo
+              <RotateCw size={20} className="text-white" />
+            </button>
+
+            {/* Audio Toggle (for video mode) */}
+            {cameraMode === 'video' && (
+              <button
+                onClick={() => _setWithAudio(!withAudio)}
+                className="p-3 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+                title={withAudio ? 'Mute Audio' : 'Enable Audio'}
+              >
+                {withAudio ? (
+                  <Shield size={20} className="text-green-400" />
+                ) : (
+                  <Shield size={20} className="text-red-400" />
+                )}
+              </button>
+            )}
+
+            {/* Fullscreen */}
+            <button
+              onClick={toggleFullscreen}
+              className="p-3 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+              title={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
+            >
+              {isFullscreen ? (
+                <Minimize size={20} className="text-white" />
+              ) : (
+                <Maximize size={20} className="text-white" />
+              )}
             </button>
           </div>
 
-          {/* Control Buttons */}
-          <div className="flex flex-wrap items-center justify-between gap-3 md:gap-4">
-            <div className="flex items-center gap-3">
-              {/* Camera Switch */}
+          {/* Main Action Button */}
+          <div className="flex flex-col sm:flex-row items-center gap-3 md:gap-4 w-full sm:w-auto">
+            {capturedData ? (
+              <>
+                {/* Retake */}
+                <button
+                  onClick={() => {
+                    setCapturedData(null);
+                    setStatus('idle');
+                    startCamera();
+                  }}
+                  className="px-4 md:px-6 py-2 md:py-3 bg-white/10 hover:bg-white/20 text-white rounded-xl font-medium transition-colors flex items-center gap-2 text-sm md:text-base flex-1 sm:flex-auto justify-center"
+                >
+                  <RotateCw size={18} />
+                  <span className="hidden sm:inline">Retake</span>
+                  <span className="sm:hidden">Retake</span>
+                </button>
 
-              {/* Audio Toggle */}
-
-              {/* Fullscreen */}
+                {/* Submit */}
+                <button
+                  onClick={() => capturedData && onCapture(capturedData)}
+                  disabled={!capturedData}
+                  className="px-4 md:px-8 py-2 md:py-3 bg-gradient-to-r from-emerald-500 to-green-500 text-white rounded-xl font-bold hover:shadow-[0_0_30px_rgba(16,185,129,0.3)] transition-all flex items-center gap-2 text-sm md:text-base flex-1 sm:flex-auto justify-center"
+                >
+                  <CheckCircle size={18} />
+                  <span className="hidden sm:inline">Submit Now</span>
+                  <span className="sm:hidden">Submit</span>
+                </button>
+              </>
+            ) : cameraMode === 'photo' ? (
+              // Capture Photo
               <button
-                onClick={toggleFullscreen}
-                className="p-3 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
-                title={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
+                onClick={capturePhoto}
+                disabled={!cameraActive}
+                className="px-4 md:px-8 py-2 md:py-3 bg-gradient-to-r from-amber-500 to-yellow-500 text-black rounded-xl font-bold hover:shadow-[0_0_30px_rgba(245,158,11,0.3)] transition-all flex items-center gap-2 disabled:opacity-50 text-sm md:text-base flex-1 sm:flex-auto justify-center"
               >
-                {isFullscreen ? (
-                  <Minimize size={20} className="text-white" />
+                <Camera size={18} />
+                <span className="hidden sm:inline">Capture Photo</span>
+                <span className="sm:hidden">Capture</span>
+              </button>
+            ) : (
+              // Video Recording
+              <button
+                onClick={isRecording ? stopRecording : startRecording}
+                disabled={!cameraActive}
+                className={`px-4 md:px-8 py-2 md:py-3 rounded-xl font-bold transition-all flex items-center gap-2 text-sm md:text-base flex-1 sm:flex-auto justify-center ${
+                  isRecording
+                    ? 'bg-gradient-to-r from-red-500 to-rose-500 text-white hover:shadow-[0_0_30px_rgba(239,68,68,0.3)]'
+                    : 'bg-gradient-to-r from-amber-500 to-yellow-500 text-black hover:shadow-[0_0_30px_rgba(245,158,11,0.3)]'
+                } disabled:opacity-50`}
+              >
+                {isRecording ? (
+                  <>
+                    <div className="w-2 h-2 rounded-full bg-white animate-pulse" />
+                    <span className="hidden sm:inline">
+                      Stop Recording ({formatTime(recordTime)})
+                    </span>
+                    <span className="sm:hidden">Stop</span>
+                  </>
                 ) : (
-                  <Maximize size={20} className="text-white" />
+                  <>
+                    <Video size={18} />
+                    <span className="hidden sm:inline">Start Recording</span>
+                    <span className="sm:hidden">Record</span>
+                  </>
                 )}
               </button>
-            </div>
-
-            {/* Main Action Button */}
-            <div className="flex flex-col sm:flex-row items-center gap-3 md:gap-4 w-full sm:w-auto">
-              {capturedData ? (
-                <>
-                  <button
-                    onClick={() => {
-                      setCapturedData(null);
-                      setStatus('idle');
-                      startCamera();
-                    }}
-                    className="px-4 md:px-6 py-2 md:py-3 bg-white/10 hover:bg-white/20 text-white rounded-xl font-medium transition-colors flex items-center gap-2 text-sm md:text-base flex-1 sm:flex-auto justify-center"
-                  >
-                    <RotateCw size={18} />
-                    <span className="hidden sm:inline">Retake</span>
-                    <span className="sm:hidden">Retake</span>
-                  </button>
-                  <button
-                    onClick={() => onCapture(capturedData)}
-                    className="px-4 md:px-8 py-2 md:py-3 bg-gradient-to-r from-emerald-500 to-green-500 text-white rounded-xl font-bold hover:shadow-[0_0_30px_rgba(16,185,129,0.3)] transition-all flex items-center gap-2 text-sm md:text-base flex-1 sm:flex-auto justify-center"
-                  >
-                    <CheckCircle size={18} />
-                    <span className="hidden sm:inline">Submit Now</span>
-                    <span className="sm:hidden">Submit</span>
-                  </button>
-                </>
-              ) : cameraMode === 'photo' ? (
-                <button
-                  onClick={capturePhoto}
-                  disabled={!cameraActive}
-                  className="px-4 md:px-8 py-2 md:py-3 bg-gradient-to-r from-amber-500 to-yellow-500 text-black rounded-xl font-bold hover:shadow-[0_0_30px_rgba(245,158,11,0.3)] transition-all flex items-center gap-2 disabled:opacity-50 text-sm md:text-base flex-1 sm:flex-auto justify-center"
-                >
-                  <Camera size={18} />
-                  <span className="hidden sm:inline">Capture Photo</span>
-                  <span className="sm:hidden">Capture</span>
-                </button>
-              ) : (
-                <button
-                  onClick={isRecording ? stopRecording : startRecording}
-                  disabled={!cameraActive}
-                  className={`px-4 md:px-8 py-2 md:py-3 rounded-xl font-bold transition-all flex items-center gap-2 text-sm md:text-base flex-1 sm:flex-auto justify-center ${
-                    isRecording
-                      ? 'bg-gradient-to-r from-red-500 to-rose-500 text-white hover:shadow-[0_0_30px_rgba(239,68,68,0.3)]'
-                      : 'bg-gradient-to-r from-amber-500 to-yellow-500 text-black hover:shadow-[0_0_30px_rgba(245,158,11,0.3)]'
-                  } disabled:opacity-50`}
-                >
-                  {isRecording ? (
-                    <>
-                      <div className="w-2 h-2 rounded-full bg-white animate-pulse" />
-                      <span className="hidden sm:inline">
-                        Stop Recording ({formatTime(recordTime)})
-                      </span>
-                      <span className="sm:hidden">Stop</span>
-                    </>
-                  ) : (
-                    <>
-                      <Video size={18} />
-                      <span className="hidden sm:inline">Start Recording</span>
-                      <span className="sm:hidden">Record</span>
-                    </>
-                  )}
-                </button>
-              )}
-            </div>
-          </div>
-
-          {/* Status Indicator */}
-          <div className="flex items-center justify-center">
-            <StatusBadge status={status} />
-          </div>
-
-          {/* Instructions */}
-          <div className="p-4 bg-white/5 rounded-xl border border-white/10">
-            <h4 className="font-medium text-white mb-2 flex items-center gap-2">
-              <Shield size={16} className="text-blue-400" />
-              Instructions for best results:
-            </h4>
-            <ul className="text-sm text-zinc-400 space-y-1">
-              {cameraMode === 'photo' ? (
-                <>
-                  <li className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                    Ensure good lighting - natural light is best
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                    Position face within the frame guide
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                    Look directly at the camera
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                    Keep steady and press capture
-                  </li>
-                </>
-              ) : (
-                <>
-                  <li className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                    Speak clearly if audio is enabled
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                    Record in a quiet environment
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                    Minimum 5 seconds recommended
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                    Stay within the frame throughout
-                  </li>
-                </>
-              )}
-            </ul>
+            )}
           </div>
         </div>
       </GlassCard>

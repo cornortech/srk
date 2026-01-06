@@ -246,6 +246,8 @@ export const AfterVerifiedDashboardPage: React.FC = () => {
             hasPurchased={hasPurchased}
             setHasPurchased={setHasPurchased}
             addNotification={addNotification}
+            kycStatus={userProfileData?.body.userData.kycStatus ?? 'pending'}
+            rejectionReason={undefined}
           />
         );
       case 'analytics':
@@ -255,7 +257,6 @@ export const AfterVerifiedDashboardPage: React.FC = () => {
           <TasksView
             isApproved={isApproved}
             setDashView={setDashView}
-            rejectedTasks={rejectedTasks}
             setTaskCategory={setTaskCategory}
             setReviewingRejectedTask={setReviewingRejectedTask}
           />
@@ -389,11 +390,11 @@ export const AfterVerifiedDashboardPage: React.FC = () => {
           balance={balance}
           setDashView={setDashView}
           isApproved={isApproved}
-          rejectedTasks={rejectedTasks}
           eligible={eligible}
           isMenuOpen={isMenuOpen}
           setIsMenuOpen={setIsMenuOpen}
           addNotification={addNotification}
+          isActivated={userProfileData?.body.userData.isActivated ?? false}
           // title={viewsConfig[dashView].title}
           // desc={viewsConfig[dashView].desc}
         >

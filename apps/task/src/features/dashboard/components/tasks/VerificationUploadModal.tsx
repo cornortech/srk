@@ -1,16 +1,17 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Coins, RefreshCw, Send, Upload, X } from 'lucide-react';
+import { RefreshCw, Send, Upload, X } from 'lucide-react';
 import { allPlatforms } from '../../../../data/dummyDashboardMockData';
-import { Task } from '../../types';
 import { DashboardGlassCard } from '../ui/DashboardGlassCard';
 import MagneticButton from '../ui/DashboardMagneticButton';
 import { api } from '../../../../lib/api';
 import { useTaskAuthStore } from '../../../../store/useTaskAuthStore';
 import {useSRKFileUpload} from '@srk/shared/hooks';
+import { getSrkTaskActionsByPlatformResponseSchema } from '@srk/shared/contracts';
+import { z } from 'zod';
 
 interface VerificationUploadModalProps {
-  task: Task;
+  task: z.infer<typeof getSrkTaskActionsByPlatformResponseSchema>;
   onClose: () => void;
   addNotification: (
     message: string,
@@ -55,7 +56,7 @@ export const VerificationUploadModal: React.FC<
       submitAction.mutate(
         {
           body: {
-            actionTodoId: task.id,
+            actionTodoId: task.actionId,
             srkTaskUserId: taskUserID || '',
             actionVerificationImageUrl: url,
           },
@@ -63,8 +64,8 @@ export const VerificationUploadModal: React.FC<
         {
           onSuccess: () => {
             setIsUploading(false);
-            completeTask(task.id);
-            addNotification(`Proof submitted for ${task.title}`, 'success');
+            completeTask(task.actionId);
+            addNotification(`Proof submitted for ${task.taskType} task`, 'success');
             setTimeout(() => onClose(), 1000);
           },
           onError: (error: any) => {
@@ -82,19 +83,20 @@ export const VerificationUploadModal: React.FC<
     }
   };
 
-  const platformInfo = allPlatforms.find((p) => p.platform === task.platform);
+  const platformInfo = allPlatforms.find((p) => p.platform === task.socialMediaPlatform);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/90 backdrop-blur-sm">
-      <DashboardGlassCard className="w-full max-w-2xl p-8 relative">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/90 backdrop-blur-sm overflow-y-auto">
+      <DashboardGlassCard className="w-full max-w-2xl my-auto relative max-h-[90vh] flex flex-col">
         <button
           onClick={onClose}
-          className="absolute top-6 right-6 p-2 hover:bg-white/10 rounded-lg"
+          className="absolute top-4 right-4 sm:top-6 sm:right-6 p-2 hover:bg-white/10 rounded-lg z-10"
         >
           <X size={20} />
         </button>
 
-        <div className="text-center mb-8">
+        <div className="overflow-y-auto px-6 sm:px-8 py-6 sm:py-8">
+        <div className="text-center mb-6 sm:mb-8">
           <div className="w-16 h-16 rounded-full bg-div-to-r from-amber-500/20 to-yellow-500/20 flex items-center justify-center mx-auto mb-4">
             <Upload size={28} className="text-amber-400" />
           </div>
@@ -116,33 +118,29 @@ export const VerificationUploadModal: React.FC<
                   })}
               </div>
               <div>
-                <h4 className="font-bold text-white">{task.title}</h4>
-                <p className="text-sm text-zinc-400">{task.desc}</p>
-              </div>
-              <div className="ml-auto flex items-center gap-2">
-                <Coins size={20} className="text-amber-400" />
-                <span className="text-lg font-bold text-amber-400">
-                  +{task.coins}
-                </span>
+                <h4 className="font-bold text-white">{task.taskType.toUpperCase()} - {task.username}</h4>
+                <p className="text-sm text-zinc-400">{task.socialMediaPlatform}</p>
               </div>
             </div>
             <p className="text-sm text-amber-400 bg-amber-500/10 p-3 rounded-lg">
-              📸 {task.required}
+              📸 {task.taskType === 'follow' ? 'Follow the profile' : 'Like the post'}
             </p>
             {/* visit link with good ui  */}
-            <div className="mt-4">
-              <label className="block text-sm font-medium text-zinc-400 mb-2">
-                 Link
-              </label>
-              <a
-                href={task.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm text-yellow-400 underline"
-              >
-                {task.url}
-              </a>
-            </div>
+            {task.postUrl && (
+              <div className="mt-4">
+                <label className="block text-sm font-medium text-zinc-400 mb-2">
+                  {task.taskType === 'like' ? 'Post Link' : 'Profile Link'}
+                </label>
+                <a
+                  href={task.postUrl || task.profileLinkURL || '#'}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-yellow-400 underline break-all"
+                >
+                  {task.postUrl || task.profileLinkURL || 'N/A'}
+                </a>
+              </div>
+            )}
        
           </DashboardGlassCard>
 
@@ -238,6 +236,7 @@ export const VerificationUploadModal: React.FC<
               </span>
             )}
           </MagneticButton>
+        </div>
         </div>
       </DashboardGlassCard>
     </div>

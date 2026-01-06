@@ -1,10 +1,9 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import React from 'react';
 import {
   AlertTriangle,
+  CheckCircle2,
   ChevronRight,
   Coins,
-  Play,
   RefreshCw,
   Share2,
   Shield,
@@ -19,17 +18,17 @@ import {
   DashboardView,
   RejectedTaskEntry,
   SocialPlatform,
-  Task,
   TaskType,
 } from '../types';
 import { DashboardGlassCard } from '../components/ui/DashboardGlassCard';
 import MagneticButton from '../components/ui/DashboardMagneticButton';
 import DashboardGradientText from '../components/ui/DashboardGradientText';
+import { api } from '../../../lib/api';
+import { useTaskAuthStore } from '../../../store/useTaskAuthStore';
 
 interface TasksViewProps {
   isApproved: boolean;
   setDashView: (view: DashboardView) => void;
-  rejectedTasks: RejectedTaskEntry[];
   setTaskCategory: (type: TaskType) => void;
   setReviewingRejectedTask: (task: RejectedTaskEntry) => void;
 }
@@ -37,12 +36,54 @@ interface TasksViewProps {
 export const TasksView: React.FC<TasksViewProps> = ({
   isApproved,
   setDashView,
-  rejectedTasks,
   setTaskCategory,
   setReviewingRejectedTask,
 }) => {
-  const [showVideoFeature, setShowVideoFeature] = useState(false);
+  const { taskUserID } = useTaskAuthStore();
 
+  // Fetch rejected tasks from backend
+  const { data: rejectedTasksData } =
+    api.srkTask.getRejectedSrkTaskActionSubmissionsByUser.useQuery(
+      ['getRejectedSrkTaskActionSubmissionsByUser', taskUserID],
+      {
+        params: { userId: taskUserID || '' },
+        query: { page: '1', limit: '100' },
+      },
+      {
+        enabled: !!taskUserID && isApproved,
+        queryKey: ['getRejectedSrkTaskActionSubmissionsByUser', taskUserID || ''],
+      }
+    );
+
+  // Transform backend data to match RejectedTaskEntry type
+  const rejectedTasks: RejectedTaskEntry[] =
+    rejectedTasksData?.body?.data?.map((task) => {
+      const todoData = task.growPackageTodoId;
+      const enrollmentData = todoData?.enrollment;
+      const packageData = enrollmentData?.growSocialMediaPackageId;
+      const packageTypeData = enrollmentData?.growSocialMediaPackageTypeId;
+      const platform = todoData?.platform as SocialPlatform;
+      
+      return {
+        id: task._id,
+        taskId: todoData?._id || '',
+        platform: platform || 'Instagram',
+        type: (task.type || 'follow') as TaskType,
+        title: `${task.type} on ${todoData?.platform || 'Unknown'}`,
+        desc: `${packageData?.name || 'Package'} - ${packageTypeData?.name || 'Type'}`,
+        coins: enrollmentData?.amount || 0,
+        difficulty: 'easy' as const,
+        estimatedTime: '2-3',
+        rejectionReason: task.rejectionReason || 'Task was rejected',
+        uploadedProofUrl: task.screenshotUrl || '',
+        date: new Date(task.createdAt).toLocaleDateString(),
+        adminComment: task.rejectionReason || '',
+        canRetry: true,
+        username: enrollmentData?.profileLinkURL?.[0] || '',
+        profileUrl: todoData?.profileUrl || '',
+        postUrl: todoData?.postUrl || '',
+      };
+    }) || [];
 
   if (!isApproved) {
     return (
@@ -77,13 +118,13 @@ export const TasksView: React.FC<TasksViewProps> = ({
       <div className="flex justify-end"></div>
 
       {/* Video Feature Section */}
-      {showVideoFeature && (
+      {/* {showVideoFeature && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         ></motion.div>
-      )}
+      )} */}
 
       {/* Task Categories */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -177,7 +218,7 @@ export const TasksView: React.FC<TasksViewProps> = ({
       </div>
 
       {/* Rejected Tasks Section */}
-      {rejectedTasks.length > 0 && (
+      {rejectedTasks.length > 0 ? (
         <div className="mt-8">
           <div className="flex items-center justify-between mb-4">
             <div>
@@ -228,7 +269,7 @@ export const TasksView: React.FC<TasksViewProps> = ({
                         <div className="flex items-center gap-2">
                           <Coins size={20} className="text-amber-400" />
                           <span className="text-xl font-bold text-amber-400">
-                            +{task.coins}
+                            +100
                           </span>
                         </div>
 
@@ -258,6 +299,23 @@ export const TasksView: React.FC<TasksViewProps> = ({
               </div>
             )}
           </div>
+        </div>
+      ) : (
+        <div className="mt-8">
+          <DashboardGlassCard className="p-12 text-center">
+            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-emerald-500/20 to-green-500/20 flex items-center justify-center mx-auto mb-6">
+              <CheckCircle2 size={40} className="text-emerald-400" />
+            </div>
+            <h3 className="text-2xl font-bold text-white mb-3">
+              All Clear! 🎉
+            </h3>
+            <p className="text-zinc-400 mb-2">
+              You don't have any rejected tasks at the moment.
+            </p>
+            <p className="text-sm text-zinc-500">
+              Keep up the great work! Complete more tasks to earn coins.
+            </p>
+          </DashboardGlassCard>
         </div>
       )}
     </div>

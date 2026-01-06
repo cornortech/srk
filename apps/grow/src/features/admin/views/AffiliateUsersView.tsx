@@ -382,11 +382,10 @@ export const AffiliateUsersView: React.FC = () => {
                       <button
                         key={pageNum}
                         onClick={() => setPage(pageNum)}
-                        className={`px-3 py-1 rounded-lg transition-colors ${
-                          page === pageNum
-                            ? 'bg-[#b68938] text-black font-bold'
-                            : 'bg-white/5 text-white hover:bg-white/10'
-                        }`}
+                        className={`px-3 py-1 rounded-lg transition-colors ${page === pageNum
+                          ? 'bg-[#b68938] text-black font-bold'
+                          : 'bg-white/5 text-white hover:bg-white/10'
+                          }`}
                       >
                         {pageNum}
                       </button>

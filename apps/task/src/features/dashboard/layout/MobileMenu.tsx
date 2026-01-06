@@ -14,8 +14,10 @@ import {
   LogOut,
   Coins,
 } from 'lucide-react';
-import { DashboardView, RejectedTaskEntry } from '../types';
+import { DashboardView } from '../types';
 import DashboardGlassCard from '../components/ui/DashboardGlassCard';
+import { api } from '../../../lib/api';
+import { useTaskAuthStore } from '../../../store/useTaskAuthStore';
 
 interface MobileMenuProps {
   isMenuOpen: boolean;
@@ -24,13 +26,13 @@ interface MobileMenuProps {
   eligible: number;
   isApproved: boolean;
   dashView: DashboardView;
-  rejectedTasks: RejectedTaskEntry[];
   setView: (view: 'landing' | 'dashboard') => void;
   setDashView: (view: DashboardView) => void;
   addNotification: (
     message: string,
     type: 'success' | 'error' | 'info'
   ) => void;
+  isActivated: boolean;
 }
 
 const MobileMenu: React.FC<MobileMenuProps> = ({
@@ -40,11 +42,28 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
   eligible,
   isApproved,
   dashView,
-  rejectedTasks,
   setView,
   setDashView,
   addNotification,
+  isActivated,
 }) => {
+  const { taskUserID } = useTaskAuthStore();
+
+  // Fetch rejected tasks count
+  const { data: rejectedTasksData } =
+    api.srkTask.getRejectedSrkTaskActionSubmissionsByUser.useQuery(
+      ['getRejectedSrkTaskActionSubmissionsByUser', taskUserID],
+      {
+        params: { userId: taskUserID || '' },
+        query: { page: '1', limit: '1' }, // Only need count
+      },
+      {
+        enabled: !!taskUserID && isApproved,
+        queryKey: ['getRejectedSrkTaskActionSubmissionsByUser', taskUserID || ''],
+      }
+    );
+
+  const rejectedTasksCount = rejectedTasksData?.body?.totalRecords || 0;
   return (
     <>
       {/* Hamburger Button */}
@@ -125,17 +144,26 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                       view: 'tasks',
                       icon: ListChecks,
                       label: 'Tasks',
-                      badge: rejectedTasks.length,
+                      badge: rejectedTasksCount,
                     },
                     { view: 'leaderboard', icon: Trophy, label: 'Leaderboard' },
                     {
                       view: 'coinExchange',
                       icon: DollarSign,
                       label: 'Coin Exchange',
+                      requiresActivation: true,
                     },
                     { view: 'profile', icon: UserCircle, label: 'Profile' },
                     { view: 'payout', icon: Wallet, label: 'Legacy Payout' },
-                  ].map((item) => {
+                  ]
+                    .filter((item) => {
+                      // Hide coin exchange if not activated
+                      if ('requiresActivation' in item && item.requiresActivation && !isActivated) {
+                        return false;
+                      }
+                      return true;
+                    })
+                    .map((item) => {
                     const Icon = item.icon;
                     const isDisabled = item.requiresApproval && !isApproved;
                     const isActive = dashView === item.view;
@@ -145,6 +173,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                         key={item.view}
                         onClick={() => {
                           if (!isDisabled) {
+                            setDashView(item.view);
                             setIsMenuOpen(false);
                           }
                         }}

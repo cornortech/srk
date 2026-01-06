@@ -6,8 +6,8 @@ import cookieParser from 'cookie-parser';
 import swaggerApiDocs from './config/swagger';
 import cronJobInit from './utils/cronjob';
 import { router } from './modules';
-import { apiContract } from '../../../libs/shared/contracts/src/index';
 import ssoRouter from './modules/sso/router';
+import { apiContract } from '@srk/shared/contracts';
 
 export const app = express();
 

@@ -6,6 +6,7 @@ export interface IGrowAffiliateUser extends mongoose.Document {
   gender: string;
   srkUniversityUserId: mongoose.Schema.Types.ObjectId;
   promocode: string;
+  isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -34,6 +35,10 @@ const growAffiliateUserSchema = new mongoose.Schema(
       ref: 'User',
       required: true,
       unique: true,
+    },
+    isActive: {
+      type: Boolean,
+      default: false,
     },
   },
   {

@@ -74,7 +74,7 @@ export const UserDashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
         {/* Profile Tab Content */}
         {activeTab === 'profile' && <UserProfileView user={user} />}
         {/* Task Upload Tab Content */}
-        {activeTab === 'taskuploading' && <TaskUploadView />}
+        {/* {activeTab === 'taskuploading' && <TaskUploadView />} */}
       </main>
     </div>
   );

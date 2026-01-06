@@ -728,8 +728,6 @@ const srkGrowAffiliateVerificationRequest: AppRouteImplementationOrOptions<
   typeof growContract.srkGrowAffiliateVerificationRequest
 > = async ({ body }) => {
   try {
-    console.log('Received affiliate verification request:', body);
-
     const srkUniversityUserExist = await UserModel.findById(
       body.srkUniversityUserId
     );
@@ -747,6 +745,7 @@ const srkGrowAffiliateVerificationRequest: AppRouteImplementationOrOptions<
     await growSrkAffiliateVerificationModel.create({
       srkUniversityUserId: body.srkUniversityUserId,
       verificationImageUrl: body.verificationImageUrl,
+      status: 'pending',
     });
 
     return {
@@ -829,6 +828,7 @@ const approveSrkGrowAffiliateVerificationRequest: AppRouteImplementationOrOption
       email: requestExist.srkUniversityUserId.email,
       gender: requestExist.srkUniversityUserId.gender,
       promoCode: growUserPromoCode,
+      isActive: true,
     });
 
     return {

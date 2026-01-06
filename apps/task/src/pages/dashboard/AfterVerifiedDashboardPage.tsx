@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import {
-  AnalyticsData,
   DashboardView,
   RejectedTaskEntry,
   SocialPlatform,
@@ -45,7 +44,6 @@ export const AfterVerifiedDashboardPage: React.FC = () => {
   const [showVerification, setShowVerification] = useState(false);
   const [isApproved, setIsApproved] = useState(false);
   const [hasPurchased, setHasPurchased] = useState(false);
-  const [payoutRequested, setPayoutRequested] = useState(false);
   const [taskCategory, setTaskCategory] = useState<TaskType | null>(null);
   const [selectedPlatform, setSelectedPlatform] =
     useState<SocialPlatform | null>(null);
@@ -138,42 +136,7 @@ export const AfterVerifiedDashboardPage: React.FC = () => {
     ...likeTasks,
   ]);
 
-  const [rejectedTasks, setRejectedTasks] = useState<RejectedTaskEntry[]>([
-    {
-      ...followTasks[0],
-      rejectionReason: 'Screenshot blurry, username not visible.',
-      uploadedProofUrl:
-        'https://placehold.co/400x300/27272a/FFF?text=Subscription+Proof',
-      taskId: 'f-yt-1',
-      id: 'f-yt-1-rejected',
-      date: '2024-01-15',
-      adminComment:
-        'Please ensure your username is clearly visible in the screenshot',
-      canRetry: true,
-    },
-    // {
-    //   ...watchTasks[1],
-    //   rejectionReason: 'Incomplete watch time, video paused at 80%.',
-    //   uploadedProofUrl:
-    //     'https://placehold.co/400x300/27272a/FFF?text=Watch+Proof',
-    //   taskId: 'w-ig-1',
-    //   id: 'w-ig-1-rejected',
-    //   date: '2024-01-14',
-    //   adminComment: 'Video must be watched completely. Please try again.',
-    //   canRetry: true,
-    // },
-    {
-      ...likeTasks[0],
-      rejectionReason: 'Shared post is private. Make it public.',
-      uploadedProofUrl:
-        'https://placehold.co/400x300/27272a/FFF?text=Share+Proof',
-      taskId: 'p-fb-1',
-      id: 'p-fb-1-rejected',
-      date: '2024-01-13',
-      adminComment: 'Please set post visibility to public',
-      canRetry: true,
-    },
-  ]);
+
   const [reviewingRejectedTask, setReviewingRejectedTask] =
     useState<RejectedTaskEntry | null>(null);
   const [notifications, setNotifications] = useState<

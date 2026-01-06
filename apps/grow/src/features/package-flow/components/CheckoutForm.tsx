@@ -130,7 +130,7 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
             <div className="flex justify-between items-center py-3 border-b border-white/10">
               <span className="text-gray-400">Price</span>
               <div className="text-right">
-                {discountDetails ? (
+                {/* {discountDetails ? (
                   <>
                     <span className="block text-sm text-gray-500 line-through">
                       {formatRupees(selectedPackage.amount)}
@@ -139,17 +139,18 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
                       {formatRupees(discountDetails.finalAmountAfterDiscount)}
                     </span>
                   </>
-                ) : (
-                  <span className="text-2xl font-bold text-[#b68938]">
-                    {formatRupees(selectedPackage.amount)}
-                  </span>
-                )}
+                ) : ( */}
+                <span className="text-2xl font-bold text-[#b68938]">
+                  {formatRupees(selectedPackage.amount)}
+                </span>
+                {/* )} */}
               </div>
             </div>
-            {selectedPackage.amountBeforeDiscount && (
+            {discountDetails && (
               <div className="mt-4 px-4 py-2 rounded-lg bg-gradient-to-r from-[#b68938]/20 to-[#e1ba73]/20 border border-[#b68938]/30 text-center">
                 <span className="text-[#e1ba73] font-bold text-sm">
-                  Save {formatRupees(selectedPackage.amountBeforeDiscount)}
+                  Save {formatRupees(discountDetails.discountAmount)} (
+                  {discountDetails.discountPercentage}% OFF)
                 </span>
               </div>
             )}

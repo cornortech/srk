@@ -1,0 +1,261 @@
+{
+  "exportDate": "2026-01-06T15:30:02.504Z",
+  "totalRecords": {
+    "packages": 3,
+    "packageTypes": 6,
+    "packageSubTypes": 12
+  },
+  "data": {
+    "packages": [
+      {
+        "_id": "693bd21b224b9cd931c7cee0",
+        "name": "Starter",
+        "socialMediaPlatforms": [
+          "Twitter",
+          "Facebook",
+          "YouTube",
+          "TikTok",
+          "Instagram"
+        ],
+        "amount": 1286,
+        "createdAt": "2025-12-12T08:28:11.195Z",
+        "updatedAt": "2025-12-12T08:28:11.195Z",
+        "__v": 0
+      },
+      {
+        "_id": "693bd21b224b9cd931c7cef2",
+        "name": "Intermediate",
+        "socialMediaPlatforms": [
+          "Twitter",
+          "Facebook",
+          "YouTube",
+          "TikTok",
+          "Instagram"
+        ],
+        "amount": 2143,
+        "createdAt": "2025-12-12T08:28:11.723Z",
+        "updatedAt": "2025-12-12T08:28:11.723Z",
+        "__v": 0
+      },
+      {
+        "_id": "693bd21c224b9cd931c7cf04",
+        "name": "Pro",
+        "socialMediaPlatforms": [
+          "Twitter",
+          "Facebook",
+          "YouTube",
+          "TikTok",
+          "Instagram"
+        ],
+        "amount": 4286,
+        "createdAt": "2025-12-12T08:28:12.238Z",
+        "updatedAt": "2025-12-12T08:28:12.238Z",
+        "__v": 0
+      }
+    ],
+    "packageTypes": [
+      {
+        "_id": "693bd21b224b9cd931c7cee2",
+        "growSocialMediaPackageId": "693bd21b224b9cd931c7cee0",
+        "name": "Follow/subscription",
+        "description": "Initial commit",
+        "amount": 900,
+        "createdAt": "2025-12-12T08:28:11.263Z",
+        "updatedAt": "2025-12-12T08:28:11.263Z",
+        "__v": 0
+      },
+      {
+        "_id": "693bd21b224b9cd931c7ceea",
+        "growSocialMediaPackageId": "693bd21b224b9cd931c7cee0",
+        "name": "Engagements",
+        "description": "Initial commit",
+        "amount": 900,
+        "createdAt": "2025-12-12T08:28:11.487Z",
+        "updatedAt": "2025-12-12T08:28:11.487Z",
+        "__v": 0
+      },
+      {
+        "_id": "693bd21b224b9cd931c7cef4",
+        "growSocialMediaPackageId": "693bd21b224b9cd931c7cef2",
+        "name": "Follow/subscription",
+        "description": "Increase followers/subscribers efficiently",
+        "amount": 1500,
+        "createdAt": "2025-12-12T08:28:11.786Z",
+        "updatedAt": "2025-12-12T08:28:11.786Z",
+        "__v": 0
+      },
+      {
+        "_id": "693bd21c224b9cd931c7cefc",
+        "growSocialMediaPackageId": "693bd21b224b9cd931c7cef2",
+        "name": "Engagements",
+        "description": "Boost likes and engagement on your posts",
+        "amount": 1500,
+        "createdAt": "2025-12-12T08:28:12.017Z",
+        "updatedAt": "2025-12-12T08:28:12.017Z",
+        "__v": 0
+      },
+      {
+        "_id": "693bd21c224b9cd931c7cf06",
+        "growSocialMediaPackageId": "693bd21c224b9cd931c7cf04",
+        "name": "Follow/subscription",
+        "description": "Increase followers/subscribers efficiently",
+        "amount": 4999,
+        "createdAt": "2025-12-12T08:28:12.296Z",
+        "updatedAt": "2025-12-12T08:28:12.296Z",
+        "__v": 0
+      },
+      {
+        "_id": "693bd21c224b9cd931c7cf0e",
+        "growSocialMediaPackageId": "693bd21c224b9cd931c7cf04",
+        "name": "Engagements",
+        "description": "Boost likes and engagement on your posts",
+        "amount": 4999,
+        "createdAt": "2025-12-12T08:28:12.519Z",
+        "updatedAt": "2025-12-12T08:28:12.519Z",
+        "__v": 0
+      }
+    ],
+    "packageSubTypes": [
+      {
+        "_id": "693bd21b224b9cd931c7cee8",
+        "growSocialMediaPackageTypeId": "693bd21b224b9cd931c7cee2",
+        "name": "300 followers/subscribers",
+        "description": "Get 300 followers/subscribers for your account",
+        "taskType": "follow",
+        "noOfFollowers": 300,
+        "createdAt": "2025-12-12T08:28:11.432Z",
+        "updatedAt": "2025-12-12T08:28:11.432Z",
+        "__v": 0
+      },
+      {
+        "_id": "693bd21b224b9cd931c7ceec",
+        "growSocialMediaPackageTypeId": "693bd21b224b9cd931c7ceea",
+        "name": "1 Post",
+        "description": "Total 300 likes in a post.",
+        "taskType": "engagement",
+        "noOfLikes": 300,
+        "noOfVideos": 1,
+        "createdAt": "2025-12-12T08:28:11.541Z",
+        "updatedAt": "2025-12-12T08:28:11.541Z",
+        "__v": 0
+      },
+      {
+        "_id": "693bd21b224b9cd931c7ceee",
+        "growSocialMediaPackageTypeId": "693bd21b224b9cd931c7ceea",
+        "name": "3 Posts",
+        "description": "100 likes per post. Total likes 300",
+        "noOfLikes": 100,
+        "noOfVideos": 3,
+        "createdAt": "2025-12-12T08:28:11.601Z",
+        "updatedAt": "2025-12-12T08:28:11.601Z",
+        "__v": 0
+      },
+      {
+        "_id": "693bd21b224b9cd931c7cef0",
+        "growSocialMediaPackageTypeId": "693bd21b224b9cd931c7ceea",
+        "name": "4 post",
+        "description": "75likes per video . Total likes 300",
+        "taskType": "engagement",
+        "noOfLikes": 300,
+        "noOfVideos": 4,
+        "createdAt": "2025-12-12T08:28:11.664Z",
+        "updatedAt": "2025-12-12T08:28:11.664Z",
+        "__v": 0
+      },
+      {
+        "_id": "693bd21b224b9cd931c7cef6",
+        "growSocialMediaPackageTypeId": "693bd21b224b9cd931c7cef4",
+        "name": "500 followers/subscribers",
+        "description": "Get 500followers/subscribers for your account",
+        "taskType": "follow",
+        "noOfFollowers": 500,
+        "createdAt": "2025-12-12T08:28:11.848Z",
+        "updatedAt": "2025-12-12T08:28:11.848Z",
+        "__v": 0
+      },
+      {
+        "_id": "693bd21c224b9cd931c7cefe",
+        "growSocialMediaPackageTypeId": "693bd21c224b9cd931c7cefc",
+        "name": "1 posts",
+        "description": "Total 500 likes per video.",
+        "taskType": "engagement",
+        "noOfLikes": 500,
+        "noOfVideos": 1,
+        "createdAt": "2025-12-12T08:28:12.073Z",
+        "updatedAt": "2025-12-12T08:28:12.073Z",
+        "__v": 0
+      },
+      {
+        "_id": "693bd21c224b9cd931c7cf00",
+        "growSocialMediaPackageTypeId": "693bd21c224b9cd931c7cefc",
+        "name": "2 posts",
+        "description": "250 likes per video. Total likes 500",
+        "taskType": "engagement",
+        "noOfLikes": 500,
+        "noOfVideos": 2,
+        "createdAt": "2025-12-12T08:28:12.128Z",
+        "updatedAt": "2025-12-12T08:28:12.128Z",
+        "__v": 0
+      },
+      {
+        "_id": "693bd21c224b9cd931c7cf02",
+        "growSocialMediaPackageTypeId": "693bd21c224b9cd931c7cefc",
+        "name": "5 posts",
+        "description": "100 likes per video. Total likes 500",
+        "taskType": "engagement",
+        "noOfLikes": 500,
+        "noOfVideos": 5,
+        "createdAt": "2025-12-12T08:28:12.184Z",
+        "updatedAt": "2025-12-12T08:28:12.184Z",
+        "__v": 0
+      },
+      {
+        "_id": "693bd21c224b9cd931c7cf08",
+        "growSocialMediaPackageTypeId": "693bd21c224b9cd931c7cf06",
+        "name": "1500 followers/subscribers",
+        "description": "Get 1500 followers/subscribers for your account",
+        "taskType": "follow",
+        "noOfFollowers": 1500,
+        "createdAt": "2025-12-12T08:28:12.352Z",
+        "updatedAt": "2025-12-12T08:28:12.352Z",
+        "__v": 0
+      },
+      {
+        "_id": "693bd21c224b9cd931c7cf10",
+        "growSocialMediaPackageTypeId": "693bd21c224b9cd931c7cf0e",
+        "name": "1 videos",
+        "description": "1500 likes per post. Total likes 1500",
+        "taskType": "engagement",
+        "noOfLikes": 1500,
+        "noOfVideos": 1,
+        "createdAt": "2025-12-12T08:28:12.571Z",
+        "updatedAt": "2025-12-12T08:28:12.571Z",
+        "__v": 0
+      },
+      {
+        "_id": "693bd21c224b9cd931c7cf12",
+        "growSocialMediaPackageTypeId": "693bd21c224b9cd931c7cf0e",
+        "name": "3 posts",
+        "description": "500 likes per post. Total likes 1500",
+        "taskType": "engagement",
+        "noOfLikes": 1500,
+        "noOfVideos": 3,
+        "createdAt": "2025-12-12T08:28:12.624Z",
+        "updatedAt": "2025-12-12T08:28:12.624Z",
+        "__v": 0
+      },
+      {
+        "_id": "693bd21c224b9cd931c7cf14",
+        "growSocialMediaPackageTypeId": "693bd21c224b9cd931c7cf0e",
+        "name": "5 posts",
+        "description": "300 likes per post. Total likes 1500",
+        "taskType": "engagement",
+        "noOfLikes": 1500,
+        "noOfVideos": 5,
+        "createdAt": "2025-12-12T08:28:12.675Z",
+        "updatedAt": "2025-12-12T08:28:12.675Z",
+        "__v": 0
+      }
+    ]
+  }
+}

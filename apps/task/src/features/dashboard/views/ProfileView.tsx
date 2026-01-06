@@ -1,19 +1,23 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Check, Crown, Shield, Star, Trophy, Zap } from 'lucide-react';
-import { DashboardView, UserProfile } from '../types';
+import { AnalyticsData, DashboardView, UserProfile } from '../types';
 import { DashboardGlassCard } from '../components/ui/DashboardGlassCard';
 import MagneticButton from '../components/ui/DashboardMagneticButton';
 import DashboardGradientText from '../components/ui/DashboardGradientText';
 import DashboardStatusBadge from '../components/ui/DashboardStatusBadge';
+import { api } from '../../../lib/api';
+import { useTaskAuthStore } from '../../../store/useTaskAuthStore';
 
 interface ProfileViewProps {
   isApproved: boolean;
   setDashView: (view: DashboardView) => void;
-  profile: UserProfile;
+  profile: Omit<
+    UserProfile,
+    'avatar' | 'level' | 'xp' | 'nextLevelXP' | 'socialLinks'
+  > | null;
   hasPurchased: boolean;
   completed: string[];
-  analyticsData: any;
 }
 
 export const ProfileView: React.FC<ProfileViewProps> = ({
@@ -22,8 +26,19 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
   profile,
   hasPurchased,
   completed,
-  analyticsData,
 }) => {
+  const { taskUserID } = useTaskAuthStore();
+  const { data: analyticsDataRes } =
+    api.srkTask.getSrkTaskUserAnalytics.useQuery(
+      ['getSrkTaskUserAnalytics', taskUserID],
+      { params: { userId: taskUserID || '' } }
+    );
+
+  const { data: userProfileData } = api.srkTask.getSrkTaskUserProfile.useQuery(
+    ['getSrkTaskUserProfile', taskUserID],
+    { params: { userId: taskUserID || '' } }
+  );
+
   if (!isApproved) {
     return (
       <DashboardGlassCard className="p-12 text-center">
@@ -41,8 +56,8 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
     );
   }
 
-  const [socialLinks, _setSocialLinks] = useState(profile.socialLinks);
-  console.log(socialLinks);
+  // const [socialLinks, _setSocialLinks] = useState(profile?.socialLinks);
+
   const [isEditing, _setIsEditing] = useState(false);
   console.log(isEditing);
 
@@ -65,19 +80,20 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
               <div className="flex items-center gap-6 mb-8">
                 <motion.div whileHover={{ scale: 1.05 }} className="relative">
                   <img
-                    src={profile.avatar}
-                    alt={profile.name}
+                    //TODO: kyc Image URL
+                    // src={profile?.avatar}
+                    alt={profile?.name}
                     className="w-24 h-24 rounded-full border-4 border-white/10"
                   />
-                  <div className="absolute -bottom-2 -right-2 w-10 h-10 rounded-full bg-div-to-r from-amber-500 to-yellow-500 flex items-center justify-center">
+                  {/* <div className="absolute -bottom-2 -right-2 w-10 h-10 rounded-full bg-div-to-r from-amber-500 to-yellow-500 flex items-center justify-center">
                     <span className="text-black font-bold">
-                      {profile.level}
+                      {profile?.level}
                     </span>
-                  </div>
+                  </div> */}
                 </motion.div>
                 <div className="flex-1">
                   <h3 className="text-2xl font-bold text-white mb-2">
-                    {profile.name}
+                    {profile?.name}
                   </h3>
                   <div className="flex flex-wrap gap-2 mb-3">
                     <DashboardStatusBadge
@@ -86,23 +102,23 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                     {hasPurchased && (
                       <DashboardStatusBadge status="SRK Grow" pulse />
                     )}
-                    <DashboardStatusBadge status={`Level ${profile.level}`} />
+                    {/* <DashboardStatusBadge status={`Level ${profile?.level}`} /> */}
                   </div>
                   <p className="text-zinc-400">
-                    {profile.email} • {profile.phone}
+                    {profile?.email} • {profile?.phone}
                   </p>
                   <p className="text-sm text-zinc-500 mt-1">
-                    Member since {profile.joinDate}
+                    Member since {profile?.joinDate}
                   </p>
                 </div>
               </div>
 
               {/* XP Progress */}
-              <div className="space-y-2">
+              {/* <div className="space-y-2">
                 <div className="flex justify-between text-sm text-zinc-400">
                   <span>Level Progress</span>
                   <span>
-                    {profile.xp} / {profile.nextLevelXP} XP
+                    {profile?.xp} / {profile?.nextLevelXP} XP
                   </span>
                 </div>
                 <div className="w-full h-2 bg-zinc-800 rounded-full overflow-hidden">
@@ -110,16 +126,16 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                     className="h-full bg-div-to-r from-purple-500 to-pink-500"
                     initial={{ width: 0 }}
                     animate={{
-                      width: `${(profile.xp / profile.nextLevelXP) * 100}%`,
+                      width: `${(profile?.xp / profile?.nextLevelXP) * 100}%`,
                     }}
                     transition={{ duration: 1 }}
                   />
                 </div>
                 <p className="text-xs text-zinc-500 text-center">
-                  {profile.nextLevelXP - profile.xp} XP needed for Level{' '}
-                  {profile.level + 1}
+                  {profile?.nextLevelXP - profile?.xp} XP needed for Level{' '}
+                  {profile?.level + 1}
                 </p>
-              </div>
+              </div> */}
             </div>
           </DashboardGlassCard>
           {/* Social Media Links */}
@@ -143,18 +159,20 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                 </div>
                 <div className="flex justify-between">
                   <span className="text-zinc-400">Success Rate:</span>
-                  <span className="text-green-400 font-bold">92%</span>
+                  <span className="text-green-400 font-bold">
+                    {Math.round(userProfileData?.body?.taskData?.successRate)}%
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-zinc-400">Avg Daily Earn:</span>
                   <span className="text-amber-400 font-bold">
-                    {analyticsData.averageDaily}
+                    {analyticsDataRes?.body?.tasksData?.averageDailyCoins}
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-zinc-400">Total Earned:</span>
                   <span className="text-purple-400 font-bold">
-                    {analyticsData.allTime} Coins
+                    {analyticsDataRes?.body?.coinsData?.allTimeCoins} Coins
                   </span>
                 </div>
               </div>

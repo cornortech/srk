@@ -55,13 +55,30 @@ export const TaskVerificationPage = () => {
 
       try {
         const stream = await navigator.mediaDevices.getUserMedia(constraints);
+        console.log('Camera stream:', stream);
+        console.log('Video element:', videoRef.current);
 
         if (videoRef.current) {
           streamRef.current = stream;
           videoRef.current.srcObject = stream;
-          await videoRef.current.play();
-          setCameraActive(true);
-          setCameraError(null);
+
+          // Handle autoplay policy
+          const playPromise = videoRef.current.play();
+          if (playPromise !== undefined) {
+            playPromise
+              .then(() => {
+                setCameraActive(true);
+                setCameraError(null);
+              })
+              .catch((e) => {
+                console.error('Autoplay blocked:', e);
+                setCameraError(
+                  'Please click the video area to enable the camera'
+                );
+                // Some browsers require explicit user interaction
+                if (videoRef.current) videoRef.current.controls = true;
+              });
+          }
         }
       } catch (permissionErr: any) {
         // Handle permission denied or device not found
@@ -138,14 +155,14 @@ export const TaskVerificationPage = () => {
   };
 
   // Toggle camera (front/back)
-  const toggleCamera = async () => {
+  const toggleCamera = () => {
     setFacingMode((prev) => (prev === 'user' ? 'environment' : 'user'));
-    // Stop current stream
-    stopCamera();
-    // Restart with new facingMode
-    setTimeout(() => {
-      startCamera();
-    }, 300);
+    // // Stop current stream
+    // stopCamera();
+    // // Restart with new facingMode
+    // setTimeout(() => {
+    //   startCamera();
+    // }, 300);
   };
 
   // Handle final submit
@@ -162,12 +179,14 @@ export const TaskVerificationPage = () => {
     let isMounted = true;
 
     const initializeCamera = async () => {
-      if (isMounted) {
-        // Small delay to ensure component is ready
-        await new Promise((resolve) => setTimeout(resolve, 500));
-        if (isMounted) {
-          startCamera();
-        }
+      // Ensure we stop any existing stream first
+      stopCamera();
+
+      // Small delay to ensure component is ready and hardware can reset
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      if (isMounted && !capturedImage) {
+        startCamera();
       }
     };
 
@@ -177,7 +196,7 @@ export const TaskVerificationPage = () => {
       isMounted = false;
       stopCamera();
     };
-  }, []); // Only run on mount, not on facingMode change
+  }, [facingMode]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0a0705] to-black text-white">
@@ -415,7 +434,39 @@ export const TaskVerificationPage = () => {
 
             {/* Camera/Preview Container */}
             <div className="relative aspect-square rounded-2xl overflow-hidden mb-6 bg-black">
-              {cameraError ? (
+              {/* Camera Video Element - Rendered when no image is captured and no error exists */}
+              {!capturedImage && !cameraError && (
+                <>
+                  <video
+                    ref={videoRef}
+                    autoPlay
+                    playsInline
+                    muted
+                    className={`w-full h-full object-cover ${
+                      cameraActive ? 'opacity-100' : 'opacity-0'
+                    }`}
+                  />
+                  {/* Face guide overlay */}
+                  {cameraActive && (
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                      <div className="w-48 h-64 rounded-2xl border-2 border-white/30 border-dashed" />
+                    </div>
+                  )}
+                  {/* Initializing loader */}
+                  {!cameraActive && (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center p-6">
+                      <Loader2
+                        size={48}
+                        className="text-[#b68938] animate-spin mb-4"
+                      />
+                      <p className="text-gray-400">Initializing camera...</p>
+                    </div>
+                  )}
+                </>
+              )}
+
+              {/* Error state */}
+              {cameraError && !capturedImage && (
                 <div className="absolute inset-0 flex flex-col items-center justify-center p-6 bg-red-500/10">
                   <AlertCircle size={48} className="text-red-400 mb-4" />
                   <p className="text-red-400 font-medium text-center">
@@ -428,7 +479,9 @@ export const TaskVerificationPage = () => {
                     Retry Camera
                   </button>
                 </div>
-              ) : capturedImage ? (
+              )}
+              {/* Captured Image Preview */}
+              {capturedImage && (
                 <>
                   <img
                     src={capturedImage}
@@ -442,28 +495,6 @@ export const TaskVerificationPage = () => {
                     <X size={20} className="text-white" />
                   </button>
                 </>
-              ) : cameraActive ? (
-                <>
-                  <video
-                    ref={videoRef}
-                    autoPlay
-                    playsInline
-                    muted
-                    className="w-full h-full object-cover"
-                  />
-                  {/* Face guide overlay */}
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-48 h-64 rounded-2xl border-2 border-white/30 border-dashed" />
-                  </div>
-                </>
-              ) : (
-                <div className="absolute inset-0 flex flex-col items-center justify-center p-6">
-                  <Loader2
-                    size={48}
-                    className="text-[#b68938] animate-spin mb-4"
-                  />
-                  <p className="text-gray-400">Initializing camera...</p>
-                </div>
               )}
 
               {/* Hidden canvas for capture */}

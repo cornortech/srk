@@ -1,24 +1,47 @@
-import { ReferralPackage, ToastType } from '../../../lib/types/dashboard';
+import { ToastType } from '../../../lib/types/dashboard';
 import { useState } from 'react';
 import { GlassCard } from '../components/ui/GlassCard';
-import { MOCK_REFERRAL_PACKAGES } from '../../../data/dashboardMock';
 import { GOLD_ACCENT, GOLD_PRIMARY } from '../constants';
 import { CheckCircleIcon, CopyIcon } from 'lucide-react';
 import {
   copyTextToClipboard,
   formatRupees,
 } from '../../../lib/utils/formatters';
+import { PackageDataTypes } from '../../../lib/types/package';
+import { api } from '../../../lib/api';
 
 interface ReferralViewProps {
-  userId: string;
+  userID: string;
+  data: PackageDataTypes[];
   showToast: (message: string, type?: ToastType) => void;
 }
 
 export const ReferralView: React.FC<ReferralViewProps> = ({
-  userId,
+  userID,
+  data = [],
   showToast,
 }) => {
   const [copiedPackage, setCopiedPackage] = useState<string | null>(null);
+
+  const { data: affiliatedUserCommission } =
+    api.growAffiliate.getUserAffiliateSalesComissionEarnings.useQuery(
+      ['affiliatedUserCommission', userID],
+      {
+        params: {
+          affiliateUserId: userID,
+        },
+      }
+    );
+
+  const { data: getPromocode } =
+    api.grow.getSrkGrowProfile.useQuery(
+      ['affiliatedUserPromocode', userID],
+      {
+        params: {
+          userId: userID,
+        },
+      }
+    );
 
   const handleCopy = async (
     referralLink: string,
@@ -34,8 +57,12 @@ export const ReferralView: React.FC<ReferralViewProps> = ({
     }
   };
 
-  const generateReferralLink = (packageId: string): string => {
-    return `https://app.srkbank.io/affiliate?ref=${userId}&package=${packageId}`;
+  const generateReferralLink = (
+    packageId: string,
+  ): string => {
+    const growBaseUrl = import.meta.env.VITE_FRONTEND_ROOT_URL || 'http://localhost:3000';
+    console.log(import.meta.env.VITE_FRONTEND_ROOT_URL);
+    return `${growBaseUrl}/package-flow?ref=${getPromocode?.body?.userDetails?.promoCode}&package=${packageId}`;
   };
 
   return (
@@ -53,7 +80,7 @@ export const ReferralView: React.FC<ReferralViewProps> = ({
 
         <GlassCard variant="violet" padding="sm">
           <div className="text-center">
-            <div className="text-lg font-bold text-violet-400">20%</div>
+            <div className="text-lg font-bold text-violet-400">15%</div>
             <p className="text-xs text-gray-400 mt-1">Max Commission</p>
           </div>
         </GlassCard>
@@ -61,7 +88,7 @@ export const ReferralView: React.FC<ReferralViewProps> = ({
         <GlassCard variant="emerald" padding="sm">
           <div className="text-center">
             <div className="text-lg font-bold text-emerald-400">
-              {formatRupees(12500)}
+              {formatRupees(affiliatedUserCommission?.body.totalRevenue ?? 0)}
             </div>
             <p className="text-xs text-gray-400 mt-1">Total Earned</p>
           </div>
@@ -69,7 +96,9 @@ export const ReferralView: React.FC<ReferralViewProps> = ({
 
         <GlassCard variant="blue" padding="sm">
           <div className="text-center">
-            <div className="text-lg font-bold text-blue-400">42</div>
+            <div className="text-lg font-bold text-blue-400">
+              {affiliatedUserCommission?.body.totalSales ?? 0}
+            </div>
             <p className="text-xs text-gray-400 mt-1">Total Referrals</p>
           </div>
         </GlassCard>
@@ -77,8 +106,8 @@ export const ReferralView: React.FC<ReferralViewProps> = ({
 
       {/* Package Cards in Compact Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {MOCK_REFERRAL_PACKAGES.map((pkg: ReferralPackage) => {
-          const referralLink: string = generateReferralLink(pkg.id);
+        {data.map((pkg: PackageDataTypes) => {
+          const referralLink: string = generateReferralLink(pkg._id);
 
           const getPackageStyles = () => {
             switch (pkg.variant) {
@@ -115,7 +144,7 @@ export const ReferralView: React.FC<ReferralViewProps> = ({
 
           return (
             <GlassCard
-              key={pkg.id}
+              key={pkg._id}
               variant={pkg.variant}
               className="min-h-[300px]"
             >
@@ -126,14 +155,14 @@ export const ReferralView: React.FC<ReferralViewProps> = ({
                       <h4 className="font-bold text-white text-lg mb-1">
                         {pkg.name}
                       </h4>
-                      <p className={`text-sm font-medium ${styles.text}`}>
+                      {/* <p className={`text-sm font-medium ${styles.text}`}>
                         {pkg.commission} Commission
-                      </p>
+                      </p> */}
                     </div>
                     <div
                       className={`px-3 py-1.5 rounded-lg ${styles.bg} ${styles.border} border text-sm font-bold text-white`}
                     >
-                      {formatRupees(pkg.price)}
+                      {formatRupees(pkg.amount)}
                     </div>
                   </div>
                   <p className="text-sm text-gray-400 mb-4">
@@ -168,12 +197,11 @@ export const ReferralView: React.FC<ReferralViewProps> = ({
                   </div>
 
                   <button
-                    onClick={() => handleCopy(referralLink, pkg.id)}
-                    className={`relative overflow-hidden group w-full py-2.5 rounded-lg font-bold text-sm text-white transition-all duration-300 flex items-center justify-center gap-2 ${
-                      styles.button
-                    } ${copiedPackage === pkg.id ? 'scale-95' : ''}`}
+                    onClick={() => handleCopy(referralLink, pkg._id)}
+                    className={`relative overflow-h_idden group w-full py-2.5 rounded-lg font-bold text-sm text-white transition-all duration-300 flex items-center justify-center gap-2 ${styles.button
+                      } ${copiedPackage === pkg._id ? 'scale-95' : ''}`}
                   >
-                    {copiedPackage === pkg.id ? (
+                    {copiedPackage === pkg._id ? (
                       <>
                         <CheckCircleIcon className="w-4 h-4" />
                         Copied!

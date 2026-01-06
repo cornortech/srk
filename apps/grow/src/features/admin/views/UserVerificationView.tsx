@@ -1,90 +1,90 @@
-import { MOCK_USER_VERIFICATION_DATA } from '../../../data/adminMock';
-import { DashboardData, VerificationItem } from '../../../lib/types/admin';
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { GradientText } from '../components/ui/GradientText';
 import { GlassCard } from '../components/ui/GlassCard';
 import { StatusBadge } from '../components/ui/StatusBadge';
-import { DocumentViewerModal } from '../Modals/DocumentViewerModal';
 import { RejectionModal } from '../Modals/RejectionModal';
+import { UserDetailsModal } from '../Modals/UserDetailsModal';
+import { api } from '../../../lib/api';
+import moment from 'moment';
+import { useSRKAlert } from '@srk/shared/hooks';
+import TablePagination from '../../../lib/ui/TablePagination';
+import { Eye } from 'lucide-react';
 
-interface UserVerificationViewProps {
-  data: DashboardData;
-}
+export const UserVerificationView = () => {
+  const [page, setPage] = useState(1);
 
-export const UserVerificationView: React.FC<UserVerificationViewProps> = () => {
-  const [userData, setUserData] = useState<VerificationItem[]>(
-    MOCK_USER_VERIFICATION_DATA
-  );
-  const [documentViewerOpen, setDocumentViewerOpen] = useState(false);
-  const [selectedDocument, setSelectedDocument] = useState<{
-    url?: string;
-    title: string;
-  } | null>(null);
+  const { data: growEnrollementUserData } =
+    api.grow.getAllGrowSocialMediaEnrollement.useQuery(
+      ['enrolledUser', page], // queryKey
+      {
+        query: {
+          page: page,
+          limit: 10,
+        },
+      }
+    );
+  
+  // Update these variables:
+const totalPage = growEnrollementUserData?.body?.totalPages ?? 1;
+
   const [rejectionModalOpen, setRejectionModalOpen] = useState(false);
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [userDetailsModalOpen, setUserDetailsModalOpen] = useState(false);
+  const [selectedUserData, setSelectedUserData] = useState<typeof growEnrollementUserData extends { body: { data: Array<infer T> } } ? T : never | null>(null);
+
+  const { show } = useSRKAlert();
+
+  const { mutate: acceptEnrollementMutation, isPending: approvePending } =
+    api.grow.acceptSocialGrowEnrollmentRequest.useMutation({
+      onSuccess: (res) => {
+        if (res.status === 200) {
+          show('Enrollement User approved', 'success');
+        }
+      },
+    });
 
   const handleApprove = (id: string) => {
-    setUserData((prev) =>
-      prev.map((item) =>
-        item.id === id
-          ? {
-              ...item,
-              status: 'approved' as const,
-              reviewedAt: new Date().toISOString().split('T')[0],
-            }
-          : item
-      )
-    );
-    alert(`User ${id} approved successfully!`);
+    setSelectedItemId(id);
+    acceptEnrollementMutation({
+      params: {
+        enrollmentId: id,
+      },
+    });
   };
+
+  const { mutate: rejectEnrollementMutation, isPending: rejectPending } =
+    api.grow.rejectSocialGrowEnrollmentRequest.useMutation({
+      onSuccess: (res) => {
+        if (res.status === 200) {
+          show('Enrollement User rejected', 'success');
+        }
+      },
+    });
 
   const handleReject = (id: string) => {
     setSelectedItemId(id);
     setRejectionModalOpen(true);
   };
 
-  const handleRejectionSubmit = (reason: string) => {
+  const handleRejectionSubmit = (rejectionReason: string) => {
     if (selectedItemId) {
-      setUserData((prev) =>
-        prev.map((item) =>
-          item.id === selectedItemId
-            ? {
-                ...item,
-                status: 'rejected' as const,
-                rejectionReason: reason,
-                reviewedAt: new Date().toISOString().split('T')[0],
-              }
-            : item
-        )
-      );
-      alert(`User ${selectedItemId} rejected with reason: ${reason}`);
-      setSelectedItemId(null);
+      rejectEnrollementMutation({
+        params: {
+          enrollmentId: selectedItemId,
+        },
+        body: {
+          rejectionReason: rejectionReason,
+        },
+      });
     }
   };
 
-  const handleViewDocuments = (item: VerificationItem) => {
-    setSelectedDocument({
-      url: item.kycDocument,
-      title: `${item.name}'s KYC Document`,
-    });
-    setDocumentViewerOpen(true);
+  const handleViewDetails = (item: NonNullable<typeof growEnrollementUserData>['body']['data'][number]) => {
+    setSelectedUserData(item);
+    setUserDetailsModalOpen(true);
   };
-
-  const filteredData = userData.filter(
-    (item) => filterStatus === 'all' || item.status === filterStatus
-  );
-
-  const pendingCount = userData.filter(
-    (item) => item.status === 'pending'
-  ).length;
-  const approvedCount = userData.filter(
-    (item) => item.status === 'approved'
-  ).length;
-  const rejectedCount = userData.filter(
-    (item) => item.status === 'rejected'
-  ).length;
 
   return (
     <motion.div
@@ -109,9 +109,7 @@ export const UserVerificationView: React.FC<UserVerificationViewProps> = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-400">Pending KYC</p>
-                <p className="text-3xl font-bold text-amber-400">
-                  {pendingCount}
-                </p>
+                <p className="text-3xl font-bold text-amber-400">{0}</p>
               </div>
               <div className="w-12 h-12 rounded-full bg-amber-500/20 flex items-center justify-center">
                 <span className="text-2xl">📝</span>
@@ -125,9 +123,7 @@ export const UserVerificationView: React.FC<UserVerificationViewProps> = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-400">Verified Users</p>
-                <p className="text-3xl font-bold text-emerald-400">
-                  {approvedCount}
-                </p>
+                <p className="text-3xl font-bold text-emerald-400">{0}</p>
               </div>
               <div className="w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center">
                 <span className="text-2xl">✅</span>
@@ -141,9 +137,7 @@ export const UserVerificationView: React.FC<UserVerificationViewProps> = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-400">Rejected KYC</p>
-                <p className="text-3xl font-bold text-rose-400">
-                  {rejectedCount}
-                </p>
+                <p className="text-3xl font-bold text-rose-400">{0}</p>
               </div>
               <div className="w-12 h-12 rounded-full bg-rose-500/20 flex items-center justify-center">
                 <span className="text-2xl">❌</span>
@@ -160,9 +154,7 @@ export const UserVerificationView: React.FC<UserVerificationViewProps> = () => {
               <h3 className="text-lg font-bold text-white">
                 User KYC Verification
               </h3>
-              <p className="text-gray-400 text-sm">
-                {filteredData.length} users found
-              </p>
+              <p className="text-gray-400 text-sm">{0} users found</p>
             </div>
             <div className="flex items-center gap-4">
               <div className="relative">
@@ -187,99 +179,102 @@ export const UserVerificationView: React.FC<UserVerificationViewProps> = () => {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-white/10">
-                  <th className="text-left py-4 px-6 text-sm font-medium text-gray-400">
-                    User ID
+                  <th className="text-left py-4 px-4 text-sm font-medium text-gray-400">
+                    S.N.
                   </th>
-                  <th className="text-left py-4 px-6 text-sm font-medium text-gray-400">
-                    Name & Email
+                  <th className="text-left py-4 px-4 text-sm font-medium text-gray-400">
+                    User Details
                   </th>
-                  <th className="text-left py-4 px-6 text-sm font-medium text-gray-400">
+                  <th className="text-left py-4 px-4 text-sm font-medium text-gray-400">
+                    Package
+                  </th>
+                  <th className="text-left py-4 px-4 text-sm font-medium text-gray-400">
                     Submitted Date
                   </th>
-                  <th className="text-left py-4 px-6 text-sm font-medium text-gray-400">
-                    KYC Document
-                  </th>
-                  <th className="text-left py-4 px-6 text-sm font-medium text-gray-400">
+                  <th className="text-left py-4 px-4 text-sm font-medium text-gray-400">
                     Status
                   </th>
-                  <th className="text-left py-4 px-6 text-sm font-medium text-gray-400">
+                  <th className="text-left py-4 px-4 text-sm font-medium text-gray-400">
                     Actions
                   </th>
                 </tr>
               </thead>
               <tbody>
-                {filteredData.map((item, index) => (
+                {growEnrollementUserData?.body.data?.map((item, index) => (
                   <motion.tr
-                    key={item.id}
+                    key={item._id}
                     initial={{ y: 20, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     transition={{ duration: 0.3, delay: index * 0.1 }}
                     className="border-b border-white/5 hover:bg-white/5 transition-colors group"
                   >
-                    <td className="py-4 px-6">
+                    <td className="py-4 px-4">
                       <code className="text-sm font-mono text-white group-hover:text-[#e1ba73] transition-colors">
-                        {item.userId}
+                        {index + 1 + (page - 1) * 10}
                       </code>
                     </td>
-                    <td className="py-4 px-6">
+                    <td className="py-4 px-4">
                       <div>
-                        <p className="font-medium text-white">{item.name}</p>
-                        <p className="text-sm text-gray-400">{item.email}</p>
-                      </div>
-                    </td>
-                    <td className="py-4 px-6">
-                      <div>
-                        <p className="text-white">{item.submittedAt}</p>
-                        {item.reviewedAt && (
-                          <p className="text-xs text-gray-400">
-                            Reviewed: {item.reviewedAt}
-                          </p>
-                        )}
-                      </div>
-                    </td>
-                    <td className="py-4 px-6">
-                      <button
-                        onClick={() => handleViewDocuments(item)}
-                        className="flex items-center gap-2 px-3 py-1 bg-white/5 text-white rounded-lg hover:bg-white/10 transition-colors"
-                      >
-                        <span>👁️</span>
-                        View KYC
-                      </button>
-                    </td>
-                    <td className="py-4 px-6">
-                      <StatusBadge status={item.status} />
-                      {item.rejectionReason && (
-                        <p className="text-xs text-rose-400 mt-1 max-w-xs">
-                          {item.rejectionReason}
+                        <p className="font-medium text-white">
+                          {item.userData.fullName}
                         </p>
-                      )}
+                        <p className="text-sm text-gray-400">
+                          {item.userData.email}
+                        </p>
+                      </div>
                     </td>
-                    <td className="py-4 px-6">
+                    <td className="py-4 px-4">
+                      <div>
+                        <p className="text-white font-medium text-sm">
+                          {item.enrollmentData.packageName}
+                        </p>
+                        <p className="text-xs text-gray-400">
+                          {item.enrollmentData.socialMediaPlatform}
+                        </p>
+                      </div>
+                    </td>
+                    <td className="py-4 px-4">
+                      <p className="text-white text-sm">
+                        {moment(item.createdAt).format('ll')}
+                      </p>
+                      <p className="text-xs text-gray-400">
+                        {moment(item.createdAt).format('LT')}
+                      </p>
+                    </td>
+                    <td className="py-4 px-4">
+                      <StatusBadge status={item.userData.status} />
+                    </td>
+                    <td className="py-4 px-4">
                       <div className="flex gap-2">
-                        {item.status === 'pending' && (
+                        <motion.button
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={() => handleViewDetails(item)}
+                          className="p-2 bg-blue-600/20 text-blue-300 rounded-lg hover:bg-blue-600/30 transition-colors"
+                          title="View Details"
+                        >
+                          <Eye size={16} />
+                        </motion.button>
+                        {item.userData.status === 'verificationPending' && (
                           <>
                             <motion.button
                               whileHover={{ scale: 1.05 }}
                               whileTap={{ scale: 0.95 }}
-                              onClick={() => handleApprove(item.id)}
-                              className="px-3 py-1 bg-emerald-600/20 text-emerald-300 rounded-lg hover:bg-emerald-600/30 transition-colors text-sm"
+                              onClick={() => handleApprove(item._id)}
+                              disabled={approvePending}
+                              className="px-3 py-1 bg-emerald-600/20 text-emerald-300 rounded-lg hover:bg-emerald-600/30 transition-colors text-xs font-medium disabled:opacity-50"
                             >
-                              Approve
+                              {approvePending && selectedItemId === item._id ? '...' : '✓'}
                             </motion.button>
                             <motion.button
                               whileHover={{ scale: 1.05 }}
                               whileTap={{ scale: 0.95 }}
-                              onClick={() => handleReject(item.id)}
-                              className="px-3 py-1 bg-rose-600/20 text-rose-300 rounded-lg hover:bg-rose-600/30 transition-colors text-sm"
+                              onClick={() => handleReject(item._id)}
+                              className="px-3 py-1 bg-rose-600/20 text-rose-300 rounded-lg hover:bg-rose-600/30 transition-colors text-xs font-medium"
                             >
-                              Reject
+                              ✕
                             </motion.button>
                           </>
-                        )}
-                        {item.status !== 'pending' && (
-                          <span className="text-sm text-gray-400">
-                            Reviewed
-                          </span>
                         )}
                       </div>
                     </td>
@@ -291,13 +286,20 @@ export const UserVerificationView: React.FC<UserVerificationViewProps> = () => {
         </div>
       </GlassCard>
 
+      {totalPage > 1 && (
+        <TablePagination
+          page={page}
+          totalPages={totalPage}
+          onPageChange={setPage}
+        />
+      )}
+
       <AnimatePresence>
-        {documentViewerOpen && selectedDocument && (
-          <DocumentViewerModal
-            isOpen={documentViewerOpen}
-            onClose={() => setDocumentViewerOpen(false)}
-            title={selectedDocument.title}
-            documentUrl={selectedDocument.url}
+        {userDetailsModalOpen && (
+          <UserDetailsModal
+            isOpen={userDetailsModalOpen}
+            onClose={() => setUserDetailsModalOpen(false)}
+            userData={selectedUserData}
           />
         )}
       </AnimatePresence>
@@ -305,6 +307,7 @@ export const UserVerificationView: React.FC<UserVerificationViewProps> = () => {
       <AnimatePresence>
         {rejectionModalOpen && (
           <RejectionModal
+            isRejecting={rejectPending}
             isOpen={rejectionModalOpen}
             onClose={() => setRejectionModalOpen(false)}
             onSubmit={handleRejectionSubmit}

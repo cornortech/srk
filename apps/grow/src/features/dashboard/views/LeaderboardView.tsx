@@ -5,18 +5,51 @@ import { ShareCountIcon } from '../components/ui/DashboardIcons';
 import { UserIcon } from 'lucide-react';
 import { GlassCard } from '../components/ui/GlassCard';
 import { formatCompactRupees } from '../../../lib/utils/formatters';
+import { api } from '../../../lib/api';
 
 interface LeaderboardViewProps {
-  leaderboardData: LeaderboardEntry[];
+  leaderboardData?: LeaderboardEntry[]; // not used anymore but kept for prop compatibility
+  userID: string;
 }
 
-export const LeaderboardView: React.FC<LeaderboardViewProps> = ({
-  leaderboardData,
-}) => {
+export const LeaderboardView: React.FC<LeaderboardViewProps> = (
+  userID,
+) => {
   const [timeFilter, setTimeFilter] = useState<'today' | 'week' | 'all'>('all');
+  const [page, setPage] = useState('1');
+
+  const { data: commissionResponse, isLoading } =
+    api.growAffiliate.getAllUsersAffiliateComissionLeaderBoard.useQuery(
+      ['affiliatedUserCommission', page, timeFilter],
+      {
+        query: {
+          limit: '10',
+          page,
+          timeRange: timeFilter,
+        },
+      }
+    );
+
+  // API returns:
+  // { data: [{ rank, affiliateUsersStats: {name,id}, salesStats:{totalRevenue,totalSales}}], page, totalUsers, totalPages }
+  const apiData = commissionResponse?.body.data ?? [];
+
+  const normalizedData: LeaderboardEntry[] = apiData.map((item: any) => ({
+    rank: item.rank,
+    username: item.affiliateUsersStats?.name,
+    referralCount: item.salesStats?.totalSales,
+    totalAmountEarned: item.salesStats?.totalRevenue,
+    weekEarning: item.salesStats?.totalRevenue, // replace if backend returns separate week
+    todayEarning: item.salesStats?.totalRevenue, // replace if backend returns "today"
+    shares: item.salesStats?.totalSales,
+    trend: 'stable',
+    avatarText: item.affiliateUsersStats?.name?.charAt(0),
+    avatarColor: '#4F46E5',
+    isCurrent: item.affiliateUsersStats?.affiliateUserId === userID,
+  }));
 
   const getSortedData = useMemo(() => {
-    const sorted = [...leaderboardData].sort((a, b) => {
+    const sorted = [...normalizedData].sort((a, b) => {
       switch (timeFilter) {
         case 'today':
           return b.todayEarning - a.todayEarning;
@@ -31,7 +64,7 @@ export const LeaderboardView: React.FC<LeaderboardViewProps> = ({
       ...entry,
       rank: index + 1,
     }));
-  }, [leaderboardData, timeFilter]);
+  }, [normalizedData, timeFilter]);
 
   const getDisplayAmount = (entry: LeaderboardEntry) => {
     switch (timeFilter) {
@@ -151,146 +184,176 @@ export const LeaderboardView: React.FC<LeaderboardViewProps> = ({
     }
   };
 
+  // 🧠 Loading UI
+  if (isLoading) {
+    return (
+      <div className="text-gray-300 p-6 text-center">
+        Loading leaderboard...
+      </div>
+    );
+  }
+
+  // 🧠 Empty state
+  if (!normalizedData.length) {
+    return (
+      <div className="text-gray-400 p-6 text-center">
+        No leaderboard data available.
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-2">
-        <div>
-          <h1 className="text-2xl font-bold text-white">Leaderboard</h1>
-          <p className="text-gray-400 text-sm">
-            Top performers this {timeFilter}
-          </p>
+    <>
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-2">
+          <div>
+            <h1 className="text-2xl font-bold text-white">Leaderboard</h1>
+            <p className="text-gray-400 text-sm">
+              Top performers this {timeFilter}
+            </p>
+          </div>
+
+          {/* Filter */}
+          <div className="flex gap-2">
+            {(['today', 'week', 'all'] as const).map((filter) => {
+              const isActive = timeFilter === filter;
+
+              return (
+                <button
+                  key={filter}
+                  onClick={() => setTimeFilter(filter)}
+                  className={`
+        relative overflow-hidden group
+        px-4 py-2 rounded-lg text-sm font-medium
+        transition-all duration-300
+        ${
+          isActive
+            ? 'text-black'
+            : 'bg-white/5 text-gray-400 hover:text-white hover:bg-white/10'
+        }
+      `}
+                  style={
+                    isActive
+                      ? {
+                          background: `linear-gradient(to right, ${GOLD_PRIMARY}, ${GOLD_ACCENT})`,
+                        }
+                      : undefined
+                  }
+                >
+                  {filter === 'today'
+                    ? 'Today'
+                    : filter === 'week'
+                    ? 'Week'
+                    : 'All Time'}
+                  <div className="absolute inset-0 bg-white/0 group-hover:bg-white/10 transition-colors duration-300"></div>
+                </button>
+              );
+            })}
+          </div>
         </div>
 
-        {/* Filter Controls */}
-        <div className="flex gap-2">
-          {(['today', 'week', 'all'] as const).map((filter) => (
-            <button
-              key={filter}
-              onClick={() => setTimeFilter(filter)}
-              className={`
-                relative overflow-hidden group
-                px-4 py-2 rounded-lg text-sm font-medium
-                transition-all duration-300
-                ${
-                  timeFilter === filter
-                    ? `text-black bg-gradient-to-r from-[${GOLD_PRIMARY}] to-[${GOLD_ACCENT}]`
-                    : 'bg-white/5 text-gray-400 hover:text-white hover:bg-white/10'
-                }
-              `}
-            >
-              {filter === 'today'
-                ? 'Today'
-                : filter === 'week'
-                ? 'Week'
-                : 'All Time'}
-              <div className="absolute inset-0 bg-white/0 group-hover:bg-white/10 transition-colors duration-300" />
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Top 3 Podium */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {getSortedData.slice(0, 3).map((entry) => {
-          const rankStyle = getRankColor(entry.rank);
-          return (
-            <GlassCard
-              key={entry.rank}
-              variant={entry.rank === 1 ? 'gold' : 'neutral'}
-              className="min-h-[280px]"
-            >
-              <div className="h-full flex flex-col items-center text-center">
-                {/* Rank Badge with Glass Effect */}
-                <div
-                  className={`relative mb-4 ${
-                    entry.rank <= 3 ? 'scale-110' : ''
-                  }`}
-                >
-                  <div
-                    className={`absolute inset-0 ${rankStyle.bg} rounded-full blur-md opacity-50`}
-                  ></div>
-                  <div
-                    className={`relative w-14 h-14 rounded-full flex items-center justify-center ${rankStyle.bg} ${rankStyle.border} border-2 ${rankStyle.shadow}`}
-                  >
-                    <span className={`font-bold text-lg ${rankStyle.text}`}>
-                      #{entry.rank}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Avatar with Glass Effect */}
-                <div className="relative mb-4">
-                  <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent rounded-full blur-lg"></div>
-                  <div
-                    className="relative w-20 h-20 rounded-full flex items-center justify-center text-white font-bold text-2xl"
-                    style={{
-                      backgroundColor: entry.avatarColor,
-                      boxShadow: `0 8px 32px ${entry.avatarColor}40`,
-                    }}
-                  >
-                    {entry.avatarText}
-                  </div>
-                  {entry.isCurrent && (
-                    <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 px-3 py-1 bg-gradient-to-r from-emerald-600 to-emerald-500 text-white text-xs font-bold rounded-full border border-emerald-400/30">
-                      You
-                    </div>
-                  )}
-                </div>
-
-                {/* User Info */}
-                <h3
-                  className={`font-bold text-lg mb-1 ${
-                    entry.isCurrent ? 'text-emerald-400' : 'text-white'
-                  }`}
-                >
-                  {entry.username}
-                </h3>
-
-                {/* Stats */}
-                <div className="mt-3 grid grid-cols-2 gap-3 w-full">
-                  <div className="text-center">
-                    <div className="text-xs text-gray-500">Shares</div>
-                    <div className="font-bold text-white">{entry.shares}</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-xs text-gray-500">Referrals</div>
-                    <div className="font-bold text-white">
-                      {entry.referralCount}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Earnings */}
-                <div className="mt-auto w-full pt-4 border-t border-white/5">
-                  <div
-                    className="text-xl font-bold"
-                    style={{ color: GOLD_PRIMARY }}
-                  >
-                    {formatCompactRupees(getDisplayAmount(entry))}
-                  </div>
-                  <div className="flex items-center justify-center gap-2 mt-2">
-                    <TrendIcon trend={entry.trend} size="lg" />
-                    <span className="text-xs text-gray-500">
-                      {getDisplayLabel()}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </GlassCard>
-          );
-        })}
-      </div>
-
-      {/* Leaderboard List */}
-      <GlassCard variant="neutral" blur="lg">
-        <div className="space-y-2">
-          {getSortedData.slice(3).map((entry) => {
+        {/* Top 3 */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {getSortedData.slice(0, 3).map((entry) => {
             const rankStyle = getRankColor(entry.rank);
             return (
-              <div
+              <GlassCard
                 key={entry.rank}
-                className={`
+                variant={entry.rank === 1 ? 'gold' : 'neutral'}
+                className="min-h-[280px]"
+              >
+                <div className="h-full flex flex-col items-center text-center">
+                  {/* Rank */}
+                  <div
+                    className={`relative mb-4 ${
+                      entry.rank <= 3 ? 'scale-110' : ''
+                    }`}
+                  >
+                    <div
+                      className={`absolute inset-0 ${rankStyle.bg} rounded-full blur-md opacity-50`}
+                    ></div>
+                    <div
+                      className={`relative w-14 h-14 rounded-full flex items-center justify-center ${rankStyle.bg} ${rankStyle.border} border-2 ${rankStyle.shadow}`}
+                    >
+                      <span className={`font-bold text-lg ${rankStyle.text}`}>
+                        #{entry.rank}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Avatar */}
+                  <div className="relative mb-4">
+                    <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent rounded-full blur-lg"></div>
+                    <div
+                      className="relative w-20 h-20 rounded-full flex items-center justify-center text-white font-bold text-2xl"
+                      style={{
+                        backgroundColor: entry.avatarColor,
+                        boxShadow: `0 8px 32px ${entry.avatarColor}40`,
+                      }}
+                    >
+                      {entry.avatarText}
+                    </div>
+                    {entry.isCurrent && (
+                      <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 px-3 py-1 bg-gradient-to-r from-emerald-600 to-emerald-500 text-white text-xs font-bold rounded-full border border-emerald-400/30">
+                        You
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Username */}
+                  <h3
+                    className={`font-bold text-lg mb-1 ${
+                      entry.isCurrent ? 'text-emerald-400' : 'text-white'
+                    }`}
+                  >
+                    {entry.username}
+                  </h3>
+
+                  {/* Stats */}
+                  <div className="mt-3 grid grid-cols-2 gap-3 w-full">
+                    <div className="text-center">
+                      <div className="text-xs text-gray-500">Shares</div>
+                      <div className="font-bold text-white">{entry.shares}</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-xs text-gray-500">Referrals</div>
+                      <div className="font-bold text-white">
+                        {entry.referralCount}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Earnings */}
+                  <div className="mt-auto w-full pt-4 border-t border-white/5">
+                    <div
+                      className="text-xl font-bold"
+                      style={{ color: GOLD_PRIMARY }}
+                    >
+                      {formatCompactRupees(getDisplayAmount(entry))}
+                    </div>
+                    <div className="flex items-center justify-center gap-2 mt-2">
+                      <TrendIcon trend={entry.trend} size="lg" />
+                      <span className="text-xs text-gray-500">
+                        {getDisplayLabel()}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </GlassCard>
+            );
+          })}
+        </div>
+
+        {/* Leaderboard List */}
+        <GlassCard variant="neutral" blur="lg">
+          <div className="space-y-2">
+            {getSortedData.slice(3).map((entry) => {
+              const rankStyle = getRankColor(entry.rank);
+              return (
+                <div
+                  key={entry.rank}
+                  className={`
                   relative overflow-hidden group
                   flex items-center justify-between p-4 rounded-xl transition-all duration-300
                   ${
@@ -300,88 +363,82 @@ export const LeaderboardView: React.FC<LeaderboardViewProps> = ({
                   }
                   border border-transparent hover:border-white/10
                 `}
-              >
-                {/* Background Glow Effect */}
-                {entry.isCurrent && (
-                  <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/5 to-transparent"></div>
-                )}
-
-                <div className="flex items-center gap-4 flex-1 min-w-0">
-                  {/* Rank */}
-                  <div
-                    className={`relative ${
-                      entry.rank <= 10 ? 'scale-110' : ''
-                    }`}
-                  >
+                >
+                  <div className="flex items-center gap-4 flex-1 min-w-0">
                     <div
-                      className={`w-10 h-10 rounded-xl flex items-center justify-center ${rankStyle.bg} ${rankStyle.border} border`}
+                      className={`relative ${
+                        entry.rank <= 10 ? 'scale-110' : ''
+                      }`}
                     >
-                      <span className={`font-bold ${rankStyle.text}`}>
-                        #{entry.rank}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Avatar */}
-                  <div className="relative">
-                    <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent rounded-full blur-md"></div>
-                    <div
-                      className="relative w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-base"
-                      style={{
-                        backgroundColor: entry.avatarColor,
-                        boxShadow: `0 4px 20px ${entry.avatarColor}30`,
-                      }}
-                    >
-                      {entry.avatarText}
-                    </div>
-                  </div>
-
-                  {/* User Info */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span
-                        className={`font-medium truncate ${
-                          entry.isCurrent ? 'text-emerald-400' : 'text-white'
-                        }`}
+                      <div
+                        className={`w-10 h-10 rounded-xl flex items-center justify-center ${rankStyle.bg} ${rankStyle.border} border`}
                       >
-                        {entry.username}
-                      </span>
-                      {entry.isCurrent && (
-                        <span className="px-2 py-0.5 text-xs bg-gradient-to-r from-emerald-600 to-emerald-500 text-white rounded-full border border-emerald-400/30">
-                          You
+                        <span className={`font-bold ${rankStyle.text}`}>
+                          #{entry.rank}
                         </span>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-3 mt-1">
-                      <div className="flex items-center gap-1 text-xs text-gray-500">
-                        <ShareCountIcon className="w-3 h-3" />
-                        <span>{entry.shares} shares</span>
                       </div>
-                      <div className="flex items-center gap-1 text-xs text-gray-500">
-                        <UserIcon className="w-3 h-3" />
-                        <span>{entry.referralCount} refs</span>
+                    </div>
+
+                    <div className="relative">
+                      <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent rounded-full blur-md"></div>
+                      <div
+                        className="relative w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-base"
+                        style={{
+                          backgroundColor: entry.avatarColor,
+                          boxShadow: `0 4px 20px ${entry.avatarColor}30`,
+                        }}
+                      >
+                        {entry.avatarText}
+                      </div>
+                    </div>
+
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span
+                          className={`font-medium truncate ${
+                            entry.isCurrent ? 'text-emerald-400' : 'text-white'
+                          }`}
+                        >
+                          {entry.username}
+                        </span>
+                        {entry.isCurrent && (
+                          <span className="px-2 py-0.5 text-xs bg-gradient-to-r from-emerald-600 to-emerald-500 text-white rounded-full border border-emerald-400/30">
+                            You
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-3 mt-1">
+                        <div className="flex items-center gap-1 text-xs text-gray-500">
+                          <ShareCountIcon className="w-3 h-3" />
+                          <span>{entry.shares} shares</span>
+                        </div>
+                        <div className="flex items-center gap-1 text-xs text-gray-500">
+                          <UserIcon className="w-3 h-3" />
+                          <span>{entry.referralCount} refs</span>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
 
-                <div className="flex items-center gap-4">
-                  <TrendIcon trend={entry.trend} />
-                  <div className="text-right">
-                    <div className="font-bold text-white">
-                      {formatCompactRupees(getDisplayAmount(entry))}
+                  <div className="flex items-center gap-4">
+                    <TrendIcon trend={entry.trend} />
+                    <div className="text-right">
+                      <div className="font-bold text-white">
+                        {formatCompactRupees(getDisplayAmount(entry))}
+                      </div>
+                      <p className="text-xs text-gray-500">
+                        {getDisplayLabel()}
+                      </p>
                     </div>
-                    <p className="text-xs text-gray-500">{getDisplayLabel()}</p>
                   </div>
-                </div>
 
-                {/* Hover Effect */}
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/0 to-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
-              </div>
-            );
-          })}
-        </div>
-      </GlassCard>
-    </div>
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/0 to-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+                </div>
+              );
+            })}
+          </div>
+        </GlassCard>
+      </div>
+    </>
   );
 };

@@ -14,7 +14,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
   isMobile = false,
   onClose,
 }) => {
-  // In Sidebar component, update the navItems array:
   const navItems = useMemo(
     () => [
       { id: 'global', label: 'Global Overview', icon: '🌐' },
@@ -23,15 +22,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
         label: 'Affiliate Verification',
         icon: '👥',
       },
-      { id: 'userverification', label: 'User Verification', icon: '👤' },
-      { id: 'paymentverification', label: 'Payment Verification', icon: '💰' },
+      { id: 'userverification', label: 'Enrollment Verification', icon: '👤' },
+      // { id: 'paymentverification', label: 'Payment Verification', icon: '💰' },
       { id: 'taskmonitoring', label: 'Task Monitoring', icon: '📊' },
-      { id: 'privatetasks', label: 'Private Tasks', icon: '🎯' },
-      { id: 'userlist', label: 'All Users', icon: '👥' },
-      { id: 'affiliatelist', label: 'Affiliates Only', icon: '🌟' },
+      // { id: 'privatetasks', label: 'Private Tasks', icon: '🎯' },
+      { id: 'affiliatelist', label: 'Affiliate Users', icon: '🌟' },
+      { id: 'packagelist', label: 'Package Users', icon: '👥' },
       { id: 'createuser', label: 'Create User', icon: '➕' },
+      { id: 'packagemanagement', label: 'Manage Packages', icon: '📦' },
       { id: 'payoutqueue', label: 'Payout Queue', icon: '💰' },
-      { id: 'trend', label: 'Performance Trends', icon: '📈' },
+      // { id: 'trend', label: 'Performance Trends', icon: '📈' },
     ],
     []
   );
@@ -66,14 +66,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
               ? 'fixed inset-y-0 left-0 z-50'
               : 'hidden lg:flex lg:fixed lg:inset-y-0 lg:left-0'
           }
-          flex-col w-64
+          flex flex-col w-64 h-full
         `}
       >
         <div
-          className={`flex-1 flex flex-col ${
+          className={`flex-1 flex flex-col min-h-0 ${
             isMobile ? 'bg-gradient-to-b from-[#1a140f] to-[#0f0a05]' : ''
           }`}
         >
+          {/* Header */}
           <div className="p-6 border-b border-white/10">
             <div className="flex items-center gap-3">
               <motion.div
@@ -89,6 +90,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 </h1>
                 <p className="text-xs text-gray-400">Premium Dashboard</p>
               </div>
+
               {isMobile && onClose && (
                 <motion.button
                   whileHover={{ scale: 1.1 }}
@@ -102,6 +104,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </div>
           </div>
 
+          {/* Navigation */}
           <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
             {navItems.map((item, index) => (
               <motion.button
@@ -112,7 +115,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 onClick={() => handleNavClick(item.id)}
                 whileHover={{ x: 10 }}
                 className={`
-                  w-full flex items-center gap-3 p-3 rounded-xl
+                  w-full h-[60px] flex items-center gap-3 p-3 rounded-xl
                   transition-all duration-200 text-left
                   ${
                     activeView === item.id
@@ -134,7 +137,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
             ))}
           </nav>
 
-          <div className="p-6 border-t border-white/10">
+          {/* Footer */}
+          <div className="px-6 border-t border-white/10 py-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-800 to-black border border-white/10 flex items-center justify-center">
                 <span className="text-gray-400">⚙️</span>

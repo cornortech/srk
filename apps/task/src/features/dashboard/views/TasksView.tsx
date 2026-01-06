@@ -13,8 +13,7 @@ import {
 import {
   allPlatforms,
   followTasks,
-  postTasks,
-  watchTasks,
+  likeTasks,
 } from '../../../data/dummyDashboardMockData';
 import {
   DashboardView,
@@ -43,9 +42,7 @@ export const TasksView: React.FC<TasksViewProps> = ({
   setReviewingRejectedTask,
 }) => {
   const [showVideoFeature, setShowVideoFeature] = useState(false);
-  if (false) {
-    setShowVideoFeature(false);
-  }
+
 
   if (!isApproved) {
     return (
@@ -98,19 +95,19 @@ export const TasksView: React.FC<TasksViewProps> = ({
             color: 'from-emerald-500/20 to-green-500/20',
             count: followTasks.length,
           },
+          // {
+          //   type: 'watch' as TaskType,
+          //   icon: Play,
+          //   label: 'Watch Tasks',
+          //   color: 'from-blue-500/20 to-cyan-500/20',
+          //   count: watchTasks.length,
+          // },
           {
-            type: 'watch' as TaskType,
-            icon: Play,
-            label: 'Watch Tasks',
-            color: 'from-blue-500/20 to-cyan-500/20',
-            count: watchTasks.length,
-          },
-          {
-            type: 'post' as TaskType,
+            type: 'like' as TaskType,
             icon: Share2,
-            label: 'Post Tasks',
+            label: 'Like Tasks',
             color: 'from-purple-500/20 to-pink-500/20',
-            count: postTasks.length,
+            count: likeTasks.length,
           },
         ].map((category) => {
           const Icon = category.icon;
@@ -121,9 +118,9 @@ export const TasksView: React.FC<TasksViewProps> = ({
               gradient={
                 category.type === 'follow'
                   ? 'green'
-                  : category.type === 'watch'
-                  ? 'blue'
-                  : 'purple'
+                  : // : category.type === 'watch'
+                  // ? 'blue'
+                  'purple'
               }
               onClick={() => setTaskCategory(category.type)}
               className="cursor-pointer"
@@ -138,9 +135,9 @@ export const TasksView: React.FC<TasksViewProps> = ({
                       className={
                         category.type === 'follow'
                           ? 'text-emerald-400'
-                          : category.type === 'watch'
-                          ? 'text-blue-400'
-                          : 'text-purple-400'
+                          : // : category.type === 'watch'
+                          // ? 'text-blue-400'
+                          'text-purple-400'
                       }
                     />
                   </div>
@@ -158,12 +155,13 @@ export const TasksView: React.FC<TasksViewProps> = ({
                   <div className="flex items-center gap-2">
                     <Coins size={20} className="text-amber-400" />
                     <span className="text-lg font-bold text-amber-400">
-                      {category.type === 'follow'
+                      {/* {category.type === 'follow'
                         ? '150+'
-                        : category.type === 'watch'
-                        ? '200+'
-                        : '120+'}{' '}
-                      Coins
+                        : // : category.type === 'watch'
+                        // ? '200+'
+                        '120+'}{' '}
+                      Coins */}
+                      100+
                     </span>
                   </div>
 

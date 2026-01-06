@@ -1,32 +1,16 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import type { ReactNode } from 'react';
 import {
   AnalyticsData,
   DashboardData,
-  LeaderboardEntry,
   NavItem,
-  Payout,
-  SalesData,
   ToastType,
   ViewId,
 } from '../lib/types/dashboard';
-import {
-  BanknoteIcon,
-  HomeIcon,
-  ShareIcon,
-  ShoppingBagIcon,
-  TrendingUpIcon,
-  UserIcon,
-  WalletIcon,
-} from 'lucide-react';
 import { DARK_BG, GOLD_PRIMARY } from '../features/dashboard/constants';
 import {
   MOCK_ANALYTICS_DATA,
   MOCK_DASHBOARD_DATA,
-  MOCK_LEADERBOARD,
-  MOCK_PAYOUTS,
-  MOCK_SALES_DATA,
-  MOCK_USER_PROFILE,
 } from '../data/dashboardMock';
 import { DashboardView } from '../features/dashboard/views/DashboardView';
 import { ReferralView } from '../features/dashboard/views/ReferralView';
@@ -38,6 +22,8 @@ import { BackgroundEffects } from '../features/dashboard/components/ui/Backgroun
 import { MenuIcon } from '../features/dashboard/components/ui/DashboardIcons';
 import { Toast } from '../features/dashboard/components/ui/Toast';
 import { DashboardSidebar } from '../features/dashboard/components/DashboardSidebar';
+import { api } from '../lib/api';
+import { Navigate } from 'react-router-dom';
 
 export const initialEarningData: DashboardData = {
   today: 0,
@@ -49,26 +35,29 @@ export const initialEarningData: DashboardData = {
 };
 
 export const GrowDashboard = () => {
+  const affiliateUserId = localStorage.getItem('affiliateGrowUserId');
+
+  if (!affiliateUserId) {
+    return <Navigate to="/login" replace />;
+  }
+
   const [currentView, setCurrentView] = useState<ViewId>('dashboard');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [toastType, setToastType] = useState<ToastType>('success');
   const [dashboardData, setDashboardData] =
     useState<DashboardData>(initialEarningData);
-  const [salesData, setSalesData] = useState<SalesData[]>([]);
-  const [leaderboardData, setLeaderboardData] = useState<LeaderboardEntry[]>(
-    []
-  );
-  const [payoutHistory, setPayoutHistory] = useState<Payout[]>([]);
-  const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+
+    const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(
     null
   );
-  // const currentTitle: string = useMemo(
-  //   () =>
-  //     navItems.find((item) => item.id === currentView)?.label || 'Dashboard',
-  //   [currentView]
-  // );
+
+  const { data: growPackagesRes, isLoading: packagesLoading } =
+    api.package.getAllSrkGrowPackages.useQuery(['packages']);
+
+  const dataToSend = growPackagesRes?.body;
+
+  console.log(growPackagesRes?.body);
 
   const showToast = useCallback(
     (message: string, type: ToastType = 'success'): void => {
@@ -78,6 +67,16 @@ export const GrowDashboard = () => {
     },
     []
   );
+
+  const { data: affiliatedUserCommission, isLoading: commissionLoading } =
+    api.growAffiliate.getUserAffiliateSalesComissionEarnings.useQuery(
+      ['affiliatedUserCommission', affiliateUserId],
+      {
+        params: {
+          affiliateUserId: affiliateUserId,
+        },
+      }
+    );
 
   const handleNavigation = useCallback(
     (item: NavItem) => {
@@ -93,21 +92,18 @@ export const GrowDashboard = () => {
   );
 
   useEffect(() => {
-    setIsLoading(true);
+    // setIsLoading(true);
     const timer = setTimeout(() => {
       setDashboardData(MOCK_DASHBOARD_DATA);
-      setSalesData(MOCK_SALES_DATA);
-      setLeaderboardData(MOCK_LEADERBOARD);
-      setPayoutHistory(MOCK_PAYOUTS);
       setAnalyticsData(MOCK_ANALYTICS_DATA);
-      setIsLoading(false);
+      // setIsLoading(false);
     }, 800);
 
     return () => clearTimeout(timer);
   }, []);
 
   const renderCurrentView = (): ReactNode => {
-    if (isLoading) {
+    if (packagesLoading) {
       return (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
           {[...Array(6)].map((_, i) => (
@@ -126,7 +122,7 @@ export const GrowDashboard = () => {
 
     switch (currentView) {
       case 'dashboard':
-        return <DashboardView data={dashboardData} showToast={showToast} />;
+        return <DashboardView userID={affiliateUserId} data={dashboardData} showToast={showToast} />;
       case 'analytics':
         return analyticsData ? (
           'null'
@@ -145,24 +141,29 @@ export const GrowDashboard = () => {
           </div>
         );
       case 'referral':
+        return <ReferralView userID={affiliateUserId} data={dataToSend ?? []} showToast={showToast} />;
+      case 'mysales':
         return (
-          <ReferralView
-            userId={MOCK_USER_PROFILE.userId}
+          <MySalesView
+            userID={affiliateUserId}
+            data={affiliatedUserCommission?.body ?? []}
+            isLoading={commissionLoading}
+          />
+        );
+      case 'leaderboard':
+        return <LeaderboardView userID={affiliateUserId} />;
+      case 'payout':
+        return <PayoutView userID={affiliateUserId} />;
+      case 'profile':
+        return (
+          <ProfileView
+            userID={affiliateUserId}
+            data={affiliatedUserCommission?.body}
             showToast={showToast}
           />
         );
-      case 'mysales':
-        return <MySalesView salesData={salesData} />;
-      case 'leaderboard':
-        return <LeaderboardView leaderboardData={leaderboardData} />;
-      case 'payout':
-        return <PayoutView payouts={payoutHistory} />;
-      case 'profile':
-        return (
-          <ProfileView profile={MOCK_USER_PROFILE} showToast={showToast} />
-        );
       default:
-        return <DashboardView data={dashboardData} showToast={showToast} />;
+        return <DashboardView userID={affiliateUserId} data={dashboardData} showToast={showToast} />;
     }
   };
 
@@ -183,6 +184,7 @@ export const GrowDashboard = () => {
 
       {/* Sidebars */}
       <DashboardSidebar
+        userID={affiliateUserId}
         isMobile={false}
         currentView={currentView}
         isOpen={isSidebarOpen}
@@ -190,6 +192,7 @@ export const GrowDashboard = () => {
         onNavigate={handleNavigation}
       />
       <DashboardSidebar
+        userID={affiliateUserId}
         isMobile={true}
         currentView={currentView}
         isOpen={isSidebarOpen}
@@ -223,7 +226,7 @@ export const GrowDashboard = () => {
             <h2 className="text-2xl font-bold text-white uppercase">
               {currentView}
             </h2>
-            {isLoading && (
+            {packagesLoading && (
               <div
                 className="flex items-center space-x-2 text-sm"
                 style={{ color: GOLD_PRIMARY }}

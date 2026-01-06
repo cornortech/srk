@@ -2,6 +2,8 @@ import {
   BarChart3,
   Coins,
   DollarSign,
+  FileClock,
+  History,
   ListChecks,
   Lock,
   LogOut,
@@ -66,6 +68,12 @@ const Sidebar: React.FC<SidebarProps> = ({
       badge: rejectedTasks.length,
     },
     {
+      view: 'taskHistory',
+      icon: FileClock,
+      label: 'Task History',
+      requiresApproval: true,
+    },
+    {
       view: 'leaderboard',
       icon: Trophy,
       label: 'Leaderboard',
@@ -75,6 +83,12 @@ const Sidebar: React.FC<SidebarProps> = ({
       view: 'coinExchange',
       icon: DollarSign,
       label: 'Coin Exchange',
+      requiresApproval: true,
+    },
+    {
+      view: 'finance',
+      icon: History,
+      label: 'Finance History',
       requiresApproval: true,
     },
     {
@@ -132,7 +146,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                     w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all relative
                     ${
                       isActive
-                        ? 'bg-linear-to-r from-[#b68938]/20 to-[#b68938]/10 text-white border border-white/10'
+                        ? 'bg-gradient-to-r from-[#b68938]/20 to-[#b68938]/10 text-white border border-white/10'
                         : 'text-zinc-400 hover:text-white hover:bg-white/5'
                     }
                     ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}
@@ -164,7 +178,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                 {isActive && (
                   <motion.div
                     layoutId="activeTab"
-                    className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-amber-400 rounded-r-full"
+                    className="absolute left-0 top-0 bottom-0 my-auto w-1 h-6 bg-amber-400 rounded-r-full"
                   />
                 )}
               </motion.button>

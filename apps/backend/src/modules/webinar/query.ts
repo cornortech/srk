@@ -1,6 +1,6 @@
-import { AppRouteImplementationOrOptions } from "@ts-rest/express/src/lib/types";
-import { webinarContract } from "../../contract/webinar/contract";
-import { WebinarModel } from "../../model/webinarModel";
+import { AppRouteImplementationOrOptions } from '@ts-rest/express/src/lib/types';
+import { webinarContract } from '../../../../../libs/shared/contracts/src/lib/webinar/contract';
+import { WebinarModel } from '../../model/webinarModel';
 
 const getAllWebinar: AppRouteImplementationOrOptions<
   typeof webinarContract.getAllWebinars
@@ -8,8 +8,7 @@ const getAllWebinar: AppRouteImplementationOrOptions<
   try {
     const webinarData = await WebinarModel.find({}).sort({
       createdAt: -1,
-    })
-
+    });
 
     return {
       status: 200,
@@ -26,7 +25,7 @@ const getAllWebinar: AppRouteImplementationOrOptions<
       status: 500,
       body: {
         success: false,
-        message: "Internal Server Error",
+        message: 'Internal Server Error',
       },
     };
   }

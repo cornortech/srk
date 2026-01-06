@@ -1,5 +1,5 @@
 import { AppRouteImplementationOrOptions } from '@ts-rest/express/src/lib/types';
-import { ssoContract } from '../../contract/sso/contract';
+import { ssoContract } from '@srk/shared/contracts';
 import { AutoCodeModel } from '../../model/autoCodeModel';
 import { UserModel } from '../../model/userModel';
 import { adminModel } from '../../model/adminModel';
@@ -62,7 +62,10 @@ const getAutoCode: AppRouteImplementationOrOptions<
       const taskDomain =
         process.env['TASK_FRONTEND_URL'] || 'http://localhost:4400';
       redirectUrl = `${taskDomain}/callback?code=${code}`;
-    } else if (targetApp === 'grow') {
+    } else if (
+      targetApp === 'growaffiliate' ||
+      targetApp === 'growsocialmedia'
+    ) {
       const growDomain =
         process.env['GROW_FRONTEND_URL'] || 'http://localhost:4500';
       redirectUrl = `${growDomain}/callback?code=${code}`;
@@ -168,9 +171,11 @@ const exchangeCode: AppRouteImplementationOrOptions<
     // Set redirection URL based on target app
     let redirectionUrl = '/dashboard';
     if (autoCode.targetApp === 'task') {
-      redirectionUrl = '/task/verification';
-    } else if (autoCode.targetApp === 'grow') {
+      redirectionUrl = '/task/dashboard';
+    } else if (autoCode.targetApp === 'growaffiliate') {
       redirectionUrl = '/grow/verification';
+    } else if (autoCode.targetApp === 'growsocialmedia') {
+      redirectionUrl = '/';
     } else if (autoCode.targetApp === 'bank') {
       redirectionUrl = '/bank/dashboard';
     }
@@ -182,13 +187,19 @@ const exchangeCode: AppRouteImplementationOrOptions<
     });
 
     // Set HTTP-only cookie for the new domain
-    res.cookie('x-auth-token', token, {
+    const isProduction = process.env.NODE_ENV === 'production';
+    const cookieOptions: any = {
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
       httpOnly: true,
-      secure: process.env['NODE_ENV'] === 'production',
-      sameSite: 'lax',
-      domain: process.env['COOKIE_DOMAIN'] || undefined,
-    });
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax',
+    };
+
+    if (process.env.COOKIE_DOMAIN) {
+      cookieOptions.domain = process.env.COOKIE_DOMAIN;
+    }
+
+    res.cookie('x-auth-token', token, cookieOptions);
 
     // Clean up - delete the used code
     await AutoCodeModel.deleteOne({ _id: autoCode._id });

@@ -1,45 +1,102 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import DashboardGradientText from '../components/ui/DashboardGradientText';
 import { DashboardGlassCard } from '../components/ui/DashboardGlassCard';
 import MagneticButton from '../components/ui/DashboardMagneticButton';
-import { CheckCircle, Coins } from 'lucide-react';
+import { CheckCircle, Coins, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { api } from '../../../lib/api';
+import { useTaskAuthStore } from '../../../store/useTaskAuthStore';
 
 interface CoinExchangeViewProps {
   eligible: number;
   balance: number;
-  payoutRequested: boolean;
-  setPayoutRequested: (requested: boolean) => void;
+  payoutRequested?: boolean;
+  setPayoutRequested?: (requested: boolean) => void;
   addNotification: (
     message: string,
     type: 'success' | 'error' | 'info'
   ) => void;
+  onPayoutSuccess?: () => void;
 }
 
 export const CoinExchangeView: React.FC<CoinExchangeViewProps> = ({
   eligible,
   balance,
-  payoutRequested,
-  setPayoutRequested,
+  onPayoutSuccess,
   addNotification,
 }) => {
+  const { taskUserID } = useTaskAuthStore();
+
   const EXCHANGE_RATE = 100;
   const TDS_RATE = 0.15;
   const MIN_WITHDRAWAL = 500;
+  const MAX_WITHDRAWAL = 1000;
 
   const [exchangeAmount, setExchangeAmount] = useState(0);
+
+  // 1. Fetch Existing Payout Requests (To check if one is pending)
+  const { data: payoutsData, refetch: refetchPayouts } =
+    api.srkTask.getSrkTaskUserEarningsPayoutsByUser.useQuery(
+      ['srk-task-payouts', taskUserID],
+      {
+        params: { userId: taskUserID || '' },
+        query: { limit: '1' }, // We just need to know if the latest is pending
+      }
+    );
+
+  // 2. Mutation for requesting payout
+  const { mutate: requestPayout, isPending: isSubmitting } =
+    api.srkTask.srkTaskEarningsPayoutRequest.useMutation({
+      onSuccess: () => {
+        addNotification('Payout request submitted successfully!', 'success');
+        setExchangeAmount(0);
+        refetchPayouts();
+        if (onPayoutSuccess) onPayoutSuccess();
+      },
+      onError: (error) => {
+        const msg = (error as any)?.body?.message || 'Failed to request payout';
+        addNotification(msg, 'error');
+      },
+    });
+
   const rupeeRate = 1 / EXCHANGE_RATE;
   const grossAmount = exchangeAmount * rupeeRate;
   const tdsAmount = grossAmount * TDS_RATE;
   const netAmount = grossAmount - tdsAmount;
 
+  // Check if user already has a pending payout from backend data
+  const isPayoutPending = useMemo(() => {
+    if (!payoutsData?.body?.data) return false;
+    return payoutsData.body.data.some((p: any) => p.status === 'pending');
+  }, [payoutsData]);
+
+  const sliderMax = Math.min(eligible, MAX_WITHDRAWAL);
+
   const isValidAmount = exchangeAmount > 0 && exchangeAmount <= eligible;
   const meetsMinimum = exchangeAmount >= MIN_WITHDRAWAL;
-  const canRequest = isValidAmount && meetsMinimum && !payoutRequested;
+  const withinMaxLimit = exchangeAmount <= MAX_WITHDRAWAL;
+
+  const canRequest =
+    isValidAmount &&
+    meetsMinimum &&
+    withinMaxLimit &&
+    !isPayoutPending &&
+    !isSubmitting;
 
   const handleMaxClick = () => {
-    setExchangeAmount(eligible);
+    setExchangeAmount(sliderMax);
   };
+
+  const handleRequestPayout = () => {
+    if (!canRequest || !taskUserID) return;
+    requestPayout({
+      body: {
+        srkTaskUserId: taskUserID,
+        coins: exchangeAmount,
+      },
+    });
+  };
+
   return (
     <div className="space-y-8">
       <div>
@@ -63,7 +120,8 @@ export const CoinExchangeView: React.FC<CoinExchangeViewProps> = ({
                 <div>
                   <div className="flex items-center justify-between mb-2">
                     <label className="text-sm font-medium text-zinc-400">
-                      Coins to Exchange (Max: {eligible.toLocaleString()} Coins)
+                      Coins to Exchange (Max: {MAX_WITHDRAWAL.toLocaleString()}{' '}
+                      Coins)
                     </label>
                     <button
                       onClick={handleMaxClick}
@@ -77,8 +135,10 @@ export const CoinExchangeView: React.FC<CoinExchangeViewProps> = ({
                     <input
                       type="range"
                       min="0"
-                      max={eligible}
-                      value={exchangeAmount}
+                      max={sliderMax}
+                      value={
+                        exchangeAmount > sliderMax ? sliderMax : exchangeAmount
+                      }
                       onChange={(e) =>
                         setExchangeAmount(parseInt(e.target.value))
                       }
@@ -86,7 +146,7 @@ export const CoinExchangeView: React.FC<CoinExchangeViewProps> = ({
                     />
                     <div className="flex justify-between text-xs text-zinc-500 mt-2">
                       <span>0</span>
-                      <span>{eligible.toLocaleString()}</span>
+                      <span>{sliderMax.toLocaleString()}</span>
                     </div>
                   </div>
 
@@ -167,19 +227,23 @@ export const CoinExchangeView: React.FC<CoinExchangeViewProps> = ({
 
                 {/* Submit Button */}
                 <MagneticButton
-                  onClick={() => {
-                    setPayoutRequested(true);
-                    addNotification(
-                      `Payout request submitted for Rs. ${netAmount.toFixed(
-                        2
-                      )}`,
-                      'success'
-                    );
-                  }}
+                  onClick={
+                    // setPayoutRequested(true);
+                    // addNotification(
+                    //   `Payout request submitted for Rs. ${netAmount.toFixed(
+                    //     2
+                    //   )}`,
+                    //   'success'
+                    // );
+                    handleRequestPayout
+                  }
                   disabled={!canRequest}
                   className="w-full"
                 >
-                  {payoutRequested
+                  {isSubmitting && (
+                    <Loader2 className="animate-spin" size={18} />
+                  )}
+                  {isPayoutPending
                     ? 'Request Submitted ✓'
                     : canRequest
                     ? `Request Rs. ${netAmount.toFixed(2)} Payout`
@@ -191,6 +255,15 @@ export const CoinExchangeView: React.FC<CoinExchangeViewProps> = ({
                   <div className="p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
                     <p className="text-yellow-400 text-sm">
                       Minimum withdrawal is {MIN_WITHDRAWAL} coins
+                    </p>
+                  </div>
+                )}
+
+                {exchangeAmount > MAX_WITHDRAWAL && (
+                  <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
+                    <p className="text-red-400 text-sm">
+                      Maximum withdrawal per transaction is {MAX_WITHDRAWAL}{' '}
+                      coins
                     </p>
                   </div>
                 )}
@@ -243,12 +316,19 @@ export const CoinExchangeView: React.FC<CoinExchangeViewProps> = ({
               <div className="mt-6">
                 <div className="flex justify-between text-sm text-zinc-400 mb-1">
                   <span>Withdrawal Progress</span>
-                  <span>{Math.round((eligible / balance) * 100)}%</span>
+                  <span>
+                    {balance > 0
+                      ? Math.min(100, Math.round((eligible / balance) * 100))
+                      : 0}
+                    %
+                  </span>
                 </div>
                 <div className="w-full h-2 bg-zinc-800 rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-div-to-r from-emerald-500 to-green-500"
-                    style={{ width: `${(eligible / balance) * 100}%` }}
+                    className="h-full bg-gradient-to-r from-emerald-500 to-green-500"
+                    style={{
+                      width: `${balance > 0 ? (eligible / balance) * 100 : 0}%`,
+                    }}
                   />
                 </div>
               </div>
@@ -326,7 +406,7 @@ export const CoinExchangeView: React.FC<CoinExchangeViewProps> = ({
           </DashboardGlassCard>
 
           {/* Payout Status */}
-          {payoutRequested && (
+          {isPayoutPending && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}

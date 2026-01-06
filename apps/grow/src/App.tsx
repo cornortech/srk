@@ -5,9 +5,14 @@ import { GrowLandingPage } from './pages/LandingPage';
 import CallbackPage from './pages/CallbackPage';
 import { LoginPage } from './pages/LoginPage';
 import { GrowVerificationPage } from './pages/VerificationPage';
-import SocialMediaGrow from './pages/SocialMediaPage';
 import { GrowOnlyAdminDashboard } from './pages/GrowAdminDashboard';
 import { GrowDashboard } from './pages/GrowDashboard';
+import { PackageFlowPage } from './pages/PackageFlowPage';
+import { OrderConfirmationPage } from './pages/OrderConfirmationPage';
+import { UserDashboardPage } from './pages/UserDashboardPage';
+import { ToastProvider } from './lib/contexts/ToastContext';
+import ViewerPage from './pages/ViewDocumentPage';
+import { UserVerificationPage } from './pages/UserVerificationPage';
 
 const queryClient = new QueryClient();
 
@@ -15,6 +20,18 @@ const router = createBrowserRouter([
   {
     path: '/',
     element: <GrowLandingPage />,
+  },
+  {
+    path: '/package-flow',
+    element: <PackageFlowPage />,
+  },
+  {
+    path: '/order-confirmation',
+    element: <OrderConfirmationPage />,
+  },
+  {
+    path: '/dashboard',
+    element: <UserDashboardPage />,
   },
   {
     path: '/callback',
@@ -29,15 +46,19 @@ const router = createBrowserRouter([
     element: <GrowVerificationPage />,
   },
   {
-    path: '/socialmedia-grow',
-    element: <SocialMediaGrow />,
+    path: '/grow/verification-wall',
+    element: <UserVerificationPage />
   },
   {
     path: '/admin/dashboard',
     element: <GrowOnlyAdminDashboard />,
   },
   {
-    path: '/affilate/dashboard',
+    path: '/admin/view-document',
+    element: <ViewerPage />,
+  },
+  {
+    path: '/affiliate/dashboard',
     element: <GrowDashboard />,
   },
 ]);
@@ -45,7 +66,9 @@ const router = createBrowserRouter([
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
+      <ToastProvider>
+        <RouterProvider router={router} />
+      </ToastProvider>
     </QueryClientProvider>
   );
 }

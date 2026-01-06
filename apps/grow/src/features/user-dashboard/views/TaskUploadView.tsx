@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Share2, Youtube } from 'lucide-react';
+import { useToast } from '../../../lib/contexts/ToastContext';
 
 export const TaskUploadView: React.FC = () => {
+  const toast = useToast();
   const [taskType, setTaskType] = useState<'post' | 'video'>('post');
   const [postUrl, setPostUrl] = useState('');
   const [videoUrl, setVideoUrl] = useState('');
@@ -28,7 +30,7 @@ export const TaskUploadView: React.FC = () => {
   const handleAddTask = () => {
     if (taskType === 'post' && postUrl.trim()) {
       if (packageLimits.posts.used >= packageLimits.posts.total) {
-        alert('You have reached your post limit!');
+        toast.error('You have reached your post limit!');
         return;
       }
       const newPost = {
@@ -48,7 +50,7 @@ export const TaskUploadView: React.FC = () => {
       setPostUrl('');
     } else if (taskType === 'video' && videoUrl.trim()) {
       if (packageLimits.videos.used >= packageLimits.videos.total) {
-        alert('You have reached your video limit!');
+        toast.error('You have reached your video limit!');
         return;
       }
       // Note: Video logic was incomplete in source, just updating limits here

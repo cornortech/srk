@@ -2,66 +2,125 @@ import {
   CardVariant,
   DashboardData,
   ToastType,
-} from 'apps/grow/src/lib/types/dashboard';
+} from '../../../lib/types/dashboard';
 import { SparklesIcon, TrendingUpIcon, WalletIcon } from 'lucide-react';
 import { GOLD_ACCENT, GOLD_PRIMARY, INFO, SUCCESS } from '../constants';
 import { WithdrawIcon } from '../components/ui/DashboardIcons';
 import React, { useState } from 'react';
 import { GlassCard } from '../components/ui/GlassCard';
 import { formatRupees } from '../../../lib/utils/formatters';
+import { api } from '../../../lib/api';
 
 interface DashboardViewProps {
+  userID: string;
   data: DashboardData;
   showToast: (message: string, type?: ToastType) => void;
 }
 
+import { WithdrawalModal } from '../components/WithdrawalModal';
+
 export const DashboardView: React.FC<DashboardViewProps> = ({
+  userID,
   data,
   showToast,
 }) => {
-  const [isWithdrawing, setIsWithdrawing] = useState(false);
+  const [showWithdrawModal, setShowWithdrawModal] = useState(false);
 
-  const handleWithdraw = async () => {
-    setIsWithdrawing(true);
-    // Simulate API call to SRK Bank
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      showToast('Withdrawal request sent to SRK Bank!', 'success');
-    } catch (error) {
-      showToast('Withdrawal failed. Please try again.', 'error');
-    } finally {
-      setIsWithdrawing(false);
+  const {
+    data: getAffiliateUserDashboardStats,
+    isLoading,
+    refetch,
+  } = api.growAffiliate.getGrowAffiliateUserComissionEarningsDashboard.useQuery(
+    ['affiliatedUserDashboardStats', userID],
+    {
+      params: {
+        affiliateUserId: userID,
+      },
     }
+  );
+
+  const withdrawMutation =
+    api.grow.createGrowSrkAffiliateEarningPayoutRequest.useMutation({
+      onSuccess: (response) => {
+        if (response.status === 201) {
+          showToast('Withdrawal request submitted successfully!', 'success');
+          setShowWithdrawModal(false);
+          refetch(); // Refresh stats to reflect pending requests if any
+        } else {
+          showToast(
+            (response.body as any)?.message || 'Withdrawal failed',
+            'error'
+          );
+        }
+      },
+      onError: () => {
+        showToast('Something went wrong. Please try again later.', 'error');
+      },
+    });
+
+  const balance = getAffiliateUserDashboardStats?.body.currentBalance || 0;
+
+  const handleWithdrawClick = () => {
+    if (balance <= 0) {
+      showToast('No funds available for withdrawal', 'error');
+      return;
+    }
+    setShowWithdrawModal(true);
   };
+
+  const handleWithdrawSubmit = (amount: number) => {
+    withdrawMutation.mutate({
+      body: {
+        srkGrowUserId: userID,
+        amount: amount,
+      },
+    });
+  };
+
+  const consistencyDays =
+    getAffiliateUserDashboardStats?.body.activeDaysStreak ?? 0;
 
   const stats = [
     {
       label: 'Today',
-      value: formatRupees(data.today),
+      value: formatRupees(
+        getAffiliateUserDashboardStats?.body.todayEarnings?.totalEarnings ?? 0
+      ),
       variant: 'gold' as CardVariant,
-      change: '+12%',
+      change: `+${getAffiliateUserDashboardStats?.body.todayEarnings?.growthPercentage ??
+        0
+        }%`,
       icon: <SparklesIcon className="w-4 h-4" />,
       description: 'Earnings today',
     },
     {
       label: 'Wallet',
-      value: formatRupees(data.wallet),
+      value: formatRupees(
+        getAffiliateUserDashboardStats?.body.currentBalance ?? 0
+      ),
       variant: 'emerald' as CardVariant,
-      info: 'Available for withdrawal',
+      info: balance > 10 ? 'Available for withdrawal' : 'No funds',
       icon: <WalletIcon className="w-4 h-4" />,
       description: 'Current balance',
     },
     {
       label: '7 Days',
-      value: formatRupees(data.week),
+      value: formatRupees(
+        getAffiliateUserDashboardStats?.body.last7DaysEarnings?.totalEarnings ??
+        0
+      ),
       variant: 'violet' as CardVariant,
-      change: '+8%',
+      change: `+${getAffiliateUserDashboardStats?.body.last7DaysEarnings
+        ?.growthPercentage ?? 0
+        }%`,
       icon: <TrendingUpIcon className="w-4 h-4" />,
       description: 'Weekly earnings',
     },
     {
       label: 'All Time',
-      value: formatRupees(data.allTime),
+      value: formatRupees(
+        getAffiliateUserDashboardStats?.body.allTimeEarnings ?? 0
+      ),
       variant: 'gold' as CardVariant,
       icon: (
         <svg
@@ -78,9 +137,14 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     },
     {
       label: '28 Days',
-      value: formatRupees(data.days28),
+      value: formatRupees(
+        getAffiliateUserDashboardStats?.body.last28DaysEarnings
+          ?.totalEarnings ?? 0
+      ),
       variant: 'blue' as CardVariant,
-      change: '+5%',
+      change: `+${getAffiliateUserDashboardStats?.body.last28DaysEarnings
+        ?.growthPercentage ?? 0
+        }%`,
       icon: (
         <svg
           className="w-4 h-4"
@@ -99,7 +163,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     },
     {
       label: 'Consistency',
-      value: `${data.consistencyDays} Days`,
+      value: `${consistencyDays} Days`,
       variant: 'emerald' as CardVariant,
       info: 'Active streak',
       icon: (
@@ -128,18 +192,15 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           </p>
         </div>
         <button
-          onClick={handleWithdraw}
-          disabled={isWithdrawing || data.wallet <= 0}
+          onClick={handleWithdrawClick}
+          disabled={withdrawMutation.isPending || balance <= 0}
           className={`
             relative overflow-hidden group
             px-6 py-3 rounded-xl
             font-bold text-sm
             transition-all duration-300
             flex items-center justify-center gap-2
-            ${
-              data.wallet <= 0
-                ? 'opacity-50 cursor-not-allowed'
-                : 'hover:scale-105'
+            ${balance <= 0 ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105'
             }
           `}
           style={{
@@ -147,7 +208,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             boxShadow: `0 4px 20px ${GOLD_PRIMARY}40`,
           }}
         >
-          {isWithdrawing ? (
+          {withdrawMutation.isPending ? (
             <>
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
               Processing...
@@ -155,12 +216,20 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           ) : (
             <>
               <WithdrawIcon className="w-4 h-4" />
-              Withdraw {formatRupees(data.wallet)}
+              Withdraw {formatRupees(balance)}
             </>
           )}
           <div className="absolute inset-0 bg-white/0 group-hover:bg-white/10 transition-colors duration-300" />
         </button>
       </div>
+
+      <WithdrawalModal
+        isOpen={showWithdrawModal}
+        onClose={() => setShowWithdrawModal(false)}
+        onSubmit={handleWithdrawSubmit}
+        isSubmitting={withdrawMutation.isPending}
+        currentBalance={balance}
+      />
 
       {/* Small Tile Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
@@ -188,43 +257,41 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                       stat.variant === 'gold'
                         ? `${GOLD_PRIMARY}20`
                         : stat.variant === 'emerald'
-                        ? `${SUCCESS}20`
-                        : stat.variant === 'violet'
-                        ? `rgba(139, 92, 246, 0.2)`
-                        : stat.variant === 'blue'
-                        ? `${INFO}20`
-                        : 'rgba(255, 255, 255, 0.1)',
+                          ? `${SUCCESS}20`
+                          : stat.variant === 'violet'
+                            ? `rgba(139, 92, 246, 0.2)`
+                            : stat.variant === 'blue'
+                              ? `${INFO}20`
+                              : 'rgba(255, 255, 255, 0.1)',
                   }}
                 >
                   {React.cloneElement(stat.icon, {
-                    className: `${stat.icon.props.className} ${
-                      stat.variant === 'gold'
-                        ? `text-[${GOLD_PRIMARY}]`
-                        : stat.variant === 'emerald'
+                    className: `${stat.icon.props.className} ${stat.variant === 'gold'
+                      ? `text-[${GOLD_PRIMARY}]`
+                      : stat.variant === 'emerald'
                         ? `text-[${SUCCESS}]`
                         : stat.variant === 'violet'
-                        ? 'text-[#8B5CF6]'
-                        : stat.variant === 'blue'
-                        ? `text-[${INFO}]`
-                        : 'text-gray-400'
-                    }`,
+                          ? 'text-[#8B5CF6]'
+                          : stat.variant === 'blue'
+                            ? `text-[${INFO}]`
+                            : 'text-gray-400'
+                      }`,
                   })}
                 </div>
               </div>
 
               <div className="mt-auto">
                 <div
-                  className={`text-xl font-bold ${
-                    stat.variant === 'gold'
-                      ? 'text-[#E1BA73]'
-                      : stat.variant === 'emerald'
+                  className={`text-xl font-bold ${stat.variant === 'gold'
+                    ? 'text-[#E1BA73]'
+                    : stat.variant === 'emerald'
                       ? 'text-emerald-400'
                       : stat.variant === 'violet'
-                      ? 'text-violet-400'
-                      : stat.variant === 'blue'
-                      ? 'text-blue-400'
-                      : 'text-white'
-                  }`}
+                        ? 'text-violet-400'
+                        : stat.variant === 'blue'
+                          ? 'text-blue-400'
+                          : 'text-white'
+                    }`}
                 >
                   {stat.value}
                 </div>
@@ -232,11 +299,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 <div className="flex items-center justify-between mt-2 pt-2 border-t border-white/5">
                   {stat.change && (
                     <span
-                      className={`text-xs font-medium ${
-                        stat.change.startsWith('+')
-                          ? 'text-emerald-400'
-                          : 'text-rose-400'
-                      }`}
+                      className={`text-xs font-medium ${stat.change.startsWith('+')
+                        ? 'text-emerald-400'
+                        : 'text-rose-400'
+                        }`}
                     >
                       {stat.change}
                     </span>
@@ -304,7 +370,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                   className="text-2xl font-bold"
                   style={{ color: GOLD_PRIMARY }}
                 >
-                  {data.consistencyDays}
+                  {consistencyDays}
                 </div>
               </div>
             </div>
@@ -319,10 +385,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 <div
                   className="h-full rounded-full transition-all duration-1000"
                   style={{
-                    width: `${Math.min(
-                      (data.consistencyDays / 30) * 100,
-                      100
-                    )}%`,
+                    width: `${Math.min((consistencyDays / 30) * 100, 100)}%`,
                     background: `linear-gradient(90deg, ${GOLD_PRIMARY}, ${GOLD_ACCENT})`,
                     boxShadow: `0 0 20px ${GOLD_PRIMARY}40`,
                   }}

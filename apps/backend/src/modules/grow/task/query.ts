@@ -1732,7 +1732,6 @@ const getApprovedSrkTaskAffiliateVerificationRequest: AppRouteImplementationOrOp
         taskUserId: verificationRecord._id,
       });
 
-    console.log('TaskUserId', verificationRecord._id);
     return {
       status: 200,
       body: {

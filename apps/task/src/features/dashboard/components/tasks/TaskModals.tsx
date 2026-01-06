@@ -109,22 +109,24 @@ export const PlatformSpecificTaskModal: React.FC<
 
     const realTasks: Task[] =
       tasksRes?.status === 200 && tasksRes.body.data
-        ? tasksRes.body.data.map((item: any) => ({
-          id: item.actionId,
-          title:
-            item.taskType === 'follow'
-              ? `Follow ${item.username}`
-              : `Like Post`,
-          desc: `${item.socialMediaPlatform} ${item.taskType} Task`,
-          platform: item.socialMediaPlatform.toLowerCase() as SocialPlatform,
-          type: item.taskType as TaskType,
-          coins: 100, // Hardcoded as per instruction
-          username: item.username,
-          url: item.profileLinkURL || item.postUrl,
-          required: 'Screenshot Proof',
-          status: 'pending',
-          completed: false,
-        }))
+        ? tasksRes.body.data
+          .filter((item: any) => item?.socialMediaPlatform && item?.taskType)
+          .map((item: any) => ({
+            id: item.actionId || '',
+            title:
+              item.taskType === 'follow'
+                ? `Follow ${item.username || 'User'}`
+                : `Like Post`,
+            desc: `${item.socialMediaPlatform} ${item.taskType} Task`,
+            platform: item.socialMediaPlatform.toLowerCase() as SocialPlatform,
+            type: item.taskType as TaskType,
+            coins: 100, // Hardcoded as per instruction
+            username: item.username || '',
+            url: item.postUrl || item.profileLinkURL || '',
+            required: 'Screenshot Proof',
+            status: 'pending',
+            completed: false,
+          }))
         : [];
 
     const tasks = realTasks;
@@ -172,7 +174,7 @@ export const PlatformSpecificTaskModal: React.FC<
               <div>
                 <h2 className="text-3xl font-bold text-white">
                   {platformInfo?.name}{' '}
-                  {type.charAt(0).toUpperCase() + type.slice(1)} Tasks
+                  {type ? type.charAt(0).toUpperCase() + type.slice(1) : ''} Tasks
                 </h2>
                 <p className="text-zinc-400">
                   {isLoading ? 'Loading...' : `${tasks.length} available tasks`}
@@ -235,7 +237,7 @@ export const PlatformSpecificTaskModal: React.FC<
                             </p>
                           )}
                           <p className="text-xs text-red-400 mt-2">
-                           Needed :  {task.required}
+                            Needed :  {task.required}
                           </p>
                           <div className="mt-4">
                             <a

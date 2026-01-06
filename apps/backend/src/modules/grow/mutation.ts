@@ -14,6 +14,7 @@ import { AppRouteImplementationOrOptions } from '@ts-rest/express/src/lib/types'
 import { growSrkAffiliateEarningStatementModel } from '../../model/grow/growSrkAffiliateEarningStatementModel';
 import { growSrkAffiliateUserBalanceModel } from '../../model/grow/growSrkAffiliateUserBalanceModel';
 import { GrowSrkAffiliateEarningPayoutModel } from '../../model/grow/growSrkAffiliateEarningPayoutModel';
+import GrowAffiliateUserModel from '../../model/grow/growAffiliateUserModel';
 
 export function calculatePackageDiscount(
   packageId: string,
@@ -727,8 +728,6 @@ const srkGrowAffiliateVerificationRequest: AppRouteImplementationOrOptions<
   typeof growContract.srkGrowAffiliateVerificationRequest
 > = async ({ body }) => {
   try {
-    console.log('Received affiliate verification request:', body);
-    
     const srkUniversityUserExist = await UserModel.findById(
       body.srkUniversityUserId
     );
@@ -746,6 +745,7 @@ const srkGrowAffiliateVerificationRequest: AppRouteImplementationOrOptions<
     await growSrkAffiliateVerificationModel.create({
       srkUniversityUserId: body.srkUniversityUserId,
       verificationImageUrl: body.verificationImageUrl,
+      status: 'pending',
     });
 
     return {
@@ -822,18 +822,13 @@ const approveSrkGrowAffiliateVerificationRequest: AppRouteImplementationOrOption
     const growUserPromoCode =
       await AuthService.generateUniquePromoCodeForSrkGrowUser();
 
-    await growSocialMediaPackageUserModel.create({
-      userType: 'affiliate',
-      country: requestExist.srkUniversityUserId.country,
-      fullName: `${requestExist.srkUniversityUserId.firstName}  ${requestExist.srkUniversityUserId.lastName}`,
+    await GrowAffiliateUserModel.create({
+      srkUniversityUserId: requestExist.srkUniversityUserId._id,
+      fullName: `${requestExist.srkUniversityUserId.firstName} ${requestExist.srkUniversityUserId.lastName}`,
       email: requestExist.srkUniversityUserId.email,
       gender: requestExist.srkUniversityUserId.gender,
-      phone: requestExist.srkUniversityUserId.phoneNumber,
-      status: 'portalActivated',
-      kycURL: requestExist.verificationImageUrl,
-      password: '-',
       promoCode: growUserPromoCode,
-      srkUniversityUserId: requestExist.srkUniversityUserId._id,
+      isActive: true,
     });
 
     return {
@@ -1011,7 +1006,7 @@ const acceptGrowSrkAffiliateEarningPayoutRequestByAdmin: AppRouteImplementationO
 
     // Update user balance
     const userBalance = await growSrkAffiliateUserBalanceModel.findOne({
-      growSocialMediaPackageUserId: payoutRequest.srkGrowUserId,
+      growAffiliateUserId: payoutRequest.growAffiliateUserId,
     });
 
     if (!userBalance || userBalance.wallet < payoutRequest.amount) {

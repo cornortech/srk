@@ -12,7 +12,9 @@ interface UseGrowSSOReturn {
   error: string | null;
 }
 
-const useGrowSSO = ({ backendUrl }: UseGrowSSOOptions): UseGrowSSOReturn => {
+export const useGrowSSO = ({
+  backendUrl,
+}: UseGrowSSOOptions): UseGrowSSOReturn => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -22,7 +24,10 @@ const useGrowSSO = ({ backendUrl }: UseGrowSSOOptions): UseGrowSSOReturn => {
       setError(null);
 
       try {
-        const response: SSOCodeResponse = await getAutoCode(backendUrl, program);
+        const response: SSOCodeResponse = await getAutoCode(
+          backendUrl,
+          program
+        );
 
         if (response.success && response.data?.redirectUrl) {
           window.location.href = response.data.redirectUrl;
@@ -31,9 +36,7 @@ const useGrowSSO = ({ backendUrl }: UseGrowSSOOptions): UseGrowSSOReturn => {
         }
       } catch (err: any) {
         const errorMessage =
-          err.response?.data?.message ||
-          err.message ||
-          'SSO redirect failed';
+          err.response?.data?.message || err.message || 'SSO redirect failed';
 
         setError(errorMessage);
         console.error('SSO redirect error:', err);
@@ -55,5 +58,3 @@ const useGrowSSO = ({ backendUrl }: UseGrowSSOOptions): UseGrowSSOReturn => {
     error,
   };
 };
-
-export default useGrowSSO;

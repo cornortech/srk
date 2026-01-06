@@ -57,11 +57,6 @@ const growSocialMediaPackageUserSchema = new mongoose.Schema(
     promoCode: {
       type: String,
     },
-    userType: {
-      type: String,
-      enum: ['affiliate', 'package'],
-      required: true,
-    },
     srkUniversityUserId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',

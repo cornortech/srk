@@ -14,14 +14,15 @@ import {
 } from 'lucide-react';
 import React from 'react';
 import { motion } from 'framer-motion';
-import { DashboardView, RejectedTaskEntry } from '../types';
+import { DashboardView } from '../types';
 import { DashboardGlassCard } from '../components/ui/DashboardGlassCard';
+import { api } from '../../../lib/api';
+import { useTaskAuthStore } from '../../../store/useTaskAuthStore';
 
 interface SidebarProps {
   dashView: DashboardView;
   setDashView: (view: DashboardView) => void;
   isApproved: boolean;
-  rejectedTasks: RejectedTaskEntry[];
   setView: (view: 'landing' | 'dashboard') => void;
   balance: number;
   eligible: number;
@@ -29,23 +30,42 @@ interface SidebarProps {
     message: string,
     type: 'success' | 'error' | 'info'
   ) => void;
+  isActivated: boolean;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
   dashView,
   setDashView,
   isApproved,
-  rejectedTasks,
   setView,
   balance,
   eligible,
   addNotification,
+  isActivated,
 }) => {
+  const { taskUserID } = useTaskAuthStore();
+
+  // Fetch rejected tasks count
+  const { data: rejectedTasksData } =
+    api.srkTask.getRejectedSrkTaskActionSubmissionsByUser.useQuery(
+      ['getRejectedSrkTaskActionSubmissionsByUser', taskUserID],
+      {
+        params: { userId: taskUserID || '' },
+        query: { page: '1', limit: '1' }, // Only need count
+      },
+      {
+        enabled: !!taskUserID && isApproved,
+        queryKey: ['getRejectedSrkTaskActionSubmissionsByUser', taskUserID || ''],
+      }
+    );
+
+  const rejectedTasksCount = rejectedTasksData?.body?.totalRecords || 0;
   const navItems: {
     view: DashboardView;
     icon: React.FC<any>;
     label: string;
     requiresApproval?: boolean;
+    requiresActivation?: boolean;
     badge?: number;
   }[] = [
     {
@@ -65,7 +85,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       icon: ListChecks,
       label: 'Tasks',
       requiresApproval: true,
-      badge: rejectedTasks.length,
+      badge: rejectedTasksCount,
     },
     {
       view: 'taskHistory',
@@ -84,6 +104,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       icon: DollarSign,
       label: 'Coin Exchange',
       requiresApproval: true,
+      requiresActivation: true,
     },
     {
       view: 'finance',
@@ -124,10 +145,18 @@ const Sidebar: React.FC<SidebarProps> = ({
         </div>
 
         <nav className="space-y-2">
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            const isDisabled = item.requiresApproval && !isApproved;
-            const isActive = dashView === item.view;
+          {navItems
+            .filter((item) => {
+              // Hide coin exchange if not activated
+              if (item.requiresActivation && !isActivated) {
+                return false;
+              }
+              return true;
+            })
+            .map((item) => {
+              const Icon = item.icon;
+              const isDisabled = item.requiresApproval && !isApproved;
+              const isActive = dashView === item.view;
 
             return (
               <motion.button

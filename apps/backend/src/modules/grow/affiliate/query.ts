@@ -487,7 +487,6 @@ const getGrowAffiliateUser: AppRouteImplementationOrOptions<typeof growAffiliate
           fullName: affiliateUserExist.fullName,
           email: affiliateUserExist.email,
           phone: affiliateUserExist.phone,
-          userType: affiliateUserExist.userType,
           createdAt: affiliateUserExist.createdAt.toLocaleString(),
           isEmailNotifications: affiliateUserExist.isEmailNotifications ?? null,
           isPushNotifications: affiliateUserExist.isPushNotifications ?? null,

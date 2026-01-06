@@ -1,5 +1,4 @@
 import { AppRouteImplementationOrOptions } from '@ts-rest/express/src/lib/types';
-import { authContract } from '../../../../../libs/shared/contracts/src/index';
 import { UserModel } from '../../model/userModel';
 import AuthService from '../../services/authService';
 import { SubscriptionModel } from '../../model/subscriptionModel';
@@ -19,6 +18,7 @@ import { CoursePaymentModel } from '../../model/coursePayment';
 import { methods } from '../../utils/methods';
 import { EarningStatementModel } from '../../model/earningStatementModel';
 import { growSocialMediaPackageUserModel } from '../../model/growSocialMediaPackageUserModel';
+import { authContract } from '@srk/shared/contracts';
 
 interface CalculateEarningsProps {
   referredBy: string;
@@ -51,7 +51,7 @@ const calculateEarnings = async ({
   seniorPackageId,
 }: CalculateEarningsProps) => {
   try {
-    let {
+    const {
       balance,
       companyTurnover,
       earning,

@@ -4,10 +4,8 @@ import {
   Clock,
   AlertTriangle,
   Upload,
-  FileText,
   CreditCard,
   Loader2,
-  Trash2,
   ExternalLink,
   X,
 } from 'lucide-react';
@@ -27,13 +25,12 @@ type TResubmitForm = z.infer<typeof resubmitGrowVerificationSchema>;
 
 export const UserVerificationPage = () => {
   const navigate = useNavigate();
-  const { user, setUser, logout } = useGrowAuthStore();
+  const { user: storeUser, logout } = useGrowAuthStore();
   const toast = useToast();
   // const [kycFiles, setKycFiles] = useState<File[]>([]);
-  const [currentKycDocs, setCurrentKycDocs] = useState<string[]>([]);
   const [paymentProof, setPaymentProof] = useState<File | null>(null);
   const { uploadFile, isUploading: isUploadingFiles } =
-    useSRKFileUpload('grow-resubmission');
+    useSRKFileUpload('grow');
 
   const {
     register,
@@ -46,16 +43,18 @@ export const UserVerificationPage = () => {
     resolver: zodResolver(resubmitGrowVerificationSchema),
   });
 
-  // API Hooks
-  const { data: profileData, refetch } = api.grow.getSrkGrowProfile.useQuery(
-    ['growProfile', user?._id],
-    user?._id ? { params: { userId: user._id } } : ({} as any),
+  // API Hooks - Check if profile exists
+  const { data: profileData, refetch, isLoading } = api.grow.getSrkGrowProfile.useQuery(
+    ['growProfile', storeUser?._id],
+    storeUser?._id ? { params: { userId: storeUser._id } } : ({} as any),
     {
-      enabled: !!user?._id,
+      queryKey: ['growProfile', storeUser?._id],
+      enabled: !!storeUser?._id,
       refetchOnWindowFocus: true,
-      queryKey: ['growProfile', user?._id || ''],
     }
   );
+
+  const user = profileData?.status === 200 ? profileData.body : null;
 
   const resubmitMutation = api.grow.resubmitGrowVerification.useMutation({
     onSuccess: (data) => {
@@ -77,47 +76,29 @@ export const UserVerificationPage = () => {
     },
   });
 
-  // Sync profile data to store and local state
+  // Sync profile data to local state
   useEffect(() => {
-    if (profileData?.status === 200) {
-      const updatedUser = profileData.body.userDetails;
-      const payment = profileData.body.enrollmentData?.enrollmentPaymentDetails;
-      setUser({
-        ...user!,
-        status: updatedUser.status as any,
-        rejectionReason: payment?.rejectionReason ?? null,
-        // kycURL: updatedUser.kycURL,
-        phone: updatedUser.phone,
-        country: updatedUser.country,
-        transactionId: payment?.transactionId,
-        paymentURL: payment?.paymentUrl,
-        paymentMethod: payment?.paymentMethod as any,
-      });
+    if (user?.userDetails) {
+      const updatedUser = user.userDetails;
+      const payment = user.enrollmentData?.enrollmentPaymentDetails;
 
       if (updatedUser._id) setValue('userId', updatedUser._id);
       if (payment?.transactionId)
         setValue('transactionId', payment.transactionId);
       if (payment?.paymentUrl) setValue('paymentURL', payment.paymentUrl);
-      // if (updatedUser.kycURL) {
-      //   const docs = Array.isArray(updatedUser.kycURL)
-      //     ? updatedUser.kycURL
-      //     : [updatedUser.kycURL];
-      //   setCurrentKycDocs(docs);
-      //   setValue('kycURLs', docs);
-      // }
     }
-  }, [profileData, setUser, setValue]);
+  }, [user, setValue]);
 
   useEffect(() => {
-    if (!user) {
+    if (!storeUser) {
       navigate('/login');
       return;
     }
 
-    if (user.status === 'portalActivated') {
+    if (storeUser.status === 'portalActivated') {
       navigate('/dashboard');
     }
-  }, [user, navigate]);
+  }, [storeUser, navigate]);
 
   // const handleKycFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
   //   if (e.target.files && e.target.files.length > 0) {
@@ -171,8 +152,8 @@ export const UserVerificationPage = () => {
       // 4. Call Backend
       resubmitMutation.mutate({
         body: {
-          userId: user._id,
-          // kycURLs: totalKycUrls,
+          userId: user.userDetails._id || "",
+          kycURLs: [],
           transactionId: data.transactionId,
           paymentURL: finalPaymentUrl,
         },
@@ -182,8 +163,6 @@ export const UserVerificationPage = () => {
       toast.error('Failed to upload documents. Please try again.');
     }
   };
-
-  if (!user) return null;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0a0705] to-black text-white flex items-center justify-center p-4">
@@ -200,7 +179,23 @@ export const UserVerificationPage = () => {
           <p className="text-gray-400">Manage your verification status</p>
         </div>
 
-        {user.status === 'verificationPending' && (
+        {isLoading ? (
+          <GlassCard className="max-w-xl mx-auto text-center py-12 px-8">
+            <Loader2 size={48} className="text-blue-400 animate-spin mx-auto mb-4" />
+            <div className="text-white">Loading verification status...</div>
+          </GlassCard>
+        ) : !user ? (
+          <GlassCard className="max-w-xl mx-auto text-center py-12 px-8">
+            <AlertTriangle size={48} className="text-red-400 mx-auto mb-4" />
+            <div className="text-white mb-4">Unable to load user data</div>
+            <button
+              onClick={() => navigate('/login')}
+              className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors text-white text-sm"
+            >
+              Back to Login
+            </button>
+          </GlassCard>
+        ) : user.userDetails.status === 'verificationPending' ? (
           <GlassCard className="max-w-xl mx-auto text-center py-12 px-8">
             <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-blue-500/10 flex items-center justify-center">
               <Clock size={48} className="text-blue-400 animate-pulse" />
@@ -229,9 +224,7 @@ export const UserVerificationPage = () => {
               </button>
             </div>
           </GlassCard>
-        )}
-
-        {user.status === 'verificationRejected' && (
+        ) : user.userDetails.status === 'verificationRejected' ? (
           <div className="grid lg:grid-cols-5 gap-8">
             <div className="lg:col-span-2 space-y-6">
               <GlassCard className="border-red-500/30 bg-red-500/5">
@@ -250,7 +243,7 @@ export const UserVerificationPage = () => {
                     Reason for Rejection
                   </span>
                   <p className="text-white text-sm">
-                    {profileData?.body.enrollmentData?.enrollmentPaymentDetails
+                    {user.enrollmentData?.enrollmentPaymentDetails
                       ?.rejectionReason ||
                       'One or more documents were blurry or invalid.'}
                   </p>
@@ -466,7 +459,7 @@ export const UserVerificationPage = () => {
               </GlassCard>
             </div>
           </div>
-        )}
+        ) : null}
       </div>
     </div>
   );

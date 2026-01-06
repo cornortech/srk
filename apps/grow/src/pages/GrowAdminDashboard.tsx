@@ -17,9 +17,7 @@ import {
 import { GlobalOverviewView } from '../features/admin/views/GlobalOverviewView';
 import { AffiliateVerificationView } from '../features/admin/views/AffiliateVerificationView';
 import { UserVerificationView } from '../features/admin/views/UserVerificationView';
-import { PaymentVerificationView } from '../features/admin/views/PaymentVerificationView';
 import { TaskMonitoringView } from '../features/admin/views/TaskMonitoringViewNew';
-import { PrivateTasksView } from '../features/admin/views/PrivateTasksView';
 import { AffiliateUsersView } from '../features/admin/views/AffiliateUsersView';
 import { PackageUsersView } from '../features/admin/views/PackageUsersView';
 import { CreateUserView } from '../features/admin/views/CreateUserView';
@@ -77,8 +75,6 @@ export const GrowOnlyAdminDashboard = () => {
         return <UserVerificationView />;
       case 'taskmonitoring':
         return <TaskMonitoringView />;
-      case 'privatetasks':
-        return <PrivateTasksView data={data} />;
       case 'affiliatelist':
         return <AffiliateUsersView />;
       case 'packagelist':

@@ -18,20 +18,15 @@ import {
   paginatedGrowSrkAffiliateEarningPayoutsSchema,
   getSrkGrowAffiliateEarningPayoutQueryParamsSchema,
   taskMonitoringResponseSchema,
-  toggleEnrollmentActiveStatusSchema,
   globalOverviewResponseSchema,
   globalOverviewQuerySchema,
-  resubmitGrowVerificationSchema,
+  getGrowAffiliateUserResponseSchema,
+  getAllSrkGrowAffiliateUsersQueryParams,
+  getAllSrkGrowAffiliateUsersResponseSchema,
+  getGrowAffiliateVerificationResponseSchema,
 } from './schema';
 import { ErrorSchema, SuccessSchema } from '../common';
 import { z } from 'zod';
-
-const GrowAffiliateApprovedResponseSchema = z.object({
-  success: z.boolean(),
-  message: z.string(),
-  verificationRequests: z.array(z.any()),
-  relatedUserData: z.array(z.any()),
-});
 
 const c = initContract();
 
@@ -82,7 +77,18 @@ export const growContract = c.router({
       200: getAllSrkGrowUsersResponseSchema,
       500: ErrorSchema,
     },
-    summary: 'Get all srk grow users who is registered',
+    summary: 'Get all srk grow package users who are registered',
+  },
+
+  getAllSrkGrowAffiliateUsers: {
+    method: 'GET',
+    path: '/grow-affiliate-users',
+    query: getAllSrkGrowAffiliateUsersQueryParams,
+    responses: {
+      200: getAllSrkGrowAffiliateUsersResponseSchema,
+      500: ErrorSchema,
+    },
+    summary: 'Get all srk grow affiliate users',
   },
 
   getSrkGrowProfile: {
@@ -98,6 +104,20 @@ export const growContract = c.router({
       500: ErrorSchema,
     },
     summary: 'Get Srk Grow Profile by Id',
+  },
+
+  getGrowAffiliateUser: {
+    method: 'GET',
+    path: '/grow-affiliate-user/:userId',
+    pathParams: z.object({
+      userId: z.string(),
+    }),
+    responses: {
+      200: getGrowAffiliateUserResponseSchema,
+      404: ErrorSchema,
+      500: ErrorSchema,
+    },
+    summary: 'Get Grow Affiliate User details by ID',
   },
 
   createGrowSocialMediaEnrollment: {
@@ -163,7 +183,12 @@ export const growContract = c.router({
   resubmitGrowVerification: {
     method: 'PUT',
     path: '/resubmit-verification',
-    body: resubmitGrowVerificationSchema,
+    body: z.object({
+      userId: z.string(),
+      kycURLs: z.array(z.string()),
+      transactionId: z.string(),
+      paymentURL: z.string(),
+    }),
     responses: {
       200: SuccessSchema,
       400: ErrorSchema,
@@ -318,14 +343,14 @@ export const growContract = c.router({
     },
     summary: 'Get approved SRK Grow Affiliate Verification Request for a user',
   },
-  getApprovedSrkGrowAffiliateVerificationRequest: {
+  getSrkGrowAffiliateVerificationRequest: {
     method: 'GET',
     path: '/grow/affiliate/get-approved-verification-request',
     query: z.object({
       srkUniversityUserId: z.string(), // required
     }),
     responses: {
-      200: GrowAffiliateApprovedResponseSchema,
+      200: getGrowAffiliateVerificationResponseSchema,
       403: ErrorSchema,
       404: ErrorSchema,
       500: ErrorSchema,

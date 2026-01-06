@@ -14,7 +14,7 @@ import { Eye } from 'lucide-react';
 export const UserVerificationView = () => {
   const [page, setPage] = useState(1);
 
-  const { data: growEnrollementUserData } =
+  const { data: growEnrollementUserData, refetch } =
     api.grow.getAllGrowSocialMediaEnrollement.useQuery(
       ['enrolledUser', page], // queryKey
       {
@@ -24,15 +24,15 @@ export const UserVerificationView = () => {
         },
       }
     );
-  
+
   // Update these variables:
-const totalPage = growEnrollementUserData?.body?.totalPages ?? 1;
+  const totalPage = growEnrollementUserData?.body?.totalPages ?? 1;
 
   const [rejectionModalOpen, setRejectionModalOpen] = useState(false);
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [userDetailsModalOpen, setUserDetailsModalOpen] = useState(false);
-  const [selectedUserData, setSelectedUserData] = useState<typeof growEnrollementUserData extends { body: { data: Array<infer T> } } ? T : never | null>(null);
+  const [selectedUserData, setSelectedUserData] = useState<NonNullable<typeof growEnrollementUserData>['body']['data'][number] | null>(null);
 
   const { show } = useSRKAlert();
 
@@ -41,6 +41,8 @@ const totalPage = growEnrollementUserData?.body?.totalPages ?? 1;
       onSuccess: (res) => {
         if (res.status === 200) {
           show('Enrollement User approved', 'success');
+          refetch();
+          setUserDetailsModalOpen(false);
         }
       },
     });
@@ -59,6 +61,9 @@ const totalPage = growEnrollementUserData?.body?.totalPages ?? 1;
       onSuccess: (res) => {
         if (res.status === 200) {
           show('Enrollement User rejected', 'success');
+          refetch();
+          setRejectionModalOpen(false);
+          setUserDetailsModalOpen(false);
         }
       },
     });
@@ -84,6 +89,27 @@ const totalPage = growEnrollementUserData?.body?.totalPages ?? 1;
   const handleViewDetails = (item: NonNullable<typeof growEnrollementUserData>['body']['data'][number]) => {
     setSelectedUserData(item);
     setUserDetailsModalOpen(true);
+  };
+
+  const getStatusBackground = (status: string) => {
+    switch (status) {
+      case 'Active':
+      case 'Approved':
+      case 'verified':
+        return 'bg-emerald-500/10';
+      case 'Inactive':
+      case 'Rejected':
+        return 'bg-rose-500/10';
+      case 'Pending':
+      case 'verificationPending':
+      case 'In Review':
+      case 'Pending Verification':
+        return 'bg-amber-500/10';
+      case 'Package Timed Out':
+        return 'bg-rose-900/20';
+      default:
+        return 'bg-zinc-500/10';
+    }
   };
 
   return (
@@ -152,7 +178,7 @@ const totalPage = growEnrollementUserData?.body?.totalPages ?? 1;
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
             <div>
               <h3 className="text-lg font-bold text-white">
-                User KYC Verification
+                Package Enrollment Verification
               </h3>
               <p className="text-gray-400 text-sm">{0} users found</p>
             </div>
@@ -241,7 +267,7 @@ const totalPage = growEnrollementUserData?.body?.totalPages ?? 1;
                         {moment(item.createdAt).format('LT')}
                       </p>
                     </td>
-                    <td className="py-4 px-4">
+                    <td className={`py-4 px-4 ${getStatusBackground(item.userData.status)}`}>
                       <StatusBadge status={item.userData.status} />
                     </td>
                     <td className="py-4 px-4">
@@ -255,27 +281,6 @@ const totalPage = growEnrollementUserData?.body?.totalPages ?? 1;
                         >
                           <Eye size={16} />
                         </motion.button>
-                        {item.userData.status === 'verificationPending' && (
-                          <>
-                            <motion.button
-                              whileHover={{ scale: 1.05 }}
-                              whileTap={{ scale: 0.95 }}
-                              onClick={() => handleApprove(item._id)}
-                              disabled={approvePending}
-                              className="px-3 py-1 bg-emerald-600/20 text-emerald-300 rounded-lg hover:bg-emerald-600/30 transition-colors text-xs font-medium disabled:opacity-50"
-                            >
-                              {approvePending && selectedItemId === item._id ? '...' : '✓'}
-                            </motion.button>
-                            <motion.button
-                              whileHover={{ scale: 1.05 }}
-                              whileTap={{ scale: 0.95 }}
-                              onClick={() => handleReject(item._id)}
-                              className="px-3 py-1 bg-rose-600/20 text-rose-300 rounded-lg hover:bg-rose-600/30 transition-colors text-xs font-medium"
-                            >
-                              ✕
-                            </motion.button>
-                          </>
-                        )}
                       </div>
                     </td>
                   </motion.tr>
@@ -300,6 +305,10 @@ const totalPage = growEnrollementUserData?.body?.totalPages ?? 1;
             isOpen={userDetailsModalOpen}
             onClose={() => setUserDetailsModalOpen(false)}
             userData={selectedUserData}
+            onApprove={handleApprove}
+            onReject={handleReject}
+            approvePending={approvePending}
+            selectedItemId={selectedItemId}
           />
         )}
       </AnimatePresence>

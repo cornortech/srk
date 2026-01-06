@@ -84,31 +84,30 @@ const analyticsData: {
 };
 
 export const AnalyticsView: React.FC = () => {
-  const { user, setUser } = useGrowAuthStore();
+  const { user: storeUser } = useGrowAuthStore();
   const [isAddingLink, setIsAddingLink] = useState(false);
   const [newLink, setNewLink] = useState('');
   const { showToast } = useToast();
+
+  // Fetch user data from API
+  const { data: profileData, isLoading } = api.grow.getSrkGrowProfile.useQuery(
+    ['growProfile', storeUser?._id],
+    storeUser?._id ? { params: { userId: storeUser._id } } : ({} as any),
+    {
+      queryKey: ['growProfile', storeUser?._id],
+      enabled: !!storeUser?._id,
+      refetchOnWindowFocus: true,
+    }
+  );
+
+  const user = profileData?.status === 200 ? profileData.body : null;
 
   const { mutate: createTasks, isPending } =
     api.grow.createGrowSocialMediaTasks.useMutation({
       onSuccess: () => {
         showToast('Link added successfully', 'success');
-        if (user && user.enrollmentData) {
-          const updatedUser = {
-            ...user,
-            enrollmentData: {
-              ...user.enrollmentData,
-              engagementPostURLs: [
-                ...(user.enrollmentData.engagementPostURLs || []),
-                newLink,
-              ],
-            },
-          };
-
-          setUser(updatedUser);
-          setNewLink('');
-          setIsAddingLink(false);
-        }
+        setNewLink('');
+        setIsAddingLink(false);
       },
       onError: (error: any) => {
         showToast(error.body.message || 'Failed to add link', 'error');
@@ -158,6 +157,22 @@ export const AnalyticsView: React.FC = () => {
   const enrolledPlatform = enrollmentPackageDetails?.socialMediaPlatform;
   const enrolledPackageSubType =
     enrollmentData?.enrollmentPackageDetails?.packageType?.packageSubType;
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-white">Loading analytics...</div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-white">Unable to load user data</div>
+      </div>
+    );
+  }
 
   const filteredPlatforms = analyticsData.platforms
     .filter((platform) =>

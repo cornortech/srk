@@ -129,8 +129,8 @@ export const AfterVerifiedDashboardPage: React.FC = () => {
         userProfileData.body.userData.kycStatus === 'approved'
           ? 'verified'
           : userProfileData.body.userData.kycStatus === 'rejected'
-          ? 'rejected'
-          : 'pending',
+            ? 'rejected'
+            : 'pending',
     };
 
   const [activeTasks, setActiveTasks] = useState<Task[]>([
@@ -246,7 +246,7 @@ export const AfterVerifiedDashboardPage: React.FC = () => {
             hasPurchased={hasPurchased}
             setHasPurchased={setHasPurchased}
             addNotification={addNotification}
-            kycStatus={userProfileData?.body.userData.kycStatus ?? 'pending'}
+            kycStatus={userProfileData?.body.userData.kycStatus}
             rejectionReason={undefined}
           />
         );
@@ -395,8 +395,8 @@ export const AfterVerifiedDashboardPage: React.FC = () => {
           setIsMenuOpen={setIsMenuOpen}
           addNotification={addNotification}
           isActivated={userProfileData?.body.userData.isActivated ?? false}
-          // title={viewsConfig[dashView].title}
-          // desc={viewsConfig[dashView].desc}
+        // title={viewsConfig[dashView].title}
+        // desc={viewsConfig[dashView].desc}
         >
           <AnimatedBackground />
           {renderView()}

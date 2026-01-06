@@ -15,7 +15,6 @@ interface DashboardLayoutProps {
   setDashView: (view: DashboardViewType) => void;
   // Props for sidebar/mobile menu
   isApproved: boolean;
-  rejectedTasks: any[];
   eligible: number;
   isMenuOpen: boolean;
   setIsMenuOpen: (open: boolean) => void;
@@ -23,6 +22,7 @@ interface DashboardLayoutProps {
     message: string,
     type: 'success' | 'error' | 'info'
   ) => void;
+  isActivated: boolean;
   // title: string;
   // desc: string;
 }
@@ -34,11 +34,11 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   balance,
   setDashView,
   isApproved,
-  rejectedTasks,
   eligible,
   isMenuOpen,
   setIsMenuOpen,
   addNotification,
+  isActivated,
   // title,
   // desc,
 }) => {
@@ -88,13 +88,15 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                   </div>
                 </div>
 
-                {/* Notification Bell */}
-                <MagneticButton
-                  small
-                  onClick={() => setDashView('coinExchange')}
-                >
-                  <Wallet size={16} /> Withdraw
-                </MagneticButton>
+                {/* Withdraw Button - Only show if portal is activated */}
+                {isActivated && (
+                  <MagneticButton
+                    small
+                    onClick={() => setDashView('coinExchange')}
+                  >
+                    <Wallet size={16} /> Withdraw
+                  </MagneticButton>
+                )}
               </div>
             </div>
           </div>
@@ -107,10 +109,10 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
           eligible={eligible}
           isApproved={isApproved}
           dashView={dashView}
-          rejectedTasks={rejectedTasks}
           setView={setView}
           setDashView={setDashView}
           addNotification={addNotification}
+          isActivated={isActivated}
         />
 
         <div className="max-w-7xl mx-auto px-6 py-8">
@@ -121,11 +123,11 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                 dashView={dashView}
                 setDashView={setDashView}
                 isApproved={isApproved}
-                rejectedTasks={rejectedTasks}
                 setView={setView}
                 balance={balance}
                 eligible={eligible}
                 addNotification={addNotification}
+                isActivated={isActivated}
               />
             </div>
 

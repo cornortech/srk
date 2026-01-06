@@ -2,9 +2,9 @@ import mongoose from 'mongoose';
 
 const growSrkAffiliateUserBalanceSchema = new mongoose.Schema(
   {
-    growSocialMediaPackageUserId: {
+    growAffiliateUserId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'growSocialMediaPackageUser',
+      ref: 'growAffiliateUser',
       required: true,
     },
     wallet: {

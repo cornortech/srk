@@ -1,6 +1,6 @@
 import { Button } from '@nextui-org/react';
+import { useGrowSSO } from '@srk/shared/hooks';
 import { toast } from 'sonner';
-import useGrowSSO from '../../../../libs/shared/hooks/src/lib/useGrowSSO'
 
 interface GrowProgramButtonProps {
   className?: string;
@@ -12,13 +12,13 @@ interface GrowProgramButtonProps {
  * Button to redirect user to Grow Program via SSO
  * Place this in the university dashboard where users can access the Grow app
  */
-const GrowAffiliateProgramButton = ({ 
-  className = '', 
+const GrowAffiliateProgramButton = ({
+  className = '',
   variant = 'solid',
   size = 'md'
 }: GrowProgramButtonProps) => {
   const backendUrl = import.meta.env.VITE_BACKEND_ROOT_URL || 'http://localhost:4000';
-  
+
   const { redirectToGrowAffiliateProgram, isLoading, error } = useGrowSSO({
     backendUrl,
   });

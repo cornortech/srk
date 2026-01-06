@@ -9,6 +9,8 @@ import {
   Crown,
   ShieldCheck,
   Sparkles,
+  AlertCircle,
+  Clock,
 } from 'lucide-react';
 import DashboardStatusBadge from '../components/ui/DashboardStatusBadge';
 import MagneticButton from '../components/ui/DashboardMagneticButton';
@@ -19,6 +21,8 @@ interface VerificationViewProps {
   hasPurchased: boolean;
   setHasPurchased: (purchased: boolean) => void;
   addNotification: (message: string, type: 'success') => void;
+  kycStatus: 'pending' | 'approved' | 'rejected';
+  rejectionReason?: string;
 }
 
 export const VerificationView: React.FC<VerificationViewProps> = ({
@@ -27,7 +31,101 @@ export const VerificationView: React.FC<VerificationViewProps> = ({
   hasPurchased,
   setHasPurchased,
   addNotification,
-}: VerificationViewProps) => (
+  kycStatus,
+  rejectionReason,
+}: VerificationViewProps) => {
+  const getVerificationContent = () => {
+    switch (kycStatus) {
+      case 'approved':
+        return (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="p-4 bg-emerald-500/10 rounded-xl border border-emerald-500/20 flex items-center gap-3"
+          >
+            <CheckCircle size={20} className="text-emerald-400" />
+            <span className="text-sm text-emerald-300">
+              Your identity has been verified! All features are now unlocked.
+            </span>
+          </motion.div>
+        );
+      
+      case 'rejected':
+        return (
+          <div className="space-y-4">
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="p-4 bg-rose-500/10 rounded-xl border border-rose-500/20"
+            >
+              <div className="flex items-start gap-3 mb-3">
+                <AlertCircle size={20} className="text-rose-400 flex-shrink-0 mt-0.5" />
+                <div>
+                  <span className="text-sm text-rose-300 font-semibold block mb-1">
+                    Verification Rejected
+                  </span>
+                  {rejectionReason && (
+                    <p className="text-sm text-rose-300/80">
+                      Reason: {rejectionReason}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+            <MagneticButton
+              onClick={() => setShowVerification(true)}
+              className="w-full"
+            >
+              <span className="flex items-center justify-center gap-2">
+                <Camera size={18} />
+                Retry Verification
+              </span>
+            </MagneticButton>
+          </div>
+        );
+      
+      case 'pending':
+        return (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="p-4 bg-amber-500/10 rounded-xl border border-amber-500/20"
+          >
+            <div className="flex items-start gap-3">
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
+              >
+                <Clock size={20} className="text-amber-400 flex-shrink-0" />
+              </motion.div>
+              <div>
+                <span className="text-sm text-amber-300 font-semibold block mb-1">
+                  Verification Under Review
+                </span>
+                <p className="text-sm text-amber-300/80">
+                  Your verification documents are being reviewed by our team. This usually takes 24-48 hours. You'll be notified once the review is complete.
+                </p>
+              </div>
+            </div>
+          </motion.div>
+        );
+      
+      default:
+        return (
+          <MagneticButton
+            onClick={() => setShowVerification(true)}
+            className="w-full"
+          >
+            <span className="flex items-center justify-center gap-2">
+              <Camera size={18} />
+              Start Verification
+            </span>
+          </MagneticButton>
+        );
+    }
+  };
+
+  return (
   <div className="space-y-8">
     <div>
       <h1 className="text-4xl font-bold text-white mb-2">
@@ -58,8 +156,8 @@ export const VerificationView: React.FC<VerificationViewProps> = ({
               </div>
             </div>
             <DashboardStatusBadge
-              status={isApproved ? 'Verified' : 'Pending'}
-              pulse={!isApproved}
+              status={kycStatus === 'approved' ? 'Verified' : kycStatus === 'rejected' ? 'Rejected' : 'Pending'}
+              pulse={kycStatus === 'pending'}
             />
           </div>
 
@@ -69,28 +167,7 @@ export const VerificationView: React.FC<VerificationViewProps> = ({
             verification.
           </p>
 
-          {!isApproved ? (
-            <MagneticButton
-              onClick={() => setShowVerification(true)}
-              className="w-full"
-            >
-              <span className="flex items-center justify-center gap-2">
-                <Camera size={18} />
-                Start Verification
-              </span>
-            </MagneticButton>
-          ) : (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="p-4 bg-emerald-500/10 rounded-xl border border-emerald-500/20 flex items-center gap-3"
-            >
-              <CheckCircle size={20} className="text-emerald-400" />
-              <span className="text-sm text-emerald-300">
-                Your identity has been verified! All features are now unlocked.
-              </span>
-            </motion.div>
-          )}
+          {getVerificationContent()}
         </div>
       </DashboardGlassCard>
 
@@ -247,5 +324,5 @@ export const VerificationView: React.FC<VerificationViewProps> = ({
       </DashboardGlassCard>
     )}
   </div>
-);
-
+  );
+};

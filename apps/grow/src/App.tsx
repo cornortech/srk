@@ -42,7 +42,7 @@ const router = createBrowserRouter([
     element: <LoginPage />,
   },
   {
-    path: '/grow/verification',
+    path: '/grow/affiliate/verification',
     element: <GrowVerificationPage />,
   },
   {

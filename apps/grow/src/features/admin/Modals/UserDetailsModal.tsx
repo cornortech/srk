@@ -42,12 +42,20 @@ interface UserDetailsModalProps {
     createdAt: string;
     updatedAt: string;
   } | null;
+  onApprove?: (id: string) => void;
+  onReject?: (id: string) => void;
+  approvePending?: boolean;
+  selectedItemId?: string | null;
 }
 
 export const UserDetailsModal = ({
   isOpen,
   onClose,
   userData,
+  onApprove,
+  onReject,
+  approvePending,
+  selectedItemId,
 }: UserDetailsModalProps) => {
   if (!isOpen || !userData) return null;
 
@@ -376,12 +384,36 @@ export const UserDetailsModal = ({
 
         {/* Footer */}
         <div className="sticky bottom-0 bg-gradient-to-r from-gray-900/95 to-black/95 backdrop-blur-sm border-t border-white/10 p-6">
-          <button
-            onClick={onClose}
-            className="w-full px-4 py-3 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-colors font-semibold"
-          >
-            Close
-          </button>
+          {userData.userData.status === 'verificationPending' && onApprove && onReject ? (
+            <div className="flex gap-3">
+              <button
+                onClick={() => onApprove(userData._id)}
+                disabled={approvePending && selectedItemId === userData._id}
+                className="flex-1 px-4 py-3 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 rounded-xl transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {approvePending && selectedItemId === userData._id ? 'Approving...' : '✓ Approve'}
+              </button>
+              <button
+                onClick={() => onReject(userData._id)}
+                className="flex-1 px-4 py-3 bg-rose-600/20 hover:bg-rose-600/30 text-rose-300 rounded-xl transition-colors font-semibold"
+              >
+                ✕ Reject
+              </button>
+              <button
+                onClick={onClose}
+                className="px-6 py-3 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-colors font-semibold"
+              >
+                Close
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={onClose}
+              className="w-full px-4 py-3 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-colors font-semibold"
+            >
+              Close
+            </button>
+          )}
         </div>
       </motion.div>
     </div>

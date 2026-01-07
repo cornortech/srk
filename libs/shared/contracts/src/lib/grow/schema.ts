@@ -545,6 +545,7 @@ export const getGrowAffiliateVerificationResponseSchema = z.object({
       verificationImageUrl: z.string(),
       createdAt: z.string(),
       status: z.enum(['pending', 'approved', 'rejected']),
+      rejectionReason: z.string().optional(),
     })
     .optional(),
   affiliateUser: z

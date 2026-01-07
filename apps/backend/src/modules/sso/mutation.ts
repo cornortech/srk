@@ -83,6 +83,10 @@ const getAutoCode: AppRouteImplementationOrOptions<
         const growDomain =
           process.env['GROW_FRONTEND_URL'] || 'http://localhost:4500';
         redirectUrl = `${growDomain}/callback?code=${code}${redirectUrlQueryParams}`;
+      } else {
+        const growDomain =
+          process.env['GROW_FRONTEND_URL'] || 'http://localhost:4500';
+        redirectUrl = `${growDomain}/callback?code=${code}`;
       }
     } else {
       const bankDomain =

@@ -117,12 +117,12 @@ const PaymentModel: React.FC<PaymentModalProps> = ({
   return (
     <>
       <AnimatePresence>
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-black/80 backdrop-blur-sm">
           <motion.div
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="relative w-full max-w-3xl bg-[#1a1410] rounded-3xl border border-[#b68938]/30 shadow-2xl flex flex-col max-h-[90vh]"
+            className="relative max-w-[90vw]  sm:max-w-3xl bg-[#1a1410] rounded-3xl border border-[#b68938]/30 shadow-2xl flex flex-col max-h-[90vh] overflow-hidden"
           >
             <div className="absolute top-4 right-4 z-20">
               <button
@@ -132,26 +132,26 @@ const PaymentModel: React.FC<PaymentModalProps> = ({
                 <X size={20} />
               </button>
             </div>
-            <div className="overflow-y-auto no-scrollbar p-1">
+            <div className="overflow-y-auto no-scrollbar p-2 sm:p-6">
               {/* Payment Form */}
               {step === 'payment' && (
                 <div className="p-8 pt-12">
                   <div className="text-center mb-8">
-                    <h2 className="text-3xl font-bold text-white mb-2">
+                    <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">
                       Complete Your Payment
                     </h2>
-                    <p className="text-gray-400">
+                    <p className="text-gray-400 text-sm sm:text-base">
                       Select payment method and provide transaction details
                     </p>
                   </div>
 
                   {/* Total Amount Box */}
-                  <div className="mb-8 p-6 rounded-2xl bg-[#b68938]/10 border border-[#b68938]/30">
+                  <div className="mb-8 p-4 sm:p-6 rounded-2xl bg-[#b68938]/10 border border-[#b68938]/30">
                     <div className="flex justify-between items-center">
                       <span className="text-gray-400 text-lg">
                         Total Amount:
                       </span>
-                      <span className="text-4xl font-bold text-[#b68938]">
+                      <span className="text-2xl sm:text-4xl font-bold text-[#b68938]">
                         {packagePrice}
                       </span>
                     </div>
@@ -159,10 +159,10 @@ const PaymentModel: React.FC<PaymentModalProps> = ({
 
                   {/* Payment Method Selection */}
                   <div className="mb-8">
-                    <label className="block text-sm font-bold text-gray-400 mb-4 uppercase tracking-widest">
+                    <label className="block text-sm sm:text-base font-bold text-gray-400 mb-4 uppercase tracking-widest">
                       Select Payment Method *
                     </label>
-                    <div className="space-y-3">
+                    <div className="space-y-4 sm:space-y-3">
                       {paymentMethods.map((method) => (
                         <motion.button
                           key={method.id}
@@ -177,13 +177,13 @@ const PaymentModel: React.FC<PaymentModalProps> = ({
                         >
                           <div className="flex items-center space-x-4">
                             <div
-                              className={`w-14 h-14 rounded-lg bg-gradient-to-br ${method.color} flex items-center justify-center text-2xl`}
+                              className={`w-12 h-12 sm:w-14 sm:h-14 rounded-lg bg-gradient-to-br ${method.color} flex items-center justify-center text-2xl`}
                             >
                               {method.icon}
                             </div>
                             <div className="flex-1 text-left">
                               <h3
-                                className={`text-lg font-bold transition-colors ${
+                                className={`text-sm sm:text-lg font-bold transition-colors ${
                                   selectedMethod === method.id
                                     ? 'text-[#b68938]'
                                     : 'text-white'
@@ -191,12 +191,12 @@ const PaymentModel: React.FC<PaymentModalProps> = ({
                               >
                                 {method.name}
                               </h3>
-                              <p className="text-sm text-gray-400">
+                              <p className="text-xs sm:text-sm text-gray-400">
                                 {method.description}
                               </p>
                             </div>
                             <div
-                              className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
+                              className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full border-2 flex items-center justify-center ${
                                 selectedMethod === method.id
                                   ? 'border-[#b68938] bg-[#b68938]'
                                   : 'border-white/30'
@@ -217,12 +217,12 @@ const PaymentModel: React.FC<PaymentModalProps> = ({
                     <motion.div
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="mb-8 p-5 rounded-xl bg-blue-500/10 border border-blue-500/30"
+                      className="mb-8 p-4 sm:p-5 rounded-xl bg-blue-500/10 border border-blue-500/30 text-sm sm:text-base"
                     >
                       <h4 className="font-bold text-white mb-2">
                         Payment Instructions:
                       </h4>
-                      <ol className="text-sm text-gray-300 space-y-1 list-decimal list-inside">
+                      <ol className="text-sm sm:text-base text-gray-300 space-y-1 list-decimal list-inside">
                         <li>
                           Open your{' '}
                           {
@@ -247,7 +247,7 @@ const PaymentModel: React.FC<PaymentModalProps> = ({
 
                   {/* Screenshot Upload */}
                   <div className="mb-6">
-                    <label className="block text-sm font-bold text-gray-400 mb-3 uppercase tracking-widest">
+                    <label className="block text-sm sm:text-base font-bold text-gray-400 mb-3 uppercase tracking-widest">
                       Upload Payment Screenshot *
                     </label>
                     <div className="relative">
@@ -260,20 +260,20 @@ const PaymentModel: React.FC<PaymentModalProps> = ({
                       />
                       <label
                         htmlFor="screenshot-upload"
-                        className="block w-full p-6 rounded-xl border-2 border-dashed border-white/20 hover:border-[#b68938]/50 bg-white/5 cursor-pointer transition-all group"
+                        className="block w-full p-4 sm:p-6  rounded-xl border-2 border-dashed border-white/20 hover:border-[#b68938]/50 bg-white/5 cursor-pointer transition-all group"
                       >
                         {screenshotPreview ? (
                           <div className="flex items-center space-x-4">
                             <img
                               src={screenshotPreview}
                               alt="Screenshot preview"
-                              className="w-20 h-20 rounded-lg object-cover border border-[#b68938]/30"
+                              className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg object-cover border border-[#b68938]/30"
                             />
                             <div className="flex-1">
                               <p className="text-white font-bold mb-1">
                                 {screenshot?.name}
                               </p>
-                              <p className="text-sm text-gray-400">
+                              <p className="text-xs sm:text-sm text-gray-400">
                                 Click to change image
                               </p>
                             </div>
@@ -285,10 +285,10 @@ const PaymentModel: React.FC<PaymentModalProps> = ({
                               size={32}
                               className="mx-auto mb-2 text-gray-400 group-hover:text-[#b68938] transition-colors"
                             />
-                            <p className="text-white font-bold mb-1">
+                            <p className="text-white font-bold mb-1 text-sm sm:text-base">
                               Click to upload screenshot
                             </p>
-                            <p className="text-sm text-gray-400">
+                            <p className="text-xs sm:text-sm text-gray-400">
                               PNG, JPG up to 10MB
                             </p>
                           </div>
@@ -299,7 +299,7 @@ const PaymentModel: React.FC<PaymentModalProps> = ({
 
                   {/* Transaction ID Input */}
                   <div className="mb-4">
-                    <label className="block text-sm font-bold text-gray-400 mb-3 uppercase tracking-widest">
+                    <label className="block text-sm sm:text-base  font-bold text-gray-400 mb-3 uppercase tracking-widest">
                       Transaction ID / Reference Number *
                     </label>
                     <input
@@ -307,9 +307,9 @@ const PaymentModel: React.FC<PaymentModalProps> = ({
                       value={transactionId}
                       onChange={(e) => setTransactionId(e.target.value)}
                       placeholder="Enter your transaction ID"
-                      className="w-full px-4 py-4 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-600 focus:outline-none focus:border-[#b68938] focus:ring-2 focus:ring-[#b68938]/50 transition-all text-lg"
+                      className="w-full  px-4 py-3 sm:py-4 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-600 focus:outline-none focus:border-[#b68938] focus:ring-2 focus:ring-[#b68938]/50 transition-all text-sm sm:text-lg"
                     />
-                    <p className="mt-2 text-xs text-gray-500">
+                    <p className="mt-2 text-xs sm:text-sm text-gray-500">
                       This can be found in your transaction receipt or
                       confirmation message
                     </p>
@@ -334,7 +334,7 @@ const PaymentModel: React.FC<PaymentModalProps> = ({
                       !screenshot ||
                       isProcessing
                     }
-                    className="w-full py-5 rounded-full font-bold text-lg uppercase tracking-widest transition-all bg-gradient-to-r from-[#b68938] to-[#e1ba73] text-black hover:shadow-[0_0_40px_rgba(182,137,56,0.6)] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none"
+                    className="w-full  py-4 sm:py-5 rounded-full font-bold text-sm sm:text-lg uppercase tracking-widest transition-all bg-gradient-to-r from-[#b68938] to-[#e1ba73] text-black hover:shadow-[0_0_40px_rgba(182,137,56,0.6)] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none"
                   >
                     {isProcessing ? (
                       <span className="flex items-center justify-center space-x-2">
@@ -346,7 +346,7 @@ const PaymentModel: React.FC<PaymentModalProps> = ({
                     )}
                   </motion.button>
 
-                  <p className="mt-4 text-center text-xs text-gray-500">
+                  <p className="mt-2 sm:mt-4 text-center text-xs sm:text-sm text-gray-500">
                     Your order will be verified within 24 hours after payment
                     confirmation
                   </p>
@@ -355,29 +355,29 @@ const PaymentModel: React.FC<PaymentModalProps> = ({
 
               {/* Success Screen */}
               {step === 'success' && (
-                <div className="p-8 text-center pt-12">
+                <div className="p-4 sm:p-8 text-center pt-12">
                   <motion.div
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
                     transition={{ type: 'spring', duration: 0.6 }}
-                    className="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center"
+                    className="w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-4 sm:mb-6  rounded-full bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center"
                   >
                     <CheckCircle size={48} className="text-white" />
                   </motion.div>
 
-                  <h2 className="text-3xl font-bold text-white mb-2">
+                  <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">
                     Order Placed Successfully!
                   </h2>
-                  <p className="text-gray-400 mb-8">
+                  <p className="text-gray-400 text-sm sm:text-base mb-8">
                     Your payment is being verified
                   </p>
 
-                  <div className="space-y-6 mb-8">
+                  <div className="space-y-4 sm:space-y-6 mb-8">
                     <div className="p-6 rounded-2xl bg-white/5 border border-white/10 text-left">
                       <h3 className="text-lg font-bold text-white mb-4">
                         Order Details
                       </h3>
-                      <div className="space-y-3">
+                      <div className="space-y-2 sm:space-y-3">
                         <div className="flex justify-between">
                           <span className="text-gray-400">Order ID:</span>
                           <span className="font-mono text-white">
@@ -414,7 +414,7 @@ const PaymentModel: React.FC<PaymentModalProps> = ({
                             {transactionId}
                           </span>
                         </div>
-                        <div className="flex justify-between border-t border-white/10 pt-3">
+                        <div className="flex justify-between border-t border-white/10 pt-2 sm:pt-3">
                           <span className="text-gray-400">Amount Paid:</span>
                           <span className="text-2xl font-bold text-[#b68938]">
                             {packagePrice}
@@ -423,14 +423,14 @@ const PaymentModel: React.FC<PaymentModalProps> = ({
                       </div>
                     </div>
 
-                    <div className="p-4 rounded-xl bg-green-500/10 border border-green-500/30">
+                    <div className="p-3 sm:p-4 rounded-xl bg-green-500/10 border border-green-500/30">
                       <p className="text-sm text-green-400">
                         ✅ A confirmation email has been sent to{' '}
                         <strong>{userDetails.email}</strong>
                       </p>
                     </div>
 
-                    <div className="p-4 rounded-xl bg-yellow-500/10 border border-yellow-500/30">
+                    <div className="p-3 sm:p-4 rounded-xl bg-yellow-500/10 border border-yellow-500/30">
                       <p className="text-sm text-yellow-400">
                         ⏳ Your payment will be verified within 24 hours. We'll
                         notify you once confirmed.
@@ -442,7 +442,7 @@ const PaymentModel: React.FC<PaymentModalProps> = ({
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={handleClose}
-                    className="w-full py-5 rounded-full font-bold text-lg uppercase tracking-widest transition-all bg-gradient-to-r from-[#b68938] to-[#e1ba73] text-black hover:shadow-[0_0_40px_rgba(182,137,56,0.6)]"
+                    className="w-full  py-4 sm:py-5 rounded-full font-bold text-sm sm:text-lg uppercase tracking-widest transition-all bg-gradient-to-r from-[#b68938] to-[#e1ba73] text-black hover:shadow-[0_0_40px_rgba(182,137,56,0.6)]"
                   >
                     Done
                   </motion.button>

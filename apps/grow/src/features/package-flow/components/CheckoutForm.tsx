@@ -93,42 +93,46 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
-          className="backdrop-blur-md rounded-3xl border border-[rgba(182,137,56,0.2)] bg-[rgba(26,20,16,0.4)] p-6 sticky top-32"
+          className="sm:backdrop-blur-md max-w-[100%] mx-auto rounded-3xl border border-[rgba(182,137,56,0.2)] bg-[rgba(26,20,16,0.4)] p-6 sticky top-32"
         >
           <div className="mb-6">
-            <h3 className="text-2xl font-bold text-white mb-2">
+            <h3 className="text-xl sm:text-2xl font-medium sm:font-bold text-white mb-2">
               Order Summary
             </h3>
           </div>
           <div className="space-y-4">
             <div className="flex justify-between items-center py-3 border-b border-white/10">
-              <span className="text-gray-400">Package</span>
-              <span className="font-bold text-white">
+              <span className="text-sm sm:text-base text-gray-400">
+                Package
+              </span>
+              <span className="font-medium sm:font-bold text-white">
                 {selectedPackage.name}
               </span>
             </div>
             <div className="flex justify-between items-center py-3 border-b border-white/10">
-              <span className="text-gray-400">Platform</span>
-              <span className="font-bold text-white capitalize">
+              <span className="text-sm sm:text-base text-gray-400">
+                Platform
+              </span>
+              <span className="font-medium sm:font-bold text-white capitalize">
                 {selectedPlatform}
               </span>
             </div>
             <div className="flex justify-between items-center py-3 border-b border-white/10">
-              <span className="text-gray-400">Type</span>
-              <span className="font-bold text-white">
+              <span className="text-sm sm:text-base text-gray-400">Type</span>
+              <span className="ffont-medium sm:ont-bold text-white">
                 {engagementType === 'follow'
                   ? 'Follow/Subscribe'
                   : 'Reach & Engagement'}
               </span>
             </div>
             <div className="flex justify-between items-center py-3 border-b border-white/10">
-              <span className="text-gray-400">Option</span>
-              <span className="font-bold text-white text-right">
+              <span className="text-sm sm:text-base text-gray-400">Option</span>
+              <span className="font-medium sm:font-bold text-white text-right">
                 {optionDescription}
               </span>
             </div>
             <div className="flex justify-between items-center py-3 border-b border-white/10">
-              <span className="text-gray-400">Price</span>
+              <span className="text-sm sm:text-base text-gray-400">Price</span>
               <div className="text-right">
                 {/* {discountDetails ? (
                   <>
@@ -140,7 +144,7 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
                     </span>
                   </>
                 ) : ( */}
-                <span className="text-2xl font-bold text-[#b68938]">
+                <span className="text-2xl font-medium sm:font-bold text-[#b68938]">
                   {formatRupees(selectedPackage.amount)}
                 </span>
                 {/* )} */}
@@ -163,17 +167,19 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="backdrop-blur-xl rounded-3xl border border-[#b68938]/30 p-8"
+          className="sm:backdrop-blur-xl max-w-[95%] mx-auto rounded-3xl border border-[#b68938]/30 p-6"
           style={{ background: 'rgba(26, 20, 16, 0.6)' }}
         >
-          <h2 className="text-3xl font-bold mb-2">Personal Information</h2>
-          <p className="text-gray-400 mb-8">
+          <h2 className="text-2xl sm:text-3xl font-medium sm:font-bold mb-2">
+            Personal Information
+          </h2>
+          <p className="text-gray-400 text-sm sm:text-base mb-8">
             Please provide your details to proceed with the purchase.
           </p>
 
           <div className="grid md:grid-cols-2 gap-6 mb-8">
             <div>
-              <label className="block text-sm font-bold text-gray-400 mb-2 uppercase tracking-widest">
+              <label className="block text-xs sm:text-sm font-medium sm:font-bold text-gray-400 mb-2 uppercase tracking-widest">
                 Full Name *
               </label>
               <input
@@ -195,7 +201,7 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
             </div>
 
             <div>
-              <label className="block text-sm font-bold text-gray-400 mb-2 uppercase tracking-widest">
+              <label className="block text-xs sm:text-sm font-bold text-gray-400 mb-2 uppercase tracking-widest">
                 Email Address *
               </label>
               <input
@@ -215,7 +221,7 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
             </div>
 
             <div>
-              <label className="block text-sm font-bold text-gray-400 mb-2 uppercase tracking-widest">
+              <label className="w-full block text-xs sm:text-sm font-medium sm:font-bold text-gray-400 mb-2 uppercase tracking-widest">
                 Password *
               </label>
               <div className="relative">
@@ -233,7 +239,7 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+                  className="absolute right-5 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
                 >
                   {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
@@ -246,7 +252,7 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
             </div>
 
             <div>
-              <label className="block text-sm font-bold text-gray-400 mb-2 uppercase tracking-widest">
+              <label className="block text-xs sm:text-sm  font-bold text-gray-400 mb-2 uppercase tracking-widest">
                 Confirm Password *
               </label>
               <div className="relative">
@@ -261,7 +267,7 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+                  className="absolute right-5 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
                 >
                   {showConfirmPassword ? (
                     <EyeOff size={20} />
@@ -273,7 +279,7 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
             </div>
 
             <div>
-              <label className="block text-sm font-bold text-gray-400 mb-2 uppercase tracking-widest">
+              <label className="block text-xs sm:text-sm  font-bold text-gray-400 mb-2 uppercase tracking-widest">
                 Phone Number *
               </label>
               <input
@@ -295,7 +301,7 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
             </div>
 
             <div>
-              <label className="block text-sm font-bold text-gray-400 mb-2 uppercase tracking-widest">
+              <label className="block text-xs sm:text-sm  font-bold text-gray-400 mb-2 uppercase tracking-widest">
                 Country *
               </label>
               <select
@@ -341,7 +347,7 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
             </div>
 
             <div>
-              <label className="block text-sm font-bold text-gray-400 mb-2 uppercase tracking-widest">
+              <label className="block text-xs sm:text-sm  font-bold text-gray-400 mb-2 uppercase tracking-widest">
                 Gender *
               </label>
               <select
@@ -381,14 +387,14 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
             {/* Dynamic Post Link Fields */}
             {showMultiplePostLinks ? (
               <div className="md:col-span-2">
-                <label className="block text-sm font-bold text-gray-400 mb-2 uppercase tracking-widest">
+                <label className="block text-xs sm:text-sm  font-bold text-gray-400 mb-2 uppercase tracking-widest">
                   Post/Video Links * ({numPostLinks} links required)
                 </label>
                 <div className="space-y-4">
                   {Array.from({ length: numPostLinks }).map((_, index) => (
                     <div key={index}>
                       <div className="flex items-center space-x-4">
-                        <span className="text-sm text-gray-500 min-w-[60px]">
+                        <span className="text-xs sm:text-sm  text-gray-500 min-w-[60px]">
                           Post {index + 1}:
                         </span>
                         <input
@@ -428,7 +434,7 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
               </div>
             ) : (
               <div>
-                <label className="block text-sm font-bold text-gray-400 mb-2 uppercase tracking-widest">
+                <label className="block text-xs sm:text-sm  font-bold text-gray-400 mb-2 uppercase tracking-widest">
                   {engagementType === 'follow'
                     ? 'Profile Link *'
                     : 'Post/Video Link *'}
@@ -469,10 +475,10 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
             )}
 
             <div>
-              <label className="block text-sm font-bold text-gray-400 mb-2 uppercase tracking-widest">
+              <label className="block text-xs sm:text-sm  font-bold text-gray-400 mb-2 uppercase tracking-widest">
                 Promo Code
               </label>
-              <div className="flex gap-2">
+              <div className="flex flex-col gap-2">
                 <input
                   {...register('userData.usedPromoCode')}
                   type="text"
@@ -483,22 +489,24 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
                   type="button"
                   onClick={onValidatePromoCode}
                   disabled={isValidatingPromo || !promoCodeValue}
-                  className="px-6 py-2 rounded-xl bg-[#b68938]/20 text-[#b68938] border border-[#b68938]/50 hover:bg-[#b68938]/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all font-bold"
+                  className="max-w-[50%] px-6 py-2 rounded-xl bg-[#b68938]/20 text-[#b68938] border border-[#b68938]/50 hover:bg-[#b68938]/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all font-bold"
                 >
                   {isValidatingPromo ? 'Checking...' : 'Apply'}
                 </button>
               </div>
               {promoError && (
-                <p className="mt-2 text-sm text-red-500">{promoError}</p>
+                <p className="mt-2 text-xs sm:text-sm  text-red-500">
+                  {promoError}
+                </p>
               )}
               {promoSuccessMessage && (
-                <p className="mt-2 text-sm text-green-500">
+                <p className="mt-2 text-xs sm:text-sm  text-green-500">
                   {promoSuccessMessage}
                 </p>
               )}
             </div>
             {/* <div>
-              <label className="block text-sm font-bold text-gray-400 mb-2 uppercase tracking-widest">
+              <label className="block text-xs sm:text-sm  font-bold text-gray-400 mb-2 uppercase tracking-widest">
                 Upload KYC documents *
               </label>
               <div className="space-y-4">
@@ -542,7 +550,7 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
                             <CheckCircle size={20} className="text-[#b68938]" />
                           </div>
                           <div className="min-w-0">
-                            <p className="text-sm font-medium text-white truncate">
+                            <p className="text-xs sm:text-sm  font-medium text-white truncate">
                               {file.name}
                             </p>
                             <p className="text-xs text-gray-400">
@@ -580,7 +588,7 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
                 onChange={(e) => setTermsAccepted(e.target.checked)}
                 className="w-5 h-5 rounded bg-white/5 border border-white/10 focus:ring-[#b68938] focus:ring-2 focus:ring-offset-2 focus:ring-offset-black text-[#b68938] transition-all"
               />
-              <span className="text-sm text-gray-400 group-hover:text-gray-300 transition-colors">
+              <span className="text-xs sm:text-sm  text-gray-400 group-hover:text-gray-300 transition-colors">
                 I agree to the Terms & Conditions and Privacy Policy. I
                 understand that all engagements come from verified SRK
                 University students and the delivery time is{' '}
@@ -595,10 +603,10 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
           </div>
 
           {/* Action Buttons */}
-          <div className="flex justify-between items-center pt-6 border-t border-white/10">
+          <div className="flex justify-between items-center pt-6 border-t border-white/10 gap-4">
             <button
               onClick={handleBack}
-              className="px-6 py-3 rounded-full bg-white/5 hover:bg-white/10 text-white border border-white/20 font-bold text-sm uppercase tracking-widest transition-all"
+              className="px-4 sm:px-6 py-2 sm:py-3 rounded-full bg-white/5 hover:bg-white/10 text-white border border-white/20 font-medium sm:font-bold text-xs sm:text-sm uppercase tracking-widest transition-all"
             >
               Back to Options
             </button>
@@ -606,7 +614,7 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
             <button
               onClick={handleSubmit}
               disabled={isUploadingKYC || !termsAccepted}
-              className="px-8 py-3 rounded-full font-bold text-sm uppercase tracking-widest transition-all bg-gradient-to-r from-[#b68938] to-[#e1ba73] text-black hover:shadow-[0_0_30px_rgba(182,137,56,0.5)] hover:scale-105 active:scale-95 disabled:from-[#b68938] disabled:to-[#e1ba73] disabled:text-gray-900 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:active:scale-100 disabled:hover:shadow-none disabled:opacity-70 "
+              className="px-6 sm:px-8 py-2 sm:py-3 rounded-full font-medium sm:font-bold text-xs sm:text-sm uppercase tracking-widest transition-all bg-gradient-to-r from-[#b68938] to-[#e1ba73] text-black hover:shadow-[0_0_30px_rgba(182,137,56,0.5)] hover:scale-105 active:scale-95 disabled:from-[#b68938] disabled:to-[#e1ba73] disabled:text-gray-900 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:active:scale-100 disabled:hover:shadow-none disabled:opacity-70 "
             >
               {isUploadingKYC ? 'Uploading KYC...' : 'Proceed to Payment'}
             </button>
@@ -614,7 +622,7 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
 
           {/* Secure Payment Note */}
           <div className="mt-6 pt-6 border-t border-white/10">
-            <div className="flex items-center gap-2 text-sm text-gray-500">
+            <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-500">
               <Shield size={16} className="text-[#b68938]" />
               <span>
                 Your information is secured with 256-bit SSL encryption

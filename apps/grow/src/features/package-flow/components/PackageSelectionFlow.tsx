@@ -414,8 +414,8 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
       : 0;
 
   return (
-    <div className="min-h-screen z-[1000] bg-[#0a0705] text-white pt-32 px-6">
-      <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen z-[1000] bg-[#0a0705] text-white pt-24 sm:pt-32 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-full sm:max-w-6xl mx-auto">
         {/* Back Button & Header */}
         <div className="mb-8">
           <button

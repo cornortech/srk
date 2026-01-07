@@ -17,12 +17,7 @@ import { useAuthGrowAffiliate } from '../hooks/getUser';
 export const GrowVerificationPage = () => {
   const { uploadFile, isUploading } = useSRKFileUpload('grow');
   const navigate = useNavigate();
-  const {
-    user,
-    isLoading: userLoading,
-  } = useAuthGrowAffiliate();
-
-
+  const { user, isLoading: userLoading } = useAuthGrowAffiliate();
 
   // --- ALL HOOKS MUST STAY ABOVE ANY CONDITIONAL RETURN ---
   const [showCamera, setShowCamera] = useState(false);
@@ -76,14 +71,14 @@ export const GrowVerificationPage = () => {
       const file: File =
         data instanceof Blob
           ? new File(
-            [data],
-            `capture.${mediaType === 'photo' ? 'jpg' : 'webm'}`,
-            { type: data.type }
-          )
+              [data],
+              `capture.${mediaType === 'photo' ? 'jpg' : 'webm'}`,
+              { type: data.type }
+            )
           : base64ToFile(
-            data,
-            `capture.${mediaType === 'photo' ? 'jpg' : 'webm'}`
-          );
+              data,
+              `capture.${mediaType === 'photo' ? 'jpg' : 'webm'}`
+            );
 
       const uploadedUrl = await uploadFile(
         file,
@@ -126,29 +121,34 @@ export const GrowVerificationPage = () => {
     setShowCamera(true);
   };
 
-  // --- AUTH / LOADING UI MUST BE CHECKED ONLY AFTER HOOKS EXECUTED ---
-  if (userLoading) {
-    return <div className="text-white p-10 text-center">Loading...</div>;
-  }
-
   // if (!isAuthenticated || !user) {
   //   return <Navigate to="/login" replace />;
   // }
+  useEffect(() => {
+    // Extract backend response
+    if (!checkLoading && affiliateResp?.status === 200) {
+      const affiliateVerification =
+        affiliateResp.body.affiliateVerificationRequest;
+      const affiliateUser = affiliateResp.body.affiliateUser;
 
-  // Extract backend response
-  if (!checkLoading && affiliateResp?.status === 200) {
-    const affiliateVerification = affiliateResp.body.affiliateVerificationRequest;
-    const affiliateUser = affiliateResp.body.affiliateUser;
+      console.log('debug 2 - Verification request:', affiliateVerification);
+      console.log('debug 2 - Affiliate user:', affiliateUser);
 
-    console.log("debug 2 - Verification request:", affiliateVerification);
-    console.log("debug 2 - Affiliate user:", affiliateUser);
-
-    // Check if verification is approved
-    if (affiliateVerification?.status === 'approved' && affiliateUser) {
-      localStorage.setItem('affiliateGrowUserId', affiliateUser._id);
-      console.log("debug 3 - Redirecting to dashboard with userId:", affiliateUser._id);
-      return <Navigate to="/affiliate/dashboard" replace />;
+      // Check if verification is approved
+      if (affiliateVerification?.status === 'approved' && affiliateUser) {
+        localStorage.setItem('affiliateGrowUserId', affiliateUser._id);
+        console.log(
+          'debug 3 - Redirecting to dashboard with userId:',
+          affiliateUser._id
+        );
+        navigate('/affiliate/dashboard', { replace: true });
+      }
     }
+  }, [checkLoading, affiliateResp, navigate]);
+
+  // --- AUTH / LOADING UI MUST BE CHECKED ONLY AFTER HOOKS EXECUTED ---
+  if (userLoading) {
+    return <div className="text-white p-10 text-center">Loading...</div>;
   }
 
   return (
@@ -170,7 +170,9 @@ export const GrowVerificationPage = () => {
               <GradientText>Verification Submitted!</GradientText>
             </h2>
             <p className="text-gray-400 mb-8 leading-relaxed text-lg">
-              Your affiliate verification has been submitted successfully. Our admin team will review your application within 24-48 hours. You'll receive an email notification once approved.
+              Your affiliate verification has been submitted successfully. Our
+              admin team will review your application within 24-48 hours. You'll
+              receive an email notification once approved.
             </p>
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm text-gray-400 mb-8">
               <Shield size={16} />
@@ -193,8 +195,8 @@ export const GrowVerificationPage = () => {
                 <GradientText>Advanced Camera Verification</GradientText>
               </h1>
               <p className="text-gray-400 max-w-2xl mx-auto text-lg">
-                Capture photos or videos for secure identity verification with live
-                preview
+                Capture photos or videos for secure identity verification with
+                live preview
               </p>
             </div>
 
@@ -209,7 +211,9 @@ export const GrowVerificationPage = () => {
                     <h3 className="text-2xl font-bold text-white mb-2">
                       Capture Options
                     </h3>
-                    <p className="text-gray-400">Choose your verification method</p>
+                    <p className="text-gray-400">
+                      Choose your verification method
+                    </p>
                   </div>
                   <div className="grid grid-cols-1 gap-4">
                     <button
@@ -279,35 +283,37 @@ export const GrowVerificationPage = () => {
                     ) : null}
                   </div>
 
-                  {submissionStatus !== 'idle' && submissionStatus !== 'success' && (
-                    <div
-                      className={`p-4 rounded-xl mb-4 ${submissionStatus === 'error'
-                        ? 'bg-red-500/10 border border-red-500/20'
-                        : 'bg-blue-500/10 border border-blue-500/20'
+                  {submissionStatus !== 'idle' &&
+                    submissionStatus !== 'success' && (
+                      <div
+                        className={`p-4 rounded-xl mb-4 ${
+                          submissionStatus === 'error'
+                            ? 'bg-red-500/10 border border-red-500/20'
+                            : 'bg-blue-500/10 border border-blue-500/20'
                         }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        {submissionStatus === 'submitting' ? (
-                          <>
-                            <Loader2
-                              size={20}
-                              className="text-blue-400 animate-spin"
-                            />
-                            <span className="text-blue-400">
-                              Submitting verification...
-                            </span>
-                          </>
-                        ) : (
-                          <>
-                            <AlertCircle size={20} className="text-red-400" />
-                            <span className="text-red-400">
-                              Submission failed. Please try again.
-                            </span>
-                          </>
-                        )}
+                      >
+                        <div className="flex items-center gap-3">
+                          {submissionStatus === 'submitting' ? (
+                            <>
+                              <Loader2
+                                size={20}
+                                className="text-blue-400 animate-spin"
+                              />
+                              <span className="text-blue-400">
+                                Submitting verification...
+                              </span>
+                            </>
+                          ) : (
+                            <>
+                              <AlertCircle size={20} className="text-red-400" />
+                              <span className="text-red-400">
+                                Submission failed. Please try again.
+                              </span>
+                            </>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
 
                   <div className="space-y-3">
                     {capturedMedia ? (
@@ -324,8 +330,8 @@ export const GrowVerificationPage = () => {
                           {isUploading
                             ? 'Uploading...'
                             : affiliateVerificationMutation.isPending
-                              ? 'Submitting...'
-                              : 'Submit Verification'}
+                            ? 'Submitting...'
+                            : 'Submit Verification'}
                         </button>
                       </div>
                     ) : (
@@ -351,7 +357,8 @@ export const GrowVerificationPage = () => {
                   <p className="text-gray-400 text-sm">
                     All captured media is encrypted end-to-end and processed
                     securely. We never store your biometric data longer than
-                    necessary for verification. Your privacy is our top priority.
+                    necessary for verification. Your privacy is our top
+                    priority.
                   </p>
                 </GlassCard>
               </div>
@@ -371,5 +378,5 @@ export const GrowVerificationPage = () => {
         />
       )}
     </div>
-  )
-}
+  );
+};

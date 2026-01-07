@@ -22,7 +22,7 @@ export const PlatformStep: React.FC<PlatformStepProps> = ({
   <motion.div
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
-    className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6"
+    className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-6"
   >
     {platforms.map((platform) => (
       <SocialPlatformCard
@@ -48,7 +48,7 @@ export const EngagementStep: React.FC<EngagementStepProps> = ({
   <motion.div
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
-    className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-4xl mx-auto"
+    className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-8 max-w-full lg:max-w-4xl mx-auto"
   >
     <EngagementOption
       type="follow"
@@ -82,7 +82,7 @@ export const OptionStep: React.FC<OptionStepProps> = ({
   <motion.div
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
-    className="max-w-2xl mx-auto space-y-4"
+    className="max-w-full sm:max-w-2xl mx-auto space-y-2 sm:space-y-4"
   >
     {packageData.packageTypes?.map((packageType, typeIndex) => (
       <div key={packageType._id} className="space-y-4">

@@ -742,6 +742,63 @@ const srkGrowAffiliateVerificationRequest: AppRouteImplementationOrOptions<
       };
     }
 
+    const srkAffiliateVerificationExist =
+      await growSrkAffiliateVerificationModel.findOne({
+        srkUniversityUserId: body.srkUniversityUserId,
+      });
+
+    if (
+      srkAffiliateVerificationExist &&
+      srkAffiliateVerificationExist.status === 'pending'
+    ) {
+      return {
+        status: 400,
+        body: {
+          message:
+            'You have already submitted a verification request. Please wait for it to be processed.',
+          success: false,
+        },
+      };
+    }
+
+    if (
+      srkAffiliateVerificationExist &&
+      srkAffiliateVerificationExist.status === 'approved'
+    ) {
+      return {
+        status: 400,
+        body: {
+          message:
+            'Your affiliate verification request has already been approved.',
+          success: false,
+        },
+      };
+    }
+
+    // If rejected, allow resubmission by updating the existing request
+    if (
+      srkAffiliateVerificationExist &&
+      srkAffiliateVerificationExist.status === 'rejected'
+    ) {
+      await growSrkAffiliateVerificationModel.findByIdAndUpdate(
+        srkAffiliateVerificationExist._id,
+        {
+          verificationImageUrl: body.verificationImageUrl,
+          status: 'pending',
+          rejectionReason: undefined, // Clear the rejection reason
+        }
+      );
+
+      return {
+        status: 201,
+        body: {
+          message:
+            'Srk Grow Affiliate verification request resubmitted successfully',
+          success: true,
+        },
+      };
+    }
+
     await growSrkAffiliateVerificationModel.create({
       srkUniversityUserId: body.srkUniversityUserId,
       verificationImageUrl: body.verificationImageUrl,
@@ -822,14 +879,17 @@ const approveSrkGrowAffiliateVerificationRequest: AppRouteImplementationOrOption
     const growUserPromoCode =
       await AuthService.generateUniquePromoCodeForSrkGrowUser();
 
-    await GrowAffiliateUserModel.create({
+
+    const newGrowAffiliateUser = await GrowAffiliateUserModel.create({
       srkUniversityUserId: requestExist.srkUniversityUserId._id,
       fullName: `${requestExist.srkUniversityUserId.firstName} ${requestExist.srkUniversityUserId.lastName}`,
       email: requestExist.srkUniversityUserId.email,
       gender: requestExist.srkUniversityUserId.gender,
-      promoCode: growUserPromoCode,
+      promocode: growUserPromoCode,
       isActive: true,
     });
+
+    console.log('New Grow Affiliate User created:', newGrowAffiliateUser);
 
     return {
       status: 201,

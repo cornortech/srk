@@ -173,7 +173,7 @@ export const TaskMonitoringView = () => {
                           transition={{ duration: 0.3, delay: index * 0.05 }}
                           className={`w-full text-left p-4 rounded-xl transition-all duration-200 ${
                             selectedUserId === user._id
-                              ? 'bg-gradient-to-r from-white/10 to-white/5 border border-white/20 shadow-lg'
+                              ? 'bg-gradient-to-r from-[#b68938]/20 to-[#e1ba73]/10 border-2 border-[#b68938] shadow-xl ring-2 ring-[#b68938]/30'
                               : 'bg-white/5 hover:bg-white/10 border border-transparent hover:border-white/10'
                           }`}
                         >
@@ -279,44 +279,6 @@ export const TaskMonitoringView = () => {
 
                   {/* Task Details */}
                   <div className="space-y-4">
-                    {/* Follow Tasks Overview */}
-                    {currentUser.tasks.follow.total > 0 && (
-                      <motion.div
-                        initial={{ scale: 0.95, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        transition={{ duration: 0.3 }}
-                        className="p-6 rounded-xl bg-gradient-to-br from-blue-500/10 to-blue-600/5 border border-blue-500/20"
-                      >
-                        <div className="flex items-center justify-between mb-4">
-                          <div className="flex items-center gap-2">
-                            <span className="text-2xl">👥</span>
-                            <h3 className="text-lg font-bold text-white">Follow Tasks Overview</h3>
-                          </div>
-                          <span className="text-2xl font-bold text-white">
-                            {currentUser.tasks.follow.percentage}%
-                          </span>
-                        </div>
-
-                        <div className="space-y-3">
-                          <div className="flex justify-between text-sm">
-                            <span className="text-gray-400">Total Progress</span>
-                            <span className="text-white font-medium">
-                              {currentUser.tasks.follow.completed} / {currentUser.tasks.follow.total}
-                            </span>
-                          </div>
-
-                          <div className="w-full bg-gray-800/50 rounded-full h-3 overflow-hidden">
-                            <motion.div
-                              initial={{ width: 0 }}
-                              animate={{ width: `${currentUser.tasks.follow.percentage}%` }}
-                              transition={{ duration: 1 }}
-                              className="h-3 rounded-full bg-gradient-to-r from-blue-500 to-blue-600"
-                            />
-                          </div>
-                        </div>
-                      </motion.div>
-                    )}
-
                     {/* Individual Profile Cards for Follow */}
                     {currentUser.tasks.profiles && currentUser.tasks.profiles.length > 0 && (
                       <div className="space-y-3">
@@ -378,44 +340,6 @@ export const TaskMonitoringView = () => {
                           </motion.div>
                         ))}
                       </div>
-                    )}
-
-                    {/* Overall Like Task Summary */}
-                    {currentUser.tasks.like.total > 0 && (
-                      <motion.div
-                        initial={{ scale: 0.95, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        transition={{ duration: 0.3, delay: 0.1 }}
-                        className="p-6 rounded-xl bg-gradient-to-br from-pink-500/10 to-pink-600/5 border border-pink-500/20"
-                      >
-                        <div className="flex items-center justify-between mb-4">
-                          <div className="flex items-center gap-2">
-                            <span className="text-2xl">❤️</span>
-                            <h3 className="text-lg font-bold text-white">Like Tasks Overview</h3>
-                          </div>
-                          <span className="text-2xl font-bold text-white">
-                            {currentUser.tasks.like.percentage}%
-                          </span>
-                        </div>
-
-                        <div className="space-y-3">
-                          <div className="flex justify-between text-sm">
-                            <span className="text-gray-400">Total Progress</span>
-                            <span className="text-white font-medium">
-                              {currentUser.tasks.like.completed} / {currentUser.tasks.like.total}
-                            </span>
-                          </div>
-
-                          <div className="w-full bg-gray-800/50 rounded-full h-3 overflow-hidden">
-                            <motion.div
-                              initial={{ width: 0 }}
-                              animate={{ width: `${currentUser.tasks.like.percentage}%` }}
-                              transition={{ duration: 1, delay: 0.2 }}
-                              className="h-3 rounded-full bg-gradient-to-r from-pink-500 to-pink-600"
-                            />
-                          </div>
-                        </div>
-                      </motion.div>
                     )}
 
                     {/* Individual Video Cards */}
@@ -516,6 +440,35 @@ export const TaskMonitoringView = () => {
                         </p>
                       </div>
                     </div>
+                    
+                    {/* Task Breakdown */}
+                    <div className="grid grid-cols-2 gap-4 mb-4">
+                      {currentUser.tasks.follow.total > 0 && (
+                        <div className="p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-lg">👥</span>
+                            <p className="text-xs text-gray-400">Follow Tasks</p>
+                          </div>
+                          <p className="text-xl font-bold text-white">{currentUser.tasks.follow.percentage}%</p>
+                          <p className="text-xs text-gray-400">
+                            {currentUser.tasks.follow.completed} / {currentUser.tasks.follow.total}
+                          </p>
+                        </div>
+                      )}
+                      {currentUser.tasks.like.total > 0 && (
+                        <div className="p-3 rounded-lg bg-pink-500/10 border border-pink-500/20">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-lg">❤️</span>
+                            <p className="text-xs text-gray-400">Like Tasks</p>
+                          </div>
+                          <p className="text-xl font-bold text-white">{currentUser.tasks.like.percentage}%</p>
+                          <p className="text-xs text-gray-400">
+                            {currentUser.tasks.like.completed} / {currentUser.tasks.like.total}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+
                     <div className="w-full bg-gray-800/50 rounded-full h-4 overflow-hidden">
                       <motion.div
                         initial={{ width: 0 }}

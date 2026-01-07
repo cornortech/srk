@@ -14,7 +14,7 @@ import {
 } from '../../model/growSocialMediaPackageUserModel';
 import { growSrkAffiliateVerificationModel } from '../../model/growSrkAffiliateVerificationModel';
 import { IGrowSocialMediaPackage } from '../../model/growSocialMediaPackageModel';
-import { IUser } from '../../model/userModel';
+import { IUser, UserModel } from '../../model/userModel';
 import { GrowSrkAffiliateEarningPayoutModel } from '../../model/grow/growSrkAffiliateEarningPayoutModel';
 import { growSrkAffiliateEarningStatementModel } from '../../model/grow/growSrkAffiliateEarningStatementModel';
 import GrowAffiliateUserModel from '../../model/grow/growAffiliateUserModel';
@@ -826,9 +826,9 @@ const getSrkGrowAffiliateEarningPayoutRequestByUser: AppRouteImplementationOrOpt
     const skip = (pageNum - 1) * limitNum;
 
     // Validate user exists
-    const growUser = await growSocialMediaPackageUserModel.findById(userId);
+    const growAffiliateUser = await GrowAffiliateUserModel.findById(userId);
 
-    if (!growUser) {
+    if (!growAffiliateUser) {
       return {
         status: 404,
         body: {
@@ -903,6 +903,22 @@ const getSrkGrowAffiliateVerificationRequest: AppRouteImplementationOrOptions<
   try {
     const srkUniversityUserId = query.srkUniversityUserId;
 
+    // check if srk university user exist wth this id
+
+    const srkUniversityUserExist = await UserModel.findById(
+      srkUniversityUserId
+    );
+
+    if (!srkUniversityUserExist) {
+      return {
+        status: 403,
+        body: {
+          success: false,
+          message: "Srk university user doesn't exist.",
+        },
+      };
+    }
+
     const srkAffiliateVerificationExist =
       await growSrkAffiliateVerificationModel
         .findOne({
@@ -926,6 +942,11 @@ const getSrkGrowAffiliateVerificationRequest: AppRouteImplementationOrOptions<
       };
     }
 
+    console.log(
+      'Found affiliate verification request:',
+      srkAffiliateVerificationExist
+    );
+
     // ✅ Check for affiliate user (approved affiliates are created in GrowAffiliateUserModel)
     const growAffiliateUserExist = await GrowAffiliateUserModel.findOne({
       srkUniversityUserId,
@@ -943,6 +964,7 @@ const getSrkGrowAffiliateVerificationRequest: AppRouteImplementationOrOptions<
             srkAffiliateVerificationExist.verificationImageUrl,
           createdAt: srkAffiliateVerificationExist.createdAt.toISOString(),
           status: srkAffiliateVerificationExist.status,
+          rejectionReason: srkAffiliateVerificationExist.rejectionReason,
         },
         affiliateUser: growAffiliateUserExist
           ? {
@@ -965,7 +987,7 @@ const getSrkGrowAffiliateVerificationRequest: AppRouteImplementationOrOptions<
     return {
       status: 500,
       body: {
-        message:"Internal server error",
+        message: 'Internal server error',
         success: false,
       },
     };
@@ -976,10 +998,10 @@ const getTaskMonitoring: AppRouteImplementationOrOptions<
   typeof growContract.getTaskMonitoring
 > = async ({ query }) => {
   try {
-    const { search } = query || {};
+    const { search = '' } = query || {};
 
     // Build user filter based on search
-    const userFilter: any = { userType: 'package' };
+    const userFilter: any = {};
 
     if (search) {
       userFilter.$or = [
@@ -987,7 +1009,6 @@ const getTaskMonitoring: AppRouteImplementationOrOptions<
         { email: { $regex: search, $options: 'i' } },
       ];
     }
-
     // Get all package users (not affiliates)
     const users = await growSocialMediaPackageUserModel
       .find(userFilter)

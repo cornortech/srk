@@ -6,7 +6,7 @@ import CallbackPage from './pages/CallbackPage';
 import { LoginPage } from './pages/LoginPage';
 import { GrowVerificationPage } from './pages/VerificationPage';
 import { GrowOnlyAdminDashboard } from './pages/GrowAdminDashboard';
-import { GrowDashboard } from './pages/GrowDashboard';
+import { GrowAffiliateDashboard } from './pages/GrowDashboard';
 import { PackageFlowPage } from './pages/PackageFlowPage';
 import { OrderConfirmationPage } from './pages/OrderConfirmationPage';
 import { UserDashboardPage } from './pages/UserDashboardPage';
@@ -59,7 +59,7 @@ const router = createBrowserRouter([
   },
   {
     path: '/affiliate/dashboard',
-    element: <GrowDashboard />,
+    element: <GrowAffiliateDashboard />,
   },
 ]);
 

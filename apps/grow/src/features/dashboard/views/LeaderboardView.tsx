@@ -1,8 +1,8 @@
-import { LeaderboardEntry } from 'apps/grow/src/lib/types/dashboard';
+import { UserIcon } from 'lucide-react';
 import { useMemo, useState } from 'react';
+import { LeaderboardEntry } from '../../../lib/types/dashboard';
 import { GOLD_ACCENT, GOLD_PRIMARY } from '../constants';
 import { ShareCountIcon } from '../components/ui/DashboardIcons';
-import { UserIcon } from 'lucide-react';
 import { GlassCard } from '../components/ui/GlassCard';
 import { formatCompactRupees } from '../../../lib/utils/formatters';
 import { api } from '../../../lib/api';
@@ -102,24 +102,21 @@ export const LeaderboardView: React.FC<LeaderboardViewProps> = (
 
     return (
       <div
-        className={`${
-          sizeClasses[size]
-        } rounded-full flex items-center justify-center ${
-          trend === 'up'
+        className={`${sizeClasses[size]
+          } rounded-full flex items-center justify-center ${trend === 'up'
             ? 'bg-emerald-500/20'
             : trend === 'down'
-            ? 'bg-rose-500/20'
-            : 'bg-gray-500/20'
-        }`}
+              ? 'bg-rose-500/20'
+              : 'bg-gray-500/20'
+          }`}
       >
         <svg
-          className={`${
-            trend === 'up'
-              ? 'text-emerald-400'
-              : trend === 'down'
+          className={`${trend === 'up'
+            ? 'text-emerald-400'
+            : trend === 'down'
               ? 'text-rose-400'
               : 'text-gray-400'
-          } ${size === 'sm' ? 'w-3 h-3' : 'w-4 h-4'}`}
+            } ${size === 'sm' ? 'w-3 h-3' : 'w-4 h-4'}`}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -227,25 +224,24 @@ export const LeaderboardView: React.FC<LeaderboardViewProps> = (
         relative overflow-hidden group
         px-4 py-2 rounded-lg text-sm font-medium
         transition-all duration-300
-        ${
-          isActive
-            ? 'text-black'
-            : 'bg-white/5 text-gray-400 hover:text-white hover:bg-white/10'
-        }
+        ${isActive
+                      ? 'text-black'
+                      : 'bg-white/5 text-gray-400 hover:text-white hover:bg-white/10'
+                    }
       `}
                   style={
                     isActive
                       ? {
-                          background: `linear-gradient(to right, ${GOLD_PRIMARY}, ${GOLD_ACCENT})`,
-                        }
+                        background: `linear-gradient(to right, ${GOLD_PRIMARY}, ${GOLD_ACCENT})`,
+                      }
                       : undefined
                   }
                 >
                   {filter === 'today'
                     ? 'Today'
                     : filter === 'week'
-                    ? 'Week'
-                    : 'All Time'}
+                      ? 'Week'
+                      : 'All Time'}
                   <div className="absolute inset-0 bg-white/0 group-hover:bg-white/10 transition-colors duration-300"></div>
                 </button>
               );
@@ -266,9 +262,8 @@ export const LeaderboardView: React.FC<LeaderboardViewProps> = (
                 <div className="h-full flex flex-col items-center text-center">
                   {/* Rank */}
                   <div
-                    className={`relative mb-4 ${
-                      entry.rank <= 3 ? 'scale-110' : ''
-                    }`}
+                    className={`relative mb-4 ${entry.rank <= 3 ? 'scale-110' : ''
+                      }`}
                   >
                     <div
                       className={`absolute inset-0 ${rankStyle.bg} rounded-full blur-md opacity-50`}
@@ -303,9 +298,8 @@ export const LeaderboardView: React.FC<LeaderboardViewProps> = (
 
                   {/* Username */}
                   <h3
-                    className={`font-bold text-lg mb-1 ${
-                      entry.isCurrent ? 'text-emerald-400' : 'text-white'
-                    }`}
+                    className={`font-bold text-lg mb-1 ${entry.isCurrent ? 'text-emerald-400' : 'text-white'
+                      }`}
                   >
                     {entry.username}
                   </h3>
@@ -356,19 +350,17 @@ export const LeaderboardView: React.FC<LeaderboardViewProps> = (
                   className={`
                   relative overflow-hidden group
                   flex items-center justify-between p-4 rounded-xl transition-all duration-300
-                  ${
-                    entry.isCurrent
+                  ${entry.isCurrent
                       ? 'bg-gradient-to-r from-emerald-500/10 to-emerald-900/5'
                       : 'hover:bg-white/5'
-                  }
+                    }
                   border border-transparent hover:border-white/10
                 `}
                 >
                   <div className="flex items-center gap-4 flex-1 min-w-0">
                     <div
-                      className={`relative ${
-                        entry.rank <= 10 ? 'scale-110' : ''
-                      }`}
+                      className={`relative ${entry.rank <= 10 ? 'scale-110' : ''
+                        }`}
                     >
                       <div
                         className={`w-10 h-10 rounded-xl flex items-center justify-center ${rankStyle.bg} ${rankStyle.border} border`}
@@ -395,9 +387,8 @@ export const LeaderboardView: React.FC<LeaderboardViewProps> = (
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         <span
-                          className={`font-medium truncate ${
-                            entry.isCurrent ? 'text-emerald-400' : 'text-white'
-                          }`}
+                          className={`font-medium truncate ${entry.isCurrent ? 'text-emerald-400' : 'text-white'
+                            }`}
                         >
                           {entry.username}
                         </span>

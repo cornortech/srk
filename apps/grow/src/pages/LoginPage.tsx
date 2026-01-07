@@ -15,11 +15,11 @@ export const LoginPage = () => {
   // Guard: Redirect if already logged in
   useEffect(() => {
     if (user) {
-      if (user.status === 'portalActivated') {
-        navigate('/dashboard');
-      } else {
-        navigate('/grow/verification-wall');
-      }
+      // if (user.status === 'portalActivated') {
+      //   navigate('/dashboard');
+      // } else {
+      //   navigate('/grow/verification-wall');
+      // }
     }
   }, [user, navigate]);
 

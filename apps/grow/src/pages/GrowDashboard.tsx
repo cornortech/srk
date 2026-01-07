@@ -34,7 +34,7 @@ export const initialEarningData: DashboardData = {
   consistencyDays: 0,
 };
 
-export const GrowDashboard = () => {
+export const GrowAffiliateDashboard = () => {
   const affiliateUserId = localStorage.getItem('affiliateGrowUserId');
 
   if (!affiliateUserId) {

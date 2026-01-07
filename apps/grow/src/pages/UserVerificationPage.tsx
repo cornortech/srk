@@ -9,6 +9,7 @@ import {
   ExternalLink,
   X,
 } from 'lucide-react';
+import { z } from 'zod';
 import { useNavigate } from 'react-router-dom';
 import { GradientText } from '../features/verification/components/ui/GradientText';
 import { GlassCard } from '../features/verification/components/ui/GlassCard';
@@ -18,7 +19,6 @@ import useGrowAuthStore from '../store/useGrowAuthStore';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { resubmitGrowVerificationSchema } from '@srk/shared/contracts';
-import { z } from 'zod';
 import { useToast } from '../lib/contexts/ToastContext';
 
 type TResubmitForm = z.infer<typeof resubmitGrowVerificationSchema>;

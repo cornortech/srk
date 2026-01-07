@@ -157,7 +157,7 @@ export const Navbar = () => {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="fixed inset-0 z-40 bg-linear-to-b from-black to-[#0a0705] md:hidden pt-32 px-8 flex flex-col gap-6"
+            className="fixed inset-0 z-40 bg-gradient-to-b from-black to-[#0a0705] md:hidden pt-32 px-8 flex flex-col gap-6"
           >
             {['Features', 'Trust', 'Synergy', 'Reviews'].map((item, index) => (
               <motion.a
@@ -178,6 +178,10 @@ export const Navbar = () => {
               transition={{ delay: 0.4 }}
               whileTap={{ scale: 0.95 }}
               className="w-full py-5 rounded-2xl font-bold text-lg mt-4 bg-gradient-to-r from-[#e1ba73] to-[#b68938] text-black shadow-[0_20px_60px_rgba(225,186,115,0.4)]"
+              onClick={() => {
+                closeMobileMenu();
+                window.location.href = '/task/dashboard';
+              }}
             >
               Start Earning
             </motion.button>

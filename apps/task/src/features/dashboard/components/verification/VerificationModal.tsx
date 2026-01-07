@@ -232,11 +232,11 @@ export const VerificationModal: React.FC<VerificationModalProps> = ({
     switch (currentStep) {
       case 1:
         return (
-          <div className="space-y-6">
-            <h2 className="text-xl font-semibold text-white">
+          <div className="space-y-4 sm:space-y-6">
+            <h2 className="text-lg sm:text-xl font-semibold text-white">
               1. Upload Document
             </h2>
-            <p className="text-gray-400">
+            <p className="text-sm sm:text-base text-gray-400">
               Please upload a valid government-issued ID (e.g., Passport,
               Driver's License).
             </p>
@@ -279,11 +279,11 @@ export const VerificationModal: React.FC<VerificationModalProps> = ({
         );
       case 2:
         return (
-          <div className="space-y-6">
-            <h2 className="text-xl font-semibold text-white">
+          <div className="space-y-4 sm:space-y-6">
+            <h2 className="text-lg sm:text-xl font-semibold text-white">
               2. Selfie Capture
             </h2>
-            <p className="text-gray-400">
+            <p className="text-sm sm:text-base text-gray-400">
               Please position your face clearly within the frame for a live
               photo.
             </p>
@@ -375,11 +375,11 @@ export const VerificationModal: React.FC<VerificationModalProps> = ({
         );
       case 3:
         return (
-          <div className="space-y-6">
-            <h2 className="text-xl font-semibold text-white">
+          <div className="space-y-4 sm:space-y-6">
+            <h2 className="text-lg sm:text-xl font-semibold text-white">
               3. Digital Signature
             </h2>
-            <p className="text-gray-400">
+            <p className="text-sm sm:text-base text-gray-400">
               Draw your signature in the box below
             </p>
 
@@ -405,8 +405,8 @@ export const VerificationModal: React.FC<VerificationModalProps> = ({
         );
       case 4:
         return (
-          <div className="space-y-6">
-            <h2 className="text-xl font-semibold text-white">
+          <div className="space-y-4 sm:space-y-6">
+            <h2 className="text-lg sm:text-xl font-semibold text-white">
               4. Personal Details
             </h2>
             <div className="space-y-4">
@@ -464,10 +464,10 @@ export const VerificationModal: React.FC<VerificationModalProps> = ({
         );
       case 5:
         return (
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             {!submissionStatus && (
               <>
-                <h2 className="text-xl font-semibold text-white">
+                <h2 className="text-lg sm:text-xl font-semibold text-white">
                   5. Review and Submit
                 </h2>
                 <div className="space-y-3 p-4 bg-white/5 rounded-lg">
@@ -609,7 +609,7 @@ export const VerificationModal: React.FC<VerificationModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/90 backdrop-blur-sm overflow-y-auto cursor-default">
       <div className="w-full max-w-2xl bg-linear-to-br from-[#1a1410]/95 to-[#0a0a0a]/95 border border-amber-500/20 rounded-2xl shadow-2xl overflow-hidden">
-        <div className="p-4 sm:p-8 max-h-[95vh] flex flex-col">
+        <div className="p-4 sm:p-8 max-h-[92vh] sm:max-h-[95vh] flex flex-col">
           <div className="flex items-center justify-between mb-6 shrink-0">
             <h1 className="text-xl sm:text-2xl font-extrabold text-white">
               <span className="bg-linear-to-r from-[#ac9976] to-[#e1ba73] bg-clip-text text-transparent">
@@ -647,7 +647,7 @@ export const VerificationModal: React.FC<VerificationModalProps> = ({
           )}
 
           {/* Content Area - Scrollable */}
-          <div className="overflow-y-auto pr-1 -mr-1 custom-scrollbar">
+          <div className="flex-1 overflow-y-auto pr-1 -mr-1 custom-scrollbar">
             {renderStepContent()}
           </div>
         </div>

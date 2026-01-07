@@ -23,6 +23,10 @@ export const LeaderboardView: React.FC = () => {
           search: searchQuery || undefined,
           currentUserId: taskUserID || undefined,
         },
+      },
+      {
+        enabled: !!taskUserID,
+        queryKey: ['getTaskUserLeaderboard'],
       }
     );
 

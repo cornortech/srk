@@ -493,6 +493,7 @@ export const getAllTaskAffiliateResponseSchema = z.object({
   fullName: z.string(),
   dob: z.string(),
   isActivated: z.boolean(),
+  status: z.enum(['pending', 'approved', 'rejected']).optional(),
   createdAt: z.string(),
   updatedAt: z.string(),
 });

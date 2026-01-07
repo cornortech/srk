@@ -238,10 +238,10 @@ export const SignaturePad: React.FC<SignaturePadProps> = ({
         </div>
 
         {/* Action Buttons */}
-        <div className="flex gap-3">
+        <div className="flex flex-col sm:flex-row gap-3">
           <button
             onClick={clearSignature}
-            className="flex-1 px-4 py-2 text-sm bg-red-500/10 text-red-400 hover:bg-red-500/20 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+            className="w-full sm:flex-1 px-3 py-2 text-xs sm:text-sm bg-red-500/10 text-red-400 hover:bg-red-500/20 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
           >
             <Trash2 size={16} />
             Clear
@@ -261,7 +261,7 @@ export const SignaturePad: React.FC<SignaturePadProps> = ({
               ctx.textAlign = 'center';
               ctx.fillText(name, canvas.width / 2, canvas.height / 2);
             }}
-            className="flex-1 px-6 py-3 bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 rounded-xl font-medium transition-colors flex items-center justify-center gap-2"
+            className="w-full sm:flex-1 px-3 py-2 sm:px-6 sm:py-3 text-xs sm:text-sm bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 rounded-xl font-medium transition-colors flex items-center justify-center gap-2"
           >
             <Type size={18} />
             Sample
@@ -269,7 +269,7 @@ export const SignaturePad: React.FC<SignaturePadProps> = ({
 
           <MagneticButton
             onClick={saveSignature}
-            className={`flex-1 transition-all duration-300`}
+            className={`w-full sm:flex-1 min-h-[44px] transition-all duration-300`}
           >
             <Check size={16} />
             Save Signature

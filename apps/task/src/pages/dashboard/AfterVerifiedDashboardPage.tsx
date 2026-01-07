@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import {
   DashboardView,
   RejectedTaskEntry,
@@ -37,7 +37,20 @@ import { TaskHistoryView } from '../../features/dashboard/views/TaskHistoryView'
 import { useAuthAffiliateVerification } from '../../../../../libs/shared/hooks/src/lib/useAuthAffiliate';
 
 export const AfterVerifiedDashboardPage: React.FC = () => {
-  const { user, isAuthenticated, isLoading } = useAuthAffiliateVerification();
+  const {
+    user: ssoUser,
+    isAuthenticated: ssoAuthenticated,
+    isLoading: ssoLoading,
+  } = useAuthAffiliateVerification();
+  const {
+    user: storeUser,
+    isAuthenticated: storeAuthenticated,
+    isLoading: storeLoading,
+  } = useTaskAuthStore();
+
+  const user = ssoUser || storeUser;
+  const isAuthenticated = ssoAuthenticated || storeAuthenticated;
+  const isLoading = ssoLoading || storeLoading;
 
   const [view, setView] = useState<'landing' | 'dashboard'>('landing');
   const [dashView, setDashView] = useState<DashboardView>('verification');
@@ -55,7 +68,7 @@ export const AfterVerifiedDashboardPage: React.FC = () => {
 
   const { taskUserID, setTaskUserID } = useTaskAuthStore();
 
-  const { data: verificationRequest } =
+  const { data: verificationRequest, isLoading: isVerifyingOnboarding } =
     api.srkTask.getAllSrkTaskAffiliateVerificationRequest.useQuery(
       ['getAllSrkTaskAffiliateVerificationRequest', user?._id],
       { query: { srkUniversityUserId: user?._id || '' } },
@@ -74,8 +87,8 @@ export const AfterVerifiedDashboardPage: React.FC = () => {
       verificationRequest.body.success &&
       verificationRequest.body.data
     ) {
-      if (typeof verificationRequest.body.data._id === 'string') {
-        setTaskUserID(verificationRequest.body.data._id);
+      if (verificationRequest.body.data._id) {
+        setTaskUserID(verificationRequest.body.data._id.toString());
       }
     }
   }, [verificationRequest, setTaskUserID]);
@@ -99,11 +112,7 @@ export const AfterVerifiedDashboardPage: React.FC = () => {
       }
     );
 
-  const balance =
-    analyticsData?.status === 200
-      ? analyticsData.body.coinsData.walletCoins
-      : 0;
-  // const balance = 1250;
+  const balance = analyticsData?.body.coinsData.walletCoins ?? 0;
 
   const eligible = Math.max(0, balance - 100);
 
@@ -127,15 +136,14 @@ export const AfterVerifiedDashboardPage: React.FC = () => {
         userProfileData.body.userData.kycStatus === 'approved'
           ? 'verified'
           : userProfileData.body.userData.kycStatus === 'rejected'
-            ? 'rejected'
-            : 'pending',
+          ? 'rejected'
+          : 'pending',
     };
 
   const [activeTasks, setActiveTasks] = useState<Task[]>([
     ...followTasks,
     ...likeTasks,
   ]);
-
 
   const [reviewingRejectedTask, setReviewingRejectedTask] =
     useState<RejectedTaskEntry | null>(null);
@@ -178,10 +186,9 @@ export const AfterVerifiedDashboardPage: React.FC = () => {
 
   // Handle verification success
   const handleVerificationSuccess = () => {
-    setIsApproved(true);
-    setDashView('tasks');
+    setShowVerification(false);
     addNotification(
-      'Verification submitted successfully! You can now access all features.',
+      'Verification submitted successfully! Our team will review your documents.',
       'success'
     );
   };
@@ -256,8 +263,31 @@ export const AfterVerifiedDashboardPage: React.FC = () => {
     }
   };
 
+  if (isLoading || (isAuthenticated && !taskUserID && isVerifyingOnboarding)) {
+    return (
+      <div className="min-h-screen bg-black flex flex-col items-center justify-center p-6">
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
+          className="w-12 h-12 border-4 border-amber-500/20 border-t-amber-500 rounded-full mb-4"
+        />
+        <p className="text-zinc-400 font-medium">Loading Dashboard...</p>
+      </div>
+    );
+  }
+
   if (!user || !isAuthenticated) {
-    return null;
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="text-center p-8 bg-zinc-900/50 border border-zinc-800 rounded-2xl backdrop-blur-xl">
+          <h2 className="text-2xl font-bold mb-4">Not Authenticated</h2>
+          <p className="text-zinc-400 mb-6">
+            Please get affiliated through srk university to access your
+            dashboard.
+          </p>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -337,7 +367,15 @@ export const AfterVerifiedDashboardPage: React.FC = () => {
         /* Mobile optimizations */
         @media (max-width: 640px) {
           .text-7xl, .text-8xl {
-            font-size: 3.5rem;
+            font-size: 3rem;
+          }
+          .text-4xl, .text-5xl {
+            font-size: 2.25rem;
+            line-height: 2.5rem;
+          }
+          .text-3xl {
+            font-size: 1.875rem;
+            line-height: 2.25rem;
           }
         }
      `,
@@ -358,8 +396,8 @@ export const AfterVerifiedDashboardPage: React.FC = () => {
           setIsMenuOpen={setIsMenuOpen}
           addNotification={addNotification}
           isActivated={userProfileData?.body.userData.isActivated ?? false}
-        // title={viewsConfig[dashView].title}
-        // desc={viewsConfig[dashView].desc}
+          // title={viewsConfig[dashView].title}
+          // desc={viewsConfig[dashView].desc}
         >
           <AnimatedBackground />
           {renderView()}
@@ -415,7 +453,7 @@ export const AfterVerifiedDashboardPage: React.FC = () => {
             onClose={() => setReviewingRejectedTask(null)}
             activeTasks={activeTasks}
             setVerifyingTask={setVerifyingTask}
-            setRejectedTasks={setRejectedTasks}
+            // setRejectedTasks={setRejectedTasks}
             addNotification={addNotification}
           />
         )}

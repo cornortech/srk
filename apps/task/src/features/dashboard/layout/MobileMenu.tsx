@@ -13,6 +13,8 @@ import {
   Lock,
   LogOut,
   Coins,
+  FileClock,
+  History,
 } from 'lucide-react';
 import { DashboardView } from '../types';
 import DashboardGlassCard from '../components/ui/DashboardGlassCard';
@@ -59,7 +61,10 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
       },
       {
         enabled: !!taskUserID && isApproved,
-        queryKey: ['getRejectedSrkTaskActionSubmissionsByUser', taskUserID || ''],
+        queryKey: [
+          'getRejectedSrkTaskActionSubmissionsByUser',
+          taskUserID || '',
+        ],
       }
     );
 
@@ -67,12 +72,14 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
   return (
     <>
       {/* Hamburger Button */}
-      <button
-        onClick={() => setIsMenuOpen(!isMenuOpen)}
-        className="lg:hidden fixed top-6 right-6 z-50 p-2 bg-black/50 backdrop-blur-sm rounded-lg border border-white/10"
-      >
-        <Menu size={24} className="text-white" />
-      </button>
+      {!isMenuOpen && (
+        <button
+          onClick={() => setIsMenuOpen(!isMenuOpen)}
+          className="lg:hidden fixed top-6 right-6 z-50 p-2 bg-black/50 backdrop-blur-sm rounded-lg border border-white/10"
+        >
+          <Menu size={24} className="text-white" />
+        </button>
+      )}
 
       {/* Mobile Menu Overlay */}
       {isMenuOpen && (
@@ -144,40 +151,73 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                       view: 'tasks',
                       icon: ListChecks,
                       label: 'Tasks',
+                      requiresApproval: true,
                       badge: rejectedTasksCount,
                     },
-                    { view: 'leaderboard', icon: Trophy, label: 'Leaderboard' },
+                    {
+                      view: 'taskHistory',
+                      icon: FileClock,
+                      label: 'Task History',
+                      requiresApproval: true,
+                    },
+                    {
+                      view: 'leaderboard',
+                      icon: Trophy,
+                      label: 'Leaderboard',
+                      requiresApproval: true,
+                    },
                     {
                       view: 'coinExchange',
                       icon: DollarSign,
                       label: 'Coin Exchange',
+                      requiresApproval: true,
                       requiresActivation: true,
                     },
-                    { view: 'profile', icon: UserCircle, label: 'Profile' },
-                    { view: 'payout', icon: Wallet, label: 'Legacy Payout' },
+                    {
+                      view: 'finance',
+                      icon: History,
+                      label: 'Finance History',
+                      requiresApproval: true,
+                    },
+                    {
+                      view: 'profile',
+                      icon: UserCircle,
+                      label: 'Profile',
+                      requiresApproval: true,
+                    },
+                    {
+                      view: 'payout',
+                      icon: Wallet,
+                      label: 'Legacy Payout',
+                      requiresApproval: true,
+                    },
                   ]
                     .filter((item) => {
                       // Hide coin exchange if not activated
-                      if ('requiresActivation' in item && item.requiresActivation && !isActivated) {
+                      if (
+                        'requiresActivation' in item &&
+                        item.requiresActivation &&
+                        !isActivated
+                      ) {
                         return false;
                       }
                       return true;
                     })
                     .map((item) => {
-                    const Icon = item.icon;
-                    const isDisabled = item.requiresApproval && !isApproved;
-                    const isActive = dashView === item.view;
+                      const Icon = item.icon;
+                      const isDisabled = item.requiresApproval && !isApproved;
+                      const isActive = dashView === item.view;
 
-                    return (
-                      <button
-                        key={item.view}
-                        onClick={() => {
-                          if (!isDisabled) {
-                            setDashView(item.view);
-                            setIsMenuOpen(false);
-                          }
-                        }}
-                        className={`
+                      return (
+                        <button
+                          key={item.view}
+                          onClick={() => {
+                            if (!isDisabled) {
+                              setDashView(item.view as typeof dashView);
+                              setIsMenuOpen(false);
+                            }
+                          }}
+                          className={`
                           w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all
                           ${
                             isActive
@@ -186,26 +226,26 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                           }
                           ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}
                         `}
-                        disabled={isDisabled}
-                      >
-                        <Icon
-                          size={20}
-                          className={
-                            isActive ? 'from-[#ac9976] to-[#e1ba73]' : ''
-                          }
-                        />
-                        <span className="font-medium">{item.label}</span>
-                        {item.badge && (
-                          <span className="ml-auto px-2 py-1 bg-red-500 text-white text-xs rounded-full">
-                            {item.badge}
-                          </span>
-                        )}
-                        {isDisabled && (
-                          <Lock size={16} className="ml-auto text-zinc-500" />
-                        )}
-                      </button>
-                    );
-                  })}
+                          disabled={isDisabled}
+                        >
+                          <Icon
+                            size={20}
+                            className={
+                              isActive ? 'from-[#ac9976] to-[#e1ba73]' : ''
+                            }
+                          />
+                          <span className="font-medium">{item.label}</span>
+                          {item.badge && (
+                            <span className="ml-auto px-2 py-1 bg-red-500 text-white text-xs rounded-full">
+                              {item.badge}
+                            </span>
+                          )}
+                          {isDisabled && (
+                            <Lock size={16} className="ml-auto text-zinc-500" />
+                          )}
+                        </button>
+                      );
+                    })}
                 </div>
 
                 {/* Logout Button */}

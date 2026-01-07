@@ -44,7 +44,7 @@ export const LandingView: React.FC<LandingViewProps> = ({
         </p>
 
         {/* Animated stats */}
-        <div className="flex justify-center gap-8 mb-12">
+        <div className="flex flex-wrap justify-center gap-4 sm:gap-8 mb-12">
           {[
             { value: '10K+', label: 'Active Users' },
             { value: '500K+', label: 'Coins Earned' },

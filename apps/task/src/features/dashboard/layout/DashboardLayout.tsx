@@ -90,10 +90,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 
                 {/* Withdraw Button - Only show if portal is activated */}
                 {isActivated && (
-                  <MagneticButton
-                    small
-                    onClick={() => setDashView('coinExchange')}
-                  >
+                  <MagneticButton onClick={() => setDashView('coinExchange')}>
                     <Wallet size={16} /> Withdraw
                   </MagneticButton>
                 )}
@@ -117,8 +114,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 
         <div className="max-w-7xl mx-auto px-6 py-8">
           <div className="flex flex-col lg:flex-row gap-8">
-            {/* Sidebar */}
-            <div className="lg:w-64">
+            <div className="hidden lg:block lg:w-64">
               <Sidebar
                 dashView={dashView}
                 setDashView={setDashView}

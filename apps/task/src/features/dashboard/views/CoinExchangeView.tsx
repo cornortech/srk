@@ -111,7 +111,7 @@ export const CoinExchangeView: React.FC<CoinExchangeViewProps> = ({
       <div className="grid md:grid-cols-3 gap-8">
         <div className="md:col-span-2">
           <DashboardGlassCard>
-            <div className="p-8">
+            <div className="p-6 sm:p-8">
               <h3 className="text-xl font-bold text-white mb-6">
                 Exchange Calculator
               </h3>
@@ -163,7 +163,7 @@ export const CoinExchangeView: React.FC<CoinExchangeViewProps> = ({
                 </div>
 
                 {/* Exchange Info Cards */}
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <DashboardGlassCard className="p-4">
                     <div className="text-center">
                       <p className="text-sm text-zinc-400 mb-1">

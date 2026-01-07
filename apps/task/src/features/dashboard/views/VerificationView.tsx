@@ -59,7 +59,10 @@ export const VerificationView: React.FC<VerificationViewProps> = ({
               className="p-4 bg-rose-500/10 rounded-xl border border-rose-500/20"
             >
               <div className="flex items-start gap-3 mb-3">
-                <AlertCircle size={20} className="text-rose-400 flex-shrink-0 mt-0.5" />
+                <AlertCircle
+                  size={20}
+                  className="text-rose-400 flex-shrink-0 mt-0.5"
+                />
                 <div>
                   <span className="text-sm text-rose-300 font-semibold block mb-1">
                     Verification Rejected
@@ -103,7 +106,9 @@ export const VerificationView: React.FC<VerificationViewProps> = ({
                   Verification Under Review
                 </span>
                 <p className="text-sm text-amber-300/80">
-                  Your verification documents are being reviewed by our team. This usually takes 24-48 hours. You'll be notified once the review is complete.
+                  Your verification documents are being reviewed by our team.
+                  This usually takes 24-48 hours. You'll be notified once the
+                  review is complete.
                 </p>
               </div>
             </div>
@@ -139,7 +144,7 @@ export const VerificationView: React.FC<VerificationViewProps> = ({
       <div className="grid md:grid-cols-2 gap-8">
         {/* Identity Verification Card */}
         <DashboardGlassCard hover>
-          <div className="p-8">
+          <div className="p-6 sm:p-8">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
                 <motion.div
@@ -156,7 +161,13 @@ export const VerificationView: React.FC<VerificationViewProps> = ({
                 </div>
               </div>
               <DashboardStatusBadge
-                status={kycStatus === 'approved' ? 'Verified' : kycStatus === 'rejected' ? 'Rejected' : 'Pending'}
+                status={
+                  kycStatus === 'approved'
+                    ? 'Verified'
+                    : kycStatus === 'rejected'
+                    ? 'Rejected'
+                    : 'Pending'
+                }
                 pulse={kycStatus === 'pending'}
               />
             </div>
@@ -181,7 +192,7 @@ export const VerificationView: React.FC<VerificationViewProps> = ({
             {/* Animated background */}
             <div className="absolute inset-0 bg-linear-to-br from-purple-500/5 via-transparent to-pink-500/5" />
 
-            <div className="p-8 relative z-10">
+            <div className="p-6 sm:p-8 relative z-10">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
                   <motion.div

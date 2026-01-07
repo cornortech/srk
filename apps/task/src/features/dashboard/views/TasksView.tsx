@@ -51,7 +51,10 @@ export const TasksView: React.FC<TasksViewProps> = ({
       },
       {
         enabled: !!taskUserID && isApproved,
-        queryKey: ['getRejectedSrkTaskActionSubmissionsByUser', taskUserID || ''],
+        queryKey: [
+          'getRejectedSrkTaskActionSubmissionsByUser',
+          taskUserID || '',
+        ],
       }
     );
 
@@ -63,14 +66,16 @@ export const TasksView: React.FC<TasksViewProps> = ({
       const packageData = enrollmentData?.growSocialMediaPackageId;
       const packageTypeData = enrollmentData?.growSocialMediaPackageTypeId;
       const platform = todoData?.platform as SocialPlatform;
-      
+
       return {
         id: task._id,
         taskId: todoData?._id || '',
         platform: platform || 'Instagram',
         type: (task.type || 'follow') as TaskType,
         title: `${task.type} on ${todoData?.platform || 'Unknown'}`,
-        desc: `${packageData?.name || 'Package'} - ${packageTypeData?.name || 'Type'}`,
+        desc: `${packageData?.name || 'Package'} - ${
+          packageTypeData?.name || 'Type'
+        }`,
         coins: enrollmentData?.amount || 0,
         difficulty: 'easy' as const,
         estimatedTime: '2-3',
@@ -160,13 +165,13 @@ export const TasksView: React.FC<TasksViewProps> = ({
                 category.type === 'follow'
                   ? 'green'
                   : // : category.type === 'watch'
-                  // ? 'blue'
-                  'purple'
+                    // ? 'blue'
+                    'purple'
               }
               onClick={() => setTaskCategory(category.type)}
               className="cursor-pointer"
             >
-              <div className="p-8">
+              <div className="p-6 sm:p-8">
                 <div className="flex items-center gap-4 mb-6">
                   <div
                     className={`w-16 h-16 rounded-2xl bg-div-to-br ${category.color} flex items-center justify-center`}
@@ -177,8 +182,8 @@ export const TasksView: React.FC<TasksViewProps> = ({
                         category.type === 'follow'
                           ? 'text-emerald-400'
                           : // : category.type === 'watch'
-                          // ? 'text-blue-400'
-                          'text-purple-400'
+                            // ? 'text-blue-400'
+                            'text-purple-400'
                       }
                     />
                   </div>
@@ -302,7 +307,7 @@ export const TasksView: React.FC<TasksViewProps> = ({
         </div>
       ) : (
         <div className="mt-8">
-          <DashboardGlassCard className="p-12 text-center">
+          <DashboardGlassCard className="p-6 sm:p-12 text-center">
             <div className="w-20 h-20 rounded-full bg-gradient-to-br from-emerald-500/20 to-green-500/20 flex items-center justify-center mx-auto mb-6">
               <CheckCircle2 size={40} className="text-emerald-400" />
             </div>

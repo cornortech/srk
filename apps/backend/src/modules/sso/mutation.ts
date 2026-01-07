@@ -67,9 +67,23 @@ const getAutoCode: AppRouteImplementationOrOptions<
       targetApp === 'growaffiliate' ||
       targetApp === 'growsocialmedia'
     ) {
-      const growDomain =
-        process.env['GROW_FRONTEND_URL'] || 'http://localhost:4500';
-      redirectUrl = `${growDomain}/callback?code=${code}`;
+      let growAffiliateId = null;
+      if (targetApp === 'growaffiliate') {
+        const growAffiliateRecord = await GrowAffiliateUserModel.findOne({
+          srkUniversityUserId: userId,
+          isActive: true,
+        });
+
+        let redirectUrlQueryParams = '';
+        if (growAffiliateRecord) {
+          growAffiliateId = growAffiliateRecord._id.toString();
+          redirectUrlQueryParams = `&affiliateId=${growAffiliateId}`;
+        }
+
+        const growDomain =
+          process.env['GROW_FRONTEND_URL'] || 'http://localhost:4500';
+        redirectUrl = `${growDomain}/callback?code=${code}${redirectUrlQueryParams}`;
+      }
     } else {
       const bankDomain =
         process.env['BANK_FRONTEND_URL'] || 'http://localhost:4300';
@@ -179,8 +193,6 @@ const exchangeCode: AppRouteImplementationOrOptions<
         srkUniversityUserId: loggedInUser._id.toString(),
         isActive: true,
       });
-
-      console.log('Existing affiliate:', existingAffiliate);
 
       // If already approved, go to dashboard, otherwise go to verification
       redirectionUrl = existingAffiliate

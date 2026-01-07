@@ -23,7 +23,7 @@ const Navbar: React.FC<NavbarProps> = () => {
     if (user.status === 'portalActivated') {
       navigate('/dashboard');
     } else {
-      navigate('/grow/verification-wall');
+      // navigate('/grow/verification-wall');
     }
     setMobileMenuOpen(false);
   };
@@ -63,7 +63,7 @@ const Navbar: React.FC<NavbarProps> = () => {
 
           {/* Desktop Actions */}
           <div className="hidden md:flex items-center gap-4">
-            {user ? (
+            {/* {user ? (
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -82,7 +82,15 @@ const Navbar: React.FC<NavbarProps> = () => {
               >
                 Login
               </motion.button>
-            )}
+            )} */}
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={buttonAction}
+              className="px-8 py-3 rounded-full bg-gradient-to-r from-[#b68938] to-[#e1ba73] text-black font-bold text-sm uppercase tracking-widest hover:shadow-[0_0_30px_rgba(182,137,56,0.6)]"
+            >
+              Login
+            </motion.button>
           </div>
 
           {/* Mobile Actions */}

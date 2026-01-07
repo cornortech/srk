@@ -30,6 +30,13 @@ const CallbackPage = () => {
   useEffect(() => {
     const handleSSOCallback = async () => {
       const code = searchParams.get('code');
+      const affiliateId = searchParams.get('affiliateId');
+
+      // Store affiliateId if present
+      if (affiliateId) {
+        localStorage.setItem('affiliateGrowUserId', affiliateId);
+        console.log('Stored affiliateGrowUserId:', affiliateId);
+      }
 
       if (!code) {
         setStatus('error');
@@ -55,7 +62,6 @@ const CallbackPage = () => {
             fullName: response.user.firstName || "",
             // lastName: response.user.lastName || "",
           });
-
 
           console.log("debug 1 response.user?.redirectionUrl:", response.user?.redirectionUrl);
           // Redirect to dashboard

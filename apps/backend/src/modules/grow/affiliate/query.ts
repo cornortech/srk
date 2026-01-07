@@ -4,7 +4,11 @@ import { growSrkAffiliateUserBalanceModel } from '../../../model/grow/growSrkAff
 import { growSrkAffiliateEarningStatementModel } from '../../../model/grow/growSrkAffiliateEarningStatementModel';
 import { growAffiliateContract } from '@srk/shared/contracts';
 import { growSrkAffiliateUserEarningsPayoutModel } from '../../../model/grow/growSrkAffiliateUserEarningsPayoutModel';
-import { growSocialMediaPackageUserModel, IGrowSocialMediaPackageUser } from '../../../model/growSocialMediaPackageUserModel'
+import {
+  growSocialMediaPackageUserModel,
+  IGrowSocialMediaPackageUser,
+} from '../../../model/growSocialMediaPackageUserModel';
+import GrowAffiliateUserModel from '../../../model/grow/growAffiliateUserModel';
 
 const getGrowAffiliateUserComissionEarningsDashboard: AppRouteImplementationOrOptions<
   typeof growAffiliateContract.getGrowAffiliateUserComissionEarningsDashboard
@@ -37,19 +41,29 @@ const getGrowAffiliateUserComissionEarningsDashboard: AppRouteImplementationOrOp
     const now = new Date();
 
     // Start and end of today in UTC
-    const startOfToday = new Date(Date.UTC(
-      now.getUTCFullYear(),
-      now.getUTCMonth(),
-      now.getUTCDate(),
-      0, 0, 0, 0
-    ));
+    const startOfToday = new Date(
+      Date.UTC(
+        now.getUTCFullYear(),
+        now.getUTCMonth(),
+        now.getUTCDate(),
+        0,
+        0,
+        0,
+        0
+      )
+    );
 
-    const endOfToday = new Date(Date.UTC(
-      now.getUTCFullYear(),
-      now.getUTCMonth(),
-      now.getUTCDate(),
-      23, 59, 59, 999
-    ));
+    const endOfToday = new Date(
+      Date.UTC(
+        now.getUTCFullYear(),
+        now.getUTCMonth(),
+        now.getUTCDate(),
+        23,
+        59,
+        59,
+        999
+      )
+    );
 
     // Start and end of yesterday in UTC
     const startOfYesterday = new Date(startOfToday);
@@ -89,33 +103,49 @@ const getGrowAffiliateUserComissionEarningsDashboard: AppRouteImplementationOrOp
         $facet: {
           today: [
             { $match: { createdAt: { $gte: startOfToday, $lte: endOfToday } } },
-            { $group: { _id: null, total: { $sum: "$amount" } } },
+            { $group: { _id: null, total: { $sum: '$amount' } } },
           ],
           yesterday: [
-            { $match: { createdAt: { $gte: startOfYesterday, $lte: endOfYesterday } } },
-            { $group: { _id: null, total: { $sum: "$amount" } } },
+            {
+              $match: {
+                createdAt: { $gte: startOfYesterday, $lte: endOfYesterday },
+              },
+            },
+            { $group: { _id: null, total: { $sum: '$amount' } } },
           ],
           last7Days: [
             { $match: { createdAt: { $gte: startOf7Days } } },
-            { $group: { _id: null, total: { $sum: "$amount" } } },
+            { $group: { _id: null, total: { $sum: '$amount' } } },
           ],
           prev7Days: [
-            { $match: { createdAt: { $gte: startOfPrev7Days, $lte: endOfPrev7Days } } },
-            { $group: { _id: null, total: { $sum: "$amount" } } },
+            {
+              $match: {
+                createdAt: { $gte: startOfPrev7Days, $lte: endOfPrev7Days },
+              },
+            },
+            { $group: { _id: null, total: { $sum: '$amount' } } },
           ],
           last28Days: [
             { $match: { createdAt: { $gte: startOf28Days } } },
-            { $group: { _id: null, total: { $sum: "$amount" } } },
+            { $group: { _id: null, total: { $sum: '$amount' } } },
           ],
           prev28Days: [
-            { $match: { createdAt: { $gte: startOfPrev28Days, $lte: endOfPrev28Days } } },
-            { $group: { _id: null, total: { $sum: "$amount" } } },
+            {
+              $match: {
+                createdAt: { $gte: startOfPrev28Days, $lte: endOfPrev28Days },
+              },
+            },
+            { $group: { _id: null, total: { $sum: '$amount' } } },
           ],
-          allTime: [
-            { $group: { _id: null, total: { $sum: "$amount" } } },
-          ],
+          allTime: [{ $group: { _id: null, total: { $sum: '$amount' } } }],
           activeDates: [
-            { $group: { _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } } } },
+            {
+              $group: {
+                _id: {
+                  $dateToString: { format: '%Y-%m-%d', date: '$createdAt' },
+                },
+              },
+            },
             { $sort: { _id: 1 } },
           ],
         },
@@ -129,7 +159,7 @@ const getGrowAffiliateUserComissionEarningsDashboard: AppRouteImplementationOrOp
     // -----------------------------
     const calcGrowth = (current: number, previous: number) => {
       if (previous === 0) return 0;
-      return parseFloat(((current - previous) / previous * 100).toFixed(2));
+      return parseFloat((((current - previous) / previous) * 100).toFixed(2));
     };
 
     const todayTotal = data.today[0]?.total || 0;
@@ -153,7 +183,8 @@ const getGrowAffiliateUserComissionEarningsDashboard: AppRouteImplementationOrOp
       if (!lastDate) {
         streak = 1;
       } else {
-        const diff = (date.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24);
+        const diff =
+          (date.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24);
         if (diff === 1) streak += 1; // consecutive day
         else streak = 1; // reset streak
       }
@@ -166,9 +197,18 @@ const getGrowAffiliateUserComissionEarningsDashboard: AppRouteImplementationOrOp
       body: {
         growSocialMediaPackageUserId: affiliateUserId,
         currentBalance,
-        todayEarnings: { totalEarnings: todayTotal, growthPercentage: calcGrowth(todayTotal, yesterdayTotal) },
-        last7DaysEarnings: { totalEarnings: last7Total, growthPercentage: calcGrowth(last7Total, prev7Total) },
-        last28DaysEarnings: { totalEarnings: last28Total, growthPercentage: calcGrowth(last28Total, prev28Total) },
+        todayEarnings: {
+          totalEarnings: todayTotal,
+          growthPercentage: calcGrowth(todayTotal, yesterdayTotal),
+        },
+        last7DaysEarnings: {
+          totalEarnings: last7Total,
+          growthPercentage: calcGrowth(last7Total, prev7Total),
+        },
+        last28DaysEarnings: {
+          totalEarnings: last28Total,
+          growthPercentage: calcGrowth(last28Total, prev28Total),
+        },
         allTimeEarnings: allTimeTotal,
         activeDaysStreak: maxStreak,
       },
@@ -179,7 +219,9 @@ const getGrowAffiliateUserComissionEarningsDashboard: AppRouteImplementationOrOp
       status: 500,
       body: {
         success: false,
-        message: error.message ? `Internal server error: ${error.message}` : "Internal server error",
+        message: error.message
+          ? `Internal server error: ${error.message}`
+          : 'Internal server error',
       },
     };
   }
@@ -293,7 +335,7 @@ const getUserAffiliateSalesComissionEarnings: AppRouteImplementationOrOptions<
             name: u.name,
           })),
         })),
-      }
+      },
     };
   } catch (error) {
     console.error(error);
@@ -324,34 +366,30 @@ const getAllUsersAffiliateComissionLeaderBoard: AppRouteImplementationOrOptions<
       startOfToday.setHours(0, 0, 0, 0);
 
       dateMatch.createdAt = {
-        $gte: startOfToday
+        $gte: startOfToday,
       };
     }
 
     if (timeRange === 'week') {
-      const sevenDaysAgo = new Date(
-        Date.now() - 7 * 24 * 60 * 60 * 1000
-      );
+      const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
 
       dateMatch.createdAt = {
-        $gte: sevenDaysAgo
+        $gte: sevenDaysAgo,
       };
     }
 
     const affiliateLeaderboardResults =
       await growSrkAffiliateEarningStatementModel.aggregate([
         // Time filter FIRST (performance)
-        ...(timeRange !== 'all'
-          ? [{ $match: dateMatch }]
-          : []),
+        ...(timeRange !== 'all' ? [{ $match: dateMatch }] : []),
         {
           $group: {
             _id: '$refferedBY',
             totalSales: {
-              $sum: 1
+              $sum: 1,
             },
             totalRevenue: {
-              $sum: '$amount'
+              $sum: '$amount',
             },
           },
         },
@@ -365,7 +403,7 @@ const getAllUsersAffiliateComissionLeaderBoard: AppRouteImplementationOrOptions<
           },
         },
         {
-          $unwind: '$affiliateUser'
+          $unwind: '$affiliateUser',
         },
 
         {
@@ -383,39 +421,42 @@ const getAllUsersAffiliateComissionLeaderBoard: AppRouteImplementationOrOptions<
           $facet: {
             paginatedResults: [
               {
-                $skip: skip
+                $skip: skip,
               },
               {
-                $limit: limit
-              }
+                $limit: limit,
+              },
             ],
             totalCount: [
               {
-                $count: 'count'
-              }
+                $count: 'count',
+              },
             ],
           },
-        }
+        },
       ]);
 
-    const totalRecords = affiliateLeaderboardResults[0].totalCount[0]?.count || 0;
+    const totalRecords =
+      affiliateLeaderboardResults[0].totalCount[0]?.count || 0;
     const totalPages = Math.ceil(totalRecords / limit);
 
     return {
       status: 200,
       body: {
         timeRange,
-        data: affiliateLeaderboardResults[0].paginatedResults.map((affiliate, index) => ({
-          rank: skip + index + 1,
-          affiliateUsersStats: {
-            affiliateUserId: affiliate.affiliateUser._id.toString(),
-            name: affiliate.affiliateUser.fullName,
-          },
-          salesStats: {
-            totalSales: affiliate.totalSales,
-            totalRevenue: affiliate.totalRevenue,
-          },
-        })),
+        data: affiliateLeaderboardResults[0].paginatedResults.map(
+          (affiliate, index) => ({
+            rank: skip + index + 1,
+            affiliateUsersStats: {
+              affiliateUserId: affiliate.affiliateUser._id.toString(),
+              name: affiliate.affiliateUser.fullName,
+            },
+            salesStats: {
+              totalSales: affiliate.totalSales,
+              totalRevenue: affiliate.totalRevenue,
+            },
+          })
+        ),
         page,
         limit,
         totalRecords,
@@ -428,56 +469,62 @@ const getAllUsersAffiliateComissionLeaderBoard: AppRouteImplementationOrOptions<
       status: 500,
       body: {
         success: false,
-        message: error.message ? `Internal server error: ${error.message}` : "Internal server error",
+        message: error.message
+          ? `Internal server error: ${error.message}`
+          : 'Internal server error',
       },
     };
   }
 };
 
-const getGrowAffiliateUser: AppRouteImplementationOrOptions<typeof growAffiliateContract.getGrowAffiliateUser> = async ({ params }) => {
+const getGrowAffiliateUser: AppRouteImplementationOrOptions<
+  typeof growAffiliateContract.getGrowAffiliateUser
+> = async ({ params }) => {
   try {
-    const affiliateUserExist = await growSocialMediaPackageUserModel.findById({ _id: params.id })
+    const affiliateUserExist = await GrowAffiliateUserModel.findById({
+      _id: params.id,
+    });
 
     if (!affiliateUserExist) {
       return {
         status: 404,
         body: {
           success: false,
-          message: "Affiliate user not found",
+          message: 'Affiliate user not found',
         },
-      }
+      };
     }
 
     // 2. Fetch wallet balance
     await growSrkAffiliateUserBalanceModel.findOne({
-      growSocialMediaPackageUserId: affiliateUserExist._id
+      growSocialMediaPackageUserId: affiliateUserExist._id,
     });
 
     // 3. Aggregate total earnings
-    const earningsAggregate = await growSrkAffiliateEarningStatementModel.aggregate([
-      {
-        $match:
+    const earningsAggregate =
+      await growSrkAffiliateEarningStatementModel.aggregate([
         {
-          refferedBY: affiliateUserExist._id
-
-        }
-      },
-      {
-        $group:
+          $match: {
+            refferedBY: affiliateUserExist._id,
+          },
+        },
         {
-          _id: null,
-          totalAmount: {
-            $sum: "$amount"
-          }
-        }
-      }
-    ]);
+          $group: {
+            _id: null,
+            totalAmount: {
+              $sum: '$amount',
+            },
+          },
+        },
+      ]);
 
     const totalEarnings = earningsAggregate[0]?.totalAmount || 0;
 
-    const totalReferrals = await growSocialMediaPackageUserModel.countDocuments({
-      referredBy: affiliateUserExist._id
-    });
+    const totalReferrals = await growSocialMediaPackageUserModel.countDocuments(
+      {
+        referredBy: affiliateUserExist._id,
+      }
+    );
 
     return {
       status: 200,
@@ -486,28 +533,30 @@ const getGrowAffiliateUser: AppRouteImplementationOrOptions<typeof growAffiliate
           _id: affiliateUserExist._id.toString(),
           fullName: affiliateUserExist.fullName,
           email: affiliateUserExist.email,
-          phone: affiliateUserExist.phone,
+          phone: '',
           createdAt: affiliateUserExist.createdAt.toLocaleString(),
-          isEmailNotifications: affiliateUserExist.isEmailNotifications ?? null,
-          isPushNotifications: affiliateUserExist.isPushNotifications ?? null,
+          isEmailNotifications: null,
+          isPushNotifications: null,
         },
         affiliateData: {
           totalAffiliates: totalReferrals,
           totalComissionRevenue: totalEarnings,
         },
       },
-    }
+    };
   } catch (error) {
     console.error(error);
     return {
       status: 500,
       body: {
         success: false,
-        message: error.message ? `Internal server error: ${error.message}` : "Internal server error",
+        message: error.message
+          ? `Internal server error: ${error.message}`
+          : 'Internal server error',
       },
-    }
+    };
   }
-}
+};
 
 const getAllSrkAffiliateEarningPayoutForAdmin: AppRouteImplementationOrOptions<
   typeof growAffiliateContract.getSrkAffiliateEarningPayoutForAdmin

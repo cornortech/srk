@@ -1203,9 +1203,9 @@ const getRejectedSrkTaskActionSubmissionsByUser: AppRouteImplementationOrOptions
     const skip = (page - 1) * limit;
 
     // Filter for rejected submissions only
-    const filter: any = { 
-      taskUserId, 
-      status: 'rejected' 
+    const filter: any = {
+      taskUserId,
+      status: 'rejected',
     };
 
     const [totalRecords, submissions] = await Promise.all([
@@ -1257,29 +1257,35 @@ const getRejectedSrkTaskActionSubmissionsByUser: AppRouteImplementationOrOptions
                     profileLinkURL: enrollment.profileLinkURL || [],
                     amount: enrollment.amount || 0,
                     isActive: enrollment.isActive || false,
-                    growSocialMediaPackageId: enrollment.growSocialMediaPackageId
-                      ? {
-                          _id: enrollment.growSocialMediaPackageId._id.toString(),
-                          name: enrollment.growSocialMediaPackageId.name || '',
-                          description:
-                            enrollment.growSocialMediaPackageId.description || '',
-                          socialMediaPlatforms:
-                            enrollment.growSocialMediaPackageId
-                              .socialMediaPlatforms || [],
-                          amount: enrollment.growSocialMediaPackageId.amount || 0,
-                        }
-                      : undefined,
+                    growSocialMediaPackageId:
+                      enrollment.growSocialMediaPackageId
+                        ? {
+                            _id: enrollment.growSocialMediaPackageId._id.toString(),
+                            name:
+                              enrollment.growSocialMediaPackageId.name || '',
+                            description:
+                              enrollment.growSocialMediaPackageId.description ||
+                              '',
+                            socialMediaPlatforms:
+                              enrollment.growSocialMediaPackageId
+                                .socialMediaPlatforms || [],
+                            amount:
+                              enrollment.growSocialMediaPackageId.amount || 0,
+                          }
+                        : undefined,
                     growSocialMediaPackageTypeId:
                       enrollment.growSocialMediaPackageTypeId
                         ? {
                             _id: enrollment.growSocialMediaPackageTypeId._id.toString(),
                             name:
-                              enrollment.growSocialMediaPackageTypeId.name || '',
+                              enrollment.growSocialMediaPackageTypeId.name ||
+                              '',
                             description:
                               enrollment.growSocialMediaPackageTypeId
                                 .description || '',
                             amount:
-                              enrollment.growSocialMediaPackageTypeId.amount || 0,
+                              enrollment.growSocialMediaPackageTypeId.amount ||
+                              0,
                           }
                         : undefined,
                     growSocialMediaPackageSubTypeId:
@@ -1369,7 +1375,7 @@ const getSrkTaskActionsByPlatforms: AppRouteImplementationOrOptions<
     if (srkTaskUserId) {
       const taskUserId = new mongoose.Types.ObjectId(srkTaskUserId);
       const submissions = await srkTaskActionSubmissionModel
-        .find({ taskUserId ,status:"approved"})
+        .find({ taskUserId, status: { $in: ['approved', 'pending'] } })
         .select('growPackageTodoId')
         .lean();
       submittedTodoIds = submissions.map((s) => s.growPackageTodoId);

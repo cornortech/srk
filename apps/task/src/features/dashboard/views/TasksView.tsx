@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   AlertTriangle,
   CheckCircle2,
   ChevronRight,
+  Clock,
   Coins,
-  RefreshCw,
   Share2,
   Shield,
   Users,
@@ -33,6 +33,14 @@ interface TasksViewProps {
   setReviewingRejectedTask: (task: RejectedTaskEntry) => void;
 }
 
+// Utility function to check if current time is within allowed window
+const isWithinAllowedTime = (): boolean => {
+  const now = new Date();
+  const hours = now.getHours();
+  // Tasks are available between 7pm (19:00) and 10pm (22:00)
+  return hours >= 19 && hours < 22;
+};
+
 export const TasksView: React.FC<TasksViewProps> = ({
   isApproved,
   setDashView,
@@ -40,6 +48,16 @@ export const TasksView: React.FC<TasksViewProps> = ({
   setReviewingRejectedTask,
 }) => {
   const { taskUserID } = useTaskAuthStore();
+  const [isTaskTimeAllowed, setIsTaskTimeAllowed] = useState(isWithinAllowedTime());
+
+  // Check time every minute
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIsTaskTimeAllowed(isWithinAllowedTime());
+    }, 60000); // Check every minute
+
+    return () => clearInterval(interval);
+  }, []);
 
   // Fetch rejected tasks from backend
   const { data: rejectedTasksData } =
@@ -63,7 +81,7 @@ export const TasksView: React.FC<TasksViewProps> = ({
       const packageData = enrollmentData?.growSocialMediaPackageId;
       const packageTypeData = enrollmentData?.growSocialMediaPackageTypeId;
       const platform = todoData?.platform as SocialPlatform;
-      
+
       return {
         id: task._id,
         taskId: todoData?._id || '',
@@ -114,6 +132,31 @@ export const TasksView: React.FC<TasksViewProps> = ({
         </p>
       </div>
 
+      {/* Time Restriction Notice */}
+      <DashboardGlassCard
+        className={`p-6 ${isTaskTimeAllowed ? 'bg-emerald-500/10 border-emerald-500/30' : 'bg-amber-500/10 border-amber-500/30'}`}
+      >
+        <div className="flex items-center gap-4">
+          <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${isTaskTimeAllowed
+              ? 'bg-emerald-500/20 text-emerald-400'
+              : 'bg-amber-500/20 text-amber-400'
+            }`}>
+            <Clock size={24} />
+          </div>
+          <div className="flex-1">
+            <h3 className={`text-lg font-bold mb-1 ${isTaskTimeAllowed ? 'text-emerald-400' : 'text-amber-400'
+              }`}>
+              {isTaskTimeAllowed ? 'Tasks Are Available Now!' : 'Tasks Currently Unavailable'}
+            </h3>
+            <p className="text-zinc-300 text-sm">
+              {isTaskTimeAllowed
+                ? 'You can complete tasks until 10:00 PM. Make the most of your time!'
+                : 'Tasks can only be done between 7:00 PM and 10:00 PM daily.'}
+            </p>
+          </div>
+        </div>
+      </DashboardGlassCard>
+
       {/* Video Feature Toggle */}
       <div className="flex justify-end"></div>
 
@@ -155,7 +198,7 @@ export const TasksView: React.FC<TasksViewProps> = ({
           return (
             <DashboardGlassCard
               key={category.type}
-              hover
+              hover={isTaskTimeAllowed}
               gradient={
                 category.type === 'follow'
                   ? 'green'
@@ -163,8 +206,12 @@ export const TasksView: React.FC<TasksViewProps> = ({
                   // ? 'blue'
                   'purple'
               }
-              onClick={() => setTaskCategory(category.type)}
-              className="cursor-pointer"
+              onClick={() => isTaskTimeAllowed && setTaskCategory(category.type)}
+              className={`${isTaskTimeAllowed
+                  ? 'cursor-pointer'
+                  // blur it and disable pointer events
+                  : 'cursor-not-allowed opacity-30  pointer-events-none blur-[1px]'
+                }`}
             >
               <div className="p-8">
                 <div className="flex items-center gap-4 mb-6">
@@ -273,14 +320,14 @@ export const TasksView: React.FC<TasksViewProps> = ({
                           </span>
                         </div>
 
-                        <MagneticButton
+                        {/* <MagneticButton
                           small
                           onClick={() => setReviewingRejectedTask(task)}
                           className="px-6!"
                         >
                           <RefreshCw size={16} />
                           Review
-                        </MagneticButton>
+                        </MagneticButton> */}
                       </div>
                     </div>
                   </div>

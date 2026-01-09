@@ -9,6 +9,7 @@ import {
   Wallet,
   Repeat2,
   CheckCircle,
+  Settings,
 } from 'lucide-react';
 import { useIsDesktop } from '../../features/admin/hooks/useIsDesktop';
 import { NavLink, Payout } from '../../features/admin/types';
@@ -19,6 +20,7 @@ import { TaskDoneContent } from '../../features/admin/views/TaskDoneContent';
 import { TaskVerificationContent } from '../../features/admin/views/TaskVerificationContent';
 import { AllUsersContent } from '../../features/admin/views/AllUsersContent';
 import { LeaderboardContent } from '../../features/admin/views/LeaderboardContent';
+import { AppSettingsContent } from '../../features/admin/views/AppSettingsContent';
 import {
   DARK_BG,
   GOLD_PRIMARY,
@@ -77,6 +79,11 @@ export const AdminDashboard: React.FC = () => {
         name: 'Leaderboard',
         icon: Trophy,
         content: <LeaderboardContent />,
+      },
+      {
+        name: 'App Settings',
+        icon: Settings,
+        content: <AppSettingsContent />,
       },
     ],
     []

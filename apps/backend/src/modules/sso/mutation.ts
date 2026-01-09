@@ -208,26 +208,42 @@ const exchangeCode: AppRouteImplementationOrOptions<
       redirectionUrl = '/bank/dashboard';
     }
 
-    // Generate new JWT token
-    const token = await AuthService.generateJwtToken({
-      email: loggedInUser.email,
-      userId: loggedInUser._id.toString(),
-    });
+    // Generate access and refresh tokens
+    const [accessToken, refreshToken] = await Promise.all([
+      AuthService.generateAccessToken({
+        email: loggedInUser.email,
+        userId: loggedInUser._id.toString(),
+      }),
+      AuthService.generateRefreshToken({
+        email: loggedInUser.email,
+        userId: loggedInUser._id.toString(),
+      }),
+    ]);
 
-    // Set HTTP-only cookie for the new domain
+    // Set cookies with proper configuration
     const isProduction = process.env.NODE_ENV === 'production';
-    const cookieOptions: any = {
-      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+
+    const accessTokenOptions: any = {
+      maxAge: 15 * 60 * 1000, // 15 minutes
       httpOnly: true,
-      secure: isProduction,
       sameSite: isProduction ? 'none' : 'lax',
+      secure: isProduction,
+    };
+
+    const refreshTokenOptions: any = {
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+      httpOnly: true,
+      sameSite: isProduction ? 'none' : 'lax',
+      secure: isProduction,
     };
 
     if (process.env.COOKIE_DOMAIN) {
-      cookieOptions.domain = process.env.COOKIE_DOMAIN;
+      accessTokenOptions.domain = process.env.COOKIE_DOMAIN;
+      refreshTokenOptions.domain = process.env.COOKIE_DOMAIN;
     }
 
-    res.cookie('x-auth-token', token, cookieOptions);
+    res.cookie('access_token', accessToken, accessTokenOptions);
+    res.cookie('refresh_token', refreshToken, refreshTokenOptions);
 
     // Clean up - delete the used code
     await AutoCodeModel.deleteOne({ _id: autoCode._id });

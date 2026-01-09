@@ -101,4 +101,29 @@ export const authContract = c.router({
     },
     summary: 'Login Srk Grow User',
   },
+  refreshToken: {
+    method: 'POST',
+    path: '/auth/refresh',
+    body: z.object({}).optional(),
+    responses: {
+      200: z.object({
+        success: z.boolean(),
+        message: z.string(),
+      }),
+      401: z.object({
+        success: z.boolean(),
+        message: z.string(),
+      }),
+    },
+    summary: 'Refresh access token using refresh token',
+  },
+  logout: {
+    method: 'POST',
+    path: '/auth/logout',
+    body: z.object({}).optional(),
+    responses: {
+      200: SuccessSchema,
+    },
+    summary: 'Logout user and clear tokens',
+  },
 });

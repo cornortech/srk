@@ -42,6 +42,30 @@ class AuthService {
   }
 
   /**
+   * Generates an access token (15 minutes)
+   * @param user - The user object
+   * @returns The access token
+   */
+  static async generateAccessToken(user: {
+    email: string;
+    userId: string;
+  }): Promise<string> {
+    return jwt.sign(user, env.JWT_SECRET as string, { expiresIn: '15m' });
+  }
+
+  /**
+   * Generates a refresh token (30 days)
+   * @param user - The user object
+   * @returns The refresh token
+   */
+  static async generateRefreshToken(user: {
+    email: string;
+    userId: string;
+  }): Promise<string> {
+    return jwt.sign(user, env.JWT_SECRET as string, { expiresIn: '30d' });
+  }
+
+  /**
    * Verifies a jwt token
    * @param token
    * @returns

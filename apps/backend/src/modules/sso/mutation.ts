@@ -1,11 +1,11 @@
 import { AppRouteImplementationOrOptions } from '@ts-rest/express/src/lib/types';
 import { ssoContract } from '@srk/shared/contracts';
-import { AutoCodeModel } from '../../model/autoCodeModel';
 import { UserModel } from '../../model/userModel';
 import { adminModel } from '../../model/adminModel';
 import AuthService from '../../services/authService';
 import crypto from 'crypto';
 import GrowAffiliateUserModel from '../../model/grow/growAffiliateUserModel';
+import { AutoCodeModel } from '../../model/autoCodeModel';
 
 /**
  * Generate a one-time SSO auto code
@@ -187,25 +187,39 @@ const exchangeCode: AppRouteImplementationOrOptions<
     // Determine role
     const role = adminExist ? 'admin' : 'user';
 
-    // Set redirection URL based on target app
+    // Set redirection URL based on target app and role
     let redirectionUrl = '/dashboard';
-    if (autoCode.targetApp === 'task') {
-      redirectionUrl = '/task/dashboard';
-    } else if (autoCode.targetApp === 'growaffiliate') {
-      // Check if affiliate is already approved
-      const existingAffiliate = await GrowAffiliateUserModel.findOne({
-        srkUniversityUserId: loggedInUser._id.toString(),
-        isActive: true,
-      });
 
-      // If already approved, go to dashboard, otherwise go to verification
-      redirectionUrl = existingAffiliate
-        ? '/affiliate/dashboard'
-        : '/grow/affiliate/verification';
-    } else if (autoCode.targetApp === 'growsocialmedia') {
-      redirectionUrl = '/';
-    } else if (autoCode.targetApp === 'bank') {
-      redirectionUrl = '/bank/dashboard';
+    if (autoCode.isAdmin && role === 'admin') {
+      // Admin SSO redirect
+      if (autoCode.targetApp === 'task') {
+        redirectionUrl = '/admin';
+      } else if (
+        autoCode.targetApp === 'growaffiliate' ||
+        autoCode.targetApp === 'growsocialmedia'
+      ) {
+        redirectionUrl = '/admin';
+      }
+    } else {
+      // User SSO redirect
+      if (autoCode.targetApp === 'task') {
+        redirectionUrl = '/task/dashboard';
+      } else if (autoCode.targetApp === 'growaffiliate') {
+        // Check if affiliate is already approved
+        const existingAffiliate = await GrowAffiliateUserModel.findOne({
+          srkUniversityUserId: loggedInUser._id.toString(),
+          isActive: true,
+        });
+
+        // If already approved, go to dashboard, otherwise go to verification
+        redirectionUrl = existingAffiliate
+          ? '/affiliate/dashboard'
+          : '/grow/affiliate/verification';
+      } else if (autoCode.targetApp === 'growsocialmedia') {
+        redirectionUrl = '/';
+      } else if (autoCode.targetApp === 'bank') {
+        redirectionUrl = '/bank/dashboard';
+      }
     }
 
     // Generate access and refresh tokens

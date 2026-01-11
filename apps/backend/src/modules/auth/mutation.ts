@@ -19,6 +19,8 @@ import { methods } from '../../utils/methods';
 import { EarningStatementModel } from '../../model/earningStatementModel';
 import { growSocialMediaPackageUserModel } from '../../model/growSocialMediaPackageUserModel';
 import { authContract } from '@srk/shared/contracts';
+import crypto from 'crypto';
+import { AutoCodeModel } from '../../model/autoCodeModel';
 
 interface CalculateEarningsProps {
   referredBy: string;
@@ -370,6 +372,9 @@ const login: AppRouteImplementationOrOptions<
 
   // Set redirection URL based on user type and status
   let redirectionUrl = '/auth/login'; // Default for users
+  let requiresSSO = false;
+  let ssoCode = '';
+  
   if (role === 'user') {
     if (userExist) {
       redirectionUrl = methods.getFrontendRedirectionUrl(
@@ -381,7 +386,38 @@ const login: AppRouteImplementationOrOptions<
       redirectionUrl = '/auth/login';
     }
   } else {
-    redirectionUrl = '/admin'; // Admin redirection
+    // Admin login - check domain for SSO redirect
+    const adminDomain = (adminExist as any).domain;
+    
+    if (adminDomain === 'task' || adminDomain === 'grow') {
+      // Need SSO redirect for task/grow admin
+      requiresSSO = true;
+      
+      // Generate SSO code
+      ssoCode = crypto.randomBytes(5).toString('hex').toUpperCase();
+      const expiresAt = new Date(Date.now() + 30 * 1000);
+      
+      await AutoCodeModel.create({
+        code: ssoCode,
+        userId: loggedInUser._id.toString(),
+        targetApp: adminDomain,
+        expiresAt,
+        isUsed: false,
+        isAdmin: true,
+      });
+      
+      // Generate redirect URL based on domain
+      if (adminDomain === 'task') {
+        const taskDomain = process.env['TASK_FRONTEND_URL'] || 'http://localhost:4400';
+        redirectionUrl = `${taskDomain}/admin/callback?code=${ssoCode}`;
+      } else if (adminDomain === 'grow') {
+        const growDomain = process.env['GROW_FRONTEND_URL'] || 'http://localhost:4500';
+        redirectionUrl = `${growDomain}/admin/callback?code=${ssoCode}`;
+      }
+    } else {
+      // University admin - direct redirect
+      redirectionUrl = '/admin';
+    }
   }
 
   // Generate access and refresh tokens

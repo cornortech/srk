@@ -9,6 +9,8 @@ import { growPackageTodoModel } from '../../../model/growPackageTodoModel';
 import { growSocialMediaPackageEnrollmentModel } from '../../../model/growSocialMediaPackageEnrollment';
 import { srkTaskUserBalanceModel } from '../../../model/task/srkTaskUserBalanceModel';
 import { srkTaskEarningStatementModel } from '../../../model/task/srkTaskEarningStatementModel';
+import { srkTaskUserPaymentDetailsRequestModel } from '../../../model/task/srkTaskUserPaymentDetailsRequestModel';
+import mongoose from 'mongoose';
 
 const acceptSrkTaskUserEarningsPayout: AppRouteImplementationOrOptions<
   typeof srkTaskContract.acceptSrkTaskUserEarningsPayout
@@ -757,6 +759,159 @@ const srkTaskEarningsPayoutRequest: AppRouteImplementationOrOptions<
   }
 };
 
+
+
+// ============================================
+// Payment Details Mutation Handlers
+// ============================================
+
+const submitPaymentDetailsRequest: AppRouteImplementationOrOptions<
+  typeof srkTaskContract.submitPaymentDetailsRequest
+> = async ({ params, body }) => {
+  try {
+    const { userId } = params;
+
+    // Check if user exists
+    const userExists = await srkTaskUserModel.findById(userId);
+    if (!userExists) {
+      return {
+        status: 404,
+        body: {
+          success: false,
+          message: 'User not found',
+        },
+      };
+    }
+
+    // Check if there's already a pending request
+    const pendingRequest =
+      await srkTaskUserPaymentDetailsRequestModel.findOne({
+        srkTaskUserId: userId,
+        status: 'pending',
+      });
+
+    if (pendingRequest) {
+      return {
+        status: 400,
+        body: {
+          success: false,
+          message: 'You already have a pending payment details request',
+        },
+      };
+    }
+
+    // Create new request
+    await srkTaskUserPaymentDetailsRequestModel.create({
+      srkTaskUserId: userId,
+      accountHolderName: body.accountHolderName,
+      bankName: body.bankName,
+      accountNumber: body.accountNumber,
+      branchName: body.branchName,
+      qrCodeUrl: body.qrCodeUrl,
+      status: 'pending',
+    });
+
+    return {
+      status: 201,
+      body: {
+        success: true,
+        message: 'Payment details request submitted successfully',
+      },
+    };
+  } catch (error: any) {
+    console.error('Error submitting payment details request:', error);
+    return {
+      status: 500,
+      body: {
+        success: false,
+        message: error.message || 'Failed to submit payment details request',
+      },
+    };
+  }
+};
+
+const reviewPaymentDetailsRequest: AppRouteImplementationOrOptions<
+  typeof srkTaskContract.reviewPaymentDetailsRequest
+> = async ({ body }) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    const { requestId, status, rejectionReason } = body;
+
+    // Find the request
+    const request = await srkTaskUserPaymentDetailsRequestModel
+      .findById(requestId)
+      .session(session);
+
+    if (!request) {
+      await session.abortTransaction();
+      return {
+        status: 404,
+        body: {
+          success: false,
+          message: 'Payment details request not found',
+        },
+      };
+    }
+
+    if (request.status !== 'pending') {
+      await session.abortTransaction();
+      return {
+        status: 400,
+        body: {
+          success: false,
+          message: `Request already ${request.status}`,
+        },
+      };
+    }
+
+    // Update request status
+    request.status = status;
+    request.reviewedAt = new Date();
+    if (status === 'rejected' && rejectionReason) {
+      request.rejectionReason = rejectionReason;
+    }
+
+    // If approved, mark any previous approved requests as inactive
+    if (status === 'approved') {
+      await srkTaskUserPaymentDetailsRequestModel.updateMany(
+        {
+          srkTaskUserId: request.srkTaskUserId,
+          _id: { $ne: request._id },
+          status: 'approved',
+        },
+        { isActive: false },
+        { session }
+      );
+    }
+
+    await request.save({ session });
+
+    await session.commitTransaction();
+
+    return {
+      status: 200,
+      body: {
+        success: true,
+        message: `Payment details request ${status} successfully`,
+      },
+    };
+  } catch (error: any) {
+    await session.abortTransaction();
+    console.error('Error reviewing payment details request:', error);
+    return {
+      status: 500,
+      body: {
+        success: false,
+        message: error.message || 'Failed to review payment details request',
+      },
+    };
+  } finally {
+    session.endSession();
+  }
+};
+
 export const srkTaskMutationHandler = {
   srkTaskEarningsPayoutRequest,
   acceptSrkTaskUserEarningsPayout,
@@ -767,4 +922,6 @@ export const srkTaskMutationHandler = {
   srkTaskActionSubmission,
   approveSrkTaskActionSubmissionByAdmin,
   rejectSrkTaskActionSubmissionByAdmin,
+  submitPaymentDetailsRequest,
+  reviewPaymentDetailsRequest,
 };

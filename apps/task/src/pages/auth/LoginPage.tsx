@@ -1,4 +1,5 @@
 import { Button } from '@nextui-org/react';
+import { env } from '../../lib/env';
 
 /**
  * Login Page for Task App
@@ -7,7 +8,7 @@ import { Button } from '@nextui-org/react';
 export const LoginPage = () => {
   const handleGoToUniversity = () => {
     // Redirect to university login
-    window.location.href = 'http://localhost:4200/auth/login';
+    window.location.href = `${env.universityUrl}/auth/login`;
   };
 
   return (

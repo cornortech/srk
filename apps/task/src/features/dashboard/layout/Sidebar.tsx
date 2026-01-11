@@ -1,6 +1,7 @@
 import {
   BarChart3,
   Coins,
+  CreditCard,
   DollarSign,
   FileClock,
   History,
@@ -110,6 +111,12 @@ const Sidebar: React.FC<SidebarProps> = ({
       view: 'finance',
       icon: History,
       label: 'Finance History',
+      requiresApproval: true,
+    },
+    {
+      view: 'paymentDetails',
+      icon: CreditCard,
+      label: 'Payment Details',
       requiresApproval: true,
     },
     {

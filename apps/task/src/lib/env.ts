@@ -8,6 +8,8 @@ export const env = {
   backendUrl: import.meta.env.VITE_BACKEND_ROOT_URL || 'http://localhost:4000',
   frontendUrl:
     import.meta.env.VITE_FRONTEND_ROOT_URL || 'http://localhost:4400',
+  universityUrl:
+    import.meta.env.VITE_UNIVERSITY_FRONTEND_URL || 'http://localhost:4200',
 
   // Firebase Configuration
   firebase: {

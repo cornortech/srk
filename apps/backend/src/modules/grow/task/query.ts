@@ -14,6 +14,7 @@ import { IUser } from '../../../model/userModel';
 import { srkTaskUserBalanceModel } from '../../../model/task/srkTaskUserBalanceModel';
 import { growPackageTodoModel } from '../../../model/growPackageTodoModel';
 import { growSocialMediaPackageEnrollmentModel } from '../../../model/growSocialMediaPackageEnrollment';
+import { srkTaskUserPaymentDetailsRequestModel } from '../../../model/task/srkTaskUserPaymentDetailsRequestModel';
 
 const getAllSrkTasksActionSubmissionByStatusForAdmin: AppRouteImplementationOrOptions<
   typeof srkTaskContract.getAllSrkTasksActionSubmissionByStatusForAdmin
@@ -818,6 +819,22 @@ const getAllSrkTaskEarningPayoutsByAdmin: AppRouteImplementationOrOptions<
         }),
     ]);
 
+    // Get payment details for each user
+    const userIds = payouts.map((p) => (p.taskUserId as any)?._id).filter(Boolean);
+    const paymentDetailsMap = new Map();
+    
+    if (userIds.length > 0) {
+      const paymentDetails = await srkTaskUserPaymentDetailsRequestModel.find({
+        srkTaskUserId: { $in: userIds },
+        status: 'approved',
+        isActive: true,
+      }).lean();
+      
+      paymentDetails.forEach((pd) => {
+        paymentDetailsMap.set(pd.srkTaskUserId.toString(), pd);
+      });
+    }
+
     return {
       status: 200,
       body: {
@@ -827,13 +844,23 @@ const getAllSrkTaskEarningPayoutsByAdmin: AppRouteImplementationOrOptions<
         totalPages: Math.ceil(totalRecords / limit),
         data: payouts.map((payout) => {
           const taskUser = payout.taskUserId as any;
+          const userId = taskUser?._id?.toString() || '';
+          const paymentDetails = paymentDetailsMap.get(userId);
+          
           return {
             _id: payout._id.toString(),
             taskUserId: {
-              _id: taskUser?._id?.toString() || '',
+              _id: userId,
               fullName: taskUser?.fullName || 'Unknown User',
               email: taskUser?.srkUniversityUserId?.email || 'Unknown Email',
             },
+            paymentDetails: paymentDetails ? {
+              accountHolderName: paymentDetails.accountHolderName,
+              bankName: paymentDetails.bankName,
+              accountNumber: paymentDetails.accountNumber,
+              branchName: paymentDetails.branchName,
+              qrCodeUrl: paymentDetails.qrCodeUrl,
+            } : null,
             transactionId: payout.transactionId || null,
             coinsUsed: payout.coinsUsed,
             tds: payout.tds,
@@ -1767,6 +1794,153 @@ const getApprovedSrkTaskAffiliateVerificationRequest: AppRouteImplementationOrOp
   }
 };
 
+
+// ============================================
+// Payment Details Query Handlers
+// ============================================
+
+const getUserPaymentDetails: AppRouteImplementationOrOptions<
+  typeof srkTaskContract.getUserPaymentDetails
+> = async ({ params }) => {
+  try {
+    const { userId } = params;
+
+    // Get approved payment details (active approved request)
+    const approvedDetails = await srkTaskUserPaymentDetailsRequestModel.findOne({
+      srkTaskUserId: userId,
+      status: 'approved',
+      isActive: true,
+    });
+
+    // Get pending request if any
+    const pendingRequest =
+      await srkTaskUserPaymentDetailsRequestModel.findOne({
+        srkTaskUserId: userId,
+        status: 'pending',
+      });
+
+    // Get latest rejected request if any
+    const rejectedRequest =
+      await srkTaskUserPaymentDetailsRequestModel.findOne({
+        srkTaskUserId: userId,
+        status: 'rejected',
+      }).sort({ createdAt: -1 });
+
+    const formatPaymentDetails = (details: any) => details ? {
+      _id: details._id.toString(),
+      srkTaskUserId: details.srkTaskUserId.toString(),
+      accountHolderName: details.accountHolderName,
+      bankName: details.bankName,
+      accountNumber: details.accountNumber,
+      branchName: details.branchName,
+      qrCodeUrl: details.qrCodeUrl,
+      status: details.status,
+      rejectionReason: details.rejectionReason,
+      reviewedBy: details.reviewedBy?.toString(),
+      reviewedAt: details.reviewedAt?.toISOString(),
+      isActive: details.isActive,
+      createdAt: details.createdAt.toISOString(),
+      updatedAt: details.updatedAt.toISOString(),
+    } : null;
+
+    return {
+      status: 200,
+      body: {
+        success: true,
+        approvedDetails: formatPaymentDetails(approvedDetails),
+        pendingRequest: formatPaymentDetails(pendingRequest),
+        rejectedRequest: formatPaymentDetails(rejectedRequest),
+      },
+    };
+  } catch (error: any) {
+    console.error('Error fetching user payment details:', error);
+    return {
+      status: 500,
+      body: {
+        success: false,
+        message: error.message || 'Failed to fetch payment details',
+      },
+    };
+  }
+};
+
+const getAllPaymentDetailsRequestsForAdmin: AppRouteImplementationOrOptions<
+  typeof srkTaskContract.getAllPaymentDetailsRequestsForAdmin
+> = async ({ query }) => {
+  try {
+    const page = Number(query?.page ?? 1);
+    const limit = Number(query?.limit ?? 10);
+    const skip = (page - 1) * limit;
+    const status = query?.status;
+
+    const filter = status ? { status } : {};
+
+    const [totalRecords, requests] = await Promise.all([
+      srkTaskUserPaymentDetailsRequestModel.countDocuments(filter),
+      srkTaskUserPaymentDetailsRequestModel
+        .find(filter)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .populate({
+          path: 'srkTaskUserId',
+          populate: {
+            path: 'srkUniversityUserId',
+            select: 'fullName email phoneNumber',
+          },
+        })
+        .lean(),
+    ]);
+
+    const data = requests.map((request: any) => ({
+      _id: request._id.toString(),
+      srkTaskUserId: request.srkTaskUserId?.srkUniversityUserId
+        ? {
+            _id: request.srkTaskUserId._id.toString(),
+            fullName:
+              request.srkTaskUserId.srkUniversityUserId.fullName || '',
+            email: request.srkTaskUserId.srkUniversityUserId.email || '',
+            phoneNumber:
+              request.srkTaskUserId.srkUniversityUserId.phoneNumber || '',
+          }
+        : request.srkTaskUserId._id.toString(),
+      accountHolderName: request.accountHolderName,
+      bankName: request.bankName,
+      accountNumber: request.accountNumber,
+      branchName: request.branchName,
+      qrCodeUrl: request.qrCodeUrl,
+      status: request.status,
+      rejectionReason: request.rejectionReason,
+      reviewedBy: request.reviewedBy?.toString(),
+      reviewedAt: request.reviewedAt?.toISOString(),
+      createdAt: request.createdAt.toISOString(),
+      updatedAt: request.updatedAt.toISOString(),
+    }));
+
+    return {
+      status: 200,
+      body: {
+        data,
+        pagination: {
+          currentPage: page,
+          totalPages: Math.ceil(totalRecords / limit),
+          totalRecords,
+          limit,
+        },
+      },
+    };
+  } catch (error: any) {
+    console.error('Error fetching payment details requests:', error);
+    return {
+      status: 500,
+      body: {
+        success: false,
+        message: error.message || 'Failed to fetch payment details requests',
+      },
+    };
+  }
+};
+
 export const srkTaskQueryHandler = {
   getSrkTaskActionsByPlatforms,
   getSrkTaskUserProfile,
@@ -1782,4 +1956,6 @@ export const srkTaskQueryHandler = {
   getApprovedSrkTaskAffiliateVerificationRequest,
   getAllSrkTaskUsersForAdmin,
   getAllCompletedSrkTaskSubmissionsForAdmin,
+  getUserPaymentDetails,
+  getAllPaymentDetailsRequestsForAdmin,
 };

@@ -3,9 +3,10 @@ import mongoose from 'mongoose';
 export interface IAutoCode extends mongoose.Document {
   code: string;
   userId: mongoose.Types.ObjectId;
-  targetApp: 'task' | 'growaffiliate' | 'growsocialmedia' | 'bank'; // Which app the code is for
+  targetApp: 'task' | 'grow' | 'university' | 'growaffiliate' | 'growsocialmedia' | 'bank'; // Which app the code is for
   expiresAt: Date;
   isUsed: boolean;
+  isAdmin?: boolean; // Flag for admin SSO
   createdAt: Date;
   updatedAt: Date;
 }
@@ -25,7 +26,7 @@ const autoCodeSchema = new mongoose.Schema(
     },
     targetApp: {
       type: String,
-      enum: ['task', 'growaffiliate', 'growsocialmedia', 'bank'],
+      enum: ['task', 'grow', 'university', 'growaffiliate', 'growsocialmedia', 'bank'],
       required: true,
     },
     expiresAt: {
@@ -34,6 +35,10 @@ const autoCodeSchema = new mongoose.Schema(
       index: true,
     },
     isUsed: {
+      type: Boolean,
+      default: false,
+    },
+    isAdmin: {
       type: Boolean,
       default: false,
     },

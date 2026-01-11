@@ -686,6 +686,16 @@ const srkTaskEarningsPayoutRequest: AppRouteImplementationOrOptions<
       };
     }
 
+    if (body.coins < 20000) {
+      return {
+        status: 400,
+        body: {
+          success: false,
+          message: 'Minimum payout request is 20,000 coins',
+        },
+      };
+    }
+
     if (srkTaskUserBalanceExist.currentCoins < body.coins) {
       return {
         status: 400,

@@ -138,7 +138,7 @@ export const GrowOnlyAdminDashboard = () => {
   }, [activeView]);
 
   return (
-    <div className="min-h-screen bg-black text-white overflow-x-hidden">
+    <div className="min-h-[100dvh] bg-black text-white overflow-x-hidden">
       <div className="fixed inset-0 pointer-events-none">
         <div className="absolute inset-0 bg-gradient-to-br from-black via-[#0f0a05] to-black" />
         <motion.div
@@ -187,7 +187,7 @@ export const GrowOnlyAdminDashboard = () => {
         setActiveView={handleViewChange}
       /> */}
 
-      <main ref={mainRef} className="lg:ml-64 min-h-screen">
+      <main ref={mainRef} className="lg:ml-64 min-h-screen relative z-10">
         <motion.header
           initial={{ y: 0 }}
           animate={{ y: isNavVisible ? 0 : -100 }}
@@ -226,11 +226,11 @@ export const GrowOnlyAdminDashboard = () => {
                 <span>Live</span>
               </motion.div>
               <MagneticButton
-                className="px-4 py-2 text-sm"
                 onClick={handleRefresh}
+                className="w-40 h-12 sm:w-40 sm:h-12 px-3 sm:px-4 text-xs sm:text-sm inline-flex items-center justify-center gap-2 whitespace-nowrap"
               >
-                <span>🔄</span>
-                Refresh Data
+                <span className="leading-none">🔄</span>
+                <span className="leading-none">Refresh Data</span>
               </MagneticButton>
             </div>
           </div>

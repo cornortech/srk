@@ -6,8 +6,10 @@ import { THEME } from '../constants/theme';
 import { api } from '../../../lib/api';
 
 export const GlobalOverviewView: React.FC = () => {
-  const [timeRange, setTimeRange] = useState<'6months' | '1year' | 'all'>('6months');
-  
+  const [timeRange, setTimeRange] = useState<'6months' | '1year' | 'all'>(
+    '6months'
+  );
+
   const { data, isLoading } = api.grow.getGlobalOverview.useQuery(
     ['globalOverview', timeRange],
     {
@@ -193,10 +195,12 @@ export const GlobalOverviewView: React.FC = () => {
                 <p className="text-gray-400 text-sm">Revenue & User Growth</p>
               </div>
               <div className="relative">
-                <select 
+                <select
                   className="bg-black/30 border border-white/10 rounded-lg px-4 py-2 text-white text-sm appearance-none pr-8"
                   value={timeRange}
-                  onChange={(e) => setTimeRange(e.target.value as '6months' | '1year' | 'all')}
+                  onChange={(e) =>
+                    setTimeRange(e.target.value as '6months' | '1year' | 'all')
+                  }
                 >
                   <option value="6months">Last 6 months</option>
                   <option value="1year">Last year</option>
@@ -234,7 +238,12 @@ export const GlobalOverviewView: React.FC = () => {
                     <div className="h-2 bg-gray-800/50 rounded-full overflow-hidden">
                       <motion.div
                         initial={{ width: 0 }}
-                        animate={{ width: `${Math.min((trend.revenue / 420) * 100, 100)}%` }}
+                        animate={{
+                          width: `${Math.min(
+                            (trend.revenue / 420) * 100,
+                            100
+                          )}%`,
+                        }}
                         transition={{ duration: 1, delay: index * 0.2 }}
                         className="h-full rounded-full"
                         style={{ background: THEME.colors.goldGradient }}
@@ -251,7 +260,9 @@ export const GlobalOverviewView: React.FC = () => {
                     <div className="h-2 bg-gray-800/50 rounded-full overflow-hidden">
                       <motion.div
                         initial={{ width: 0 }}
-                        animate={{ width: `${Math.min((trend.users / 200) * 100, 100)}%` }}
+                        animate={{
+                          width: `${Math.min((trend.users / 200) * 100, 100)}%`,
+                        }}
                         transition={{ duration: 1, delay: index * 0.2 + 0.1 }}
                         className="h-full rounded-full"
                         style={{ backgroundColor: THEME.colors.blueInfo }}

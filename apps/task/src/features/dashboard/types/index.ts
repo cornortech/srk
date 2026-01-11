@@ -14,6 +14,7 @@ export type DashboardView =
   | 'taskHistory'
   | 'leaderboard'
   | 'coinExchange'
+  | 'paymentDetails'
   | 'profile'
   | 'payout'
   | 'finance'

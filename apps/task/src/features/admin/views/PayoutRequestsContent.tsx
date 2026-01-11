@@ -11,6 +11,13 @@ interface ApprovalModalProps {
   onConfirm: (transactionId: string, paymentScreenshotUrl: string) => void;
   payoutAmount: number;
   username: string;
+  paymentDetails: {
+    accountHolderName: string;
+    bankName: string;
+    accountNumber: string;
+    branchName: string;
+    qrCodeUrl: string;
+  } | null;
 }
 
 const ApprovalModal: React.FC<ApprovalModalProps> = ({
@@ -19,6 +26,7 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
   onConfirm,
   payoutAmount,
   username,
+  paymentDetails,
 }) => {
   const [transactionId, setTransactionId] = useState('');
   const [paymentScreenshotUrl, setPaymentScreenshotUrl] = useState('');
@@ -45,7 +53,7 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.9, opacity: 0 }}
-            className="bg-[#1a1a1a] rounded-2xl p-6 max-w-md w-full border border-[#E1BA73]/30"
+            className="bg-[#1a1a1a] rounded-2xl p-6 max-w-2xl w-full border border-[#E1BA73]/30 max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-between items-center mb-4">
@@ -66,6 +74,47 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
                 Amount: <span className="text-green-400 font-bold">₹{payoutAmount.toFixed(2)}</span>
               </p>
             </div>
+
+            {/* Payment Details Section */}
+            {paymentDetails ? (
+              <div className="mb-6 p-4 bg-gray-800/50 rounded-lg border border-gray-700">
+                <h4 className="text-lg font-semibold text-[#E1BA73] mb-3">User Payment Details</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  <div>
+                    <p className="text-xs text-gray-400">Account Holder</p>
+                    <p className="text-sm text-white font-medium">{paymentDetails.accountHolderName}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-400">Bank Name</p>
+                    <p className="text-sm text-white font-medium">{paymentDetails.bankName}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-400">Account Number</p>
+                    <p className="text-sm text-white font-medium">{paymentDetails.accountNumber}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-400">Branch</p>
+                    <p className="text-sm text-white font-medium">{paymentDetails.branchName}</p>
+                  </div>
+                </div>
+                {paymentDetails.qrCodeUrl && (
+                  <div className="mt-4">
+                    <p className="text-xs text-gray-400 mb-2">Payment QR Code</p>
+                    <div className="flex justify-center">
+                      <img
+                        src={paymentDetails.qrCodeUrl}
+                        alt="Payment QR Code"
+                        className="w-48 h-48 rounded-lg border-2 border-[#E1BA73]/30 object-contain bg-white p-2"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="mb-6 p-4 bg-yellow-900/20 rounded-lg border border-yellow-600/30">
+                <p className="text-yellow-400 text-sm">⚠️ No payment details found for this user. Please ask them to add payment details first.</p>
+              </div>
+            )}
 
             <div className="space-y-4 mb-6">
               <div>
@@ -219,11 +268,19 @@ export const PayoutRequestsContent: React.FC = React.memo(() => {
     payoutId: string | null;
     amount: number;
     username: string;
+    paymentDetails: {
+      accountHolderName: string;
+      bankName: string;
+      accountNumber: string;
+      branchName: string;
+      qrCodeUrl: string;
+    } | null;
   }>({
     isOpen: false,
     payoutId: null,
     amount: 0,
     username: '',
+    paymentDetails: null,
   });
   const [rejectionModal, setRejectionModal] = useState<{
     isOpen: boolean;
@@ -258,6 +315,7 @@ export const PayoutRequestsContent: React.FC = React.memo(() => {
         payoutId: null,
         amount: 0,
         username: '',
+        paymentDetails: null,
       });
     },
   });
@@ -275,12 +333,24 @@ export const PayoutRequestsContent: React.FC = React.memo(() => {
     },
   });
 
-  const handleApproveClick = useCallback((payoutId: string, amount: number, username: string) => {
+  const handleApproveClick = useCallback((
+    payoutId: string, 
+    amount: number, 
+    username: string,
+    paymentDetails: {
+      accountHolderName: string;
+      bankName: string;
+      accountNumber: string;
+      branchName: string;
+      qrCodeUrl: string;
+    } | null
+  ) => {
     setApprovalModal({
       isOpen: true,
       payoutId,
       amount,
       username,
+      paymentDetails,
     });
   }, []);
 
@@ -328,6 +398,7 @@ export const PayoutRequestsContent: React.FC = React.memo(() => {
       payoutId: null,
       amount: 0,
       username: '',
+      paymentDetails: null,
     });
   }, []);
 
@@ -432,7 +503,12 @@ export const PayoutRequestsContent: React.FC = React.memo(() => {
 
               <div className="flex gap-2">
                 <GoldButton
-                  onClick={() => handleApproveClick(payout._id, payout.amount, payout.taskUserId.fullName)}
+                  onClick={() => handleApproveClick(
+                    payout._id, 
+                    payout.amount, 
+                    payout.taskUserId.fullName,
+                    payout.paymentDetails
+                  )}
                   className="h-10 text-sm px-5 w-full sm:w-auto"
                   disabled={approveMutation.isPending}
                 >
@@ -492,6 +568,7 @@ export const PayoutRequestsContent: React.FC = React.memo(() => {
         onConfirm={handleConfirmApproval}
         payoutAmount={approvalModal.amount}
         username={approvalModal.username}
+        paymentDetails={approvalModal.paymentDetails}
       />
 
       <RejectionModal

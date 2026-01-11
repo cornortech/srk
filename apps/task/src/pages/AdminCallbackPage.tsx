@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { exchangeCode } from '@srk/shared/api';
 import '../App.css';
+import { env } from '../lib';
 
 /**
  * Admin SSO Callback Page for Task App
@@ -37,7 +38,7 @@ const AdminCallbackPage = () => {
       }
 
       try {
-        const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000';
+        const backendUrl = env.backendUrl || 'http://localhost:4000';
         const response = await exchangeCode(backendUrl, code);
 
         if (response.success && response.user) {

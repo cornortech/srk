@@ -16,6 +16,11 @@ import {
   getAllCompletedSrkTaskSubmissionsQueryParams,
   getRejectedSrkTaskActionSubmissionsByUserQueryParams,
   paginatedRejectedSrkTaskActionSubmissionsByUserSchema,
+  getUserPaymentDetailsResponseSchema,
+  submitSrkTaskPaymentDetailsRequestSchema,
+  paginatedSrkTaskPaymentDetailsRequestsSchema,
+  getSrkTaskPaymentDetailsRequestsQueryParams,
+  reviewSrkTaskPaymentDetailsRequestSchema,
 } from './schema';
 
 import { paginatedSrkTaskEarningRequestsByUserSchema } from './schema';
@@ -320,5 +325,57 @@ export const srkTaskContract = c.router({
       500: ErrorSchema,
     },
     summary: 'Get all completed (approved) task submissions for admin',
+  },
+
+  // Payment Details Endpoints
+  getUserPaymentDetails: {
+    method: 'GET',
+    path: '/task/user-payment-details/:userId',
+    responses: {
+      200: getUserPaymentDetailsResponseSchema,
+      404: ErrorSchema,
+      500: ErrorSchema,
+    },
+    summary: 'Get user payment details and pending request',
+  },
+
+  submitPaymentDetailsRequest: {
+    method: 'POST',
+    path: '/task/submit-payment-details-request/:userId',
+    body: submitSrkTaskPaymentDetailsRequestSchema,
+    responses: {
+      201: z.object({
+        success: z.boolean(),
+        message: z.string(),
+      }),
+      400: ErrorSchema,
+      500: ErrorSchema,
+    },
+    summary: 'Submit payment details verification request',
+  },
+
+  getAllPaymentDetailsRequestsForAdmin: {
+    method: 'GET',
+    path: '/task/admin/payment-details-requests',
+    query: getSrkTaskPaymentDetailsRequestsQueryParams.optional(),
+    responses: {
+      200: paginatedSrkTaskPaymentDetailsRequestsSchema,
+      400: ErrorSchema,
+      500: ErrorSchema,
+    },
+    summary: 'Get all payment details requests for admin',
+  },
+
+  reviewPaymentDetailsRequest: {
+    method: 'POST',
+    path: '/task/admin/review-payment-details-request',
+    body: reviewSrkTaskPaymentDetailsRequestSchema,
+    responses: {
+      200: SuccessSchema,
+      400: ErrorSchema,
+      404: ErrorSchema,
+      500: ErrorSchema,
+    },
+    summary: 'Approve or reject payment details request',
   },
 });

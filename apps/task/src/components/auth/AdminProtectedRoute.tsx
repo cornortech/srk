@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { getMe } from '@srk/shared/api';
+import { env } from '../../lib'
 
 interface AdminProtectedRouteProps {
   children: React.ReactNode;
@@ -20,7 +21,7 @@ export const AdminProtectedRoute: React.FC<AdminProtectedRouteProps> = ({
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4000';
+        const backendUrl = env.backendUrl || 'http://localhost:4000';
         const response = await getMe(backendUrl);
 
         if (response.success && response.user?.role === 'admin') {

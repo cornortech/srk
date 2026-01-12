@@ -21,6 +21,7 @@ import {
   paginatedSrkTaskPaymentDetailsRequestsSchema,
   getSrkTaskPaymentDetailsRequestsQueryParams,
   reviewSrkTaskPaymentDetailsRequestSchema,
+  updateSrkTaskUserProfileSchema,
 } from './schema';
 
 import { paginatedSrkTaskEarningRequestsByUserSchema } from './schema';
@@ -160,7 +161,8 @@ export const srkTaskContract = c.router({
       400: ErrorSchema,
       500: ErrorSchema,
     },
-    summary: 'Get rejected srk task action submissions by user (attention needed)',
+    summary:
+      'Get rejected srk task action submissions by user (attention needed)',
   },
   getAllSrkTaskUserFinanceStatement: {
     method: 'GET',
@@ -183,7 +185,8 @@ export const srkTaskContract = c.router({
       400: ErrorSchema,
       500: ErrorSchema,
     },
-    summary: 'Get all srk task users for admin with comprehensive details (paginated)',
+    summary:
+      'Get all srk task users for admin with comprehensive details (paginated)',
   },
 
   srkTaskEarningsPayoutRequest: {
@@ -377,5 +380,17 @@ export const srkTaskContract = c.router({
       500: ErrorSchema,
     },
     summary: 'Approve or reject payment details request',
+  },
+  updateProfile: {
+    method: 'PUT',
+    path: '/task/user/:userId',
+    body: updateSrkTaskUserProfileSchema,
+    responses: {
+      200: SuccessSchema,
+      400: ErrorSchema,
+      404: ErrorSchema,
+      500: ErrorSchema,
+    },
+    summary: 'Update user profile',
   },
 });

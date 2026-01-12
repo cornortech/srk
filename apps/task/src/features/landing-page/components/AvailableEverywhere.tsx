@@ -85,7 +85,7 @@ export const AvailableEverywhere = () => {
   const [animatedBalance, setAnimatedBalance] = useState(24500);
   const [pulse, setPulse] = useState(1);
   const [windowSize, setWindowSize] = useState({ width: 1000, height: 1000 });
-  console.log(windowSize);
+  // console.log(windowSize);
   // Notification triggers based on scroll
   useEffect(() => {
     const unsubscribe = scrollYProgress.onChange((latest) => {

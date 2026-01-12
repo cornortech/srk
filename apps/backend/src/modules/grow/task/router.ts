@@ -55,4 +55,5 @@ export const srkTaskRouter = s.router(srkTaskContract, {
     srkTaskQueryHandler.getAllPaymentDetailsRequestsForAdmin,
   reviewPaymentDetailsRequest:
     srkTaskMutationHandler.reviewPaymentDetailsRequest,
+  updateProfile: srkTaskMutationHandler.updateProfile,
 });

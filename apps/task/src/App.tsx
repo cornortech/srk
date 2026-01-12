@@ -12,6 +12,7 @@ import {
 } from './pages';
 import AuthInitializer from './components/auth/AuthInitializer';
 import { AdminProtectedRoute } from './components/auth/AdminProtectedRoute';
+import { ToastProvider } from './lib/contexts/ToastContext';
 
 const queryClient = new QueryClient();
 
@@ -66,7 +67,9 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthInitializer>
-        <RouterProvider router={router} />
+        <ToastProvider>
+          <RouterProvider router={router} />
+        </ToastProvider>
       </AuthInitializer>
     </QueryClientProvider>
   );

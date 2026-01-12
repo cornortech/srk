@@ -386,13 +386,15 @@ export const srkTaskEarningRequestResponseSchema = z.object({
     fullName: z.string(),
     email: z.string(),
   }),
-  paymentDetails: z.object({
-    accountHolderName: z.string(),
-    bankName: z.string(),
-    accountNumber: z.string(),
-    branchName: z.string(),
-    qrCodeUrl: z.string(),
-  }).nullable(),
+  paymentDetails: z
+    .object({
+      accountHolderName: z.string(),
+      bankName: z.string(),
+      accountNumber: z.string(),
+      branchName: z.string(),
+      qrCodeUrl: z.string(),
+    })
+    .nullable(),
   transactionId: z.string().nullable(),
   coinsUsed: z.number(),
   tds: z.number(),
@@ -649,4 +651,14 @@ export const getUserPaymentDetailsResponseSchema = z.object({
 
 export type TGetUserPaymentDetailsResponse = z.infer<
   typeof getUserPaymentDetailsResponseSchema
+>;
+
+export const updateSrkTaskUserProfileSchema = z.object({
+  fullName: z.string().optional(),
+  email: z.string().optional(),
+  phone: z.string().optional(),
+});
+
+export type TUpdateSrkTaskUserProfile = z.infer<
+  typeof updateSrkTaskUserProfileSchema
 >;

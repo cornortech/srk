@@ -1,6 +1,17 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Check, Crown, Shield, Star, Trophy, Zap } from 'lucide-react';
+import {
+  Check,
+  Crown,
+  Edit2,
+  Loader2,
+  Save,
+  Shield,
+  Star,
+  Trophy,
+  X,
+  Zap,
+} from 'lucide-react';
 import { AnalyticsData, DashboardView, UserProfile } from '../types';
 import { DashboardGlassCard } from '../components/ui/DashboardGlassCard';
 import MagneticButton from '../components/ui/DashboardMagneticButton';
@@ -8,6 +19,9 @@ import DashboardGradientText from '../components/ui/DashboardGradientText';
 import DashboardStatusBadge from '../components/ui/DashboardStatusBadge';
 import { api } from '../../../lib/api';
 import { useTaskAuthStore } from '../../../store/useTaskAuthStore';
+import { Toaster } from 'sonner';
+import { useToast } from '../../../lib/contexts/ToastContext';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface ProfileViewProps {
   isApproved: boolean;
@@ -28,6 +42,10 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
   completed,
 }) => {
   const { taskUserID } = useTaskAuthStore();
+  const { showToast } = useToast();
+
+  const queryClient = useQueryClient();
+
   const { data: analyticsDataRes } =
     api.srkTask.getSrkTaskUserAnalytics.useQuery(
       ['getSrkTaskUserAnalytics', taskUserID],
@@ -35,11 +53,67 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
       { enabled: !!taskUserID, queryKey: ['getSrkTaskUserAnalytics'] }
     );
 
-  const { data: userProfileData } = api.srkTask.getSrkTaskUserProfile.useQuery(
-    ['getSrkTaskUserProfile', taskUserID],
-    { params: { userId: taskUserID || '' } },
-    { enabled: !!taskUserID, queryKey: ['getSrkTaskUserProfile'] }
-  );
+  const { data: userProfileData, isLoading: isProfileLoading } =
+    api.srkTask.getSrkTaskUserProfile.useQuery(
+      ['getSrkTaskUserProfile', taskUserID],
+      { params: { userId: taskUserID || '' } },
+      { enabled: !!taskUserID, queryKey: ['getSrkTaskUserProfile'] }
+    );
+
+  const updateProfileMutation = api.srkTask.updateProfile.useMutation({
+    onSuccess: () => {
+      showToast('Profile updated successfully', 'success');
+      setIsEditing(false);
+      queryClient.invalidateQueries({ queryKey: ['getSrkTaskUserProfile'] });
+    },
+    onError: (error: any) => {
+      showToast(error.body?.message || 'Failed to update profile', 'error');
+    },
+  });
+
+  const [isEditing, setIsEditing] = useState(false);
+  const [formData, setFormData] = useState({
+    fullName: '',
+    email: '',
+    phone: '',
+  });
+
+  useEffect(() => {
+    if (userProfileData?.body?.userData) {
+      setFormData({
+        fullName: userProfileData?.body?.userData?.fullName,
+        email: userProfileData?.body?.userData?.email,
+        phone: userProfileData?.body?.userData?.phone,
+      });
+    }
+  }, [userProfileData]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSave = () => {
+    if (!taskUserID) return;
+    updateProfileMutation.mutate({
+      params: { userId: taskUserID },
+      body: {
+        fullName: formData.fullName,
+        email: formData.email,
+        phone: formData.phone,
+      },
+    });
+  };
+
+  const handleCancel = () => {
+    setIsEditing(false);
+    if (userProfileData?.body?.userData) {
+      setFormData({
+        fullName: userProfileData.body.userData.fullName || '',
+        email: userProfileData.body.userData.email || '',
+        phone: userProfileData.body.userData.phone || '',
+      });
+    }
+  };
 
   if (!isApproved) {
     return (
@@ -60,18 +134,32 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
 
   // const [socialLinks, _setSocialLinks] = useState(profile?.socialLinks);
 
-  const [isEditing, _setIsEditing] = useState(false);
-  console.log(isEditing);
-
+  const displayData = userProfileData?.body?.userData || {
+    fullName: profile?.name,
+    email: profile?.email,
+    phone: profile?.phone,
+    createdAt: profile?.joinDate,
+  };
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl sm:text-4xl font-bold text-white mb-1 sm:mb-2">
-          <DashboardGradientText>Profile Settings</DashboardGradientText>
-        </h1>
-        <p className="text-zinc-400 text-sm sm:text-base">
-          Manage your profile, social links, and preferences
-        </p>
+      <div className="flex justify-between items-end">
+        <div>
+          <h1 className="text-2xl sm:text-4xl font-bold text-white mb-1 sm:mb-2">
+            <DashboardGradientText>Profile Settings</DashboardGradientText>
+          </h1>
+          <p className="text-zinc-400 text-sm sm:text-base">
+            Manage your profile, social links, and preferences
+          </p>
+        </div>
+        {!isEditing && (
+          <button
+            onClick={() => setIsEditing(true)}
+            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-zinc-800/50 hover:bg-zinc-800 rounded-lg border border-white/10 transition-colors"
+          >
+            <Edit2 size={16} />
+            <span>Edit Profile</span>
+          </button>
+        )}
       </div>
 
       <div className="grid lg:grid-cols-3 gap-8">
@@ -80,10 +168,14 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
           <DashboardGlassCard>
             <div className="p-6 sm:p-8">
               <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-4 sm:p-6 mb-6 sm:mb-8">
-                <motion.div whileHover={{ scale: 1.05 }} className="relative">
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  className="relative flex-shrink-0 mx-auto sm:mx-0"
+                >
                   <img
                     //TODO: kyc Image URL
                     // src={profile?.avatar}
+                    src={`https://ui-avatars.com/api/?name=${displayData.fullName}&background=random`}
                     alt={profile?.name}
                     className="w-16 h-16 sm:w-24 sm:h-24 rounded-full border-4 border-white/10"
                   />
@@ -93,56 +185,103 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                     </span>
                   </div> */}
                 </motion.div>
-                <div className="flex-1">
-                  <h3 className="text-lg sm:text-2xl font-bold text-white mb-1 sm:mb-2">
-                    {profile?.name}
-                  </h3>
-                  <div className="flex flex-wrap gap-2 mb-3">
-                    <DashboardStatusBadge
-                      status={isApproved ? 'Verified' : 'Pending'}
-                    />
-                    {hasPurchased && (
-                      <DashboardStatusBadge status="SRK Grow" pulse />
-                    )}
-                    {/* <DashboardStatusBadge status={`Level ${profile?.level}`} /> */}
-                  </div>
-                  <p className="text-xs sm:text-base text-zinc-400">
-                    {profile?.email} • {profile?.phone}
-                  </p>
-                  <p className="text-xs sm:text-sm text-zinc-500 mt-0.5 sm:mt-1">
-                    Member since {profile?.joinDate}
-                  </p>
+                <div className="flex-1 w-full">
+                  {isEditing ? (
+                    <div className="space-y-4 animate-in fade-in duration-300">
+                      <div>
+                        <label className="text-xs text-zinc-500 mb-1 block">
+                          Full Name
+                        </label>
+                        <input
+                          type="text"
+                          name="fullName"
+                          value={formData.fullName}
+                          onChange={handleInputChange}
+                          className="w-full bg-zinc-900/50 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all"
+                        />
+                      </div>
+                      <div className="grid sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="text-xs text-zinc-500 mb-1 block">
+                            Email
+                          </label>
+                          <input
+                            type="email"
+                            name="email"
+                            value={formData.email}
+                            onChange={handleInputChange}
+                            className="w-full bg-zinc-900/50 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-xs text-zinc-500 mb-1 block">
+                            Phone
+                          </label>
+                          <input
+                            type="text"
+                            name="phone"
+                            value={formData.phone}
+                            onChange={handleInputChange}
+                            className="w-full bg-zinc-900/50 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="flex gap-3 pt-2">
+                        <button
+                          onClick={handleSave}
+                          disabled={updateProfileMutation.isPending}
+                          className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
+                        >
+                          {updateProfileMutation.isPending ? (
+                            <Loader2 className="animate-spin" size={16} />
+                          ) : (
+                            <Save size={16} />
+                          )}
+                          Save Changes
+                        </button>
+                        <button
+                          onClick={handleCancel}
+                          disabled={updateProfileMutation.isPending}
+                          className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 rounded-lg text-sm font-medium transition-colors"
+                        >
+                          <X size={16} />
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-center sm:text-left">
+                      <h3 className="text-lg sm:text-2xl font-bold text-white mb-2">
+                        {displayData.fullName}
+                      </h3>
+                      <div className="flex flex-wrap justify-center sm:justify-start gap-2 mb-4">
+                        <DashboardStatusBadge
+                          status={isApproved ? 'Verified' : 'Pending'}
+                        />
+                        {hasPurchased && (
+                          <DashboardStatusBadge status="SRK Grow" pulse />
+                        )}
+                      </div>
+
+                      <div className="flex flex-col sm:flex-row gap-2 sm:gap-6 text-sm text-zinc-400 justify-center sm:justify-start">
+                        <span>{displayData.email}</span>
+                        <span className="hidden sm:inline">•</span>
+                        <span>{displayData.phone}</span>
+                      </div>
+
+                      <p className="text-xs text-zinc-500 mt-2">
+                        Member since{' '}
+                        {new Date(
+                          displayData.createdAt || Date.now()
+                        ).toLocaleDateString()}
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
-
-              {/* XP Progress */}
-              {/* <div className="space-y-2">
-                <div className="flex justify-between text-sm text-xs sm:text-sm text-zinc-400">
-                  <span>Level Progress</span>
-                  <span>
-                    {profile?.xp} / {profile?.nextLevelXP} XP
-                  </span>
-                </div>
-                <div className="w-full h-2 bg-zinc-800 rounded-full overflow-hidden">
-                  <motion.div
-                    className="h-full bg-div-to-r from-purple-500 to-pink-500"
-                    initial={{ width: 0 }}
-                    animate={{
-                      width: `${(profile?.xp / profile?.nextLevelXP) * 100}%`,
-                    }}
-                    transition={{ duration: 1 }}
-                  />
-                </div>
-                <p className="text-xs text-zinc-500 text-center">
-                  {profile?.nextLevelXP - profile?.xp} XP needed for Level{' '}
-                  {profile?.level + 1}
-                </p>
-              </div> */}
             </div>
           </DashboardGlassCard>
-          {/* Social Media Links */}
-
-          {/* Custom Task Request (SRK Grow Only) */}
         </div>
 
         {/* Sidebar Stats */}

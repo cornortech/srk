@@ -759,8 +759,6 @@ const srkTaskEarningsPayoutRequest: AppRouteImplementationOrOptions<
   }
 };
 
-
-
 // ============================================
 // Payment Details Mutation Handlers
 // ============================================
@@ -784,11 +782,10 @@ const submitPaymentDetailsRequest: AppRouteImplementationOrOptions<
     }
 
     // Check if there's already a pending request
-    const pendingRequest =
-      await srkTaskUserPaymentDetailsRequestModel.findOne({
-        srkTaskUserId: userId,
-        status: 'pending',
-      });
+    const pendingRequest = await srkTaskUserPaymentDetailsRequestModel.findOne({
+      srkTaskUserId: userId,
+      status: 'pending',
+    });
 
     if (pendingRequest) {
       return {
@@ -912,6 +909,86 @@ const reviewPaymentDetailsRequest: AppRouteImplementationOrOptions<
   }
 };
 
+const updateProfile: AppRouteImplementationOrOptions<
+  typeof srkTaskContract.updateProfile
+> = async ({ params, body }) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    const { userId } = params;
+    const taskUser = await srkTaskUserModel.findById(userId).session(session);
+
+    if (!taskUser) {
+      await session.abortTransaction();
+      return {
+        status: 404,
+        body: {
+          success: false,
+          message: 'Task User not found',
+        },
+      };
+    }
+    if (body.fullName) taskUser.fullName = body.fullName;
+
+    await taskUser.save({ session });
+
+    if (body.email || body.phone) {
+      const universityUser = await UserModel.findById(
+        taskUser.srkUniversityUserId
+      ).session(session);
+
+      if (!universityUser) {
+        await session.abortTransaction();
+        return {
+          status: 404,
+          body: {
+            success: false,
+            message: 'Linked University User account not found',
+          },
+        };
+      }
+
+      if (body.email) universityUser.email = body.email;
+      if (body.phone) universityUser.phoneNumber = body.phone;
+
+      await universityUser.save({ session });
+    }
+
+    await session.commitTransaction();
+
+    return {
+      status: 200,
+      body: {
+        success: true,
+        message: 'Profile updated successfully',
+      },
+    };
+  } catch (error) {
+    await session.abortTransaction();
+    console.error('Error updating task user profile:', error);
+
+    if (error.code === 11000) {
+      return {
+        status: 400,
+        body: {
+          success: false,
+          message: 'Email or Phone number already in use by another account',
+        },
+      };
+    }
+
+    return {
+      status: 500,
+      body: {
+        success: false,
+        message: error.message || 'Failed to update task user profile',
+      },
+    };
+  } finally {
+    session.endSession();
+  }
+};
 export const srkTaskMutationHandler = {
   srkTaskEarningsPayoutRequest,
   acceptSrkTaskUserEarningsPayout,
@@ -924,4 +1001,5 @@ export const srkTaskMutationHandler = {
   rejectSrkTaskActionSubmissionByAdmin,
   submitPaymentDetailsRequest,
   reviewPaymentDetailsRequest,
+  updateProfile,
 };

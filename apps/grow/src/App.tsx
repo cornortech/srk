@@ -3,6 +3,7 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
 import { GrowLandingPage } from './pages/LandingPage';
 import CallbackPage from './pages/CallbackPage';
+import AdminCallbackPage from './pages/AdminCallbackPage';
 import { LoginPage } from './pages/LoginPage';
 import { GrowVerificationPage } from './pages/VerificationPage';
 import { GrowOnlyAdminDashboard } from './pages/GrowAdminDashboard';
@@ -13,6 +14,7 @@ import { UserDashboardPage } from './pages/UserDashboardPage';
 import { ToastProvider } from './lib/contexts/ToastContext';
 import ViewerPage from './pages/ViewDocumentPage';
 import { UserVerificationPage } from './pages/UserVerificationPage';
+import { AdminProtectedRoute } from './components/auth/AdminProtectedRoute';
 
 const queryClient = new QueryClient();
 
@@ -38,6 +40,10 @@ const router = createBrowserRouter([
     element: <CallbackPage />,
   },
   {
+    path: '/admin/callback',
+    element: <AdminCallbackPage />,
+  },
+  {
     path: '/login',
     element: <LoginPage />,
   },
@@ -51,11 +57,27 @@ const router = createBrowserRouter([
   },
   {
     path: '/admin/dashboard',
-    element: <GrowOnlyAdminDashboard />,
+    element: (
+      <AdminProtectedRoute>
+        <GrowOnlyAdminDashboard />
+      </AdminProtectedRoute>
+    ),
+  },
+  {
+    path: '/admin',
+    element: (
+      <AdminProtectedRoute>
+        <GrowOnlyAdminDashboard />
+      </AdminProtectedRoute>
+    ),
   },
   {
     path: '/admin/view-document',
-    element: <ViewerPage />,
+    element: (
+      <AdminProtectedRoute>
+        <ViewerPage />
+      </AdminProtectedRoute>
+    ),
   },
   {
     path: '/affiliate/dashboard',

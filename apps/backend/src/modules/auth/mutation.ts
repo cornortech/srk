@@ -19,6 +19,8 @@ import { methods } from '../../utils/methods';
 import { EarningStatementModel } from '../../model/earningStatementModel';
 import { growSocialMediaPackageUserModel } from '../../model/growSocialMediaPackageUserModel';
 import { authContract } from '@srk/shared/contracts';
+import crypto from 'crypto';
+import { AutoCodeModel } from '../../model/autoCodeModel';
 
 interface CalculateEarningsProps {
   referredBy: string;
@@ -370,6 +372,9 @@ const login: AppRouteImplementationOrOptions<
 
   // Set redirection URL based on user type and status
   let redirectionUrl = '/auth/login'; // Default for users
+  let requiresSSO = false;
+  let ssoCode = '';
+  
   if (role === 'user') {
     if (userExist) {
       redirectionUrl = methods.getFrontendRedirectionUrl(
@@ -381,29 +386,76 @@ const login: AppRouteImplementationOrOptions<
       redirectionUrl = '/auth/login';
     }
   } else {
-    redirectionUrl = '/admin'; // Admin redirection
+    // Admin login - check domain for SSO redirect
+    const adminDomain = (adminExist as any).domain;
+    
+    if (adminDomain === 'task' || adminDomain === 'grow') {
+      // Need SSO redirect for task/grow admin
+      requiresSSO = true;
+      
+      // Generate SSO code
+      ssoCode = crypto.randomBytes(5).toString('hex').toUpperCase();
+      const expiresAt = new Date(Date.now() + 30 * 1000);
+      
+      await AutoCodeModel.create({
+        code: ssoCode,
+        userId: loggedInUser._id.toString(),
+        targetApp: adminDomain,
+        expiresAt,
+        isUsed: false,
+        isAdmin: true,
+      });
+      
+      // Generate redirect URL based on domain
+      if (adminDomain === 'task') {
+        const taskDomain = process.env['TASK_FRONTEND_URL'] || 'http://localhost:4400';
+        redirectionUrl = `${taskDomain}/admin/callback?code=${ssoCode}`;
+      } else if (adminDomain === 'grow') {
+        const growDomain = process.env['GROW_FRONTEND_URL'] || 'http://localhost:4500';
+        redirectionUrl = `${growDomain}/admin/callback?code=${ssoCode}`;
+      }
+    } else {
+      // University admin - direct redirect
+      redirectionUrl = '/admin';
+    }
   }
 
-  // Generate JWT token
-  const token = await AuthService.generateJwtToken({
-    email: loggedInUser.email,
-    userId: loggedInUser._id.toString(),
-  });
+  // Generate access and refresh tokens
+  const [accessToken, refreshToken] = await Promise.all([
+    AuthService.generateAccessToken({
+      email: loggedInUser.email,
+      userId: loggedInUser._id.toString(),
+    }),
+    AuthService.generateRefreshToken({
+      email: loggedInUser.email,
+      userId: loggedInUser._id.toString(),
+    }),
+  ]);
 
-  // Set cookie
+  // Set cookies with proper configuration
   const isProduction = process.env.NODE_ENV === 'production';
-  const cookieOptions: any = {
-    maxAge: 24 * 60 * 60 * 1000,
+
+  const accessTokenOptions: any = {
+    maxAge: 15 * 60 * 1000, // 15 minutes
+    httpOnly: true,
+    sameSite: isProduction ? 'none' : 'lax',
+    secure: isProduction,
+  };
+
+  const refreshTokenOptions: any = {
+    maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
     httpOnly: true,
     sameSite: isProduction ? 'none' : 'lax',
     secure: isProduction,
   };
 
   if (process.env.COOKIE_DOMAIN) {
-    cookieOptions.domain = process.env.COOKIE_DOMAIN;
+    accessTokenOptions.domain = process.env.COOKIE_DOMAIN;
+    refreshTokenOptions.domain = process.env.COOKIE_DOMAIN;
   }
 
-  res.cookie('x-auth-token', token, cookieOptions);
+  res.cookie('access_token', accessToken, accessTokenOptions);
+  res.cookie('refresh_token', refreshToken, refreshTokenOptions);
 
   return {
     status: 200,
@@ -861,17 +913,42 @@ const loginSrkGrow: AppRouteImplementationOrOptions<
         ? '/dashboard'
         : '/grow/verification';
 
-    const token = await AuthService.generateJwtToken({
-      email: userExist.email,
-      userId: userExist._id.toString(),
-    });
+    // Generate access and refresh tokens
+    const [accessToken, refreshToken] = await Promise.all([
+      AuthService.generateAccessToken({
+        email: userExist.email,
+        userId: userExist._id.toString(),
+      }),
+      AuthService.generateRefreshToken({
+        email: userExist.email,
+        userId: userExist._id.toString(),
+      }),
+    ]);
 
-    res.cookie('x-auth-token', token, {
-      maxAge: 24 * 60 * 60 * 1000,
+    // Set cookies with proper configuration
+    const isProduction = process.env.NODE_ENV === 'production';
+
+    const accessTokenOptions: any = {
+      maxAge: 15 * 60 * 1000, // 15 minutes
       httpOnly: true,
-      sameSite: 'lax',
-      secure: process.env.NODE_ENV === 'production',
-    });
+      sameSite: isProduction ? 'none' : 'lax',
+      secure: isProduction,
+    };
+
+    const refreshTokenOptions: any = {
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+      httpOnly: true,
+      sameSite: isProduction ? 'none' : 'lax',
+      secure: isProduction,
+    };
+
+    if (process.env.COOKIE_DOMAIN) {
+      accessTokenOptions.domain = process.env.COOKIE_DOMAIN;
+      refreshTokenOptions.domain = process.env.COOKIE_DOMAIN;
+    }
+
+    res.cookie('access_token', accessToken, accessTokenOptions);
+    res.cookie('refresh_token', refreshToken, refreshTokenOptions);
 
     return {
       status: 200,
@@ -899,6 +976,114 @@ const loginSrkGrow: AppRouteImplementationOrOptions<
   }
 };
 
+const refreshToken: AppRouteImplementationOrOptions<
+  typeof authContract.refreshToken
+> = async ({ req, res }) => {
+  try {
+    const refreshToken = req.cookies.refresh_token;
+
+    if (!refreshToken) {
+      return {
+        status: 401,
+        body: {
+          success: false,
+          message: 'Refresh token not found',
+        },
+      };
+    }
+
+    // Verify refresh token
+    let decoded: any;
+    try {
+      decoded = await AuthService.verifyJwtToken(refreshToken);
+    } catch (error) {
+      return {
+        status: 401,
+        body: {
+          success: false,
+          message: 'Invalid or expired refresh token',
+        },
+      };
+    }
+
+    // Generate new access token
+    const newAccessToken = await AuthService.generateAccessToken({
+      email: decoded.email,
+      userId: decoded.userId,
+    });
+
+    // Set new access token cookie
+    const isProduction = process.env.NODE_ENV === 'production';
+    const accessTokenOptions: any = {
+      maxAge: 15 * 60 * 1000, // 15 minutes
+      httpOnly: true,
+      sameSite: isProduction ? 'none' : 'lax',
+      secure: isProduction,
+    };
+
+    if (process.env.COOKIE_DOMAIN) {
+      accessTokenOptions.domain = process.env.COOKIE_DOMAIN;
+    }
+
+    res.cookie('access_token', newAccessToken, accessTokenOptions);
+
+    return {
+      status: 200,
+      body: {
+        success: true,
+        message: 'Access token refreshed successfully',
+      },
+    };
+  } catch (error) {
+    console.error('Error refreshing token:', error);
+    return {
+      status: 500,
+      body: {
+        success: false,
+        message: 'Internal server error',
+      },
+    };
+  }
+};
+
+const logout: AppRouteImplementationOrOptions<
+  typeof authContract.logout
+> = async ({ res }) => {
+  try {
+    // Clear both tokens
+    const isProduction = process.env.NODE_ENV === 'production';
+    const clearOptions: any = {
+      httpOnly: true,
+      sameSite: isProduction ? 'none' : 'lax',
+      secure: isProduction,
+    };
+
+    if (process.env.COOKIE_DOMAIN) {
+      clearOptions.domain = process.env.COOKIE_DOMAIN;
+    }
+
+    res.clearCookie('access_token', clearOptions);
+    res.clearCookie('refresh_token', clearOptions);
+
+    return {
+      status: 200,
+      body: {
+        success: true,
+        message: 'Logged out successfully',
+      },
+    };
+  } catch (error) {
+    console.error('Error logging out:', error);
+    return {
+      status: 500,
+      body: {
+        success: false,
+        message: 'Internal server error',
+      },
+    };
+  }
+};
+
 export const authMutationHandler = {
   register,
   login,
@@ -908,4 +1093,6 @@ export const authMutationHandler = {
   rejectPaymentDetails,
   approvePaymentDetails,
   loginSrkGrow,
+  refreshToken,
+  logout,
 };

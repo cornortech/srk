@@ -28,4 +28,6 @@ export * from './lib/grow/affiliate/contract'
 export * from './lib/grow/affiliate/schema'
 export * from './lib/grow/task/contract'
 export * from './lib/grow/task/schema'
+export * from './lib/appSettings/contract'
+export * from './lib/appSettings/schema'
 

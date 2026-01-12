@@ -50,6 +50,23 @@ export const TasksView: React.FC<TasksViewProps> = ({
   const { taskUserID } = useTaskAuthStore();
   const [isTaskTimeAllowed, setIsTaskTimeAllowed] = useState(isWithinAllowedTime());
 
+  // Fetch app settings from backend
+  const { data: appSettingsData } = api.appSettings.getAppSettings.useQuery(
+    ['getAppSettings'],
+    {},
+    {
+      queryKey: ['getAppSettings'],
+      refetchInterval: 60000, // Refetch every minute
+    }
+  );
+
+  const isTaskFeatureEnabled = appSettingsData?.body?.data?.taskFeatureEnabled ?? true;
+  
+  // Tasks are allowed only if BOTH conditions are met:
+  // 1. Admin has enabled the task feature
+  // 2. Current time is within the allowed window (7pm-10pm)
+  const areTasksAllowed = isTaskFeatureEnabled && isTaskTimeAllowed;
+
   // Check time every minute
   useEffect(() => {
     const interval = setInterval(() => {
@@ -139,25 +156,32 @@ export const TasksView: React.FC<TasksViewProps> = ({
 
       {/* Time Restriction Notice */}
       <DashboardGlassCard
-        className={`p-6 ${isTaskTimeAllowed ? 'bg-emerald-500/10 border-emerald-500/30' : 'bg-amber-500/10 border-amber-500/30'}`}
+        className={`p-6 ${areTasksAllowed ? 'bg-emerald-500/10 border-emerald-500/30' : 'bg-amber-500/10 border-amber-500/30'}`}
       >
         <div className="flex items-center gap-4">
-          <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${isTaskTimeAllowed
+          <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${areTasksAllowed
               ? 'bg-emerald-500/20 text-emerald-400'
               : 'bg-amber-500/20 text-amber-400'
             }`}>
             <Clock size={24} />
           </div>
           <div className="flex-1">
-            <h3 className={`text-lg font-bold mb-1 ${isTaskTimeAllowed ? 'text-emerald-400' : 'text-amber-400'
+            <h3 className={`text-lg font-bold mb-1 ${areTasksAllowed ? 'text-emerald-400' : 'text-amber-400'
               }`}>
-              {isTaskTimeAllowed ? 'Tasks Are Available Now!' : 'Tasks Currently Unavailable'}
+              {areTasksAllowed ? 'Tasks Are Available Now!' : 'Tasks Currently Unavailable'}
             </h3>
             <p className="text-zinc-300 text-sm">
-              {isTaskTimeAllowed
-                ? 'You can complete tasks until 10:00 PM. Make the most of your time!'
-                : 'Tasks can only be done between 7:00 PM and 10:00 PM daily.'}
+              {!isTaskFeatureEnabled 
+                ? 'Task feature is currently disabled by admin. Please check back later.' 
+                : !isTaskTimeAllowed
+                  ? 'Tasks can only be done between 7:00 PM and 10:00 PM daily.'
+                  : 'You can complete tasks until 10:00 PM. Make the most of your time!'}
             </p>
+            {isTaskFeatureEnabled && (
+              <p className="text-zinc-400 text-xs mt-1">
+                Time window: 7:00 PM - 10:00 PM
+              </p>
+            )}
           </div>
         </div>
       </DashboardGlassCard>
@@ -203,7 +227,7 @@ export const TasksView: React.FC<TasksViewProps> = ({
           return (
             <DashboardGlassCard
               key={category.type}
-              hover={isTaskTimeAllowed}
+              hover={areTasksAllowed}
               gradient={
                 category.type === 'follow'
                   ? 'green'
@@ -211,8 +235,8 @@ export const TasksView: React.FC<TasksViewProps> = ({
                     // ? 'blue'
                     'purple'
               }
-              onClick={() => isTaskTimeAllowed && setTaskCategory(category.type)}
-              className={`${isTaskTimeAllowed
+              onClick={() => areTasksAllowed && setTaskCategory(category.type)}
+              className={`${areTasksAllowed
                   ? 'cursor-pointer'
                   // blur it and disable pointer events
                   : 'cursor-not-allowed opacity-30  pointer-events-none blur-[1px]'

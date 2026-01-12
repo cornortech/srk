@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
 const adminModelSchema = new mongoose.Schema(
   {
@@ -10,11 +10,15 @@ const adminModelSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    domain: {
+      type: String,
+      required: true,
+      enum: ['university', 'grow', 'task'],
+    },
   },
   {
     timestamps: true,
   }
 );
 
-export const adminModel = mongoose.model("Admin", adminModelSchema);
-
+export const adminModel = mongoose.model('Admin', adminModelSchema);

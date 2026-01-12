@@ -34,6 +34,7 @@ import { api } from '../../lib/api';
 import { useTaskAuthStore } from '../../store/useTaskAuthStore';
 import { FinanceHistoryView } from '../../features/dashboard/views/FinanceHistoryView';
 import { TaskHistoryView } from '../../features/dashboard/views/TaskHistoryView';
+import { PaymentDetailsView } from '../../features/dashboard/views/PaymentDetailsView';
 import { useAuthAffiliateVerification } from '../../../../../libs/shared/hooks/src/lib/useAuthAffiliate';
 
 export const AfterVerifiedDashboardPage: React.FC = () => {
@@ -258,6 +259,8 @@ export const AfterVerifiedDashboardPage: React.FC = () => {
         return <FinanceHistoryView />;
       case 'taskHistory':
         return <TaskHistoryView />;
+      case 'paymentDetails':
+        return <PaymentDetailsView addNotification={addNotification} />;
       default:
         return null;
     }

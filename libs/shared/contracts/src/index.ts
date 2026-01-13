@@ -23,11 +23,10 @@ export * from './lib/tour/tour.contract';
 export * from './lib/tour/tour.schema';
 export * from './lib/task/contract';
 export * from './lib/task/schema';
-export * from './lib/index'
-export * from './lib/grow/affiliate/contract'
-export * from './lib/grow/affiliate/schema'
-export * from './lib/grow/task/contract'
-export * from './lib/grow/task/schema'
-export * from './lib/appSettings/contract'
-export * from './lib/appSettings/schema'
-
+export * from './lib/index';
+export * from './lib/grow/affiliate/contract';
+export * from './lib/grow/affiliate/schema';
+export * from './lib/grow/task/contract';
+export * from './lib/grow/task/schema';
+export * from './lib/appSettings/contract';
+export * from './lib/appSettings/schema';

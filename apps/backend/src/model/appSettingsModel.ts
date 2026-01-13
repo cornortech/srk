@@ -16,6 +16,10 @@ const appSettingsSchema = new mongoose.Schema(
       type: String,
       default: '',
     },
+    qrcodeUrl: {
+      type: String,
+      default: '',
+    },
   },
   {
     timestamps: true,
@@ -25,19 +29,23 @@ const appSettingsSchema = new mongoose.Schema(
 // Ensure only one settings document exists
 appSettingsSchema.index({}, { unique: true });
 
-export const AppSettingsModel = mongoose.model('AppSettings', appSettingsSchema);
+export const AppSettingsModel = mongoose.model(
+  'AppSettings',
+  appSettingsSchema
+);
 
 // Helper function to get or create settings
 export const getOrCreateAppSettings = async () => {
   let settings = await AppSettingsModel.findOne();
-  
+
   if (!settings) {
     settings = await AppSettingsModel.create({
       taskFeatureEnabled: true,
       maintenanceMode: false,
       announcementMessage: '',
+      qrcodeUrl: '',
     });
   }
-  
+
   return settings;
 };

@@ -4,6 +4,7 @@ import { X, CheckCircle, Upload } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { UserDetails } from '../types/types';
 import { useSRKFileUpload } from '@srk/shared/hooks';
+import { api } from '../api';
 
 interface PaymentModalProps {
   isOpen: boolean;
@@ -37,6 +38,10 @@ const PaymentModel: React.FC<PaymentModalProps> = ({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const navigate = useNavigate();
   const { uploadFile } = useSRKFileUpload('grow');
+  const { data: settings } = api.appSettings.getAppSettings.useQuery([
+    'appSettings',
+  ]);
+  const qrcodeUrl = settings?.body?.data?.qrcodeUrl;
   const paymentMethods = [
     {
       id: 'esewa' as PaymentMethod,
@@ -144,7 +149,6 @@ const PaymentModel: React.FC<PaymentModalProps> = ({
                       Select payment method and provide transaction details
                     </p>
                   </div>
-
                   {/* Total Amount Box */}
                   <div className="mb-8 p-4 sm:p-6 rounded-2xl bg-[#b68938]/10 border border-[#b68938]/30">
                     <div className="flex justify-between items-center">
@@ -157,6 +161,77 @@ const PaymentModel: React.FC<PaymentModalProps> = ({
                     </div>
                   </div>
 
+                  {/* Payment Instructions */}
+
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.35, ease: 'easeOut' }}
+                    className="mb-8 rounded-2xl border border-blue-500/30 bg-gradient-to-br from-blue-500/10 to-blue-500/5 p-5 sm:p-6 flex flex-col lg:flex-row gap-8 items-center"
+                  >
+                    <div className="flex-1">
+                      <h4 className="text-lg sm:text-xl font-bold text-white mb-4">
+                        Payment Instructions:
+                      </h4>
+                      <ul className="space-y-3">
+                        {[
+                          `Open your ${
+                            paymentMethods.find((m) => m.id === selectedMethod)
+                              ?.name || 'payment'
+                          } app`,
+                          `Scan the QR code or send ${packagePrice} to our account`,
+                          'Complete the payment and take a screenshot',
+                          'Upload the screenshot below',
+                          'Enter your transaction ID',
+                        ].map((text, index) => (
+                          <li key={index} className="flex items-start gap-3">
+                            <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-500/20 text-blue-400 text-xs font-bold">
+                              {index + 1}
+                            </span>
+                            <p className="text-sm sm:text-base text-gray-300 leading-relaxed">
+                              {index === 1 ? (
+                                <>
+                                  Scan the QR code and send{' '}
+                                  <strong className="text-[#b68938] font-semibold">
+                                    {packagePrice}
+                                  </strong>{' '}
+                                  to our account
+                                </>
+                              ) : (
+                                text
+                              )}
+                            </p>
+                          </li>
+                        ))}
+                      </ul>
+
+                      <p className="mt-4 text-xs sm:text-sm text-gray-400">
+                        Make sure the payment amount matches exactly to avoid
+                        verification delays.
+                      </p>
+                    </div>
+
+                    {qrcodeUrl && (
+                      <div className="flex flex-col items-center gap-3">
+                        <div className="bg-white rounded-3xl p-4 sm:p-5 shadow-xl ring-1 ring-black/5">
+                          <img
+                            src={qrcodeUrl}
+                            alt="Payment QR Code"
+                            className="w-64 h-64 sm:w-72 sm:h-72 md:w-80 md:h-80 object-contain"
+                          />
+                        </div>
+
+                        <div className="text-center">
+                          <p className="text-sm sm:text-base font-semibold text-white">
+                            Scan to Pay
+                          </p>
+                          <p className="text-xs sm:text-sm text-gray-400">
+                            Use your payment app camera
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </motion.div>
                   {/* Payment Method Selection */}
                   <div className="mb-8">
                     <label className="block text-sm sm:text-base font-bold text-gray-400 mb-4 uppercase tracking-widest">
@@ -212,39 +287,6 @@ const PaymentModel: React.FC<PaymentModalProps> = ({
                     </div>
                   </div>
 
-                  {/* Payment Instructions */}
-                  {selectedMethod && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="mb-8 p-4 sm:p-5 rounded-xl bg-blue-500/10 border border-blue-500/30 text-sm sm:text-base"
-                    >
-                      <h4 className="font-bold text-white mb-2">
-                        Payment Instructions:
-                      </h4>
-                      <ol className="text-sm sm:text-base text-gray-300 space-y-1 list-decimal list-inside">
-                        <li>
-                          Open your{' '}
-                          {
-                            paymentMethods.find((m) => m.id === selectedMethod)
-                              ?.name
-                          }{' '}
-                          app
-                        </li>
-                        <li>
-                          Send{' '}
-                          <strong className="text-[#b68938]">
-                            {packagePrice}
-                          </strong>{' '}
-                          to our account
-                        </li>
-                        <li>Take a screenshot of the transaction</li>
-                        <li>Upload the screenshot below</li>
-                        <li>Enter your transaction ID</li>
-                      </ol>
-                    </motion.div>
-                  )}
-
                   {/* Screenshot Upload */}
                   <div className="mb-6">
                     <label className="block text-sm sm:text-base font-bold text-gray-400 mb-3 uppercase tracking-widest">
@@ -296,7 +338,6 @@ const PaymentModel: React.FC<PaymentModalProps> = ({
                       </label>
                     </div>
                   </div>
-
                   {/* Transaction ID Input */}
                   <div className="mb-4">
                     <label className="block text-sm sm:text-base  font-bold text-gray-400 mb-3 uppercase tracking-widest">
@@ -314,7 +355,6 @@ const PaymentModel: React.FC<PaymentModalProps> = ({
                       confirmation message
                     </p>
                   </div>
-
                   {errorMessage && (
                     <div className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/30">
                       <p className="text-sm text-red-500 text-center font-medium">
@@ -322,7 +362,6 @@ const PaymentModel: React.FC<PaymentModalProps> = ({
                       </p>
                     </div>
                   )}
-
                   {/* Submit Button */}
                   <motion.button
                     whileHover={{ scale: 1.02 }}
@@ -345,7 +384,6 @@ const PaymentModel: React.FC<PaymentModalProps> = ({
                       'Place Order'
                     )}
                   </motion.button>
-
                   <p className="mt-2 sm:mt-4 text-center text-xs sm:text-sm text-gray-500">
                     Your order will be verified within 24 hours after payment
                     confirmation

@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X, Zap, LayoutDashboard } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import useGrowAuthStore from '../../store/useGrowAuthStore';
+import { useToast } from '../../lib/contexts/ToastContext';
 
 interface NavbarProps {
   onUserUpdate?: (user: any) => void;
@@ -13,6 +14,7 @@ const Navbar: React.FC<NavbarProps> = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
   const { user } = useGrowAuthStore();
+  const { showToast } = useToast();
 
   const buttonAction = () => {
     navigate('/login');
@@ -24,6 +26,7 @@ const Navbar: React.FC<NavbarProps> = () => {
       navigate('/dashboard');
     } else {
       // navigate('/grow/verification-wall');
+      showToast('Your portal has not been activated yet', 'error');
     }
     setMobileMenuOpen(false);
   };
@@ -95,7 +98,7 @@ const Navbar: React.FC<NavbarProps> = () => {
 
           {/* Mobile Actions */}
           <div className="md:hidden flex items-center gap-4">
-            {user ? (
+            {/* {user ? (
               <button
                 onClick={handleDashboardClick}
                 className="w-10 h-10 rounded-full bg-[#b68938]/20 border border-[#b68938]/40 flex items-center justify-center text-[#b68938]"
@@ -109,7 +112,14 @@ const Navbar: React.FC<NavbarProps> = () => {
               >
                 Login
               </button>
-            )}
+            )} */}
+
+            <button
+              onClick={buttonAction}
+              className="px-4 py-2 rounded-full bg-gradient-to-r from-[#b68938] to-[#e1ba73] text-black font-bold text-sm"
+            >
+              Login
+            </button>
 
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}

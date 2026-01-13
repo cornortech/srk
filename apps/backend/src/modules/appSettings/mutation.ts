@@ -7,7 +7,7 @@ export const updateAppSettings: AppRouteImplementationOrOptions<
 > = async ({ body }) => {
   try {
     const updates = body;
-    
+
     // Validate that at least one field is being updated
     if (Object.keys(updates).length === 0) {
       return {
@@ -18,15 +18,16 @@ export const updateAppSettings: AppRouteImplementationOrOptions<
         },
       };
     }
-    
+
     // Get existing settings or create if not exists
     let settings = await AppSettingsModel.findOne();
-    
+
     if (!settings) {
       settings = await AppSettingsModel.create({
         taskFeatureEnabled: true,
         maintenanceMode: false,
         announcementMessage: '',
+        qrcodeUrl: '',
         ...updates,
       });
     } else {
@@ -34,9 +35,9 @@ export const updateAppSettings: AppRouteImplementationOrOptions<
       Object.assign(settings, updates);
       await settings.save();
     }
-    
+
     const settingsObj = settings.toObject();
-    
+
     return {
       status: 200,
       body: {

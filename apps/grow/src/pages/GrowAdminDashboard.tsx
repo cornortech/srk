@@ -24,6 +24,7 @@ import { CreateUserView } from '../features/admin/views/CreateUserView';
 import { PackageManagementView } from '../features/admin/views/PackageManagementView';
 import { PayoutQueueView } from '../features/admin/views/PayoutQueueView';
 import { PerformanceTrendView } from '../features/admin/views/PerformanceTrendView';
+import { AppSettingsView } from '../features/admin/views/AppSettingsView';
 import { FloatingParticles } from '../features/admin/components/ui/FloatingParticles';
 import { Sidebar } from '../features/admin/components/AdminSidebar';
 import { MagneticButton } from '../lib/ui/MagneticButton';
@@ -85,6 +86,8 @@ export const GrowOnlyAdminDashboard = () => {
         return <PackageManagementView />;
       case 'payoutqueue':
         return <PayoutQueueView />;
+      case 'appsettings':
+        return <AppSettingsView />;
       case 'trend':
         return <PerformanceTrendView data={data} />;
       default:
@@ -130,6 +133,8 @@ export const GrowOnlyAdminDashboard = () => {
         return 'Create User';
       case 'payoutqueue':
         return 'Payout Queue';
+      case 'appsettings':
+        return 'App Settings';
       case 'trend':
         return 'Performance Trends';
       default:

@@ -9,7 +9,7 @@ export const VerificatinPendingPage = () => {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   
-  const { data: users, refetch } = useQuery<TGetUserByStatusByResponse>({
+  const { data: users, refetch, isLoading } = useQuery<TGetUserByStatusByResponse>({
     queryKey: ['verificaitonPendingUsers', page, search],
     queryFn: async () => {
       const res = await getUsersByStatus(
@@ -21,10 +21,6 @@ export const VerificatinPendingPage = () => {
       return res;
     },
   });
-
-  if (!users?.data) {
-    return <div></div>;
-  }
 
   const userLists = users?.data || [];
 
@@ -41,13 +37,19 @@ export const VerificatinPendingPage = () => {
           />
         </CardHeader>
         <CardBody>
-          <PaymentVerificationPendingUsersTable
-            users={userLists}
-            refetch={() => refetch()}
-            page={users.page}
-            totalPages={users.totalPages}
-            onPageChange={(p) => setPage(p)}
-          />
+          {isLoading && !users ? (
+            <div className="flex justify-center items-center py-10">
+              <div>Loading...</div>
+            </div>
+          ) : (
+            <PaymentVerificationPendingUsersTable
+              users={userLists}
+              refetch={() => refetch()}
+              page={users?.page || 1}
+              totalPages={users?.totalPages || 1}
+              onPageChange={(p) => setPage(p)}
+            />
+          )}
         </CardBody>
       </Card>
     </div>

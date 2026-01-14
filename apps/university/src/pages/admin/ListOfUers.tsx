@@ -9,7 +9,7 @@ export const ListOfUsers = () => {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
 
-  const { data: users } = useQuery<TGetUserByStatusByResponse>({
+  const { data: users, isLoading } = useQuery<TGetUserByStatusByResponse>({
     queryKey: ['users', page, search],
     queryFn: async () =>
       getUsersByStatus(
@@ -26,8 +26,6 @@ export const ListOfUsers = () => {
       ),
   });
 
-  if (!users?.data) return <div>Loading...</div>;
-
   const userLists = users?.data || [];
 
   return (
@@ -43,12 +41,18 @@ export const ListOfUsers = () => {
           />
         </CardHeader>
         <CardBody>
-          <UserTable
-            users={userLists}
-            page={users.page}
-            totalPages={users.totalPages}
-            onPageChange={(p) => setPage(p)}
-          />
+          {isLoading && !users ? (
+            <div className="flex justify-center items-center py-10">
+              <div>Loading...</div>
+            </div>
+          ) : (
+            <UserTable
+              users={userLists}
+              page={users?.page || 1}
+              totalPages={users?.totalPages || 1}
+              onPageChange={(p) => setPage(p)}
+            />
+          )}
         </CardBody>
       </Card>
     </div>

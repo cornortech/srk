@@ -15,9 +15,21 @@ const getAllAffiliateRequestsByStatus: AppRouteImplementationOrOptions<
     const page = query?.page ? parseInt(query.page, 10) : 1;
     const limit = query?.limit ? parseInt(query.limit, 10) : 10;
 
-    const queryReq: Record<string, any> = {};
+    const queryReq: Record<string, any> = {
+      status: {
+        $in: status,
+      },
+    };
 
-    const totalRequest = await affiliateRequestModel.countDocuments(queryReq);
+    // Add search functionality
+    if (query?.search) {
+      const searchRegex = new RegExp(query.search, 'i');
+      queryReq.$or = [
+        { 'userId.email': searchRegex },
+        { 'userId.firstName': searchRegex },
+        { 'userId.lastName': searchRegex },
+      ];
+    }
 
     const skip = (page - 1) * limit;
 
@@ -42,8 +54,28 @@ const getAllAffiliateRequestsByStatus: AppRouteImplementationOrOptions<
         };
       }>('userId');
 
+    // Filter results if search is provided (after population)
+    let filteredRequests = affiliateRequests;
+    if (query?.search) {
+      const searchRegex = new RegExp(query.search, 'i');
+      filteredRequests = affiliateRequests.filter((request) => {
+        return (
+          searchRegex.test(request.userId?.email || '') ||
+          searchRegex.test(request.userId?.firstName || '') ||
+          searchRegex.test(request.userId?.lastName || '')
+        );
+      });
+    }
+
+    // Count total after filtering
+    const totalRequest = query?.search
+      ? filteredRequests.length
+      : await affiliateRequestModel.countDocuments({
+          status: { $in: status },
+        });
+
     const formattedRequest = await Promise.all(
-      affiliateRequests.map(async (request) => {
+      filteredRequests.map(async (request) => {
         const affiliateBiometricData = await affiliateBiometricModel.findOne({
           userId: request.userId?._id,
         });

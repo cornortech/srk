@@ -263,6 +263,7 @@ export const financeContract = c.router({
       status: z.union([z.string(), z.string().array()]).optional(),
       page: z.string().optional(),
       limit: z.string().optional(),
+      search: z.string().optional(),
     }),
     responses: {
       200: z.object({

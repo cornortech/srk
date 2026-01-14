@@ -7,28 +7,26 @@ import PaymentVerificationPendingUsersTable from '../../components/admin/users/V
 
 export const VerificatinPendingPage = () => {
   const [page, setPage] = useState(1);
+  const [search, setSearch] = useState('');
+  
   const { data: users, refetch } = useQuery<TGetUserByStatusByResponse>({
-    queryKey: ['verificaitonPendingUsers'],
+    queryKey: ['verificaitonPendingUsers', page, search],
     queryFn: async () => {
-      const res = await getUsersByStatus(['PAYMENT_VERIFICATION_PENDING']);
+      const res = await getUsersByStatus(
+        ['PAYMENT_VERIFICATION_PENDING'],
+        page,
+        10,
+        search || undefined
+      );
       return res;
     },
   });
-
-  const [search, setSearch] = useState('');
 
   if (!users?.data) {
     return <div></div>;
   }
 
-  const filteredUsers = users?.data.filter((user) => {
-    const searchTerm = search.toLowerCase();
-    return (
-      user.email.toLowerCase().includes(searchTerm) ||
-      user.firstName.toLowerCase().includes(searchTerm) ||
-      user.lastName.toLowerCase().includes(searchTerm)
-    );
-  });
+  const userLists = users?.data || [];
 
   return (
     <div className="container mx-auto py-10">
@@ -44,7 +42,7 @@ export const VerificatinPendingPage = () => {
         </CardHeader>
         <CardBody>
           <PaymentVerificationPendingUsersTable
-            users={filteredUsers}
+            users={userLists}
             refetch={() => refetch()}
             page={users.page}
             totalPages={users.totalPages}

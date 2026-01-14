@@ -5,6 +5,8 @@ import { GrowLandingPage } from './pages/LandingPage';
 import CallbackPage from './pages/CallbackPage';
 import AdminCallbackPage from './pages/AdminCallbackPage';
 import { LoginPage } from './pages/LoginPage';
+import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
+import { ResetPasswordPage } from './pages/ResetPasswordPage';
 import { GrowVerificationPage } from './pages/VerificationPage';
 import { GrowOnlyAdminDashboard } from './pages/GrowAdminDashboard';
 import { GrowAffiliateDashboard } from './pages/GrowDashboard';
@@ -46,6 +48,14 @@ const router = createBrowserRouter([
   {
     path: '/login',
     element: <LoginPage />,
+  },
+  {
+    path: '/forgot-password',
+    element: <ForgotPasswordPage />,
+  },
+  {
+    path: '/reset-password',
+    element: <ResetPasswordPage />,
   },
   {
     path: '/grow/affiliate/verification',

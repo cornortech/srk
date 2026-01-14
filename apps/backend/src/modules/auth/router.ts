@@ -15,4 +15,8 @@ export const authRouter = s.router(authContract, {
   loginSrkGrow: authMutationHandler.loginSrkGrow,
   logout: authMutationHandler.logout,
   refreshToken: authMutationHandler.refreshToken,
+  forgotPassword: authMutationHandler.forgotPassword,
+  resetPassword: authMutationHandler.resetPassword,
+  forgotPasswordSrkGrow: authMutationHandler.forgotPasswordSrkGrow,
+  resetPasswordSrkGrow: authMutationHandler.resetPasswordSrkGrow,
 });

@@ -1,5 +1,5 @@
 import { initContract } from '@ts-rest/core';
-import { LoginSchema, LoginSuccessResponse, RegisterSchema } from './schema';
+import { LoginSchema, LoginSuccessResponse, RegisterSchema, ForgotPasswordSchema, ResetPasswordSchema } from './schema';
 import { ErrorSchema, SuccessSchema } from '../common';
 import { z } from 'zod';
 const c = initContract();
@@ -125,5 +125,51 @@ export const authContract = c.router({
       200: SuccessSchema,
     },
     summary: 'Logout user and clear tokens',
+  },
+  forgotPassword: {
+    method: 'POST',
+    path: '/auth/forgot-password',
+    body: ForgotPasswordSchema,
+    responses: {
+      200: SuccessSchema,
+      404: ErrorSchema,
+      500: ErrorSchema,
+    },
+    summary: 'Send password reset email',
+  },
+  resetPassword: {
+    method: 'POST',
+    path: '/auth/reset-password',
+    body: ResetPasswordSchema,
+    responses: {
+      200: SuccessSchema,
+      400: ErrorSchema,
+      404: ErrorSchema,
+      500: ErrorSchema,
+    },
+    summary: 'Reset password using token',
+  },
+  forgotPasswordSrkGrow: {
+    method: 'POST',
+    path: '/auth/forgot-password-srk-grow',
+    body: ForgotPasswordSchema,
+    responses: {
+      200: SuccessSchema,
+      404: ErrorSchema,
+      500: ErrorSchema,
+    },
+    summary: 'Send password reset email for Srk Grow users',
+  },
+  resetPasswordSrkGrow: {
+    method: 'POST',
+    path: '/auth/reset-password-srk-grow',
+    body: ResetPasswordSchema,
+    responses: {
+      200: SuccessSchema,
+      400: ErrorSchema,
+      404: ErrorSchema,
+      500: ErrorSchema,
+    },
+    summary: 'Reset password using token for Srk Grow users',
   },
 });

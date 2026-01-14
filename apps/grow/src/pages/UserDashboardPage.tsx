@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { UserDashboard } from './UserDashboard';
 import useGrowAuthStore from '../store/useGrowAuthStore';
 import { api } from '../lib/api';
+import { TGetSrkGrowProfileResponse } from '@srk/shared/contracts';
 
 export const UserDashboardPage = () => {
   const navigate = useNavigate();
@@ -18,7 +19,8 @@ export const UserDashboardPage = () => {
     }
   );
 
-  const user = profileData?.status === 200 ? profileData.body : null;
+  const profileResponse: TGetSrkGrowProfileResponse | undefined = profileData?.status === 200 ? profileData.body : undefined;
+  const user = profileResponse?.userDetails;
 
   useEffect(() => {
     if (!storeUser) {
@@ -43,7 +45,8 @@ export const UserDashboardPage = () => {
 
   return (
     <UserDashboard
-      user={user as any}
+      user={user}
+      enrollmentData={profileResponse?.enrollmentData || null}
       onLogout={() => {
         logout();
         navigate('/login');

@@ -39,7 +39,7 @@ export default function BankRequest() {
     setIsModalOpen(true);
   };
 
-  const { data: bankRequest, refetch } = useQuery<
+  const { data: bankRequest, refetch, isLoading } = useQuery<
     TBankRequestByStatus | undefined
   >({
     queryKey: ['bank-requests', page, search],
@@ -97,9 +97,6 @@ export default function BankRequest() {
 
   const bankRequestList = bankRequest?.data || [];
 
-  if (!bankRequest?.data) {
-    return <div></div>;
-  }
   return (
     <div className="container mx-auto py-4">
       <Card>
@@ -113,62 +110,71 @@ export default function BankRequest() {
           />
         </CardHeader>
         <CardBody>
-          <Table aria-label="Affiliate Request table">
-        <TableHeader>
-          <TableColumn>S.</TableColumn>
-          <TableColumn>Image</TableColumn>
-          <TableColumn>Username</TableColumn>
-          <TableColumn>Package</TableColumn>
-          <TableColumn>Bank Name</TableColumn>
-          <TableColumn>Branch Name</TableColumn>
-          <TableColumn>Account Number</TableColumn>
-          <TableColumn>Status</TableColumn>
-          <TableColumn>Action</TableColumn>
-        </TableHeader>
-        <TableBody>
-          {bankRequest?.data.map((user, index) => (
-            <TableRow key={index}>
-              <TableCell>{(page - 1) * 10 + index + 1}</TableCell>
-              <TableCell>
-                <Image
-                  src={user.profilePicture}
-                  width={30}
-                  height={30}
-                  className="object-cover"
+          {isLoading && !bankRequest ? (
+            <div className="flex justify-center items-center py-10">
+              <div>Loading...</div>
+            </div>
+          ) : (
+            <>
+              <Table aria-label="Bank Request table">
+                <TableHeader>
+                  <TableColumn>S.</TableColumn>
+                  <TableColumn>Image</TableColumn>
+                  <TableColumn>Username</TableColumn>
+                  <TableColumn>Package</TableColumn>
+                  <TableColumn>Bank Name</TableColumn>
+                  <TableColumn>Branch Name</TableColumn>
+                  <TableColumn>Account Number</TableColumn>
+                  <TableColumn>Status</TableColumn>
+                  <TableColumn>Action</TableColumn>
+                </TableHeader>
+                <TableBody>
+                  {bankRequestList.map((user, index) => (
+                    <TableRow key={index}>
+                      <TableCell>{(page - 1) * 10 + index + 1}</TableCell>
+                      <TableCell>
+                        <Image
+                          src={user.profilePicture}
+                          width={30}
+                          height={30}
+                          className="object-cover"
+                        />
+                      </TableCell>
+                      <TableCell>{user.username}</TableCell>
+                      <TableCell>{user.packageTitle || '-'}</TableCell>
+                      <TableCell>{user.bankName}</TableCell>
+                      <TableCell>{user.branchName}</TableCell>
+                      <TableCell>{user.accountNumber}</TableCell>
+                      <TableCell>
+                        <Chip color={chipColorsStatusMap[user.status]} variant="flat">
+                          {user.status}
+                        </Chip>
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          isIconOnly
+                          size="sm"
+                          onPress={() => handleOpenModal(user)}
+                        >
+                          <EllipsisVertical size={15} />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+
+              {bankRequest && bankRequest.data && bankRequest.data.length >= 10 && (
+                <TablePagination
+                  page={bankRequest.page}
+                  totalPages={bankRequest.totalPages}
+                  onPageChange={(p) => setPage(p)}
                 />
-              </TableCell>
-              <TableCell>{user.username}</TableCell>
-              <TableCell>{user.packageTitle || '-'}</TableCell>
-              <TableCell>{user.bankName}</TableCell>
-              <TableCell>{user.branchName}</TableCell>
-              <TableCell>{user.accountNumber}</TableCell>
-              <TableCell>
-                <Chip color={chipColorsStatusMap[user.status]} variant="flat">
-                  {user.status}
-                </Chip>
-              </TableCell>
-
-              <TableCell>
-                <Button
-                  isIconOnly
-                  size="sm"
-                  onPress={() => handleOpenModal(user)}
-                >
-                  <EllipsisVertical size={15} />
-                </Button>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-
-      {bankRequest.data?.length >= 10 && (
-        <TablePagination
-          page={bankRequest.page}
-          totalPages={bankRequest.totalPages}
-          onPageChange={(p) => setPage(p)}
-        />
-      )}
+              )}
+            </>
+          )}
+        </CardBody>
+      </Card>
 
       {selectedUser ? (
         <VerifyBankRequestModal
@@ -190,8 +196,6 @@ export default function BankRequest() {
           username={selectedUser?.username}
         />
       ) : null}
-        </CardBody>
-      </Card>
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { Card, CardBody, CardHeader } from '@nextui-org/react';
+import { Card, CardBody, CardHeader, Input } from '@nextui-org/react';
 import AffiliateRequestTable from '../../components/admin/AffiliateRequestTable';
 import { TGetAffiliateRequestByStatus } from '../../lib/types';
 import { useQueryClient, useQuery } from '@tanstack/react-query';
@@ -10,7 +10,7 @@ export const AffilateRequestList = () => {
   const [search, setSearch] = useState('');
   const queryClient = useQueryClient();
 
-  const { data: affiliateRequestData } = useQuery<TGetAffiliateRequestByStatus>(
+  const { data: affiliateRequestData, isLoading } = useQuery<TGetAffiliateRequestByStatus>(
     {
       queryKey: ['affiliate-requests', page, search],
       queryFn: async () => {
@@ -29,12 +29,6 @@ export const AffilateRequestList = () => {
 
   const affiliateRequestList = affiliateRequestData?.data || [];
 
-  // if (!affiliateRequestData?.data) return <div>Loading...</div>;
-
-  // if (!affiliateRequestData) return <>...</>;
-  if (!affiliateRequestData?.data) return <div>Loading...</div>;
-
-  if (!affiliateRequestData) return <>...</>;
   return (
     <div className="container mx-auto py-4">
       <Card>
@@ -47,16 +41,24 @@ export const AffilateRequestList = () => {
             onChange={(e) => setSearch(e.target.value)}
           />
         </CardHeader>
-        <CardBody>A list of accounts that have affiliate requests.</CardBody>
-        <div>
-          <AffiliateRequestTable
-            refetchData={refetchData}
-            users={affiliateRequestList}
-            page={affiliateRequestData?.page || 1}
-            totalPages={affiliateRequestData?.totalPages || 1}
-            onPageChange={(p) => setPage(p)}
-          />
-        </div>
+        <CardBody>
+          {isLoading && !affiliateRequestData ? (
+            <div className="flex justify-center items-center py-10">
+              <div>Loading...</div>
+            </div>
+          ) : (
+            <>
+              <div className="mb-4">A list of accounts that have affiliate requests.</div>
+              <AffiliateRequestTable
+                refetchData={refetchData}
+                users={affiliateRequestList}
+                page={affiliateRequestData?.page || 1}
+                totalPages={affiliateRequestData?.totalPages || 1}
+                onPageChange={(p) => setPage(p)}
+              />
+            </>
+          )}
+        </CardBody>
       </Card>
     </div>
   );

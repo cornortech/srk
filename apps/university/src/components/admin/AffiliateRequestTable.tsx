@@ -11,10 +11,10 @@ import {
   // Tab,
 } from '@nextui-org/react';
 import { EllipsisVertical, SquareArrowOutUpRight } from 'lucide-react';
-import UserDetailsModal from './userDetailsModel';
 import { useState } from 'react';
-import { chipColorsStatusMap, TAffiliateRequest } from '../../lib/types';
 import { useMutation } from '@tanstack/react-query';
+import UserDetailsModal from './userDetailsModel';
+import { chipColorsStatusMap, TAffiliateRequest } from '../../lib/types';
 import {
   approveAffiliateRequestApi,
   rejectAffiliateRequestApi,

@@ -13,6 +13,8 @@ export interface IGrowSocialMediaPackageUser extends mongoose.Document {
   userType: 'affiliate' | 'package';
   srkUniversityUserId?: mongoose.Types.ObjectId;
   referredBy?: mongoose.Types.ObjectId;
+  resetPasswordToken?: string;
+  resetPasswordExpires?: Date;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -73,6 +75,12 @@ const growSocialMediaPackageUserSchema = new mongoose.Schema(
     isPushNotifications: {
       type: Boolean,
       default: null,
+    },
+    resetPasswordToken: {
+      type: String,
+    },
+    resetPasswordExpires: {
+      type: Date,
     },
   },
   {

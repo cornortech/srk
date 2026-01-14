@@ -1,10 +1,10 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { CheckCircle } from 'lucide-react';
-import { UserData } from '../../../lib/types/types';
+import { TGetSrkGrowProfileResponse } from '@srk/shared/contracts';
 
 interface UserProfileViewProps {
-  user: UserData;
+  user: TGetSrkGrowProfileResponse['userDetails'];
 }
 
 export const UserProfileView: React.FC<UserProfileViewProps> = ({ user }) => {
@@ -17,7 +17,7 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ user }) => {
       <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-3xl p-8">
         <div className="flex flex-col lg:flex-row items-center lg:items-start gap-6 mb-8 pb-8 border-b border-white/10">
           <div className="w-24 h-24 lg:w-32 lg:h-32 rounded-full bg-gradient-to-r from-[#b68938] to-[#e1ba73] flex items-center justify-center text-4xl font-bold text-black flex-shrink-0">
-            {user.fullName.charAt(0).toUpperCase()}
+            {user.fullName?.charAt(0).toUpperCase()}
           </div>
           <div className="text-center lg:text-left">
             <h2 className="text-2xl lg:text-3xl font-bold text-white mb-2">

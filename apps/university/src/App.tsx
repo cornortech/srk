@@ -8,6 +8,8 @@ import { CourseDetails } from './pages/DetailsPage';
 import AboutPage from './pages/About';
 import ContactPage from './pages/Contact';
 import { Login } from './pages/Login';
+import { ForgotPassword } from './pages/ForgotPassword';
+import { ResetPassword } from './pages/ResetPassword';
 import EarningsDashboard from './pages/dashboard/Earning';
 import CoursesDashboard from './components/dashboard/courses/CoursesDashboard';
 import Leaderboard from './pages/dashboard/LearderBoard';
@@ -152,6 +154,8 @@ const AppRouter = () => {
       children: [
         { path: 'sign-up', element: <SignUp /> },
         { path: 'login', element: <Login /> },
+        { path: 'forgot-password', element: <ForgotPassword /> },
+        { path: 'reset-password', element: <ResetPassword /> },
         { path: 'kyc-verification', element: <PortalActivationPage /> },
         {
           path: 'payment-verification',

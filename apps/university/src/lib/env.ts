@@ -5,7 +5,7 @@
 
 export const env = {
   // API Configuration
-  backendUrl: import.meta.env.VITE_BACKEND_ROOT_URL || 'http://localhost:4000',
+  backendUrl: (import.meta.env.VITE_BACKEND_ROOT_URL || 'http://localhost:4000').replace(/\/$/, ''),
   frontendUrl: import.meta.env.VITE_FRONTEND_ROOT_URL || 'http://localhost:4200',
 
   // Firebase Configuration

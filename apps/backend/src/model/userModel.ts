@@ -39,6 +39,9 @@ export interface IUser extends Document {
 
   srkBankId?: Types.ObjectId;
 
+  resetPasswordToken?: string;
+  resetPasswordExpires?: Date;
+
   createdAt: Date;
   updatedAt: Date;
 }
@@ -132,6 +135,12 @@ const userSchema = new mongoose.Schema<IUser>(
     srkBankId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "SrkBank",
+    },
+    resetPasswordToken: {
+      type: String,
+    },
+    resetPasswordExpires: {
+      type: Date,
     },
   },
   {

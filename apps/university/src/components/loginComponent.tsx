@@ -131,12 +131,17 @@ export function LoginComponent() {
         </div>
         <PrimaryButton label="Login" className="w-full " type="submit" />
 
-        <p className="text-textPrimary">
-          If you don’t have an account{" "}
-          <Link to="/packages">
-            <span className="text-primary underline">Signup</span>
+        <div className="flex justify-between items-center text-sm">
+          <p className="text-textPrimary">
+            If you don't have an account{' '}
+            <Link to="/packages">
+              <span className="text-primary underline">Signup</span>
+            </Link>
+          </p>
+          <Link to="/auth/forgot-password">
+            <span className="text-primary underline">Forgot Password?</span>
           </Link>
-        </p>
+        </div>
       </form>
     </div>
   );

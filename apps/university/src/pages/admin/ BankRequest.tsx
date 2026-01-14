@@ -8,6 +8,10 @@ import {
   Button,
   Image,
   Chip,
+  Card,
+  CardHeader,
+  CardBody,
+  Input,
 } from '@nextui-org/react';
 import { EllipsisVertical } from 'lucide-react';
 import { useState } from 'react';
@@ -27,6 +31,7 @@ import TablePagination from '../../components/admin/Pagination';
 
 export default function BankRequest() {
   const [page, setPage] = useState(1);
+  const [search, setSearch] = useState('');
   const [selectedUser, setSelectedUser] = useState<TBankRequest | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const handleOpenModal = (user: TBankRequest) => {
@@ -37,12 +42,13 @@ export default function BankRequest() {
   const { data: bankRequest, refetch } = useQuery<
     TBankRequestByStatus | undefined
   >({
-    queryKey: ['bank-requests', page],
+    queryKey: ['bank-requests', page, search],
     queryFn: async () => {
       const data = await getBankRequestApi(
         ['pending', 'approved', 'rejected'],
         page,
-        10
+        10,
+        search || undefined
       );
       return data;
     },
@@ -95,8 +101,19 @@ export default function BankRequest() {
     return <div></div>;
   }
   return (
-    <>
-      <Table aria-label="Affiliate Request table">
+    <div className="container mx-auto py-4">
+      <Card>
+        <CardHeader className="text-xl font-bold flex flex-row gap-x-4">
+          <h1>Bank Details Requests</h1>
+          <Input
+            placeholder="Search by name, bank, or account"
+            className="w-1/2 self-end ml-auto"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </CardHeader>
+        <CardBody>
+          <Table aria-label="Affiliate Request table">
         <TableHeader>
           <TableColumn>S.</TableColumn>
           <TableColumn>Image</TableColumn>
@@ -173,6 +190,8 @@ export default function BankRequest() {
           username={selectedUser?.username}
         />
       ) : null}
-    </>
+        </CardBody>
+      </Card>
+    </div>
   );
 }

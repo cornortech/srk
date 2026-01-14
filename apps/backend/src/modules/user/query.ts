@@ -193,6 +193,16 @@ const getAllUsers: AppRouteImplementationOrOptions<
       queryReq.status = { $in: query.status };
     }
 
+    // Search filter - search across email, firstName, and lastName
+    if (query?.search) {
+      const searchRegex = new RegExp(query.search, 'i'); // case-insensitive
+      queryReq.$or = [
+        { email: searchRegex },
+        { firstName: searchRegex },
+        { lastName: searchRegex },
+      ];
+    }
+
     // Count total users matching filters
     const totalUsers = await UserModel.countDocuments(queryReq);
 

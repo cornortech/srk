@@ -119,7 +119,8 @@ export const getAllUsersApi = async () => {
 export const getUsersByStatus = async (
   status: string | TUserStatus[],
   page = 1, // default page
-  limit = 10 // default limit
+  limit = 10, // default limit
+  search?: string // optional search parameter
 ) => {
   const statusArray = Array.isArray(status) ? status : [status]; // Ensure array
 
@@ -128,6 +129,7 @@ export const getUsersByStatus = async (
       status: statusArray, // Axios will handle array properly
       page,
       limit,
+      ...(search && { search }), // Only include search if it's provided
     },
   });
 
@@ -236,7 +238,8 @@ export const requestAffiliateProgramApi = async (userId: string) => {
 export const getAllAffiliateRequestsByStatusApi = async (
   status: string | string[],
   page = 1,
-  limit = 10
+  limit = 10,
+  search?: string
 ) => {
   const statusArray = Array.isArray(status) ? status : [status];
 
@@ -247,6 +250,7 @@ export const getAllAffiliateRequestsByStatusApi = async (
         status: statusArray,
         page,
         limit,
+        ...(search && { search }),
       },
     }
   );
@@ -355,7 +359,8 @@ export const getPayoutOfUserApi = async (userId: string) => {
 export const getBalancePayoutByStatus = async (
   status: string[],
   page = 1,
-  limit = 10
+  limit = 10,
+  globalSearch?: string
 ) => {
   const statusArray = Array.isArray(status) ? status : [status];
 
@@ -366,6 +371,7 @@ export const getBalancePayoutByStatus = async (
         status: statusArray,
         page,
         limit,
+        ...(globalSearch && { globalSearch }),
       },
     }
   );
@@ -481,7 +487,8 @@ export const uploadVideoApi = async (data: TUploadVideoPayload) => {
 export const getBankRequestApi = async (
   status: string[],
   page = 1,
-  limit = 10
+  limit = 10,
+  search?: string
 ) => {
   const statusArray = Array.isArray(status) ? status : [status]; // Ensure array
 
@@ -490,6 +497,7 @@ export const getBankRequestApi = async (
       status: statusArray,
       page,
       limit,
+      ...(search && { search }),
     },
   });
   return response.data;

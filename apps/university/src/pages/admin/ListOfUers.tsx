@@ -9,8 +9,8 @@ export const ListOfUsers = () => {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
 
-  const { data: users } = useQuery<TGetUserByStatusByResponse>({
-    queryKey: ['users', page],
+  const { data: users, isLoading } = useQuery<TGetUserByStatusByResponse>({
+    queryKey: ['users', page, search],
     queryFn: async () =>
       getUsersByStatus(
         [
@@ -21,22 +21,12 @@ export const ListOfUsers = () => {
           'KYC_VERIFICATION_REJECTED',
         ],
         page,
-        10
+        10,
+        search || undefined
       ),
   });
 
-  if (!users?.data) return <div>Loading...</div>;
-
   const userLists = users?.data || [];
-
-  const filteredUsers = userLists.filter((user) => {
-    const searchTerm = search.toLowerCase();
-    return (
-      user.email.toLowerCase().includes(searchTerm) ||
-      user.firstName.toLowerCase().includes(searchTerm) ||
-      user.lastName.toLowerCase().includes(searchTerm)
-    );
-  });
 
   return (
     <div className="container mx-auto py-4">
@@ -51,12 +41,18 @@ export const ListOfUsers = () => {
           />
         </CardHeader>
         <CardBody>
-          <UserTable
-            users={filteredUsers}
-            page={users.page}
-            totalPages={users.totalPages}
-            onPageChange={(p) => setPage(p)}
-          />
+          {isLoading && !users ? (
+            <div className="flex justify-center items-center py-10">
+              <div>Loading...</div>
+            </div>
+          ) : (
+            <UserTable
+              users={userLists}
+              page={users?.page || 1}
+              totalPages={users?.totalPages || 1}
+              onPageChange={(p) => setPage(p)}
+            />
+          )}
         </CardBody>
       </Card>
     </div>

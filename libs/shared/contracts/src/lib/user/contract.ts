@@ -78,6 +78,7 @@ export const userContract = c.router({
       .object({
         limit: z.string().optional(),
         page: z.string().optional(),
+        search: z.string().optional(),
         status: z
           .array(
             z.enum([

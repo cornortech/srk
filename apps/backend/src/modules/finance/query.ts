@@ -701,7 +701,10 @@ const getBankTable: AppRouteImplementationOrOptions<
   typeof financeContract.getBankTable
 > = async ({ req }) => {
   try {
-    const { status } = req.query as { status?: string | string[] };
+    const { status, search } = req.query as {
+      status?: string | string[];
+      search?: string;
+    };
 
     const statusArray: string[] = status
       ? Array.isArray(status)
@@ -721,8 +724,6 @@ const getBankTable: AppRouteImplementationOrOptions<
     if (statusArray.length > 0) {
       queryReq.status = { $in: statusArray };
     }
-
-    const totalRequest = await BankModel.countDocuments(queryReq);
 
     const bankTable = await BankModel.find(queryReq)
       .sort({ createdAt: -1 })
@@ -747,8 +748,28 @@ const getBankTable: AppRouteImplementationOrOptions<
         },
       });
 
+    // Filter results if search is provided (after population)
+    let filteredBankTable = bankTable;
+    if (search) {
+      const searchRegex = new RegExp(search, 'i');
+      filteredBankTable = bankTable.filter((bank) => {
+        const username = `${bank.userId.firstName} ${bank.userId.lastName}`;
+        return (
+          searchRegex.test(username) ||
+          searchRegex.test(bank.accountHolderName) ||
+          searchRegex.test(bank.accountNumber) ||
+          searchRegex.test(bank.bankName)
+        );
+      });
+    }
+
+    // Count total after filtering
+    const totalRequest = search
+      ? filteredBankTable.length
+      : await BankModel.countDocuments(queryReq);
+
     // Format response
-    const formattedBankTable = bankTable.map((bank) => ({
+    const formattedBankTable = filteredBankTable.map((bank) => ({
       username: `${bank.userId.firstName} ${bank.userId.lastName}`,
       profilePicture: bank.userId.profilePicture,
       _id: bank._id.toString(),

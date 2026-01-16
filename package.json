@@ -27,7 +27,8 @@
     "format:check": "nx format:check",
     "create:admin": "tsx apps/backend/src/scripts/createAdmin.ts",
     "seed:create-grow-packages": "tsx apps/backend/src/utils/script/createSrkGrowPackage.ts",
-    "script:get-user": "tsx apps/backend/src/scripts/getSrkUniversityUser.ts"
+    "script:get-user": "tsx apps/backend/src/scripts/getSrkUniversityUser.ts",
+    "script:update-task-coins": "tsx apps/backend/src/scripts/updateTaskUserCoins.ts"
   },
   "private": true,
   "devDependencies": {

@@ -1,0 +1,39 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:global(.nextui-table) {
+  background-color: #1e1e1e !important;
+  color: white !important;
+}
+input[type="date"]::-webkit-calendar-picker-indicator {
+  color: white;
+  background-color: white;
+}
+
+/* Button Glow Effect */
+.glow-button {
+  @apply px-8 font-semibold text-black mt-8 bg-yellow-500 
+         shadow-[0_0_15px_2px_rgba(255,215,0,0.6)] 
+         transition-all duration-500 ease-in-out transform;
+}
+
+.glow-button:hover {
+  @apply shadow-[0_0_20px_5px_rgba(255,215,0,0.5)] scale-105;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar-days"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M12 18h.01"/><path d="M16 18h.01"/></svg>');
+  cursor: pointer;
+  border-radius: 4px;
+  margin-right: 2px;
+  opacity: 0.6;
+  color-scheme: dark;
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}

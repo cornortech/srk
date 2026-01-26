@@ -16,7 +16,7 @@ export interface SSOExchangeResponse {
   success: boolean;
   message: string;
   user?: {
-    _id: string;
+    universityId: string;
     email: string;
     firstName?: string;
     lastName?: string;
@@ -29,7 +29,7 @@ export interface SSOGetMeResponse {
   success: boolean;
   message: string;
   user?: {
-    _id: string;
+    universityId: string;
     email: string;
     firstName?: string;
     lastName?: string;

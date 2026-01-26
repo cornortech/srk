@@ -57,10 +57,9 @@ const CallbackPage = () => {
 
           // Set user in store
           setUser({
-            _id: response.user._id,
+            _id: response.user.universityId,
             email: response.user.email,
             fullName: response.user.firstName || "",
-            // lastName: response.user.lastName || "",
           });
 
           console.log("debug 1 response.user?.redirectionUrl:", response.user?.redirectionUrl);

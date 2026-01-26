@@ -7,7 +7,7 @@ import { balancePayoutModel } from '../../model/balancePayoutModel';
 import { financeContract } from '../../../../../libs/shared/contracts/src/lib/finance/contract';
 import { balanceModel } from '../../model/balanceModel';
 import { adminBalanceModel } from '../../model/adminBalanceModel';
-import bankStatement from '../../model/bankStatement';
+import bankStatement from '../../model/bank/bankStatementModel';
 import { SrkBankModel } from '../../model/srkBankModel';
 import { AdminSrkBankModel } from '../../model/AdminSrkBankModel';
 import { UserModel } from '../../model/userModel';

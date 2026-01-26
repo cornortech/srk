@@ -7,7 +7,7 @@ import { KYCModel } from '../../model/kycModel';
 import { balanceModel } from '../../model/balanceModel';
 import { adminBalanceModel } from '../../model/adminBalanceModel';
 import { SrkBankModel } from '../../model/srkBankModel';
-import bankStatement from '../../model/bankStatement';
+import bankStatement from '../../model/bank/bankStatementModel';
 import AdminSrkBankService from '../../services/adminSrkBankService';
 import EmailService from '../../services/emailService';
 import { SrkUniversityBankModel } from '../../model/srkUniversityBankModel';

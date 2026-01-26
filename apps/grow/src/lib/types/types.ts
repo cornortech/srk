@@ -2,6 +2,7 @@ import {
   TSrkGrowPackagesSchema,
   TValidateGrowUserPromoCodeResponse,
   TGetGrowSocialMediaEnrollmentById,
+  TGetSrkGrowProfileResponse,
 } from '@srk/shared/contracts';
 
 export type SocialPlatform =
@@ -112,7 +113,7 @@ export interface OrderDetails {
 }
 
 export interface DashboardProps {
-  user: UserData;
+  user: TGetSrkGrowProfileResponse;
   onLogout: () => void;
 }
 

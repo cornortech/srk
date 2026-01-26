@@ -1,10 +1,10 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { CheckCircle } from 'lucide-react';
-import { UserData } from '../../../lib/types/types';
+import { TGetSrkGrowProfileResponse } from '@srk/shared/contracts';
 
 interface UserProfileViewProps {
-  user: UserData;
+  user: TGetSrkGrowProfileResponse;
 }
 
 export const UserProfileView: React.FC<UserProfileViewProps> = ({ user }) => {
@@ -17,16 +17,20 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ user }) => {
       <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-3xl p-8">
         <div className="flex flex-col lg:flex-row items-center lg:items-start gap-6 mb-8 pb-8 border-b border-white/10">
           <div className="w-24 h-24 lg:w-32 lg:h-32 rounded-full bg-gradient-to-r from-[#b68938] to-[#e1ba73] flex items-center justify-center text-4xl font-bold text-black flex-shrink-0">
-            {user.fullName.charAt(0).toUpperCase()}
+            {user?.userDetails?.fullName.charAt(0).toUpperCase()}
           </div>
           <div className="text-center lg:text-left">
             <h2 className="text-2xl lg:text-3xl font-bold text-white mb-2">
-              {user.fullName}
+              {user?.userDetails?.fullName}
             </h2>
-            <p className="text-gray-400 text-lg mb-4">{user.email}</p>
+            <p className="text-gray-400 text-lg mb-4">
+              {user?.userDetails?.email}
+            </p>
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-green-500/20 border border-green-500/30 text-green-400 text-sm font-bold uppercase">
               <CheckCircle size={16} /> KYC{' '}
-              {user.status === 'portalActivated' ? 'Verified' : 'Pending'}
+              {user?.userDetails?.status === 'portalActivated'
+                ? 'Verified'
+                : 'Pending'}
             </div>
           </div>
         </div>
@@ -37,7 +41,7 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ user }) => {
               Account ID
             </label>
             <div className="p-4 bg-white/5 rounded-2xl text-white font-mono text-sm border border-white/10">
-              {user._id}
+              {user.userDetails._id}
             </div>
           </div>
           <div>
@@ -45,8 +49,8 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ user }) => {
               Join Date
             </label>
             <div className="p-4 bg-white/5 rounded-2xl text-white text-sm border border-white/10">
-              {user.createdAt
-                ? new Date(user.createdAt).toLocaleDateString()
+              {user.userDetails.createdAt
+                ? new Date(user.userDetails.createdAt).toLocaleDateString()
                 : 'N/A'}
             </div>
           </div>
@@ -55,7 +59,7 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ user }) => {
               Country
             </label>
             <div className="p-4 bg-white/5 rounded-2xl text-white text-sm border border-white/10">
-              {user.country || 'Not specified'}
+              {user.userDetails.country || 'Not specified'}
             </div>
           </div>
           <div>
@@ -63,7 +67,7 @@ export const UserProfileView: React.FC<UserProfileViewProps> = ({ user }) => {
               Phone
             </label>
             <div className="p-4 bg-white/5 rounded-2xl text-white text-sm border border-white/10">
-              {user.phone || 'Not specified'}
+              {user.userDetails.phone || 'Not specified'}
             </div>
           </div>
         </div>

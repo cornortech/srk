@@ -21,7 +21,7 @@ const SSOExchangeResponseSchema = z.object({
   message: z.string(),
   user: z
     .object({
-      _id: z.string(),
+      universityId: z.string(),
       email: z.string(),
       firstName: z.string().optional(),
       lastName: z.string().optional(),
@@ -41,7 +41,7 @@ const GetMeResponseSchema = z.object({
   message: z.string(),
   user: z
     .object({
-      _id: z.string(),
+      universityId: z.string(),
       email: z.string(),
       firstName: z.string().optional(),
       lastName: z.string().optional(),

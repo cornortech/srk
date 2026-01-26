@@ -28,9 +28,8 @@ export const useTaskAuthStore = create<TaskAuthState>()(
       setUser: (user) =>
         set({
           user,
-          universityID: user?._id,
+          universityID: user?.universityId,
           taskUserID: null,
-          // '69545b8c4036f70e122fe9ef',
           isAuthenticated: !!user,
           isLoading: false,
         }),

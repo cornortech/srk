@@ -268,7 +268,7 @@ const exchangeCode: AppRouteImplementationOrOptions<
         success: true,
         message: 'Authentication successful',
         user: {
-          _id: loggedInUser._id.toString(),
+          universityId: loggedInUser._id.toString(),
           email: loggedInUser.email,
           firstName: userExist?.firstName || undefined,
           lastName: userExist?.lastName || undefined,
@@ -332,7 +332,7 @@ const getMe: AppRouteImplementationOrOptions<
         success: true,
         message: 'User retrieved successfully',
         user: {
-          _id: loggedInUser._id.toString(),
+          universityId: loggedInUser._id.toString(),
           email: loggedInUser.email,
           firstName: userExist?.firstName || undefined,
           lastName: userExist?.lastName || undefined,

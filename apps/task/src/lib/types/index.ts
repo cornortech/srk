@@ -1,5 +1,5 @@
 export interface TaskUser {
-  _id: string;
+  universityId: string;
   email: string;
   firstName?: string;
   lastName?: string;

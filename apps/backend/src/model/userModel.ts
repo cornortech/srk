@@ -11,17 +11,12 @@ export interface IUser extends Document {
   country: string;
   email: string;
   password: string;
-
   affiliateEnabled: boolean;
   allowedToAddUsers: boolean;
-
   profilePicture?: string;
-
   referralCode?: string;
   referredBy?: Types.ObjectId;
-
   packageId?: Types.ObjectId;
-
   status:
     | "REGISTERED"
     | "PAYMENT_VERIFICATION_PENDING"
@@ -34,14 +29,13 @@ export interface IUser extends Document {
 
   hasSrkBonusDeposited: boolean;
   isSelfSignup: boolean;
-
   purpose?: "affiliate" | "study";
-
   srkBankId?: Types.ObjectId;
 
   resetPasswordToken?: string;
   resetPasswordExpires?: Date;
 
+  baseSecret: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -141,6 +135,9 @@ const userSchema = new mongoose.Schema<IUser>(
     },
     resetPasswordExpires: {
       type: Date,
+    },
+    baseSecret: {
+      type: String,
     },
   },
   {

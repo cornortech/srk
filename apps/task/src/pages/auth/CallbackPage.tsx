@@ -50,7 +50,7 @@ export const CallbackPage = () => {
 
           // Set user in store
           setUser({
-            _id: response.user._id,
+            universityId: response.user.universityId,
             email: response.user.email,
             firstName: response.user.firstName,
             lastName: response.user.lastName,

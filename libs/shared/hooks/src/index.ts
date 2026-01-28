@@ -10,3 +10,4 @@ export * from './lib/useGrowSSO';
 export * from './lib/useTaskAdminSSO';
 export * from './lib/useGrowAdminSSO';
 export * from './lib/useAuthAffiliate';
+export * from './lib/useBankSSO'

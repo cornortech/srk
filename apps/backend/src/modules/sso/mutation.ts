@@ -6,6 +6,7 @@ import AuthService from '../../services/authService';
 import crypto from 'crypto';
 import GrowAffiliateUserModel from '../../model/grow/growAffiliateUserModel';
 import { AutoCodeModel } from '../../model/autoCodeModel';
+import { SrkBankModel } from '../../model/srkBankModel';
 
 /**
  * Generate a one-time SSO auto code
@@ -90,7 +91,7 @@ const getAutoCode: AppRouteImplementationOrOptions<
       }
     } else {
       const bankDomain =
-        process.env['BANK_FRONTEND_URL'] || 'http://localhost:4300';
+        process.env['BANK_FRONTEND_URL'] || 'http://localhost:4600';
       redirectUrl = `${bankDomain}/callback?code=${code}`;
     }
 
@@ -130,6 +131,7 @@ const exchangeCode: AppRouteImplementationOrOptions<
 
     // Find the auto code
     const autoCode = await AutoCodeModel.findOne({ code });
+    const userId = autoCode?.userId;
 
     if (!autoCode) {
       return {
@@ -164,14 +166,9 @@ const exchangeCode: AppRouteImplementationOrOptions<
       };
     }
 
-    // Mark code as used immediately (one-time use)
-    autoCode.isUsed = true;
-    await autoCode.save();
-
     // Get user details
     const userExist = await UserModel.findById(autoCode.userId);
     const adminExist = await adminModel.findById(autoCode.userId);
-
     const loggedInUser = userExist || adminExist;
 
     if (!loggedInUser) {
@@ -183,7 +180,10 @@ const exchangeCode: AppRouteImplementationOrOptions<
         },
       };
     }
-
+    
+    // Mark code as used immediately (one-time use)
+    autoCode.isUsed = true;
+    await autoCode.save();
     // Determine role
     const role = adminExist ? 'admin' : 'user';
 
@@ -218,7 +218,50 @@ const exchangeCode: AppRouteImplementationOrOptions<
       } else if (autoCode.targetApp === 'growsocialmedia') {
         redirectionUrl = '/';
       } else if (autoCode.targetApp === 'bank') {
-        redirectionUrl = '/bank/dashboard';
+        let bankUser = await SrkBankModel.findOne({ userId });
+
+        if (!bankUser) {
+          // Auto-create bank record for the user if it doesn't exist
+          bankUser = await SrkBankModel.create({
+            userId,
+            amount: 0,
+            status: 'ONBOARDING_DETAILS_ADDED', // Initial status
+          });
+
+          // Link it to the user record
+          if (userExist) {
+            userExist.srkBankId = bankUser._id as any;
+            await userExist.save();
+          }
+        }
+
+        // if (!bankUser.bankDetailsId) {
+        //   // If they haven't filled out the registration form yet
+        //   redirectionUrl = '/onboarding/register';
+        // } else {
+          switch (bankUser.status) {
+            case 'ONBOARDING_DETAILS_ADDED':
+              redirectionUrl = '/onboarding/otp-verification';
+              break;
+            case 'OTP_VERIFIED':
+              redirectionUrl = '/onboarding/register';
+              break;
+            case 'PROFILE_PICTURE_UPLOADED':
+              redirectionUrl = '/onboarding/user-preview';
+              break;
+            case 'TRANSACTION_PIN_ADDED':
+              redirectionUrl = '/onboarding/setup-pin';
+              break;
+            case 'PORTAL_ACTIVATED':
+              redirectionUrl = '/dashboard';
+              break;
+            case 'REJECTED':
+              redirectionUrl = null;
+              break;
+            default:
+              redirectionUrl = '/onboarding/otp-verification';
+          }
+        // }
       }
     }
 
@@ -261,6 +304,7 @@ const exchangeCode: AppRouteImplementationOrOptions<
 
     // Clean up - delete the used code
     await AutoCodeModel.deleteOne({ _id: autoCode._id });
+    
 
     return {
       status: 200,
@@ -272,6 +316,10 @@ const exchangeCode: AppRouteImplementationOrOptions<
           email: loggedInUser.email,
           firstName: userExist?.firstName || undefined,
           lastName: userExist?.lastName || undefined,
+          phoneNumber: userExist?.phoneNumber || undefined,
+          gender: userExist?.gender || undefined,
+          dob: userExist?.dob?.toISOString() || undefined,
+          country: userExist?.country || undefined,
           role,
           redirectionUrl,
         },

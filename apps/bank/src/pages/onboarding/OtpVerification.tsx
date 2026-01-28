@@ -52,7 +52,7 @@ export default function OTPVerificationPage() {
 
         try {
             await bankApi.validateBankRegistrationOtp(userDetails._id, otp);
-            navigate("/bank/onboarding/upload-image");
+            navigate("/onboarding/upload-image");
         } catch {
             setError("Verification failed. Please try again.");
         } finally {

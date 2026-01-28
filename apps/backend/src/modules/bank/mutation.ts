@@ -127,6 +127,7 @@ const createBankDetails: AppRouteImplementationOrOptions<
         code: otpCode,
       }),
     });
+    console.log(`[DEV] OTP for ${userExist.email}: ${otpCode}`);
 
     return {
       status: 200,
@@ -345,6 +346,7 @@ const sendBankRegistrationOtp: AppRouteImplementationOrOptions<
         code: otpCode,
       }),
     });
+    console.log(`[DEV] New OTP for ${userExist.email}: ${otpCode}`);
 
     return {
       status: 200,

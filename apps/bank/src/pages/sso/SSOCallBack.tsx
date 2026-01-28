@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { exchangeCode } from '@srk/shared/api';
 import { useBankAuthStore } from '../../store/useBankAuthStore';
+import useAuthStore from '../../store/useAuth';
 import env from '../../libs/env';
 
 /**
@@ -20,14 +21,20 @@ const CallbackPage = () => {
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
     const { setUser, setLoading } = useBankAuthStore();
+    const { setAuthDetails } = useAuthStore();
 
     const [status, setStatus] = useState<'loading' | 'success' | 'error'>(
         'loading'
     );
     const [message, setMessage] = useState('Authenticating...');
 
+    const calledRef = useRef(false);
+
     useEffect(() => {
         const handleSSOCallback = async () => {
+            if (calledRef.current) return;
+            calledRef.current = true;
+
             const code = searchParams.get('code');
             const affiliateId = searchParams.get('affiliateId');
 
@@ -53,26 +60,48 @@ const CallbackPage = () => {
                     setStatus('success');
                     setMessage('Authentication successful! Redirecting...');
 
-                    // Set user in store
-                    setUser({
+                    // Set user in both stores safely
+                    const bankUser = {
                         _id: response.user.universityId,
                         email: response.user.email,
-                        fullName: response.user.firstName + ' ' + response.user.lastName,
-                        // lastName: response.user.lastName || "",
+                        fullName: `${response.user.firstName || ''} ${response.user.lastName || ''}`.trim(),
+                    };
+                    
+                    setUser(bankUser);
+
+                    // Sync common auth store for components that depend on it
+                    setAuthDetails({
+                        authDetails: {
+                            role: response.user.role as "admin" | "user",
+                            email: response.user.email,
+                            redirectionUrl: response.user.redirectionUrl,
+                        },
+                        srkBank: null, 
+                        userDetails: {
+                            ...response.user,
+                            _id: response.user.universityId,
+                            firstName: response.user.firstName || "",
+                            lastName: response.user.lastName || "",
+                            phoneNumber: response.user.phoneNumber || "",
+                            gender: response.user.gender as any || "Other",
+                            dob: response.user.dob || "",
+                            country: response.user.country || "",
+                            affiliateEnabled: response.user.affiliateEnabled || false,
+                            isActive: response.user.isActive || true,
+                            status: response.user.status || "REGISTERED",
+                            purpose: response.user.purpose || "study",
+                        } as any,
                     });
 
-                    // Redirect to dashboard
+                    // Navigate on success
                     setTimeout(() => {
-                        navigate(response.user?.redirectionUrl || '/bank/affiliate/verification', {
-                            replace: true,
-                        });
-                    }, 1000);
+                        navigate(response.user?.redirectionUrl || "/dashboard", { replace: true });
+                    }, 500);
+         
                 } else {
                     console.error('SSO callback failed:', response);
                     setStatus('error');
-
                     setMessage(response.message || 'Authentication failed');
-
                 }
             } catch (err: any) {
                 console.error('SSO callback error:', err);

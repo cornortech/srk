@@ -25,6 +25,10 @@ const SSOExchangeResponseSchema = z.object({
       email: z.string(),
       firstName: z.string().optional(),
       lastName: z.string().optional(),
+      phoneNumber: z.string().optional(),
+      gender: z.string().optional(),
+      dob: z.string().optional(),
+      country: z.string().optional(),
       role: z.string(),
       redirectionUrl: z.string(),
     })

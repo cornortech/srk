@@ -30,9 +30,16 @@ import AccountSettings from './pages/dashboard/AccountSettings';
 import { BankPayout } from './pages/dashboard/Payouts';
 import PasswordResetPage from './pages/dashboard/PasswordReset';
 import CallbackPage from './pages/sso/SSOCallBack';
+import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
+
+
+const queryClient = new QueryClient();
+
 
 export function App() {
   return (
+    <QueryClientProvider client={queryClient}>
+
     <Routes>
       <Route path='/callback' element={<CallbackPage />} />
       <Route
@@ -75,6 +82,7 @@ export function App() {
         </Route>
       </Route>
     </Routes>
+    </QueryClientProvider>
   );
 }
 

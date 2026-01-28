@@ -6,6 +6,7 @@ import {
   AlignLeftIcon,
   LayoutDashboardIcon,
   WorkflowIcon,
+  Banknote,
 } from "lucide-react";
 import { useState } from "react";
 import {
@@ -20,7 +21,7 @@ import useAlert from "../hooks/useAlert";
 import { Button } from "@nextui-org/react";
 import { useMutation } from "@tanstack/react-query";
 import { updateUserDetailsApi } from "../lib/apiClient";
-import { useTaskSSO } from "@srk/shared/hooks";
+import { useTaskSSO, useBankSSO } from "@srk/shared/hooks";
 
 interface Tsidebar {
   sideBarName: string;
@@ -48,6 +49,10 @@ export const Sidebar = ({
   const backendUrl = import.meta.env.VITE_BACKEND_ROOT_URL || 'http://localhost:4000';
 
   const { redirectToTaskProgram, isLoading: isRedirectingToTaskProgram, error: redirectToTaskProgramError } = useTaskSSO({
+    backendUrl,
+  });
+
+  const { redirectToBankProgram, isLoading: isRedirectingToBankProgram, error: redirectToBankProgramError } = useBankSSO({
     backendUrl,
   });
   const { mutate: updateUserPermission } = useMutation({
@@ -112,10 +117,11 @@ export const Sidebar = ({
     updateUserPermission();
   };
 
-
-
   const handleRedirectToTaskProgram = () => {
     redirectToTaskProgram();
+  }
+  const handleRedirectToBankProgram = () => {
+    redirectToBankProgram();
   }
 
   return (
@@ -174,14 +180,25 @@ export const Sidebar = ({
 
           {
             sidebarType === "study" &&
+            <>
             <div
               className="flex cursor-pointer items-center gap-x-3 w-full justify-start text-textPrimary bg-bgSecondary p-2 rounded-md transition-all duration-300 ease-in-out"
               color="primary"
               onClick={handleRedirectToTaskProgram}
-            >
+              >
               <WorkflowIcon />
               {isRedirectingToTaskProgram ? "Redirecting..." : "SRK Task Program"}
             </div>
+            <div
+              className="flex cursor-pointer items-center gap-x-3 w-full justify-start text-textPrimary bg-bgSecondary p-2 rounded-md transition-all duration-300 ease-in-out"
+              color="primary"
+              onClick={handleRedirectToBankProgram}
+              >
+              <Banknote />
+              {isRedirectingToBankProgram ? "Redirecting..." : "SRK Bank Program"}
+            </div>
+              </>
+
           }
 
           {showInMobileView && sidebarType === "visitor" && (

@@ -1,7 +1,7 @@
-import { authenticator } from "otplib";
+import { authenticator } from 'otplib';
 
-const OTP_STEP = parseInt(process.env.OTP_STEP || "120", 10);
-const OTP_DIGITS = parseInt(process.env.OTP_DIGITS || "6", 10);
+const OTP_STEP = parseInt(process.env.OTP_STEP || '120', 10);
+const OTP_DIGITS = parseInt(process.env.OTP_DIGITS || '6', 10);
 
 // Configure otplib
 authenticator.options = {

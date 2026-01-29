@@ -1,7 +1,7 @@
-import { initServer } from "@ts-rest/express";
-import { bankQueryHandlers } from "./query";
-import { bankMutationHandlers } from "./mutation";
-import { bankContract } from "@srk/shared/contracts";
+import { initServer } from '@ts-rest/express';
+import { bankQueryHandlers } from './query';
+import { bankMutationHandlers } from './mutation';
+import { bankContract } from '@srk/shared/contracts';
 
 const s = initServer();
 
@@ -12,6 +12,7 @@ export const bankRouter = s.router(bankContract, {
     bankQueryHandlers.getBankDetailsByAccountNumber,
   getBankBalance: bankQueryHandlers.getBankBalance,
   createBankDetails: bankMutationHandlers.createBankDetails,
+  updateBankDetails: bankMutationHandlers.updateBankDetails,
   sendMoney: bankMutationHandlers.sendMoney,
   validateTransactionPIN: bankMutationHandlers.validateTransactionPIN,
   validateBankRegistrationOtp: bankMutationHandlers.validateBankRegistrationOtp,

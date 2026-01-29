@@ -29,6 +29,7 @@ const SSOExchangeResponseSchema = z.object({
       gender: z.string().optional(),
       dob: z.string().optional(),
       country: z.string().optional(),
+      bankDetailsId: z.string().optional(),
       role: z.string(),
       redirectionUrl: z.string(),
     })
@@ -63,7 +64,9 @@ export const ssoContract = c.router({
     method: 'GET',
     path: '/auth/sso/get-auto-code',
     query: z.object({
-      targetApp: z.enum(['task', 'growaffiliate', 'growsocialmedia', 'bank']).default('task'),
+      targetApp: z
+        .enum(['task', 'growaffiliate', 'growsocialmedia', 'bank'])
+        .default('task'),
     }),
     responses: {
       200: SSOCodeResponseSchema,

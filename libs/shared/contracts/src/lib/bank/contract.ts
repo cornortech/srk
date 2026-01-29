@@ -1,20 +1,33 @@
-import { initContract } from "@ts-rest/core";
-import { ErrorSchema, SuccessSchema } from "../common";
+import { initContract } from '@ts-rest/core';
+import { ErrorSchema, SuccessSchema } from '../common';
 import {
   createBankDetailsSchema,
   getBankDetailsSchema,
   paymentIntentReponseSchema,
-} from "./schema";
-import { z } from "zod";
+} from './schema';
+import { z } from 'zod';
 
 const c = initContract();
 
 export const bankContract = c.router({
   createBankDetails: {
-    method: "POST",
-    path: "/bank/details/:userId",
-    description: "Create bank details for a user",
-    summary: "Create Bank Details",
+    method: 'POST',
+    path: '/bank/details/:userId',
+    description: 'Create bank details for a user',
+    summary: 'Create Bank Details',
+    body: createBankDetailsSchema,
+    responses: {
+      200: SuccessSchema,
+      404: ErrorSchema,
+      400: ErrorSchema,
+      500: ErrorSchema,
+    },
+  },
+  updateBankDetails: {
+    method: 'PUT',
+    path: '/bank/details/:userId',
+    description: 'Update bank details for a user',
+    summary: 'Update Bank Details',
     body: createBankDetailsSchema,
     responses: {
       200: SuccessSchema,
@@ -24,10 +37,10 @@ export const bankContract = c.router({
     },
   },
   getBankDetailsByUserId: {
-    method: "GET",
-    path: "/bank/details/:userId",
-    description: "Get bank details for a user",
-    summary: "Get Bank Details",
+    method: 'GET',
+    path: '/bank/details/:userId',
+    description: 'Get bank details for a user',
+    summary: 'Get Bank Details',
     responses: {
       200: getBankDetailsSchema,
       400: ErrorSchema,
@@ -38,10 +51,10 @@ export const bankContract = c.router({
     },
   },
   getBankBalance: {
-    method: "GET",
-    path: "/bank/balance/:userId",
-    description: "Get bank balance for a user",
-    summary: "Get Bank Balance",
+    method: 'GET',
+    path: '/bank/balance/:userId',
+    description: 'Get bank balance for a user',
+    summary: 'Get Bank Balance',
     responses: {
       200: z.object({
         balance: z.number(),
@@ -54,10 +67,10 @@ export const bankContract = c.router({
     },
   },
   getBankDetailsByAccountNumber: {
-    method: "GET",
-    path: "/bank/:accountNumber",
-    description: "Get bank details by account number",
-    summary: "Get Bank Details by Account Number",
+    method: 'GET',
+    path: '/bank/:accountNumber',
+    description: 'Get bank details by account number',
+    summary: 'Get Bank Details by Account Number',
     responses: {
       200: getBankDetailsSchema,
       400: ErrorSchema,
@@ -68,10 +81,10 @@ export const bankContract = c.router({
     },
   },
   createBankTransactionPin: {
-    method: "POST",
-    path: "/bank/create-transaction-pin/:userId",
-    description: "Create transaction PIN for a user",
-    summary: "Create Transaction PIN",
+    method: 'POST',
+    path: '/bank/create-transaction-pin/:userId',
+    description: 'Create transaction PIN for a user',
+    summary: 'Create Transaction PIN',
     body: z.object({
       transactionPIN: z.string().length(4),
     }),
@@ -85,10 +98,10 @@ export const bankContract = c.router({
     },
   },
   sendMoney: {
-    method: "POST",
-    path: "/bank/send-money/:userId",
-    description: "Send money to another user",
-    summary: "Send Money",
+    method: 'POST',
+    path: '/bank/send-money/:userId',
+    description: 'Send money to another user',
+    summary: 'Send Money',
     body: z.object({
       intentId: z.string(),
     }),
@@ -103,10 +116,10 @@ export const bankContract = c.router({
   },
 
   validateTransactionPIN: {
-    method: "POST",
-    path: "/bank/validate-transaction-pin",
-    description: "Validate transaction PIN for a user",
-    summary: "Validate Transaction PIN",
+    method: 'POST',
+    path: '/bank/validate-transaction-pin',
+    description: 'Validate transaction PIN for a user',
+    summary: 'Validate Transaction PIN',
     body: z.object({
       intentId: z.string(),
       transactionPIN: z.string().length(4),
@@ -121,10 +134,10 @@ export const bankContract = c.router({
     },
   },
   sendBankRegistrationOtp: {
-    method: "POST",
-    path: "/bank/send-registration-otp/:userId",
-    description: "Send OTP for bank registration",
-    summary: "Send Bank Registration OTP",
+    method: 'POST',
+    path: '/bank/send-registration-otp/:userId',
+    description: 'Send OTP for bank registration',
+    summary: 'Send Bank Registration OTP',
     body: z.object({}),
     responses: {
       200: SuccessSchema,
@@ -136,10 +149,10 @@ export const bankContract = c.router({
     },
   },
   validateBankRegistrationOtp: {
-    method: "POST",
-    path: "/bank/validate-registration-otp/:userId",
-    description: "Validate OTP for bank registration",
-    summary: "Validate Bank Registration OTP",
+    method: 'POST',
+    path: '/bank/validate-registration-otp/:userId',
+    description: 'Validate OTP for bank registration',
+    summary: 'Validate Bank Registration OTP',
     body: z.object({
       otp: z.string().length(6),
     }),
@@ -153,10 +166,10 @@ export const bankContract = c.router({
     },
   },
   uploadBankProfilePicture: {
-    method: "POST",
-    path: "/bank/upload-profile-picture/:userId",
-    description: "Upload profile picture for bank account",
-    summary: "Upload Bank Profile Picture",
+    method: 'POST',
+    path: '/bank/upload-profile-picture/:userId',
+    description: 'Upload profile picture for bank account',
+    summary: 'Upload Bank Profile Picture',
     body: z.object({
       profilePicture: z.string().min(2).max(1000),
     }),
@@ -170,9 +183,9 @@ export const bankContract = c.router({
     },
   },
   paymentIntent: {
-    method: "POST",
-    path: "/bank/payment-intent/:userId",
-    summary: "Create Payment Intent",
+    method: 'POST',
+    path: '/bank/payment-intent/:userId',
+    summary: 'Create Payment Intent',
     body: z.object({
       recipientName: z.string().min(2).max(100),
       amount: z.number().min(500).max(10000),

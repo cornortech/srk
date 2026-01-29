@@ -1,13 +1,12 @@
 export type TSrkBankStatus =
-  | "ONBOARDING_DETAILS_ADDED"
-  | "OTP_VERIFIED"
-  | "PROFILE_PICTURE_UPLOADED"
-  | "TRANSACTION_PIN_ADDED"
-  | "PORTAL_ACTIVATED"
-  | "REJECTED";
+  | 'ONBOARDING_DETAILS_ADDED'
+  | 'OTP_VERIFIED'
+  | 'PROFILE_PICTURE_UPLOADED'
+  | 'TRANSACTION_PIN_ADDED'
+  | 'PORTAL_ACTIVATED'
+  | 'REJECTED';
 
-
-  export type TPackage = {
+export type TPackage = {
   _id: string;
   title: string;
   description: string;
@@ -23,7 +22,7 @@ export type TSrkBankStatus =
   updatedAt?: Date; // This will be automatically managed as well
 };
 
-  export type TUser = {
+export type TUser = {
   _id: string;
   email: string;
   firstName: string;
@@ -36,36 +35,37 @@ export type TSrkBankStatus =
   isActive: boolean;
   hasSrkBonusDeposited?: boolean;
   dob: string;
-  gender: "Male" | "Female" | "Other";
+  gender: 'Male' | 'Female' | 'Other';
   status:
-    | "REGISTERED"
-    | "PAYMENT_VERIFICATION_PENDING"
-    | "PAYMENT_VERIFICATION_APPROVED"
-    | "PAYMENT_VERIFICATION_REJECTED"
-    | "KYC_VERIFICATION_REJECTED"
-    | "KYC_VERIFICATION_PENDING"
-    | "PORTAL_ACTIVATED"
-    | "PORTAL_DEACTIVATED";
-  purpose: "affiliate" | "study";
+    | 'REGISTERED'
+    | 'PAYMENT_VERIFICATION_PENDING'
+    | 'PAYMENT_VERIFICATION_APPROVED'
+    | 'PAYMENT_VERIFICATION_REJECTED'
+    | 'KYC_VERIFICATION_REJECTED'
+    | 'KYC_VERIFICATION_PENDING'
+    | 'PORTAL_ACTIVATED'
+    | 'PORTAL_DEACTIVATED';
+  purpose: 'affiliate' | 'study';
   phoneNumber: string;
   referredBy?: string;
   packageId: TPackage;
+  bankDetailsId?: string | null;
   createdAt?: Date; // This will be automatically managed by the `timestamps` option in the schema
   updatedAt?: Date; // This will be automatically managed as well
 };
-
 
 export type TSrkBank = {
   _id: string;
   accountNumber: string | null;
   status: TSrkBankStatus | null;
   amount: number;
+  bankDetailsId?: string | null;
 };
 
 export type TAuthState = {
   refresh: boolean;
   authDetails: {
-    role: "admin" | "user";
+    role: 'admin' | 'user';
     email: string;
     redirectionUrl: string;
   };
@@ -74,7 +74,7 @@ export type TAuthState = {
   userDetails: (TUser & { redirectionUrl: string }) | null;
   setAuthDetails: (details: {
     authDetails: {
-      role: "admin" | "user";
+      role: 'admin' | 'user';
       email: string;
       redirectionUrl: string;
     };
@@ -84,7 +84,7 @@ export type TAuthState = {
   clearAuthDetails: () => void;
 };
 
-export interface IBankUser{
+export interface IBankUser {
   _id: string;
   email: string;
   fullName: string;

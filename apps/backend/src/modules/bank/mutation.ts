@@ -1,16 +1,16 @@
-import mongoose from "mongoose";
-import { AppRouteImplementationOrOptions } from "@ts-rest/express/src/lib/types";
-import { UserModel } from "../../model/userModel";
-import { BankDetailsModel } from "../../model/bankDetails";
-import { SrkBankModel } from "../../model/srkBankModel";
-import EmailService from "../../services/emailService";
-import AuthService from "../../services/authService";
-import { methods } from "../../utils/methods";
-import { v4 as uuidv4 } from "uuid";
-import { bankContract } from "@srk/shared/contracts";
-import { bankStatementService } from "../../services/bankStatementService";
-import { PaymentIntentModel } from "../../model/bank/bankPaymentIntentModel";
-import { OtpLib } from "../../libs/otplib";
+import mongoose from 'mongoose';
+import { AppRouteImplementationOrOptions } from '@ts-rest/express/src/lib/types';
+import { UserModel } from '../../model/userModel';
+import { BankDetailsModel } from '../../model/bankDetails';
+import { SrkBankModel } from '../../model/srkBankModel';
+import EmailService from '../../services/emailService';
+import AuthService from '../../services/authService';
+import { methods } from '../../utils/methods';
+import { v4 as uuidv4 } from 'uuid';
+import { bankContract } from '@srk/shared/contracts';
+import { bankStatementService } from '../../services/bankStatementService';
+import { PaymentIntentModel } from '../../model/bank/bankPaymentIntentModel';
+import { OtpLib } from '../../libs/otplib';
 
 const createBankDetails: AppRouteImplementationOrOptions<
   typeof bankContract.createBankDetails
@@ -23,7 +23,7 @@ const createBankDetails: AppRouteImplementationOrOptions<
       return {
         status: 400,
         body: {
-          message: "Invalid user ID",
+          message: 'Invalid user ID',
           success: false,
         },
       };
@@ -35,12 +35,12 @@ const createBankDetails: AppRouteImplementationOrOptions<
       return {
         status: 404,
         body: {
-          message: "User not found",
+          message: 'User not found',
           success: false,
         },
       };
     }
-    console.log("userExist: ", userExist);
+    console.log('userExist: ', userExist);
 
     const srkBankExist = await SrkBankModel.findById(userExist.srkBankId);
 
@@ -48,7 +48,7 @@ const createBankDetails: AppRouteImplementationOrOptions<
       return {
         status: 404,
         body: {
-          message: "SRK Bank not found",
+          message: 'SRK Bank not found',
           success: false,
         },
       };
@@ -58,7 +58,7 @@ const createBankDetails: AppRouteImplementationOrOptions<
       return {
         status: 400,
         body: {
-          message: "Bank details already exist for this user",
+          message: 'Bank details already exist for this user',
           success: false,
         },
       };
@@ -113,17 +113,17 @@ const createBankDetails: AppRouteImplementationOrOptions<
     srkBankExist.accountNumber = methods.generateSRKBankId();
     srkBankExist.password = await AuthService.hashPassword(body.password);
     srkBankExist.bankDetailsId = newBankDetails._id;
-    srkBankExist.status = "ONBOARDING_DETAILS_ADDED";
+    srkBankExist.status = 'ONBOARDING_DETAILS_ADDED';
 
     await srkBankExist.save();
 
     EmailService.sendEmail({
-      subject: "Bank Registrataion OTP ",
+      subject: 'Bank Registrataion OTP ',
       email: userExist.email,
       message: EmailService.EmailTemplate({
-        heading: "Bank Registration OTP",
+        heading: 'Bank Registration OTP',
         message: `Below is the otp for bank registration . Please dont share it with anyone. It will is valid for 1 min only.`,
-        receiver_name: userExist.firstName + " " + userExist.lastName,
+        receiver_name: userExist.firstName + ' ' + userExist.lastName,
         code: otpCode,
       }),
     });
@@ -132,16 +132,132 @@ const createBankDetails: AppRouteImplementationOrOptions<
     return {
       status: 200,
       body: {
-        message: "Bank details created successfully",
+        message: 'Bank details created successfully',
         success: true,
       },
     };
   } catch (error) {
-    console.error("Error creating bank details:", error);
+    console.error('Error creating bank details:', error);
     return {
       status: 500,
       body: {
-        message: "Error creating bank details",
+        message: 'Error creating bank details',
+        success: false,
+      },
+    };
+  }
+};
+
+const updateBankDetails: AppRouteImplementationOrOptions<
+  typeof bankContract.updateBankDetails
+> = async ({ req }) => {
+  try {
+    const { userId } = req.params;
+    const body = req.body;
+
+    if (mongoose.isValidObjectId(userId) === false) {
+      return {
+        status: 400,
+        body: {
+          message: 'Invalid user ID',
+          success: false,
+        },
+      };
+    }
+
+    const userExist = await UserModel.findById(userId);
+
+    if (!userExist) {
+      return {
+        status: 404,
+        body: {
+          message: 'User not found',
+          success: false,
+        },
+      };
+    }
+
+    const srkBankExist = await SrkBankModel.findById(userExist.srkBankId);
+
+    if (!srkBankExist) {
+      return {
+        status: 404,
+        body: {
+          message: 'SRK Bank not found',
+          success: false,
+        },
+      };
+    }
+
+    if (!srkBankExist.bankDetailsId) {
+      return {
+        status: 400,
+        body: {
+          message: 'Bank details not found for this user',
+          success: false,
+        },
+      };
+    }
+
+    // Update bank details
+    await BankDetailsModel.findByIdAndUpdate(srkBankExist.bankDetailsId, {
+      documents: {
+        ppSizePhoto: body.documents.ppSizePhoto,
+        nationalIdCard: body.documents.nationalIdCard,
+      },
+      identificationDetails: {
+        idType: body.identificationDetails.idType,
+        idNumber: body.identificationDetails.idNumber,
+        issuedDate: body.identificationDetails.issuedDate,
+        issuedFrom: body.identificationDetails.issuedFrom,
+        placeOfBirth: body.identificationDetails.placeOfBirth,
+      },
+      familyDetails: {
+        fatherName: body.familyDetails.fatherName,
+        motherName: body.familyDetails.motherName,
+        spouseName: body.familyDetails.spouseName || '',
+        childrenNames: body.familyDetails.childrenNames || [],
+      },
+      permanentAddress: {
+        country: body.permanentAddress.country,
+        province: body.permanentAddress.province,
+        district: body.permanentAddress.district,
+        municipality: body.permanentAddress.municipality,
+        wardNo: body.permanentAddress.wardNo,
+        street: body.permanentAddress.street,
+      },
+      currentAddress: {
+        country: body.currentAddress.country,
+        province: body.currentAddress.province,
+        district: body.currentAddress.district,
+        municipality: body.currentAddress.municipality,
+        wardNo: body.currentAddress.wardNo,
+        street: body.currentAddress.street,
+      },
+    });
+
+    if (body.password) {
+      srkBankExist.password = await AuthService.hashPassword(body.password);
+      await srkBankExist.save();
+    }
+
+    srkBankExist.status = 'ONBOARDING_DETAILS_ADDED';
+
+    await srkBankExist.save();
+
+    return {
+      status: 200,
+      body: {
+        message: 'Bank details updated successfully',
+        success: true,
+      },
+    };
+  } catch (error) {
+    console.error('Error updating bank details:', error);
+    return {
+      status: 500,
+      body: {
+        message: 'Error updating bank details',
         success: false,
       },
     };
@@ -159,19 +275,19 @@ const sendMoney: AppRouteImplementationOrOptions<
     await session.startTransaction(); // ✅ must await
 
     const intent = await PaymentIntentModel.findById(intentId).session(session);
-    if (!intent) throw new Error("Payment intent not found");
-    if (intent.status !== "confirmed")
-      throw new Error("Intent not confirmed or already processed");
+    if (!intent) throw new Error('Payment intent not found');
+    if (intent.status !== 'confirmed')
+      throw new Error('Intent not confirmed or already processed');
 
     const sender = await SrkBankModel.findById(intent.senderBankId).session(
-      session
+      session,
     );
     const receiver = await SrkBankModel.findById(intent.receiverBankId).session(
-      session
+      session,
     );
 
-    if (!sender || !receiver) throw new Error("Sender or receiver not found");
-    if (sender.amount < intent.amount) throw new Error("INSUFFICIENT_BALANCE");
+    if (!sender || !receiver) throw new Error('Sender or receiver not found');
+    if (sender.amount < intent.amount) throw new Error('INSUFFICIENT_BALANCE');
 
     // 1️⃣ Update balances
     sender.amount -= intent.amount;
@@ -183,29 +299,29 @@ const sendMoney: AppRouteImplementationOrOptions<
     await bankStatementService.createBankStatement(
       {
         amount: intent.amount,
-        type: "send",
+        type: 'send',
         bankId: sender._id,
         receiverBankId: receiver._id,
         currentAmount: sender.amount,
-        status: "pending",
+        status: 'pending',
       },
-      session
+      session,
     );
 
     await bankStatementService.createBankStatement(
       {
         amount: intent.amount,
-        type: "receive",
+        type: 'receive',
         bankId: receiver._id,
         receiverBankId: sender._id,
         currentAmount: receiver.amount,
-        status: "pending",
+        status: 'pending',
       },
-      session
+      session,
     );
 
     // 3️⃣ Update intent
-    intent.status = "completed";
+    intent.status = 'completed';
     await intent.save({ session });
 
     await session.commitTransaction(); // ✅ must await
@@ -214,7 +330,7 @@ const sendMoney: AppRouteImplementationOrOptions<
     return {
       status: 200,
       body: {
-        message: "Money sent successfully",
+        message: 'Money sent successfully',
         success: true,
       },
     };
@@ -222,21 +338,21 @@ const sendMoney: AppRouteImplementationOrOptions<
     await session.abortTransaction(); // ✅ ensures rollback
     await session.endSession();
 
-    console.error("Error sending money:", error.message);
-    let message = "Something went wrong";
+    console.error('Error sending money:', error.message);
+    let message = 'Something went wrong';
 
     switch (error.message) {
-      case "INVALID_SENDER":
-        message = "Invalid sender account number.";
+      case 'INVALID_SENDER':
+        message = 'Invalid sender account number.';
         return { status: 404, body: { message, success: false } };
-      case "INVALID_PIN":
-        message = "Invalid transaction PIN.";
+      case 'INVALID_PIN':
+        message = 'Invalid transaction PIN.';
         return { status: 400, body: { message, success: false } };
-      case "INVALID_RECEIVER":
-        message = "Invalid receiver account number.";
+      case 'INVALID_RECEIVER':
+        message = 'Invalid receiver account number.';
         return { status: 404, body: { message, success: false } };
-      case "INSUFFICIENT_BALANCE":
-        message = "Insufficient balance.";
+      case 'INSUFFICIENT_BALANCE':
+        message = 'Insufficient balance.';
         return { status: 400, body: { message, success: false } };
       default:
         return {
@@ -253,12 +369,12 @@ const validateTransactionPIN: AppRouteImplementationOrOptions<
   try {
     const { intentId, transactionPIN } = req.body;
 
-    console.log("Validating transaction PIN:", { intentId, transactionPIN });
+    console.log('Validating transaction PIN:', { intentId, transactionPIN });
 
     if (!mongoose.isValidObjectId(intentId)) {
       return {
         status: 400,
-        body: { message: "Invalid intent ID", success: false },
+        body: { message: 'Invalid intent ID', success: false },
       };
     }
 
@@ -268,14 +384,14 @@ const validateTransactionPIN: AppRouteImplementationOrOptions<
     if (!intent) {
       return {
         status: 404,
-        body: { message: "Payment intent not found", success: false },
+        body: { message: 'Payment intent not found', success: false },
       };
     }
 
-    if (intent.status !== "pending") {
+    if (intent.status !== 'pending') {
       return {
         status: 400,
-        body: { message: "Payment intent is not pending", success: false },
+        body: { message: 'Payment intent is not pending', success: false },
       };
     }
 
@@ -284,33 +400,33 @@ const validateTransactionPIN: AppRouteImplementationOrOptions<
     if (!sender) {
       return {
         status: 404,
-        body: { message: "Sender not found", success: false },
+        body: { message: 'Sender not found', success: false },
       };
     }
 
     if (sender.transactionPIN !== transactionPIN) {
       return {
         status: 403,
-        body: { message: "Invalid transaction PIN", success: false },
+        body: { message: 'Invalid transaction PIN', success: false },
       };
     }
 
     // Mark intent as confirmed
-    intent.status = "confirmed";
+    intent.status = 'confirmed';
     await intent.save();
 
     return {
       status: 200,
       body: {
-        message: "Transaction PIN validated successfully",
+        message: 'Transaction PIN validated successfully',
         success: true,
       },
     };
   } catch (error) {
-    console.error("Error validating transaction PIN:", error);
+    console.error('Error validating transaction PIN:', error);
     return {
       status: 500,
-      body: { message: "Error validating transaction PIN", success: false },
+      body: { message: 'Error validating transaction PIN', success: false },
     };
   }
 };
@@ -326,23 +442,23 @@ const sendBankRegistrationOtp: AppRouteImplementationOrOptions<
       return {
         status: 404,
         body: {
-          message: "User not found",
+          message: 'User not found',
           success: false,
         },
       };
     }
 
     const otpFeatureSecret = `${userExist.baseSecret}-bank_registration`;
-    console.log("otpFeatureSecret: 1", otpFeatureSecret);
+    console.log('otpFeatureSecret: 1', otpFeatureSecret);
     const otpCode = OtpLib.generateOTP(otpFeatureSecret);
 
     EmailService.sendEmail({
       email: userExist.email,
-      subject: "Bank Registration OTP",
+      subject: 'Bank Registration OTP',
       message: EmailService.EmailTemplate({
-        heading: "Bank Registration OTP",
+        heading: 'Bank Registration OTP',
         message: `Below is the otp for bank registration . Please dont share it with anyone. It will is valid for 1 min only.`,
-        receiver_name: userExist.firstName + " " + userExist.lastName,
+        receiver_name: userExist.firstName + ' ' + userExist.lastName,
         code: otpCode,
       }),
     });
@@ -351,16 +467,16 @@ const sendBankRegistrationOtp: AppRouteImplementationOrOptions<
     return {
       status: 200,
       body: {
-        message: "Bank registration OTP sent successfully",
+        message: 'Bank registration OTP sent successfully',
         success: true,
       },
     };
   } catch (error) {
-    console.error("Error sending bank registration OTP:", error);
+    console.error('Error sending bank registration OTP:', error);
     return {
       status: 500,
       body: {
-        message: "Error sending bank registration OTP",
+        message: 'Error sending bank registration OTP',
         success: false,
       },
     };
@@ -377,7 +493,7 @@ const validateBankRegistrationOtp: AppRouteImplementationOrOptions<
       return {
         status: 400,
         body: {
-          message: "OTP is required",
+          message: 'OTP is required',
           success: false,
         },
       };
@@ -386,7 +502,7 @@ const validateBankRegistrationOtp: AppRouteImplementationOrOptions<
       return {
         status: 400,
         body: {
-          message: "Invalid user ID",
+          message: 'Invalid user ID',
           success: false,
         },
       };
@@ -398,25 +514,25 @@ const validateBankRegistrationOtp: AppRouteImplementationOrOptions<
         status: string;
       };
     }>({
-      path: "srkBankId",
-      select: "status",
+      path: 'srkBankId',
+      select: 'status',
     });
 
     if (!userExist) {
       return {
         status: 404,
         body: {
-          message: "User not found",
+          message: 'User not found',
           success: false,
         },
       };
     }
 
-    if (userExist.srkBankId.status !== "ONBOARDING_DETAILS_ADDED") {
+    if (userExist.srkBankId.status !== 'ONBOARDING_DETAILS_ADDED') {
       return {
         status: 400,
         body: {
-          message: "User is not in the onboarding process",
+          message: 'User is not in the onboarding process',
           success: false,
         },
       };
@@ -428,29 +544,29 @@ const validateBankRegistrationOtp: AppRouteImplementationOrOptions<
       return {
         status: 400,
         body: {
-          message: "Invalid OTP",
+          message: 'Invalid OTP',
           success: false,
         },
       };
     }
 
     await SrkBankModel.findByIdAndUpdate(userExist.srkBankId._id, {
-      status: "OTP_VERIFIED",
+      status: 'OTP_VERIFIED',
     });
 
     return {
       status: 200,
       body: {
-        message: "Bank registration OTP validated successfully",
+        message: 'Bank registration OTP validated successfully',
         success: true,
       },
     };
   } catch (error) {
-    console.error("Error validating bank registration OTP:", error);
+    console.error('Error validating bank registration OTP:', error);
     return {
       status: 500,
       body: {
-        message: "Error validating bank registration OTP",
+        message: 'Error validating bank registration OTP',
         success: false,
       },
     };
@@ -468,7 +584,7 @@ const uploadBankProfilePicture: AppRouteImplementationOrOptions<
       return {
         status: 400,
         body: {
-          message: "Invalid user ID",
+          message: 'Invalid user ID',
           success: false,
         },
       };
@@ -481,9 +597,9 @@ const uploadBankProfilePicture: AppRouteImplementationOrOptions<
         bankDetailsId: string;
       };
     }>({
-      path: "srkBankId",
+      path: 'srkBankId',
       populate: {
-        path: "bankDetailsId",
+        path: 'bankDetailsId',
       },
     });
 
@@ -491,7 +607,7 @@ const uploadBankProfilePicture: AppRouteImplementationOrOptions<
       return {
         status: 404,
         body: {
-          message: "User not found",
+          message: 'User not found',
           success: false,
         },
       };
@@ -503,26 +619,26 @@ const uploadBankProfilePicture: AppRouteImplementationOrOptions<
         basicInfo: {
           profilePicture: profilePicture,
         },
-      }
+      },
     );
 
     await SrkBankModel.findByIdAndUpdate(userExist.srkBankId._id, {
-      status: "PROFILE_PICTURE_UPLOADED",
+      status: 'PROFILE_PICTURE_UPLOADED',
     });
 
     return {
       status: 200,
       body: {
-        message: "Profile picture uploaded successfully",
+        message: 'Profile picture uploaded successfully',
         success: true,
       },
     };
   } catch (error) {
-    console.error("Error uploading bank profile picture:", error);
+    console.error('Error uploading bank profile picture:', error);
     return {
       status: 500,
       body: {
-        message: "Error uploading bank profile picture",
+        message: 'Error uploading bank profile picture',
         success: false,
       },
     };
@@ -540,7 +656,7 @@ const createBankTransactionPin: AppRouteImplementationOrOptions<
       return {
         status: 400,
         body: {
-          message: "Invalid user ID",
+          message: 'Invalid user ID',
           success: false,
         },
       };
@@ -552,7 +668,7 @@ const createBankTransactionPin: AppRouteImplementationOrOptions<
         status: string;
       };
     }>({
-      path: "srkBankId",
+      path: 'srkBankId',
     });
 
     const srkBankId = userExist?.srkBankId?._id;
@@ -561,7 +677,7 @@ const createBankTransactionPin: AppRouteImplementationOrOptions<
       return {
         status: 404,
         body: {
-          message: "User not found",
+          message: 'User not found',
           success: false,
         },
       };
@@ -571,18 +687,18 @@ const createBankTransactionPin: AppRouteImplementationOrOptions<
       return {
         status: 404,
         body: {
-          message: "SRK Bank not found",
+          message: 'SRK Bank not found',
           success: false,
         },
       };
     }
 
-    if (userExist.srkBankId.status !== "PROFILE_PICTURE_UPLOADED") {
+    if (userExist.srkBankId.status !== 'PROFILE_PICTURE_UPLOADED') {
       return {
         status: 400,
         body: {
           message:
-            "Profile picture must be uploaded before creating transaction PIN",
+            'Profile picture must be uploaded before creating transaction PIN',
           success: false,
         },
       };
@@ -590,23 +706,23 @@ const createBankTransactionPin: AppRouteImplementationOrOptions<
 
     await SrkBankModel.findByIdAndUpdate(srkBankId, {
       transactionPIN: transactionPIN,
-      status: "PORTAL_ACTIVATED",
+      status: 'PORTAL_ACTIVATED',
     });
 
     return {
       status: 200,
       body: {
-        message: "Transaction PIN created successfully",
+        message: 'Transaction PIN created successfully',
         success: true,
       },
     };
   } catch (error) {
-    console.error("Error creating bank transaction PIN:", error);
+    console.error('Error creating bank transaction PIN:', error);
 
     return {
       status: 200,
       body: {
-        message: "Transaction PIN created successfully",
+        message: 'Transaction PIN created successfully',
         success: true,
       },
     };
@@ -624,7 +740,7 @@ const createPaymentIntent: AppRouteImplementationOrOptions<
       return {
         status: 400,
         body: {
-          message: "Invalid user ID",
+          message: 'Invalid user ID',
           success: false,
         },
       };
@@ -637,7 +753,7 @@ const createPaymentIntent: AppRouteImplementationOrOptions<
         amount: number;
       };
     }>({
-      path: "srkBankId",
+      path: 'srkBankId',
     });
 
     const receiverSrkBankExist = await SrkBankModel.findOne({
@@ -649,14 +765,14 @@ const createPaymentIntent: AppRouteImplementationOrOptions<
         status: string;
       };
     }>({
-      path: "userId",
+      path: 'userId',
     });
 
     if (!receiverSrkBankExist) {
       return {
         status: 404,
         body: {
-          message: "Invalid receiver account number",
+          message: 'Invalid receiver account number',
           success: false,
         },
       };
@@ -666,7 +782,7 @@ const createPaymentIntent: AppRouteImplementationOrOptions<
       return {
         status: 404,
         body: {
-          message: "Receiver user not found",
+          message: 'Receiver user not found',
           success: false,
         },
       };
@@ -676,7 +792,7 @@ const createPaymentIntent: AppRouteImplementationOrOptions<
       return {
         status: 404,
         body: {
-          message: "User not found",
+          message: 'User not found',
           success: false,
         },
       };
@@ -686,7 +802,7 @@ const createPaymentIntent: AppRouteImplementationOrOptions<
       return {
         status: 404,
         body: {
-          message: "SRK Bank not found",
+          message: 'SRK Bank not found',
           success: false,
         },
       };
@@ -696,7 +812,7 @@ const createPaymentIntent: AppRouteImplementationOrOptions<
       return {
         status: 400,
         body: {
-          message: "Insufficient balance",
+          message: 'Insufficient balance',
           success: false,
         },
       };
@@ -707,23 +823,23 @@ const createPaymentIntent: AppRouteImplementationOrOptions<
       amount,
       receiverBankId: receiverSrkBankExist._id,
       idempotencyKey: uuidv4(),
-      status: "pending",
+      status: 'pending',
     });
 
     return {
       status: 200,
       body: {
-        message: "Payment intent created successfully",
+        message: 'Payment intent created successfully',
         success: true,
         paymentIntentId: paymentIntent._id.toString(),
       },
     };
   } catch (error) {
-    console.error("Error creating payment intent:", error);
+    console.error('Error creating payment intent:', error);
     return {
       status: 500,
       body: {
-        message: "Error creating payment intent",
+        message: 'Error creating payment intent',
         success: false,
       },
     };
@@ -734,6 +850,7 @@ export const bankMutationHandlers = {
   createPaymentIntent,
   sendBankRegistrationOtp,
   createBankDetails,
+  updateBankDetails,
   sendMoney,
   createBankTransactionPin,
   uploadBankProfilePicture,

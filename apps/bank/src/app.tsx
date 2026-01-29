@@ -14,7 +14,6 @@ import BankSetupPinPage from './pages/onboarding/SetupPin';
 import BankDashboardPage from './pages/dashboard/BankDashboard';
 import BankStatement from './pages/dashboard/Account';
 
-
 // Send Money Flow
 import SendMoneyPage from './pages/dashboard/payment/SendMoney';
 import SendMoneyPinPage from './pages/dashboard/payment/SendMoneyPin';
@@ -31,57 +30,54 @@ import { BankPayout } from './pages/dashboard/Payouts';
 import PasswordResetPage from './pages/dashboard/PasswordReset';
 import CallbackPage from './pages/sso/SSOCallBack';
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
-
+import UserVerification from './pages/onboarding/UserVerification';
 
 const queryClient = new QueryClient();
-
 
 export function App() {
   return (
     <QueryClientProvider client={queryClient}>
-
-    <Routes>
-      <Route path='/callback' element={<CallbackPage />} />
-      <Route
-        path="/"
-        element={
-          <BankLayout />
-        }
-      >
-        <Route path="login" element={<BankLoginPage />} />
-        <Route path="onboarding">
-          <Route path="otp-verification" element={<OTPVerificationPage />} />
-          <Route path="register" element={<BankRegisterPage />} />
-          <Route path="user-preview" element={<BankUserPreviewPage />} />
-          <Route path="upload-image" element={<BankUploadImage />} />
-          <Route path="setup-pin" element={<BankSetupPinPage />} />
+      <Routes>
+        <Route path="/callback" element={<CallbackPage />} />
+        <Route path="/" element={<BankLayout />}>
+          <Route path="login" element={<BankLoginPage />} />
+          <Route path="onboarding">
+            <Route path="register" element={<BankRegisterPage />} />
+            <Route path="otp-verification" element={<OTPVerificationPage />} />
+            <Route path="upload-image" element={<BankUploadImage />} />
+            <Route path="user-preview" element={<BankUserPreviewPage />} />
+            <Route path="setup-pin" element={<BankSetupPinPage />} />
+            <Route path="user-verification" element={<UserVerification />} />
+          </Route>
+          <Route path="dashboard" element={<BankDashboardLayout />}>
+            <Route index element={<BankDashboardPage />} />
+            <Route path="account/statement" element={<BankStatement />} />
+            <Route path="account/settings" element={<AccountSettings />} />
+            <Route path="account/payouts" element={<BankPayout />} />
+            <Route
+              path="account/settings/reset-password"
+              element={<PasswordResetPage />}
+            />
+            <Route path="account" element={<BankDashboardPage />} />
+            <Route path="send-money">
+              <Route index element={<SendMoneyPage />} />
+              <Route path="pin" element={<SendMoneyPinPage />} />
+              <Route path="preview" element={<SendMoneyPreviewPage />} />
+              <Route path="success" element={<SendMoneySuccessPage />} />
+              <Route path="failure" element={<SendMoneyFailurePage />} />
+            </Route>
+            <Route path="withdraw-money">
+              <Route index element={<WithDrawMoneyPage />} />
+            </Route>
+            <Route path="addMoney">
+              <Route index element={<AddMoneyPage />} />
+            </Route>
+            <Route path="QRpay">
+              <Route index element={<QRPage />} />
+            </Route>
+          </Route>
         </Route>
-        <Route path="dashboard" element={<BankDashboardLayout />}>
-          <Route index element={<BankDashboardPage />} />
-          <Route path="account/statement" element={<BankStatement />} />
-          <Route path="account/settings" element={<AccountSettings />} />
-          <Route path="account/payouts" element={<BankPayout />} />
-          <Route path="account/settings/reset-password" element={<PasswordResetPage />} />
-          <Route path="account" element={<BankDashboardPage />} />
-          <Route path="send-money">
-            <Route index element={<SendMoneyPage />} />
-            <Route path="pin" element={<SendMoneyPinPage />} />
-            <Route path="preview" element={<SendMoneyPreviewPage />} />
-            <Route path="success" element={<SendMoneySuccessPage />} />
-            <Route path="failure" element={<SendMoneyFailurePage />} />
-          </Route>
-          <Route path="withdraw-money">
-            <Route index element={<WithDrawMoneyPage />} />
-          </Route>
-          <Route path="addMoney">
-            <Route index element={<AddMoneyPage />} />
-          </Route>
-          <Route path="QRpay">
-            <Route index element={<QRPage />} />
-          </Route>
-        </Route>
-      </Route>
-    </Routes>
+      </Routes>
     </QueryClientProvider>
   );
 }

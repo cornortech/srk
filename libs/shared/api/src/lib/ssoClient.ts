@@ -1,4 +1,8 @@
-import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from 'axios';
+import axios, {
+  AxiosError,
+  AxiosInstance,
+  InternalAxiosRequestConfig,
+} from 'axios';
 import { API_ENDPOINTS } from './api/endpoints';
 
 // SSO Response Types
@@ -20,8 +24,17 @@ export interface SSOExchangeResponse {
     email: string;
     firstName?: string;
     lastName?: string;
+    phoneNumber?: string;
+    gender?: string;
+    dob?: string;
+    country?: string;
+    bankDetailsId?: string;
     role: string;
     redirectionUrl: string;
+    affiliateEnabled?: boolean;
+    isActive?: boolean;
+    status?: string;
+    purpose?: string;
   };
 }
 
@@ -95,16 +108,16 @@ const createSSOClient = (backendUrl: string): AxiosInstance => {
         try {
           // Attempt to refresh token
           await client.post('/auth/refresh');
-          
+
           // Token refreshed successfully, process queued requests
           processQueue();
-          
+
           // Retry original request
           return client(originalRequest);
         } catch (refreshError) {
           // Refresh failed, clear queue and redirect to login
           processQueue(refreshError);
-          
+
           // Clear any existing tokens
           try {
             await client.post('/auth/logout');
@@ -116,7 +129,7 @@ const createSSOClient = (backendUrl: string): AxiosInstance => {
           if (typeof window !== 'undefined') {
             window.location.href = '/auth/login';
           }
-          
+
           return Promise.reject(refreshError);
         } finally {
           isRefreshing = false;
@@ -124,7 +137,7 @@ const createSSOClient = (backendUrl: string): AxiosInstance => {
       }
 
       return Promise.reject(error);
-    }
+    },
   );
 
   return client;
@@ -136,11 +149,11 @@ const createSSOClient = (backendUrl: string): AxiosInstance => {
  */
 export const getAutoCode = async (
   backendUrl: string,
-  targetApp: 'task' | 'growaffiliate' | 'growsocialmedia' | 'bank' = 'task'
+  targetApp: 'task' | 'growaffiliate' | 'growsocialmedia' | 'bank' = 'task',
 ): Promise<SSOCodeResponse> => {
   const client = createSSOClient(backendUrl);
   const response = await client.get<SSOCodeResponse>(
-    `${API_ENDPOINTS.sso.getAutoCode}?targetApp=${targetApp}`
+    `${API_ENDPOINTS.sso.getAutoCode}?targetApp=${targetApp}`,
   );
   return response.data;
 };
@@ -151,12 +164,12 @@ export const getAutoCode = async (
  */
 export const exchangeCode = async (
   backendUrl: string,
-  code: string
+  code: string,
 ): Promise<SSOExchangeResponse> => {
   const client = createSSOClient(backendUrl);
   const response = await client.post<SSOExchangeResponse>(
     API_ENDPOINTS.sso.exchangeCode,
-    { code }
+    { code },
   );
   return response.data;
 };

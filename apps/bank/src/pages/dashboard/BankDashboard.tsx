@@ -10,39 +10,36 @@ import {
   CreditCard,
   ChevronRight,
   Activity,
-} from "lucide-react";
-import { Link } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import moment from "moment";
-import { bankApi } from "../../utils/api/bank/bank.api";
-import useAuthStore from "../../store/useAuth";
-import { TBankStatement } from "../../utils/types/bank.type";
+} from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import moment from 'moment';
+import { bankApi } from '../../utils/api/bank/bank.api';
+import useAuthStore from '../../store/useAuth';
+import { TBankStatement } from '../../utils/types/bank.type';
 
 export default function ModernBankDashboard() {
   const { userDetails, srkBank } = useAuthStore();
 
-
   const { data: transactionData } = useQuery<{ data: TBankStatement[] }>({
-    queryKey: ["srk-bank-transactions", userDetails?._id],
+    queryKey: ['srk-bank-transactions', userDetails?._id],
     queryFn: async () => {
-      return bankApi.getBankStatementOfUser(userDetails?._id || "")
+      return bankApi.getBankStatementOfUser(userDetails?._id || '');
     },
     enabled: !!userDetails?._id,
-  })
-
-
+  });
 
   const getTransactionIcon = (type: string) => {
     switch (type) {
-      case "deposit":
+      case 'deposit':
         return <ArrowDownLeft className="w-4 h-4 text-green-500" />;
-      case "receive":
+      case 'receive':
         return <ArrowDownLeft className="w-4 h-4 text-green-500" />;
-      case "withdrawal":
-      case "payout_request":
+      case 'withdrawal':
+      case 'payout_request':
         return <ArrowUpRight className="w-4 h-4 text-red-500" />;
-      case "send":
-        return <Send className="w-4 h-4" style={{ color: "#b68938" }} />;
+      case 'send':
+        return <Send className="w-4 h-4" style={{ color: '#b68938' }} />;
       default:
         return <Wallet className="w-4 h-4 text-gray-500" />;
     }
@@ -50,19 +47,19 @@ export default function ModernBankDashboard() {
 
   const getTransactionColor = (type: string) => {
     switch (type) {
-      case "deposit":
-      case "receive":
-        return "text-green-500";
-      case "withdrawal":
-      case "payout_request":
-      case "send":
-        return "text-red-500";
+      case 'deposit':
+      case 'receive':
+        return 'text-green-500';
+      case 'withdrawal':
+      case 'payout_request':
+      case 'send':
+        return 'text-red-500';
       default:
-        return "text-gray-500";
+        return 'text-gray-500';
     }
   };
 
-  if (!transactionData) return <div>Loading...</div>
+  if (!transactionData) return <div>Loading...</div>;
 
   return (
     <div className="min-h-screen bg-black mt-32">
@@ -87,21 +84,21 @@ export default function ModernBankDashboard() {
               className="rounded-3xl p-8 text-white shadow-2xl relative overflow-hidden"
               style={{
                 background:
-                  "linear-gradient(135deg, #1a1410 0%, #2a2520 50%, #1a1410 100%)",
+                  'linear-gradient(135deg, #1a1410 0%, #2a2520 50%, #1a1410 100%)',
               }}
             >
               <div
                 className="absolute top-0 right-0 w-64 h-64 rounded-full -mr-32 -mt-32"
                 style={{
                   background:
-                    "radial-gradient(circle, rgba(182, 137, 56, 0.15) 0%, transparent 70%)",
+                    'radial-gradient(circle, rgba(182, 137, 56, 0.15) 0%, transparent 70%)',
                 }}
               ></div>
               <div
                 className="absolute bottom-0 left-0 w-48 h-48 rounded-full -ml-24 -mb-24"
                 style={{
                   background:
-                    "radial-gradient(circle, rgba(182, 137, 56, 0.1) 0%, transparent 70%)",
+                    'radial-gradient(circle, rgba(182, 137, 56, 0.1) 0%, transparent 70%)',
                 }}
               ></div>
 
@@ -110,40 +107,40 @@ export default function ModernBankDashboard() {
                 className="absolute top-0 left-0 right-0 h-1"
                 style={{
                   background:
-                    "linear-gradient(90deg, #e1ba73, #b68938, #e1ba73)",
+                    'linear-gradient(90deg, #e1ba73, #b68938, #e1ba73)',
                 }}
               ></div>
 
               <div className="relative z-10">
                 <div className="flex items-center justify-between mb-8">
                   <div>
-                    <p className="text-sm mb-2" style={{ color: "#b68938" }}>
+                    <p className="text-sm mb-2" style={{ color: '#b68938' }}>
                       Total Balance
                     </p>
                     <h3 className="text-5xl font-bold text-white">
                       Nrs.
-                      {srkBank?.amount?.toLocaleString("en-US", {
+                      {srkBank?.amount?.toLocaleString('en-US', {
                         minimumFractionDigits: 2,
                       })}
                     </h3>
                   </div>
                   <div
                     className="p-3 rounded-2xl backdrop-blur-sm"
-                    style={{ backgroundColor: "rgba(182, 137, 56, 0.2)" }}
+                    style={{ backgroundColor: 'rgba(182, 137, 56, 0.2)' }}
                   >
                     <Activity
                       className="w-6 h-6"
-                      style={{ color: "#b68938" }}
+                      style={{ color: '#b68938' }}
                     />
                   </div>
                 </div>
 
                 <div
                   className="flex items-center justify-between pt-6"
-                  style={{ borderTop: "1px solid rgba(182, 137, 56, 0.2)" }}
+                  style={{ borderTop: '1px solid rgba(182, 137, 56, 0.2)' }}
                 >
                   <div>
-                    <p className="text-xs mb-1" style={{ color: "#b68938" }}>
+                    <p className="text-xs mb-1" style={{ color: '#b68938' }}>
                       Account Number
                     </p>
                     <p className="font-mono text-lg font-medium text-white">
@@ -153,11 +150,11 @@ export default function ModernBankDashboard() {
                   <div className="flex gap-2">
                     <div
                       className="w-12 h-8 rounded backdrop-blur-sm"
-                      style={{ backgroundColor: "rgba(182, 137, 56, 0.2)" }}
+                      style={{ backgroundColor: 'rgba(182, 137, 56, 0.2)' }}
                     ></div>
                     <div
                       className="w-12 h-8 rounded backdrop-blur-sm"
-                      style={{ backgroundColor: "rgba(182, 137, 56, 0.2)" }}
+                      style={{ backgroundColor: 'rgba(182, 137, 56, 0.2)' }}
                     ></div>
                   </div>
                 </div>
@@ -167,13 +164,13 @@ export default function ModernBankDashboard() {
             {/* Quick Actions */}
             {/* Quick Actions */}
             <div className="grid grid-cols-4 gap-4">
-              <Link to={"/bank/dashboard/send-money"} className="w-full">
+              <Link to={'/dashboard/send-money'} className="w-full">
                 <button className="w-full bg-[#1a1a1a] rounded-2xl p-6 hover:shadow-lg transition-all border border-[#b68938]/40 group hover:border-[#b68938]/60">
                   <div
                     className="w-12 h-12 rounded-xl flex items-center justify-center mb-3 mx-auto transition-colors"
-                    style={{ backgroundColor: "rgba(182, 137, 56, 0.1)" }}
+                    style={{ backgroundColor: 'rgba(182, 137, 56, 0.1)' }}
                   >
-                    <Send className="w-5 h-5" style={{ color: "#b68938" }} />
+                    <Send className="w-5 h-5" style={{ color: '#b68938' }} />
                   </div>
                   <p className="font-semibold text-white mb-1 text-center">
                     Send
@@ -183,15 +180,15 @@ export default function ModernBankDashboard() {
                   </p>
                 </button>
               </Link>
-              <Link to="/bank/dashboard/withdraw-money">
+              <Link to="/dashboard/withdraw-money">
                 <button className="w-full bg-[#1a1a1a] rounded-2xl p-6 hover:shadow-lg transition-all border border-[#b68938]/40 group hover:border-[#b68938]/60">
                   <div
                     className="w-12 h-12 rounded-xl flex items-center justify-center mb-3 mx-auto transition-colors"
-                    style={{ backgroundColor: "rgba(182, 137, 56, 0.1)" }}
+                    style={{ backgroundColor: 'rgba(182, 137, 56, 0.1)' }}
                   >
                     <ArrowUpRight
                       className="w-5 h-5"
-                      style={{ color: "#b68938" }}
+                      style={{ color: '#b68938' }}
                     />
                   </div>
                   <p className="font-semibold text-white mb-1 text-center">
@@ -201,13 +198,13 @@ export default function ModernBankDashboard() {
                 </button>
               </Link>
 
-              <Link to="/bank/dashboard/addMoney">
+              <Link to="/dashboard/addMoney">
                 <button className="w-full bg-[#1a1a1a] rounded-2xl p-6 hover:shadow-lg transition-all border border-[#b68938]/40 group hover:border-[#b68938]/60">
                   <div
                     className="w-12 h-12 rounded-xl flex items-center justify-center mb-3 mx-auto transition-colors"
-                    style={{ backgroundColor: "rgba(182, 137, 56, 0.1)" }}
+                    style={{ backgroundColor: 'rgba(182, 137, 56, 0.1)' }}
                   >
-                    <Plus className="w-5 h-5" style={{ color: "#b68938" }} />
+                    <Plus className="w-5 h-5" style={{ color: '#b68938' }} />
                   </div>
                   <p className="font-semibold text-white mb-1 text-center">
                     Add Money
@@ -215,29 +212,32 @@ export default function ModernBankDashboard() {
                   <p className="text-xs text-gray-400 text-center">
                     Deposit funds
                   </p>
-                </button></Link>
+                </button>
+              </Link>
 
-              <Link to="/bank/dashboard/QRpay">
+              <Link to="/dashboard/QRpay">
                 <button className="w-full bg-[#1a1a1a] rounded-2xl p-6 hover:shadow-lg transition-all border border-[#b68938]/40 group hover:border-[#b68938]/60">
                   <div
                     className="w-12 h-12 rounded-xl flex items-center justify-center mb-3 mx-auto transition-colors"
-                    style={{ backgroundColor: "rgba(182, 137, 56, 0.1)" }}
+                    style={{ backgroundColor: 'rgba(182, 137, 56, 0.1)' }}
                   >
-                    <QrCode className="w-5 h-5" style={{ color: "#b68938" }} />
+                    <QrCode className="w-5 h-5" style={{ color: '#b68938' }} />
                   </div>
                   <p className="font-semibold text-white mb-1 text-center">
                     QR Payment
                   </p>
-                  <p className="text-xs text-gray-400 text-center">Scan & pay</p>
-                </button></Link>
+                  <p className="text-xs text-gray-400 text-center">
+                    Scan & pay
+                  </p>
+                </button>
+              </Link>
             </div>
-
 
             {/* Transactions */}
             <div className="bg-[#1a1a1a] rounded-3xl border border-[#b68938]/40 shadow-2xl shadow-[#b68938]/10">
               <div
                 className="p-6"
-                style={{ borderBottom: "1px solid rgba(182, 137, 56, 0.2)" }}
+                style={{ borderBottom: '1px solid rgba(182, 137, 56, 0.2)' }}
               >
                 <div className="flex items-center justify-between">
                   <div>
@@ -251,7 +251,7 @@ export default function ModernBankDashboard() {
                   <Link to="/bank/dashboard/account/statement">
                     <button
                       className="text-sm font-medium hover:opacity-80 flex items-center gap-1 transition-opacity"
-                      style={{ color: "#b68938" }}
+                      style={{ color: '#b68938' }}
                     >
                       View all
                       <ChevronRight className="w-4 h-4" />
@@ -262,7 +262,7 @@ export default function ModernBankDashboard() {
 
               <div
                 className="divide-y"
-                style={{ borderColor: "rgba(182, 137, 56, 0.1)" }}
+                style={{ borderColor: 'rgba(182, 137, 56, 0.1)' }}
               >
                 {transactionData?.data?.map((transaction) => (
                   <div
@@ -273,37 +273,40 @@ export default function ModernBankDashboard() {
                       <div className="flex items-center gap-4">
                         <div
                           className="w-12 h-12 rounded-xl flex items-center justify-center"
-                          style={{ backgroundColor: "rgba(182, 137, 56, 0.1)" }}
+                          style={{ backgroundColor: 'rgba(182, 137, 56, 0.1)' }}
                         >
                           {getTransactionIcon(transaction.type)}
                         </div>
                         <div>
                           <p className="font-semibold text-white mb-1">
-                            {transaction.description || "Something went wrong to fetch description"}
+                            {transaction.description ||
+                              'Something went wrong to fetch description'}
                           </p>
                           <p className="text-sm text-gray-400">
-                            {moment(transaction.createdAt).format("MMM D, YYYY h:mm A")}
+                            {moment(transaction.createdAt).format(
+                              'MMM D, YYYY h:mm A',
+                            )}
                           </p>
                         </div>
                       </div>
                       <div className="text-right">
                         <p
                           className={`font-bold text-lg ${getTransactionColor(
-                            transaction.type
+                            transaction.type,
                           )}`}
                         >
-                          {["send", "withdrawal", "payout_request"].includes(
-                            transaction.type
+                          {['send', 'withdrawal', 'payout_request'].includes(
+                            transaction.type,
                           )
-                            ? "-"
-                            : "+"}
+                            ? '-'
+                            : '+'}
                           ${transaction.amount.toLocaleString()}
                         </p>
                         <span
                           className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium mt-1"
                           style={{
-                            backgroundColor: "rgba(182, 137, 56, 0.2)",
-                            color: "#b68938",
+                            backgroundColor: 'rgba(182, 137, 56, 0.2)',
+                            color: '#b68938',
                           }}
                         >
                           {transaction.status}
@@ -393,10 +396,26 @@ export default function ModernBankDashboard() {
               <h3 className="font-bold text-white mb-4">Quick Links</h3>
               <div className="space-y-2">
                 {[
-                  { icon: User, label: "Account Settings", url: "/bank/dashboard/account/settings" },
-                  { icon: FileText, label: "Statements", url: "/bank/dashboard/account/statement" },
-                  { icon: CreditCard, label: "Payouts", url: "/bank/dashboard/account/payouts" },
-                  { icon: Plus, label: "Add Money", url: "/bank/dashboard/addMoney" },
+                  {
+                    icon: User,
+                    label: 'Account Settings',
+                    url: '/dashboard/account/settings',
+                  },
+                  {
+                    icon: FileText,
+                    label: 'Statements',
+                    url: '/dashboard/account/statement',
+                  },
+                  {
+                    icon: CreditCard,
+                    label: 'Payouts',
+                    url: '/dashboard/account/payouts',
+                  },
+                  {
+                    icon: Plus,
+                    label: 'Add Money',
+                    url: '/dashboard/addMoney',
+                  },
                 ].map((item, idx) => {
                   const Icon = item.icon;
                   return (
@@ -407,11 +426,11 @@ export default function ModernBankDashboard() {
                       >
                         <div
                           className="w-8 h-8 rounded-lg flex items-center justify-center"
-                          style={{ backgroundColor: "rgba(182, 137, 56, 0.1)" }}
+                          style={{ backgroundColor: 'rgba(182, 137, 56, 0.1)' }}
                         >
                           <Icon
                             className="w-4 h-4"
-                            style={{ color: "#b68938" }}
+                            style={{ color: '#b68938' }}
                           />
                         </div>
                         <span className="text-sm font-medium text-gray-300 group-hover:text-white transition-colors">

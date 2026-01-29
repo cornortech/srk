@@ -180,7 +180,7 @@ const exchangeCode: AppRouteImplementationOrOptions<
         },
       };
     }
-    
+
     // Mark code as used immediately (one-time use)
     autoCode.isUsed = true;
     await autoCode.save();
@@ -189,6 +189,7 @@ const exchangeCode: AppRouteImplementationOrOptions<
 
     // Set redirection URL based on target app and role
     let redirectionUrl = '/dashboard';
+    let bankUser: any = null;
 
     if (autoCode.isAdmin && role === 'admin') {
       // Admin SSO redirect
@@ -218,14 +219,14 @@ const exchangeCode: AppRouteImplementationOrOptions<
       } else if (autoCode.targetApp === 'growsocialmedia') {
         redirectionUrl = '/';
       } else if (autoCode.targetApp === 'bank') {
-        let bankUser = await SrkBankModel.findOne({ userId });
+        bankUser = await SrkBankModel.findOne({ userId });
 
         if (!bankUser) {
           // Auto-create bank record for the user if it doesn't exist
           bankUser = await SrkBankModel.create({
             userId,
             amount: 0,
-            status: 'ONBOARDING_DETAILS_ADDED', // Initial status
+            status: null, // Initial status
           });
 
           // Link it to the user record
@@ -235,33 +236,28 @@ const exchangeCode: AppRouteImplementationOrOptions<
           }
         }
 
-        // if (!bankUser.bankDetailsId) {
-        //   // If they haven't filled out the registration form yet
-        //   redirectionUrl = '/onboarding/register';
-        // } else {
-          switch (bankUser.status) {
-            case 'ONBOARDING_DETAILS_ADDED':
-              redirectionUrl = '/onboarding/otp-verification';
-              break;
-            case 'OTP_VERIFIED':
-              redirectionUrl = '/onboarding/register';
-              break;
-            case 'PROFILE_PICTURE_UPLOADED':
-              redirectionUrl = '/onboarding/user-preview';
-              break;
-            case 'TRANSACTION_PIN_ADDED':
-              redirectionUrl = '/onboarding/setup-pin';
-              break;
-            case 'PORTAL_ACTIVATED':
-              redirectionUrl = '/dashboard';
-              break;
-            case 'REJECTED':
-              redirectionUrl = null;
-              break;
-            default:
-              redirectionUrl = '/onboarding/otp-verification';
-          }
-        // }
+        switch (bankUser.status) {
+          case 'ONBOARDING_DETAILS_ADDED':
+            redirectionUrl = '/onboarding/otp-verification';
+            break;
+          case 'OTP_VERIFIED':
+            redirectionUrl = '/onboarding/upload-image';
+            break;
+          case 'PROFILE_PICTURE_UPLOADED':
+            redirectionUrl = '/onboarding/user-preview';
+            break;
+          case 'TRANSACTION_PIN_ADDED':
+            redirectionUrl = '/onboarding/user-verification';
+            break;
+          case 'PORTAL_ACTIVATED':
+            redirectionUrl = '/dashboard';
+            break;
+          case 'REJECTED':
+            redirectionUrl = '/onboarding/register';
+            break;
+          default:
+            redirectionUrl = '/onboarding/register';
+        }
       }
     }
 
@@ -304,7 +300,6 @@ const exchangeCode: AppRouteImplementationOrOptions<
 
     // Clean up - delete the used code
     await AutoCodeModel.deleteOne({ _id: autoCode._id });
-    
 
     return {
       status: 200,
@@ -320,6 +315,7 @@ const exchangeCode: AppRouteImplementationOrOptions<
           gender: userExist?.gender || undefined,
           dob: userExist?.dob?.toISOString() || undefined,
           country: userExist?.country || undefined,
+          bankDetailsId: bankUser?.bankDetailsId?.toString() || undefined,
           role,
           redirectionUrl,
         },

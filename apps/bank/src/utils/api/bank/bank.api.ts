@@ -1,4 +1,4 @@
-import { apiClient } from "../../../libs/axios";
+import { apiClient } from '../../../libs/axios';
 
 export type CreateBankDetailsPayload = {
   password: string;
@@ -40,9 +40,16 @@ export type CreateBankDetailsPayload = {
 
 const createBankDetailsApi = (
   userId: string,
-  payload: CreateBankDetailsPayload
+  payload: CreateBankDetailsPayload,
 ) => {
   return apiClient.post(`/bank/details/${userId}`, payload);
+};
+
+const updateBankDetailsApi = (
+  userId: string,
+  payload: CreateBankDetailsPayload,
+) => {
+  return apiClient.put(`/bank/details/${userId}`, payload);
 };
 
 const validateBankRegistrationOtp = (userId: string, otp: string) => {
@@ -114,7 +121,7 @@ const getBankStatementOfUser = (userId: string) => {
 
 export const srkBankPayoutRequestApi = async (
   userId: string,
-  amount: number
+  amount: number,
 ) => {
   const response = await apiClient.post(`/finance/srkBankPayoutRequest`, {
     userId,
@@ -125,7 +132,7 @@ export const srkBankPayoutRequestApi = async (
 
 export const createBalancePayoutApi = async (
   userId: string,
-  amount: number
+  amount: number,
 ) => {
   const response = await apiClient.post(`/finance/balance-payout`, {
     userId,
@@ -136,7 +143,7 @@ export const createBalancePayoutApi = async (
 
 export const getEarningDetailsofUserApi = async (userId: string) => {
   const response = await apiClient.get(
-    `/finance/getEarningDetailsOfUser/${userId}`
+    `/finance/getEarningDetailsOfUser/${userId}`,
   );
   return response.data;
 };
@@ -147,6 +154,7 @@ export const bankApi = {
   getBankBalance,
   createPaymentIntent,
   createBankDetailsApi,
+  updateBankDetailsApi,
   validateBankRegistrationOtp,
   validateTransactionPin,
   sendBankRegistrationOtp,
@@ -155,5 +163,5 @@ export const bankApi = {
   getBankDetailsByUserId,
   srkBankPayoutRequestApi,
   getEarningDetailsofUserApi,
-  createBalancePayoutApi
+  createBalancePayoutApi,
 };

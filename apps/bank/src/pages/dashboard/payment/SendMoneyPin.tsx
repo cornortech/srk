@@ -1,26 +1,25 @@
-import React, { useState, useRef, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import { Button, Card, CardHeader, CardBody } from "@nextui-org/react";
-import { ArrowLeft, Lock } from "lucide-react";
-import useAuthStore from "../../../store/useAuth";
-import useSendMoneyStore from "../../../store/useSendMoneyStore";
-import { bankApi } from "../../../utils/api/bank/bank.api";
+import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { Button, Card, CardHeader, CardBody } from '@nextui-org/react';
+import { ArrowLeft, Lock } from 'lucide-react';
+import useAuthStore from '../../../store/useAuth';
+import useSendMoneyStore from '../../../store/useSendMoneyStore';
+import { bankApi } from '../../../utils/api/bank/bank.api';
 
 export default function SendMoneyPinPage() {
-  const [pin, setPin] = useState("");
-  const [error, setError] = useState("");
+  const [pin, setPin] = useState('');
+  const [error, setError] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const { intentId, receiverAccountName, amount, receiverAccountNumber } = useSendMoneyStore();
+  const { intentId, receiverAccountName, amount, receiverAccountNumber } =
+    useSendMoneyStore();
   const navigate = useNavigate();
   const { userDetails } = useAuthStore();
 
   const handlePinInput = (value: string) => {
-    const numericValue = value.replace(/\D/g, "").slice(0, 4);
+    const numericValue = value.replace(/\D/g, '').slice(0, 4);
     setPin(numericValue);
   };
-
-
 
   useEffect(() => {
     // auto-focus when page loads
@@ -29,13 +28,13 @@ export default function SendMoneyPinPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
+    setError('');
 
-    console.log("Intent ID:", intentId);
+    console.log('Intent ID:', intentId);
 
-    if (!intentId) return setError("Invalid transaction. Please try again.");
-    if (!userDetails) return setError("Please log in");
-    if (pin.length !== 4) return setError("Please enter your 4-digit PIN");
+    if (!intentId) return setError('Invalid transaction. Please try again.');
+    if (!userDetails) return setError('Please log in');
+    if (pin.length !== 4) return setError('Please enter your 4-digit PIN');
 
     try {
       await bankApi.validateTransactionPin(pin, intentId);
@@ -43,10 +42,10 @@ export default function SendMoneyPinPage() {
         userId: userDetails._id,
         intentId: intentId,
       });
-      navigate("/bank/dashboard/send-money/success");
+      navigate('/dashboard/send-money/success');
     } catch (error) {
-      console.log("Error validating PIN or sending money:", error);
-      setError("Invalid PIN");
+      console.log('Error validating PIN or sending money:', error);
+      setError('Invalid PIN');
     }
   };
 
@@ -67,7 +66,11 @@ export default function SendMoneyPinPage() {
         {/* Header */}
         <div className="flex items-center gap-3 sm:gap-4 mb-6">
           <Link to="/bank/dashboard/send-money/preview">
-            <Button isIconOnly variant="light" className="text-white hover:opacity-80">
+            <Button
+              isIconOnly
+              variant="light"
+              className="text-white hover:opacity-80"
+            >
               <ArrowLeft className="w-5 h-5 sm:w-6 sm:h-6" />
             </Button>
           </Link>
@@ -78,11 +81,15 @@ export default function SendMoneyPinPage() {
           <CardHeader className="flex flex-col items-center text-center gap-3 sm:gap-4 pt-4 sm:pt-6 pb-4 sm:pb-6">
             <div
               className="w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center shadow-xl"
-              style={{ background: "linear-gradient(125deg, #e1ba73, #b68938)" }}
+              style={{
+                background: 'linear-gradient(125deg, #e1ba73, #b68938)',
+              }}
             >
               <Lock className="w-7 h-7 sm:w-8 sm:h-8 text-black" />
             </div>
-            <p className="text-white font-bold text-base sm:text-lg">Secure Transaction</p>
+            <p className="text-white font-bold text-base sm:text-lg">
+              Secure Transaction
+            </p>
             <p className="text-gray-400 text-xs sm:text-sm">
               Enter your PIN to complete the transfer
             </p>
@@ -91,7 +98,8 @@ export default function SendMoneyPinPage() {
           <div
             className="h-px w-full"
             style={{
-              background: "linear-gradient(90deg, transparent, #b68938, transparent)",
+              background:
+                'linear-gradient(90deg, transparent, #b68938, transparent)',
               opacity: 0.3,
             }}
           ></div>
@@ -125,17 +133,19 @@ export default function SendMoneyPinPage() {
                     key={index}
                     className="w-12 h-12 sm:w-14 sm:h-14 border-2 rounded-xl flex items-center justify-center font-bold transition-all duration-300 cursor-pointer"
                     style={{
-                      borderColor: pin[index] ? "#b68938" : "rgba(182,137,56,0.3)",
-                      backgroundColor: "#2a2520",
+                      borderColor: pin[index]
+                        ? '#b68938'
+                        : 'rgba(182,137,56,0.3)',
+                      backgroundColor: '#2a2520',
                     }}
                   >
                     <span
                       style={{
-                        fontSize: "1.25rem",
-                        color: pin[index] ? "#b68938" : "transparent",
+                        fontSize: '1.25rem',
+                        color: pin[index] ? '#b68938' : 'transparent',
                       }}
                     >
-                      {pin[index] ? "•" : ""}
+                      {pin[index] ? '•' : ''}
                     </span>
                   </div>
                 ))}
@@ -154,7 +164,9 @@ export default function SendMoneyPinPage() {
               <Button
                 type="submit"
                 className="w-full h-10 sm:h-11 text-sm sm:text-base text-black font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
-                style={{ background: "linear-gradient(125deg, #e1ba73, #b68938)" }}
+                style={{
+                  background: 'linear-gradient(125deg, #e1ba73, #b68938)',
+                }}
               >
                 Complete Transfer
               </Button>

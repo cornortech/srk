@@ -1,5 +1,5 @@
 import { adminBalanceModel } from '../model/adminBalanceModel';
-import { AdminSrkBankModel } from '../model/AdminSrkBankModel';
+import { AdminSrkBankModel } from '../model/bank/AdminSrkBankModel';
 
 interface TUpdateAdminBalance {
   ceoSalary?: number;

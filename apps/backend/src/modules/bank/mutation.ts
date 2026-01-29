@@ -1,16 +1,16 @@
 import mongoose from "mongoose";
+import { v4 as uuidv4 } from "uuid";
 import { AppRouteImplementationOrOptions } from "@ts-rest/express/src/lib/types";
 import { UserModel } from "../../model/userModel";
-import { BankDetailsModel } from "../../model/bankDetails";
-import { SrkBankModel } from "../../model/srkBankModel";
+import { SrkBankModel } from "../../model/bank/srkBankModel";
 import EmailService from "../../services/emailService";
 import AuthService from "../../services/authService";
 import { methods } from "../../utils/methods";
-import { v4 as uuidv4 } from "uuid";
 import { bankContract } from "@srk/shared/contracts";
 import { bankStatementService } from "../../services/bankStatementService";
 import { PaymentIntentModel } from "../../model/bank/bankPaymentIntentModel";
 import { OtpLib } from "../../libs/otplib";
+import { BankDetailsModel } from "../../model/bank/bankDetails";
 
 const createBankDetails: AppRouteImplementationOrOptions<
   typeof bankContract.createBankDetails
@@ -208,7 +208,6 @@ const sendMoney: AppRouteImplementationOrOptions<
     await intent.save({ session });
 
     await session.commitTransaction(); // ✅ must await
-    await session.endSession();
 
     return {
       status: 200,
@@ -219,7 +218,6 @@ const sendMoney: AppRouteImplementationOrOptions<
     };
   } catch (error: any) {
     await session.abortTransaction(); // ✅ ensures rollback
-    await session.endSession();
 
     console.error("Error sending money:", error.message);
     let message = "Something went wrong";
@@ -243,6 +241,9 @@ const sendMoney: AppRouteImplementationOrOptions<
           body: { message, success: false },
         };
     }
+  } finally {
+    // ✅ CRITICAL: Always close session in finally block
+    await session.endSession();
   }
 };
 

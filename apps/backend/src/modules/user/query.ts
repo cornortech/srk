@@ -1,12 +1,12 @@
 import { AppRouteImplementationOrOptions } from '@ts-rest/express/src/lib/types';
-import { userContract } from '../../../../../libs/shared/contracts/src/lib/user/contract';
 import { UserModel } from '../../model/userModel';
-import { BankModel } from '../../model/bankModel';
 import { KYCModel } from '../../model/kycModel';
 import { affiliateBiometricModel } from '../../model/affiliateVerificationModel';
 import { affiliateRequestModel } from '../../model/affiliateRequestModel';
 import { methods } from '../../utils/methods';
 import { CoursePaymentModel } from '../../model/coursePayment';
+import { userContract } from '@srk/shared/contracts';
+import { BankModel } from '../../model/bankModel';
 
 export const getUserDetails: AppRouteImplementationOrOptions<
   typeof userContract.getUserDetails

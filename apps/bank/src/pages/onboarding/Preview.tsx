@@ -53,7 +53,7 @@ const [registrationData] = useState({
 
         setIsLoading(true)
         setError("")
-
+        
         try {
             const success = true
             if (success) {

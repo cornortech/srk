@@ -11,6 +11,7 @@ export const bankRouter = s.router(bankContract, {
   getBankDetailsByAccountNumber:
     bankQueryHandlers.getBankDetailsByAccountNumber,
   getBankBalance: bankQueryHandlers.getBankBalance,
+  getBankStatus: bankQueryHandlers.getBankStatus,
   createBankDetails: bankMutationHandlers.createBankDetails,
   updateBankDetails: bankMutationHandlers.updateBankDetails,
   sendMoney: bankMutationHandlers.sendMoney,

@@ -46,6 +46,18 @@ export interface SSOGetMeResponse {
     email: string;
     firstName?: string;
     lastName?: string;
+    phoneNumber?: string;
+    gender?: string;
+    dob?: string;
+    country?: string;
+    bankDetailsId?: string;
+    srkBank?: {
+      _id: string;
+      accountNumber: string | null;
+      status: string | null;
+      amount: number;
+      bankDetailsId: string | null;
+    };
     role: string;
   };
 }

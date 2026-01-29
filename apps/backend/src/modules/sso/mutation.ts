@@ -374,6 +374,12 @@ const getMe: AppRouteImplementationOrOptions<
 
     const role = userExist ? 'user' : 'admin';
 
+    // Fetch bank details for the user if it's a bank user
+    let srkBank = null;
+    if (userExist) {
+      srkBank = await SrkBankModel.findOne({ userId: userExist._id });
+    }
+
     return {
       status: 200,
       body: {
@@ -384,6 +390,20 @@ const getMe: AppRouteImplementationOrOptions<
           email: loggedInUser.email,
           firstName: userExist?.firstName || undefined,
           lastName: userExist?.lastName || undefined,
+          phoneNumber: userExist?.phoneNumber || undefined,
+          gender: userExist?.gender || undefined,
+          dob: userExist?.dob?.toISOString() || undefined,
+          country: userExist?.country || undefined,
+          bankDetailsId: srkBank?.bankDetailsId?.toString() || undefined,
+          srkBank: srkBank
+            ? {
+                _id: srkBank._id.toString(),
+                accountNumber: srkBank.accountNumber || null,
+                status: srkBank.status || null,
+                amount: srkBank.amount || 0,
+                bankDetailsId: srkBank.bankDetailsId?.toString() || null,
+              }
+            : undefined,
           role,
         },
       },

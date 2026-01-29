@@ -1,8 +1,8 @@
 import mongoose from 'mongoose';
 import { AppRouteImplementationOrOptions } from '@ts-rest/express/src/lib/types';
 import { UserModel } from '../../model/userModel';
-import { BankDetailsModel } from '../../model/bankDetails';
-import { SrkBankModel } from '../../model/srkBankModel';
+import { BankDetailsModel } from '../../model/bank/bankDetails';
+import { SrkBankModel } from '../../model/bank/srkBankModel';
 import EmailService from '../../services/emailService';
 import AuthService from '../../services/authService';
 import { methods } from '../../utils/methods';

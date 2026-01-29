@@ -17,6 +17,7 @@ import moment from 'moment';
 import { bankApi } from '../../utils/api/bank/bank.api';
 import useAuthStore from '../../store/useAuth';
 import { TBankStatement } from '../../utils/types/bank.type';
+import { Spinner } from '@nextui-org/react';
 
 export default function ModernBankDashboard() {
   const { userDetails, srkBank } = useAuthStore();
@@ -59,7 +60,18 @@ export default function ModernBankDashboard() {
     }
   };
 
-  if (!transactionData) return <div>Loading...</div>;
+  if (!transactionData) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <Spinner color="warning" size="lg" />
+          <p className="text-[#b68938] font-medium animate-pulse">
+            Syncing your accounts...
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-black mt-32">

@@ -66,6 +66,26 @@ export const bankContract = c.router({
       500: ErrorSchema,
     },
   },
+  getBankStatus: {
+    method: 'GET',
+    path: '/bank/status/:userId',
+    description: 'Get bank status for a user',
+    summary: 'Get Bank Status',
+    responses: {
+      200: z.object({
+        _id: z.string(),
+        accountNumber: z.string().nullable(),
+        status: z.string().nullable(),
+        amount: z.number(),
+        bankDetailsId: z.string().nullable(),
+      }),
+      400: ErrorSchema,
+      401: ErrorSchema,
+      403: ErrorSchema,
+      404: ErrorSchema,
+      500: ErrorSchema,
+    },
+  },
   getBankDetailsByAccountNumber: {
     method: 'GET',
     path: '/bank/:accountNumber',

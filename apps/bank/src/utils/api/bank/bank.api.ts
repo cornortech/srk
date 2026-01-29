@@ -76,6 +76,10 @@ const getBankDetailsByUserId = (userId: string) => {
   return apiClient.get(`/bank/details/${userId}`);
 };
 
+const getBankStatus = (userId: string) => {
+  return apiClient.get(`/bank/status/${userId}`);
+};
+
 const getBankBalance = (userId: string) => {
   return apiClient.get(`/bank/balance/${userId}`);
 };
@@ -152,6 +156,7 @@ export const bankApi = {
   sendMoney,
   getBankStatementOfUser,
   getBankBalance,
+  getBankStatus,
   createPaymentIntent,
   createBankDetailsApi,
   updateBankDetailsApi,

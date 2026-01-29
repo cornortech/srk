@@ -1,7 +1,7 @@
-import { AppRouteImplementationOrOptions } from "@ts-rest/express/src/lib/types";
-import { UserModel } from "../../model/userModel";
-import { SrkBankModel } from "../../model/bank/srkBankModel";
-import { bankContract } from "@srk/shared/contracts";
+import { AppRouteImplementationOrOptions } from '@ts-rest/express/src/lib/types';
+import { UserModel } from '../../model/userModel';
+import { SrkBankModel } from '../../model/bank/srkBankModel';
+import { bankContract } from '@srk/shared/contracts';
 
 const getBankDetailsByUserId: AppRouteImplementationOrOptions<
   typeof bankContract.getBankDetailsByUserId
@@ -14,7 +14,7 @@ const getBankDetailsByUserId: AppRouteImplementationOrOptions<
         status: 400,
         body: {
           success: false,
-          message: "User ID is required",
+          message: 'User ID is required',
         },
       };
     }
@@ -57,15 +57,14 @@ const getBankDetailsByUserId: AppRouteImplementationOrOptions<
             ppSizePhoto: string;
             nationalIdCard: string;
           };
-          
         };
       };
     }>({
-      path: "srkBankId",
-      model: "SrkBank",
+      path: 'srkBankId',
+      model: 'SrkBank',
       populate: {
-        path: "bankDetailsId",
-        model: "BankDetails",
+        path: 'bankDetailsId',
+        model: 'BankDetails',
       },
     });
 
@@ -74,7 +73,7 @@ const getBankDetailsByUserId: AppRouteImplementationOrOptions<
         status: 404,
         body: {
           success: false,
-          message: "User not found",
+          message: 'User not found',
         },
       };
     }
@@ -141,7 +140,7 @@ const getBankDetailsByUserId: AppRouteImplementationOrOptions<
                 userExist.srkBankId.bankDetailsId.documents.nationalIdCard,
             }
           : null,
-          familyDetails: userExist.srkBankId?.bankDetailsId?.familyDetails
+        familyDetails: userExist.srkBankId?.bankDetailsId?.familyDetails
           ? {
               fatherName:
                 userExist.srkBankId.bankDetailsId.familyDetails.fatherName,
@@ -162,7 +161,7 @@ const getBankDetailsByUserId: AppRouteImplementationOrOptions<
       status: 500,
       body: {
         success: false,
-        message: error instanceof Error ? error.message : "Unknown error",
+        message: error instanceof Error ? error.message : 'Unknown error',
       },
     };
   }
@@ -178,7 +177,7 @@ const getBankDetailsByAccountNumber: AppRouteImplementationOrOptions<
         status: 400,
         body: {
           success: false,
-          message: "Account number is required",
+          message: 'Account number is required',
         },
       };
     }
@@ -222,8 +221,8 @@ const getBankDetailsByAccountNumber: AppRouteImplementationOrOptions<
         };
       };
     }>({
-      path: "bankDetailsId",
-      model: "BankDetails",
+      path: 'bankDetailsId',
+      model: 'BankDetails',
     });
 
     if (!srkBank) {
@@ -231,11 +230,10 @@ const getBankDetailsByAccountNumber: AppRouteImplementationOrOptions<
         status: 404,
         body: {
           success: false,
-          message: "User not found",
+          message: 'User not found',
         },
       };
     }
-
 
     return {
       status: 200,
@@ -297,7 +295,7 @@ const getBankDetailsByAccountNumber: AppRouteImplementationOrOptions<
       status: 500,
       body: {
         success: false,
-        message: error instanceof Error ? error.message : "Unknown error",
+        message: error instanceof Error ? error.message : 'Unknown error',
       },
     };
   }
@@ -313,7 +311,7 @@ const getBankBalance: AppRouteImplementationOrOptions<
         status: 400,
         body: {
           success: false,
-          message: "User ID is required",
+          message: 'User ID is required',
         },
       };
     }
@@ -327,7 +325,7 @@ const getBankBalance: AppRouteImplementationOrOptions<
         status: 404,
         body: {
           success: false,
-          message: "User not found",
+          message: 'User not found',
         },
       };
     }
@@ -344,7 +342,58 @@ const getBankBalance: AppRouteImplementationOrOptions<
       status: 500,
       body: {
         success: false,
-        message: error instanceof Error ? error.message : "Unknown error",
+        message: error instanceof Error ? error.message : 'Unknown error',
+      },
+    };
+  }
+};
+
+const getBankStatus: AppRouteImplementationOrOptions<
+  typeof bankContract.getBankStatus
+> = async ({ req }) => {
+  try {
+    const userId = req.params.userId;
+    if (!userId) {
+      return {
+        status: 400,
+        body: {
+          success: false,
+          message: 'User ID is required',
+        },
+      };
+    }
+
+    const srkBank = await SrkBankModel.findOne({
+      userId: userId,
+    });
+
+    if (!srkBank) {
+      return {
+        status: 404,
+        body: {
+          success: false,
+          message: 'User not found',
+        },
+      };
+    }
+
+    return {
+      status: 200,
+      body: {
+        _id: srkBank._id.toString(),
+        accountNumber: srkBank.accountNumber || null,
+        status: srkBank.status || null,
+        amount: srkBank.amount || 0,
+        bankDetailsId: srkBank.bankDetailsId?.toString() || null,
+      },
+    };
+  } catch (error) {
+    console.log(error);
+    return {
+      status: 500,
+      body: {
+        success: false,
+        message: error instanceof Error ? error.message : 'Unknown error',
       },
     };
   }
@@ -352,6 +401,7 @@ const getBankBalance: AppRouteImplementationOrOptions<
 
 export const bankQueryHandlers = {
   getBankBalance,
+  getBankStatus,
   getBankDetailsByUserId,
   getBankDetailsByAccountNumber,
 };

@@ -50,6 +50,20 @@ const GetMeResponseSchema = z.object({
       email: z.string(),
       firstName: z.string().optional(),
       lastName: z.string().optional(),
+      phoneNumber: z.string().optional(),
+      gender: z.string().optional(),
+      dob: z.string().optional(),
+      country: z.string().optional(),
+      bankDetailsId: z.string().optional(),
+      srkBank: z
+        .object({
+          _id: z.string(),
+          accountNumber: z.string().nullable(),
+          status: z.string().nullable(),
+          amount: z.number(),
+          bankDetailsId: z.string().nullable(),
+        })
+        .optional(),
       role: z.string(),
     })
     .optional(),

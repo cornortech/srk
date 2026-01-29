@@ -53,7 +53,7 @@ export default function BankSetupPinPage() {
     setIsLoading(true);
     try {
       await bankApi.createBankTransactionPin(userId, pin);
-      navigate('/dashboard');
+      navigate('/onboarding/user-verification');
     } catch {
       setError('Failed to set PIN. Please try again.');
     } finally {

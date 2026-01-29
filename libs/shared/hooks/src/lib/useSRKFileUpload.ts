@@ -17,7 +17,7 @@ export const useSRKFileUpload = (appName: string) => {
   const uploadFile = async (
     file: File,
     fileType: 'video' | 'image',
-    onProgress?: (progress: number, url?: string) => void
+    onProgress?: (progress: number, url?: string) => void,
   ): Promise<{ url: string }> => {
     const uploadId = uuidv4();
     setIsUploading(true);
@@ -27,7 +27,7 @@ export const useSRKFileUpload = (appName: string) => {
         file,
         fileType,
         uploadId,
-        onProgress
+        onProgress,
       );
       return { url };
     } catch (error) {
@@ -49,7 +49,7 @@ export const useSRKFileUpload = (appName: string) => {
     file: File,
     fileType: string,
     uploadId: string,
-    onProgress?: (progress: number, url?: string) => void
+    onProgress?: (progress: number, url?: string) => void,
   ): Promise<string> => {
     return new Promise<string>((resolve, reject) => {
       const uniqueSuffix = `${Date.now()}-${uuidv4()}`;
@@ -61,7 +61,7 @@ export const useSRKFileUpload = (appName: string) => {
         import.meta.env.VITE_FIREBASE_ENV === 'prod' ? 'prod' : 'local';
       const storageRef = ref(
         storage,
-        `/${envPrefix}/${appName}/${fileType}/${uniqueFileName}`
+        `/${envPrefix}/${appName}/${fileType}/${uniqueFileName}`,
       );
       const uploadTask = uploadBytesResumable(storageRef, file);
 
@@ -119,7 +119,7 @@ export const useSRKFileUpload = (appName: string) => {
               resolve(downloadURL);
             })
             .catch(reject);
-        }
+        },
       );
     });
   };
@@ -130,7 +130,7 @@ export const useSRKFileUpload = (appName: string) => {
     if (uploads.length === 0) return 0;
     const totalProgress = uploads.reduce(
       (sum, upload) => sum + upload.progress,
-      0
+      0,
     );
     return Math.round(totalProgress / uploads.length);
   };

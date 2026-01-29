@@ -6,7 +6,7 @@ import AuthService from '../../services/authService';
 import crypto from 'crypto';
 import GrowAffiliateUserModel from '../../model/grow/growAffiliateUserModel';
 import { AutoCodeModel } from '../../model/autoCodeModel';
-import { SrkBankModel } from '../../model/srkBankModel';
+import { SrkBankModel } from '../../model/bank/srkBankModel';
 
 /**
  * Generate a one-time SSO auto code
@@ -236,6 +236,10 @@ const exchangeCode: AppRouteImplementationOrOptions<
           }
         }
 
+        // if (!bankUser.bankDetailsId) {
+        //   // If they haven't filled out the registration form yet
+        //   redirectionUrl = '/onboarding/register';
+        // } else {
         switch (bankUser.status) {
           case 'ONBOARDING_DETAILS_ADDED':
             redirectionUrl = '/onboarding/otp-verification';

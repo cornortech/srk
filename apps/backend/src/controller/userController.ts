@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { UserModel } from "../model/userModel";
-import { BankModel } from "../model/bankModel";
 import { KYCModel } from "../model/kycModel";
+import { BankModel } from "../model/bankModel";
 
 class UserController {
   /**

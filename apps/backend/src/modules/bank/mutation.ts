@@ -325,7 +325,6 @@ const sendMoney: AppRouteImplementationOrOptions<
     await intent.save({ session });
 
     await session.commitTransaction(); // ✅ must await
-    await session.endSession();
 
     return {
       status: 200,
@@ -336,7 +335,6 @@ const sendMoney: AppRouteImplementationOrOptions<
     };
   } catch (error: any) {
     await session.abortTransaction(); // ✅ ensures rollback
-    await session.endSession();
 
     console.error('Error sending money:', error.message);
     let message = 'Something went wrong';
@@ -360,6 +358,9 @@ const sendMoney: AppRouteImplementationOrOptions<
           body: { message, success: false },
         };
     }
+  } finally {
+    // ✅ CRITICAL: Always close session in finally block
+    await session.endSession();
   }
 };
 

@@ -1,6 +1,6 @@
 import { AppRouteImplementationOrOptions } from "@ts-rest/express/src/lib/types";
 import { UserModel } from "../../model/userModel";
-import { SrkBankModel } from "../../model/srkBankModel";
+import { SrkBankModel } from "../../model/bank/srkBankModel";
 import { bankContract } from "@srk/shared/contracts";
 
 const getBankDetailsByUserId: AppRouteImplementationOrOptions<

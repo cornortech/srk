@@ -6,7 +6,7 @@ import AuthService from '../../services/authService';
 import crypto from 'crypto';
 import GrowAffiliateUserModel from '../../model/grow/growAffiliateUserModel';
 import { AutoCodeModel } from '../../model/autoCodeModel';
-import { SrkBankModel } from '../../model/srkBankModel';
+import { SrkBankModel } from '../../model/bank/srkBankModel';
 
 /**
  * Generate a one-time SSO auto code

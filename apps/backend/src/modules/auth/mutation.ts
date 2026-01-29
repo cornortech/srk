@@ -1,9 +1,12 @@
+import crypto from 'crypto';
+import mongoose from 'mongoose';
+import moment from 'moment';
 import { AppRouteImplementationOrOptions } from '@ts-rest/express/src/lib/types';
+
 import { UserModel } from '../../model/userModel';
 import AuthService from '../../services/authService';
 import { SubscriptionModel } from '../../model/subscriptionModel';
 import { PackageModel } from '../../model/packageModel';
-import mongoose from 'mongoose';
 import CustomerBalanceService from '../../services/customerBalanceService';
 import AdminBalanceService from '../../services/adminBalanceService';
 import { KYCModel } from '../../model/kycModel';
@@ -13,13 +16,11 @@ import { adminModel } from '../../model/adminModel';
 import { balanceModel } from '../../model/balanceModel';
 import { FinanceService } from '../../services/financeService';
 import { modifyAndUploadAgreement } from '../../services/pdfService';
-import moment from 'moment';
 import { CoursePaymentModel } from '../../model/coursePayment';
 import { methods } from '../../utils/methods';
 import { EarningStatementModel } from '../../model/earningStatementModel';
 import { growSocialMediaPackageUserModel } from '../../model/growSocialMediaPackageUserModel';
 import { authContract } from '@srk/shared/contracts';
-import crypto from 'crypto';
 import { AutoCodeModel } from '../../model/autoCodeModel';
 
 interface CalculateEarningsProps {
@@ -38,7 +39,7 @@ interface CalculateEarningsProps {
 
 export function calculateAmountFromPercentage(
   amount: number,
-  commission: number
+  commission: number,
 ) {
   return (amount * commission) / 100;
 }
@@ -108,7 +109,7 @@ const calculateEarnings = async ({
             totalEarnings: srkBonus,
             eventWallet: 0,
           },
-        }
+        },
       );
 
       await EarningStatementModel.create({
@@ -132,7 +133,7 @@ const calculateEarnings = async ({
 
 const register: AppRouteImplementationOrOptions<
   typeof authContract.register
-> = async ({ req, body }) => {
+> = async ({body }) => {
   try {
     // Check if user already exists
     const existingUser = await UserModel.findOne({ email: body.email });
@@ -218,6 +219,7 @@ const register: AppRouteImplementationOrOptions<
       dob: body.dob,
       packageId: body.packageId,
       purpose: body.purpose,
+      baseSecret: AuthService.generateBaseSecret(),
       status: body.isAddedByUser
         ? 'REGISTERED'
         : 'PAYMENT_VERIFICATION_PENDING',
@@ -355,7 +357,7 @@ const login: AppRouteImplementationOrOptions<
   // Verify password
   const isPasswordValid = await AuthService.verifyPassword(
     body.password,
-    loggedInUser.password
+    loggedInUser.password,
   );
 
   if (!isPasswordValid) {
@@ -381,7 +383,7 @@ const login: AppRouteImplementationOrOptions<
       redirectionUrl = methods.getFrontendRedirectionUrl(
         false,
         userExist.status,
-        userExist.packageId?.toString() || ''
+        userExist.packageId?.toString() || '',
       );
     } else {
       redirectionUrl = '/auth/login';
@@ -520,7 +522,7 @@ const verifyKyc: AppRouteImplementationOrOptions<
         $set: {
           status: 'approved',
         },
-      }
+      },
     );
 
     userExist.status = 'PORTAL_ACTIVATED';
@@ -529,7 +531,7 @@ const verifyKyc: AppRouteImplementationOrOptions<
       userExist.firstName,
       kycExist.verificationImage,
       moment(kycExist.createdAt).format('DD-MM-YYYY'),
-      userExist.referralCode || ''
+      userExist.referralCode || '',
     );
 
     kycExist.courseEnrollAgreement = courseEnrollAgreementUrl;
@@ -596,7 +598,7 @@ const rejectKyc: AppRouteImplementationOrOptions<
           status: 'rejected',
           rejectionReason: body.reason,
         },
-      }
+      },
     );
 
     userExist.status = 'KYC_VERIFICATION_REJECTED';
@@ -898,7 +900,7 @@ const loginSrkGrow: AppRouteImplementationOrOptions<
 
     const isPasswordValid = await AuthService.verifyPassword(
       body.password,
-      userExist.password
+      userExist.password,
     );
 
     if (!isPasswordValid) {

@@ -1,16 +1,16 @@
 import { AppRouteImplementation } from '@ts-rest/express';
 import { balancePayoutModel } from '../../model/balancePayoutModel';
-import { BankModel } from '../../model/bankModel';
 import { UserModel } from '../../model/userModel';
 import { KYCModel } from '../../model/kycModel';
 import { balanceModel } from '../../model/balanceModel';
 import { adminBalanceModel } from '../../model/adminBalanceModel';
-import { SrkBankModel } from '../../model/srkBankModel';
+import { SrkBankModel } from '../../model/bank/srkBankModel';
 import bankStatement from '../../model/bank/bankStatementModel';
 import AdminSrkBankService from '../../services/adminSrkBankService';
 import EmailService from '../../services/emailService';
 import { SrkUniversityBankModel } from '../../model/srkUniversityBankModel';
 import { financeContract } from '@srk/shared/contracts';
+import { BankModel } from '../../model/bankModel';
 
 const createBalancePayout: AppRouteImplementation<
   typeof financeContract.createBalancePayout

@@ -56,9 +56,15 @@ export default function BankRegisterPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const { uploadFile } = useSRKFileUpload('bank');
-  const { userDetails, srkBank } = useAuthStore();
+  const { userDetails, srkBank, setAuthDetails, authDetails } = useAuthStore();
   const navigate = useNavigate();
 
+  useEffect(() => {
+    console.log('REGISTER PAGE STATUS =>', srkBank?.status);
+    if (srkBank?.status === 'PORTAL_ACTIVATED') {
+      navigate('/dashboard');
+    }
+  }, [srkBank?.status, navigate]);
   useEffect(() => {
     if (userDetails) {
       setFormData((prev) => ({
@@ -285,6 +291,22 @@ export default function BankRegisterPage() {
         await bankApi.updateBankDetailsApi(userDetails._id, payload);
       } else {
         await bankApi.createBankDetailsApi(userDetails._id, payload);
+      }
+
+      // Update store status immediately
+      const statusRes = await bankApi.getBankStatus(userDetails._id);
+      if (statusRes.status === 200 && statusRes.data) {
+        setAuthDetails({
+          authDetails,
+          userDetails,
+          srkBank: {
+            _id: statusRes.data._id,
+            accountNumber: statusRes.data.accountNumber || '',
+            status: statusRes.data.status || null,
+            amount: statusRes.data.amount || 0,
+            bankDetailsId: statusRes.data.bankDetailsId || null,
+          },
+        });
       }
 
       navigate('/onboarding/otp-verification');

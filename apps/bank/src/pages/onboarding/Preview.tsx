@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardHeader, CardBody } from '@nextui-org/card';
 import { Button } from '@nextui-org/button';
@@ -15,9 +15,10 @@ import {
 import { Avatar } from '@nextui-org/avatar';
 import { Spinner } from '@nextui-org/spinner';
 import useAuthStore from '../../store/useAuth';
+import { bankApi } from '../../utils/api/bank/bank.api';
 
 export default function BankUserPreviewPage() {
-  const [registrationData] = useState({
+  const [registrationData, setRegistrationData] = useState({
     fullName: 'John Doe',
     email: 'john@example.com',
     phoneNumber: '+977-9841234567',
@@ -51,9 +52,25 @@ export default function BankUserPreviewPage() {
     additionalDocs: false,
   });
   const [error, setError] = useState('');
-  const { userDetails } = useAuthStore();
+  const { userDetails, setAuthDetails, authDetails } = useAuthStore();
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchDetails = async () => {
+      if (!userDetails?._id) return;
+      try {
+        const response = await bankApi.getBankDetailsByUserId(userDetails._id);
+        if (response.status === 200 && response.data) {
+          setRegistrationData(response.data);
+        }
+      } catch (err) {
+        console.error('Error fetching bank details:', err);
+        setError('Failed to load your registration details.');
+      }
+    };
+    fetchDetails();
+  }, [userDetails?._id]);
 
   const handleConfirm = async () => {
     if (!userDetails?._id) return;

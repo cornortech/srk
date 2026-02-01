@@ -322,6 +322,15 @@ const exchangeCode: AppRouteImplementationOrOptions<
           bankDetailsId: bankUser?.bankDetailsId?.toString() || undefined,
           role,
           redirectionUrl,
+          srkBank: bankUser
+            ? {
+                _id: bankUser._id.toString(),
+                accountNumber: bankUser.accountNumber || null,
+                status: bankUser.status || null,
+                amount: bankUser.amount || 0,
+                bankDetailsId: bankUser.bankDetailsId?.toString() || null,
+              }
+            : undefined,
         },
       },
     };

@@ -32,6 +32,15 @@ const SSOExchangeResponseSchema = z.object({
       bankDetailsId: z.string().optional(),
       role: z.string(),
       redirectionUrl: z.string(),
+      srkBank: z
+        .object({
+          _id: z.string(),
+          accountNumber: z.string().nullable(),
+          status: z.string().nullable(),
+          amount: z.number(),
+          bankDetailsId: z.string().nullable(),
+        })
+        .optional(),
     })
     .optional(),
 });

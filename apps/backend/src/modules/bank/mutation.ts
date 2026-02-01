@@ -707,7 +707,7 @@ const createBankTransactionPin: AppRouteImplementationOrOptions<
 
     await SrkBankModel.findByIdAndUpdate(srkBankId, {
       transactionPIN: transactionPIN,
-      status: 'PORTAL_ACTIVATED',
+      status: 'TRANSACTION_PIN_ADDED',
     });
 
     return {
@@ -721,10 +721,10 @@ const createBankTransactionPin: AppRouteImplementationOrOptions<
     console.error('Error creating bank transaction PIN:', error);
 
     return {
-      status: 200,
+      status: 500,
       body: {
-        message: 'Transaction PIN created successfully',
-        success: true,
+        message: 'Error creating bank transaction PIN',
+        success: false,
       },
     };
   }

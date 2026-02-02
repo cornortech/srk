@@ -341,7 +341,6 @@ const login: AppRouteImplementationOrOptions<
 
   const loggedInUser = userExist || adminExist;
 
-  console.log('Logged in user:', loggedInUser);
 
   if (!loggedInUser) {
     return {

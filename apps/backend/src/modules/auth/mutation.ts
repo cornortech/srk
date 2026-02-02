@@ -334,12 +334,13 @@ const register: AppRouteImplementationOrOptions<
 
 const login: AppRouteImplementationOrOptions<
   typeof authContract.login
-> = async ({ req, res, body }) => {
+> = async ({  res, body }) => {
   // Fetch user from the database
   const userExist = await UserModel.findOne({ email: body.email });
   const adminExist = await adminModel.findOne({ email: body.email });
 
   const loggedInUser = userExist || adminExist;
+
 
   if (!loggedInUser) {
     return {

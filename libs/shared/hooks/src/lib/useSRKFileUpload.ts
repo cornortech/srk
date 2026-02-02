@@ -58,7 +58,7 @@ export const useSRKFileUpload = (appName: string) => {
 
       // Dynamic path: /prod/appName or /dev/appName
       const envPrefix =
-        import.meta.env.VITE_FIREBASE_ENV === 'prod' ? 'prod' : 'dev';
+        import.meta.env.VITE_FIREBASE_ENV === 'prod' ? 'prod' : 'local';
       const storageRef = ref(
         storage,
         `/${envPrefix}/${appName}/${fileType}/${uniqueFileName}`

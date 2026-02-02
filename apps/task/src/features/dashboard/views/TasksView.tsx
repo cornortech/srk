@@ -5,6 +5,7 @@ import {
   ChevronRight,
   Clock,
   Coins,
+  RefreshCw,
   Share2,
   Shield,
   Users,
@@ -344,14 +345,14 @@ export const TasksView: React.FC<TasksViewProps> = ({
                           </span>
                         </div>
 
-                        {/* <MagneticButton
+                        <MagneticButton
                           small
                           onClick={() => setReviewingRejectedTask(task)}
                           className="px-6!"
                         >
                           <RefreshCw size={16} />
                           Review
-                        </MagneticButton> */}
+                        </MagneticButton>
                       </div>
                     </div>
                   </div>

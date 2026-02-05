@@ -115,7 +115,9 @@ export const TaskHistoryView: React.FC = () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-4">
-              {submissions.map((item, idx) => {
+              {submissions
+                .slice(0, statusFilter === 'rejected' ? 2 : submissions.length)
+                .map((item, idx) => {
                 const statusConfig = getStatusConfig(item.status);
                 return (
                   <motion.div

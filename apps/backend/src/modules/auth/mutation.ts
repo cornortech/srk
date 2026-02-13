@@ -334,12 +334,13 @@ const register: AppRouteImplementationOrOptions<
 
 const login: AppRouteImplementationOrOptions<
   typeof authContract.login
-> = async ({ req, res, body }) => {
+> = async ({  res, body }) => {
   // Fetch user from the database
   const userExist = await UserModel.findOne({ email: body.email });
   const adminExist = await adminModel.findOne({ email: body.email });
 
   const loggedInUser = userExist || adminExist;
+
 
   if (!loggedInUser) {
     return {
@@ -374,7 +375,7 @@ const login: AppRouteImplementationOrOptions<
   let redirectionUrl = '/auth/login'; // Default for users
   let requiresSSO = false;
   let ssoCode = '';
-  
+
   if (role === 'user') {
     if (userExist) {
       redirectionUrl = methods.getFrontendRedirectionUrl(
@@ -388,15 +389,15 @@ const login: AppRouteImplementationOrOptions<
   } else {
     // Admin login - check domain for SSO redirect
     const adminDomain = (adminExist as any).domain;
-    
+
     if (adminDomain === 'task' || adminDomain === 'grow') {
       // Need SSO redirect for task/grow admin
       requiresSSO = true;
-      
+
       // Generate SSO code
       ssoCode = crypto.randomBytes(5).toString('hex').toUpperCase();
       const expiresAt = new Date(Date.now() + 30 * 1000);
-      
+
       await AutoCodeModel.create({
         code: ssoCode,
         userId: loggedInUser._id.toString(),
@@ -405,13 +406,15 @@ const login: AppRouteImplementationOrOptions<
         isUsed: false,
         isAdmin: true,
       });
-      
+
       // Generate redirect URL based on domain
       if (adminDomain === 'task') {
-        const taskDomain = process.env['TASK_FRONTEND_URL'] || 'http://localhost:4400';
+        const taskDomain =
+          process.env['TASK_FRONTEND_URL'] || 'http://localhost:4400';
         redirectionUrl = `${taskDomain}/admin/callback?code=${ssoCode}`;
       } else if (adminDomain === 'grow') {
-        const growDomain = process.env['GROW_FRONTEND_URL'] || 'http://localhost:4500';
+        const growDomain =
+          process.env['GROW_FRONTEND_URL'] || 'http://localhost:4500';
         redirectionUrl = `${growDomain}/admin/callback?code=${ssoCode}`;
       }
     } else {
@@ -1084,6 +1087,276 @@ const logout: AppRouteImplementationOrOptions<
   }
 };
 
+const forgotPassword: AppRouteImplementationOrOptions<
+  typeof authContract.forgotPassword
+> = async ({ body }) => {
+  try {
+    const user = await UserModel.findOne({ email: body.email });
+
+    if (!user) {
+      return {
+        status: 404,
+        body: {
+          success: false,
+          message: 'No account found with this email address',
+        },
+      };
+    }
+
+    // Generate reset token (10 characters)
+    const resetToken = crypto.randomBytes(5).toString('hex').toUpperCase();
+
+    // Token expires in 1 hour
+    const resetTokenExpires = new Date(Date.now() + 60 * 60 * 1000);
+
+    // Save token to user
+    user.resetPasswordToken = resetToken;
+    user.resetPasswordExpires = resetTokenExpires;
+    await user.save();
+
+    // Create reset URL
+    const resetUrl = `${env.FRONTEND_BASE_URL}/auth/reset-password?token=${resetToken}`;
+
+    // Send email
+    const emailTemplate = EmailService.EmailTemplate({
+      heading: 'Password Reset Request',
+      message: `
+        <p>Hi ${user.firstName},</p>
+        <p>You requested to reset your password. Click the button below to reset it:</p>
+        <p><strong>Reset Code:</strong> ${resetToken}</p>
+        <p>This code will expire in 1 hour.</p>
+        <p>If you didn't request this, please ignore this email.</p>
+      `,
+      link_name: 'Reset Password',
+      link: resetUrl,
+    });
+
+    await EmailService.sendEmail({
+      email: user.email,
+      subject: 'Password Reset Request',
+      message: emailTemplate,
+    });
+
+    return {
+      status: 200,
+      body: {
+        success: true,
+        message: 'Password reset email sent successfully',
+      },
+    };
+  } catch (error) {
+    console.error('Error in forgot password:', error);
+    return {
+      status: 500,
+      body: {
+        success: false,
+        message: 'Internal server error',
+      },
+    };
+  }
+};
+
+const resetPassword: AppRouteImplementationOrOptions<
+  typeof authContract.resetPassword
+> = async ({ body }) => {
+  try {
+    const user = await UserModel.findOne({
+      resetPasswordToken: body.token,
+      resetPasswordExpires: { $gt: new Date() },
+    });
+
+    if (!user) {
+      return {
+        status: 400,
+        body: {
+          success: false,
+          message: 'Invalid or expired reset token',
+        },
+      };
+    }
+
+    // Hash new password
+    const hashedPassword = await AuthService.hashPassword(body.newPassword);
+
+    // Update password and clear reset token
+    user.password = hashedPassword;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpires = undefined;
+    await user.save();
+
+    // Send confirmation email
+    const emailTemplate = EmailService.EmailTemplate({
+      heading: 'Password Reset Successful',
+      message: `
+        <p>Hi ${user.firstName},</p>
+        <p>Your password has been successfully reset.</p>
+        <p>If you didn't make this change, please contact support immediately.</p>
+      `,
+      link_name: 'Login Now',
+      link: `${env.FRONTEND_BASE_URL}/auth/login`,
+    });
+
+    await EmailService.sendEmail({
+      email: user.email,
+      subject: 'Password Reset Successful',
+      message: emailTemplate,
+    });
+
+    return {
+      status: 200,
+      body: {
+        success: true,
+        message: 'Password reset successfully',
+      },
+    };
+  } catch (error) {
+    console.error('Error in reset password:', error);
+    return {
+      status: 500,
+      body: {
+        success: false,
+        message: 'Internal server error',
+      },
+    };
+  }
+};
+
+const forgotPasswordSrkGrow: AppRouteImplementationOrOptions<
+  typeof authContract.forgotPasswordSrkGrow
+> = async ({ body }) => {
+  try {
+    const user = await growSocialMediaPackageUserModel.findOne({
+      email: body.email,
+    });
+
+    if (!user) {
+      return {
+        status: 404,
+        body: {
+          success: false,
+          message: 'No account found with this email address',
+        },
+      };
+    }
+
+    // Generate reset token (10 characters)
+    const resetToken = crypto.randomBytes(5).toString('hex').toUpperCase();
+
+    // Token expires in 1 hour
+    const resetTokenExpires = new Date(Date.now() + 60 * 60 * 1000);
+
+    // Save token to user
+    user.resetPasswordToken = resetToken;
+    user.resetPasswordExpires = resetTokenExpires;
+    await user.save();
+
+    // Create reset URL
+    const resetUrl = `${process.env.GROW_FRONTEND_URL}/reset-password?token=${resetToken}`;
+
+    // Send email
+    const emailTemplate = EmailService.EmailTemplate({
+      heading: 'Password Reset Request',
+      message: `
+        <p>Hi ${user.fullName},</p>
+        <p>You requested to reset your password. Click the button below to reset it:</p>
+        <p><strong>Reset Code:</strong> ${resetToken}</p>
+        <p>This code will expire in 1 hour.</p>
+        <p>If you didn't request this, please ignore this email.</p>
+      `,
+      link_name: 'Reset Password',
+      link: resetUrl,
+    });
+
+    await EmailService.sendEmail({
+      email: user.email,
+      subject: 'Password Reset Request',
+      message: emailTemplate,
+    });
+
+    return {
+      status: 200,
+      body: {
+        success: true,
+        message: 'Password reset email sent successfully',
+      },
+    };
+  } catch (error) {
+    console.error('Error in forgot password (Grow):', error);
+    return {
+      status: 500,
+      body: {
+        success: false,
+        message: 'Internal server error',
+      },
+    };
+  }
+};
+
+const resetPasswordSrkGrow: AppRouteImplementationOrOptions<
+  typeof authContract.resetPasswordSrkGrow
+> = async ({ body }) => {
+  try {
+    const user = await growSocialMediaPackageUserModel.findOne({
+      resetPasswordToken: body.token,
+      resetPasswordExpires: { $gt: new Date() },
+    });
+
+    if (!user) {
+      return {
+        status: 400,
+        body: {
+          success: false,
+          message: 'Invalid or expired reset token',
+        },
+      };
+    }
+
+    // Hash new password
+    const hashedPassword = await AuthService.hashPassword(body.newPassword);
+
+    // Update password and clear reset token
+    user.password = hashedPassword;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpires = undefined;
+    await user.save();
+
+    // Send confirmation email
+    const emailTemplate = EmailService.EmailTemplate({
+      heading: 'Password Reset Successful',
+      message: `
+        <p>Hi ${user.fullName},</p>
+        <p>Your password has been successfully reset.</p>
+        <p>If you didn't make this change, please contact support immediately.</p>
+      `,
+      link_name: 'Login Now',
+      link: `${process.env.GROW_FRONTEND_URL}/login`,
+    });
+
+    await EmailService.sendEmail({
+      email: user.email,
+      subject: 'Password Reset Successful',
+      message: emailTemplate,
+    });
+
+    return {
+      status: 200,
+      body: {
+        success: true,
+        message: 'Password reset successfully',
+      },
+    };
+  } catch (error) {
+    console.error('Error in reset password (Grow):', error);
+    return {
+      status: 500,
+      body: {
+        success: false,
+        message: 'Internal server error',
+      },
+    };
+  }
+};
+
 export const authMutationHandler = {
   register,
   login,
@@ -1095,4 +1368,8 @@ export const authMutationHandler = {
   loginSrkGrow,
   refreshToken,
   logout,
+  forgotPassword,
+  resetPassword,
+  forgotPasswordSrkGrow,
+  resetPasswordSrkGrow,
 };

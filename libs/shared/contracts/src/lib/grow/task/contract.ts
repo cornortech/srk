@@ -160,7 +160,8 @@ export const srkTaskContract = c.router({
       400: ErrorSchema,
       500: ErrorSchema,
     },
-    summary: 'Get rejected srk task action submissions by user (attention needed)',
+    summary:
+      'Get rejected srk task action submissions by user (attention needed)',
   },
   getAllSrkTaskUserFinanceStatement: {
     method: 'GET',
@@ -183,7 +184,8 @@ export const srkTaskContract = c.router({
       400: ErrorSchema,
       500: ErrorSchema,
     },
-    summary: 'Get all srk task users for admin with comprehensive details (paginated)',
+    summary:
+      'Get all srk task users for admin with comprehensive details (paginated)',
   },
 
   srkTaskEarningsPayoutRequest: {
@@ -193,8 +195,7 @@ export const srkTaskContract = c.router({
       srkTaskUserId: z.string(),
       coins: z
         .number()
-        .min(500, 'Coins must be at least 500')
-        .max(1000, 'Coins must be at most 1000'),
+        .min(20000, 'Coins must be at least 20,000 to request a payout'),
     }),
     responses: {
       201: SuccessSchema,

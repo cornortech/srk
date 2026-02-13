@@ -2,7 +2,6 @@ import { useState } from 'react';
 import {
   Button,
   Chip,
-  Spinner,
   Table,
   TableBody,
   TableCell,
@@ -26,6 +25,7 @@ import TablePagination from './Pagination';
 
 export function BalancePayoutTable() {
   const [page, setPage] = useState(1);
+  const [search, setSearch] = useState('');
   const [selectedPayout, setSelectedPayout] = useState<TBalancePayout | null>(
     null
   );
@@ -36,14 +36,15 @@ export function BalancePayoutTable() {
     setSelectedPayout(null);
   };
 
-  const { data: payouts, refetch: refetchBalancePayoutQuery } =
+  const { data: payouts, refetch: refetchBalancePayoutQuery, isLoading } =
     useQuery<TBalancePayoutResponse>({
-      queryKey: ['payouts', page],
+      queryKey: ['payouts', page, search],
       queryFn: async () => {
         const data = await getBalancePayoutByStatus(
           ['pending', 'approved', 'rejected'],
           page,
-          10
+          10,
+          search || undefined
         );
 
         return data;
@@ -54,23 +55,8 @@ export function BalancePayoutTable() {
     refetchBalancePayoutQuery();
   };
 
-  // if (!payouts?.data) {
-  //   return (
-  //     <div className="flex justify-center items-center h-screen">
-  //       <Spinner />
-  //     </div>
-  //   );
-  // }
-
   const payoutList = payouts?.data || [];
 
-  if (!payouts?.data) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <Spinner />
-      </div>
-    );
-  }
   return (
     <>
       <div className="flex justify-between items-center mb-4">
@@ -96,7 +82,8 @@ export function BalancePayoutTable() {
           <Input
             type="text"
             placeholder="Search by username or user ID"
-            // onChange={(e) => handleFilterChange("search", e.target.value)}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
             classNames={{
               input: 'pl-8',
             }}
@@ -116,7 +103,7 @@ export function BalancePayoutTable() {
           <TableColumn>Action</TableColumn>
           <TableColumn>Status</TableColumn>
         </TableHeader>
-        <TableBody>
+        <TableBody emptyContent={isLoading ? "Loading..." : "No payouts found"}>
           {payoutList.map((payout, index) => (
             <TableRow key={payout._id}>
               <TableCell>{(page - 1) * 10 + index + 1}</TableCell>
@@ -147,10 +134,10 @@ export function BalancePayoutTable() {
           ))}
         </TableBody>
       </Table>
-      {payouts?.data.length >= 10 && (
+      {payoutList.length >= 10 && (
         <TablePagination
           page={page}
-          totalPages={payouts?.totalPages}
+          totalPages={payouts?.totalPages || 1}
           onPageChange={(p) => setPage(p)}
         />
       )}

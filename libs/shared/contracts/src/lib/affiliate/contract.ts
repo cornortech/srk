@@ -70,6 +70,7 @@ export const affiliateContract = c.router({
       status: z.array(z.string()).optional(),
       limit: z.string().optional(),
       page: z.string().optional(),
+      search: z.string().optional(),
     }),
     responses: {
       200: z.object({

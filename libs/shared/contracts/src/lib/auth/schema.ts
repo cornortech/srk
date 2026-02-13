@@ -46,3 +46,12 @@ export const RegisterSchema = z
     },
     { message: 'Password is required', path: ['password'] }
   );
+
+export const ForgotPasswordSchema = z.object({
+  email: z.string().email('Invalid email address'),
+});
+
+export const ResetPasswordSchema = z.object({
+  token: z.string().min(1, 'Token is required'),
+  newPassword: z.string().min(6, 'Password must be at least 6 characters'),
+});

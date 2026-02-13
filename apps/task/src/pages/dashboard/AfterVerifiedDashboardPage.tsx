@@ -137,6 +137,7 @@ export const AfterVerifiedDashboardPage: React.FC = () => {
     ...likeTasks,
   ]);
 
+  const [rejectedTasks, setRejectedTasks] = useState<RejectedTaskEntry[]>([]);
 
   const [reviewingRejectedTask, setReviewingRejectedTask] =
     useState<RejectedTaskEntry | null>(null);

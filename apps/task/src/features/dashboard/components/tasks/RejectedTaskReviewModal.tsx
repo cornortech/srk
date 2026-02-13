@@ -1,5 +1,5 @@
 import React from 'react';
-import { RejectedTaskEntry, Task } from '../../types';
+import { RejectedTaskEntry, Task, TaskStatus } from '../../types';
 import { allPlatforms } from '../../../../data/dummyDashboardMockData';
 import { DashboardGlassCard } from '../ui/DashboardGlassCard';
 import { AlertTriangle, Coins, RefreshCw, X } from 'lucide-react';
@@ -27,18 +27,27 @@ export const RejectedTaskReviewModal: React.FC<
   setRejectedTasks,
   addNotification,
 }: RejectedTaskReviewModalProps) => {
-    const originalTask = activeTasks.find((t) => t.id === task.taskId);
     const platformInfo = allPlatforms.find((p) => p.platform === task.platform);
 
     const handleRetry = () => {
-      console.log('Original Task:', activeTasks, task);
-      if (originalTask) {
+      // Convert RejectedTaskEntry to Task format for verification
+      const taskForVerification: Task = {
+        id: task.taskId,
+        type: task.type,
+        platform: task.platform,
+        title: task.title,
+        coins: task.coins,
+        desc: task.desc,
+        status: 'pending' as TaskStatus,
+        username: task.username,
+        link: task.postUrl || task.profileUrl,
+        proofType: 'screenshot' as const,
+      };
 
-        setVerifyingTask(originalTask);
-        setRejectedTasks((prev) => prev.filter((t) => t.id !== task.id));
-        addNotification('Task ready for resubmission', 'info');
-        onClose();
-      }
+      setVerifyingTask(taskForVerification);
+      setRejectedTasks((prev) => prev.filter((t) => t.id !== task.id));
+      addNotification('Task ready for resubmission', 'info');
+      onClose();
     };
 
     const handleCancel = () => {

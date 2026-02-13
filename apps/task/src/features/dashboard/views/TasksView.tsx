@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import {
-  AlertTriangle,
-  CheckCircle2,
+  // AlertTriangle,
+  // CheckCircle2,
   ChevronRight,
   Clock,
   Coins,
+  // RefreshCw,
   Share2,
   Shield,
   Users,
 } from 'lucide-react';
 import {
-  allPlatforms,
+  // allPlatforms,
   followTasks,
   likeTasks,
 } from '../../../data/dummyDashboardMockData';
@@ -289,7 +290,7 @@ export const TasksView: React.FC<TasksViewProps> = ({
       </div>
 
       {/* Rejected Tasks Section */}
-      {rejectedTasks.length > 0 ? (
+      {/* {rejectedTasks.length > 0 ? (
         <div className="mt-8">
           <div className="flex items-center justify-between mb-4">
             <div>
@@ -344,14 +345,14 @@ export const TasksView: React.FC<TasksViewProps> = ({
                           </span>
                         </div>
 
-                        {/* <MagneticButton
+                        <MagneticButton
                           small
                           onClick={() => setReviewingRejectedTask(task)}
                           className="px-6!"
                         >
                           <RefreshCw size={16} />
                           Review
-                        </MagneticButton> */}
+                        </MagneticButton>
                       </div>
                     </div>
                   </div>
@@ -388,7 +389,7 @@ export const TasksView: React.FC<TasksViewProps> = ({
             </p>
           </DashboardGlassCard>
         </div>
-      )}
+      )} */}
     </div>
   );
 };

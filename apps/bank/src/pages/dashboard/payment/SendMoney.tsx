@@ -10,7 +10,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import {
   createPaymentIntentSchema,
   TCreatePaymentIntentForm,
-} from '../../../utils/api/bank/bank.validation';
+} from '../../../../../../libs/shared/contracts/src/lib/bank/schema';
 import { useMutation } from '@tanstack/react-query';
 import { bankApi } from '../../../utils/api/bank/bank.api';
 import { AxiosResponse } from 'axios';
@@ -18,7 +18,6 @@ import { AxiosResponse } from 'axios';
 export default function SendMoneyPage() {
   const { srkBank, userDetails } = useAuthStore();
 
-  // Initialize form
   const {
     register,
     handleSubmit,
@@ -35,8 +34,6 @@ export default function SendMoneyPage() {
     },
   });
 
-  // Mock user data
-
   const [error, setError] = useState('');
   const [isFromQR, setIsFromQR] = useState(false);
   const isMobileView = useIsMobileView();
@@ -49,8 +46,6 @@ export default function SendMoneyPage() {
   useEffect(() => {
     if (receiverAccountName && receiverAccountNumber) {
       setIsFromQR(true);
-      // setValue("recipientName", receiverAccountName);
-      // setValue("recipientAccount", receiverAccountNumber);
       reset({
         recipientName: receiverAccountName,
         recipientAccount: receiverAccountNumber,
@@ -99,21 +94,25 @@ export default function SendMoneyPage() {
     },
     onError: (error: any) => {
       // Handle error
-      setError(
+      const zodMessage = error?.response?.data?.issues?.[0]?.message;
+      const finalMessage =
+        zodMessage ||
         error?.response?.data?.message ||
-          'An error occurred. Please try again.',
-      );
+        'An error occurred. Please try again.';
+      setError(finalMessage);
     },
   });
 
   const onSubmit = () => {
+    setError('');
+
     if (!userDetails?._id) {
       setError('Please log in');
       return;
     }
 
-    if (getValues('amount') <= 0) {
-      setError('Please enter a valid amount');
+    if (getValues('amount') < 500) {
+      setError('Please enter a valid amount (Min. 500)');
       return;
     }
     if (!getValues('recipientAccount') || !getValues('recipientName')) {
@@ -132,8 +131,8 @@ export default function SendMoneyPage() {
   };
   console.log(error);
   return (
-    <div className="min-h-screen w-full relative top-[10vh] bg-black p-4 sm:p-6 pt-12 sm:pt-16">
-      <div className="max-w-md mx-auto">
+    <div className="min-h-screen w-full relative bg-black p-4 sm:p-6 pt-12 sm:pt-16">
+      <div className="max-w-lg mx-auto">
         {/* Header */}
         <div className="flex items-center gap-3 sm:gap-4 mb-6">
           <Button
@@ -244,17 +243,18 @@ export default function SendMoneyPage() {
               )}
 
               <Input
-                label="Amount *"
+                label="Amount (NRs.)*"
                 type="number"
                 variant="bordered"
-                {...register('amount')}
+                {...register('amount', { valueAsNumber: true })}
+                isInvalid={!!errors.amount}
                 classNames={{
                   input: 'text-white text-sm sm:text-base',
                   label: 'text-[#b68938] text-xs sm:text-sm',
                   inputWrapper:
                     'bg-[#2a2520] border-[#b68938]/40 hover:border-[#b68938]/60 focus-within:border-[#b68938]',
                 }}
-                placeholder="0.00"
+                placeholder="Min. 500"
               />
 
               {errors.amount && (
@@ -302,16 +302,16 @@ export default function SendMoneyPage() {
               </Button>
 
               {!isMobileView && (
-                <Link to="/bank/dashboard/QRpay" className="w-full">
-                  <Button
-                    variant="bordered"
-                    className="w-full h-10 sm:h-11 text-sm sm:text-base font-semibold mt-3"
-                    style={{ borderColor: '#b68938', color: '#b68938' }}
-                  >
-                    <QrCode className="w-4 h-4" />
-                    Scan QR Code Instead
-                  </Button>
-                </Link>
+                <Button
+                  as={Link}
+                  to="/dashboard/QRpay"
+                  variant="bordered"
+                  className="w-full h-10 sm:h-11 text-sm sm:text-base font-semibold mt-3"
+                  style={{ borderColor: '#b68938', color: '#b68938' }}
+                >
+                  <QrCode className="w-4 h-4" />
+                  Scan QR Code Instead
+                </Button>
               )}
             </form>
           </CardBody>

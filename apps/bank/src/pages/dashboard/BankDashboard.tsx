@@ -18,6 +18,8 @@ import { bankApi } from '../../utils/api/bank/bank.api';
 import useAuthStore from '../../store/useAuth';
 import { TBankStatement } from '../../utils/types/bank.type';
 import { Spinner } from '@nextui-org/react';
+import { useEffect } from 'react';
+import { TAuthState } from '../../utils/types/auth/auth.type';
 
 export default function ModernBankDashboard() {
   const { userDetails, srkBank } = useAuthStore();
@@ -26,6 +28,34 @@ export default function ModernBankDashboard() {
     queryKey: ['srk-bank-transactions', userDetails?._id],
     queryFn: async () => {
       return bankApi.getBankStatementOfUser(userDetails?._id || '');
+    },
+    enabled: !!userDetails?._id,
+  });
+
+  const { data: BankDetails } = useQuery<{ data: any }>({
+    queryKey: ['srk-bank-details', userDetails?._id],
+    queryFn: async () => {
+      return bankApi.getBankDetailsByUserId(userDetails?._id || '');
+    },
+    enabled: !!userDetails?._id,
+  });
+
+  useEffect(() => {
+    const newAccountno = BankDetails?.data?.srkBankDetails?.accountNumber;
+    if (newAccountno && newAccountno != srkBank?.accountNumber) {
+      useAuthStore.setState((state) => ({
+        srkBank: {
+          ...state.srkBank,
+          accountNumber: newAccountno,
+        } as TAuthState['srkBank'],
+      }));
+    }
+  }, [BankDetails]);
+
+  const { data: balance } = useQuery<{ data: any }>({
+    queryKey: ['srk-bank-balance', userDetails?._id],
+    queryFn: async () => {
+      return bankApi.getBankBalance(userDetails?._id || '');
     },
     enabled: !!userDetails?._id,
   });
@@ -74,10 +104,10 @@ export default function ModernBankDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-black mt-32">
+    <div className="min-h-screen bg-black">
       {/* Top Bar with Gold Accent */}
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-[91%] mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Welcome Section */}
         <div className="mb-8">
           <h2 className="text-3xl font-bold text-white mb-2">
@@ -131,7 +161,7 @@ export default function ModernBankDashboard() {
                     </p>
                     <h3 className="text-5xl font-bold text-white">
                       Nrs.
-                      {srkBank?.amount?.toLocaleString('en-US', {
+                      {balance?.data?.balance?.toLocaleString('en-US', {
                         minimumFractionDigits: 2,
                       })}
                     </h3>
@@ -156,10 +186,10 @@ export default function ModernBankDashboard() {
                       Account Number
                     </p>
                     <p className="font-mono text-lg font-medium text-white">
-                      {srkBank?.accountNumber}
+                      {BankDetails?.data?.srkBankDetails?.accountNumber}
                     </p>
                   </div>
-                  <div className="flex gap-2">
+                  {/* <div className="flex gap-2">
                     <div
                       className="w-12 h-8 rounded backdrop-blur-sm"
                       style={{ backgroundColor: 'rgba(182, 137, 56, 0.2)' }}
@@ -168,12 +198,11 @@ export default function ModernBankDashboard() {
                       className="w-12 h-8 rounded backdrop-blur-sm"
                       style={{ backgroundColor: 'rgba(182, 137, 56, 0.2)' }}
                     ></div>
-                  </div>
+                  </div> */}
                 </div>
               </div>
             </div>
 
-            {/* Quick Actions */}
             {/* Quick Actions */}
             <div className="grid grid-cols-4 gap-4">
               <Link to={'/dashboard/send-money'} className="w-full">

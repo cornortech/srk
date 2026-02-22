@@ -1,4 +1,11 @@
-import { ArrowLeft, Wallet, AlertCircle, Shield, Clock, DollarSign } from 'lucide-react';
+import {
+  ArrowLeft,
+  Wallet,
+  AlertCircle,
+  Shield,
+  Clock,
+  DollarSign,
+} from 'lucide-react';
 import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
@@ -22,7 +29,6 @@ export default function WithdrawMoneyPage() {
   //   { id: 'bank', name: 'Bank Transfer', logo: 'https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg' }
   // ];
 
-
   // const { data: earningDetails, refetch: refetchEarningDetails } = useQuery<
   //   TEarningDetails | undefined
   // >({
@@ -34,24 +40,23 @@ export default function WithdrawMoneyPage() {
   //   enabled: !!userDetails?._id,
   // });
 
-
   const { mutate: srkBankPayoutMutation } = useMutation({
     mutationFn: async (data: { userId: string; amount: number }) => {
       await bankApi.srkBankPayoutRequestApi(data.userId, data.amount);
     },
     onSuccess: () => {
       // refetchEarningDetails();
-      navigate("/affiliate/payout");
-      show("Payout request successful", "success");
+      navigate('/affiliate/payout');
+      show('Payout request successful', 'success');
     },
     onError: (error: AxiosError<{ message: string }>) => {
-      show(error.response?.data?.message || "Payout request failed", "error");
+      show(error.response?.data?.message || 'Payout request failed', 'error');
     },
   });
 
   const handlePayout = (amount: number) => {
     if (amount < 500) {
-      show("You can't payout less than Rs.500", "error");
+      show("You can't payout less than Rs.500", 'error');
       return;
     }
     if (userDetails?._id) {
@@ -63,15 +68,17 @@ export default function WithdrawMoneyPage() {
   };
 
   return (
-    <div className="min-h-screen relative top-[15vh] bg-black p-8">
+    <div className="min-h-screen relative bg-black p-8">
       <div className="max-w-4xl mx-auto">
         {/* Back Button */}
         <button
           onClick={() => window.history.back()}
           className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors mb-8 group"
         >
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center transition-all group-hover:bg-[#b68938]/10"
-            style={{ backgroundColor: 'rgba(182, 137, 56, 0.05)' }}>
+          <div
+            className="w-10 h-10 rounded-xl flex items-center justify-center transition-all group-hover:bg-[#b68938]/10"
+            style={{ backgroundColor: 'rgba(182, 137, 56, 0.05)' }}
+          >
             <ArrowLeft className="w-5 h-5" />
           </div>
           <span className="font-medium">Back to Dashboard</span>
@@ -79,8 +86,12 @@ export default function WithdrawMoneyPage() {
 
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">Request Withdrawal</h1>
-          <p className="text-gray-400">Transfer funds to your preferred payment method</p>
+          <h1 className="text-4xl font-bold text-white mb-2">
+            Request Withdrawal
+          </h1>
+          <p className="text-gray-400">
+            Transfer funds to your preferred payment method
+          </p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -89,7 +100,10 @@ export default function WithdrawMoneyPage() {
             <div className="bg-[#1a1a1a] rounded-3xl border border-[#b68938]/40 p-8">
               {/* Withdrawal Amount */}
               <div className="mb-6">
-                <label className="block text-sm font-medium mb-3 flex items-center gap-2" style={{ color: '#b68938' }}>
+                <label
+                  className="text-sm font-medium mb-3 flex items-center gap-2"
+                  style={{ color: '#b68938' }}
+                >
                   <DollarSign className="w-4 h-4" />
                   Withdrawal Amount
                 </label>
@@ -97,7 +111,12 @@ export default function WithdrawMoneyPage() {
                   <div className="absolute inset-0 bg-gradient-to-r from-[#b68938]/20 via-[#b68938]/5 to-[#b68938]/20 rounded-2xl opacity-0 group-focus-within:opacity-100 transition-opacity blur"></div>
                   <div className="relative">
                     <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
-                      <span className="text-xl font-semibold" style={{ color: '#b68938' }}>₨</span>
+                      <span
+                        className="text-xl font-semibold"
+                        style={{ color: '#b68938' }}
+                      >
+                        ₨
+                      </span>
                     </div>
                     <input
                       type="number"
@@ -107,7 +126,13 @@ export default function WithdrawMoneyPage() {
                       className="w-full bg-black/50 border border-[#b68938]/30 rounded-2xl pl-12 pr-20 py-5 text-white text-2xl font-bold focus:outline-none focus:border-[#b68938] focus:bg-black/70 transition-all"
                     />
                     <div className="absolute right-4 top-1/2 -translate-y-1/2">
-                      <span className="text-sm font-semibold px-3 py-1 rounded-lg" style={{ backgroundColor: 'rgba(182, 137, 56, 0.2)', color: '#b68938' }}>
+                      <span
+                        className="text-sm font-semibold px-3 py-1 rounded-lg"
+                        style={{
+                          backgroundColor: 'rgba(182, 137, 56, 0.2)',
+                          color: '#b68938',
+                        }}
+                      >
                         NPR
                       </span>
                     </div>
@@ -123,7 +148,10 @@ export default function WithdrawMoneyPage() {
 
               {/* Description */}
               <div className="mb-6">
-                <label className="block text-sm font-medium mb-3" style={{ color: '#b68938' }}>
+                <label
+                  className="block text-sm font-medium mb-3"
+                  style={{ color: '#b68938' }}
+                >
                   Description (Optional)
                 </label>
                 <textarea
@@ -188,11 +216,15 @@ export default function WithdrawMoneyPage() {
               <button
                 onClick={() => handlePayout(parseFloat(amount))}
                 disabled={!amount}
-                className={`w-full py-4 rounded-2xl font-bold text-white transition-all relative overflow-hidden group ${amount
-                  ? 'hover:shadow-xl hover:shadow-[#b68938]/30 hover:scale-[1.02]'
-                  : 'opacity-50 cursor-not-allowed'
-                  }`}
-                style={{ background: 'linear-gradient(135deg, #e1ba73, #b68938, #8a6b2e)' }}
+                className={`w-full py-4 rounded-2xl font-bold text-white transition-all relative overflow-hidden group ${
+                  amount
+                    ? 'hover:shadow-xl hover:shadow-[#b68938]/30 hover:scale-[1.02]'
+                    : 'opacity-50 cursor-not-allowed'
+                }`}
+                style={{
+                  background:
+                    'linear-gradient(135deg, #e1ba73, #b68938, #8a6b2e)',
+                }}
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
                 <span className="relative z-10 flex items-center justify-center gap-2">
@@ -214,28 +246,48 @@ export default function WithdrawMoneyPage() {
               <div className="space-y-4">
                 <div className="flex justify-between items-start">
                   <span className="text-sm text-gray-400">Minimum Amount</span>
-                  <span className="text-sm font-semibold text-white">NPR 100</span>
+                  <span className="text-sm font-semibold text-white">
+                    NPR 100
+                  </span>
                 </div>
                 <div className="flex justify-between items-start">
                   <span className="text-sm text-gray-400">Daily Limit</span>
-                  <span className="text-sm font-semibold text-white">NPR 50,000</span>
+                  <span className="text-sm font-semibold text-white">
+                    NPR 50,000
+                  </span>
                 </div>
                 <div className="flex justify-between items-start">
                   <span className="text-sm text-gray-400">Processing Fee</span>
-                  <span className="text-sm font-semibold" style={{ color: '#b68938' }}>Free</span>
+                  <span
+                    className="text-sm font-semibold"
+                    style={{ color: '#b68938' }}
+                  >
+                    Free
+                  </span>
                 </div>
                 <div className="flex justify-between items-start">
                   <span className="text-sm text-gray-400">Processing Time</span>
-                  <span className="text-sm font-semibold text-white">24 Hours</span>
+                  <span className="text-sm font-semibold text-white">
+                    24 Hours
+                  </span>
                 </div>
               </div>
             </div>
 
             {/* Security Notice */}
-            <div className="rounded-3xl p-6 relative overflow-hidden"
-              style={{ background: 'linear-gradient(135deg, #2a2520, #1a1410)' }}>
-              <div className="absolute top-0 right-0 w-32 h-32 rounded-full -mr-16 -mt-16"
-                style={{ background: 'radial-gradient(circle, rgba(182, 137, 56, 0.2) 0%, transparent 70%)' }}></div>
+            <div
+              className="rounded-3xl p-6 relative overflow-hidden"
+              style={{
+                background: 'linear-gradient(135deg, #2a2520, #1a1410)',
+              }}
+            >
+              <div
+                className="absolute top-0 right-0 w-32 h-32 rounded-full -mr-16 -mt-16"
+                style={{
+                  background:
+                    'radial-gradient(circle, rgba(182, 137, 56, 0.2) 0%, transparent 70%)',
+                }}
+              ></div>
 
               <div className="relative z-10">
                 <div className="flex items-center gap-2 mb-3">
@@ -244,19 +296,28 @@ export default function WithdrawMoneyPage() {
                 </div>
                 <div className="space-y-3">
                   <div className="flex gap-2">
-                    <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: '#b68938' }} />
+                    <AlertCircle
+                      className="w-4 h-4 mt-0.5 flex-shrink-0"
+                      style={{ color: '#b68938' }}
+                    />
                     <p className="text-sm text-gray-300">
                       Always verify payment details before confirming
                     </p>
                   </div>
                   <div className="flex gap-2">
-                    <Clock className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: '#b68938' }} />
+                    <Clock
+                      className="w-4 h-4 mt-0.5 flex-shrink-0"
+                      style={{ color: '#b68938' }}
+                    />
                     <p className="text-sm text-gray-300">
                       Withdrawals are processed within 24 hours
                     </p>
                   </div>
                   <div className="flex gap-2">
-                    <Shield className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: '#b68938' }} />
+                    <Shield
+                      className="w-4 h-4 mt-0.5 flex-shrink-0"
+                      style={{ color: '#b68938' }}
+                    />
                     <p className="text-sm text-gray-300">
                       Your funds are protected with bank-level security
                     </p>
@@ -275,7 +336,12 @@ export default function WithdrawMoneyPage() {
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-gray-400">Remaining Limit</span>
-                  <span className="text-sm font-semibold" style={{ color: '#b68938' }}>NPR 50,000</span>
+                  <span
+                    className="text-sm font-semibold"
+                    style={{ color: '#b68938' }}
+                  >
+                    NPR 50,000
+                  </span>
                 </div>
               </div>
             </div>

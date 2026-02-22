@@ -6,3 +6,10 @@ export const apiClient = axios.create({
     'Content-Type': 'application/json',
   },
 });
+
+export const getBankStatementOfUserApi = async (userId: string) => {
+  const response = await apiClient.get(
+    `/finance/getBankStatementOfUser/${userId}`,
+  );
+  return response.data;
+};

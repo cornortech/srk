@@ -12,7 +12,6 @@ import BankSetupPinPage from './pages/onboarding/SetupPin';
 
 // Dashboard Pages
 import BankDashboardPage from './pages/dashboard/BankDashboard';
-import BankStatement from './pages/dashboard/Account';
 
 // Send Money Flow
 import SendMoneyPage from './pages/dashboard/payment/SendMoney';
@@ -31,6 +30,7 @@ import PasswordResetPage from './pages/dashboard/PasswordReset';
 import CallbackPage from './pages/sso/SSOCallBack';
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
 import UserVerification from './pages/onboarding/UserVerification';
+import BankStatement from './pages/dashboard/BankStatement';
 
 const queryClient = new QueryClient();
 

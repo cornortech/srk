@@ -9,8 +9,10 @@ interface TaskAuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
   setTaskUserID: (id: string) => void;
+  clearTaskUserID: () => void;
   setUser: (user: TaskUser | null) => void;
   setLoading: (loading: boolean) => void;
+  setUniversityID: (id: string | null) => void;
   logout: () => void;
 }
 
@@ -25,14 +27,19 @@ export const useTaskAuthStore = create<TaskAuthState>()(
 
       setTaskUserID: (id) => set({ taskUserID: id }),
 
+      // Clears a stale taskUserID (e.g. when the DB record was deleted and re-created)
+      clearTaskUserID: () => set({ taskUserID: null }),
+
+      setUniversityID: (id) => set({ universityID: id }),
+
       setUser: (user) =>
-        set({
+        set((state) => ({
           user,
-          universityID: user?.universityId,
-          taskUserID: null,
+          universityID: user?.universityId ?? state.universityID,
+          taskUserID: state.taskUserID,
           isAuthenticated: !!user,
           isLoading: false,
-        }),
+        })),
 
       setLoading: (isLoading) => set({ isLoading }),
 

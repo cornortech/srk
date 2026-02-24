@@ -922,30 +922,32 @@ const getSrkTaskOnboardingVerificationRequestForAdmin: AppRouteImplementationOrO
         limit,
         totalRecords,
         totalPages: Math.ceil(totalRecords / limit),
-        data: verificationRequests.map((request) => {
-          const taskUser = request.taskUserId as any;
-          return {
-            _id: request._id.toString(),
-            taskUserId: {
-              _id: taskUser._id.toString(),
-              fullName: taskUser.fullName,
-              dob: taskUser.dob,
-              isActivated: taskUser.isActivated,
-              srkUniversityUserId: {
-                _id: taskUser.srkUniversityUserId._id.toString(),
-                email: taskUser.srkUniversityUserId.email,
-                phoneNumber: taskUser.srkUniversityUserId.phoneNumber,
+        data: verificationRequests
+          .filter((request) => request.taskUserId !== null) // Filter out orphaned requests
+          .map((request) => {
+            const taskUser = request.taskUserId as any;
+            return {
+              _id: request._id.toString(),
+              taskUserId: {
+                _id: taskUser._id.toString(),
+                fullName: taskUser.fullName,
+                dob: taskUser.dob,
+                isActivated: taskUser.isActivated,
+                srkUniversityUserId: {
+                  _id: taskUser.srkUniversityUserId._id.toString(),
+                  email: taskUser.srkUniversityUserId.email,
+                  phoneNumber: taskUser.srkUniversityUserId.phoneNumber,
+                },
               },
-            },
-            kycDocumentUrl: request.kycDocumentUrl,
-            imageUrl: request.imageUrl,
-            signatureUrl: request.signatureUrl,
-            status: request.status,
-            rejectionReason: request.rejectionReason || null,
-            createdAt: request.createdAt.toISOString(),
-            updatedAt: request.updatedAt.toISOString(),
-          };
-        }),
+              kycDocumentUrl: request.kycDocumentUrl,
+              imageUrl: request.imageUrl,
+              signatureUrl: request.signatureUrl,
+              status: request.status,
+              rejectionReason: request.rejectionReason || null,
+              createdAt: request.createdAt.toISOString(),
+              updatedAt: request.updatedAt.toISOString(),
+            };
+          }),
       },
     };
   } catch (error) {
@@ -1743,15 +1745,20 @@ const getApprovedSrkTaskAffiliateVerificationRequest: AppRouteImplementationOrOp
       };
     }
     console.log('srk university Id', srkUniversityUserId);
-    // 1️⃣ Look for verification request
-    const verificationRecord = await srkTaskUserModel
+    
+    // ✅ CRITICAL FIX: 
+    // 1. Find the srkTaskUser by srkUniversityUserId
+    // 2. Get the LATEST verification request for that taskUser
+    // 3. Return the correct taskUserID from the latest verification
+    
+    const srkTaskUser = await srkTaskUserModel
       .findOne({
-        srkUniversityUserId,
+        srkUniversityUserId: new mongoose.Types.ObjectId(srkUniversityUserId),
       })
+      .sort({ createdAt: -1 }) // Get the most recent srkTaskUser
       .lean();
 
-    // 2️⃣ Not found → pending
-    if (!verificationRecord) {
+    if (!srkTaskUser) {
       return {
         status: 200,
         body: {
@@ -1760,10 +1767,24 @@ const getApprovedSrkTaskAffiliateVerificationRequest: AppRouteImplementationOrOp
         },
       };
     }
-    const srkTaskOnboardingVerificationRequestExists =
-      await srkTaskOnboardingVerificationRequestModel.findOne({
-        taskUserId: verificationRecord._id,
-      });
+
+    // Now get the LATEST verification request for this taskUser
+    const latestVerificationRequest = await srkTaskOnboardingVerificationRequestModel
+      .findOne({
+        taskUserId: srkTaskUser._id,
+      })
+      .sort({ createdAt: -1 }) // Get the most recent verification request
+      .lean();
+
+    if (!latestVerificationRequest) {
+      return {
+        status: 200,
+        body: {
+          success: false,
+          message: 'Not verified yet',
+        },
+      };
+    }
 
     return {
       status: 200,
@@ -1771,14 +1792,12 @@ const getApprovedSrkTaskAffiliateVerificationRequest: AppRouteImplementationOrOp
         success: true,
         message: 'Affiliate request found',
         data: getAllTaskAffiliateResponseSchema.parse({
-          ...verificationRecord,
-          _id: verificationRecord._id.toString(),
-          srkUniversityUserId:
-            verificationRecord.srkUniversityUserId.toString(),
-          isActivated: verificationRecord.isActivated,
-          status: srkTaskOnboardingVerificationRequestExists.status,
-          createdAt: verificationRecord.createdAt.toISOString(),
-          updatedAt: verificationRecord.updatedAt.toISOString(),
+          _id: srkTaskUser._id.toString(),
+          srkUniversityUserId: srkUniversityUserId,
+          isActivated: srkTaskUser.isActivated,
+          status: latestVerificationRequest.status,
+          createdAt: srkTaskUser.createdAt.toISOString(),
+          updatedAt: srkTaskUser.updatedAt.toISOString(),
         }),
       },
     };

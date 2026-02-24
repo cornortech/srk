@@ -154,3 +154,14 @@ export const getSrkBonusCashFlowForAdminSchema = z.object({
 export type TGetSrkBonusCashFlowForAdmin = z.infer<
   typeof getSrkBonusCashFlowForAdminSchema
 >;
+
+export const createTaskBalancePayoutSchema = z.object({
+  userId: z.string(),   // This is the srk University userId
+  amount: z.number(),   // Coins to withdraw
+});
+
+export const getTaskEarningDetailsSchema = z.object({
+  totalCoinsEarned: z.number(),
+  currentCoins: z.number(),
+  totalEarnings: z.number(),
+});

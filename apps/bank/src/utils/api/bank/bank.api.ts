@@ -152,6 +152,24 @@ export const getEarningDetailsofUserApi = async (userId: string) => {
   return response.data;
 };
 
+export const getTaskEarningDetailsApi = async (userId: string) => {
+  const response = await apiClient.get(
+    `/finance/task-earning/${userId}`,
+  );
+  return response.data;
+};
+
+export const createTaskBalancePayoutApi = async (
+  userId: string,
+  amount: number,
+) => {
+  const response = await apiClient.post(`/finance/task-balance-payout`, {
+    userId,
+    amount,
+  });
+  return response.data;
+};
+
 export const bankApi = {
   sendMoney,
   getBankStatementOfUser,
@@ -169,4 +187,6 @@ export const bankApi = {
   srkBankPayoutRequestApi,
   getEarningDetailsofUserApi,
   createBalancePayoutApi,
+  getTaskEarningDetailsApi,
+  createTaskBalancePayoutApi,
 };

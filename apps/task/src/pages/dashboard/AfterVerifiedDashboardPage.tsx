@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import {
   DashboardView,
@@ -35,12 +35,13 @@ import { useTaskAuthStore } from '../../store/useTaskAuthStore';
 import { FinanceHistoryView } from '../../features/dashboard/views/FinanceHistoryView';
 import { TaskHistoryView } from '../../features/dashboard/views/TaskHistoryView';
 import { PaymentDetailsView } from '../../features/dashboard/views/PaymentDetailsView';
-import { useAuthAffiliateVerification } from '../../../../../libs/shared/hooks/src/lib/useAuthAffiliate';
 
 export const AfterVerifiedDashboardPage: React.FC = () => {
-  const { user, isAuthenticated, isLoading } = useAuthAffiliateVerification();
+  const { user, isAuthenticated, isLoading, taskUserID, setTaskUserID, clearTaskUserID } = useTaskAuthStore();
 
-  const [view, setView] = useState<'landing' | 'dashboard'>('landing');
+  const [view, setView] = useState<'landing' | 'dashboard'>(
+    () => (taskUserID ? 'dashboard' : 'landing')
+  );
   const [dashView, setDashView] = useState<DashboardView>('verification');
   const [showVerification, setShowVerification] = useState(false);
   const [isApproved, setIsApproved] = useState(false);
@@ -54,32 +55,19 @@ export const AfterVerifiedDashboardPage: React.FC = () => {
   const [showRequestModal, setShowRequestModal] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  const { taskUserID, setTaskUserID } = useTaskAuthStore();
-
-  const { data: verificationRequest } =
+  const { data: verificationRequest, refetch: refetchVerification } =
     api.srkTask.getAllSrkTaskAffiliateVerificationRequest.useQuery(
-      ['getAllSrkTaskAffiliateVerificationRequest', user?._id],
-      { query: { srkUniversityUserId: user?._id || '' } },
+      ['getAllSrkTaskAffiliateVerificationRequest', user?.universityId],
+      { query: { srkUniversityUserId: user?.universityId || '' } },
       {
-        enabled: !!user?._id && !taskUserID,
+        enabled: !!user?.universityId,
         queryKey: [
           'getAllSrkTaskAffiliateVerificationRequest',
-          user?._id || '',
+          user?.universityId || '',
+          taskUserID ?? 'none',
         ],
       }
     );
-
-  React.useEffect(() => {
-    if (
-      verificationRequest?.status === 200 &&
-      verificationRequest.body.success &&
-      verificationRequest.body.data
-    ) {
-      if (typeof verificationRequest.body.data._id === 'string') {
-        setTaskUserID(verificationRequest.body.data._id);
-      }
-    }
-  }, [verificationRequest, setTaskUserID]);
 
   const { data: userProfileData } = api.srkTask.getSrkTaskUserProfile.useQuery(
     ['getSrkTaskUserProfile', taskUserID],
@@ -89,6 +77,12 @@ export const AfterVerifiedDashboardPage: React.FC = () => {
       queryKey: ['getSrkTaskUserProfile', taskUserID || ''],
     }
   );
+
+  useEffect(() => {
+    if (userProfileData && userProfileData.status !== 200) {
+      clearTaskUserID();
+    }
+  }, [userProfileData, clearTaskUserID]);
 
   const { data: analyticsData, refetch: refetchAnalytics } =
     api.srkTask.getSrkTaskUserAnalytics.useQuery(
@@ -108,9 +102,13 @@ export const AfterVerifiedDashboardPage: React.FC = () => {
 
   const eligible = Math.max(0, balance - 100);
 
-  if (userProfileData?.body.userData.kycStatus === 'approved') {
-    if (!isApproved) setIsApproved(true);
-  }
+  // ✅ BUG FIX: Derive isApproved from the fetched profile data reactively.
+  // Doing this in render was a side-effect anti-pattern and caused stale state issues.
+  React.useEffect(() => {
+    if (userProfileData?.body.userData.kycStatus === 'approved') {
+      setIsApproved(true);
+    }
+  }, [userProfileData]);
 
   let currentProfile: Omit<
     UserProfile,
@@ -137,7 +135,7 @@ export const AfterVerifiedDashboardPage: React.FC = () => {
     ...likeTasks,
   ]);
 
-
+  const [rejectedTasks, setRejectedTasks] = useState<RejectedTaskEntry[]>([]);
   const [reviewingRejectedTask, setReviewingRejectedTask] =
     useState<RejectedTaskEntry | null>(null);
   const [notifications, setNotifications] = useState<

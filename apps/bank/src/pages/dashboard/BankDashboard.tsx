@@ -160,7 +160,7 @@ export default function ModernBankDashboard() {
                       Total Balance
                     </p>
                     <h3 className="text-5xl font-bold text-white">
-                      Nrs.
+                      NRs.
                       {balance?.data?.balance?.toLocaleString('en-US', {
                         minimumFractionDigits: 2,
                       })}

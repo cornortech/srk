@@ -14,6 +14,8 @@ import { SrkUniversityBankModel } from '../../model/srkUniversityBankModel';
 import { EarningStatementModel } from '../../model/earningStatementModel';
 import { financeContract, TGetSrkBonusCashFlow } from '@srk/shared/contracts';
 import { BankModel } from '../../model/bankModel';
+import { srkTaskUserModel } from '../../model/task/srkTaskUserModel';
+import { srkTaskUserBalanceModel } from '../../model/task/srkTaskUserBalanceModel';
 
 const getAllBalancePayoutOfUser: AppRouteImplementationOrOptions<
   typeof financeContract.getAllBalancePayoutOfUser
@@ -168,6 +170,47 @@ const getFinanceDetailsOfUser: AppRouteImplementationOrOptions<
     };
   } catch (error) {
     console.error('Error fetching earnings:', error);
+    return {
+      status: 500,
+      body: {
+        success: false,
+        message: 'Internal server error',
+      },
+    };
+  }
+};
+
+const getTaskEarningDetails: AppRouteImplementationOrOptions<
+  typeof financeContract.getTaskEarningDetails
+> = async ({ req }) => {
+  try {
+    const { userId } = req.params;
+
+    // Find the task user associated with this user
+    const taskUser = await srkTaskUserModel.findOne({ srkUniversityUserId: userId });
+
+    if (!taskUser) {
+      return {
+        status: 404,
+        body: {
+          success: false,
+          message: 'Task user not found',
+        },
+      };
+    }
+
+    const taskBalance = await srkTaskUserBalanceModel.findOne({ taskUserId: taskUser._id });
+
+    return {
+      status: 200,
+      body: {
+        totalCoinsEarned: taskBalance?.totalCoinsEarned || 0,
+        currentCoins: taskBalance?.currentCoins || 0,
+        totalEarnings: taskBalance?.totalEarnings || 0,
+      },
+    };
+  } catch (error) {
+    console.error('Error fetching task earnings:', error);
     return {
       status: 500,
       body: {
@@ -987,4 +1030,5 @@ export const financeQueryHandler = {
   getAllBalancePayoutsByStatus,
   getTeamCashflowOfUser,
   getSrkBonusFlowForAdmin,
+  getTaskEarningDetails,
 };

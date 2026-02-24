@@ -30,4 +30,6 @@ export const financeRouter = s.router(financeContract, {
   rejectBankRequest: financeMutationHandler.rejectBankRequest,
   getTeamCashflowOfUser: financeQueryHandler.getTeamCashflowOfUser,
   getSrkBonusFlowForAdmin: financeQueryHandler.getSrkBonusFlowForAdmin,
+  getTaskEarningDetails: financeQueryHandler.getTaskEarningDetails,
+  createTaskBalancePayout: financeMutationHandler.createTaskBalancePayout,
 });

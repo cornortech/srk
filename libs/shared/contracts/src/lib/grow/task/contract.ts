@@ -65,6 +65,7 @@ export const srkTaskContract = c.router({
     responses: {
       200: getSrkTaskUserAnalyticsSchema,
       400: ErrorSchema,
+      404: ErrorSchema,
       500: ErrorSchema,
     },
     summary: 'Get SRK Task User Analytics details by Id',
@@ -233,7 +234,11 @@ export const srkTaskContract = c.router({
     path: '/task/submit-onboarding-verification/:srkUniversityId',
     body: submitTaskOnboardingVerificationSchema,
     responses: {
-      201: SuccessSchema,
+      201: z.object({
+        success: z.boolean(),
+        message: z.string(),
+        taskUserID: z.string(),
+      }),
       400: ErrorSchema,
       500: ErrorSchema,
     },

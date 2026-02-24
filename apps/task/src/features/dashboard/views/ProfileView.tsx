@@ -59,7 +59,6 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
   // const [socialLinks, _setSocialLinks] = useState(profile?.socialLinks);
 
   const [isEditing, _setIsEditing] = useState(false);
-  console.log(isEditing);
 
   return (
     <div className="space-y-8">
@@ -193,11 +192,10 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                 ].map((achievement, idx) => (
                   <div key={idx} className="flex items-center gap-3">
                     <div
-                      className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                        achievement.achieved
+                      className={`w-10 h-10 rounded-lg flex items-center justify-center ${achievement.achieved
                           ? 'bg-div-to-r from-amber-500/20 to-yellow-500/20'
                           : 'bg-zinc-800/50'
-                      }`}
+                        }`}
                     >
                       <achievement.icon
                         size={18}

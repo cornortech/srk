@@ -204,6 +204,8 @@ const submitSrkTaskOnboardingVerification: AppRouteImplementationOrOptions<
       };
     }
 
+    let taskUserId: string;
+
     if (!srkTaskUserExist) {
       const newSrkTaskUserExist = await srkTaskUserModel.create({
         fullName: body.fullName,
@@ -211,6 +213,8 @@ const submitSrkTaskOnboardingVerification: AppRouteImplementationOrOptions<
         dob: body.dateOfBirth,
         isActivated: false,
       });
+
+      taskUserId = newSrkTaskUserExist._id.toString();
 
       await srkTaskOnboardingVerificationRequestModel.create({
         taskUserId: newSrkTaskUserExist._id,
@@ -222,6 +226,7 @@ const submitSrkTaskOnboardingVerification: AppRouteImplementationOrOptions<
         status: 'pending',
       });
     } else {
+      taskUserId = srkTaskUserExist._id.toString();
       srkTaskUserExist.fullName = body.fullName;
       srkTaskUserExist.dob = body.dateOfBirth;
       await srkTaskUserExist.save();
@@ -244,6 +249,7 @@ const submitSrkTaskOnboardingVerification: AppRouteImplementationOrOptions<
       body: {
         success: true,
         message: 'Onboarding verification submitted successfully',
+        taskUserID: taskUserId,
       },
     };
   } catch (error) {

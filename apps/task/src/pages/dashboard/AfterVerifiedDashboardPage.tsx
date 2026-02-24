@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import {
   DashboardView,
@@ -35,12 +35,13 @@ import { useTaskAuthStore } from '../../store/useTaskAuthStore';
 import { FinanceHistoryView } from '../../features/dashboard/views/FinanceHistoryView';
 import { TaskHistoryView } from '../../features/dashboard/views/TaskHistoryView';
 import { PaymentDetailsView } from '../../features/dashboard/views/PaymentDetailsView';
-import { useAuthAffiliateVerification } from '../../../../../libs/shared/hooks/src/lib/useAuthAffiliate';
 
 export const AfterVerifiedDashboardPage: React.FC = () => {
-  const { user, isAuthenticated, isLoading } = useAuthAffiliateVerification();
+  const { user, isAuthenticated, isLoading, taskUserID, setTaskUserID, clearTaskUserID } = useTaskAuthStore();
 
-  const [view, setView] = useState<'landing' | 'dashboard'>('landing');
+  const [view, setView] = useState<'landing' | 'dashboard'>(
+    () => (taskUserID ? 'dashboard' : 'landing')
+  );
   const [dashView, setDashView] = useState<DashboardView>('verification');
   const [showVerification, setShowVerification] = useState(false);
   const [isApproved, setIsApproved] = useState(false);
@@ -54,32 +55,19 @@ export const AfterVerifiedDashboardPage: React.FC = () => {
   const [showRequestModal, setShowRequestModal] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  const { taskUserID, setTaskUserID } = useTaskAuthStore();
-
-  const { data: verificationRequest } =
+  const { data: verificationRequest, refetch: refetchVerification } =
     api.srkTask.getAllSrkTaskAffiliateVerificationRequest.useQuery(
-      ['getAllSrkTaskAffiliateVerificationRequest', user?._id],
-      { query: { srkUniversityUserId: user?._id || '' } },
+      ['getAllSrkTaskAffiliateVerificationRequest', user?.universityId],
+      { query: { srkUniversityUserId: user?.universityId || '' } },
       {
-        enabled: !!user?._id && !taskUserID,
+        enabled: !!user?.universityId,
         queryKey: [
           'getAllSrkTaskAffiliateVerificationRequest',
-          user?._id || '',
+          user?.universityId || '',
+          taskUserID ?? 'none',
         ],
       }
     );
-
-  React.useEffect(() => {
-    if (
-      verificationRequest?.status === 200 &&
-      verificationRequest.body.success &&
-      verificationRequest.body.data
-    ) {
-      if (typeof verificationRequest.body.data._id === 'string') {
-        setTaskUserID(verificationRequest.body.data._id);
-      }
-    }
-  }, [verificationRequest, setTaskUserID]);
 
   const { data: userProfileData } = api.srkTask.getSrkTaskUserProfile.useQuery(
     ['getSrkTaskUserProfile', taskUserID],
@@ -89,6 +77,12 @@ export const AfterVerifiedDashboardPage: React.FC = () => {
       queryKey: ['getSrkTaskUserProfile', taskUserID || ''],
     }
   );
+
+  useEffect(() => {
+    if (userProfileData && userProfileData.status !== 200) {
+      clearTaskUserID();
+    }
+  }, [userProfileData, clearTaskUserID]);
 
   const { data: analyticsData, refetch: refetchAnalytics } =
     api.srkTask.getSrkTaskUserAnalytics.useQuery(
@@ -108,9 +102,13 @@ export const AfterVerifiedDashboardPage: React.FC = () => {
 
   const eligible = Math.max(0, balance - 100);
 
-  if (userProfileData?.body.userData.kycStatus === 'approved') {
-    if (!isApproved) setIsApproved(true);
-  }
+  // ✅ BUG FIX: Derive isApproved from the fetched profile data reactively.
+  // Doing this in render was a side-effect anti-pattern and caused stale state issues.
+  React.useEffect(() => {
+    if (userProfileData?.body.userData.kycStatus === 'approved') {
+      setIsApproved(true);
+    }
+  }, [userProfileData]);
 
   let currentProfile: Omit<
     UserProfile,
@@ -138,7 +136,6 @@ export const AfterVerifiedDashboardPage: React.FC = () => {
   ]);
 
   const [rejectedTasks, setRejectedTasks] = useState<RejectedTaskEntry[]>([]);
-
   const [reviewingRejectedTask, setReviewingRejectedTask] =
     useState<RejectedTaskEntry | null>(null);
   const [notifications, setNotifications] = useState<
@@ -276,68 +273,68 @@ export const AfterVerifiedDashboardPage: React.FC = () => {
         * {
           font-family: 'Inter', sans-serif;
         }
-        
+
         @keyframes gradient {
           0%, 100% { background-position: 0% 50%; }
           50% { background-position: 100% 50%; }
         }
-        
+
         @keyframes float {
           0%, 100% { transform: translateY(0px); }
           50% { transform: translateY(-10px); }
         }
-        
+
         @keyframes shimmer {
           0% { transform: translateX(-100%); }
           100% { transform: translateX(100%); }
         }
-        
+
         @keyframes pulse {
           0%, 100% { opacity: 1; }
           50% { opacity: 0.5; }
         }
-        
+
         .animate-gradient {
           background-size: 200% auto;
           animation: gradient 3s ease infinite;
         }
-        
+
         /* Custom scrollbar */
         ::-webkit-scrollbar {
           width: 8px;
           height: 8px;
         }
-        
+
         ::-webkit-scrollbar-track {
           background: rgba(255, 255, 255, 0.05);
         }
-        
+
         ::-webkit-scrollbar-thumb {
           background: rgba(182, 137, 56, 0.3);
           border-radius: 4px;
         }
-        
+
         ::-webkit-scrollbar-thumb:hover {
           background: rgba(182, 137, 56, 0.5);
         }
-        
+
         /* Selection */
         ::selection {
           background: rgba(182, 137, 56, 0.3);
           color: white;
         }
-        
+
         /* Smooth transitions */
         * {
           transition: background-color 0.3s ease, border-color 0.3s ease;
         }
-        
+
         /* Focus styles */
         :focus-visible {
           outline: 2px solid rgba(182, 137, 56, 0.5);
           outline-offset: 2px;
         }
-        
+
         /* Mobile optimizations */
         @media (max-width: 640px) {
           .text-7xl, .text-8xl {

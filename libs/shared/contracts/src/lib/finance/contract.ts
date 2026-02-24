@@ -15,6 +15,8 @@ import {
   getPaginatedBalancePayoutSchema,
   upsertBankDetailsSchema,
   upsertKYCDetailsSchema,
+  createTaskBalancePayoutSchema,
+  getTaskEarningDetailsSchema,
 } from './schema';
 import { z } from 'zod';
 const c = initContract();
@@ -43,6 +45,29 @@ export const financeContract = c.router({
       500: ErrorSchema,
     },
     summary: 'Create a balance payout',
+  },
+  getTaskEarningDetails: {
+    method: 'GET',
+    path: '/finance/task-earning/:userId',
+    responses: {
+      200: getTaskEarningDetailsSchema,
+      403: ErrorSchema,
+      404: ErrorSchema,
+      500: ErrorSchema,
+    },
+    summary: 'Get earning details of task user',
+  },
+  createTaskBalancePayout: {
+    method: 'POST',
+    path: '/finance/task-balance-payout',
+    body: createTaskBalancePayoutSchema,
+    responses: {
+      201: SuccessSchema,
+      403: ErrorSchema,
+      404: ErrorSchema,
+      500: ErrorSchema,
+    },
+    summary: 'Create a balance payout from task balance to srk bank',
   },
   getAllBalancePayoutOfUser: {
     method: 'GET',

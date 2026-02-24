@@ -289,7 +289,7 @@ export default function ModernBankDashboard() {
                       Your latest transactions
                     </p>
                   </div>
-                  <Link to="/bank/dashboard/account/statement">
+                  <Link to="/dashboard/account/statement">
                     <button
                       className="text-sm font-medium hover:opacity-80 flex items-center gap-1 transition-opacity"
                       style={{ color: '#b68938' }}

@@ -77,13 +77,13 @@ export default function AddMoneyPage() {
   }
 
   return (
-    <div className="min-h-screen  bg-black pt-32">
+    <div className="min-h-screen  bg-black">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
           <button className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors mb-4">
             <ArrowLeft className="w-5 h-5" />
-            <Link to="/bank/dashboard"><span className="text-sm font-medium">Back to Dashboard</span></Link>
+            <Link to="/dashboard"><span className="text-sm font-medium">Back to Dashboard</span></Link>
           </button>
           <h2 className="text-3xl font-bold text-white mb-2">Add Money 💰</h2>
           <p className="text-gray-400">Top up your SRK Bank account</p>

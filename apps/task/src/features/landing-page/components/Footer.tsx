@@ -1,8 +1,11 @@
 import { motion } from 'framer-motion';
 import { ArrowUpRight, ChevronRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { MagneticButton } from '../../../components/ui/MagneticButton';
 
 export const Footer = () => {
+  const universityUrl = import.meta.env.VITE_SRK_UNIVERSITY_URL || 'https://thesrkuniversity.com';
+  
   const platformLinks = [
     'How It Works',
     'Features',
@@ -11,11 +14,12 @@ export const Footer = () => {
     'Documentation',
   ];
   const companyLinks = [
-    'About Us',
-    'Careers',
-    'Blog',
-    'Contact',
-    'Privacy Policy',
+    { name: 'About Us', href: '/about' },
+    { name: 'Careers', href: '#careers' },
+    { name: 'Blog', href: '#blog' },
+    { name: 'Contact', href: '#contact' },
+    { name: 'Privacy Policy', href: '/privacy-policy' },
+    { name: 'Terms & Conditions', href: '/terms-and-conditions' },
   ];
   const socialLinks = ['Twitter', 'Instagram', 'LinkedIn', 'Discord'];
 
@@ -47,7 +51,9 @@ export const Footer = () => {
                 Join the Network
               </MagneticButton>
               <a
-                href="#"
+                href={universityUrl}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="text-sm text-[#e1ba73] font-bold flex items-center gap-2 hover:text-white transition-colors group"
               >
                 University Portal
@@ -88,13 +94,22 @@ export const Footer = () => {
             <h4 className="text-white font-bold mb-6 text-lg">Company</h4>
             <ul className="space-y-4 text-gray-500 text-sm font-medium">
               {companyLinks.map((item) => (
-                <li key={item}>
-                  <a
-                    href={`#${item.toLowerCase().replace(/\s/g, '-')}`}
-                    className="hover:text-[#e1ba73] transition-colors"
-                  >
-                    {item}
-                  </a>
+                <li key={item.name}>
+                  {item.href.startsWith('/') ? (
+                    <Link
+                      to={item.href}
+                      className="hover:text-[#e1ba73] transition-colors"
+                    >
+                      {item.name}
+                    </Link>
+                  ) : (
+                    <a
+                      href={item.href}
+                      className="hover:text-[#e1ba73] transition-colors"
+                    >
+                      {item.name}
+                    </a>
+                  )}
                 </li>
               ))}
             </ul>

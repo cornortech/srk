@@ -12,6 +12,9 @@ import {
 } from './pages';
 import AuthInitializer from './components/auth/AuthInitializer';
 import { AdminProtectedRoute } from './components/auth/AdminProtectedRoute';
+import { TermsAndConditions } from './pages/TermsAndConditions';
+import { PrivacyPolicy } from './pages/PrivacyPolicy';
+import { About } from './pages/About';
 
 const queryClient = new QueryClient();
 
@@ -19,6 +22,18 @@ const router = createBrowserRouter([
   {
     path: '/',
     element: <TaskLandingPage />,
+  },
+  {
+    path: '/about',
+    element: <About />,
+  },
+  {
+    path: '/terms-and-conditions',
+    element: <TermsAndConditions />,
+  },
+  {
+    path: '/privacy-policy',
+    element: <PrivacyPolicy />,
   },
   {
     path: '/login',

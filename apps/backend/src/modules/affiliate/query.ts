@@ -21,24 +21,30 @@ const getAllAffiliateRequestsByStatus: AppRouteImplementationOrOptions<
       },
     };
 
-    // Add search functionality
+    // Add search functionality - apply BEFORE pagination
     if (query?.search) {
       const searchRegex = new RegExp(query.search, 'i');
-      queryReq.$or = [
-        { 'userId.email': searchRegex },
-        { 'userId.firstName': searchRegex },
-        { 'userId.lastName': searchRegex },
-      ];
+      
+      // Find matching users first
+      const matchingUsers = await UserModel.find({
+        $or: [
+          { email: searchRegex },
+          { firstName: searchRegex },
+          { lastName: searchRegex },
+        ],
+      }).select('_id');
+
+      const matchingUserIds = matchingUsers.map((u) => u._id);
+      
+      // Add user filter to query
+      queryReq.userId = { $in: matchingUserIds };
     }
 
     const skip = (page - 1) * limit;
 
+    // Query with ALL filters, then paginate
     const affiliateRequests = await affiliateRequestModel
-      .find({
-        status: {
-          $in: status,
-        },
-      })
+      .find(queryReq)
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
@@ -54,28 +60,11 @@ const getAllAffiliateRequestsByStatus: AppRouteImplementationOrOptions<
         };
       }>('userId');
 
-    // Filter results if search is provided (after population)
-    let filteredRequests = affiliateRequests;
-    if (query?.search) {
-      const searchRegex = new RegExp(query.search, 'i');
-      filteredRequests = affiliateRequests.filter((request) => {
-        return (
-          searchRegex.test(request.userId?.email || '') ||
-          searchRegex.test(request.userId?.firstName || '') ||
-          searchRegex.test(request.userId?.lastName || '')
-        );
-      });
-    }
-
-    // Count total after filtering
-    const totalRequest = query?.search
-      ? filteredRequests.length
-      : await affiliateRequestModel.countDocuments({
-          status: { $in: status },
-        });
+    // Count total with the same filter (no need to filter again after population)
+    const totalRequest = await affiliateRequestModel.countDocuments(queryReq);
 
     const formattedRequest = await Promise.all(
-      filteredRequests.map(async (request) => {
+      affiliateRequests.map(async (request) => {
         const affiliateBiometricData = await affiliateBiometricModel.findOne({
           userId: request.userId?._id,
         });

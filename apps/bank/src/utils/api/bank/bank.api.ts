@@ -170,6 +170,34 @@ export const createTaskBalancePayoutApi = async (
   return response.data;
 };
 
+export const getAllBalancePayoutsOfUserApi = async (userId: string) => {
+  const response = await apiClient.get(
+    `/finance/getAllBalancePayoutsOfUser/${userId}`,
+  );
+  return response.data;
+};
+
+export const getSrkTaskUserEarningsPayoutsByUserApi = async (
+  userId: string,
+) => {
+  const response = await apiClient.get(
+    `/task/user/${userId}/srk-task-earning-payouts`,
+  );
+  return response.data;
+};
+
+export const getSrkTaskAffiliateVerificationRequestApi = async (
+  srkUniversityUserId: string,
+) => {
+  const response = await apiClient.get(
+    `/task/affiliate/get-approved-verification-request`,
+    {
+      params: { srkUniversityUserId },
+    },
+  );
+  return response.data;
+};
+
 export const bankApi = {
   sendMoney,
   getBankStatementOfUser,
@@ -189,4 +217,7 @@ export const bankApi = {
   createBalancePayoutApi,
   getTaskEarningDetailsApi,
   createTaskBalancePayoutApi,
+  getAllBalancePayoutsOfUserApi,
+  getSrkTaskUserEarningsPayoutsByUserApi,
+  getSrkTaskAffiliateVerificationRequestApi,
 };

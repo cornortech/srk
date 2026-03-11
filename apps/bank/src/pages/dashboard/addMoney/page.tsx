@@ -1,364 +1,357 @@
 import { useState } from "react";
-import { ArrowLeft, Plus} from "lucide-react";
+import { ArrowLeft, Wallet, Info, History, ShieldCheck, Zap, Coins } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useMutation, useQuery } from "@tanstack/react-query";
-// import { createBalancePayoutApi, getEarningDetailsofUserApi } from "../../../../../lib/apiClient";
-import {useSRKAlert} from "@srk/shared/hooks";
+import { useSRKAlert } from "@srk/shared/hooks";
 import { AxiosError } from "axios";
 import useAuthStore from "../../../store/useAuth";
 import { bankApi } from "../../../utils/api/bank/bank.api";
-import { TEarningDetails } from "../../../utils/types/bank.type";
+import { TEarningDetails, TTaskEarningDetails } from "../../../utils/types/bank.type";
+import { Spinner } from "@nextui-org/react";
+
+// Exchange rate: 100 coins = 1 Rupee
+const COIN_TO_RUPEE = 100;
+const TDS_RATE = 0.15;
+const MIN_TASK_COINS = 20000;
+
+type Source = "university" | "task";
 
 export default function AddMoneyPage() {
   const [amount, setAmount] = useState("");
-  const { userDetails } = useAuthStore()
-  const navigate = useNavigate()
+  const [source, setSource] = useState<Source>("university");
+  const { userDetails } = useAuthStore();
+  const navigate = useNavigate();
   const { show } = useSRKAlert();
 
+  // University (Affiliate) Balance
+  const { data: userBalance, isLoading: isUniLoading } = useQuery<TEarningDetails | null>({
+    queryKey: ["getUserBalance", userDetails?._id],
+    queryFn: async () => bankApi.getEarningDetailsofUserApi(userDetails!._id),
+    enabled: !!userDetails?._id,
+  });
+
+  // Task App Coins/Balance
+  const { data: taskBalance, isLoading: isTaskLoading } = useQuery<TTaskEarningDetails | null>({
+    queryKey: ["getTaskBalance", userDetails?._id],
+    queryFn: async () => bankApi.getTaskEarningDetailsApi(userDetails!._id),
+    enabled: !!userDetails?._id,
+  });
 
   const { mutate, isPending } = useMutation({
     mutationKey: ["payout"],
-    mutationFn: async ({
-      userId,
-      withDrawalAmount,
-    }: {
-      userId: string;
-      withDrawalAmount: number;
-    }) => {
-      await bankApi.createBalancePayoutApi(userId, withDrawalAmount);
+    mutationFn: async ({ userId, targetSource }: { userId: string; targetSource: Source }) => {
+      if (targetSource === "task") {
+        // For task: `amount` is in COINS. Send coins directly; backend converts.
+        await bankApi.createTaskBalancePayoutApi(userId, +amount);
+      } else {
+        // For university: `amount` is in Rupees.
+        await bankApi.createBalancePayoutApi(userId, +amount);
+      }
     },
     onSuccess: () => {
-      show("Payout request successful", "success");
-      navigate("/affiliate/bank");
+      show("Payout request successful. Funds are being moved to your SRK Bank.", "success");
+      navigate("/dashboard");
     },
     onError: (error: AxiosError<{ message: string }>) => {
       show(error.response?.data?.message || "Payout request failed", "error");
     },
   });
 
-  const { data: userBalance } = useQuery<TEarningDetails | null>({
-    queryKey: ["getUserBalance"],
-    queryFn: async () => {
-      return bankApi.getEarningDetailsofUserApi(userDetails!._id)
-    },
-    enabled: !!userDetails?._id
-  })
+  // --- Calculations ---
+  const isTaskSource = source === "task";
+  const numAmount = +amount || 0;
 
+  // For university: amount is rupees already.
+  // For task: amount is coins → convert to rupees first.
+  const grossRupees = isTaskSource ? numAmount / COIN_TO_RUPEE : numAmount;
+  const tdsDeduction = grossRupees * TDS_RATE;
+  const netDeposit = grossRupees - tdsDeduction;
 
+  const currentBalance = isTaskSource
+    ? (taskBalance?.currentCoins || 0)
+    : (userBalance?.walletBalance || 0);
 
-  const calculateTDS = (amount: number) => {
-    const tdsRate = 0.15; // 15% TDS
-    return amount - amount * tdsRate;
-  };
+  const meetsMinimum = isTaskSource ? numAmount >= MIN_TASK_COINS : numAmount > 0;
+  const isOverBalance = numAmount > currentBalance;
 
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     const userId = userDetails?._id;
-    if (!userId || !userBalance) return;
-
-    if (userBalance.walletBalance === undefined) {
-      show("Unable to fetch user balance", "error");
-      return;
+    if (!userId) return;
+    if (numAmount <= 0) { show("Please enter a valid amount", "error"); return; }
+    if (!meetsMinimum && isTaskSource) {
+      show(`Minimum withdrawal is ${MIN_TASK_COINS.toLocaleString()} coins`, "error"); return;
     }
-
-    if (+amount > userBalance.walletBalance) {
-      show("Insufficient balance", "error");
-      return;
+    if (isOverBalance) {
+      show(`Insufficient balance in ${isTaskSource ? "Task App" : "University"} account`, "error"); return;
     }
-
-    mutate({
-      userId,
-      withDrawalAmount: +amount,
-    })
-
+    mutate({ userId, targetSource: source });
   };
 
-  if (!userBalance) {
-    return <div>Loading...</div>
+  if (isUniLoading || isTaskLoading) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <Spinner color="warning" size="lg" />
+      </div>
+    );
   }
 
+  const taskPresets = [20000, 50000, 75000, 100000];
+  const uniPresets = [100, 500, 1000, 5000];
+
   return (
-    <div className="min-h-screen  bg-black">
+    <div className="min-h-screen bg-black overflow-x-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
-          <button className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors mb-4">
-            <ArrowLeft className="w-5 h-5" />
+          <button className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors mb-4 group">
+            <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
             <Link to="/dashboard"><span className="text-sm font-medium">Back to Dashboard</span></Link>
           </button>
-          <h2 className="text-3xl font-bold text-white mb-2">Add Money 💰</h2>
-          <p className="text-gray-400">Top up your SRK Bank account</p>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h1 className="text-4xl font-extrabold text-white tracking-tight">
+                Add Money <span className="inline-block animate-bounce-slow">💰</span>
+              </h1>
+              <p className="text-gray-400 mt-1">Move your earnings to your SRK Bank account.</p>
+            </div>
+            <Link
+              to="/dashboard/account/payouts"
+              className="px-6 py-2 rounded-2xl bg-[#b68938]/10 text-[#b68938] border border-[#b68938]/20 hover:bg-[#b68938]/20 transition-all text-sm font-bold flex items-center gap-2 w-fit"
+            >
+              <History className="w-4 h-4" />
+              Payout History
+            </Link>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* Main Form */}
-          <div className="lg:col-span-8">
-            {/* Balance Card */}
-            <div
-              className="rounded-3xl p-8 text-white shadow-2xl relative overflow-hidden mb-6"
-              style={{
-                background:
-                  "linear-gradient(135deg, #1a1410 0%, #2a2520 50%, #1a1410 100%)",
-              }}
-            >
-              <div
-                className="absolute top-0 right-0 w-64 h-64 rounded-full -mr-32 -mt-32"
-                style={{
-                  background:
-                    "radial-gradient(circle, rgba(182, 137, 56, 0.15) 0%, transparent 70%)",
-                }}
-              ></div>
-              <div
-                className="absolute top-0 left-0 right-0 h-1"
-                style={{
-                  background:
-                    "linear-gradient(90deg, #e1ba73, #b68938, #e1ba73)",
-                }}
-              ></div>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          <div className="lg:col-span-8 space-y-6">
 
-              <div className="relative z-10 flex items-center justify-between">
-                <div>
-                  <p className="text-sm mb-2" style={{ color: "#b68938" }}>
-                    Current Balance
-                  </p>
-                  <h3 className="text-4xl font-bold text-white">
-                    Nrs.{userBalance.walletBalance.toFixed(2)}
-                  </h3>
-                </div>
-                <div
-                  className="p-3 rounded-2xl backdrop-blur-sm"
-                  style={{ backgroundColor: "rgba(182, 137, 56, 0.2)" }}
-                >
-                  <Plus className="w-6 h-6" style={{ color: "#b68938" }} />
-                </div>
-              </div>
-            </div>
-
-            {/* Form Card */}
-            <div className="bg-[#1a1a1a] rounded-3xl border border-[#b68938]/40 shadow-2xl shadow-[#b68938]/10">
-              <div
-                className="p-6"
-                style={{ borderBottom: "1px solid rgba(182, 137, 56, 0.2)" }}
+            {/* Source Selector */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* University */}
+              <button
+                onClick={() => { setSource("university"); setAmount(""); }}
+                className={`group relative p-6 rounded-3xl border transition-all overflow-hidden text-left ${source === "university"
+                  ? "bg-[#b68938]/10 border-[#b68938] shadow-[0_0_20px_rgba(182,137,56,0.1)]"
+                  : "bg-[#111] border-white/5 hover:border-[#b68938]/30"}`}
               >
-                <div className="flex items-center gap-3">
-                  <div
-                    className="w-10 h-10 rounded-xl flex items-center justify-center"
-                    style={{ backgroundColor: "rgba(182, 137, 56, 0.1)" }}
-                  >
-                    <Plus className="w-5 h-5" style={{ color: "#b68938" }} />
+                {source === "university" && (
+                  <div className="absolute top-3 right-3">
+                    <div className="w-2 h-2 rounded-full bg-[#b68938] animate-pulse" />
+                  </div>
+                )}
+                <div className="flex items-center gap-4">
+                  <div className={`p-3 rounded-2xl ${source === "university" ? "bg-[#b68938] text-black" : "bg-white/5 text-gray-400"}`}>
+                    <ShieldCheck className="w-6 h-6" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold text-white">
-                      Top Up Account
-                    </h3>
-                    <p className="text-sm text-gray-400">
-                      Add funds to your srk bank account
-                    </p>
+                    <p className={`text-xs font-bold uppercase tracking-widest ${source === "university" ? "text-[#b68938]" : "text-gray-500"}`}>University</p>
+                    <h3 className="text-base font-bold text-white">Affiliate Earnings</h3>
+                    <p className="text-xl font-black mt-1 text-white">Nrs. {userBalance?.walletBalance?.toLocaleString() ?? "0"}</p>
                   </div>
                 </div>
+              </button>
+
+              {/* Task App */}
+              <button
+                onClick={() => { setSource("task"); setAmount(""); }}
+                className={`group relative p-6 rounded-3xl border transition-all overflow-hidden text-left ${source === "task"
+                  ? "bg-[#b68938]/10 border-[#b68938] shadow-[0_0_20px_rgba(182,137,56,0.1)]"
+                  : "bg-[#111] border-white/5 hover:border-[#b68938]/30"}`}
+              >
+                {source === "task" && (
+                  <div className="absolute top-3 right-3">
+                    <div className="w-2 h-2 rounded-full bg-[#b68938] animate-pulse" />
+                  </div>
+                )}
+                <div className="flex items-center gap-4">
+                  <div className={`p-3 rounded-2xl ${source === "task" ? "bg-[#b68938] text-black" : "bg-white/5 text-gray-400"}`}>
+                    <Zap className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <p className={`text-xs font-bold uppercase tracking-widest ${source === "task" ? "text-[#b68938]" : "text-gray-500"}`}>Task App</p>
+                    <h3 className="text-base font-bold text-white">Task Coins</h3>
+                    <div className="flex items-center gap-1 mt-1">
+                      <Coins className="w-4 h-4 text-amber-400" />
+                      <p className="text-xl font-black text-white">{taskBalance?.currentCoins?.toLocaleString() ?? "0"}</p>
+                      <span className="text-xs text-gray-400">coins</span>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-0.5">≈ Nrs. {((taskBalance?.currentCoins || 0) / COIN_TO_RUPEE).toFixed(2)}</p>
+                  </div>
+                </div>
+              </button>
+            </div>
+
+            {/* Task notice */}
+            {isTaskSource && (
+              <div className="flex items-start gap-3 text-amber-400 bg-amber-400/5 p-4 rounded-2xl border border-amber-400/10">
+                <Coins className="w-5 h-5 shrink-0 mt-0.5" />
+                <p className="text-sm font-medium">
+                  Enter the number of <strong>coins</strong> to exchange. Min: {MIN_TASK_COINS.toLocaleString()} coins. Rate: 100 coins = Nrs. 1
+                </p>
               </div>
+            )}
 
-              <div className="p-6 space-y-6">
+            {/* Input Card */}
+            <div className="bg-[#111] border border-white/5 rounded-[40px] p-8 shadow-2xl relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-96 h-96 bg-[#b68938]/5 rounded-full -mr-48 -mt-48 blur-3xl" />
+              <div className="relative z-10 space-y-8">
 
+                {/* TDS notice */}
+                <div className="flex items-center gap-3 text-red-400 bg-red-400/5 p-4 rounded-2xl border border-red-400/10">
+                  <Info className="w-5 h-5 shrink-0" />
+                  <p className="text-sm font-medium">A 15% TDS will be deducted from your withdrawal {isTaskSource ? "(applied to rupee value)" : "amount"}.</p>
+                </div>
 
-                <b className="text-red-500">15% TDS applied on withdrawal.</b>
-                {/* Amount Input */}
-                <div className="space-y-3">
-                  <label htmlFor="amount" className="text-white font-medium block">
-                    Amount to Add *
+                <div className="space-y-4">
+                  <label className="text-sm font-bold uppercase tracking-widest text-[#b68938]">
+                    {isTaskSource ? "Enter Coins to Exchange" : "Enter Amount (Nrs.)"}
                   </label>
-                  <div className="relative">
-                    <span
-                      className="absolute left-4 top-1/2 -translate-y-1/2 text-2xl font-bold"
-                      style={{ color: "#b68938" }}
-                    >
-                      Nrs.
+                  <div className="relative group">
+                    <span className="absolute left-6 top-1/2 -translate-y-1/2 text-2xl font-black text-[#b68938]">
+                      {isTaskSource ? <Coins className="w-8 h-8" /> : "Nrs."}
                     </span>
                     <input
-                      id="amount"
                       type="number"
-                      step="0.01"
-                      min="0.01"
                       value={amount}
                       onChange={(e) => setAmount(e.target.value)}
-                      className="w-full bg-black/50 border border-[#b68938]/40 rounded-2xl px-4 pl-16 py-4 text-white text-2xl font-bold focus:outline-none focus:border-[#b68938] transition-colors placeholder:text-gray-600"
-                      placeholder="0.00"
+                      placeholder="0"
+                      min={0}
+                      max={currentBalance}
+                      className="w-full bg-black/40 border-2 border-white/5 rounded-3xl px-8 pl-24 py-7 text-4xl font-black text-white focus:outline-none focus:border-[#b68938] transition-all placeholder:text-white/10"
                     />
                   </div>
-                  <div className="flex gap-2">
-                    {[50, 100, 200, 500].map((preset) => (
+
+                  {/* Quick presets */}
+                  <div className="flex gap-2 flex-wrap">
+                    {(isTaskSource ? taskPresets : uniPresets).map(preset => (
                       <button
                         key={preset}
-                        type="button"
                         onClick={() => setAmount(preset.toString())}
-                        className="flex-1 py-2 px-4 rounded-xl bg-black/50 border border-[#b68938]/40 text-white hover:bg-[#b68938]/10 hover:border-[#b68938]/60 transition-all text-sm font-medium"
+                        className="flex-1 py-3 rounded-xl bg-white/5 hover:bg-[#b68938] hover:text-black transition-all font-bold text-sm min-w-[70px]"
                       >
-                        Nrs.{preset}
+                        {isTaskSource ? `${(preset / 1000).toFixed(0)}K` : `+${preset}`}
                       </button>
                     ))}
-                  </div>
-                </div>
-                <div className="space-y-3">
-                  <label htmlFor="amount" className="text-white font-medium block">
-                    Amount after TDS Deduction
-                  </label>
-                  <div className="relative">
-                    <span
-                      className="absolute left-4 top-1/2 -translate-y-1/2 text-2xl font-bold"
-                      style={{ color: "#b68938" }}
+                    <button
+                      onClick={() => setAmount(currentBalance.toString())}
+                      className="flex-1 py-3 rounded-xl bg-white/5 hover:bg-[#b68938] hover:text-black transition-all font-bold text-sm min-w-[60px]"
                     >
-                      Nrs.
-                    </span>
-                    <input
-                      disabled
-                      id="amount"
-                      type="number"
-                      step="0.01"
-                      min="0.01"
-                      value={amount ? calculateTDS(Number.parseFloat(amount)).toFixed(2) : ""}
-                      onChange={(e) => setAmount(e.target.value)}
-                      className="w-full bg-black/50 border border-[#b68938]/40 rounded-2xl px-4 pl-16 py-4 text-white text-2xl font-bold focus:outline-none focus:border-[#b68938] transition-colors placeholder:text-gray-600"
-                      placeholder="0.00"
-                    />
+                      Max
+                    </button>
                   </div>
-
                 </div>
 
-                {/* Payment Method */}
-                {/* <div className="space-y-3">
-                  <label className="text-white font-medium block">
-                    Payment Method
-                  </label>
-                  <div className="space-y-3">
-                    {paymentMethods.map((method) => {
-                      return (
-                        <div
-                          key={method.id}
-                          className={`p-5 rounded-2xl cursor-pointer transition-all relative overflow-hidden ${paymentMethod === method.id
-                            ? "bg-[#b68938]/10 border-2 border-[#b68938] shadow-lg shadow-[#b68938]/20"
-                            : "bg-black/50 border-2 border-[#b68938]/40 hover:border-[#b68938]/60"
-                            }`}
-                          onClick={() => setPaymentMethod(method.id)}
-                        >
-                          {paymentMethod === method.id && (
-                            <div className="absolute inset-0 bg-gradient-to-r from-[#b68938]/5 via-transparent to-[#b68938]/5"></div>
-                          )}
-                          <div className="flex items-center gap-4 relative z-10">
-                            <div
-                              className={`w-14 h-14 rounded-xl flex items-center justify-center p-2 flex-shrink-0 transition-all ${paymentMethod === method.id ? 'bg-white/10' : 'bg-white/5 hover:bg-white/10'
-                                }`}
-                            >
-                              <img src={method.logo} alt={method.name} className="w-full h-full object-contain" />
-                            </div>
-                            <div className="flex-1">
-                              <p className="text-white font-semibold text-lg mb-1">
-                                {method.name}
-                              </p>
-                              <p className="text-gray-400 text-sm">
-                                {method.description}
-                              </p>
-                            </div>
-                            {paymentMethod === method.id && (
-                              <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0"
-                                style={{ backgroundColor: '#b68938' }}>
-                                <svg className="w-3.5 h-3.5 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                                </svg>
-                              </div>
-                            )}
-                            {!paymentMethod || paymentMethod !== method.id ? (
-                              <ChevronRight className="w-5 h-5 text-gray-500 flex-shrink-0" />
-                            ) : null}
-                          </div>
-                        </div>
-                      );
-                    })}
+                {/* Breakdown */}
+                {numAmount > 0 && (
+                  <div className="p-6 rounded-3xl bg-white/[0.02] border border-white/5 space-y-3">
+                    {isTaskSource && (
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-400">Coins Selected</span>
+                        <span className="text-white font-bold">{numAmount.toLocaleString()} coins</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-400">Gross Amount</span>
+                      <span className="text-white font-bold">Nrs. {grossRupees.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-400">TDS Deduction (15%)</span>
+                      <span className="text-red-400 font-bold">− Nrs. {tdsDeduction.toFixed(2)}</span>
+                    </div>
+                    <div className="h-px bg-white/5" />
+                    <div className="flex justify-between items-center text-xl">
+                      <span className="text-white font-bold">Net Deposit</span>
+                      <span className="text-[#b68938] font-black">Nrs. {netDeposit.toFixed(2)}</span>
+                    </div>
                   </div>
-                </div> */}
+                )}
 
-                {/* Demo Notice */}
+                {/* Validation warnings */}
+                {isTaskSource && numAmount > 0 && !meetsMinimum && (
+                  <div className="p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-xl">
+                    <p className="text-yellow-400 text-sm">Minimum withdrawal is {MIN_TASK_COINS.toLocaleString()} coins.</p>
+                  </div>
+                )}
+                {isOverBalance && numAmount > 0 && (
+                  <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl">
+                    <p className="text-red-400 text-sm">
+                      Cannot exceed available {isTaskSource ? "coins" : "balance"}: {currentBalance.toLocaleString()}
+                    </p>
+                  </div>
+                )}
 
-
-                {/* Submit Button */}
                 <button
-                  type="button"
-                  disabled={isPending}
+                  disabled={isPending || !amount || numAmount <= 0 || isOverBalance || (isTaskSource && !meetsMinimum)}
                   onClick={handleSubmit}
-                  className="w-full py-4 px-6 rounded-2xl font-bold text-lg text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg hover:shadow-[#b68938]/20"
-                  style={{
-                    background: isPending
-                      ? "#666"
-                      : "linear-gradient(135deg, #e1ba73, #b68938)",
-                  }}
+                  className="w-full relative group overflow-hidden py-7 rounded-[28px] font-black text-2xl transition-all disabled:opacity-50 disabled:grayscale"
                 >
-                  {isPending
-                    ? "Processing Payment..."
-                    : `Add Nrs.${amount || "0.00"} to Srk Bank`}
+                  <div className="absolute inset-0 bg-gradient-to-r from-[#e1ba73] to-[#b68938] group-hover:scale-105 transition-transform duration-500" />
+                  <span className="relative z-10 text-black flex items-center justify-center gap-3">
+                    {isPending ? (
+                      <><Spinner size="sm" color="default" />Processing...</>
+                    ) : (
+                      <><Wallet className="w-7 h-7" />Deposit Funds</>
+                    )}
+                  </span>
                 </button>
               </div>
             </div>
           </div>
 
-          {/* Sidebar */}
+          {/* Sidebar Guide */}
           <div className="lg:col-span-4 space-y-6">
-            {/* Recent Deposits */}
-            {/* <div className="bg-[#1a1a1a] rounded-3xl border border-[#b68938]/40 p-6">
-              <h3 className="font-bold text-white mb-4">Recent Deposits</h3>
-              <div className="space-y-3">
-                {[
-                  { amount: 500, date: "Oct 14, 2025", method: "eSewa" },
-                  { amount: 250, date: "Oct 10, 2025", method: "Khalti" },
-                  { amount: 1000, date: "Oct 5, 2025", method: "Card" },
-                ].map((deposit, idx) => (
-                  <div
-                    key={idx}
-                    className="p-4 rounded-xl bg-black/50 border border-[#b68938]/20"
-                  >
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-white font-semibold">
-                        +${deposit.amount}
-                      </span>
-                      <span className="text-xs" style={{ color: "#b68938" }}>
-                        {deposit.method}
-                      </span>
-                    </div>
-                    <p className="text-xs text-gray-400">{deposit.date}</p>
-                  </div>
-                ))}
-              </div>
-            </div> */}
-
-            {/* Info Card */}
-            <div
-              className="rounded-3xl p-6 text-white relative overflow-hidden"
-              style={{
-                background: "linear-gradient(135deg, #2a2520, #1a1410)",
-              }}
-            >
-              <div
-                className="absolute top-0 right-0 w-32 h-32 rounded-full -mr-16 -mt-16"
-                style={{
-                  background:
-                    "radial-gradient(circle, rgba(182, 137, 56, 0.2) 0%, transparent 70%)",
-                }}
-              ></div>
-              <h3 className="text-lg font-bold mb-3 relative z-10">
-                💡 Quick Tips
-              </h3>
-              <ul className="space-y-2 relative z-10">
-                <li className="text-sm text-gray-300">
-                  • Instant deposits with digital wallets
+            <div className="bg-gradient-to-br from-[#1a1a1a] to-black border border-white/5 rounded-[40px] p-8 shadow-2xl">
+              <h3 className="text-xl font-bold text-white mb-6">Quick Guide</h3>
+              <ul className="space-y-5">
+                <li className="flex gap-4">
+                  <div className="w-8 h-8 rounded-full bg-[#b68938]/20 flex items-center justify-center shrink-0 font-bold text-[#b68938]">1</div>
+                  <p className="text-sm text-gray-400">Select <strong className="text-white">University</strong> for affiliate earnings (Rupees) or <strong className="text-white">Task App</strong> for coins.</p>
                 </li>
-                <li className="text-sm text-gray-300">
-                  • Secure payment processing
+                <li className="flex gap-4">
+                  <div className="w-8 h-8 rounded-full bg-[#b68938]/20 flex items-center justify-center shrink-0 font-bold text-[#b68938]">2</div>
+                  <p className="text-sm text-gray-400">Task coins are converted at <strong className="text-white">100 coins = Nrs. 1</strong>. Min. 20,000 coins required.</p>
                 </li>
-                <li className="text-sm text-gray-300">
-                  • No hidden fees
+                <li className="flex gap-4">
+                  <div className="w-8 h-8 rounded-full bg-[#b68938]/20 flex items-center justify-center shrink-0 font-bold text-[#b68938]">3</div>
+                  <p className="text-sm text-gray-400">A <strong className="text-white">15% TDS</strong> is deducted from your gross amount before deposit.</p>
+                </li>
+                <li className="flex gap-4">
+                  <div className="w-8 h-8 rounded-full bg-[#b68938]/20 flex items-center justify-center shrink-0 font-bold text-[#b68938]">4</div>
+                  <p className="text-sm text-gray-400">Funds appear in your SRK Bank balance immediately.</p>
                 </li>
               </ul>
+            </div>
+
+            {/* Balance Summary */}
+            <div className="bg-[#111] border border-white/5 rounded-[32px] p-6">
+              <h4 className="font-bold text-white mb-4">Your Balances</h4>
+              <div className="space-y-3">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-400 text-sm flex items-center gap-2"><ShieldCheck className="w-4 h-4" />University</span>
+                  <span className="text-white font-bold">Nrs. {userBalance?.walletBalance?.toLocaleString() ?? "0"}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-400 text-sm flex items-center gap-2"><Coins className="w-4 h-4" />Task Coins</span>
+                  <span className="text-white font-bold">{taskBalance?.currentCoins?.toLocaleString() ?? "0"}</span>
+                </div>
+                <div className="flex justify-between items-center border-t border-white/5 pt-3">
+                  <span className="text-gray-400 text-sm">Task ≈ Rupees</span>
+                  <span className="text-[#b68938] font-bold">Nrs. {((taskBalance?.currentCoins || 0) / COIN_TO_RUPEE).toFixed(2)}</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
+      <style>{`
+        @keyframes bounce-slow {
+          0%, 100% { transform: translateY(-5%); animation-timing-function: cubic-bezier(0.8,0,1,1); }
+          50% { transform: none; animation-timing-function: cubic-bezier(0,0,0.2,1); }
+        }
+        .animate-bounce-slow { animation: bounce-slow 2s infinite; }
+      `}</style>
     </div>
   );
 }

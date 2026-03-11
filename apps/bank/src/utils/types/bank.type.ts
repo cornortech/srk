@@ -54,6 +54,12 @@ export type TEarningDetails = {
   totalBankPayout: number;
 };
 
+export type TTaskEarningDetails = {
+  totalCoinsEarned: number;
+  currentCoins: number;
+  totalEarnings: number;
+};
+
 export type TBankStatement = {
   _id: string;
   username: string;
@@ -67,3 +73,36 @@ export type TBankStatement = {
   createdAt: string;
   updatedAt: string;
 };
+
+export type TUniversityPayout = {
+  _id: string;
+  amount: number;
+  username: string;
+  status: string;
+  userId: string;
+  createdAt: string;
+  updatedAt: string;
+  tdsAmount: number;
+  totalAmount: number;
+  transactionNumber: string;
+  paymentMethod: string;
+  paymentProofUrl: string;
+  qrUrl: string;
+  packageTitle: string;
+};
+
+export type TTaskPayout = {
+  _id: string;
+  taskUserId: {
+    _id: string;
+    fullName: string;
+    email: string;
+  };
+  coinsUsed: number;
+  tds: number;
+  amount: number;
+  status: 'pending' | 'approved' | 'rejected';
+  transactionId: string | null;
+  createdAt: string;
+  updatedAt: string;
+};

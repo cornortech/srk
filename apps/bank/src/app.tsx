@@ -26,6 +26,7 @@ import AddMoneyPage from './pages/dashboard/addMoney/page';
 import QRPage from './pages/dashboard/QRPage/page';
 import AccountSettings from './pages/dashboard/AccountSettings';
 import { BankPayout } from './pages/dashboard/Payouts';
+import SendMoneyHistoryPage from './pages/dashboard/SendMoneyHistory';
 import PasswordResetPage from './pages/dashboard/PasswordReset';
 import CallbackPage from './pages/sso/SSOCallBack';
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
@@ -54,6 +55,7 @@ export function App() {
             <Route path="account/statement" element={<BankStatement />} />
             <Route path="account/settings" element={<AccountSettings />} />
             <Route path="account/payouts" element={<BankPayout />} />
+            <Route path="account/transfers" element={<SendMoneyHistoryPage />} />
             <Route
               path="account/settings/reset-password"
               element={<PasswordResetPage />}

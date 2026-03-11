@@ -1,4 +1,5 @@
 import { AppRouteImplementation } from '@ts-rest/express';
+import mongoose from 'mongoose';
 import { balancePayoutModel } from '../../model/balancePayoutModel';
 import { UserModel } from '../../model/userModel';
 import { KYCModel } from '../../model/kycModel';
@@ -17,122 +18,91 @@ import { srkTasksEarningsPayoutModel } from '../../model/task/srkTasksEarningsPa
 const createBalancePayout: AppRouteImplementation<
   typeof financeContract.createBalancePayout
 > = async ({ req }) => {
+  const session = await mongoose.startSession();
   try {
-    const balanceExist = await balanceModel.findOne({
-      userId: req.body.userId,
-    });
-
-    const srkBankExist = await SrkBankModel.findOne({
-      userId: req.body.userId,
-    });
+    const balanceExist = await balanceModel.findOne({ userId: req.body.userId });
+    const srkBankExist = await SrkBankModel.findOne({ userId: req.body.userId });
 
     if (!balanceExist) {
-      return {
-        status: 404,
-        body: {
-          success: false,
-          message: 'User balance not found',
-        },
-      };
+      return { status: 404, body: { success: false, message: 'User balance not found' } };
     }
-
     if (!srkBankExist) {
-      return {
-        status: 404,
-        body: {
-          success: false,
-          message: 'User balance not found',
-        },
-      };
+      return { status: 404, body: { success: false, message: 'SRK Bank account not found' } };
     }
     if (req.body.amount <= 0) {
-      return {
-        status: 400,
-        body: {
-          success: false,
-          message: 'Amount must be greater than 0',
-        },
-      };
+      return { status: 400, body: { success: false, message: 'Amount must be greater than 0' } };
     }
     if (balanceExist.balance < req.body.amount) {
-      return {
-        status: 400,
-        body: {
-          success: false,
-          message: 'Insufficient balance',
-        },
-      };
+      return { status: 400, body: { success: false, message: 'Insufficient balance' } };
     }
 
     const tdsAmount = +(req.body.amount * 0.15).toFixed(2);
     const withdrawAmount = +(req.body.amount - tdsAmount).toFixed(2);
 
-    await balanceModel.updateOne(
-      { userId: req.body.userId },
-      {
-        $inc: {
-          balance: -req.body.amount,
-          totalTds: tdsAmount,
-          totalWithdraw: withdrawAmount,
-        },
-      }
+    await session.startTransaction();
+
+    // 1. Deduct from affiliate balance
+    const updatedBalance = await balanceModel.findOneAndUpdate(
+      { userId: req.body.userId, balance: { $gte: req.body.amount } },
+      { $inc: { balance: -req.body.amount, totalTds: tdsAmount, totalWithdraw: withdrawAmount } },
+      { new: true, session }
     );
 
+    // Race-condition guard: another request may have drained the balance first
+    if (!updatedBalance) {
+      throw new Error('BALANCE_RACE_CONDITION');
+    }
+
+    // 2. Credit TDS to admin balance
     await adminBalanceModel.updateOne(
       {},
-      {
-        $inc: {
-          tdsAmount: tdsAmount,
-        },
-      }
+      { $inc: { tdsAmount: tdsAmount } },
+      { session }
     );
 
+    // 3. Credit net amount to SRK Bank
     const updatedSrkBank = await SrkBankModel.findOneAndUpdate(
-      {
-        userId: req.body.userId,
-      },
-      {
-        $inc: {
-          amount: withdrawAmount,
-        },
-      },
-      {
-        new: true,
-      }
+      { userId: req.body.userId },
+      { $inc: { amount: withdrawAmount } },
+      { new: true, session }
     );
 
-    await bankStatement.create({
-      amount: withdrawAmount,
-      type: 'deposit',
-      bankId: srkBankExist._id,
-      description: 'Balance deposit to srk bank',
-      currentAmount: updatedSrkBank?.amount,
-    });
-
-    const adminSrkBankExist = await AdminSrkBankService.getSrkBankDocument();
-
-    await adminSrkBankExist.updateOne({
-      $inc: {
+    // 4. Write bank statement
+    await bankStatement.create(
+      [{
         amount: withdrawAmount,
-      },
-    });
+        type: 'deposit',
+        bankId: srkBankExist._id,
+        description: 'Balance deposit to srk bank',
+        currentAmount: updatedSrkBank?.amount,
+        status: 'completed',
+      }],
+      { session }
+    );
+
+    // 5. Credit to admin SRK bank pool
+    const adminSrkBankExist = await AdminSrkBankService.getSrkBankDocument();
+    await adminSrkBankExist.updateOne(
+      { $inc: { amount: withdrawAmount } },
+      { session }
+    );
+
+    await session.commitTransaction();
 
     return {
       status: 201,
-      body: {
-        success: true,
-        message: 'Balance payout created successfully',
-      },
+      body: { success: true, message: 'Balance payout created successfully' },
     };
-  } catch (error) {
-    console.error(error);
-    return {
-      status: 500,
-      body: {
-        success: false,
-        message: 'Internal server error',
-      },
-    };
+  } catch (error: any) {
+    await session.abortTransaction();
+    console.error('[createBalancePayout]', error);
+
+    if (error.message === 'BALANCE_RACE_CONDITION') {
+      return { status: 400, body: { success: false, message: 'Insufficient balance (concurrent request detected)' } };
+    }
+    return { status: 500, body: { success: false, message: 'Internal server error' } };
+  } finally {
+    await session.endSession();
   }
 };
 
@@ -297,6 +267,7 @@ export const approveBalancePayout: AppRouteImplementation<
       bankId: srkBankExist?._id,
       description: 'Balance payout to user',
       currentAmount: srkBankExist?.amount,
+      status: 'completed',
     });
 
     EmailService.sendEmail({
@@ -401,6 +372,7 @@ export const rejectBalancePayout: AppRouteImplementation<
       currentAmount: updatedSrkBank?.amount,
       type: 'refunded',
       description: 'Rejected balance payout and refunded to user',
+      status: 'completed',
     });
 
     return {
@@ -488,6 +460,7 @@ const srkBankPayoutRequest: AppRouteImplementation<
       amount: transactionAmount,
       description: 'Srk bank payout request',
       currentAmount: updatedSrkBankExist?.amount || 0,
+      status: 'pending',
     });
 
     const adminSrkBankDoc = await AdminSrkBankService.getSrkBankDocument();
@@ -591,6 +564,7 @@ const createSrkUniversityPayout: AppRouteImplementation<
       description: ` ${req.body.type} balance deposited to srk university bank`,
       currentAmount: adminSrkUniversityUpdated?.amount || 0,
       srkUniversityBankId: srkUniversityBankExist._id,
+      status: 'completed',
     });
 
     const adminSrkBankDoc = await AdminSrkBankService.getSrkBankDocument();
@@ -670,6 +644,7 @@ const srkBankPayoutRequestForAdmin: AppRouteImplementation<
       type: 'payout_request',
       description: 'srk university payout request',
       currentAmount: srkUniversityBankUpdated?.amount,
+      status: 'pending',
     });
 
     const adminSrkBankDoc = await AdminSrkBankService.getSrkBankDocument();
@@ -821,20 +796,15 @@ const rejectBankRequest: AppRouteImplementation<
 
 const createTaskBalancePayout: AppRouteImplementation<
   typeof financeContract.createTaskBalancePayout
-> = async ({ req, res }) => {
+> = async ({ req }) => {
+  const session = await mongoose.startSession();
   try {
     const taskUser = await srkTaskUserModel.findOne({
       srkUniversityUserId: req.body.userId,
     });
 
     if (!taskUser) {
-      return {
-        status: 404,
-        body: {
-          success: false,
-          message: 'Task user not found',
-        },
-      };
+      return { status: 404, body: { success: false, message: 'Task user not found' } };
     }
 
     const taskBalance = await srkTaskUserBalanceModel.findOne({
@@ -842,111 +812,118 @@ const createTaskBalancePayout: AppRouteImplementation<
     });
 
     if (!taskBalance) {
-      return {
-        status: 404,
-        body: {
-          success: false,
-          message: 'Task balance not found',
-        },
-      };
+      return { status: 404, body: { success: false, message: 'Task balance not found' } };
     }
 
-    const srkBankExist = await SrkBankModel.findOne({
-      userId: req.body.userId,
-    });
+    const srkBankExist = await SrkBankModel.findOne({ userId: req.body.userId });
 
     if (!srkBankExist) {
-      return {
-        status: 404,
-        body: { success: false, message: 'SRK Bank account not found' }
-      }
+      return { status: 404, body: { success: false, message: 'SRK Bank account not found' } };
     }
 
-    if (req.body.amount <= 0) {
-      return {
-        status: 400,
-        body: {
-          success: false,
-          message: 'Amount must be greater than 0',
-        },
-      };
-    }
+    const COIN_TO_RUPEE_RATE = 100; // 100 coins = 1 rupee
+    const coinsToExchange = req.body.amount; // amount from frontend is in COINS
 
-    if (taskBalance.currentCoins < req.body.amount) {
+    if (coinsToExchange <= 0) {
+      return { status: 400, body: { success: false, message: 'Amount must be greater than 0' } };
+    }
+    if (coinsToExchange < 20000) {
+      return { status: 400, body: { success: false, message: 'Minimum withdrawal is 20,000 coins' } };
+    }
+    if (taskBalance.currentCoins < coinsToExchange) {
       return {
         status: 400,
         body: {
           success: false,
-          message: 'Insufficient balance',
+          message: `Insufficient coins. Available: ${taskBalance.currentCoins}, Requested: ${coinsToExchange}`,
         },
       };
     }
 
-    const withdrawAmount = req.body.amount;
-    const tdsAmount = +(withdrawAmount * 0.15).toFixed(2);
-    const amountAfterTds = +(withdrawAmount - tdsAmount).toFixed(2);
+    // Convert coins → rupees, then apply 15% TDS
+    const grossRupees = +(coinsToExchange / COIN_TO_RUPEE_RATE).toFixed(2);
+    const tdsAmount = +(grossRupees * 0.15).toFixed(2);
+    const amountAfterTds = +(grossRupees - tdsAmount).toFixed(2);
 
-    await srkTaskUserBalanceModel.updateOne(
-      { taskUserId: taskUser._id },
-      {
-        $inc: {
-          currentCoins: -withdrawAmount,
-        },
-      }
+    // ── Atomic transaction ─────────────────────────────────────────────────
+    await session.startTransaction();
+
+    // 1. Deduct coins from task balance (with race-condition guard via $gte)
+    const updatedTaskBalance = await srkTaskUserBalanceModel.findOneAndUpdate(
+      { taskUserId: taskUser._id, currentCoins: { $gte: coinsToExchange } },
+      { $inc: { currentCoins: -coinsToExchange } },
+      { new: true, session }
     );
 
-    await srkTasksEarningsPayoutModel.create({
-      taskUserId: taskUser._id,
-      coinsUsed: withdrawAmount,
-      tds: tdsAmount,
-      amount: amountAfterTds,
-      status: 'approved',
-    });
+    if (!updatedTaskBalance) {
+      throw new Error('COINS_RACE_CONDITION');
+    }
 
+    // 2. Record the payout in earnings history
+    await srkTasksEarningsPayoutModel.create(
+      [{
+        taskUserId: taskUser._id,
+        coinsUsed: coinsToExchange,
+        tds: tdsAmount,
+        amount: amountAfterTds,
+        status: 'approved',
+      }],
+      { session }
+    );
+
+    // 3. Credit TDS to admin balance pool
     await adminBalanceModel.updateOne(
       {},
-      {
-        $inc: {
-          tdsAmount: tdsAmount,
-        },
-      }
+      { $inc: { tdsAmount: tdsAmount } },
+      { session }
     );
 
+    // 4. Credit net rupees to SRK Bank
     const updatedSrkBank = await SrkBankModel.findOneAndUpdate(
       { userId: req.body.userId },
       { $inc: { amount: amountAfterTds } },
-      { new: true }
+      { new: true, session }
     );
 
-    await bankStatement.create({
-      amount: amountAfterTds,
-      type: 'deposit',
-      bankId: srkBankExist._id,
-      description: 'Coins converted to money and deposited to SRK Bank',
-      currentAmount: updatedSrkBank?.amount,
-    });
+    // 5. Write bank statement entry
+    await bankStatement.create(
+      [{
+        amount: amountAfterTds,
+        type: 'deposit',
+        bankId: srkBankExist._id,
+        description: `Coins converted to money and deposited to SRK Bank (${coinsToExchange} coins → Nrs. ${amountAfterTds})`,
+        currentAmount: updatedSrkBank?.amount,
+        status: 'completed',
+      }],
+      { session }
+    );
 
+    // 6. Credit to admin SRK bank pool
     const adminSrkBankExist = await AdminSrkBankService.getSrkBankDocument();
-    await adminSrkBankExist.updateOne({
-      $inc: { amount: amountAfterTds },
-    });
+    await adminSrkBankExist.updateOne(
+      { $inc: { amount: amountAfterTds } },
+      { session }
+    );
+
+    await session.commitTransaction();
 
     return {
       status: 201,
-      body: {
-        success: true,
-        message: 'Balance payout created successfully',
-      },
+      body: { success: true, message: 'Task balance payout created successfully' },
     };
-  } catch (error) {
-    console.error(error);
-    return {
-      status: 500,
-      body: {
-        success: false,
-        message: 'Internal server error',
-      },
-    };
+  } catch (error: any) {
+    await session.abortTransaction();
+    console.error('[createTaskBalancePayout]', error);
+
+    if (error.message === 'COINS_RACE_CONDITION') {
+      return {
+        status: 400,
+        body: { success: false, message: 'Insufficient coins (concurrent request detected)' },
+      };
+    }
+    return { status: 500, body: { success: false, message: 'Internal server error' } };
+  } finally {
+    await session.endSession();
   }
 };
 

@@ -452,6 +452,11 @@ export default function ModernBankDashboard() {
                     label: 'Payouts',
                     url: '/dashboard/account/payouts',
                   },
+                  // {
+                  //   icon: Send,
+                  //   label: 'Transfer History',
+                  //   url: '/dashboard/account/transfers',
+                  // },
                   {
                     icon: Plus,
                     label: 'Add Money',

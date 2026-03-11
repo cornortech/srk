@@ -809,6 +809,19 @@ const createPaymentIntent: AppRouteImplementationOrOptions<
       };
     }
 
+    if (
+      senderUserExist.srkBankId._id.toString() ===
+      receiverSrkBankExist._id.toString()
+    ) {
+      return {
+        status: 400,
+        body: {
+          message: 'Cannot transfer money to your own account',
+          success: false,
+        },
+      };
+    }
+
     if (senderUserExist.srkBankId.amount < amount) {
       return {
         status: 400,

@@ -194,8 +194,8 @@ export const srkTaskContract = c.router({
       srkTaskUserId: z.string(),
       coins: z
         .number()
-        .min(500, 'Coins must be at least 500')
-        .max(1000, 'Coins must be at most 1000'),
+        .min(20000, 'Coins must be at least 20,000')
+        .max(100000, 'Coins must be at most 100,000'),
     }),
     responses: {
       201: SuccessSchema,

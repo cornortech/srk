@@ -1,11 +1,9 @@
-import * as bcrypt from "bcryptjs";
-import * as jwt from "jsonwebtoken";
-import * as crypto from "crypto";
+
 import * as dotenv from "dotenv";
+import { UserModel } from "../model/userModel";
+import AuthService from "../services/authService";
+import connectToDatabase from "../config/database";
 dotenv.config();
-import { UserModel } from "../../model/userModel";
-import connectToDatabase from "../../config/database";
-import AuthService from "../../services/authService";
 
 // import { connectToDatabase } from "../../config/dbConfig";
 

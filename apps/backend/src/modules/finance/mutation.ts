@@ -1,5 +1,4 @@
 import { AppRouteImplementation } from '@ts-rest/express';
-import { financeContract } from '../../../../../libs/shared/contracts/src/lib/finance/contract';
 import { balancePayoutModel } from '../../model/balancePayoutModel';
 import { BankModel } from '../../model/bankModel';
 import { UserModel } from '../../model/userModel';
@@ -11,10 +10,11 @@ import bankStatement from '../../model/bankStatement';
 import AdminSrkBankService from '../../services/adminSrkBankService';
 import EmailService from '../../services/emailService';
 import { SrkUniversityBankModel } from '../../model/srkUniversityBankModel';
+import { financeContract } from '@srk/shared/contracts';
 
 const createBalancePayout: AppRouteImplementation<
   typeof financeContract.createBalancePayout
-> = async ({ req, res }) => {
+> = async ({ req }) => {
   try {
     const balanceExist = await balanceModel.findOne({
       userId: req.body.userId,

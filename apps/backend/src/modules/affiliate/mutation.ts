@@ -98,7 +98,7 @@ const approveAffiliateRequest: AppRouteImplementationOrOptions<
 
     const srkBankExist = await SrkBankModel.findOne({ userId });
     if (!srkBankExist) {
-      await SrkBankModel.create({ userId });
+      await SrkBankModel.create({ userId, amount: 0, status: 'pending' });
     }
 
     const userBalanceExist = await balanceModel.findOne({ userId });
@@ -244,8 +244,6 @@ const rejectAffiliateRequest: AppRouteImplementationOrOptions<
     };
   }
 };
-
-
 
 export const affiliateMutationHandler = {
   affiliateRequest,

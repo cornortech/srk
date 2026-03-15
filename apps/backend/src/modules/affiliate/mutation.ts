@@ -1,11 +1,12 @@
 import { AppRouteImplementationOrOptions } from '@ts-rest/express/src/lib/types';
-import { affiliateContract } from '../../../../../libs/shared/contracts/src/lib/affiliate/contract';
 import { affiliateRequestModel } from '../../model/affiliateRequestModel';
 import { UserModel } from '../../model/userModel';
 import { affiliateBiometricModel } from '../../model/affiliateVerificationModel';
 import { balanceModel } from '../../model/balanceModel';
 import EmailService from '../../services/emailService';
 import mongoose from 'mongoose';
+import { affiliateContract } from '@srk/shared/contracts';
+import { SrkBankModel } from '../../model/srkBankModel';
 
 const affiliateRequest: AppRouteImplementationOrOptions<
   typeof affiliateContract.affiliateRequest
@@ -95,10 +96,10 @@ const approveAffiliateRequest: AppRouteImplementationOrOptions<
 
     await Promise.all([existingAffiliateRequest.save(), userExist.save()]);
 
-    // const srkBankExist = await SrkBankModel.findOne({ userId });
-    // if (!srkBankExist) {
-    //   await SrkBankModel.create({ userId });
-    // }
+    const srkBankExist = await SrkBankModel.findOne({ userId });
+    if (!srkBankExist) {
+      await SrkBankModel.create({ userId });
+    }
 
     const userBalanceExist = await balanceModel.findOne({ userId });
     if (!userBalanceExist) {

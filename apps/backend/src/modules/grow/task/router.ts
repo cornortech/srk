@@ -41,6 +41,10 @@ export const srkTaskRouter = s.router(srkTaskContract, {
     srkTaskMutationHandler.approveSrkTaskActionSubmissionByAdmin,
   rejectSrkTaskActionSubmissionByAdmin:
     srkTaskMutationHandler.rejectSrkTaskActionSubmissionByAdmin,
+  bulkApproveSrkTaskSubmissionsByAdmin:
+    srkTaskMutationHandler.bulkApproveSrkTaskSubmissionsByAdmin,
+  bulkRejectSrkTaskSubmissionsByAdmin:
+    srkTaskMutationHandler.bulkRejectSrkTaskSubmissionsByAdmin,
   srkTaskActionSubmission: srkTaskMutationHandler.srkTaskActionSubmission,
   getSrkTaskActionsByPlatforms:
     srkTaskQueryHandler.getSrkTaskActionsByPlatforms,

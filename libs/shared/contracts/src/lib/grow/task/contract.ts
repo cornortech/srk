@@ -28,6 +28,8 @@ import { paginatedSrkTaskEarningRequestsByUserSchema } from './schema';
 import { initContract } from '@ts-rest/core';
 import {
   acceptSrkTaskUserEarningsPayoutSchema,
+  bulkApproveSrkTaskSubmissionsSchema,
+  bulkRejectSrkTaskSubmissionsSchema,
   getSrkTaskEarningRequestsByAdminQueryParams,
   getSrkTaskUserAnalyticsSchema,
   getSrkTaskUserEarningsLeaderboardQueryParams,
@@ -297,6 +299,28 @@ export const srkTaskContract = c.router({
       500: ErrorSchema,
     },
     summary: 'Approve an action submission for srk task user by admin',
+  },
+  bulkApproveSrkTaskSubmissionsByAdmin: {
+    method: 'POST',
+    path: '/task/admin/bulk-approve-submissions',
+    body: bulkApproveSrkTaskSubmissionsSchema,
+    responses: {
+      200: SuccessSchema,
+      400: ErrorSchema,
+      500: ErrorSchema,
+    },
+    summary: 'Bulk approve task submissions by admin',
+  },
+  bulkRejectSrkTaskSubmissionsByAdmin: {
+    method: 'POST',
+    path: '/task/admin/bulk-reject-submissions',
+    body: bulkRejectSrkTaskSubmissionsSchema,
+    responses: {
+      200: SuccessSchema,
+      400: ErrorSchema,
+      500: ErrorSchema,
+    },
+    summary: 'Bulk reject task submissions by admin',
   },
   getAllSrkTaskAffiliateVerificationRequest: {
     method: 'GET',

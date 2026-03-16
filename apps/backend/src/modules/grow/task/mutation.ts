@@ -918,6 +918,171 @@ const reviewPaymentDetailsRequest: AppRouteImplementationOrOptions<
   }
 };
 
+const bulkApproveSrkTaskSubmissionsByAdmin: AppRouteImplementationOrOptions<
+  typeof srkTaskContract.bulkApproveSrkTaskSubmissionsByAdmin
+> = async ({ body, req }) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  try {
+    const adminId = (req as any).user?._id || 'system';
+    const { submissionIds } = body;
+
+    const pendingSubmissions = await srkTaskActionSubmissionModel
+      .find({
+        _id: { $in: submissionIds },
+        status: 'pending',
+      })
+      .session(session);
+
+    if (pendingSubmissions.length === 0) {
+      return {
+        status: 400,
+        body: {
+          success: false,
+          message: 'No pending submissions found for the provided IDs',
+        },
+      };
+    }
+
+    for (const submission of pendingSubmissions) {
+      // 1. Update submission status
+      submission.status = 'approved';
+      await submission.save({ session });
+
+      // 2. Fetch associated todo to get reward amount
+      const todo = await growPackageTodoModel
+        .findById(submission.growPackageTodoId)
+        .populate({
+          path: 'growSocialMediaPackageEnrollmentId',
+          populate: [
+            { path: 'growSocialMediaPackageId' },
+            { path: 'growSocialMediaPackageTypeId' },
+            { path: 'growSocialMediaPackageSubTypeId' },
+          ],
+        })
+        .session(session);
+
+      if (!todo) continue;
+
+      // Logic to determine reward coins (respecting 100-coin-to-1-rupee if applicable)
+      // This is based on existing logic in approveSrkTaskActionSubmissionByAdmin
+      let rewardCoins = 0;
+      const enrollment = todo.growSocialMediaPackageEnrollmentId as any;
+      if (enrollment) {
+        if (submission.type === 'follow') {
+          rewardCoins = enrollment.growSocialMediaPackageSubTypeId?.noOfFollowers || 0;
+        } else if (submission.type === 'like') {
+          rewardCoins = enrollment.growSocialMediaPackageSubTypeId?.noOfLikes || 0;
+        }
+      }
+
+      if (rewardCoins > 0) {
+        // 3. Update User Balance (Only increasing coins, not totalEarnings cash)
+        const userBalance = await srkTaskUserBalanceModel.findOneAndUpdate(
+          { taskUserId: submission.taskUserId },
+          {
+            $inc: {
+              totalCoinsEarned: rewardCoins,
+              currentCoins: rewardCoins,
+            },
+          },
+          { session, new: true, upsert: true }
+        );
+
+        // 4. Create Audit Log (Earning Statement)
+        await srkTaskEarningStatementModel.create(
+          [
+            {
+              taskUserId: submission.taskUserId,
+              growPackageTodoId: submission.growPackageTodoId,
+              description: `Bulk Approved by Admin ID: ${adminId} - ${submission.type} task`,
+              type: 'credit',
+              coin: rewardCoins,
+              coinAfterTransaction: userBalance.currentCoins,
+            },
+          ],
+          { session }
+        );
+      }
+    }
+
+    await session.commitTransaction();
+    return {
+      status: 200,
+      body: {
+        success: true,
+        message: `Successfully approved ${pendingSubmissions.length} submissions`,
+      },
+    };
+  } catch (error: any) {
+    await session.abortTransaction();
+    return {
+      status: 500,
+      body: {
+        success: false,
+        message: error.message || 'Failed to bulk approve submissions',
+      },
+    };
+  } finally {
+    session.endSession();
+  }
+};
+
+const bulkRejectSrkTaskSubmissionsByAdmin: AppRouteImplementationOrOptions<
+  typeof srkTaskContract.bulkRejectSrkTaskSubmissionsByAdmin
+> = async ({ body, req }) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  try {
+    const adminId = (req as any).user?._id || 'system';
+    const { submissionIds, rejectionReason } = body;
+
+    const result = await srkTaskActionSubmissionModel.updateMany(
+      {
+        _id: { $in: submissionIds },
+        status: 'pending',
+      },
+      {
+        $set: {
+          status: 'rejected',
+          rejectionReason: `${rejectionReason} (Bulk Rejected by Admin ID: ${adminId})`,
+        },
+      },
+      { session }
+    );
+
+    if (result.matchedCount === 0) {
+      return {
+        status: 400,
+        body: {
+          success: false,
+          message: 'No pending submissions found for the provided IDs',
+        },
+      };
+    }
+
+    await session.commitTransaction();
+    return {
+      status: 200,
+      body: {
+        success: true,
+        message: `Successfully rejected ${result.modifiedCount} submissions`,
+      },
+    };
+  } catch (error: any) {
+    await session.abortTransaction();
+    return {
+      status: 500,
+      body: {
+        success: false,
+        message: error.message || 'Failed to bulk reject submissions',
+      },
+    };
+  } finally {
+    session.endSession();
+  }
+};
+
 export const srkTaskMutationHandler = {
   srkTaskEarningsPayoutRequest,
   acceptSrkTaskUserEarningsPayout,
@@ -928,6 +1093,8 @@ export const srkTaskMutationHandler = {
   srkTaskActionSubmission,
   approveSrkTaskActionSubmissionByAdmin,
   rejectSrkTaskActionSubmissionByAdmin,
+  bulkApproveSrkTaskSubmissionsByAdmin,
+  bulkRejectSrkTaskSubmissionsByAdmin,
   submitPaymentDetailsRequest,
   reviewPaymentDetailsRequest,
 };

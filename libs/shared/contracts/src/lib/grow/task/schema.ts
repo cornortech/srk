@@ -301,6 +301,23 @@ export type TGetAllCompletedSrkTaskSubmissionsQueryParams = z.infer<
   typeof getAllCompletedSrkTaskSubmissionsQueryParams
 >;
 
+// Bulk Action Schemas
+export const bulkApproveSrkTaskSubmissionsSchema = z.object({
+  submissionIds: z.array(z.string().min(1)),
+});
+
+export const bulkRejectSrkTaskSubmissionsSchema = z.object({
+  submissionIds: z.array(z.string().min(1)),
+  rejectionReason: z.string().min(1, 'Rejection reason is required'),
+});
+
+export type TBulkApproveSrkTaskSubmissions = z.infer<
+  typeof bulkApproveSrkTaskSubmissionsSchema
+>;
+export type TBulkRejectSrkTaskSubmissions = z.infer<
+  typeof bulkRejectSrkTaskSubmissionsSchema
+>;
+
 export const acceptSrkTaskUserEarningsPayoutSchema = z.object({
   transactionId: z.string(),
   paymentScreenshotUrl: z.string().url(),

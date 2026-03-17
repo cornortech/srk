@@ -2,9 +2,9 @@ import mongoose from "mongoose";
 import * as path from "path";
 import * as fs from "fs";
 import dotenv from "dotenv";
-import { growSocialMediaPackageModel } from "../../model/growSocialMediaPackageModel";
-import { growSocialMediaPackageTypeModel } from "../../model/growSocialMediaPackageTypeModel";
-import { growSocialMediaPackageSubTypeModel } from "../../model/growSocialMediaPackageSubTypeModel";
+import { growSocialMediaPackageModel } from "../model/growSocialMediaPackageModel";
+import { growSocialMediaPackageTypeModel } from "../model/growSocialMediaPackageTypeModel";
+import { growSocialMediaPackageSubTypeModel } from "../model/growSocialMediaPackageSubTypeModel";
 
 // Load environment variables
 dotenv.config({

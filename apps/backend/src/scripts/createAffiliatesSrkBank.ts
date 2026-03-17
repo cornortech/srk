@@ -2,7 +2,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 import mongoose from 'mongoose';
 import { UserModel } from '../model/userModel';
-import { SrkBankModel } from '../model/srkBankModel';
+import { SrkBankModel } from '../model/bank/srkBankModel';
 
 // take it from root directory
 

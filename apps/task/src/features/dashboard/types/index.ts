@@ -14,6 +14,7 @@ export type DashboardView =
   | 'taskHistory'
   | 'leaderboard'
   | 'coinExchange'
+  | 'paymentDetails'
   | 'profile'
   | 'payout'
   | 'finance'
@@ -33,6 +34,7 @@ export interface Task {
   desc: string;
   status?: TaskStatus;
   required?: string;
+  url?: string;
   proofType?: 'screenshot' | 'video' | 'link';
 }
 

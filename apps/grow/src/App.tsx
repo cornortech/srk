@@ -3,16 +3,18 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
 import { GrowLandingPage } from './pages/LandingPage';
 import CallbackPage from './pages/CallbackPage';
+import AdminCallbackPage from './pages/AdminCallbackPage';
 import { LoginPage } from './pages/LoginPage';
 import { GrowVerificationPage } from './pages/VerificationPage';
 import { GrowOnlyAdminDashboard } from './pages/GrowAdminDashboard';
-import { GrowDashboard } from './pages/GrowDashboard';
+import { GrowAffiliateDashboard } from './pages/GrowDashboard';
 import { PackageFlowPage } from './pages/PackageFlowPage';
 import { OrderConfirmationPage } from './pages/OrderConfirmationPage';
 import { UserDashboardPage } from './pages/UserDashboardPage';
 import { ToastProvider } from './lib/contexts/ToastContext';
 import ViewerPage from './pages/ViewDocumentPage';
 import { UserVerificationPage } from './pages/UserVerificationPage';
+import { AdminProtectedRoute } from './components/auth/AdminProtectedRoute';
 
 const queryClient = new QueryClient();
 
@@ -38,28 +40,48 @@ const router = createBrowserRouter([
     element: <CallbackPage />,
   },
   {
+    path: '/admin/callback',
+    element: <AdminCallbackPage />,
+  },
+  {
     path: '/login',
     element: <LoginPage />,
   },
   {
-    path: '/grow/verification',
+    path: '/grow/affiliate/verification',
     element: <GrowVerificationPage />,
   },
   {
-    path: '/grow/verification-wall',
+    path: '/grow/verification',
     element: <UserVerificationPage />
   },
   {
     path: '/admin/dashboard',
-    element: <GrowOnlyAdminDashboard />,
+    element: (
+      <AdminProtectedRoute>
+        <GrowOnlyAdminDashboard />
+      </AdminProtectedRoute>
+    ),
+  },
+  {
+    path: '/admin',
+    element: (
+      <AdminProtectedRoute>
+        <GrowOnlyAdminDashboard />
+      </AdminProtectedRoute>
+    ),
   },
   {
     path: '/admin/view-document',
-    element: <ViewerPage />,
+    element: (
+      <AdminProtectedRoute>
+        <ViewerPage />
+      </AdminProtectedRoute>
+    ),
   },
   {
     path: '/affiliate/dashboard',
-    element: <GrowDashboard />,
+    element: <GrowAffiliateDashboard />,
   },
 ]);
 

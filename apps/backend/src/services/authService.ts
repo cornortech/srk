@@ -1,9 +1,9 @@
-import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
-import { env } from "../config/env";
-import { UserModel } from "../model/userModel";
-import crypto from "crypto";
-import { growSocialMediaPackageUserModel } from "../model/growSocialMediaPackageUserModel";
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
+import { env } from '../config/env';
+import { UserModel } from '../model/userModel';
+import { growSocialMediaPackageUserModel } from '../model/growSocialMediaPackageUserModel';
 
 class AuthService {
   /**
@@ -24,7 +24,7 @@ class AuthService {
    */
   static async verifyPassword(
     password: string,
-    hash: string
+    hash: string,
   ): Promise<boolean> {
     return bcrypt.compare(password, hash);
   }
@@ -42,6 +42,30 @@ class AuthService {
   }
 
   /**
+   * Generates an access token (15 minutes)
+   * @param user - The user object
+   * @returns The access token
+   */
+  static async generateAccessToken(user: {
+    email: string;
+    userId: string;
+  }): Promise<string> {
+    return jwt.sign(user, env.JWT_SECRET as string, { expiresIn: '15m' });
+  }
+
+  /**
+   * Generates a refresh token (30 days)
+   * @param user - The user object
+   * @returns The refresh token
+   */
+  static async generateRefreshToken(user: {
+    email: string;
+    userId: string;
+  }): Promise<string> {
+    return jwt.sign(user, env.JWT_SECRET as string, { expiresIn: '30d' });
+  }
+
+  /**
    * Verifies a jwt token
    * @param token
    * @returns
@@ -49,11 +73,11 @@ class AuthService {
   static async verifyJwtToken(token: string): Promise<any> {
     return jwt.verify(token, env.JWT_SECRET as string);
   }
-  
+
   // Referral Code Generation Function
   static async generateUniqueReferralCode(): Promise<string> {
     const generateReferralCode = () =>
-      crypto.randomBytes(6).toString("hex").toUpperCase();
+      crypto.randomBytes(6).toString('hex').toUpperCase();
 
     let referralCode: string;
     let isUnique = false;
@@ -69,14 +93,16 @@ class AuthService {
 
   static async generateUniquePromoCodeForSrkGrowUser(): Promise<string> {
     const generatePromoCode = () =>
-      crypto.randomBytes(6).toString("hex").toUpperCase();
+      crypto.randomBytes(6).toString('hex').toUpperCase();
 
     let promoCode: string;
     let isUnique = false;
 
     do {
       promoCode = generatePromoCode();
-      const existingUser = await growSocialMediaPackageUserModel.findOne({ promoCode });
+      const existingUser = await growSocialMediaPackageUserModel.findOne({
+        promoCode,
+      });
       isUnique = !existingUser;
     } while (!isUnique);
 
@@ -85,13 +111,16 @@ class AuthService {
 
   static generateRandomPassword(): string {
     const characters =
-      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    let password = "";
+      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let password = '';
     for (let i = 0; i < 8; i++) {
       const randomIndex = Math.floor(Math.random() * characters.length);
       password += characters.charAt(randomIndex);
     }
     return password;
+  }
+  static generateBaseSecret(): string {
+    return crypto.randomBytes(16).toString('hex');
   }
 }
 

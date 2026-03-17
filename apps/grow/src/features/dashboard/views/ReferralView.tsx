@@ -60,8 +60,8 @@ export const ReferralView: React.FC<ReferralViewProps> = ({
   const generateReferralLink = (
     packageId: string,
   ): string => {
-    const growBaseUrl = process.env.VITE_FRONTEND_ROOT_URL || 'http://localhost:3000';
-    console.log(process.env.VITE_FRONTEND_ROOT_URL);
+    const growBaseUrl = import.meta.env.VITE_FRONTEND_ROOT_URL || 'http://localhost:3000';
+    console.log(import.meta.env.VITE_FRONTEND_ROOT_URL);
     return `${growBaseUrl}/package-flow?ref=${getPromocode?.body?.userDetails?.promoCode}&package=${packageId}`;
   };
 

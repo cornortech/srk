@@ -116,6 +116,23 @@ export type TGetSrkTaskActionSubmissionByStatusByUserQueryParams = z.infer<
   typeof getSrkTaskActionSubmissionByStatusByUserQueryParams
 >;
 
+// Rejected Task Submissions for User (Attention Needed)
+export const getRejectedSrkTaskActionSubmissionsByUserQueryParams =
+  commonPaginatedQueryParamsSchema;
+
+export type TGetRejectedSrkTaskActionSubmissionsByUserQueryParams = z.infer<
+  typeof getRejectedSrkTaskActionSubmissionsByUserQueryParams
+>;
+
+export const paginatedRejectedSrkTaskActionSubmissionsByUserSchema =
+  commonPaginationResponse.extend({
+    data: z.array(srkTaskActionSubmissionDetailsSchema),
+  });
+
+export type TPaginatedRejectedSrkTaskActionSubmissionsByUser = z.infer<
+  typeof paginatedRejectedSrkTaskActionSubmissionsByUserSchema
+>;
+
 export const srkTaskUserSchema = z.object({
   userData: z.object({
     _id: z.string(),
@@ -284,6 +301,23 @@ export type TGetAllCompletedSrkTaskSubmissionsQueryParams = z.infer<
   typeof getAllCompletedSrkTaskSubmissionsQueryParams
 >;
 
+// Bulk Action Schemas
+export const bulkApproveSrkTaskSubmissionsSchema = z.object({
+  submissionIds: z.array(z.string().min(1)),
+});
+
+export const bulkRejectSrkTaskSubmissionsSchema = z.object({
+  submissionIds: z.array(z.string().min(1)),
+  rejectionReason: z.string().min(1, 'Rejection reason is required'),
+});
+
+export type TBulkApproveSrkTaskSubmissions = z.infer<
+  typeof bulkApproveSrkTaskSubmissionsSchema
+>;
+export type TBulkRejectSrkTaskSubmissions = z.infer<
+  typeof bulkRejectSrkTaskSubmissionsSchema
+>;
+
 export const acceptSrkTaskUserEarningsPayoutSchema = z.object({
   transactionId: z.string(),
   paymentScreenshotUrl: z.string().url(),
@@ -369,6 +403,13 @@ export const srkTaskEarningRequestResponseSchema = z.object({
     fullName: z.string(),
     email: z.string(),
   }),
+  paymentDetails: z.object({
+    accountHolderName: z.string(),
+    bankName: z.string(),
+    accountNumber: z.string(),
+    branchName: z.string(),
+    qrCodeUrl: z.string(),
+  }).nullable(),
   transactionId: z.string().nullable(),
   coinsUsed: z.number(),
   tds: z.number(),
@@ -475,6 +516,7 @@ export const getAllTaskAffiliateResponseSchema = z.object({
   srkUniversityUserId: z.string(),
   fullName: z.string(),
   dob: z.string(),
+  status: z.string(),
   isActivated: z.boolean(),
   createdAt: z.string(),
   updatedAt: z.string(),
@@ -523,4 +565,105 @@ export const getSrkTaskOnboardingVerificationRequestQueryParams =
 
 export type TGetSrkTaskOnboardingVerificationRequestQueryParams = z.infer<
   typeof getSrkTaskOnboardingVerificationRequestQueryParams
+>;
+
+// ============================================
+// Payment Details Schemas
+// ============================================
+
+export const srkTaskUserPaymentDetailsSchema = z.object({
+  _id: z.string(),
+  srkTaskUserId: z.string(),
+  accountHolderName: z.string(),
+  bankName: z.string(),
+  accountNumber: z.string(),
+  branchName: z.string(),
+  qrCodeUrl: z.string(),
+  isActive: z.boolean(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
+export type TSrkTaskUserPaymentDetails = z.infer<
+  typeof srkTaskUserPaymentDetailsSchema
+>;
+
+export const srkTaskUserPaymentDetailsRequestSchema = z.object({
+  _id: z.string(),
+  srkTaskUserId: z.union([
+    z.string(),
+    z.object({
+      _id: z.string(),
+      fullName: z.string(),
+      email: z.string(),
+      phoneNumber: z.string(),
+    }),
+  ]),
+  accountHolderName: z.string(),
+  bankName: z.string(),
+  accountNumber: z.string(),
+  branchName: z.string(),
+  qrCodeUrl: z.string(),
+  status: z.enum(['pending', 'approved', 'rejected']),
+  rejectionReason: z.string().optional(),
+  reviewedBy: z.string().optional(),
+  reviewedAt: z.string().optional(),
+  isActive: z.boolean(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
+export type TSrkTaskUserPaymentDetailsRequest = z.infer<
+  typeof srkTaskUserPaymentDetailsRequestSchema
+>;
+
+export const submitSrkTaskPaymentDetailsRequestSchema = z.object({
+  accountHolderName: z.string().min(1, 'Account holder name is required'),
+  bankName: z.string().min(1, 'Bank name is required'),
+  accountNumber: z.string().min(1, 'Account number is required'),
+  branchName: z.string().min(1, 'Branch name is required'),
+  qrCodeUrl: z.string().url('Valid QR code URL is required'),
+});
+
+export type TSubmitSrkTaskPaymentDetailsRequest = z.infer<
+  typeof submitSrkTaskPaymentDetailsRequestSchema
+>;
+
+export const reviewSrkTaskPaymentDetailsRequestSchema = z.object({
+  requestId: z.string(),
+  status: z.enum(['approved', 'rejected']),
+  rejectionReason: z.string().optional(),
+});
+
+export type TReviewSrkTaskPaymentDetailsRequest = z.infer<
+  typeof reviewSrkTaskPaymentDetailsRequestSchema
+>;
+
+export const paginatedSrkTaskPaymentDetailsRequestsSchema =
+  commonPaginationResponse.extend({
+    data: z.array(srkTaskUserPaymentDetailsRequestSchema),
+  });
+
+export type TPaginatedSrkTaskPaymentDetailsRequests = z.infer<
+  typeof paginatedSrkTaskPaymentDetailsRequestsSchema
+>;
+
+export const getSrkTaskPaymentDetailsRequestsQueryParams =
+  commonPaginatedQueryParamsSchema.extend({
+    status: z.enum(['pending', 'approved', 'rejected']).optional(),
+  });
+
+export type TGetSrkTaskPaymentDetailsRequestsQueryParams = z.infer<
+  typeof getSrkTaskPaymentDetailsRequestsQueryParams
+>;
+
+export const getUserPaymentDetailsResponseSchema = z.object({
+  success: z.boolean(),
+  approvedDetails: srkTaskUserPaymentDetailsRequestSchema.nullable(),
+  pendingRequest: srkTaskUserPaymentDetailsRequestSchema.nullable(),
+  rejectedRequest: srkTaskUserPaymentDetailsRequestSchema.nullable(),
+});
+
+export type TGetUserPaymentDetailsResponse = z.infer<
+  typeof getUserPaymentDetailsResponseSchema
 >;

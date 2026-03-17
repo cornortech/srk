@@ -1,21 +1,21 @@
+import mongoose, { Types } from 'mongoose';
 import {
   AppRouteImplementation,
   AppRouteImplementationOrOptions,
 } from '@ts-rest/express/src/lib/types';
-import mongoose from 'mongoose';
 import { balancePayoutModel } from '../../model/balancePayoutModel';
-import { financeContract } from '../../../../../libs/shared/contracts/src/lib/finance/contract';
 import { balanceModel } from '../../model/balanceModel';
 import { adminBalanceModel } from '../../model/adminBalanceModel';
-import bankStatement from '../../model/bankStatement';
-import { SrkBankModel } from '../../model/srkBankModel';
-import { AdminSrkBankModel } from '../../model/AdminSrkBankModel';
+import bankStatement from '../../model/bank/bankStatementModel';
+import { SrkBankModel } from '../../model/bank/srkBankModel';
+import { AdminSrkBankModel } from '../../model/bank/AdminSrkBankModel';
 import { UserModel } from '../../model/userModel';
-import { BankModel } from '../../model/bankModel';
 import { SrkUniversityBankModel } from '../../model/srkUniversityBankModel';
-import { TGetSrkBonusCashFlow } from '../../../../../libs/shared/contracts/src/lib/finance/schema';
-import { Types } from 'mongoose';
 import { EarningStatementModel } from '../../model/earningStatementModel';
+import { financeContract, TGetSrkBonusCashFlow } from '@srk/shared/contracts';
+import { BankModel } from '../../model/bankModel';
+import { srkTaskUserModel } from '../../model/task/srkTaskUserModel';
+import { srkTaskUserBalanceModel } from '../../model/task/srkTaskUserBalanceModel';
 
 const getAllBalancePayoutOfUser: AppRouteImplementationOrOptions<
   typeof financeContract.getAllBalancePayoutOfUser
@@ -69,7 +69,7 @@ const getAllBalancePayoutOfUser: AppRouteImplementationOrOptions<
             qrUrl: bankExist?.qrUrl || '',
             packageTitle: p.userId?.packageId?.title || '',
           };
-        })
+        }),
       ),
     };
   } catch (error) {
@@ -116,7 +116,7 @@ const calculateEarnings = async (userId: string, days: number) => {
 
 const getFinanceDetailsOfUser: AppRouteImplementationOrOptions<
   typeof financeContract.getFinanceDetailsOfUser
-> = async ({ req, params }) => {
+> = async ({ req }) => {
   try {
     const { userId } = req.params;
 
@@ -148,7 +148,7 @@ const getFinanceDetailsOfUser: AppRouteImplementationOrOptions<
     const allTimeEarnings = userBalance.totalEarnings;
     const totalBankPayout = bankPayouts.reduce(
       (total, payout) => total + payout.amount,
-      0
+      0,
     );
 
     return {
@@ -170,6 +170,47 @@ const getFinanceDetailsOfUser: AppRouteImplementationOrOptions<
     };
   } catch (error) {
     console.error('Error fetching earnings:', error);
+    return {
+      status: 500,
+      body: {
+        success: false,
+        message: 'Internal server error',
+      },
+    };
+  }
+};
+
+const getTaskEarningDetails: AppRouteImplementationOrOptions<
+  typeof financeContract.getTaskEarningDetails
+> = async ({ req }) => {
+  try {
+    const { userId } = req.params;
+
+    // Find the task user associated with this user
+    const taskUser = await srkTaskUserModel.findOne({ srkUniversityUserId: userId });
+
+    if (!taskUser) {
+      return {
+        status: 404,
+        body: {
+          success: false,
+          message: 'Task user not found',
+        },
+      };
+    }
+
+    const taskBalance = await srkTaskUserBalanceModel.findOne({ taskUserId: taskUser._id });
+
+    return {
+      status: 200,
+      body: {
+        totalCoinsEarned: taskBalance?.totalCoinsEarned || 0,
+        currentCoins: taskBalance?.currentCoins || 0,
+        totalEarnings: taskBalance?.totalEarnings || 0,
+      },
+    };
+  } catch (error) {
+    console.error('Error fetching task earnings:', error);
     return {
       status: 500,
       body: {
@@ -391,7 +432,7 @@ const getAllBalancePayoutsByStatus: AppRouteImplementationOrOptions<
           paymentMethod: p.paymentMethod || '',
           packageTitle: p.userId?.packageId?.title || '',
         };
-      })
+      }),
     );
 
     // Return consistent paginated response
@@ -491,6 +532,7 @@ const getAdminEarningDetails: AppRouteImplementationOrOptions<
       },
     };
   } catch (error) {
+    console.error('Error fetching admin earning details:', error);
     return {
       status: 500,
       body: {
@@ -550,10 +592,11 @@ const getBankStatementOfUser: AppRouteImplementation<
             createdAt: statement.createdAt,
             updatedAt: statement.updatedAt,
           };
-        })
+        }),
       ),
     };
   } catch (error) {
+    console.error('Error fetching bank statement:', error);
     return {
       status: 500,
       body: {
@@ -566,7 +609,7 @@ const getBankStatementOfUser: AppRouteImplementation<
 
 const getBankStatementForAdmin: AppRouteImplementation<
   typeof financeContract.getBankStatementForAdmin
-> = async ({ req }) => {
+> = async () => {
   try {
     const bankStatements = await bankStatement
       .find({
@@ -598,7 +641,7 @@ const getBankStatementForAdmin: AppRouteImplementation<
             createdAt: statement.createdAt,
             updatedAt: statement.updatedAt,
           };
-        })
+        }),
       ),
     };
   } catch (error) {
@@ -615,7 +658,7 @@ const getBankStatementForAdmin: AppRouteImplementation<
 
 const getSrkBankDetailsForAdmin: AppRouteImplementation<
   typeof financeContract.getSrkBankDetailsForAdmin
-> = async ({ req }) => {
+> = async () => {
   try {
     const srkBankExist = await AdminSrkBankModel.findOne({});
     if (!srkBankExist) {
@@ -647,7 +690,7 @@ const getSrkBankDetailsForAdmin: AppRouteImplementation<
 };
 const getAllSrkUniversityBankStatement: AppRouteImplementationOrOptions<
   typeof financeContract.getAllSrkUniversityBankStatement
-> = async ({ req }) => {
+> = async () => {
   try {
     const srkUniversityBankExist = await SrkUniversityBankModel.findOne({});
 
@@ -683,7 +726,7 @@ const getAllSrkUniversityBankStatement: AppRouteImplementationOrOptions<
             createdAt: statement.createdAt,
             updatedAt: statement.updatedAt,
           };
-        })
+        }),
       ),
     };
   } catch (error) {
@@ -926,7 +969,7 @@ const getSrkBonusFlowForAdmin: AppRouteImplementation<
           registeredAt: user.createdAt,
           storeName: `${user.firstName} ${user.lastName}`,
         };
-      })
+      }),
     );
 
     return {
@@ -942,6 +985,7 @@ const getSrkBonusFlowForAdmin: AppRouteImplementation<
       })),
     };
   } catch (error) {
+    console.error(error);
     return {
       status: 500,
       body: {
@@ -965,4 +1009,5 @@ export const financeQueryHandler = {
   getAllBalancePayoutsByStatus,
   getTeamCashflowOfUser,
   getSrkBonusFlowForAdmin,
+  getTaskEarningDetails,
 };

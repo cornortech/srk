@@ -88,7 +88,6 @@ export const affiliateUsersProfileSchema = z.object({
     fullName: z.string(),
     email: z.string(),
     phone: z.string(),
-    userType: z.string(),
     isEmailNotifications: z.boolean().optional(),
     isPushNotifications: z.boolean().optional(),
     createdAt: z.string(),

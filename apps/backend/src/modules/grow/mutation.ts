@@ -14,6 +14,7 @@ import { AppRouteImplementationOrOptions } from '@ts-rest/express/src/lib/types'
 import { growSrkAffiliateEarningStatementModel } from '../../model/grow/growSrkAffiliateEarningStatementModel';
 import { growSrkAffiliateUserBalanceModel } from '../../model/grow/growSrkAffiliateUserBalanceModel';
 import { GrowSrkAffiliateEarningPayoutModel } from '../../model/grow/growSrkAffiliateEarningPayoutModel';
+import GrowAffiliateUserModel from '../../model/grow/growAffiliateUserModel';
 
 export function calculatePackageDiscount(
   packageId: string,
@@ -696,6 +697,7 @@ const createGrowSocialMediaTasks: AppRouteImplementationOrOptions<
             growSocialMediaPackageEnrollmentId: activeEnrollment._id,
             postUrl: url,
             type: 'like',
+            platform: activeEnrollment.socialMediaPlatform,
           }))
         );
       }
@@ -726,9 +728,9 @@ const srkGrowAffiliateVerificationRequest: AppRouteImplementationOrOptions<
   typeof growContract.srkGrowAffiliateVerificationRequest
 > = async ({ body }) => {
   try {
-    const srkUniversityUserExist = await UserModel.findOne({
-      _id: body.srkUniversityUserId,
-    });
+    const srkUniversityUserExist = await UserModel.findById(
+      body.srkUniversityUserId
+    );
 
     if (!srkUniversityUserExist) {
       return {
@@ -740,9 +742,67 @@ const srkGrowAffiliateVerificationRequest: AppRouteImplementationOrOptions<
       };
     }
 
+    const srkAffiliateVerificationExist =
+      await growSrkAffiliateVerificationModel.findOne({
+        srkUniversityUserId: body.srkUniversityUserId,
+      });
+
+    if (
+      srkAffiliateVerificationExist &&
+      srkAffiliateVerificationExist.status === 'pending'
+    ) {
+      return {
+        status: 400,
+        body: {
+          message:
+            'You have already submitted a verification request. Please wait for it to be processed.',
+          success: false,
+        },
+      };
+    }
+
+    if (
+      srkAffiliateVerificationExist &&
+      srkAffiliateVerificationExist.status === 'approved'
+    ) {
+      return {
+        status: 400,
+        body: {
+          message:
+            'Your affiliate verification request has already been approved.',
+          success: false,
+        },
+      };
+    }
+
+    // If rejected, allow resubmission by updating the existing request
+    if (
+      srkAffiliateVerificationExist &&
+      srkAffiliateVerificationExist.status === 'rejected'
+    ) {
+      await growSrkAffiliateVerificationModel.findByIdAndUpdate(
+        srkAffiliateVerificationExist._id,
+        {
+          verificationImageUrl: body.verificationImageUrl,
+          status: 'pending',
+          rejectionReason: undefined, // Clear the rejection reason
+        }
+      );
+
+      return {
+        status: 201,
+        body: {
+          message:
+            'Srk Grow Affiliate verification request resubmitted successfully',
+          success: true,
+        },
+      };
+    }
+
     await growSrkAffiliateVerificationModel.create({
       srkUniversityUserId: body.srkUniversityUserId,
       verificationImageUrl: body.verificationImageUrl,
+      status: 'pending',
     });
 
     return {
@@ -819,19 +879,17 @@ const approveSrkGrowAffiliateVerificationRequest: AppRouteImplementationOrOption
     const growUserPromoCode =
       await AuthService.generateUniquePromoCodeForSrkGrowUser();
 
-    await growSocialMediaPackageUserModel.create({
-      userType: 'affiliate',
-      country: requestExist.srkUniversityUserId.country,
-      fullName: `${requestExist.srkUniversityUserId.firstName}  ${requestExist.srkUniversityUserId.lastName}`,
+
+    const newGrowAffiliateUser = await GrowAffiliateUserModel.create({
+      srkUniversityUserId: requestExist.srkUniversityUserId._id,
+      fullName: `${requestExist.srkUniversityUserId.firstName} ${requestExist.srkUniversityUserId.lastName}`,
       email: requestExist.srkUniversityUserId.email,
       gender: requestExist.srkUniversityUserId.gender,
-      phone: requestExist.srkUniversityUserId.phoneNumber,
-      status: 'portalActivated',
-      kycURL: requestExist.verificationImageUrl,
-      password: '-',
-      promoCode: growUserPromoCode,
-      srkUniversityUserId: requestExist.srkUniversityUserId._id,
+      promocode: growUserPromoCode,
+      isActive: true,
     });
+
+    console.log('New Grow Affiliate User created:', newGrowAffiliateUser);
 
     return {
       status: 201,
@@ -1008,7 +1066,7 @@ const acceptGrowSrkAffiliateEarningPayoutRequestByAdmin: AppRouteImplementationO
 
     // Update user balance
     const userBalance = await growSrkAffiliateUserBalanceModel.findOne({
-      growSocialMediaPackageUserId: payoutRequest.srkGrowUserId,
+      growAffiliateUserId: payoutRequest.growAffiliateUserId,
     });
 
     if (!userBalance || userBalance.wallet < payoutRequest.amount) {
@@ -1133,7 +1191,9 @@ const toggleEnrollmentActiveStatus: AppRouteImplementationOrOptions<
       status: 200,
       body: {
         success: true,
-        message: `Enrollment ${enrollment.isActive ? 'activated' : 'deactivated'} successfully`,
+        message: `Enrollment ${
+          enrollment.isActive ? 'activated' : 'deactivated'
+        } successfully`,
         isActive: enrollment.isActive,
       },
     };

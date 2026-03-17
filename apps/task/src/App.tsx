@@ -4,13 +4,14 @@ import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
 import { TaskLandingPage } from './pages/landing/LandingPage';
 import { LoginPage } from './pages/auth/LoginPage';
 import { CallbackPage } from './pages/auth/CallbackPage';
-import { TaskVerificationPage } from './pages/tasks/verification/TaskVerificationPage';
+import AdminCallbackPage from './pages/AdminCallbackPage';
 import {
   AdminDashboard,
   AfterVerifiedDashboardPage,
   MainDashboardPage,
 } from './pages';
 import AuthInitializer from './components/auth/AuthInitializer';
+import { AdminProtectedRoute } from './components/auth/AdminProtectedRoute';
 
 const queryClient = new QueryClient();
 
@@ -27,6 +28,10 @@ const router = createBrowserRouter([
     path: '/callback',
     element: <CallbackPage />,
   },
+  {
+    path: '/admin/callback',
+    element: <AdminCallbackPage />,
+  },
   // {
   //   path: '/task/verification',
   //   element: <TaskVerificationPage />,
@@ -37,7 +42,19 @@ const router = createBrowserRouter([
   },
   {
     path: '/admin/dashboard',
-    element: <AdminDashboard />,
+    element: (
+      <AdminProtectedRoute>
+        <AdminDashboard />
+      </AdminProtectedRoute>
+    ),
+  },
+  {
+    path: '/admin',
+    element: (
+      <AdminProtectedRoute>
+        <AdminDashboard />
+      </AdminProtectedRoute>
+    ),
   },
   {
     path: '/dashboard',

@@ -6,53 +6,44 @@ import { api } from '../lib/api';
 
 export const UserDashboardPage = () => {
   const navigate = useNavigate();
-  const { user, setUser, logout } = useGrowAuthStore();
+  const { user: storeUser, logout } = useGrowAuthStore();
 
-  const { data: profileData } = api.grow.getSrkGrowProfile.useQuery(
-    ['growProfile', user?._id],
-    user?._id ? { params: { userId: user._id } } : ({} as any),
+  const { data: profileData, isLoading } = api.grow.getSrkGrowProfile.useQuery(
+    ['growProfile', storeUser?._id],
+    storeUser?._id ? { params: { userId: storeUser._id } } : ({} as any),
     {
-      enabled: !!user?._id,
+      queryKey: ['growProfile', storeUser?._id],
+      enabled: !!storeUser?._id,
       refetchOnWindowFocus: true,
-      queryKey: ['growProfile', user?._id || ''],
     }
   );
 
-  useEffect(() => {
-    if (profileData?.status === 200) {
-      const updatedUser = profileData.body.userDetails;
-      const payment = profileData.body.enrollmentData?.enrollmentPaymentDetails;
-      setUser({
-        ...user!,
-        status: updatedUser.status as any,
-        rejectionReason: payment?.rejectionReason ?? null,
-        kycURL: updatedUser.kycURL,
-        phone: updatedUser.phone,
-        country: updatedUser.country,
-        transactionId: payment?.transactionId,
-        paymentURL: payment?.paymentUrl,
-        paymentMethod: payment?.paymentMethod as any,
-        enrollmentData: profileData.body.enrollmentData,
-        createdAt: updatedUser.createdAt,
-      });
-    }
-  }, [profileData, setUser]);
+  const user = profileData?.status === 200 ? profileData.body : null;
 
   useEffect(() => {
-    if (!user) {
+    if (!storeUser) {
       navigate('/login');
-    } else if (user.status !== 'portalActivated') {
+    } else if (storeUser.status !== 'portalActivated') {
+      console.log('🔄 Redirecting user with status:', storeUser.status);
       navigate('/grow/verification-wall');
     }
-  }, [user, navigate]);
+  }, [storeUser, navigate]);
 
-  if (!user || user.status !== 'portalActivated') {
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900">
+        <div className="text-white text-xl">Loading...</div>
+      </div>
+    );
+  }
+
+  if (!storeUser || storeUser.status !== 'portalActivated' || !user) {
     return null;
   }
 
   return (
     <UserDashboard
-      user={user as any}
+      user={user}
       onLogout={() => {
         logout();
         navigate('/login');

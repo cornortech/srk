@@ -1,11 +1,12 @@
+import mongoose from 'mongoose';
 import { AppRouteImplementationOrOptions } from '@ts-rest/express/src/lib/types';
-import { affiliateContract } from '../../../../../libs/shared/contracts/src/lib/affiliate/contract';
 import { affiliateRequestModel } from '../../model/affiliateRequestModel';
 import { UserModel } from '../../model/userModel';
 import { affiliateBiometricModel } from '../../model/affiliateVerificationModel';
 import { balanceModel } from '../../model/balanceModel';
 import EmailService from '../../services/emailService';
-import mongoose from 'mongoose';
+import { affiliateContract } from '@srk/shared/contracts';
+import { SrkBankModel } from '../../model/bank/srkBankModel';
 
 const affiliateRequest: AppRouteImplementationOrOptions<
   typeof affiliateContract.affiliateRequest
@@ -63,7 +64,6 @@ const approveAffiliateRequest: AppRouteImplementationOrOptions<
   try {
     const userId = new mongoose.Types.ObjectId(params.userId);
 
-    console.log('Approving affiliate request for userId:', userId);
     const userExist = await UserModel.findById(userId);
     if (!userExist) {
       return {
@@ -95,10 +95,10 @@ const approveAffiliateRequest: AppRouteImplementationOrOptions<
 
     await Promise.all([existingAffiliateRequest.save(), userExist.save()]);
 
-    // const srkBankExist = await SrkBankModel.findOne({ userId });
-    // if (!srkBankExist) {
-    //   await SrkBankModel.create({ userId });
-    // }
+    const srkBankExist = await SrkBankModel.findOne({ userId });
+    if (!srkBankExist) {
+      await SrkBankModel.create({ userId });
+    }
 
     const userBalanceExist = await balanceModel.findOne({ userId });
     if (!userBalanceExist) {
@@ -234,6 +234,7 @@ const rejectAffiliateRequest: AppRouteImplementationOrOptions<
       },
     };
   } catch (error) {
+    console.log('Error rejecting affiliate request:', error);
     return {
       status: 500,
       body: {
@@ -243,8 +244,6 @@ const rejectAffiliateRequest: AppRouteImplementationOrOptions<
     };
   }
 };
-
-
 
 export const affiliateMutationHandler = {
   affiliateRequest,

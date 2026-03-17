@@ -6,8 +6,9 @@ import cookieParser from 'cookie-parser';
 import swaggerApiDocs from './config/swagger';
 import cronJobInit from './utils/cronjob';
 import { router } from './modules';
-import { apiContract } from '../../../libs/shared/contracts/src/index';
 import ssoRouter from './modules/sso/router';
+import { apiContract } from '@srk/shared/contracts';
+import { getConnectionPoolStats } from './utils/dbMonitor';
 
 export const app = express();
 
@@ -27,6 +28,16 @@ console.log('*** whitelisted origins ***', WHITE_LISTED_ORIGINS);
 
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'OK' });
+});
+
+// Add database health endpoint
+app.get('/health/db', (req, res) => {
+  const dbStats = getConnectionPoolStats();
+  const statusCode = dbStats.connected ? 200 : 503;
+  res.status(statusCode).json({
+    status: dbStats.connected ? 'OK' : 'ERROR',
+    ...dbStats,
+  });
 });
 
 app.use(

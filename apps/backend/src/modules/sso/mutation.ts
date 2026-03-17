@@ -1,10 +1,12 @@
 import { AppRouteImplementationOrOptions } from '@ts-rest/express/src/lib/types';
 import { ssoContract } from '@srk/shared/contracts';
-import { AutoCodeModel } from '../../model/autoCodeModel';
 import { UserModel } from '../../model/userModel';
 import { adminModel } from '../../model/adminModel';
 import AuthService from '../../services/authService';
 import crypto from 'crypto';
+import GrowAffiliateUserModel from '../../model/grow/growAffiliateUserModel';
+import { AutoCodeModel } from '../../model/autoCodeModel';
+import { SrkBankModel } from '../../model/bank/srkBankModel';
 
 /**
  * Generate a one-time SSO auto code
@@ -66,12 +68,30 @@ const getAutoCode: AppRouteImplementationOrOptions<
       targetApp === 'growaffiliate' ||
       targetApp === 'growsocialmedia'
     ) {
-      const growDomain =
-        process.env['GROW_FRONTEND_URL'] || 'http://localhost:4500';
-      redirectUrl = `${growDomain}/callback?code=${code}`;
+      let growAffiliateId = null;
+      if (targetApp === 'growaffiliate') {
+        const growAffiliateRecord = await GrowAffiliateUserModel.findOne({
+          srkUniversityUserId: userId,
+          isActive: true,
+        });
+
+        let redirectUrlQueryParams = '';
+        if (growAffiliateRecord) {
+          growAffiliateId = growAffiliateRecord._id.toString();
+          redirectUrlQueryParams = `&affiliateId=${growAffiliateId}`;
+        }
+
+        const growDomain =
+          process.env['GROW_FRONTEND_URL'] || 'http://localhost:4500';
+        redirectUrl = `${growDomain}/callback?code=${code}${redirectUrlQueryParams}`;
+      } else {
+        const growDomain =
+          process.env['GROW_FRONTEND_URL'] || 'http://localhost:4500';
+        redirectUrl = `${growDomain}/callback?code=${code}`;
+      }
     } else {
       const bankDomain =
-        process.env['BANK_FRONTEND_URL'] || 'http://localhost:4300';
+        process.env['BANK_FRONTEND_URL'] || 'http://localhost:4600';
       redirectUrl = `${bankDomain}/callback?code=${code}`;
     }
 
@@ -111,6 +131,7 @@ const exchangeCode: AppRouteImplementationOrOptions<
 
     // Find the auto code
     const autoCode = await AutoCodeModel.findOne({ code });
+    const userId = autoCode?.userId;
 
     if (!autoCode) {
       return {
@@ -145,14 +166,9 @@ const exchangeCode: AppRouteImplementationOrOptions<
       };
     }
 
-    // Mark code as used immediately (one-time use)
-    autoCode.isUsed = true;
-    await autoCode.save();
-
     // Get user details
     const userExist = await UserModel.findById(autoCode.userId);
     const adminExist = await adminModel.findById(autoCode.userId);
-
     const loggedInUser = userExist || adminExist;
 
     if (!loggedInUser) {
@@ -165,41 +181,122 @@ const exchangeCode: AppRouteImplementationOrOptions<
       };
     }
 
+    // Mark code as used immediately (one-time use)
+    autoCode.isUsed = true;
+    await autoCode.save();
     // Determine role
     const role = adminExist ? 'admin' : 'user';
 
-    // Set redirection URL based on target app
+    // Set redirection URL based on target app and role
     let redirectionUrl = '/dashboard';
-    if (autoCode.targetApp === 'task') {
-      redirectionUrl = '/task/dashboard';
-    } else if (autoCode.targetApp === 'growaffiliate') {
-      redirectionUrl = '/grow/verification';
-    } else if (autoCode.targetApp === 'growsocialmedia') {
-      redirectionUrl = '/';
-    } else if (autoCode.targetApp === 'bank') {
-      redirectionUrl = '/bank/dashboard';
+    let bankUser: any = null;
+
+    if (autoCode.isAdmin && role === 'admin') {
+      // Admin SSO redirect
+      if (autoCode.targetApp === 'task') {
+        redirectionUrl = '/admin';
+      } else if (
+        autoCode.targetApp === 'growaffiliate' ||
+        autoCode.targetApp === 'growsocialmedia'
+      ) {
+        redirectionUrl = '/admin';
+      }
+    } else {
+      // User SSO redirect
+      if (autoCode.targetApp === 'task') {
+        redirectionUrl = '/task/dashboard';
+      } else if (autoCode.targetApp === 'growaffiliate') {
+        // Check if affiliate is already approved
+        const existingAffiliate = await GrowAffiliateUserModel.findOne({
+          srkUniversityUserId: loggedInUser._id.toString(),
+          isActive: true,
+        });
+
+        // If already approved, go to dashboard, otherwise go to verification
+        redirectionUrl = existingAffiliate
+          ? '/affiliate/dashboard'
+          : '/grow/affiliate/verification';
+      } else if (autoCode.targetApp === 'growsocialmedia') {
+        redirectionUrl = '/';
+      } else if (autoCode.targetApp === 'bank') {
+        bankUser = await SrkBankModel.findOne({ userId });
+
+        if (!bankUser) {
+          // Auto-create bank record for the user if it doesn't exist
+          bankUser = await SrkBankModel.create({
+            userId,
+            amount: 0,
+            status: null, // Initial status
+          });
+
+          // Link it to the user record
+          if (userExist) {
+            userExist.srkBankId = bankUser._id as any;
+            await userExist.save();
+          }
+        }
+
+        switch (bankUser.status) {
+          case 'ONBOARDING_DETAILS_ADDED':
+            redirectionUrl = '/onboarding/otp-verification';
+            break;
+          case 'OTP_VERIFIED':
+            redirectionUrl = '/onboarding/upload-image';
+            break;
+          case 'PROFILE_PICTURE_UPLOADED':
+            redirectionUrl = '/onboarding/user-preview';
+            break;
+          case 'TRANSACTION_PIN_ADDED':
+            redirectionUrl = '/onboarding/user-verification';
+            break;
+          case 'PORTAL_ACTIVATED':
+            redirectionUrl = '/dashboard';
+            break;
+          case 'REJECTED':
+            redirectionUrl = '/onboarding/register';
+            break;
+          default:
+            redirectionUrl = '/onboarding/register';
+        }
+      }
     }
 
-    // Generate new JWT token
-    const token = await AuthService.generateJwtToken({
-      email: loggedInUser.email,
-      userId: loggedInUser._id.toString(),
-    });
+    // Generate access and refresh tokens
+    const [accessToken, refreshToken] = await Promise.all([
+      AuthService.generateAccessToken({
+        email: loggedInUser.email,
+        userId: loggedInUser._id.toString(),
+      }),
+      AuthService.generateRefreshToken({
+        email: loggedInUser.email,
+        userId: loggedInUser._id.toString(),
+      }),
+    ]);
 
-    // Set HTTP-only cookie for the new domain
+    // Set cookies with proper configuration
     const isProduction = process.env.NODE_ENV === 'production';
-    const cookieOptions: any = {
-      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+
+    const accessTokenOptions: any = {
+      maxAge: 15 * 60 * 1000, // 15 minutes
       httpOnly: true,
-      secure: isProduction,
       sameSite: isProduction ? 'none' : 'lax',
+      secure: isProduction,
+    };
+
+    const refreshTokenOptions: any = {
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+      httpOnly: true,
+      sameSite: isProduction ? 'none' : 'lax',
+      secure: isProduction,
     };
 
     if (process.env.COOKIE_DOMAIN) {
-      cookieOptions.domain = process.env.COOKIE_DOMAIN;
+      accessTokenOptions.domain = process.env.COOKIE_DOMAIN;
+      refreshTokenOptions.domain = process.env.COOKIE_DOMAIN;
     }
 
-    res.cookie('x-auth-token', token, cookieOptions);
+    res.cookie('access_token', accessToken, accessTokenOptions);
+    res.cookie('refresh_token', refreshToken, refreshTokenOptions);
 
     // Clean up - delete the used code
     await AutoCodeModel.deleteOne({ _id: autoCode._id });
@@ -210,12 +307,26 @@ const exchangeCode: AppRouteImplementationOrOptions<
         success: true,
         message: 'Authentication successful',
         user: {
-          _id: loggedInUser._id.toString(),
+          universityId: loggedInUser._id.toString(),
           email: loggedInUser.email,
           firstName: userExist?.firstName || undefined,
           lastName: userExist?.lastName || undefined,
+          phoneNumber: userExist?.phoneNumber || undefined,
+          gender: userExist?.gender || undefined,
+          dob: userExist?.dob?.toISOString() || undefined,
+          country: userExist?.country || undefined,
+          bankDetailsId: bankUser?.bankDetailsId?.toString() || undefined,
           role,
           redirectionUrl,
+          srkBank: bankUser
+            ? {
+                _id: bankUser._id.toString(),
+                accountNumber: bankUser.accountNumber || null,
+                status: bankUser.status || null,
+                amount: bankUser.amount || 0,
+                bankDetailsId: bankUser.bankDetailsId?.toString() || null,
+              }
+            : undefined,
         },
       },
     };
@@ -268,16 +379,36 @@ const getMe: AppRouteImplementationOrOptions<
 
     const role = userExist ? 'user' : 'admin';
 
+    // Fetch bank details for the user if it's a bank user
+    let srkBank = null;
+    if (userExist) {
+      srkBank = await SrkBankModel.findOne({ userId: userExist._id });
+    }
+
     return {
       status: 200,
       body: {
         success: true,
         message: 'User retrieved successfully',
         user: {
-          _id: loggedInUser._id.toString(),
+          universityId: loggedInUser._id.toString(),
           email: loggedInUser.email,
           firstName: userExist?.firstName || undefined,
           lastName: userExist?.lastName || undefined,
+          phoneNumber: userExist?.phoneNumber || undefined,
+          gender: userExist?.gender || undefined,
+          dob: userExist?.dob?.toISOString() || undefined,
+          country: userExist?.country || undefined,
+          bankDetailsId: srkBank?.bankDetailsId?.toString() || undefined,
+          srkBank: srkBank
+            ? {
+                _id: srkBank._id.toString(),
+                accountNumber: srkBank.accountNumber || null,
+                status: srkBank.status || null,
+                amount: srkBank.amount || 0,
+                bankDetailsId: srkBank.bankDetailsId?.toString() || null,
+              }
+            : undefined,
           role,
         },
       },

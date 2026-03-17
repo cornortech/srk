@@ -14,6 +14,13 @@ import {
   getAllSrkTaskUsersForAdminQueryParams,
   paginatedCompletedSrkTaskSubmissionsSchema,
   getAllCompletedSrkTaskSubmissionsQueryParams,
+  getRejectedSrkTaskActionSubmissionsByUserQueryParams,
+  paginatedRejectedSrkTaskActionSubmissionsByUserSchema,
+  getUserPaymentDetailsResponseSchema,
+  submitSrkTaskPaymentDetailsRequestSchema,
+  paginatedSrkTaskPaymentDetailsRequestsSchema,
+  getSrkTaskPaymentDetailsRequestsQueryParams,
+  reviewSrkTaskPaymentDetailsRequestSchema,
 } from './schema';
 
 import { paginatedSrkTaskEarningRequestsByUserSchema } from './schema';
@@ -21,6 +28,8 @@ import { paginatedSrkTaskEarningRequestsByUserSchema } from './schema';
 import { initContract } from '@ts-rest/core';
 import {
   acceptSrkTaskUserEarningsPayoutSchema,
+  bulkApproveSrkTaskSubmissionsSchema,
+  bulkRejectSrkTaskSubmissionsSchema,
   getSrkTaskEarningRequestsByAdminQueryParams,
   getSrkTaskUserAnalyticsSchema,
   getSrkTaskUserEarningsLeaderboardQueryParams,
@@ -58,6 +67,7 @@ export const srkTaskContract = c.router({
     responses: {
       200: getSrkTaskUserAnalyticsSchema,
       400: ErrorSchema,
+      404: ErrorSchema,
       500: ErrorSchema,
     },
     summary: 'Get SRK Task User Analytics details by Id',
@@ -111,6 +121,19 @@ export const srkTaskContract = c.router({
     summary:
       'Get all srk task action submissions by status for admin (paginated)',
   },
+  getAllPendingTaskSubmissionsByUserForAdmin: {
+    method: 'GET',
+    path: '/task/admin/pending-submissions-by-user',
+    query: commonPaginatedQueryParamsSchema.extend({
+      taskUserId: z.string(),
+    }),
+    responses: {
+      200: paginatedSrkTaskActionSubmissionsByStatusForAdminSchema,
+      400: ErrorSchema,
+      500: ErrorSchema,
+    },
+    summary: 'Get all pending task submissions for a specific user for admin',
+  },
   getSrkTaskActionsByPlatforms: {
     method: 'GET',
     path: '/task/srk-task-actions-by-platforms',
@@ -144,6 +167,17 @@ export const srkTaskContract = c.router({
     },
     summary: 'Get all srk task action submissions by user (paginated)',
   },
+  getRejectedSrkTaskActionSubmissionsByUser: {
+    method: 'GET',
+    path: '/task/user/:userId/rejected-submissions',
+    query: getRejectedSrkTaskActionSubmissionsByUserQueryParams.optional(),
+    responses: {
+      200: paginatedRejectedSrkTaskActionSubmissionsByUserSchema,
+      400: ErrorSchema,
+      500: ErrorSchema,
+    },
+    summary: 'Get rejected srk task action submissions by user (attention needed)',
+  },
   getAllSrkTaskUserFinanceStatement: {
     method: 'GET',
     path: '/task/user/:userId/srk-task-finance-statement',
@@ -175,8 +209,8 @@ export const srkTaskContract = c.router({
       srkTaskUserId: z.string(),
       coins: z
         .number()
-        .min(500, 'Coins must be at least 500')
-        .max(1000, 'Coins must be at most 1000'),
+        .min(20000, 'Coins must be at least 20,000')
+        .max(100000, 'Coins must be at most 100,000'),
     }),
     responses: {
       201: SuccessSchema,
@@ -214,7 +248,11 @@ export const srkTaskContract = c.router({
     path: '/task/submit-onboarding-verification/:srkUniversityId',
     body: submitTaskOnboardingVerificationSchema,
     responses: {
-      201: SuccessSchema,
+      201: z.object({
+        success: z.boolean(),
+        message: z.string(),
+        taskUserID: z.string(),
+      }),
       400: ErrorSchema,
       500: ErrorSchema,
     },
@@ -279,6 +317,28 @@ export const srkTaskContract = c.router({
     },
     summary: 'Approve an action submission for srk task user by admin',
   },
+  bulkApproveSrkTaskSubmissionsByAdmin: {
+    method: 'POST',
+    path: '/task/admin/bulk-approve-submissions',
+    body: bulkApproveSrkTaskSubmissionsSchema,
+    responses: {
+      200: SuccessSchema,
+      400: ErrorSchema,
+      500: ErrorSchema,
+    },
+    summary: 'Bulk approve task submissions by admin',
+  },
+  bulkRejectSrkTaskSubmissionsByAdmin: {
+    method: 'POST',
+    path: '/task/admin/bulk-reject-submissions',
+    body: bulkRejectSrkTaskSubmissionsSchema,
+    responses: {
+      200: SuccessSchema,
+      400: ErrorSchema,
+      500: ErrorSchema,
+    },
+    summary: 'Bulk reject task submissions by admin',
+  },
   getAllSrkTaskAffiliateVerificationRequest: {
     method: 'GET',
     path: '/task/affiliate/get-approved-verification-request',
@@ -307,5 +367,57 @@ export const srkTaskContract = c.router({
       500: ErrorSchema,
     },
     summary: 'Get all completed (approved) task submissions for admin',
+  },
+
+  // Payment Details Endpoints
+  getUserPaymentDetails: {
+    method: 'GET',
+    path: '/task/user-payment-details/:userId',
+    responses: {
+      200: getUserPaymentDetailsResponseSchema,
+      404: ErrorSchema,
+      500: ErrorSchema,
+    },
+    summary: 'Get user payment details and pending request',
+  },
+
+  submitPaymentDetailsRequest: {
+    method: 'POST',
+    path: '/task/submit-payment-details-request/:userId',
+    body: submitSrkTaskPaymentDetailsRequestSchema,
+    responses: {
+      201: z.object({
+        success: z.boolean(),
+        message: z.string(),
+      }),
+      400: ErrorSchema,
+      500: ErrorSchema,
+    },
+    summary: 'Submit payment details verification request',
+  },
+
+  getAllPaymentDetailsRequestsForAdmin: {
+    method: 'GET',
+    path: '/task/admin/payment-details-requests',
+    query: getSrkTaskPaymentDetailsRequestsQueryParams.optional(),
+    responses: {
+      200: paginatedSrkTaskPaymentDetailsRequestsSchema,
+      400: ErrorSchema,
+      500: ErrorSchema,
+    },
+    summary: 'Get all payment details requests for admin',
+  },
+
+  reviewPaymentDetailsRequest: {
+    method: 'POST',
+    path: '/task/admin/review-payment-details-request',
+    body: reviewSrkTaskPaymentDetailsRequestSchema,
+    responses: {
+      200: SuccessSchema,
+      400: ErrorSchema,
+      404: ErrorSchema,
+      500: ErrorSchema,
+    },
+    summary: 'Approve or reject payment details request',
   },
 });

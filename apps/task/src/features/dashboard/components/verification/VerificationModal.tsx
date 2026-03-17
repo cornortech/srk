@@ -14,7 +14,7 @@ import { SignaturePad } from './SignaturePad';
 import DashboardGradientText from '../ui/DashboardGradientText';
 import { useSRKFileUpload } from '../../../../../../../libs/shared/hooks/src/lib/useSRKFileUpload';
 import { api } from '../../../../lib/api';
-import useTaskAuthStore from '../../../../store/useTaskAuthStore';
+import { useTaskAuthStore } from '../../../../store/useTaskAuthStore';
 
 const dataURLtoFile = (dataurl: string, filename: string): File => {
   const arr = dataurl.split(',');
@@ -176,6 +176,8 @@ export const VerificationModal: React.FC<VerificationModalProps> = ({
       return;
     }
 
+    const { setTaskUserID } = useTaskAuthStore.getState();
+
     setIsSubmitting(true);
     setSubmissionStatus(null);
 
@@ -209,7 +211,10 @@ export const VerificationModal: React.FC<VerificationModalProps> = ({
         },
       });
 
-      if (response.status === 201) {
+      if (response.status === 201 && response.body.taskUserID) {
+        console.log('✅ Storing taskUserID from verification response:', response.body.taskUserID);
+        setTaskUserID(response.body.taskUserID);
+
         setSubmissionStatus('success');
         setCurrentStep(totalSteps);
         setTimeout(() => {
@@ -217,7 +222,7 @@ export const VerificationModal: React.FC<VerificationModalProps> = ({
           onClose();
         }, 2000);
       } else {
-        throw new Error('Submission failed');
+        throw new Error('Submission failed or no taskUserID returned');
       }
     } catch (error) {
       console.error('Verification submission failed:', error);
@@ -294,9 +299,8 @@ export const VerificationModal: React.FC<VerificationModalProps> = ({
                 autoPlay
                 muted
                 playsInline
-                className={`w-full h-full object-cover transition-opacity duration-500 ${
-                  isCameraActive ? 'opacity-100' : 'opacity-10'
-                }`}
+                className={`w-full h-full object-cover transition-opacity duration-500 ${isCameraActive ? 'opacity-100' : 'opacity-10'
+                  }`}
               />
               <canvas ref={canvasRef} className="hidden" />
 

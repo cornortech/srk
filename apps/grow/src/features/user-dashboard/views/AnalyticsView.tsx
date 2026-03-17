@@ -84,31 +84,30 @@ const analyticsData: {
 };
 
 export const AnalyticsView: React.FC = () => {
-  const { user, setUser } = useGrowAuthStore();
+  const { user: storeUser } = useGrowAuthStore();
   const [isAddingLink, setIsAddingLink] = useState(false);
   const [newLink, setNewLink] = useState('');
   const { showToast } = useToast();
+
+  // Fetch user data from API
+  const { data: profileData, isLoading } = api.grow.getSrkGrowProfile.useQuery(
+    ['growProfile', storeUser?._id],
+    storeUser?._id ? { params: { userId: storeUser._id } } : ({} as any),
+    {
+      queryKey: ['growProfile', storeUser?._id],
+      enabled: !!storeUser?._id,
+      refetchOnWindowFocus: true,
+    }
+  );
+
+  const user = profileData?.status === 200 ? profileData.body : null;
 
   const { mutate: createTasks, isPending } =
     api.grow.createGrowSocialMediaTasks.useMutation({
       onSuccess: () => {
         showToast('Link added successfully', 'success');
-        if (user && user.enrollmentData) {
-          const updatedUser = {
-            ...user,
-            enrollmentData: {
-              ...user.enrollmentData,
-              engagementPostURLs: [
-                ...(user.enrollmentData.engagementPostURLs || []),
-                newLink,
-              ],
-            },
-          };
-
-          setUser(updatedUser);
-          setNewLink('');
-          setIsAddingLink(false);
-        }
+        setNewLink('');
+        setIsAddingLink(false);
       },
       onError: (error: any) => {
         showToast(error.body.message || 'Failed to add link', 'error');
@@ -158,6 +157,22 @@ export const AnalyticsView: React.FC = () => {
   const enrolledPlatform = enrollmentPackageDetails?.socialMediaPlatform;
   const enrolledPackageSubType =
     enrollmentData?.enrollmentPackageDetails?.packageType?.packageSubType;
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-white">Loading analytics...</div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-white">Unable to load user data</div>
+      </div>
+    );
+  }
 
   const filteredPlatforms = analyticsData.platforms
     .filter((platform) =>
@@ -333,14 +348,13 @@ export const AnalyticsView: React.FC = () => {
 
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {enrollmentPostUrls.map(
-                          (url: string, index: number) => {
-                            const target =
-                              enrolledPackageSubType?.noOfLikes || 0;
-                            const completed = 0;
-                            const progress =
-                              target > 0
-                                ? Math.round((completed / target) * 100)
-                                : 0;
+                          (postData, index: number) => {
+                            // Handle both old format (string) and new format (object)
+                            const isObject = typeof postData === 'object';
+                            const urlString = isObject ? postData.url : postData;
+                            const likesAcquired = isObject ? postData.likesAcquired : 0;
+                            const likesTarget = isObject ? postData.likesTarget : (enrolledPackageSubType?.noOfLikes || 0);
+                            const progress = isObject ? postData.progress : (likesTarget > 0 ? Math.round((likesAcquired / likesTarget) * 100) : 0);
 
                             return (
                               <motion.div
@@ -355,7 +369,7 @@ export const AnalyticsView: React.FC = () => {
                                     <LinkIcon size={16} />
                                   </div>
                                   <a
-                                    href={url}
+                                    href={urlString}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="text-gray-400 hover:text-white transition-colors"
@@ -367,9 +381,9 @@ export const AnalyticsView: React.FC = () => {
                                 <div className="mb-4">
                                   <p
                                     className="text-xs text-gray-500 mb-1 truncate block w-full font-mono"
-                                    title={url}
+                                    title={urlString}
                                   >
-                                    {url}
+                                    {urlString}
                                   </p>
                                 </div>
 
@@ -390,7 +404,7 @@ export const AnalyticsView: React.FC = () => {
                                     Likes Target
                                   </span>
                                   <span className="text-sm font-bold text-white">
-                                    {completed} / {target}
+                                    {likesAcquired} / {likesTarget}
                                   </span>
                                 </div>
 

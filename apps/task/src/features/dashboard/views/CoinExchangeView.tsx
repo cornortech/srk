@@ -29,8 +29,7 @@ export const CoinExchangeView: React.FC<CoinExchangeViewProps> = ({
 
   const EXCHANGE_RATE = 100;
   const TDS_RATE = 0.15;
-  const MIN_WITHDRAWAL = 500;
-  const MAX_WITHDRAWAL = 1000;
+  const MIN_WITHDRAWAL = 20000;
 
   const [exchangeAmount, setExchangeAmount] = useState(0);
 
@@ -70,16 +69,14 @@ export const CoinExchangeView: React.FC<CoinExchangeViewProps> = ({
     return payoutsData.body.data.some((p: any) => p.status === 'pending');
   }, [payoutsData]);
 
-  const sliderMax = Math.min(eligible, MAX_WITHDRAWAL);
+  const sliderMax = eligible;
 
   const isValidAmount = exchangeAmount > 0 && exchangeAmount <= eligible;
   const meetsMinimum = exchangeAmount >= MIN_WITHDRAWAL;
-  const withinMaxLimit = exchangeAmount <= MAX_WITHDRAWAL;
 
   const canRequest =
     isValidAmount &&
     meetsMinimum &&
-    withinMaxLimit &&
     !isPayoutPending &&
     !isSubmitting;
 
@@ -120,8 +117,7 @@ export const CoinExchangeView: React.FC<CoinExchangeViewProps> = ({
                 <div>
                   <div className="flex items-center justify-between mb-2">
                     <label className="text-sm font-medium text-zinc-400">
-                      Coins to Exchange (Max: {MAX_WITHDRAWAL.toLocaleString()}{' '}
-                      Coins)
+                      Coins to Exchange (Max: {eligible.toLocaleString()} Coins)
                     </label>
                     <button
                       onClick={handleMaxClick}
@@ -246,24 +242,15 @@ export const CoinExchangeView: React.FC<CoinExchangeViewProps> = ({
                   {isPayoutPending
                     ? 'Request Submitted ✓'
                     : canRequest
-                    ? `Request Rs. ${netAmount.toFixed(2)} Payout`
-                    : 'Cannot Request Payout'}
+                      ? `Request Rs. ${netAmount.toFixed(2)} Payout`
+                      : 'Cannot Request Payout'}
                 </MagneticButton>
 
                 {/* Validation Messages */}
                 {exchangeAmount > 0 && !meetsMinimum && (
                   <div className="p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
                     <p className="text-yellow-400 text-sm">
-                      Minimum withdrawal is {MIN_WITHDRAWAL} coins
-                    </p>
-                  </div>
-                )}
-
-                {exchangeAmount > MAX_WITHDRAWAL && (
-                  <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
-                    <p className="text-red-400 text-sm">
-                      Maximum withdrawal per transaction is {MAX_WITHDRAWAL}{' '}
-                      coins
+                      Minimum withdrawal is {MIN_WITHDRAWAL.toLocaleString()} coins
                     </p>
                   </div>
                 )}
@@ -271,7 +258,7 @@ export const CoinExchangeView: React.FC<CoinExchangeViewProps> = ({
                 {exchangeAmount > eligible && (
                   <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
                     <p className="text-red-400 text-sm">
-                      Cannot exceed eligible balance of {eligible} coins
+                      Cannot exceed eligible balance of {eligible.toLocaleString()} coins
                     </p>
                   </div>
                 )}
@@ -381,20 +368,18 @@ export const CoinExchangeView: React.FC<CoinExchangeViewProps> = ({
                     </div>
                     <div className="text-right">
                       <p
-                        className={`font-medium ${
-                          tx.coins.startsWith('+')
-                            ? 'text-green-400'
-                            : 'text-red-400'
-                        }`}
+                        className={`font-medium ${tx.coins.startsWith('+')
+                          ? 'text-green-400'
+                          : 'text-red-400'
+                          }`}
                       >
                         {tx.coins}
                       </p>
                       <div
-                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs ${
-                          tx.status === 'completed'
-                            ? 'bg-green-500/20 text-green-400'
-                            : 'bg-yellow-500/20 text-yellow-400'
-                        }`}
+                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs ${tx.status === 'completed'
+                          ? 'bg-green-500/20 text-green-400'
+                          : 'bg-yellow-500/20 text-yellow-400'
+                          }`}
                       >
                         {tx.status}
                       </div>

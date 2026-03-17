@@ -1,10 +1,15 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
 const bankDetailsSchema = new mongoose.Schema({
   srkBankId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "SrkBank",
+    ref: 'SrkBank',
     required: true,
+  },
+  basicInfo: {
+    profilePicture: {
+      type: String,
+    },
   },
   familyDetails: {
     fatherName: { type: String, required: true },
@@ -33,7 +38,7 @@ const bankDetailsSchema = new mongoose.Schema({
     idNumber: { type: String, required: true },
     issuedDate: { type: Date, required: true },
     issuedFrom: { type: String, required: true },
-    nidAuthority: { type: String, required: true },
+    // nidAuthority: { type: String, required: true },
   },
   documents: {
     ppSizePhoto: { type: String, required: true },
@@ -42,6 +47,6 @@ const bankDetailsSchema = new mongoose.Schema({
 });
 
 export const BankDetailsModel = mongoose.model(
-  "BankDetails",
-  bankDetailsSchema
+  'BankDetails',
+  bankDetailsSchema,
 );

@@ -21,12 +21,26 @@ const SSOExchangeResponseSchema = z.object({
   message: z.string(),
   user: z
     .object({
-      _id: z.string(),
+      universityId: z.string(),
       email: z.string(),
       firstName: z.string().optional(),
       lastName: z.string().optional(),
+      phoneNumber: z.string().optional(),
+      gender: z.string().optional(),
+      dob: z.string().optional(),
+      country: z.string().optional(),
+      bankDetailsId: z.string().optional(),
       role: z.string(),
       redirectionUrl: z.string(),
+      srkBank: z
+        .object({
+          _id: z.string(),
+          accountNumber: z.string().nullable(),
+          status: z.string().nullable(),
+          amount: z.number(),
+          bankDetailsId: z.string().nullable(),
+        })
+        .optional(),
     })
     .optional(),
 });
@@ -41,10 +55,24 @@ const GetMeResponseSchema = z.object({
   message: z.string(),
   user: z
     .object({
-      _id: z.string(),
+      universityId: z.string(),
       email: z.string(),
       firstName: z.string().optional(),
       lastName: z.string().optional(),
+      phoneNumber: z.string().optional(),
+      gender: z.string().optional(),
+      dob: z.string().optional(),
+      country: z.string().optional(),
+      bankDetailsId: z.string().optional(),
+      srkBank: z
+        .object({
+          _id: z.string(),
+          accountNumber: z.string().nullable(),
+          status: z.string().nullable(),
+          amount: z.number(),
+          bankDetailsId: z.string().nullable(),
+        })
+        .optional(),
       role: z.string(),
     })
     .optional(),
@@ -59,7 +87,9 @@ export const ssoContract = c.router({
     method: 'GET',
     path: '/auth/sso/get-auto-code',
     query: z.object({
-      targetApp: z.enum(['task', 'growaffiliate', 'growsocialmedia', 'bank']).default('task'),
+      targetApp: z
+        .enum(['task', 'growaffiliate', 'growsocialmedia', 'bank'])
+        .default('task'),
     }),
     responses: {
       200: SSOCodeResponseSchema,

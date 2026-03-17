@@ -11,8 +11,8 @@ export const JwtAuthMiddleware = async (
   next: NextFunction
 ) => {
   try {
-    // Get token from cookies
-    const token = req.cookies?.['x-auth-token'];
+    // Get access token from cookies
+    const token = req.cookies?.['access_token'];
 
     if (!token) {
       return res.status(401).json({

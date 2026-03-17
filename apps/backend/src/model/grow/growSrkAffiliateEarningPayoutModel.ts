@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
 export type IGrowSrkAffiliateEarningPayout = {
-  srkGrowUserId: mongoose.Types.ObjectId;
+  growAffiliateUserId: mongoose.Schema.Types.ObjectId;
   amount: number;
   status: 'pending' | 'approved' | 'rejected';
   transactionId?: string;
@@ -15,9 +15,9 @@ export type IGrowSrkAffiliateEarningPayout = {
 const growSrkAffiliateEarningPayoutSchema =
   new mongoose.Schema<IGrowSrkAffiliateEarningPayout>(
     {
-      srkGrowUserId: {
+      growAffiliateUserId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'growSocialMediaPackageUser',
+        ref: 'growAffiliateUser',
         required: true,
       },
       amount: { type: Number, required: true },

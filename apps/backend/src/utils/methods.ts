@@ -48,4 +48,24 @@ const getFrontendRedirectionUrl = (
   return redirectionUrl;
 };
 
-export const methods = { getFrontendRedirectionUrl };
+function generateBankAccountNumber() {
+  let accountNumber = "";
+  for (let i = 0; i < 16; i++) {
+    const digit = Math.floor(Math.random() * 10); // Random digit from 0–9
+    accountNumber += digit;
+  }
+  return accountNumber;
+}
+
+function generateSRKBankId() {
+  // Generate a random 13-digit number
+  const randomNumber = Math.floor(Math.random() * 1e13)
+    .toString()
+    .padStart(13, "0");
+
+  // Add the prefix "SRK"
+  return `SRK${randomNumber}`;
+}
+
+export const methods = { getFrontendRedirectionUrl ,  generateBankAccountNumber,
+  generateSRKBankId };

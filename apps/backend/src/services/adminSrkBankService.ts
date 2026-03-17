@@ -1,4 +1,4 @@
-import { AdminSrkBankModel } from "../model/AdminSrkBankModel";
+import { AdminSrkBankModel } from "../model/bank/AdminSrkBankModel";
 
 class AdminSrkBankService {
   static async depositAmount(amount: number) {

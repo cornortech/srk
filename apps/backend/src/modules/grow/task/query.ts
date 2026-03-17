@@ -14,6 +14,7 @@ import { IUser } from '../../../model/userModel';
 import { srkTaskUserBalanceModel } from '../../../model/task/srkTaskUserBalanceModel';
 import { growPackageTodoModel } from '../../../model/growPackageTodoModel';
 import { growSocialMediaPackageEnrollmentModel } from '../../../model/growSocialMediaPackageEnrollment';
+import { srkTaskUserPaymentDetailsRequestModel } from '../../../model/task/srkTaskUserPaymentDetailsRequestModel';
 
 const getAllSrkTasksActionSubmissionByStatusForAdmin: AppRouteImplementationOrOptions<
   typeof srkTaskContract.getAllSrkTasksActionSubmissionByStatusForAdmin
@@ -30,7 +31,7 @@ const getAllSrkTasksActionSubmissionByStatusForAdmin: AppRouteImplementationOrOp
       srkTaskActionSubmissionModel.countDocuments(filter),
       srkTaskActionSubmissionModel
         .find(filter)
-        .sort({ createdAt: -1 })
+        .sort({ updatedAt: -1 })
         .skip(skip)
         .limit(limit)
         .populate<{
@@ -39,7 +40,11 @@ const getAllSrkTasksActionSubmissionByStatusForAdmin: AppRouteImplementationOrOp
           path: 'taskUserId',
           populate: {
             path: 'srkUniversityUserId',
-            select: 'fullName email phoneNumber',
+            select: 'fullName email phoneNumber packageId',
+            populate: {
+              path: 'packageId',
+              select: 'title',
+            },
           },
         })
         .populate<{
@@ -54,29 +59,64 @@ const getAllSrkTasksActionSubmissionByStatusForAdmin: AppRouteImplementationOrOp
               { path: 'growSocialMediaPackageSubTypeId' },
             ],
           },
-        })
-        .lean(),
+        }),
     ]);
 
-    const data = submissions.map((submission) => {
-      const taskUser = submission.taskUserId;
-      const todo = submission.growPackageTodoId;
-      const enrollment = todo?.growSocialMediaPackageEnrollmentId;
+    const data = await Promise.all(
+      submissions.map(async (submission: any) => {
+        const taskUser = submission.taskUserId;
+        const todo = submission.growPackageTodoId;
+        const enrollment = todo?.growSocialMediaPackageEnrollmentId;
 
-      return {
-        _id: submission._id.toString(),
-        type: submission.type,
-        description: submission.description,
-        taskUserId: taskUser
-          ? {
-              _id: taskUser._id.toString(),
-              fullName: taskUser.fullName || 'N/A',
-              email: taskUser.srkUniversityUserId?.email || 'N/A',
-              phoneNumber: taskUser.srkUniversityUserId?.phoneNumber || 'N/A',
-            }
-          : undefined,
-        growPackageTodoId: todo
-          ? {
+        // Get lifetime statistics for this user
+        const [approvedCount, totalSubmissions, balance] = await Promise.all([
+          taskUser
+            ? srkTaskActionSubmissionModel.countDocuments({
+                taskUserId: taskUser._id,
+                status: 'approved',
+              })
+            : Promise.resolve(0),
+          taskUser
+            ? srkTaskActionSubmissionModel.countDocuments({
+                taskUserId: taskUser._id,
+              })
+            : Promise.resolve(0),
+          taskUser
+            ? srkTaskUserBalanceModel
+                .findOne({
+                  $or: [
+                    { taskUserId: taskUser._id },
+                    { taskUserId: taskUser._id.toString() },
+                  ],
+                })
+                .lean()
+            : Promise.resolve(null),
+        ]);
+
+        return {
+          _id: submission._id.toString(),
+          type: submission.type,
+          description: submission.description,
+          taskUserId: taskUser
+            ? {
+                _id: taskUser._id.toString(),
+                fullName:
+                  taskUser.srkUniversityUserId?.fullName ||
+                  taskUser.fullName ||
+                  'N/A',
+                email: taskUser.srkUniversityUserId?.email || 'N/A',
+                phoneNumber: taskUser.srkUniversityUserId?.phoneNumber || 'N/A',
+                packageName:
+                  taskUser.srkUniversityUserId?.packageId?.title ||
+                  'SRK Basic',
+                approvedCount,
+                totalSubmissions,
+                currentCoins: balance?.currentCoins || 0,
+                totalCoinsEarned: balance?.totalCoinsEarned || 0,
+              }
+            : undefined,
+          growPackageTodoId: todo
+            ? {
               _id: todo._id.toString(),
               postUrl: todo.postUrl,
               profileUrl: todo.profileUrl,
@@ -155,7 +195,8 @@ const getAllSrkTasksActionSubmissionByStatusForAdmin: AppRouteImplementationOrOp
         createdAt: submission.createdAt?.toISOString?.() || '',
         updatedAt: submission.updatedAt?.toISOString?.() || '',
       };
-    });
+    })
+    );
 
     return {
       status: 200,
@@ -818,6 +859,22 @@ const getAllSrkTaskEarningPayoutsByAdmin: AppRouteImplementationOrOptions<
         }),
     ]);
 
+    // Get payment details for each user
+    const userIds = payouts.map((p) => (p.taskUserId as any)?._id).filter(Boolean);
+    const paymentDetailsMap = new Map();
+
+    if (userIds.length > 0) {
+      const paymentDetails = await srkTaskUserPaymentDetailsRequestModel.find({
+        srkTaskUserId: { $in: userIds },
+        status: 'approved',
+        isActive: true,
+      }).lean();
+
+      paymentDetails.forEach((pd) => {
+        paymentDetailsMap.set(pd.srkTaskUserId.toString(), pd);
+      });
+    }
+
     return {
       status: 200,
       body: {
@@ -827,13 +884,23 @@ const getAllSrkTaskEarningPayoutsByAdmin: AppRouteImplementationOrOptions<
         totalPages: Math.ceil(totalRecords / limit),
         data: payouts.map((payout) => {
           const taskUser = payout.taskUserId as any;
+          const userId = taskUser?._id?.toString() || '';
+          const paymentDetails = paymentDetailsMap.get(userId);
+
           return {
             _id: payout._id.toString(),
             taskUserId: {
-              _id: taskUser?._id?.toString() || '',
+              _id: userId,
               fullName: taskUser?.fullName || 'Unknown User',
               email: taskUser?.srkUniversityUserId?.email || 'Unknown Email',
             },
+            paymentDetails: paymentDetails ? {
+              accountHolderName: paymentDetails.accountHolderName,
+              bankName: paymentDetails.bankName,
+              accountNumber: paymentDetails.accountNumber,
+              branchName: paymentDetails.branchName,
+              qrCodeUrl: paymentDetails.qrCodeUrl,
+            } : null,
             transactionId: payout.transactionId || null,
             coinsUsed: payout.coinsUsed,
             tds: payout.tds,
@@ -895,30 +962,32 @@ const getSrkTaskOnboardingVerificationRequestForAdmin: AppRouteImplementationOrO
         limit,
         totalRecords,
         totalPages: Math.ceil(totalRecords / limit),
-        data: verificationRequests.map((request) => {
-          const taskUser = request.taskUserId as any;
-          return {
-            _id: request._id.toString(),
-            taskUserId: {
-              _id: taskUser._id.toString(),
-              fullName: taskUser.fullName,
-              dob: taskUser.dob,
-              isActivated: taskUser.isActivated,
-              srkUniversityUserId: {
-                _id: taskUser.srkUniversityUserId._id.toString(),
-                email: taskUser.srkUniversityUserId.email,
-                phoneNumber: taskUser.srkUniversityUserId.phoneNumber,
+        data: verificationRequests
+          .filter((request) => request.taskUserId !== null) // Filter out orphaned requests
+          .map((request) => {
+            const taskUser = request.taskUserId as any;
+            return {
+              _id: request._id.toString(),
+              taskUserId: {
+                _id: taskUser._id.toString(),
+                fullName: taskUser.fullName,
+                dob: taskUser.dob,
+                isActivated: taskUser.isActivated,
+                srkUniversityUserId: {
+                  _id: taskUser.srkUniversityUserId._id.toString(),
+                  email: taskUser.srkUniversityUserId.email,
+                  phoneNumber: taskUser.srkUniversityUserId.phoneNumber,
+                },
               },
-            },
-            kycDocumentUrl: request.kycDocumentUrl,
-            imageUrl: request.imageUrl,
-            signatureUrl: request.signatureUrl,
-            status: request.status,
-            rejectionReason: request.rejectionReason || null,
-            createdAt: request.createdAt.toISOString(),
-            updatedAt: request.updatedAt.toISOString(),
-          };
-        }),
+              kycDocumentUrl: request.kycDocumentUrl,
+              imageUrl: request.imageUrl,
+              signatureUrl: request.signatureUrl,
+              status: request.status,
+              rejectionReason: request.rejectionReason || null,
+              createdAt: request.createdAt.toISOString(),
+              updatedAt: request.updatedAt.toISOString(),
+            };
+          }),
       },
     };
   } catch (error) {
@@ -1191,6 +1260,156 @@ const getAllSrkTasksActionSubmissionsByUser: AppRouteImplementationOrOptions<
   }
 };
 
+const getRejectedSrkTaskActionSubmissionsByUser: AppRouteImplementationOrOptions<
+  typeof srkTaskContract.getRejectedSrkTaskActionSubmissionsByUser
+> = async ({ params, query }) => {
+  try {
+    const { userId } = params;
+    const taskUserId = new mongoose.Types.ObjectId(userId);
+
+    const page = Number(query?.page ?? 1);
+    const limit = Number(query?.limit ?? 10);
+    const skip = (page - 1) * limit;
+
+    // Filter for rejected submissions only
+    const filter: any = {
+      taskUserId,
+      status: 'rejected',
+    };
+
+    const [totalRecords, submissions] = await Promise.all([
+      srkTaskActionSubmissionModel.countDocuments(filter),
+      srkTaskActionSubmissionModel
+        .find(filter)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .populate({
+          path: 'growPackageTodoId',
+          populate: {
+            path: 'growSocialMediaPackageEnrollmentId',
+            populate: [
+              { path: 'growSocialMediaPackageId' },
+              { path: 'growSocialMediaPackageTypeId' },
+              { path: 'growSocialMediaPackageSubTypeId' },
+            ],
+          },
+        })
+        .lean(),
+    ]);
+
+    const data = submissions.map((submission: any) => {
+      const enrollment =
+        submission.growPackageTodoId?.growSocialMediaPackageEnrollmentId;
+      return {
+        _id: submission._id.toString(),
+        type: submission.type,
+        description: submission.description,
+        screenshotUrl: submission.screenshotUrl,
+        status: submission.status,
+        rejectionReason: submission.rejectionReason || null,
+        createdAt: new Date(submission.createdAt).toISOString(),
+        updatedAt: new Date(submission.updatedAt).toISOString(),
+        growPackageTodoId: submission.growPackageTodoId
+          ? {
+              _id: submission.growPackageTodoId._id.toString(),
+              postUrl: submission.growPackageTodoId.postUrl || '',
+              profileUrl: submission.growPackageTodoId.profileUrl || '',
+              type: submission.growPackageTodoId.type,
+              platform: submission.growPackageTodoId.platform || '',
+              followCounts: submission.growPackageTodoId.followCounts || 0,
+              likeCounts: submission.growPackageTodoId.likeCounts || 0,
+              enrollment: enrollment
+                ? {
+                    _id: enrollment._id.toString(),
+                    socialMediaPlatform: enrollment.socialMediaPlatform || '',
+                    profileLinkURL: enrollment.profileLinkURL || [],
+                    amount: enrollment.amount || 0,
+                    isActive: enrollment.isActive || false,
+                    growSocialMediaPackageId:
+                      enrollment.growSocialMediaPackageId
+                        ? {
+                            _id: enrollment.growSocialMediaPackageId._id.toString(),
+                            name:
+                              enrollment.growSocialMediaPackageId.name || '',
+                            description:
+                              enrollment.growSocialMediaPackageId.description ||
+                              '',
+                            socialMediaPlatforms:
+                              enrollment.growSocialMediaPackageId
+                                .socialMediaPlatforms || [],
+                            amount:
+                              enrollment.growSocialMediaPackageId.amount || 0,
+                          }
+                        : undefined,
+                    growSocialMediaPackageTypeId:
+                      enrollment.growSocialMediaPackageTypeId
+                        ? {
+                            _id: enrollment.growSocialMediaPackageTypeId._id.toString(),
+                            name:
+                              enrollment.growSocialMediaPackageTypeId.name ||
+                              '',
+                            description:
+                              enrollment.growSocialMediaPackageTypeId
+                                .description || '',
+                            amount:
+                              enrollment.growSocialMediaPackageTypeId.amount ||
+                              0,
+                          }
+                        : undefined,
+                    growSocialMediaPackageSubTypeId:
+                      enrollment.growSocialMediaPackageSubTypeId
+                        ? {
+                            _id: enrollment.growSocialMediaPackageSubTypeId._id.toString(),
+                            name:
+                              enrollment.growSocialMediaPackageSubTypeId.name ||
+                              '',
+                            description:
+                              enrollment.growSocialMediaPackageSubTypeId
+                                .description || '',
+                            taskType:
+                              enrollment.growSocialMediaPackageSubTypeId
+                                .taskType || '',
+                            noOfLikes:
+                              enrollment.growSocialMediaPackageSubTypeId
+                                .noOfLikes,
+                            noOfVideos:
+                              enrollment.growSocialMediaPackageSubTypeId
+                                .noOfVideos,
+                            noOfFollowers:
+                              enrollment.growSocialMediaPackageSubTypeId
+                                .noOfFollowers,
+                          }
+                        : undefined,
+                  }
+                : undefined,
+            }
+          : undefined,
+      };
+    });
+
+    return {
+      status: 200,
+      body: {
+        page,
+        limit,
+        totalRecords,
+        totalPages: Math.ceil(totalRecords / limit),
+        data,
+      },
+    };
+  } catch (error) {
+    console.error(error);
+    return {
+      status: 500,
+      body: {
+        success: false,
+        message: error.message || 'Internal server error',
+      },
+    };
+  }
+};
+
 const getSrkTaskActionsByPlatforms: AppRouteImplementationOrOptions<
   typeof srkTaskContract.getSrkTaskActionsByPlatforms
 > = async ({ query }) => {
@@ -1225,7 +1444,7 @@ const getSrkTaskActionsByPlatforms: AppRouteImplementationOrOptions<
     if (srkTaskUserId) {
       const taskUserId = new mongoose.Types.ObjectId(srkTaskUserId);
       const submissions = await srkTaskActionSubmissionModel
-        .find({ taskUserId })
+        .find({ taskUserId, status: { $in: ['approved', 'pending'] } })
         .select('growPackageTodoId')
         .lean();
       submittedTodoIds = submissions.map((s) => s.growPackageTodoId);
@@ -1317,7 +1536,11 @@ const getAllSrkTaskUsersForAdmin: AppRouteImplementationOrOptions<
         .limit(limit)
         .populate({
           path: 'srkUniversityUserId',
-          select: 'email phoneNumber',
+          select: 'email phoneNumber packageId',
+          populate: {
+            path: 'packageId',
+            select: 'title',
+          },
         })
         .lean(),
     ]);
@@ -1405,6 +1628,7 @@ const getAllSrkTaskUsersForAdmin: AppRouteImplementationOrOptions<
         fullName: user.fullName,
         email: universityUser?.email || 'N/A',
         phone: universityUser?.phoneNumber || 'N/A',
+        packageName: universityUser?.packageId?.title || 'No Package',
         dob: user.dob,
         isActivated: user.isActivated,
         kycStatus,
@@ -1417,6 +1641,208 @@ const getAllSrkTaskUsersForAdmin: AppRouteImplementationOrOptions<
         updatedAt: user.updatedAt.toISOString(),
       };
     });
+
+    return {
+      status: 200,
+      body: {
+        page,
+        limit,
+        totalRecords,
+        totalPages: Math.ceil(totalRecords / limit),
+        data,
+      },
+    };
+  } catch (error) {
+    console.error(error);
+    return {
+      status: 500,
+      body: {
+        success: false,
+        message: error.message || 'Internal server error',
+      },
+    };
+  }
+};
+
+const getAllPendingTaskSubmissionsByUserForAdmin: AppRouteImplementationOrOptions<
+  typeof srkTaskContract.getAllPendingTaskSubmissionsByUserForAdmin
+> = async ({ query }) => {
+  try {
+    const page = Number(query?.page ?? 1);
+    const limit = Number(query?.limit ?? 10);
+    const skip = (page - 1) * limit;
+    const taskUserId = query.taskUserId;
+
+    const filter = {
+      taskUserId,
+      status: 'pending',
+    };
+
+    const [totalRecords, submissions] = await Promise.all([
+      srkTaskActionSubmissionModel.countDocuments(filter),
+      srkTaskActionSubmissionModel
+        .find(filter)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .populate<{
+          taskUserId: any;
+        }>({
+          path: 'taskUserId',
+          populate: {
+            path: 'srkUniversityUserId',
+            select: 'fullName email phoneNumber packageId',
+            populate: {
+              path: 'packageId',
+              select: 'title',
+            },
+          },
+        })
+        .populate<{
+          growPackageTodoId: any;
+        }>({
+          path: 'growPackageTodoId',
+          populate: {
+            path: 'growSocialMediaPackageEnrollmentId',
+            populate: [
+              { path: 'growSocialMediaPackageId' },
+              { path: 'growSocialMediaPackageTypeId' },
+              { path: 'growSocialMediaPackageSubTypeId' },
+            ],
+          },
+        }),
+    ]);
+
+    const data = await Promise.all(
+      submissions.map(async (submission: any) => {
+        const taskUser = submission.taskUserId;
+        const todo = submission.growPackageTodoId;
+        const enrollment = todo?.growSocialMediaPackageEnrollmentId;
+
+        // Get approved count for today and balance for this user
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const [approvedCount, balance] = await Promise.all([
+          taskUser
+            ? srkTaskActionSubmissionModel.countDocuments({
+                taskUserId: taskUserId,
+                status: 'approved',
+                createdAt: { $gte: today },
+              })
+            : Promise.resolve(0),
+          taskUser
+            ? srkTaskUserBalanceModel
+                .findOne({
+                  $or: [{ taskUserId: taskUserId }, { taskUserId: taskUserId.toString() }],
+                })
+                .lean()
+            : Promise.resolve(null),
+        ]);
+
+        return {
+          _id: submission._id.toString(),
+          type: submission.type,
+          description: submission.description,
+          taskUserId: taskUser
+            ? {
+                _id: taskUser._id.toString(),
+                fullName:
+                  taskUser.srkUniversityUserId?.fullName ||
+                  taskUser.fullName ||
+                  'N/A',
+                email: taskUser.srkUniversityUserId?.email || 'N/A',
+                phoneNumber: taskUser.srkUniversityUserId?.phoneNumber || 'N/A',
+                packageName:
+                  taskUser.srkUniversityUserId?.packageId?.title ||
+                  'SRK Basic',
+                approvedCount,
+                currentCoins: balance?.currentCoins || 0,
+                totalCoinsEarned: balance?.totalCoinsEarned || 0,
+              }
+            : undefined,
+          growPackageTodoId: todo
+            ? {
+              _id: todo._id.toString(),
+              postUrl: todo.postUrl,
+              profileUrl: todo.profileUrl,
+              type: todo.type,
+              platform: todo.platform,
+              followCounts: todo.followCounts || 0,
+              likeCounts: todo.likeCounts || 0,
+              enrollment: enrollment
+                ? {
+                    _id: enrollment._id.toString(),
+                    socialMediaPlatform: enrollment.socialMediaPlatform,
+                    profileLinkURL: enrollment.profileLinkURL || [],
+                    amount: enrollment.amount,
+                    isActive: enrollment.isActive,
+                    growSocialMediaPackageId:
+                      enrollment.growSocialMediaPackageId
+                        ? {
+                            _id:
+                              enrollment.growSocialMediaPackageId._id?.toString?.() ||
+                              '',
+                            name: enrollment.growSocialMediaPackageId.name,
+                            description:
+                              enrollment.growSocialMediaPackageId.description,
+                            socialMediaPlatforms:
+                              enrollment.growSocialMediaPackageId
+                                .socialMediaPlatforms || [],
+                            amount: enrollment.growSocialMediaPackageId.amount,
+                          }
+                        : undefined,
+                    growSocialMediaPackageTypeId:
+                      enrollment.growSocialMediaPackageTypeId
+                        ? {
+                            _id:
+                              enrollment.growSocialMediaPackageTypeId._id?.toString?.() ||
+                              '',
+                            name: enrollment.growSocialMediaPackageTypeId.name,
+                            description:
+                              enrollment.growSocialMediaPackageTypeId
+                                .description,
+                            amount:
+                              enrollment.growSocialMediaPackageTypeId.amount,
+                          }
+                        : undefined,
+                    growSocialMediaPackageSubTypeId:
+                      enrollment.growSocialMediaPackageSubTypeId
+                        ? {
+                            _id:
+                              enrollment.growSocialMediaPackageSubTypeId._id?.toString?.() ||
+                              '',
+                            name: enrollment.growSocialMediaPackageSubTypeId
+                              .name,
+                            description:
+                              enrollment.growSocialMediaPackageSubTypeId
+                                .description,
+                            taskType:
+                              enrollment.growSocialMediaPackageSubTypeId
+                                .taskType,
+                            noOfLikes:
+                              enrollment.growSocialMediaPackageSubTypeId
+                                .noOfLikes,
+                            noOfVideos:
+                              enrollment.growSocialMediaPackageSubTypeId
+                                .noOfVideos,
+                            noOfFollowers:
+                              enrollment.growSocialMediaPackageSubTypeId
+                                .noOfFollowers,
+                          }
+                        : undefined,
+                  }
+                : undefined,
+            }
+          : undefined,
+        screenshotUrl: submission.screenshotUrl,
+        status: submission.status,
+        rejectionReason: submission.rejectionReason || null,
+        createdAt: submission.createdAt?.toISOString?.() || '',
+        updatedAt: submission.updatedAt?.toISOString?.() || '',
+      };
+    })
+    );
 
     return {
       status: 200,
@@ -1566,15 +1992,20 @@ const getApprovedSrkTaskAffiliateVerificationRequest: AppRouteImplementationOrOp
       };
     }
     console.log('srk university Id', srkUniversityUserId);
-    // 1️⃣ Look for verification request
-    const verificationRecord = await srkTaskUserModel
+
+    // ✅ CRITICAL FIX:
+    // 1. Find the srkTaskUser by srkUniversityUserId
+    // 2. Get the LATEST verification request for that taskUser
+    // 3. Return the correct taskUserID from the latest verification
+
+    const srkTaskUser = await srkTaskUserModel
       .findOne({
-        srkUniversityUserId,
+        srkUniversityUserId: new mongoose.Types.ObjectId(srkUniversityUserId),
       })
+      .sort({ createdAt: -1 }) // Get the most recent srkTaskUser
       .lean();
 
-    // 2️⃣ Not found → pending
-    if (!verificationRecord) {
+    if (!srkTaskUser) {
       return {
         status: 200,
         body: {
@@ -1583,26 +2014,39 @@ const getApprovedSrkTaskAffiliateVerificationRequest: AppRouteImplementationOrOp
         },
       };
     }
-    const srkTaskOnboardingVerificationRequestExists =
-      await srkTaskOnboardingVerificationRequestModel.findOne({
-        taskUserId: verificationRecord._id,
-      });
 
-    console.log('TaskUserId', verificationRecord._id);
+    // Now get the LATEST verification request for this taskUser
+    const latestVerificationRequest = await srkTaskOnboardingVerificationRequestModel
+      .findOne({
+        taskUserId: srkTaskUser._id,
+      })
+      .sort({ createdAt: -1 }) // Get the most recent verification request
+      .lean();
+
+    if (!latestVerificationRequest) {
+      return {
+        status: 200,
+        body: {
+          success: false,
+          message: 'Not verified yet',
+        },
+      };
+    }
+
     return {
       status: 200,
       body: {
         success: true,
         message: 'Affiliate request found',
         data: getAllTaskAffiliateResponseSchema.parse({
-          ...verificationRecord,
-          _id: verificationRecord._id.toString(),
-          srkUniversityUserId:
-            verificationRecord.srkUniversityUserId.toString(),
-          isActivated: verificationRecord.isActivated,
-          status: srkTaskOnboardingVerificationRequestExists.status,
-          createdAt: verificationRecord.createdAt.toISOString(),
-          updatedAt: verificationRecord.updatedAt.toISOString(),
+          _id: srkTaskUser._id.toString(),
+          srkUniversityUserId: srkUniversityUserId,
+          fullName: (srkTaskUser as any).fullName,
+          dob: (srkTaskUser as any).dob,
+          isActivated: srkTaskUser.isActivated,
+          status: latestVerificationRequest.status,
+          createdAt: srkTaskUser.createdAt.toISOString(),
+          updatedAt: srkTaskUser.updatedAt.toISOString(),
         }),
       },
     };
@@ -1618,6 +2062,153 @@ const getApprovedSrkTaskAffiliateVerificationRequest: AppRouteImplementationOrOp
   }
 };
 
+
+// ============================================
+// Payment Details Query Handlers
+// ============================================
+
+const getUserPaymentDetails: AppRouteImplementationOrOptions<
+  typeof srkTaskContract.getUserPaymentDetails
+> = async ({ params }) => {
+  try {
+    const { userId } = params;
+
+    // Get approved payment details (active approved request)
+    const approvedDetails = await srkTaskUserPaymentDetailsRequestModel.findOne({
+      srkTaskUserId: userId,
+      status: 'approved',
+      isActive: true,
+    });
+
+    // Get pending request if any
+    const pendingRequest =
+      await srkTaskUserPaymentDetailsRequestModel.findOne({
+        srkTaskUserId: userId,
+        status: 'pending',
+      });
+
+    // Get latest rejected request if any
+    const rejectedRequest =
+      await srkTaskUserPaymentDetailsRequestModel.findOne({
+        srkTaskUserId: userId,
+        status: 'rejected',
+      }).sort({ createdAt: -1 });
+
+    const formatPaymentDetails = (details: any) => details ? {
+      _id: details._id.toString(),
+      srkTaskUserId: details.srkTaskUserId.toString(),
+      accountHolderName: details.accountHolderName,
+      bankName: details.bankName,
+      accountNumber: details.accountNumber,
+      branchName: details.branchName,
+      qrCodeUrl: details.qrCodeUrl,
+      status: details.status,
+      rejectionReason: details.rejectionReason,
+      reviewedBy: details.reviewedBy?.toString(),
+      reviewedAt: details.reviewedAt?.toISOString(),
+      isActive: details.isActive,
+      createdAt: details.createdAt.toISOString(),
+      updatedAt: details.updatedAt.toISOString(),
+    } : null;
+
+    return {
+      status: 200,
+      body: {
+        success: true,
+        approvedDetails: formatPaymentDetails(approvedDetails),
+        pendingRequest: formatPaymentDetails(pendingRequest),
+        rejectedRequest: formatPaymentDetails(rejectedRequest),
+      },
+    };
+  } catch (error: any) {
+    console.error('Error fetching user payment details:', error);
+    return {
+      status: 500,
+      body: {
+        success: false,
+        message: error.message || 'Failed to fetch payment details',
+      },
+    };
+  }
+};
+
+const getAllPaymentDetailsRequestsForAdmin: AppRouteImplementationOrOptions<
+  typeof srkTaskContract.getAllPaymentDetailsRequestsForAdmin
+> = async ({ query }) => {
+  try {
+    const page = Number(query?.page ?? 1);
+    const limit = Number(query?.limit ?? 10);
+    const skip = (page - 1) * limit;
+    const status = query?.status;
+
+    const filter = status ? { status } : {};
+
+    const [totalRecords, requests] = await Promise.all([
+      srkTaskUserPaymentDetailsRequestModel.countDocuments(filter),
+      srkTaskUserPaymentDetailsRequestModel
+        .find(filter)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .populate({
+          path: 'srkTaskUserId',
+          populate: {
+            path: 'srkUniversityUserId',
+            select: 'fullName email phoneNumber',
+          },
+        })
+        .lean(),
+    ]);
+
+    const data = requests.map((request: any) => ({
+      _id: request._id.toString(),
+      srkTaskUserId: request.srkTaskUserId?.srkUniversityUserId
+        ? {
+            _id: request.srkTaskUserId._id.toString(),
+            fullName:
+              request.srkTaskUserId.srkUniversityUserId.fullName || '',
+            email: request.srkTaskUserId.srkUniversityUserId.email || '',
+            phoneNumber:
+              request.srkTaskUserId.srkUniversityUserId.phoneNumber || '',
+          }
+        : request.srkTaskUserId._id.toString(),
+      accountHolderName: request.accountHolderName,
+      bankName: request.bankName,
+      accountNumber: request.accountNumber,
+      branchName: request.branchName,
+      qrCodeUrl: request.qrCodeUrl,
+      status: request.status,
+      rejectionReason: request.rejectionReason,
+      reviewedBy: request.reviewedBy?.toString(),
+      reviewedAt: request.reviewedAt?.toISOString(),
+      createdAt: request.createdAt.toISOString(),
+      updatedAt: request.updatedAt.toISOString(),
+    }));
+
+    return {
+      status: 200,
+      body: {
+        data,
+        pagination: {
+          currentPage: page,
+          totalPages: Math.ceil(totalRecords / limit),
+          totalRecords,
+          limit,
+        },
+      },
+    };
+  } catch (error: any) {
+    console.error('Error fetching payment details requests:', error);
+    return {
+      status: 500,
+      body: {
+        success: false,
+        message: error.message || 'Failed to fetch payment details requests',
+      },
+    };
+  }
+};
+
 export const srkTaskQueryHandler = {
   getSrkTaskActionsByPlatforms,
   getSrkTaskUserProfile,
@@ -1628,8 +2219,12 @@ export const srkTaskQueryHandler = {
   getSrkTaskUserEarningsPayoutsByUser,
   getAllSrkTasksActionSubmissionByStatusForAdmin,
   getAllSrkTasksActionSubmissionsByUser,
+  getRejectedSrkTaskActionSubmissionsByUser,
   getAllSrkTaskUserFinanceStatement,
   getApprovedSrkTaskAffiliateVerificationRequest,
   getAllSrkTaskUsersForAdmin,
+  getAllPendingTaskSubmissionsByUserForAdmin,
   getAllCompletedSrkTaskSubmissionsForAdmin,
+  getUserPaymentDetails,
+  getAllPaymentDetailsRequestsForAdmin,
 };

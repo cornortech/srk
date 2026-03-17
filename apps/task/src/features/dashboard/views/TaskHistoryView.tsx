@@ -164,9 +164,9 @@ export const TaskHistoryView: React.FC = () => {
                               {item.description || 'Task Submission'}
                             </h4>
                             <div className="flex items-center gap-2 mt-1">
-                              {item.growEnrollmentId?.socialMediaPlatform && (
+                              {((item as any)['growEnrollmentId'] || (item as any)['growPackageTodoId']?.enrollment) && (
                                 <span className="text-xs px-2 py-0.5 rounded-md bg-white/10 text-zinc-300">
-                                  {item.growEnrollmentId.socialMediaPlatform}
+                                  {(item as any)['growEnrollmentId']?.socialMediaPlatform || (item as any)['growPackageTodoId']?.enrollment?.socialMediaPlatform}
                                 </span>
                               )}
                               <span className="text-xs text-zinc-500">

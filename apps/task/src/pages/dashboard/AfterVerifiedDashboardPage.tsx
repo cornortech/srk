@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import {
-  AnalyticsData,
   DashboardView,
   RejectedTaskEntry,
   SocialPlatform,
@@ -35,17 +34,18 @@ import { api } from '../../lib/api';
 import { useTaskAuthStore } from '../../store/useTaskAuthStore';
 import { FinanceHistoryView } from '../../features/dashboard/views/FinanceHistoryView';
 import { TaskHistoryView } from '../../features/dashboard/views/TaskHistoryView';
-import { useAuthAffiliateVerification } from '../../../../../libs/shared/hooks/src/lib/useAuthAffiliate';
+import { PaymentDetailsView } from '../../features/dashboard/views/PaymentDetailsView';
 
 export const AfterVerifiedDashboardPage: React.FC = () => {
-  const { user, isAuthenticated, isLoading } = useAuthAffiliateVerification();
+  const { user, isAuthenticated, isLoading, taskUserID, setTaskUserID, clearTaskUserID } = useTaskAuthStore();
 
-  const [view, setView] = useState<'landing' | 'dashboard'>('landing');
+  const [view, setView] = useState<'landing' | 'dashboard'>(
+    () => (taskUserID ? 'dashboard' : 'landing')
+  );
   const [dashView, setDashView] = useState<DashboardView>('verification');
   const [showVerification, setShowVerification] = useState(false);
   const [isApproved, setIsApproved] = useState(false);
   const [hasPurchased, setHasPurchased] = useState(false);
-  const [payoutRequested, setPayoutRequested] = useState(false);
   const [taskCategory, setTaskCategory] = useState<TaskType | null>(null);
   const [selectedPlatform, setSelectedPlatform] =
     useState<SocialPlatform | null>(null);
@@ -55,32 +55,19 @@ export const AfterVerifiedDashboardPage: React.FC = () => {
   const [showRequestModal, setShowRequestModal] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  const { taskUserID, setTaskUserID } = useTaskAuthStore();
-
-  const { data: verificationRequest } =
+  const { data: verificationRequest, refetch: refetchVerification } =
     api.srkTask.getAllSrkTaskAffiliateVerificationRequest.useQuery(
-      ['getAllSrkTaskAffiliateVerificationRequest', user?._id],
-      { query: { srkUniversityUserId: user?._id || '' } },
+      ['getAllSrkTaskAffiliateVerificationRequest', user?.universityId],
+      { query: { srkUniversityUserId: user?.universityId || '' } },
       {
-        enabled: !!user?._id && !taskUserID,
+        enabled: !!user?.universityId,
         queryKey: [
           'getAllSrkTaskAffiliateVerificationRequest',
-          user?._id || '',
+          user?.universityId || '',
+          taskUserID ?? 'none',
         ],
       }
     );
-
-  React.useEffect(() => {
-    if (
-      verificationRequest?.status === 200 &&
-      verificationRequest.body.success &&
-      verificationRequest.body.data
-    ) {
-      if (typeof verificationRequest.body.data._id === 'string') {
-        setTaskUserID(verificationRequest.body.data._id);
-      }
-    }
-  }, [verificationRequest, setTaskUserID]);
 
   const { data: userProfileData } = api.srkTask.getSrkTaskUserProfile.useQuery(
     ['getSrkTaskUserProfile', taskUserID],
@@ -90,6 +77,12 @@ export const AfterVerifiedDashboardPage: React.FC = () => {
       queryKey: ['getSrkTaskUserProfile', taskUserID || ''],
     }
   );
+
+  useEffect(() => {
+    if (userProfileData && userProfileData.status !== 200) {
+      clearTaskUserID();
+    }
+  }, [userProfileData, clearTaskUserID]);
 
   const { data: analyticsData, refetch: refetchAnalytics } =
     api.srkTask.getSrkTaskUserAnalytics.useQuery(
@@ -109,9 +102,13 @@ export const AfterVerifiedDashboardPage: React.FC = () => {
 
   const eligible = Math.max(0, balance - 100);
 
-  if (userProfileData?.body.userData.kycStatus === 'approved') {
-    if (!isApproved) setIsApproved(true);
-  }
+  // ✅ BUG FIX: Derive isApproved from the fetched profile data reactively.
+  // Doing this in render was a side-effect anti-pattern and caused stale state issues.
+  React.useEffect(() => {
+    if (userProfileData?.body.userData.kycStatus === 'approved') {
+      setIsApproved(true);
+    }
+  }, [userProfileData]);
 
   let currentProfile: Omit<
     UserProfile,
@@ -129,8 +126,8 @@ export const AfterVerifiedDashboardPage: React.FC = () => {
         userProfileData.body.userData.kycStatus === 'approved'
           ? 'verified'
           : userProfileData.body.userData.kycStatus === 'rejected'
-          ? 'rejected'
-          : 'pending',
+            ? 'rejected'
+            : 'pending',
     };
 
   const [activeTasks, setActiveTasks] = useState<Task[]>([
@@ -138,42 +135,7 @@ export const AfterVerifiedDashboardPage: React.FC = () => {
     ...likeTasks,
   ]);
 
-  const [rejectedTasks, setRejectedTasks] = useState<RejectedTaskEntry[]>([
-    {
-      ...followTasks[0],
-      rejectionReason: 'Screenshot blurry, username not visible.',
-      uploadedProofUrl:
-        'https://placehold.co/400x300/27272a/FFF?text=Subscription+Proof',
-      taskId: 'f-yt-1',
-      id: 'f-yt-1-rejected',
-      date: '2024-01-15',
-      adminComment:
-        'Please ensure your username is clearly visible in the screenshot',
-      canRetry: true,
-    },
-    // {
-    //   ...watchTasks[1],
-    //   rejectionReason: 'Incomplete watch time, video paused at 80%.',
-    //   uploadedProofUrl:
-    //     'https://placehold.co/400x300/27272a/FFF?text=Watch+Proof',
-    //   taskId: 'w-ig-1',
-    //   id: 'w-ig-1-rejected',
-    //   date: '2024-01-14',
-    //   adminComment: 'Video must be watched completely. Please try again.',
-    //   canRetry: true,
-    // },
-    {
-      ...likeTasks[0],
-      rejectionReason: 'Shared post is private. Make it public.',
-      uploadedProofUrl:
-        'https://placehold.co/400x300/27272a/FFF?text=Share+Proof',
-      taskId: 'p-fb-1',
-      id: 'p-fb-1-rejected',
-      date: '2024-01-13',
-      adminComment: 'Please set post visibility to public',
-      canRetry: true,
-    },
-  ]);
+  const [rejectedTasks, setRejectedTasks] = useState<RejectedTaskEntry[]>([]);
   const [reviewingRejectedTask, setReviewingRejectedTask] =
     useState<RejectedTaskEntry | null>(null);
   const [notifications, setNotifications] = useState<
@@ -246,6 +208,8 @@ export const AfterVerifiedDashboardPage: React.FC = () => {
             hasPurchased={hasPurchased}
             setHasPurchased={setHasPurchased}
             addNotification={addNotification}
+            kycStatus={userProfileData?.body.userData.kycStatus}
+            rejectionReason={undefined}
           />
         );
       case 'analytics':
@@ -255,7 +219,6 @@ export const AfterVerifiedDashboardPage: React.FC = () => {
           <TasksView
             isApproved={isApproved}
             setDashView={setDashView}
-            rejectedTasks={rejectedTasks}
             setTaskCategory={setTaskCategory}
             setReviewingRejectedTask={setReviewingRejectedTask}
           />
@@ -287,6 +250,8 @@ export const AfterVerifiedDashboardPage: React.FC = () => {
         return <FinanceHistoryView />;
       case 'taskHistory':
         return <TaskHistoryView />;
+      case 'paymentDetails':
+        return <PaymentDetailsView addNotification={addNotification} />;
       default:
         return null;
     }
@@ -389,13 +354,13 @@ export const AfterVerifiedDashboardPage: React.FC = () => {
           balance={balance}
           setDashView={setDashView}
           isApproved={isApproved}
-          rejectedTasks={rejectedTasks}
           eligible={eligible}
           isMenuOpen={isMenuOpen}
           setIsMenuOpen={setIsMenuOpen}
           addNotification={addNotification}
-          // title={viewsConfig[dashView].title}
-          // desc={viewsConfig[dashView].desc}
+          isActivated={userProfileData?.body.userData.isActivated ?? false}
+        // title={viewsConfig[dashView].title}
+        // desc={viewsConfig[dashView].desc}
         >
           <AnimatedBackground />
           {renderView()}

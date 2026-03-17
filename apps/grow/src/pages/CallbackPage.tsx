@@ -16,6 +16,7 @@ import useGrowAuthStore from '../store/useGrowAuthStore';
  * 4. On success, sets user in store and redirects to dashboard
  * 5. On failure, shows error and redirects to login
  */
+
 const CallbackPage = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -29,13 +30,20 @@ const CallbackPage = () => {
   useEffect(() => {
     const handleSSOCallback = async () => {
       const code = searchParams.get('code');
+      const affiliateId = searchParams.get('affiliateId');
+
+      // Store affiliateId if present
+      if (affiliateId) {
+        localStorage.setItem('affiliateGrowUserId', affiliateId);
+        console.log('Stored affiliateGrowUserId:', affiliateId);
+      }
 
       if (!code) {
         setStatus('error');
         setMessage('No authentication code provided');
-        setTimeout(() => {
-          navigate('/login', { replace: true });
-        }, 2000);
+        // setTimeout(() => {
+        //   navigate('/login', { replace: true });
+        // }, 2000);
         return;
       }
 
@@ -48,37 +56,34 @@ const CallbackPage = () => {
           setMessage('Authentication successful! Redirecting...');
 
           // Set user in store
-          // setUser({
-          //   _id: response.user._id,
-          //   email: response.user.email,
-          //   firstName: response.user.firstName,
-          //   lastName: response.user.lastName,
-          //   role: response.user.role,
-          // });
+          setUser({
+            _id: response.user.universityId,
+            email: response.user.email,
+            fullName: response.user.firstName || "",
+          });
 
+          console.log("debug 1 response.user?.redirectionUrl:", response.user?.redirectionUrl);
           // Redirect to dashboard
           setTimeout(() => {
-            navigate(response.user?.redirectionUrl || '/grow/verification', {
+            navigate(response.user?.redirectionUrl || '/grow/affiliate/verification', {
               replace: true,
             });
           }, 1000);
         } else {
+          console.error('SSO callback failed:', response);
           setStatus('error');
+          
           setMessage(response.message || 'Authentication failed');
-          setTimeout(() => {
-            navigate('/login', { replace: true });
-          }, 2000);
+
         }
       } catch (err: any) {
         console.error('SSO callback error:', err);
         setStatus('error');
         setMessage(
           err.response?.data?.message ||
-            'Authentication failed. Please try again.'
+          'Authentication failed. Please try again.'
         );
-        setTimeout(() => {
-          navigate('/login', { replace: true });
-        }, 2000);
+
       } finally {
         setLoading(false);
       }
@@ -124,8 +129,8 @@ const CallbackPage = () => {
             status === 'error'
               ? '#ef4444'
               : status === 'success'
-              ? '#22c55e'
-              : '#fff',
+                ? '#22c55e'
+                : '#fff',
           fontSize: '1.1rem',
           marginTop: '1rem',
         }}

@@ -9,6 +9,8 @@ import { growPackageTodoModel } from '../../../model/growPackageTodoModel';
 import { growSocialMediaPackageEnrollmentModel } from '../../../model/growSocialMediaPackageEnrollment';
 import { srkTaskUserBalanceModel } from '../../../model/task/srkTaskUserBalanceModel';
 import { srkTaskEarningStatementModel } from '../../../model/task/srkTaskEarningStatementModel';
+import { srkTaskUserPaymentDetailsRequestModel } from '../../../model/task/srkTaskUserPaymentDetailsRequestModel';
+import mongoose from 'mongoose';
 
 const acceptSrkTaskUserEarningsPayout: AppRouteImplementationOrOptions<
   typeof srkTaskContract.acceptSrkTaskUserEarningsPayout
@@ -202,6 +204,8 @@ const submitSrkTaskOnboardingVerification: AppRouteImplementationOrOptions<
       };
     }
 
+    let taskUserId: string;
+
     if (!srkTaskUserExist) {
       const newSrkTaskUserExist = await srkTaskUserModel.create({
         fullName: body.fullName,
@@ -209,6 +213,8 @@ const submitSrkTaskOnboardingVerification: AppRouteImplementationOrOptions<
         dob: body.dateOfBirth,
         isActivated: false,
       });
+
+      taskUserId = newSrkTaskUserExist._id.toString();
 
       await srkTaskOnboardingVerificationRequestModel.create({
         taskUserId: newSrkTaskUserExist._id,
@@ -220,6 +226,7 @@ const submitSrkTaskOnboardingVerification: AppRouteImplementationOrOptions<
         status: 'pending',
       });
     } else {
+      taskUserId = srkTaskUserExist._id.toString();
       srkTaskUserExist.fullName = body.fullName;
       srkTaskUserExist.dob = body.dateOfBirth;
       await srkTaskUserExist.save();
@@ -242,6 +249,7 @@ const submitSrkTaskOnboardingVerification: AppRouteImplementationOrOptions<
       body: {
         success: true,
         message: 'Onboarding verification submitted successfully',
+        taskUserID: taskUserId,
       },
     };
   } catch (error) {
@@ -360,15 +368,21 @@ const rejectSrkTaskOnboardingVerificationByAdmin: AppRouteImplementationOrOption
  *
  */
 
+const PACKAGE_LIMITS: Record<string, number> = {
+  'SRK Basic': 5,
+  'SRK Lite': 4,
+  'SRK Standard': 10,
+  'SRK Premium': 15,
+  'SRK PRO': 18,
+};
+
 const srkTaskActionSubmission: AppRouteImplementationOrOptions<
   typeof srkTaskContract.srkTaskActionSubmission
 > = async ({ body }) => {
   try {
-    // Implementation logic for srkTaskActionSubmission goes here
-
-    const srkTaskUserExist = await srkTaskUserModel.findById(
-      body.srkTaskUserId
-    );
+    const srkTaskUserExist = await srkTaskUserModel
+      .findById(body.srkTaskUserId)
+      .populate<{ srkUniversityUserId: any }>('srkUniversityUserId');
 
     if (!srkTaskUserExist) {
       return {
@@ -512,6 +526,52 @@ const approveSrkTaskActionSubmissionByAdmin: AppRouteImplementationOrOptions<
         body: {
           success: false,
           message: 'Action submission not found',
+        },
+      };
+    }
+
+    // Check submission limits based on package before approving
+    const srkTaskUserExist = await srkTaskUserModel
+      .findById(actionSubmission.taskUserId)
+      .populate<{ srkUniversityUserId: any }>('srkUniversityUserId');
+
+    if (!srkTaskUserExist) {
+      return {
+        status: 404,
+        body: {
+          success: false,
+          message: 'SRK Task User does not exist',
+        },
+      };
+    }
+
+    const universityUser = await UserModel.findById(
+      srkTaskUserExist.srkUniversityUserId
+    ).populate<{ packageId: any }>('packageId');
+
+    const packageName = universityUser?.packageId?.title || 'SRK Basic';
+    const maxLimit = PACKAGE_LIMITS[packageName] || 5;
+
+    // Use the submission's createdAt date for the limit check
+    const submissionDate = new Date(actionSubmission.createdAt);
+    const startOfDay = new Date(submissionDate);
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date(submissionDate);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    const approvedSubmissionsOnThatDay =
+      await srkTaskActionSubmissionModel.countDocuments({
+        taskUserId: actionSubmission.taskUserId,
+        status: 'approved',
+        createdAt: { $gte: startOfDay, $lte: endOfDay },
+      });
+
+    if (approvedSubmissionsOnThatDay >= maxLimit) {
+      return {
+        status: 400,
+        body: {
+          success: false,
+          message: `The user has reached the maximum daily approval limit for their ${packageName} package (${maxLimit}) for submissions on ${startOfDay.toLocaleDateString()}.`,
         },
       };
     }
@@ -686,6 +746,16 @@ const srkTaskEarningsPayoutRequest: AppRouteImplementationOrOptions<
       };
     }
 
+    if (body.coins < 20000) {
+      return {
+        status: 400,
+        body: {
+          success: false,
+          message: 'Minimum payout request is 20,000 coins',
+        },
+      };
+    }
+
     if (srkTaskUserBalanceExist.currentCoins < body.coins) {
       return {
         status: 400,
@@ -747,6 +817,386 @@ const srkTaskEarningsPayoutRequest: AppRouteImplementationOrOptions<
   }
 };
 
+
+
+// ============================================
+// Payment Details Mutation Handlers
+// ============================================
+
+const submitPaymentDetailsRequest: AppRouteImplementationOrOptions<
+  typeof srkTaskContract.submitPaymentDetailsRequest
+> = async ({ params, body }) => {
+  try {
+    const { userId } = params;
+
+    // Check if user exists
+    const userExists = await srkTaskUserModel.findById(userId);
+    if (!userExists) {
+      return {
+        status: 404,
+        body: {
+          success: false,
+          message: 'User not found',
+        },
+      };
+    }
+
+    // Check if there's already a pending request
+    const pendingRequest =
+      await srkTaskUserPaymentDetailsRequestModel.findOne({
+        srkTaskUserId: userId,
+        status: 'pending',
+      });
+
+    if (pendingRequest) {
+      return {
+        status: 400,
+        body: {
+          success: false,
+          message: 'You already have a pending payment details request',
+        },
+      };
+    }
+
+    // Create new request
+    await srkTaskUserPaymentDetailsRequestModel.create({
+      srkTaskUserId: userId,
+      accountHolderName: body.accountHolderName,
+      bankName: body.bankName,
+      accountNumber: body.accountNumber,
+      branchName: body.branchName,
+      qrCodeUrl: body.qrCodeUrl,
+      status: 'pending',
+    });
+
+    return {
+      status: 201,
+      body: {
+        success: true,
+        message: 'Payment details request submitted successfully',
+      },
+    };
+  } catch (error: any) {
+    console.error('Error submitting payment details request:', error);
+    return {
+      status: 500,
+      body: {
+        success: false,
+        message: error.message || 'Failed to submit payment details request',
+      },
+    };
+  }
+};
+
+const reviewPaymentDetailsRequest: AppRouteImplementationOrOptions<
+  typeof srkTaskContract.reviewPaymentDetailsRequest
+> = async ({ body }) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    const { requestId, status, rejectionReason } = body;
+
+    // Find the request
+    const request = await srkTaskUserPaymentDetailsRequestModel
+      .findById(requestId)
+      .session(session);
+
+    if (!request) {
+      await session.abortTransaction();
+      return {
+        status: 404,
+        body: {
+          success: false,
+          message: 'Payment details request not found',
+        },
+      };
+    }
+
+    if (request.status !== 'pending') {
+      await session.abortTransaction();
+      return {
+        status: 400,
+        body: {
+          success: false,
+          message: `Request already ${request.status}`,
+        },
+      };
+    }
+
+    // Update request status
+    request.status = status;
+    request.reviewedAt = new Date();
+    if (status === 'rejected' && rejectionReason) {
+      request.rejectionReason = rejectionReason;
+    }
+
+    // If approved, mark any previous approved requests as inactive
+    if (status === 'approved') {
+      await srkTaskUserPaymentDetailsRequestModel.updateMany(
+        {
+          srkTaskUserId: request.srkTaskUserId,
+          _id: { $ne: request._id },
+          status: 'approved',
+        },
+        { isActive: false },
+        { session }
+      );
+    }
+
+    await request.save({ session });
+
+    await session.commitTransaction();
+
+    return {
+      status: 200,
+      body: {
+        success: true,
+        message: `Payment details request ${status} successfully`,
+      },
+    };
+  } catch (error: any) {
+    await session.abortTransaction();
+    console.error('Error reviewing payment details request:', error);
+    return {
+      status: 500,
+      body: {
+        success: false,
+        message: error.message || 'Failed to review payment details request',
+      },
+    };
+  } finally {
+    session.endSession();
+  }
+};
+
+const bulkApproveSrkTaskSubmissionsByAdmin: AppRouteImplementationOrOptions<
+  typeof srkTaskContract.bulkApproveSrkTaskSubmissionsByAdmin
+> = async ({ body, req }) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  try {
+    const adminId = (req as any).user?._id || 'system';
+    const { submissionIds } = body;
+
+    const pendingSubmissions = await srkTaskActionSubmissionModel
+      .find({
+        _id: { $in: submissionIds },
+        status: 'pending',
+      })
+      .session(session);
+
+    if (pendingSubmissions.length === 0) {
+      return {
+        status: 400,
+        body: {
+          success: false,
+          message: 'No pending submissions found for the provided IDs',
+        },
+      };
+    }
+
+    // Since we are approving for a user, we check their specific limit
+    // Assuming they are all from the same user as implied by the UI context
+    const firstSubmission = pendingSubmissions[0];
+    const srkTaskUserExist = await srkTaskUserModel
+      .findById(firstSubmission.taskUserId)
+      .populate<{ srkUniversityUserId: any }>('srkUniversityUserId')
+      .session(session);
+
+    if (!srkTaskUserExist) {
+      await session.abortTransaction();
+      return {
+        status: 404,
+        body: {
+          success: false,
+          message: 'SRK Task User does not exist',
+        },
+      };
+    }
+
+    const universityUser = await UserModel.findById(
+      srkTaskUserExist.srkUniversityUserId
+    )
+      .populate<{ packageId: any }>('packageId')
+      .session(session);
+
+    const packageName = universityUser?.packageId?.title || 'SRK Basic';
+    const maxLimit = PACKAGE_LIMITS[packageName] || 5;
+
+    let successfullyApproved = 0;
+    let limitReached = false;
+    const skippedItems: string[] = [];
+    const dailyApprovedCounts = new Map<string, number>();
+
+    for (const submission of pendingSubmissions) {
+      const submissionDate = new Date(submission.createdAt);
+      const dayKey = submissionDate.toISOString().split('T')[0];
+
+      if (!dailyApprovedCounts.has(dayKey)) {
+        const startOfDay = new Date(submissionDate);
+        startOfDay.setHours(0, 0, 0, 0);
+        const endOfDay = new Date(submissionDate);
+        endOfDay.setHours(23, 59, 59, 999);
+
+        const count = await srkTaskActionSubmissionModel.countDocuments({
+          taskUserId: submission.taskUserId,
+          status: 'approved',
+          createdAt: { $gte: startOfDay, $lte: endOfDay },
+        }).session(session);
+        dailyApprovedCounts.set(dayKey, count);
+      }
+
+      const currentDayCount = dailyApprovedCounts.get(dayKey) || 0;
+
+      if (currentDayCount >= maxLimit) {
+        limitReached = true;
+        skippedItems.push(submission._id.toString());
+        continue;
+      }
+
+      // 1. Update submission status
+      submission.status = 'approved';
+      await submission.save({ session });
+      dailyApprovedCounts.set(dayKey, currentDayCount + 1);
+      successfullyApproved++;
+
+      // 2. Fetch associated todo to get reward amount
+      const todo = await growPackageTodoModel
+        .findById(submission.growPackageTodoId)
+        .populate({
+          path: 'growSocialMediaPackageEnrollmentId',
+          populate: [
+            { path: 'growSocialMediaPackageId' },
+            { path: 'growSocialMediaPackageTypeId' },
+            { path: 'growSocialMediaPackageSubTypeId' },
+          ],
+        })
+        .session(session);
+
+      if (!todo) continue;
+
+      // Logic to determine reward coins (respecting 100-coin-to-1-rupee if applicable)
+      // This is based on existing logic in approveSrkTaskActionSubmissionByAdmin
+      let rewardCoins = 0;
+      const enrollment = todo.growSocialMediaPackageEnrollmentId as any;
+      if (enrollment) {
+        if (submission.type === 'follow') {
+          rewardCoins = enrollment.growSocialMediaPackageSubTypeId?.noOfFollowers || 0;
+        } else if (submission.type === 'like') {
+          rewardCoins = enrollment.growSocialMediaPackageSubTypeId?.noOfLikes || 0;
+        }
+      }
+
+      if (rewardCoins > 0) {
+        // 3. Update User Balance (Only increasing coins, not totalEarnings cash)
+        const userBalance = await srkTaskUserBalanceModel.findOneAndUpdate(
+          { taskUserId: submission.taskUserId },
+          {
+            $inc: {
+              totalCoinsEarned: rewardCoins,
+              currentCoins: rewardCoins,
+            },
+          },
+          { session, new: true, upsert: true }
+        );
+
+        // 4. Create Audit Log (Earning Statement)
+        await srkTaskEarningStatementModel.create(
+          [
+            {
+              taskUserId: submission.taskUserId,
+              growPackageTodoId: submission.growPackageTodoId,
+              description: `Bulk Approved by Admin ID: ${adminId} - ${submission.type} task`,
+              type: 'credit',
+              coin: rewardCoins,
+              coinAfterTransaction: userBalance.currentCoins,
+            },
+          ],
+          { session }
+        );
+      }
+    }
+
+    await session.commitTransaction();
+    return {
+      status: 200,
+      body: {
+        success: true,
+        message: limitReached
+          ? `Approved ${successfullyApproved} submissions. User limit of ${maxLimit} for ${packageName} package reached.`
+          : `Successfully approved ${successfullyApproved} submissions`,
+      },
+    };
+  } catch (error: any) {
+    await session.abortTransaction();
+    return {
+      status: 500,
+      body: {
+        success: false,
+        message: error.message || 'Failed to bulk approve submissions',
+      },
+    };
+  } finally {
+    session.endSession();
+  }
+};
+
+const bulkRejectSrkTaskSubmissionsByAdmin: AppRouteImplementationOrOptions<
+  typeof srkTaskContract.bulkRejectSrkTaskSubmissionsByAdmin
+> = async ({ body, req }) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  try {
+    const adminId = (req as any).user?._id || 'system';
+    const { submissionIds, rejectionReason } = body;
+
+    const result = await srkTaskActionSubmissionModel.updateMany(
+      {
+        _id: { $in: submissionIds },
+        status: 'pending',
+      },
+      {
+        $set: {
+          status: 'rejected',
+          rejectionReason: `${rejectionReason} (Bulk Rejected by Admin ID: ${adminId})`,
+        },
+      },
+      { session }
+    );
+
+    if (result.matchedCount === 0) {
+      return {
+        status: 400,
+        body: {
+          success: false,
+          message: 'No pending submissions found for the provided IDs',
+        },
+      };
+    }
+
+    await session.commitTransaction();
+    return {
+      status: 200,
+      body: {
+        success: true,
+        message: `Successfully rejected ${result.modifiedCount} submissions`,
+      },
+    };
+  } catch (error: any) {
+    await session.abortTransaction();
+    return {
+      status: 500,
+      body: {
+        success: false,
+        message: error.message || 'Failed to bulk reject submissions',
+      },
+    };
+  } finally {
+    session.endSession();
+  }
+};
+
 export const srkTaskMutationHandler = {
   srkTaskEarningsPayoutRequest,
   acceptSrkTaskUserEarningsPayout,
@@ -757,4 +1207,8 @@ export const srkTaskMutationHandler = {
   srkTaskActionSubmission,
   approveSrkTaskActionSubmissionByAdmin,
   rejectSrkTaskActionSubmissionByAdmin,
+  bulkApproveSrkTaskSubmissionsByAdmin,
+  bulkRejectSrkTaskSubmissionsByAdmin,
+  submitPaymentDetailsRequest,
+  reviewPaymentDetailsRequest,
 };

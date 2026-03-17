@@ -1313,7 +1313,7 @@ This project is licensed under the MIT License.
 
 ## 👥 Team
 
-Developed and maintained by the SRK University Development Team.
+Developed and maintained by the SRK University Development Team. 2026
 
 ---
 

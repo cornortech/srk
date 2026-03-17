@@ -62,7 +62,7 @@ export const TasksView: React.FC<TasksViewProps> = ({
   );
 
   const isTaskFeatureEnabled = appSettingsData?.body?.data?.taskFeatureEnabled ?? true;
-  
+
   // Tasks are allowed only if BOTH conditions are met:
   // 1. Admin has enabled the task feature
   // 2. Current time is within the allowed window (7pm-10pm)
@@ -167,8 +167,8 @@ export const TasksView: React.FC<TasksViewProps> = ({
               {areTasksAllowed ? 'Tasks Are Available Now!' : 'Tasks Currently Unavailable'}
             </h3>
             <p className="text-zinc-300 text-sm">
-              {!isTaskFeatureEnabled 
-                ? 'Task feature is currently disabled by admin. Please check back later.' 
+              {!isTaskFeatureEnabled
+                ? 'Task feature is currently disabled by admin. Please check back later.'
                 : !isTaskTimeAllowed
                   ? 'Tasks can only be done between 7:00 PM and 10:00 PM daily.'
                   : 'You can complete tasks until 10:00 PM. Make the most of your time!'}

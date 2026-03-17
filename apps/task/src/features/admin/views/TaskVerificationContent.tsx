@@ -92,18 +92,13 @@ export const TaskVerificationContent: React.FC = () => {
     refetch: refetchSubmissions,
   } = submissionsQueryResult;
 
-  // Since getAllSrkTasksActionSubmissionByStatusForAdmin returns flat submissions,
-  // we need to group them by user for the initial view if the backend doesn't provide a grouped endpoint yet.
-  // HOWEVER, the requirement says "initial UI will be same as AllUsersContent with the list of pending submission approval user's request".
-  // Let's derive unique users from the submissions data if it's the only way, or use AllSrkTaskUsers list if filtered.
-
   const pendingUsers = useMemo(() => {
     if (!usersData?.body?.data) return [];
     const userMap = new Map();
     const PACKAGE_LIMITS: Record<string, number> = {
       'SRK Basic': 5,
       'SRK Lite': 4,
-      'SRK Standard': 9,
+      'SRK Standard': 10,
       'SRK Premium': 15,
       'SRK PRO': 18,
     };
@@ -117,6 +112,9 @@ export const TaskVerificationContent: React.FC = () => {
           pendingCount: 1,
           package: pkg,
           approvedCount: sub.taskUserId.approvedCount || 0,
+          totalSubmissions: sub.taskUserId.totalSubmissions || 0,
+          currentCoins: sub.taskUserId.currentCoins || 0,
+          totalCoinsEarned: sub.taskUserId.totalCoinsEarned || 0,
           limit: PACKAGE_LIMITS[pkg] || 5,
         });
       } else if (uId) {
@@ -330,8 +328,9 @@ export const TaskVerificationContent: React.FC = () => {
               <tr className="bg-[#24201D] uppercase text-xs tracking-wider text-gray-400 border-b border-gray-700">
                 <th className="py-4 px-6 text-left font-bold">User Details</th>
                 <th className="py-4 px-6 text-left font-bold">Contact info</th>
+                <th className="py-4 px-6 text-center font-bold">Coins</th>
                 <th className="py-4 px-6 text-center font-bold">Package</th>
-                <th className="py-4 px-6 text-center font-bold">Approved</th>
+                <th className="py-4 px-6 text-center font-bold">Approved / Total</th>
                 <th className="py-4 px-6 text-center font-bold">Pending</th>
                 <th className="py-4 px-6 text-right font-bold">Action</th>
               </tr>
@@ -363,17 +362,27 @@ export const TaskVerificationContent: React.FC = () => {
                     </div>
                   </td>
                   <td className="py-4 px-6 text-center">
+                    <div className="flex flex-col items-center">
+                      <span className="text-[#E1BA73] font-bold text-sm">
+                        {user.currentCoins.toLocaleString()} <span className="text-[10px] text-gray-500">CUR</span>
+                      </span>
+                      {/* <span className="text-emerald-400/70 text-[10px] font-medium">
+                        {user.totalCoinsEarned.toLocaleString()} <span className="text-gray-600">TTL</span>
+                      </span> */}
+                    </div>
+                  </td>
+                  <td className="py-4 px-6 text-center">
                     <span className="px-3 py-1 rounded-full bg-[#E1BA73]/10 border border-[#E1BA73]/30 text-[#E1BA73] text-xs font-bold uppercase">
                       {user.package}
                     </span>
                   </td>
                   <td className="py-4 px-6 text-center">
                     <div className="inline-flex items-center gap-2">
-                       <span className={`font-bold ${user.approvedCount >= user.limit ? 'text-red-400' : 'text-emerald-400'}`}>
+                       <span className="text-emerald-400 font-bold">
                          {user.approvedCount}
                        </span>
                        <span className="text-gray-600">/</span>
-                       <span className="text-gray-400 font-bold">{user.limit}</span>
+                       <span className="text-gray-400 font-bold">{user.totalSubmissions}</span>
                     </div>
                   </td>
                   <td className="py-4 px-6 text-center">

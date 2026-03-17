@@ -371,7 +371,7 @@ const rejectSrkTaskOnboardingVerificationByAdmin: AppRouteImplementationOrOption
 const PACKAGE_LIMITS: Record<string, number> = {
   'SRK Basic': 5,
   'SRK Lite': 4,
-  'SRK Standard': 9,
+  'SRK Standard': 10,
   'SRK Premium': 15,
   'SRK PRO': 18,
 };
@@ -552,18 +552,26 @@ const approveSrkTaskActionSubmissionByAdmin: AppRouteImplementationOrOptions<
     const packageName = universityUser?.packageId?.title || 'SRK Basic';
     const maxLimit = PACKAGE_LIMITS[packageName] || 5;
 
-    const approvedSubmissions =
+    // Use the submission's createdAt date for the limit check
+    const submissionDate = new Date(actionSubmission.createdAt);
+    const startOfDay = new Date(submissionDate);
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date(submissionDate);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    const approvedSubmissionsOnThatDay =
       await srkTaskActionSubmissionModel.countDocuments({
         taskUserId: actionSubmission.taskUserId,
         status: 'approved',
+        createdAt: { $gte: startOfDay, $lte: endOfDay },
       });
 
-    if (approvedSubmissions >= maxLimit) {
+    if (approvedSubmissionsOnThatDay >= maxLimit) {
       return {
         status: 400,
         body: {
           success: false,
-          message: `The user has reached the maximum approval limit for their ${packageName} package (${maxLimit}).`,
+          message: `The user has reached the maximum daily approval limit for their ${packageName} package (${maxLimit}) for submissions on ${startOfDay.toLocaleDateString()}.`,
         },
       };
     }
@@ -1016,24 +1024,41 @@ const bulkApproveSrkTaskSubmissionsByAdmin: AppRouteImplementationOrOptions<
     const packageName = universityUser?.packageId?.title || 'SRK Basic';
     const maxLimit = PACKAGE_LIMITS[packageName] || 5;
 
-    let approvedCount = await srkTaskActionSubmissionModel.countDocuments({
-      taskUserId: firstSubmission.taskUserId,
-      status: 'approved',
-    }).session(session);
-
     let successfullyApproved = 0;
     let limitReached = false;
+    const skippedItems: string[] = [];
+    const dailyApprovedCounts = new Map<string, number>();
 
     for (const submission of pendingSubmissions) {
-      if (approvedCount >= maxLimit) {
+      const submissionDate = new Date(submission.createdAt);
+      const dayKey = submissionDate.toISOString().split('T')[0];
+
+      if (!dailyApprovedCounts.has(dayKey)) {
+        const startOfDay = new Date(submissionDate);
+        startOfDay.setHours(0, 0, 0, 0);
+        const endOfDay = new Date(submissionDate);
+        endOfDay.setHours(23, 59, 59, 999);
+
+        const count = await srkTaskActionSubmissionModel.countDocuments({
+          taskUserId: submission.taskUserId,
+          status: 'approved',
+          createdAt: { $gte: startOfDay, $lte: endOfDay },
+        }).session(session);
+        dailyApprovedCounts.set(dayKey, count);
+      }
+
+      const currentDayCount = dailyApprovedCounts.get(dayKey) || 0;
+
+      if (currentDayCount >= maxLimit) {
         limitReached = true;
-        break;
+        skippedItems.push(submission._id.toString());
+        continue;
       }
 
       // 1. Update submission status
       submission.status = 'approved';
       await submission.save({ session });
-      approvedCount++;
+      dailyApprovedCounts.set(dayKey, currentDayCount + 1);
       successfullyApproved++;
 
       // 2. Fetch associated todo to get reward amount

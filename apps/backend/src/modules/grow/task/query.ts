@@ -31,7 +31,7 @@ const getAllSrkTasksActionSubmissionByStatusForAdmin: AppRouteImplementationOrOp
       srkTaskActionSubmissionModel.countDocuments(filter),
       srkTaskActionSubmissionModel
         .find(filter)
-        .sort({ createdAt: -1 })
+        .sort({ updatedAt: -1 })
         .skip(skip)
         .limit(limit)
         .populate<{
@@ -68,13 +68,30 @@ const getAllSrkTasksActionSubmissionByStatusForAdmin: AppRouteImplementationOrOp
         const todo = submission.growPackageTodoId;
         const enrollment = todo?.growSocialMediaPackageEnrollmentId;
 
-        // Get approved count for this user
-        const approvedCount = taskUser
-          ? await srkTaskActionSubmissionModel.countDocuments({
-              taskUserId: taskUser._id,
-              status: 'approved',
-            })
-          : 0;
+        // Get lifetime statistics for this user
+        const [approvedCount, totalSubmissions, balance] = await Promise.all([
+          taskUser
+            ? srkTaskActionSubmissionModel.countDocuments({
+                taskUserId: taskUser._id,
+                status: 'approved',
+              })
+            : Promise.resolve(0),
+          taskUser
+            ? srkTaskActionSubmissionModel.countDocuments({
+                taskUserId: taskUser._id,
+              })
+            : Promise.resolve(0),
+          taskUser
+            ? srkTaskUserBalanceModel
+                .findOne({
+                  $or: [
+                    { taskUserId: taskUser._id },
+                    { taskUserId: taskUser._id.toString() },
+                  ],
+                })
+                .lean()
+            : Promise.resolve(null),
+        ]);
 
         return {
           _id: submission._id.toString(),
@@ -93,6 +110,9 @@ const getAllSrkTasksActionSubmissionByStatusForAdmin: AppRouteImplementationOrOp
                   taskUser.srkUniversityUserId?.packageId?.title ||
                   'SRK Basic',
                 approvedCount,
+                totalSubmissions,
+                currentCoins: balance?.currentCoins || 0,
+                totalCoinsEarned: balance?.totalCoinsEarned || 0,
               }
             : undefined,
           growPackageTodoId: todo
@@ -1699,13 +1719,26 @@ const getAllPendingTaskSubmissionsByUserForAdmin: AppRouteImplementationOrOption
         const todo = submission.growPackageTodoId;
         const enrollment = todo?.growSocialMediaPackageEnrollmentId;
 
-        // Get approved count for this user
-        const approvedCount = taskUser
-          ? await srkTaskActionSubmissionModel.countDocuments({
-              taskUserId: taskUser._id,
-              status: 'approved',
-            })
-          : 0;
+        // Get approved count for today and balance for this user
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const [approvedCount, balance] = await Promise.all([
+          taskUser
+            ? srkTaskActionSubmissionModel.countDocuments({
+                taskUserId: taskUserId,
+                status: 'approved',
+                createdAt: { $gte: today },
+              })
+            : Promise.resolve(0),
+          taskUser
+            ? srkTaskUserBalanceModel
+                .findOne({
+                  $or: [{ taskUserId: taskUserId }, { taskUserId: taskUserId.toString() }],
+                })
+                .lean()
+            : Promise.resolve(null),
+        ]);
 
         return {
           _id: submission._id.toString(),
@@ -1724,6 +1757,8 @@ const getAllPendingTaskSubmissionsByUserForAdmin: AppRouteImplementationOrOption
                   taskUser.srkUniversityUserId?.packageId?.title ||
                   'SRK Basic',
                 approvedCount,
+                currentCoins: balance?.currentCoins || 0,
+                totalCoinsEarned: balance?.totalCoinsEarned || 0,
               }
             : undefined,
           growPackageTodoId: todo

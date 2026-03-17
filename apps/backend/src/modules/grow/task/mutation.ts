@@ -362,15 +362,21 @@ const rejectSrkTaskOnboardingVerificationByAdmin: AppRouteImplementationOrOption
  *
  */
 
+const PACKAGE_LIMITS: Record<string, number> = {
+  'SRK Basic': 5,
+  'SRK Lite': 4,
+  'SRK Standard': 9,
+  'SRK Premium': 15,
+  'SRK PRO': 18,
+};
+
 const srkTaskActionSubmission: AppRouteImplementationOrOptions<
   typeof srkTaskContract.srkTaskActionSubmission
 > = async ({ body }) => {
   try {
-    // Implementation logic for srkTaskActionSubmission goes here
-
-    const srkTaskUserExist = await srkTaskUserModel.findById(
-      body.srkTaskUserId
-    );
+    const srkTaskUserExist = await srkTaskUserModel
+      .findById(body.srkTaskUserId)
+      .populate<{ srkUniversityUserId: any }>('srkUniversityUserId');
 
     if (!srkTaskUserExist) {
       return {
@@ -514,6 +520,44 @@ const approveSrkTaskActionSubmissionByAdmin: AppRouteImplementationOrOptions<
         body: {
           success: false,
           message: 'Action submission not found',
+        },
+      };
+    }
+
+    // Check submission limits based on package before approving
+    const srkTaskUserExist = await srkTaskUserModel
+      .findById(actionSubmission.taskUserId)
+      .populate<{ srkUniversityUserId: any }>('srkUniversityUserId');
+
+    if (!srkTaskUserExist) {
+      return {
+        status: 404,
+        body: {
+          success: false,
+          message: 'SRK Task User does not exist',
+        },
+      };
+    }
+
+    const universityUser = await UserModel.findById(
+      srkTaskUserExist.srkUniversityUserId
+    ).populate<{ packageId: any }>('packageId');
+
+    const packageName = universityUser?.packageId?.title || 'SRK Basic';
+    const maxLimit = PACKAGE_LIMITS[packageName] || 5;
+
+    const approvedSubmissions =
+      await srkTaskActionSubmissionModel.countDocuments({
+        taskUserId: actionSubmission.taskUserId,
+        status: 'approved',
+      });
+
+    if (approvedSubmissions >= maxLimit) {
+      return {
+        status: 400,
+        body: {
+          success: false,
+          message: `The user has reached the maximum approval limit for their ${packageName} package (${maxLimit}).`,
         },
       };
     }
@@ -938,10 +982,53 @@ const bulkApproveSrkTaskSubmissionsByAdmin: AppRouteImplementationOrOptions<
       };
     }
 
+    // Since we are approving for a user, we check their specific limit
+    // Assuming they are all from the same user as implied by the UI context
+    const firstSubmission = pendingSubmissions[0];
+    const srkTaskUserExist = await srkTaskUserModel
+      .findById(firstSubmission.taskUserId)
+      .populate<{ srkUniversityUserId: any }>('srkUniversityUserId')
+      .session(session);
+
+    if (!srkTaskUserExist) {
+      await session.abortTransaction();
+      return {
+        status: 404,
+        body: {
+          success: false,
+          message: 'SRK Task User does not exist',
+        },
+      };
+    }
+
+    const universityUser = await UserModel.findById(
+      srkTaskUserExist.srkUniversityUserId
+    )
+      .populate<{ packageId: any }>('packageId')
+      .session(session);
+
+    const packageName = universityUser?.packageId?.title || 'SRK Basic';
+    const maxLimit = PACKAGE_LIMITS[packageName] || 5;
+
+    let approvedCount = await srkTaskActionSubmissionModel.countDocuments({
+      taskUserId: firstSubmission.taskUserId,
+      status: 'approved',
+    }).session(session);
+
+    let successfullyApproved = 0;
+    let limitReached = false;
+
     for (const submission of pendingSubmissions) {
+      if (approvedCount >= maxLimit) {
+        limitReached = true;
+        break;
+      }
+
       // 1. Update submission status
       submission.status = 'approved';
       await submission.save({ session });
+      approvedCount++;
+      successfullyApproved++;
 
       // 2. Fetch associated todo to get reward amount
       const todo = await growPackageTodoModel
@@ -1005,7 +1092,9 @@ const bulkApproveSrkTaskSubmissionsByAdmin: AppRouteImplementationOrOptions<
       status: 200,
       body: {
         success: true,
-        message: `Successfully approved ${pendingSubmissions.length} submissions`,
+        message: limitReached
+          ? `Approved ${successfullyApproved} submissions. User limit of ${maxLimit} for ${packageName} package reached.`
+          : `Successfully approved ${successfullyApproved} submissions`,
       },
     };
   } catch (error: any) {

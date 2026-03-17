@@ -23,6 +23,8 @@ export const srkTaskRouter = s.router(srkTaskContract, {
   getAllSrkTaskUserFinanceStatement:
     srkTaskQueryHandler.getAllSrkTaskUserFinanceStatement,
   getAllSrkTaskUsersForAdmin: srkTaskQueryHandler.getAllSrkTaskUsersForAdmin,
+  getAllPendingTaskSubmissionsByUserForAdmin:
+    srkTaskQueryHandler.getAllPendingTaskSubmissionsByUserForAdmin,
   getAllCompletedSrkTaskSubmissionsForAdmin:
     srkTaskQueryHandler.getAllCompletedSrkTaskSubmissionsForAdmin,
   srkTaskEarningsPayoutRequest:

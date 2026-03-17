@@ -46,7 +46,6 @@ export const UserDashboardPage = () => {
   return (
     <UserDashboard
       user={user}
-      enrollmentData={profileResponse?.enrollmentData || null}
       onLogout={() => {
         logout();
         navigate('/login');

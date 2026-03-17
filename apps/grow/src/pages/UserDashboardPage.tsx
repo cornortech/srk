@@ -43,7 +43,7 @@ export const UserDashboardPage = () => {
 
   return (
     <UserDashboard
-      user={user as any}
+      user={user}
       onLogout={() => {
         logout();
         navigate('/login');

@@ -44,14 +44,18 @@ export const UserVerificationPage = () => {
   });
 
   // API Hooks - Check if profile exists
-  const { data: profileData, refetch, isLoading } = api.grow.getSrkGrowProfile.useQuery(
+  const {
+    data: profileData,
+    refetch,
+    isLoading,
+  } = api.grow.getSrkGrowProfile.useQuery(
     ['growProfile', storeUser?._id],
     storeUser?._id ? { params: { userId: storeUser._id } } : ({} as any),
     {
       queryKey: ['growProfile', storeUser?._id],
       enabled: !!storeUser?._id,
       refetchOnWindowFocus: true,
-    }
+    },
   );
 
   const user = profileData?.status === 200 ? profileData.body : null;
@@ -71,7 +75,7 @@ export const UserVerificationPage = () => {
     onError: (error: any) => {
       console.error('Resubmission error:', error);
       toast.error(
-        error?.body?.message || 'An error occurred during resubmission.'
+        error?.body?.message || 'An error occurred during resubmission.',
       );
     },
   });
@@ -95,7 +99,10 @@ export const UserVerificationPage = () => {
       return;
     }
 
-    if (storeUser.status === 'portalActivated') {
+    if (
+      storeUser.status === 'portalActivated' ||
+      user?.userDetails.status === 'portalActivated'
+    ) {
       navigate('/dashboard');
     }
   }, [storeUser, navigate]);
@@ -152,7 +159,7 @@ export const UserVerificationPage = () => {
       // 4. Call Backend
       resubmitMutation.mutate({
         body: {
-          userId: user.userDetails._id || "",
+          userId: user.userDetails._id || '',
           kycURLs: [],
           transactionId: data.transactionId,
           paymentURL: finalPaymentUrl,
@@ -181,7 +188,10 @@ export const UserVerificationPage = () => {
 
         {isLoading ? (
           <GlassCard className="max-w-xl mx-auto text-center py-12 px-8">
-            <Loader2 size={48} className="text-blue-400 animate-spin mx-auto mb-4" />
+            <Loader2
+              size={48}
+              className="text-blue-400 animate-spin mx-auto mb-4"
+            />
             <div className="text-white">Loading verification status...</div>
           </GlassCard>
         ) : !user ? (
@@ -299,10 +309,11 @@ export const UserVerificationPage = () => {
                       <input
                         {...register('transactionId')}
                         type="text"
-                        className={`w-full pl-12 pr-4 py-3 rounded-xl bg-white/5 border ${errors.transactionId
-                          ? 'border-red-500'
-                          : 'border-white/10'
-                          } text-white focus:border-[#b68938] focus:ring-1 focus:ring-[#b68938] transition-all`}
+                        className={`w-full pl-12 pr-4 py-3 rounded-xl bg-white/5 border ${
+                          errors.transactionId
+                            ? 'border-red-500'
+                            : 'border-white/10'
+                        } text-white focus:border-[#b68938] focus:ring-1 focus:ring-[#b68938] transition-all`}
                         placeholder="Original: 123XYZ..."
                         required
                       />

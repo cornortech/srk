@@ -45,60 +45,57 @@ export const AdminDashboard: React.FC = () => {
     window.open('https://srk-bank-external-link.com', '_blank');
   }, []);
 
-  const navLinks: NavLink[] = useMemo(
-    () => [
-      {
-        name: 'Verification',
-        icon: ShieldCheck,
-        content: <VerificationContent />,
-      },
-      {
-        name: 'Payout Requests',
-        icon: Wallet,
-        content: <PayoutRequestsContent />,
-      },
-      {
-        name: 'Transactions',
-        icon: Repeat2,
-        content: <TransactionsContent />,
-      },
-      {
-        name: 'Task Done',
-        icon: ListChecks,
-        content: <TaskDoneContent />,
-      },
-      {
-        name: 'Task Verification',
-        icon: CheckCircle,
-        content: <TaskVerificationContent />,
-      },
-      {
-        name: 'All Users',
-        icon: Users,
-        content: <AllUsersContent />,
-      },
-      {
-        name: 'Payment Details',
-        icon: CreditCard,
-        content: <PaymentDetailsVerificationContent />,
-      },
-      {
-        name: 'Leaderboard',
-        icon: Trophy,
-        content: <LeaderboardContent />,
-      },
-      {
-        name: 'App Settings',
-        icon: Settings,
-        content: <AppSettingsContent />,
-      },
-    ],
-    []
-  );
+  const navLinks: NavLink[] = [
+    {
+      name: 'Verification',
+      icon: ShieldCheck,
+      content: <VerificationContent />,
+    },
+    {
+      name: 'Payout Requests',
+      icon: Wallet,
+      content: <PayoutRequestsContent />,
+    },
+    {
+      name: 'Transactions',
+      icon: Repeat2,
+      content: <TransactionsContent />,
+    },
+    {
+      name: 'Task Done',
+      icon: ListChecks,
+      content: <TaskDoneContent />,
+    },
+    {
+      name: 'Task Verification',
+      icon: CheckCircle,
+      content: <TaskVerificationContent />,
+    },
+    {
+      name: 'All Users',
+      icon: Users,
+      content: <AllUsersContent />,
+    },
+    {
+      name: 'Payment Details',
+      icon: CreditCard,
+      content: <PaymentDetailsVerificationContent />,
+    },
+    {
+      name: 'Leaderboard',
+      icon: Trophy,
+      content: <LeaderboardContent />,
+    },
+    {
+      name: 'App Settings',
+      icon: Settings,
+      content: <AppSettingsContent />,
+    },
+  ];
 
   const currentContent = useMemo(
     () => navLinks.find((link) => link.name === selectedSection)?.content,
-    [navLinks, selectedSection]
+    [navLinks, selectedSection],
   );
 
   return (

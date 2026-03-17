@@ -39,7 +39,7 @@ export const LoginPage = () => {
     if (profileData?.status === 200) {
       console.log('✅ Profile data received:', profileData.body.userDetails);
       const userProfile = profileData.body.userDetails;
-      
+
       // Store only minimal auth data
       setUser({
         _id: userProfile._id,
@@ -47,7 +47,7 @@ export const LoginPage = () => {
         fullName: userProfile.fullName,
         status: userProfile.status as any,
       });
-      
+
       console.log('👤 User status synced:', userProfile.status);
 
       // Redirect Logic based on status
@@ -55,7 +55,7 @@ export const LoginPage = () => {
         navigate('/dashboard');
       } else {
         console.log('🔄 Redirecting user with status:', userProfile.status);
-        navigate('/grow/verification-wall');
+        navigate('/grow/verification');
       }
     }
   }, [profileData, navigate, setUser]);

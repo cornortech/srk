@@ -2,7 +2,10 @@ import {
   TSrkGrowPackagesSchema,
   TValidateGrowUserPromoCodeResponse,
   TGetGrowSocialMediaEnrollmentById,
+  TGetSrkGrowProfileResponse,
 } from '@srk/shared/contracts';
+
+export type UserData = TGetSrkGrowProfileResponse;
 
 export type SocialPlatform =
   | 'YouTube'
@@ -22,17 +25,17 @@ export type PackageSubType =
 export type PackageType = TSrkGrowPackagesSchema['packageTypes'][0];
 export type PackageDetails = TSrkGrowPackagesSchema;
 
-export type UserData = Omit<
-  TGetGrowSocialMediaEnrollmentById['userData'],
-  'kycURL'
-> & {
-  _id: string;
-  kycURL?: string[] | string;
-  kycDocuments?: KYCDocument[];
-  enrollmentData?: any;
-  createdAt?: string;
-  phone?: string;
-};
+// export type UserData = Omit<
+//   TGetGrowSocialMediaEnrollmentById['userData'],
+//   'kycURL'
+// > & {
+//   _id: string;
+//   kycURL?: string[] | string;
+//   kycDocuments?: KYCDocument[];
+//   enrollmentData?: any;
+//   createdAt?: string;
+//   phone?: string;
+// };
 
 export interface kycSchema {
   userId: string;

@@ -27,13 +27,9 @@ export const CallbackPage = () => {
   );
   const [message, setMessage] = useState('Authenticating...');
 
-  const calledRef = useRef(false);
 
   useEffect(() => {
     const handleSSOCallback = async () => {
-      if (calledRef.current) return;
-      calledRef.current = true;
-
       const code = searchParams.get('code');
 
       if (!code) {

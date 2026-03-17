@@ -189,7 +189,7 @@ export const Sidebar = ({
               <WorkflowIcon />
               {isRedirectingToTaskProgram ? "Redirecting..." : "SRK Task Program"}
             </div>
-            <div
+            {/* <div
               className="flex cursor-pointer items-center gap-x-3 w-full justify-start text-textPrimary bg-bgSecondary p-2 rounded-md transition-all duration-300 ease-in-out"
               color="primary"
               onClick={handleRedirectToBankProgram}
@@ -197,6 +197,7 @@ export const Sidebar = ({
               <Banknote />
               {isRedirectingToBankProgram ? "Redirecting..." : "SRK Bank Program"}
             </div>
+            */}
               </>
 
           }

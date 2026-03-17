@@ -516,6 +516,7 @@ export const getAllTaskAffiliateResponseSchema = z.object({
   srkUniversityUserId: z.string(),
   fullName: z.string(),
   dob: z.string(),
+  status: z.string(),
   isActivated: z.boolean(),
   createdAt: z.string(),
   updatedAt: z.string(),

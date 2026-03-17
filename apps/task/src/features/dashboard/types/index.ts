@@ -34,6 +34,7 @@ export interface Task {
   desc: string;
   status?: TaskStatus;
   required?: string;
+  url?: string;
   proofType?: 'screenshot' | 'video' | 'link';
 }
 

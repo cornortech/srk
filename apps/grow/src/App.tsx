@@ -62,7 +62,7 @@ const router = createBrowserRouter([
     element: <GrowVerificationPage />,
   },
   {
-    path: '/grow/verification-wall',
+    path: '/grow/verification',
     element: <UserVerificationPage />
   },
   {

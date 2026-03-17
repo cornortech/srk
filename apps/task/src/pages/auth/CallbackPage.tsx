@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useTaskAuthStore } from '../../store/useTaskAuthStore';
 import { env } from '../../lib/env';
@@ -27,8 +27,13 @@ export const CallbackPage = () => {
   );
   const [message, setMessage] = useState('Authenticating...');
 
+  const calledRef = useRef(false);
+
   useEffect(() => {
     const handleSSOCallback = async () => {
+      if (calledRef.current) return;
+      calledRef.current = true;
+
       const code = searchParams.get('code');
 
       if (!code) {

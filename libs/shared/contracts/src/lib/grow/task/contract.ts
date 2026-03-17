@@ -121,6 +121,19 @@ export const srkTaskContract = c.router({
     summary:
       'Get all srk task action submissions by status for admin (paginated)',
   },
+  getAllPendingTaskSubmissionsByUserForAdmin: {
+    method: 'GET',
+    path: '/task/admin/pending-submissions-by-user',
+    query: commonPaginatedQueryParamsSchema.extend({
+      taskUserId: z.string(),
+    }),
+    responses: {
+      200: paginatedSrkTaskActionSubmissionsByStatusForAdminSchema,
+      400: ErrorSchema,
+      500: ErrorSchema,
+    },
+    summary: 'Get all pending task submissions for a specific user for admin',
+  },
   getSrkTaskActionsByPlatforms: {
     method: 'GET',
     path: '/task/srk-task-actions-by-platforms',

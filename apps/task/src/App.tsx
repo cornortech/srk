@@ -63,15 +63,14 @@ const router = createBrowserRouter([
       </AdminProtectedRoute>
     ),
   },
-  // {
-  //   path: '/admin',
-  //   element: <AdminDashboard />
-  //   // (
-  //   //   <AdminProtectedRoute>
-
-  //   //   </AdminProtectedRoute>
-  //   // ),
-  // },
+  {
+    path: '/admin',
+    element: (
+      <AdminProtectedRoute>
+        <AdminDashboard />
+      </AdminProtectedRoute>
+    ),
+  },
   {
     path: '/dashboard',
     element: <MainDashboardPage />,

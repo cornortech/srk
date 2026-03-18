@@ -103,23 +103,20 @@ export const TaskVerificationContent: React.FC = () => {
       'SRK PRO': 18,
     };
 
-    usersData.body.data.forEach((sub: any) => {
-      const uId = sub.taskUserId?._id;
+    usersData.body.data.forEach((res: any) => {
+      const uId = res.taskUserId?._id;
       if (uId && !userMap.has(uId)) {
-        const pkg = sub.taskUserId.packageName || 'SRK Basic';
+        const pkg = res.taskUserId.packageName || 'SRK Basic';
         userMap.set(uId, {
-          ...sub.taskUserId,
-          pendingCount: 1,
+          ...res.taskUserId,
+          pendingCount: res.pendingCount || 1,
           package: pkg,
-          approvedCount: sub.taskUserId.approvedCount || 0,
-          totalSubmissions: sub.taskUserId.totalSubmissions || 0,
-          currentCoins: sub.taskUserId.currentCoins || 0,
-          totalCoinsEarned: sub.taskUserId.totalCoinsEarned || 0,
+          approvedCount: res.taskUserId.approvedCount || 0,
+          totalSubmissions: res.taskUserId.totalSubmissions || 0,
+          currentCoins: res.taskUserId.currentCoins || 0,
+          totalCoinsEarned: res.taskUserId.totalCoinsEarned || 0,
           limit: PACKAGE_LIMITS[pkg] || 5,
         });
-      } else if (uId) {
-        const u = userMap.get(uId);
-        u.pendingCount++;
       }
     });
     return Array.from(userMap.values());

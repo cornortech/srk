@@ -20,8 +20,8 @@ const getAllSrkTasksActionSubmissionByStatusForAdmin: AppRouteImplementationOrOp
   typeof srkTaskContract.getAllSrkTasksActionSubmissionByStatusForAdmin
 > = async ({ query }) => {
   try {
-    const page = Number(query?.page ?? 1);
-    const limit = Number(query?.limit ?? 10);
+    const page = query?.page ? Number(query.page) : 1;
+    const limit = query?.limit ? Number(query.limit) : 10;
     const skip = (page - 1) * limit;
     const status = query?.status || 'pending';
 
@@ -43,12 +43,16 @@ const getAllSrkTasksActionSubmissionByStatusForAdmin: AppRouteImplementationOrOp
       {
         $facet: {
           metadata: [{ $count: 'total' }],
+          totalSubmissionsCount: [
+            { $group: { _id: null, total: { $sum: "$pendingCount" } } }
+          ],
           data: [{ $skip: skip }, { $limit: limit }],
         },
       },
     ]);
 
     const totalRecords = aggregationResults[0].metadata[0]?.total || 0;
+    const totalSubmissionsCount = aggregationResults[0].totalSubmissionsCount[0]?.total || 0;
     const userGroups = aggregationResults[0].data;
 
     const data = await Promise.all(
@@ -111,14 +115,17 @@ const getAllSrkTasksActionSubmissionByStatusForAdmin: AppRouteImplementationOrOp
       })
     );
 
+    const totalRecordsResult = data.filter(Boolean);
+
     return {
       status: 200,
       body: {
         page,
         limit,
-        totalRecords,
+        totalRecords, // returning the true count from the database aggregation
+        totalSubmissionsCount, // NEW field for total pending submissions
         totalPages: Math.ceil(totalRecords / limit),
-        data: data.filter(Boolean),
+        data: totalRecordsResult,
       },
     };
   } catch (error) {

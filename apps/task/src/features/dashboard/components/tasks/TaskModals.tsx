@@ -266,7 +266,7 @@ export const PlatformSpecificTaskModal: React.FC<
                           className="px-6!"
                         >
                           {/* {task.type === 'watch' ? 'Watch Video' :  */}
-                          'Start Task
+                          Start Task
                           {/* '} */}
                         </MagneticButton>
                       </div>

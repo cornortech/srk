@@ -28,6 +28,8 @@ import { paginatedSrkTaskEarningRequestsByUserSchema } from './schema';
 import { initContract } from '@ts-rest/core';
 import {
   acceptSrkTaskUserEarningsPayoutSchema,
+  bulkApproveSrkTaskSubmissionsSchema,
+  bulkRejectSrkTaskSubmissionsSchema,
   getSrkTaskEarningRequestsByAdminQueryParams,
   getSrkTaskUserAnalyticsSchema,
   getSrkTaskUserEarningsLeaderboardQueryParams,
@@ -117,6 +119,19 @@ export const srkTaskContract = c.router({
     },
     summary:
       'Get all srk task action submissions by status for admin (paginated)',
+  },
+  getAllPendingTaskSubmissionsByUserForAdmin: {
+    method: 'GET',
+    path: '/task/admin/pending-submissions-by-user',
+    query: commonPaginatedQueryParamsSchema.extend({
+      taskUserId: z.string(),
+    }),
+    responses: {
+      200: paginatedSrkTaskActionSubmissionsByStatusForAdminSchema,
+      400: ErrorSchema,
+      500: ErrorSchema,
+    },
+    summary: 'Get all pending task submissions for a specific user for admin',
   },
   getSrkTaskActionsByPlatforms: {
     method: 'GET',
@@ -297,6 +312,28 @@ export const srkTaskContract = c.router({
       500: ErrorSchema,
     },
     summary: 'Approve an action submission for srk task user by admin',
+  },
+  bulkApproveSrkTaskSubmissionsByAdmin: {
+    method: 'POST',
+    path: '/task/admin/bulk-approve-submissions',
+    body: bulkApproveSrkTaskSubmissionsSchema,
+    responses: {
+      200: SuccessSchema,
+      400: ErrorSchema,
+      500: ErrorSchema,
+    },
+    summary: 'Bulk approve task submissions by admin',
+  },
+  bulkRejectSrkTaskSubmissionsByAdmin: {
+    method: 'POST',
+    path: '/task/admin/bulk-reject-submissions',
+    body: bulkRejectSrkTaskSubmissionsSchema,
+    responses: {
+      200: SuccessSchema,
+      400: ErrorSchema,
+      500: ErrorSchema,
+    },
+    summary: 'Bulk reject task submissions by admin',
   },
   getAllSrkTaskAffiliateVerificationRequest: {
     method: 'GET',

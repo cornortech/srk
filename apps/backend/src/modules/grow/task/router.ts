@@ -23,6 +23,8 @@ export const srkTaskRouter = s.router(srkTaskContract, {
   getAllSrkTaskUserFinanceStatement:
     srkTaskQueryHandler.getAllSrkTaskUserFinanceStatement,
   getAllSrkTaskUsersForAdmin: srkTaskQueryHandler.getAllSrkTaskUsersForAdmin,
+  getAllPendingTaskSubmissionsByUserForAdmin:
+    srkTaskQueryHandler.getAllPendingTaskSubmissionsByUserForAdmin,
   getAllCompletedSrkTaskSubmissionsForAdmin:
     srkTaskQueryHandler.getAllCompletedSrkTaskSubmissionsForAdmin,
   srkTaskEarningsPayoutRequest:
@@ -41,6 +43,10 @@ export const srkTaskRouter = s.router(srkTaskContract, {
     srkTaskMutationHandler.approveSrkTaskActionSubmissionByAdmin,
   rejectSrkTaskActionSubmissionByAdmin:
     srkTaskMutationHandler.rejectSrkTaskActionSubmissionByAdmin,
+  bulkApproveSrkTaskSubmissionsByAdmin:
+    srkTaskMutationHandler.bulkApproveSrkTaskSubmissionsByAdmin,
+  bulkRejectSrkTaskSubmissionsByAdmin:
+    srkTaskMutationHandler.bulkRejectSrkTaskSubmissionsByAdmin,
   srkTaskActionSubmission: srkTaskMutationHandler.srkTaskActionSubmission,
   getSrkTaskActionsByPlatforms:
     srkTaskQueryHandler.getSrkTaskActionsByPlatforms,

@@ -76,6 +76,7 @@ export const srkTaskActionSubmissionDetailsSchema = z.object({
 export const paginatedSrkTaskActionSubmissionsByStatusForAdminSchema =
   commonPaginationResponse.extend({
     data: z.array(srkTaskActionSubmissionDetailsSchema),
+    totalSubmissionsCount: z.number().optional(),
   });
 
 export type TPaginatedSrkTaskActionSubmissionsByStatusForAdmin = z.infer<

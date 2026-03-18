@@ -23,7 +23,6 @@ import { BulkApprovalModal } from '../components/modals/BulkApprovalModal';
 import { GoldButton } from '../components/ui/GoldButton';
 import { CARD_BG, GOLD_PRIMARY, DARK_BG, TEXT_LIGHT } from '../constants/theme';
 import { api } from '../../../lib/api';
-import { Error } from 'mongoose';
 
 export const TaskVerificationContent: React.FC = () => {
   const [viewingUserId, setViewingUserId] = useState<string | null>(null);
@@ -85,12 +84,16 @@ export const TaskVerificationContent: React.FC = () => {
     isLoading: isUsersLoading,
     error: usersError,
   } = usersQueryResult;
+
   const {
     data: submissionsData,
     isLoading: isSubmissionsLoading,
     error: submissionsError,
     refetch: refetchSubmissions,
   } = submissionsQueryResult;
+
+  const totalSubRecords = useMemo(() => submissionsData?.body?.totalRecords || 0, [submissionsData]);
+  const totalSubPages = useMemo(() => Math.max(1, Math.ceil(totalSubRecords / 10)), [totalSubRecords]);
 
   const pendingUsers = useMemo(() => {
     if (!usersData?.body?.data) return [];
@@ -314,9 +317,14 @@ export const TaskVerificationContent: React.FC = () => {
     return (
       <div className="space-y-6">
         <div className="flex justify-between items-center border-b border-[#E1BA73]/30 pb-4 text-white">
-          <h2 className="text-xl sm:text-2xl font-bold flex items-center gap-2">
-            <User size={24} className="text-[#E1BA73]" /> Pending Submission Users
-          </h2>
+          <div>
+            <h2 className="text-xl sm:text-2xl font-bold flex items-center gap-2">
+              <User size={24} className="text-[#E1BA73]" /> Pending Submission Users
+            </h2>
+            <p className="text-xs text-gray-500 uppercase tracking-wider font-bold mt-1">
+              Showing {pendingUsers.length} user on this page • {usersData?.body?.totalRecords || 0} unique submissions total
+            </p>
+          </div>
         </div>
 
         <div className="overflow-x-auto rounded-xl border border-gray-700/50 shadow-lg bg-[#1A1715]">
@@ -400,6 +408,29 @@ export const TaskVerificationContent: React.FC = () => {
             </tbody>
           </table>
         </div>
+
+        {/* Pagination for User List */}
+        {!viewingUserId && (usersData?.body?.totalPages || 1) > 1 && (
+          <div className="flex justify-center items-center gap-4 mt-12 pb-6">
+            <button
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page === 1}
+              className="px-5 py-2.5 bg-gray-800 text-white rounded-xl disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gray-700 transition-all flex items-center gap-2 border border-gray-700 text-sm font-bold"
+            >
+              <ChevronLeft size={18} /> PREV
+            </button>
+            <span className="text-sm font-bold text-gray-400 bg-gray-800/50 px-4 py-2 rounded-lg border border-gray-700">
+              PAGE {page} OF {usersData?.body?.totalPages || 1}
+            </span>
+            <button
+              onClick={() => setPage((p) => Math.min(usersData?.body?.totalPages || 1, p + 1))}
+              disabled={page === (usersData?.body?.totalPages || 1)}
+              className="px-5 py-2.5 bg-gray-800 text-white rounded-xl disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gray-700 transition-all flex items-center gap-2 border border-gray-700 text-sm font-bold"
+            >
+              NEXT <ChevronRight size={18} />
+            </button>
+          </div>
+        )}
       </div>
     );
   };
@@ -421,9 +452,6 @@ export const TaskVerificationContent: React.FC = () => {
         </div>
       );
     }
-
-    const totalSubRecords = submissionsData?.body?.totalRecords || 0;
-    const totalSubPages = submissionsData?.body?.totalPages || 1;
 
     return (
       <div className="space-y-6 relative">

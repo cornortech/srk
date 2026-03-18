@@ -6,7 +6,6 @@ import { growSocialMediaPackageModel } from "../model/growSocialMediaPackageMode
 import { growSocialMediaPackageTypeModel } from "../model/growSocialMediaPackageTypeModel";
 import { growSocialMediaPackageSubTypeModel } from "../model/growSocialMediaPackageSubTypeModel";
 
-
 // Load environment variables
 dotenv.config({
     path: path.join(process.cwd(), "apps/backend/.env"),

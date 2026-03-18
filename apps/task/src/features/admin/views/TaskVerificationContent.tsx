@@ -321,7 +321,10 @@ export const TaskVerificationContent: React.FC = () => {
             <h2 className="text-xl sm:text-2xl font-bold flex items-center gap-2">
               <User size={24} className="text-[#E1BA73]" /> Pending Submission Users
             </h2>
-            <p className="text-xs text-gray-500 uppercase tracking-wider font-bold mt-1">
+            <p className="text-xs text-[#E1BA73]/80 uppercase tracking-widest font-black mt-2 bg-[#E1BA73]/10 px-3 py-1.5 rounded-lg border border-[#E1BA73]/20 inline-block">
+              Total Pending submissions: {usersData?.body?.totalSubmissionsCount || 0}
+            </p>
+            <p className="text-xs text-gray-500 uppercase tracking-wider font-bold mt-2">
               Showing {pendingUsers.length} user on this page • {usersData?.body?.totalRecords || 0} unique submissions total
             </p>
           </div>

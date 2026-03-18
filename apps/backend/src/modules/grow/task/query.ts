@@ -34,11 +34,18 @@ const getAllSrkTasksActionSubmissionByStatusForAdmin: AppRouteImplementationOrOp
           _id: '$taskUserId',
           latestSubmissionAt: { $max: '$createdAt' },
           pendingCount: { $sum: 1 },
-          // Store one submission ID so we can get populated data easily if needed,
-          // or just the taskUserId for later population.
           submissionId: { $first: '$_id' }
         },
       },
+      {
+        $lookup: {
+          from: 'srktaskusers',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'userDetails'
+        }
+      },
+      { $match: { 'userDetails.0': { $exists: true } } },
       { $sort: { latestSubmissionAt: -1 } },
       {
         $facet: {

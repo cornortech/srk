@@ -59,7 +59,7 @@ const getAllSrkTasksActionSubmissionByStatusForAdmin: AppRouteImplementationOrOp
     ]);
 
     const totalRecords = aggregationResults[0].metadata[0]?.total || 0;
-    const totalSubmissionsCount = aggregationResults[0].totalSubmissionsCount[0]?.total || 0;
+    const globalPendingCount = aggregationResults[0].totalSubmissionsCount[0]?.total || 0;
     const userGroups = aggregationResults[0].data;
 
     const data = await Promise.all(
@@ -129,8 +129,8 @@ const getAllSrkTasksActionSubmissionByStatusForAdmin: AppRouteImplementationOrOp
       body: {
         page,
         limit,
-        totalRecords, // returning the true count from the database aggregation
-        totalSubmissionsCount, // NEW field for total pending submissions
+        totalRecords,
+        totalSubmissionsCount: globalPendingCount,
         totalPages: Math.ceil(totalRecords / limit),
         data: totalRecordsResult,
       },

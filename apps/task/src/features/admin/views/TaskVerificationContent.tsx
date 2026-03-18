@@ -65,17 +65,17 @@ export const TaskVerificationContent: React.FC = () => {
 
   // Fetch pending task submissions for specific user
   const submissionsQueryResult = api.srkTask.getAllPendingTaskSubmissionsByUserForAdmin.useQuery(
-    ['admin-user-task-submissions', viewingUserId, page],
+    ['admin-user-task-submissions', viewingUserId],
     {
       query: {
         taskUserId: viewingUserId || '',
-        page: page.toString(),
-        limit: '10',
+        page: '1',
+        limit: '1000', // Set a high limit to show all tasks at once
       },
     },
     {
       enabled: !!viewingUserId,
-      queryKey: ['admin-user-task-submissions', viewingUserId, page],
+      queryKey: ['admin-user-task-submissions', viewingUserId],
     }
   );
 
@@ -91,9 +91,6 @@ export const TaskVerificationContent: React.FC = () => {
     error: submissionsError,
     refetch: refetchSubmissions,
   } = submissionsQueryResult;
-
-  const totalSubRecords = useMemo(() => submissionsData?.body?.totalRecords || 0, [submissionsData]);
-  const totalSubPages = useMemo(() => Math.max(1, Math.ceil(totalSubRecords / 10)), [totalSubRecords]);
 
   const pendingUsers = useMemo(() => {
     if (!usersData?.body?.data) return [];
@@ -515,7 +512,7 @@ export const TaskVerificationContent: React.FC = () => {
                 User: <span className="text-[#E1BA73]">{viewingUserName}</span>
               </h2>
               <p className="text-xs text-gray-500 uppercase tracking-wider font-bold mt-1">
-                {totalSubRecords} Pending Submissions
+                {submissions.length} Pending Submissions
               </p>
             </div>
           </div>
@@ -681,29 +678,6 @@ export const TaskVerificationContent: React.FC = () => {
             );
           })}
         </div>
-
-        {/* Pagination */}
-        {totalSubPages > 1 && (
-          <div className="flex justify-center items-center gap-4 mt-12 pb-6">
-            <button
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-              disabled={page === 1}
-              className="px-5 py-2.5 bg-gray-800 text-white rounded-xl disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gray-700 transition-all flex items-center gap-2 border border-gray-700 text-sm font-bold"
-            >
-              <ChevronLeft size={18} /> PREV
-            </button>
-            <span className="text-sm font-bold text-gray-400 bg-gray-800/50 px-4 py-2 rounded-lg border border-gray-700">
-              PAGE {page} OF {totalSubPages}
-            </span>
-            <button
-              onClick={() => setPage((p) => Math.min(totalSubPages, p + 1))}
-              disabled={page === totalSubPages}
-              className="px-5 py-2.5 bg-gray-800 text-white rounded-xl disabled:opacity-30 disabled:cursor-not-allowed hover:bg-gray-700 transition-all flex items-center gap-2 border border-gray-700 text-sm font-bold"
-            >
-              NEXT <ChevronRight size={18} />
-            </button>
-          </div>
-        )}
       </div>
     );
   };

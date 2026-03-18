@@ -1016,43 +1016,43 @@ const bulkApproveSrkTaskSubmissionsByAdmin: AppRouteImplementationOrOptions<
       .session(session);
 
     const packageName = universityUser?.packageId?.title || 'SRK Basic';
-    const maxLimit = PACKAGE_LIMITS[packageName] || 5;
+    // const maxLimit = PACKAGE_LIMITS[packageName] || 5;
 
     let successfullyApproved = 0;
-    let limitReached = false;
-    const skippedItems: string[] = [];
+    // let limitReached = false;
+    // const skippedItems: string[] = [];
     const dailyApprovedCounts = new Map<string, number>();
 
     for (const submission of pendingSubmissions) {
-      const submissionDate = new Date(submission.createdAt);
-      const dayKey = submissionDate.toISOString().split('T')[0];
+      // const submissionDate = new Date(submission.createdAt);
+      // const dayKey = submissionDate.toISOString().split('T')[0];
 
-      if (!dailyApprovedCounts.has(dayKey)) {
-        const startOfDay = new Date(submissionDate);
-        startOfDay.setHours(0, 0, 0, 0);
-        const endOfDay = new Date(submissionDate);
-        endOfDay.setHours(23, 59, 59, 999);
+      // if (!dailyApprovedCounts.has(dayKey)) {
+      //   const startOfDay = new Date(submissionDate);
+      //   startOfDay.setHours(0, 0, 0, 0);
+      //   const endOfDay = new Date(submissionDate);
+      //   endOfDay.setHours(23, 59, 59, 999);
 
-        const count = await srkTaskActionSubmissionModel.countDocuments({
-          taskUserId: submission.taskUserId,
-          status: 'approved',
-          createdAt: { $gte: startOfDay, $lte: endOfDay },
-        }).session(session);
-        dailyApprovedCounts.set(dayKey, count);
-      }
+      //   const count = await srkTaskActionSubmissionModel.countDocuments({
+      //     taskUserId: submission.taskUserId,
+      //     status: 'approved',
+      //     createdAt: { $gte: startOfDay, $lte: endOfDay },
+      //   }).session(session);
+      //   dailyApprovedCounts.set(dayKey, count);
+      // }
 
-      const currentDayCount = dailyApprovedCounts.get(dayKey) || 0;
+      // const currentDayCount = dailyApprovedCounts.get(dayKey) || 0;
 
-      if (currentDayCount >= maxLimit) {
-        limitReached = true;
-        skippedItems.push(submission._id.toString());
-        continue;
-      }
+      // if (currentDayCount >= maxLimit) {
+      //   limitReached = true;
+      //   skippedItems.push(submission._id.toString());
+      //   continue;
+      // }
 
       // 1. Update submission status
       submission.status = 'approved';
       await submission.save({ session });
-      dailyApprovedCounts.set(dayKey, currentDayCount + 1);
+      // dailyApprovedCounts.set(dayKey, currentDayCount + 1);
       successfullyApproved++;
 
       // 2. Fetch associated todo to get reward amount
@@ -1117,9 +1117,10 @@ const bulkApproveSrkTaskSubmissionsByAdmin: AppRouteImplementationOrOptions<
       status: 200,
       body: {
         success: true,
-        message: limitReached
+        message: `Successfully approved ${successfullyApproved} submissions`,
+        /* message: limitReached
           ? `Approved ${successfullyApproved} submissions. User limit of ${maxLimit} for ${packageName} package reached.`
-          : `Successfully approved ${successfullyApproved} submissions`,
+          : `Successfully approved ${successfullyApproved} submissions`, */
       },
     };
   } catch (error: any) {

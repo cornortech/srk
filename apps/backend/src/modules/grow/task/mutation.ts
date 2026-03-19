@@ -17,7 +17,7 @@ const acceptSrkTaskUserEarningsPayout: AppRouteImplementationOrOptions<
 > = async ({ params, body }) => {
   try {
     const srkTaskUserPayoutExists = await srkTasksEarningsPayoutModel.findById(
-      params.payoutId
+      params.payoutId,
     );
 
     const srkTaskUserBalanceExist = await srkTaskUserBalanceModel.findOne({
@@ -162,7 +162,7 @@ const submitSrkTaskOnboardingVerification: AppRouteImplementationOrOptions<
 > = async ({ params, body }) => {
   try {
     const srkUniversityUserExist = await UserModel.findById(
-      params.srkUniversityId
+      params.srkUniversityId,
     );
 
     if (!srkUniversityUserExist) {
@@ -235,7 +235,7 @@ const submitSrkTaskOnboardingVerification: AppRouteImplementationOrOptions<
           fullName: body.fullName,
           dateOfBirth: body.dateOfBirth,
           status: 'pending',
-        }
+        },
       );
     }
 
@@ -511,7 +511,7 @@ const approveSrkTaskActionSubmissionByAdmin: AppRouteImplementationOrOptions<
 > = async ({ params }) => {
   try {
     const actionSubmission = await srkTaskActionSubmissionModel.findById(
-      params.submissionId
+      params.submissionId,
     );
 
     if (!actionSubmission) {
@@ -540,7 +540,7 @@ const approveSrkTaskActionSubmissionByAdmin: AppRouteImplementationOrOptions<
     }
 
     const universityUser = await UserModel.findById(
-      srkTaskUserExist.srkUniversityUserId
+      srkTaskUserExist.srkUniversityUserId,
     ).populate<{ packageId: any }>('packageId');
 
     const packageName = universityUser?.packageId?.title || 'SRK Basic';
@@ -571,7 +571,7 @@ const approveSrkTaskActionSubmissionByAdmin: AppRouteImplementationOrOptions<
     }
 
     const srkGrowTodoExist = await growPackageTodoModel.findById(
-      actionSubmission.growPackageTodoId
+      actionSubmission.growPackageTodoId,
     );
 
     if (!srkGrowTodoExist) {
@@ -617,7 +617,7 @@ const approveSrkTaskActionSubmissionByAdmin: AppRouteImplementationOrOptions<
         ...(isFollowType
           ? { $inc: { followCounts: 1 } }
           : { $inc: { likeCounts: 1 } }),
-      }
+      },
     );
 
     const updatedBalance = await srkTaskUserBalanceModel.findOneAndUpdate(
@@ -628,7 +628,7 @@ const approveSrkTaskActionSubmissionByAdmin: AppRouteImplementationOrOptions<
           currentCoins: 100,
         },
       },
-      { new: true }
+      { new: true },
     );
 
     await srkTaskEarningStatementModel.create({
@@ -666,7 +666,7 @@ const rejectSrkTaskActionSubmissionByAdmin: AppRouteImplementationOrOptions<
 > = async ({ params, body }) => {
   try {
     const actionSubmission = await srkTaskActionSubmissionModel.findById(
-      params.submissionId
+      params.submissionId,
     );
 
     if (!actionSubmission) {
@@ -713,7 +713,7 @@ const srkTaskEarningsPayoutRequest: AppRouteImplementationOrOptions<
 > = async ({ body }) => {
   try {
     const srkTaskUserExist = await srkTaskUserModel.findById(
-      body.srkTaskUserId
+      body.srkTaskUserId,
     );
 
     const srkTaskUserBalanceExist = await srkTaskUserBalanceModel.findOne({
@@ -778,7 +778,7 @@ const srkTaskEarningsPayoutRequest: AppRouteImplementationOrOptions<
           currentCoins: -body.coins,
         },
       },
-      { new: true }
+      { new: true },
     );
 
     await srkTaskEarningStatementModel.create({
@@ -811,8 +811,6 @@ const srkTaskEarningsPayoutRequest: AppRouteImplementationOrOptions<
   }
 };
 
-
-
 // ============================================
 // Payment Details Mutation Handlers
 // ============================================
@@ -836,11 +834,10 @@ const submitPaymentDetailsRequest: AppRouteImplementationOrOptions<
     }
 
     // Check if there's already a pending request
-    const pendingRequest =
-      await srkTaskUserPaymentDetailsRequestModel.findOne({
-        srkTaskUserId: userId,
-        status: 'pending',
-      });
+    const pendingRequest = await srkTaskUserPaymentDetailsRequestModel.findOne({
+      srkTaskUserId: userId,
+      status: 'pending',
+    });
 
     if (pendingRequest) {
       return {
@@ -934,7 +931,7 @@ const reviewPaymentDetailsRequest: AppRouteImplementationOrOptions<
           status: 'approved',
         },
         { isActive: false },
-        { session }
+        { session },
       );
     }
 
@@ -1009,46 +1006,11 @@ const bulkApproveSrkTaskSubmissionsByAdmin: AppRouteImplementationOrOptions<
       };
     }
 
-    const universityUser = await UserModel.findById(
-      srkTaskUserExist.srkUniversityUserId
-    )
-      .populate<{ packageId: any }>('packageId')
-      .session(session);
-
-    const packageName = universityUser?.packageId?.title || 'SRK Basic';
-    // const maxLimit = PACKAGE_LIMITS[packageName] || 5;
-
     let successfullyApproved = 0;
-    // let limitReached = false;
-    // const skippedItems: string[] = [];
-    const dailyApprovedCounts = new Map<string, number>();
+
 
     for (const submission of pendingSubmissions) {
-      // const submissionDate = new Date(submission.createdAt);
-      // const dayKey = submissionDate.toISOString().split('T')[0];
-
-      // if (!dailyApprovedCounts.has(dayKey)) {
-      //   const startOfDay = new Date(submissionDate);
-      //   startOfDay.setHours(0, 0, 0, 0);
-      //   const endOfDay = new Date(submissionDate);
-      //   endOfDay.setHours(23, 59, 59, 999);
-
-      //   const count = await srkTaskActionSubmissionModel.countDocuments({
-      //     taskUserId: submission.taskUserId,
-      //     status: 'approved',
-      //     createdAt: { $gte: startOfDay, $lte: endOfDay },
-      //   }).session(session);
-      //   dailyApprovedCounts.set(dayKey, count);
-      // }
-
-      // const currentDayCount = dailyApprovedCounts.get(dayKey) || 0;
-
-      // if (currentDayCount >= maxLimit) {
-      //   limitReached = true;
-      //   skippedItems.push(submission._id.toString());
-      //   continue;
-      // }
-
+     
       // 1. Update submission status
       submission.status = 'approved';
       await submission.save({ session });
@@ -1072,44 +1034,34 @@ const bulkApproveSrkTaskSubmissionsByAdmin: AppRouteImplementationOrOptions<
 
       // Logic to determine reward coins (respecting 100-coin-to-1-rupee if applicable)
       // This is based on existing logic in approveSrkTaskActionSubmissionByAdmin
-      let rewardCoins = 0;
-      const enrollment = todo.growSocialMediaPackageEnrollmentId as any;
-      if (enrollment) {
-        if (submission.type === 'follow') {
-          rewardCoins = enrollment.growSocialMediaPackageSubTypeId?.noOfFollowers || 0;
-        } else if (submission.type === 'like') {
-          rewardCoins = enrollment.growSocialMediaPackageSubTypeId?.noOfLikes || 0;
-        }
-      }
+      const rewardCoins = 100;
 
-      if (rewardCoins > 0) {
-        // 3. Update User Balance (Only increasing coins, not totalEarnings cash)
-        const userBalance = await srkTaskUserBalanceModel.findOneAndUpdate(
-          { taskUserId: submission.taskUserId },
-          {
-            $inc: {
-              totalCoinsEarned: rewardCoins,
-              currentCoins: rewardCoins,
-            },
+      // 3. Update User Balance (Only increasing coins, not totalEarnings cash)
+      const userBalance = await srkTaskUserBalanceModel.findOneAndUpdate(
+        { taskUserId: submission.taskUserId },
+        {
+          $inc: {
+            totalCoinsEarned: rewardCoins,
+            currentCoins: rewardCoins,
           },
-          { session, new: true, upsert: true }
-        );
+        },
+        { session, new: true, upsert: true },
+      );
 
-        // 4. Create Audit Log (Earning Statement)
-        await srkTaskEarningStatementModel.create(
-          [
-            {
-              taskUserId: submission.taskUserId,
-              growPackageTodoId: submission.growPackageTodoId,
-              description: `Bulk Approved by Admin ID: ${adminId} - ${submission.type} task`,
-              type: 'credit',
-              coin: rewardCoins,
-              coinAfterTransaction: userBalance.currentCoins,
-            },
-          ],
-          { session }
-        );
-      }
+      // 4. Create Audit Log (Earning Statement)
+      await srkTaskEarningStatementModel.create(
+        [
+          {
+            taskUserId: submission.taskUserId,
+            growPackageTodoId: submission.growPackageTodoId,
+            description: `Bulk Approved by Admin ID: ${adminId} - ${submission.type} task`,
+            type: 'credit',
+            coin: rewardCoins,
+            coinAfterTransaction: userBalance.currentCoins,
+          },
+        ],
+        { session },
+      );
     }
 
     await session.commitTransaction();
@@ -1124,6 +1076,7 @@ const bulkApproveSrkTaskSubmissionsByAdmin: AppRouteImplementationOrOptions<
       },
     };
   } catch (error: any) {
+    console.error('Error bulk approving submissions:', error);
     await session.abortTransaction();
     return {
       status: 500,
@@ -1157,7 +1110,7 @@ const bulkRejectSrkTaskSubmissionsByAdmin: AppRouteImplementationOrOptions<
           rejectionReason: `${rejectionReason} (Bulk Rejected by Admin ID: ${adminId})`,
         },
       },
-      { session }
+      { session },
     );
 
     if (result.matchedCount === 0) {

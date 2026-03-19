@@ -28,6 +28,7 @@
     "create:admin": "tsx apps/backend/src/scripts/createAdmin.ts",
     "seed:create-grow-packages": "tsx apps/backend/src/scripts/createSrkGrowPackage.ts",
     "script:get-user": "tsx apps/backend/src/scripts/getSrkUniversityUser.ts",
+    "script:get-task-submissions": "tsx apps/backend/src/scripts/getSrkTaskActionSubmissions.ts",
     "script:update-task-coins": "tsx apps/backend/src/scripts/updateTaskUserCoins.ts",
     "script:create-affiliates-srkbank": "tsx apps/backend/src/scripts/createAffiliatesSrkBank.ts"
   },

@@ -364,7 +364,7 @@ Yes, all transactions use 256-bit encryption. Your financial information is prot
           <p className="text-gray-400 mb-8 text-lg max-w-2xl mx-auto">
             Explore our comprehensive resources to find answers and maximize your SRK Task experience.
           </p>
-          <div className="flex gap-4 justify-center flex-wrap">
+          <div className="flex gap-4 justify-center flex-wrap mb-8">
             <Link
               to="/faq"
               className="inline-block bg-gradient-to-r from-[#e1ba73] to-[#b68938] text-black font-bold px-8 py-4 rounded-lg hover:shadow-lg hover:shadow-[#e1ba73]/20 transition-all duration-300"
@@ -383,6 +383,26 @@ Yes, all transactions use 256-bit encryption. Your financial information is prot
             >
               Contact Support
             </Link>
+          </div>
+
+          <div className="bg-gradient-to-r from-[#e1ba73]/10 to-[#b68938]/5 border border-[#e1ba73]/20 rounded-xl p-6 max-w-md mx-auto">
+            <p className="text-gray-400 text-sm mb-4">
+              Contact us directly for additional support:
+            </p>
+            <div className="space-y-3">
+              <div>
+                <p className="text-xs text-gray-500 uppercase tracking-widest font-bold mb-1">Phone</p>
+                <a href="tel:+977976922301" className="text-[#e1ba73] font-bold hover:text-white transition-colors block">
+                  +977 976-9223013
+                </a>
+              </div>
+              <div>
+                <p className="text-xs text-gray-500 uppercase tracking-widest font-bold mb-1">Email</p>
+                <a href="mailto:support@srktask.com" className="text-[#e1ba73] font-bold hover:text-white transition-colors block">
+                  support@srktask.com
+                </a>
+              </div>
+            </div>
           </div>
         </motion.div>
       </div>

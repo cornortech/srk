@@ -51,7 +51,7 @@ export const Contact = () => {
       icon: Phone,
       title: 'Phone Support',
       description: 'Talk directly with our support team',
-      contact: '+977 1-XXXX-XXXX',
+      contact: '+977 976-9223013',
       label: 'Call us',
     },
     {

@@ -255,6 +255,33 @@ export const About = () => {
             </div>
           </div>
         </motion.div>
+
+        {/* Contact Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="mt-24 text-center"
+        >
+          <h2 className="text-3xl font-bold mb-12">Get in Touch</h2>
+          <div className="max-w-3xl mx-auto grid md:grid-cols-2 gap-8">
+            <div className="p-8 rounded-2xl bg-gradient-to-b from-white/5 to-transparent border border-white/10 hover:border-[#e1ba73]/30 transition-colors">
+              <p className="text-gray-400 mb-4 text-sm uppercase tracking-widest font-bold">Phone Support</p>
+              <a href="tel:+977976922301" className="text-[#e1ba73] font-bold text-2xl hover:text-white transition-colors">
+                +977 976-9223013
+              </a>
+              <p className="text-gray-500 text-sm mt-3">Available 24/7 for inquiries</p>
+            </div>
+            <div className="p-8 rounded-2xl bg-gradient-to-b from-white/5 to-transparent border border-white/10 hover:border-[#e1ba73]/30 transition-colors">
+              <p className="text-gray-400 mb-4 text-sm uppercase tracking-widest font-bold">Email Support</p>
+              <a href="mailto:support@srktask.com" className="text-[#e1ba73] font-bold text-2xl hover:text-white transition-colors">
+                support@srktask.com
+              </a>
+              <p className="text-gray-500 text-sm mt-3">Response within 24 hours</p>
+            </div>
+          </div>
+        </motion.div>
       </div>
 
       <Footer />

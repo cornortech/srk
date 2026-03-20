@@ -27,6 +27,10 @@ export const Footer = () => {
     { name: 'Support Center', href: '/contact' },
   ];
   const socialLinks = ['Twitter', 'Instagram', 'LinkedIn', 'Discord'];
+  const contactInfo = {
+    phone: '+977 976-9223013',
+    email: 'support@srktask.com',
+  };
 
   return (
     <footer className="pt-32 pb-12 border-t border-white/5 relative overflow-hidden bg-black">
@@ -50,6 +54,21 @@ export const Footer = () => {
               verified ecosystem growth. Built for the modern creator. Part of
               the SRK Ecosystem.
             </p>
+
+            <div className="flex flex-col gap-4 mb-8">
+              <div>
+                <p className="text-xs text-gray-400 font-semibold uppercase tracking-widest mb-1">Phone</p>
+                <a href="tel:+977976922301" className="text-[#e1ba73] font-bold hover:text-white transition-colors">
+                  {contactInfo.phone}
+                </a>
+              </div>
+              <div>
+                <p className="text-xs text-gray-400 font-semibold uppercase tracking-widest mb-1">Email</p>
+                <a href="mailto:support@srktask.com" className="text-[#e1ba73] font-bold hover:text-white transition-colors">
+                  {contactInfo.email}
+                </a>
+              </div>
+            </div>
 
             <div className="flex items-center gap-4">
               <MagneticButton className="px-5 py-2 text-sm">

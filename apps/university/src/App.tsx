@@ -58,6 +58,13 @@ import SrkBonusFlow from './pages/affiliate/SrkBonusFlow';
 import AdminSrkBonusFlow from './pages/admin/SrkBonusFlow';
 import SrkBonusFlowAdminUser from './pages/admin/SrkBonusFlowAdminUser';
 import TourTargetsPage from './pages/affiliate/TourTarget';
+import { Blog } from './pages/Blog';
+import { BlogPost } from './pages/BlogPost';
+import FAQ from './pages/FAQ';
+import Features from './pages/Features';
+import GettingStarted from './pages/GettingStarted';
+import Help from './pages/Help';
+import HowItWorks from './pages/HowItWorks';
 import AdminTourTargetUserPage from './pages/admin/TourTargetUserPage';
 import SRKGrowPortal from './pages/dashboard/GrowViewPage';
 
@@ -78,6 +85,13 @@ const AppRouter = () => {
         { path: '/course/:courseId', element: <CourseDetails /> },
         { path: '/about', element: <AboutPage /> },
         { path: '/contact', element: <ContactPage /> },
+        { path: '/blog', element: <Blog /> },
+        { path: '/blog/:slug', element: <BlogPost /> },
+        { path: '/faq', element: <FAQ /> },
+        { path: '/features', element: <Features /> },
+        { path: '/getting-started', element: <GettingStarted /> },
+        { path: '/help', element: <Help /> },
+        { path: '/how-it-works', element: <HowItWorks /> },
         { path: '/affiliate-terms', element: <AffiliateTerms /> },
         { path: '/privacy-policy', element: <PrivacyRefundPolicy /> },
         { path: '/termsAndCondition', element: <TermsAndConditions /> },

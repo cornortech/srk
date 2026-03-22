@@ -1,6 +1,5 @@
 import { Image } from "@nextui-org/react";
 import {
-  Contact,
   ContactRound,
   Facebook,
   Instagram,
@@ -48,6 +47,22 @@ export function Footer() {
                   Packages
                 </Link>
               </li>
+              <li>
+                <Link
+                  to="/features"
+                  className="hover:text-white transition-colors"
+                >
+                  Features
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/how-it-works"
+                  className="hover:text-white transition-colors"
+                >
+                  How It Works
+                </Link>
+              </li>
             </ul>
           </div>
 
@@ -84,10 +99,41 @@ export function Footer() {
 
           {/* CONTACT Section */}
           <div>
-            <h2 className="text-white mb-4 font-medium">[ CONTACT ]</h2>
+            <h2 className="text-white mb-4 font-medium">[ RESOURCES ]</h2>
             <ul className="space-y-2">
-              <li className="flex gap-2 items-center ">
-                <Contact className="w-4 h-4" />
+              <li>
+                <Link
+                  to="/faq"
+                  className="hover:text-white transition-colors"
+                >
+                  FAQ
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/blog"
+                  className="hover:text-white transition-colors"
+                >
+                  Blog
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/getting-started"
+                  className="hover:text-white transition-colors"
+                >
+                  Getting Started
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/help"
+                  className="hover:text-white transition-colors"
+                >
+                  Help Center
+                </Link>
+              </li>
+              <li>
                 <Link
                   to="/contact"
                   className="hover:text-white transition-colors"
@@ -95,6 +141,13 @@ export function Footer() {
                   Contact Us
                 </Link>
               </li>
+            </ul>
+          </div>
+
+          {/* SUPPORT Section */}
+          <div>
+            <h2 className="text-white mb-4 font-medium">[ SUPPORT ]</h2>
+            <ul className="space-y-2">
               <li className="flex gap-2 items-center">
                 <MessageCircleQuestion className="w-4 h-4" />
                 <Link
@@ -106,9 +159,9 @@ export function Footer() {
               </li>
               <li className="flex gap-2 items-center">
                 <ContactRound className="w-4 h-4" />
-                <Link to="#" className="hover:text-white transition-colors">
-                  +977 - 9821212121
-                </Link>
+                <a href="tel:+977976922301" className="hover:text-white transition-colors">
+                  +977 976-9223013
+                </a>
               </li>
               <li className="flex gap-4 pt-2">
                 <Link to="#" className="hover:text-white transition-colors">

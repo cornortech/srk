@@ -43,7 +43,7 @@ This feature allows administrators to control application-wide settings through 
 - Fetches app settings on mount and refetches every minute
 - Combines TWO conditions to determine if tasks are allowed:
   1. Admin has enabled task feature (`taskFeatureEnabled`)
-  2. Current time is within allowed window (7pm-10pm)
+  2. Current time is within allowed window (7pm-11pm)
 - Displays appropriate notice banner based on status
 - Disables/enables task cards based on combined conditions
 
@@ -53,7 +53,7 @@ This feature allows administrators to control application-wide settings through 
 ```typescript
 // Tasks are allowed ONLY if BOTH conditions are true:
 const isTaskFeatureEnabled = appSettings.taskFeatureEnabled; // Admin control
-const isTaskTimeAllowed = (currentHour >= 19 && currentHour < 22); // Time window
+const isTaskTimeAllowed = (currentHour >= 19 && currentHour < 23); // Time window
 const areTasksAllowed = isTaskFeatureEnabled && isTaskTimeAllowed;
 ```
 
@@ -137,7 +137,7 @@ The architecture is designed to be extensible. Future settings that could be add
 
 1. **Maintenance Mode UI**: Display maintenance page when enabled
 2. **Announcement Banner**: Show global announcements to all users
-3. **Task Time Window**: Make the 7pm-10pm window configurable
+3. **Task Time Window**: Make the 7pm-11pm window configurable
 4. **Feature Flags**: Enable/disable specific features
 5. **Rate Limiting**: Configure rate limits per feature
 6. **Emergency Shutdown**: Quick disable for all features
@@ -177,9 +177,9 @@ Files modified/created for this feature:
    - Verify user dashboard shows disabled state
 
 2. **Test Time Window**:
-   - Wait for or set system time to outside 7pm-10pm
+   - Wait for or set system time to outside 7pm-11pm
    - Verify tasks are disabled
-   - Set time to 7pm-10pm
+   - Set time to 7pm-11pm
    - Verify tasks are enabled (if admin toggle is on)
 
 3. **Test Combined Logic**:

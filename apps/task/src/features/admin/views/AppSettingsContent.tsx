@@ -155,7 +155,7 @@ export const AppSettingsContent: React.FC = () => {
                 <p className="text-gray-400 text-sm mb-4">
                   Enable or disable the task feature globally. When disabled, users
                   won't be able to access or complete tasks regardless of the time
-                  restriction (7pm-10pm).
+                  restriction (7pm-11pm).
                 </p>
                 <div className="flex items-center gap-2 text-sm text-gray-500">
                   <span>Current Status:</span>

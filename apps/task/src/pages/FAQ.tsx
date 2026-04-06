@@ -14,105 +14,161 @@ export const FAQ = () => {
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
 
   const faqItems: FAQItem[] = [
+    // Getting Started (5)
     {
       category: 'Getting Started',
       question: 'How do I create an account on SRK Task?',
-      answer: 'SRK Task is exclusively available to members of SRK University. To get started, you must first enroll in SRK University, complete the KYC verification process, and become an active member. Once you\'re a verified SRK University member, you can link your account to SRK Task using your university credentials. The integration is seamless and takes just a few minutes.',
+      answer: 'SRK Task does not have standalone registration. Access is exclusively for SRK University members. Complete enrollment and mandatory KYC verification at srkuniversity.com, then visit srktask.com and use the "Link Account" option with your university credentials. The entire linking process takes under five minutes once KYC is approved.',
     },
     {
       category: 'Getting Started',
       question: 'What do I need to access SRK Task?',
-      answer: 'To access SRK Task, you need: (1) An active SRK University account, (2) Completed KYC verification through SRK University, (3) A valid email address, (4) A device with internet connection. Once you meet these requirements, you can immediately start accessing available tasks on the platform.',
+      answer: 'You need four things: (1) An active, confirmed SRK University enrollment. (2) Completed KYC verification through the SRK University portal. (3) A linked SRK Task account created using your university credentials. (4) A completed SRK Task profile including your social platforms and task preferences. Once all four are complete, you can begin browsing and accepting tasks.',
     },
     {
       category: 'Getting Started',
-      question: 'Is there an age requirement to use SRK Task?',
-      answer: 'Yes, you must be at least 18 years old to use SRK Task. This age requirement is consistent across the SRK Industries ecosystem and is enforced during the KYC verification process at SRK University.',
+      question: 'Is there an age requirement?',
+      answer: 'Yes. You must be at least 18 years old to participate on SRK Task. This is enforced through the KYC process at SRK University. Any account found to belong to a person under 18 will be suspended immediately and all associated earnings will be forfeited.',
     },
+    {
+      category: 'Getting Started',
+      question: 'How long does the KYC process take?',
+      answer: 'KYC verification at SRK University typically takes 24 to 48 hours from the time of complete, accurate document submission. Incomplete submissions, documents with quality issues, or name mismatches extend this timeline. If your KYC has been pending for more than 72 hours with no update, contact SRK University support directly.',
+    },
+    {
+      category: 'Getting Started',
+      question: 'Can I access SRK Task without an SRK University account?',
+      answer: 'No. SRK Task access requires active, KYC-verified SRK University membership. There are no exceptions and no workarounds. Any attempt to access SRK Task through unauthorized means violates our Terms and Conditions and will result in permanent suspension.',
+    },
+    // Tasks and Earnings (5)
     {
       category: 'Tasks & Earnings',
       question: 'What types of tasks are available on SRK Task?',
-      answer: 'SRK Task offers a diverse range of social influence tasks including: social media engagement (likes, shares, comments), content creation tasks, follower growth activities, and verified engagement tasks from real creators and brands. All tasks are designed to be completed honestly and in full compliance with platform instructions. The platform carefully curates tasks to ensure quality and legitimacy.',
+      answer: 'Tasks on SRK Task fall into several categories: Social media engagement (following brand accounts, liking or commenting on verified content, sharing posts to your own audience), content review and feedback, written testimonials and product opinions, audience surveys and market research, brand awareness campaigns, and community participation activities. Task types expand as new brand partnerships are established.',
     },
     {
       category: 'Tasks & Earnings',
-      question: 'How much can I earn from completing tasks?',
-      answer: 'Earnings vary based on task complexity, your profile quality, and market demand. Simple engagement tasks typically pay between $0.50 to $5 per task, while specialized tasks can pay significantly more. Top-performing users with high engagement rates and verified profiles can earn between $50 to $500 per week. Your actual earnings depend on how many tasks you complete and your consistency.',
+      question: 'How much can I realistically earn on SRK Task?',
+      answer: 'Earnings on SRK Task are not guaranteed and vary significantly based on your profile rating, the tasks you choose, how consistently you work, and the quality of your submissions. New members starting with easier tasks typically earn lower amounts per task. As your profile rating increases and you unlock premium tasks, the per-task earnings increase accordingly. SRK Task is a supplemental income platform — it rewards consistent, quality effort over time. Please read our Earnings Disclaimer for a full and honest explanation.',
     },
     {
       category: 'Tasks & Earnings',
-      question: 'How quickly will I see earnings credited to my wallet?',
-      answer: 'Earnings are typically credited to your SRK Task wallet within 1-24 hours of task verification. The verification process involves our AI-powered system and human review to ensure task completion integrity. Once verified, funds appear in your wallet immediately and can be withdrawn or used for other platform features.',
+      question: 'How quickly are earnings credited after task approval?',
+      answer: 'After a task is verified and approved, earnings are typically credited to your SRK Task wallet within 1 to 24 hours. The verification process itself takes between 1 and 48 hours depending on task complexity and submission quality. You can track the status of every submission from your dashboard in real time.',
     },
     {
       category: 'Tasks & Earnings',
-      question: 'What happens if my task is flagged as incomplete or fraudulent?',
-      answer: 'If a task is flagged, our support team will contact you with detailed information about the issue. Tasks may be rejected if they don\'t meet completion requirements, show signs of bot activity, or appear to be dishonest attempts. We provide clear feedback to help you understand what went wrong so you can complete future tasks correctly. Repeated fraudulent behavior will result in account suspension.',
+      question: 'What happens if my task submission is rejected?',
+      answer: 'You will receive a notification explaining the reason for rejection. Common reasons include: incomplete proof, proof that does not match the task requirements, blurry or unreadable screenshots, submissions that show signs of automation, or missed task deadlines. For incomplete submissions, you may be given a window to resubmit with corrected proof. Repeated rejections negatively affect your profile rating, so review your submission carefully before every upload.',
     },
+    {
+      category: 'Tasks & Earnings',
+      question: 'Can I work on multiple tasks simultaneously?',
+      answer: 'Yes, within reasonable limits. You can accept and work on several tasks at the same time. However, spreading yourself too thin increases the risk of submitting incomplete or low-quality proof — which leads to rejections and rating damage. For new members, we strongly recommend completing one or two tasks fully before accepting more. Once your approval rate is consistently above 90%, you can scale your volume.',
+    },
+    // Payments and Withdrawals (5)
     {
       category: 'Payments & Withdrawals',
       question: 'How do I withdraw my earnings?',
-      answer: 'You can withdraw earnings through your SRK Task wallet. Available withdrawal methods include bank transfer, digital wallets, and other payment options depending on your location. Minimum withdrawal amounts typically start at $10. All withdrawals are processed through official SRK Task systems. Withdrawals are usually processed within 2-5 business days.',
+      answer: 'Open your wallet section, confirm your available balance meets the minimum withdrawal threshold, click "Request Withdrawal", select your preferred payment method, enter the exact amount you want to withdraw, review all details carefully, and confirm the request. Withdrawal requests are typically processed within 1 to 3 business days. You will receive a confirmation notification when the withdrawal is processed.',
     },
     {
       category: 'Payments & Withdrawals',
-      question: 'Are there any fees associated with withdrawals?',
-      answer: 'SRK Task may charge minimal processing fees on withdrawals depending on the withdrawal method chosen. Bank transfers typically have lower fees compared to instant digital payment options. The exact fee will be displayed before you confirm the withdrawal. Some special promotions offer fee-free withdrawals - check the platform for current offers.',
+      question: 'What payment methods are available for withdrawals?',
+      answer: 'SRK Task currently supports bank transfer and digital wallet options available to members in Nepal. The exact methods available to you may vary depending on your location and account verification status. Available methods are displayed in your wallet section. We work to add new payment methods based on member feedback and regional availability.',
     },
     {
       category: 'Payments & Withdrawals',
-      question: 'What should I do if a payment didn\'t arrive?',
-      answer: 'If a withdrawal doesn\'t arrive within the expected timeframe, contact our support team immediately. Provide your transaction ID and details. Our team will investigate the issue with your financial institution if necessary. In most cases, delayed payments are due to banking processes, which can take 7-10 business days for international transfers.',
+      question: 'Are there withdrawal fees?',
+      answer: 'SRK Task does not charge platform fees on withdrawals. However, your bank or digital wallet provider may apply their own transaction fees, which are outside our control. We recommend checking with your payment provider for any applicable charges before requesting a withdrawal.',
     },
+    {
+      category: 'Payments & Withdrawals',
+      question: 'What should I do if a payment does not arrive?',
+      answer: 'First, allow the full processing window of 1 to 3 business days. International transfers may take additional time. If payment has not arrived after this window, first confirm that your payment details in your account settings are correct and up to date. Then contact our support team via email or live chat with your withdrawal request ID. We will investigate and resolve the issue with your payment provider.',
+    },
+    {
+      category: 'Payments & Withdrawals',
+      question: 'Is there a minimum withdrawal amount?',
+      answer: 'Yes. The current minimum withdrawal threshold is displayed in your wallet section. This threshold may be updated periodically. We recommend checking your wallet section for the most current minimum amount before planning a withdrawal.',
+    },
+    // Account and Security (5)
     {
       category: 'Account & Security',
       question: 'How is my personal information protected?',
-      answer: 'SRK Task uses industry-leading security measures including 256-bit encryption, secure wallet systems, and multi-layer authentication. All personal data collected during KYC verification is handled securely and in compliance with data protection regulations. We never share your information with third parties without consent, and maintain strict access controls.',
+      answer: 'All data on SRK Task is protected using 256-bit SSL encryption for transmission and secure, access-controlled server storage at rest. Personal and KYC information is handled in compliance with applicable data protection standards. We do not sell your personal information to third parties for marketing purposes. Our full data practices are documented in the Privacy Policy available at srktask.com/privacy.',
     },
     {
       category: 'Account & Security',
-      question: 'What should I do if I suspect unauthorized account activity?',
-      answer: 'If you notice any suspicious activity, change your password immediately and contact support. Never share your login credentials with anyone. We recommend enabling two-factor authentication for additional security. Our fraud detection system monitors accounts constantly, but you should report anything unusual right away.',
+      question: 'What should I do if I suspect unauthorized access to my account?',
+      answer: 'Act immediately. Change your password from your account settings right away. Enable or re-verify two-factor authentication. Contact SRK Task support through live chat with "Security Alert" in the subject line for priority response. Do not share your credentials with anyone, including anyone claiming to be SRK Task staff. We will never ask for your password under any circumstances.',
     },
     {
       category: 'Account & Security',
-      question: 'Can I link multiple accounts to SRK Task?',
-      answer: 'No, linking multiple accounts or using multiple accounts to circumvent platform rules is strictly prohibited and violates our Terms and Conditions. Each user is limited to one SRK Task account per SRK University enrollment. Attempting to create multiple accounts will result in permanent suspension.',
+      question: 'Can I have multiple SRK Task accounts?',
+      answer: 'No. Each SRK Task account must correspond to exactly one SRK University enrollment and one verified identity. Operating multiple accounts — even using different devices — violates our Terms and Conditions and will result in permanent suspension of all associated accounts and forfeiture of all earnings. Our AI system is specifically designed to detect multi-account activity.',
     },
     {
       category: 'Account & Security',
-      question: 'What are your policies regarding bots and automated activity?',
-      answer: 'SRK Task has a strict zero-tolerance policy for bots and automated tools. Using bots, scripts, VPNs to manipulate results, or any deceptive behavior will result in immediate account suspension, forfeiture of all earnings, and potential legal action. Our proprietary AI detection system identifies suspicious activity patterns automatically.',
+      question: 'What is your policy on bots and automated activity?',
+      answer: 'SRK Task has a strict zero-tolerance policy on any form of automation. Our AI monitoring system analyzes all platform activity in real time. Any use of bots, automation scripts, VPNs to mask activity, click farms, or any other automated or deceptive behavior results in immediate and permanent account suspension, forfeiture of all pending and available earnings, and potential reporting to relevant authorities depending on the scale of the violation.',
     },
+    {
+      category: 'Account & Security',
+      question: 'How do I reset my password?',
+      answer: 'Since SRK Task uses your SRK University credentials, password resets are handled through the SRK University portal at srkuniversity.com. Use the "Forgot Password" option on the university login page. Once your password is reset at the university level, your updated credentials will work on SRK Task automatically — no separate SRK Task password reset is needed.',
+    },
+    // Platform and Features (5)
     {
       category: 'Platform & Features',
       question: 'What do the different task statuses mean?',
-      answer: 'Available: Task is ready to complete. In Progress: You\'re currently working on it. Pending Review: Awaiting verification. Completed & Verified: Task verified and earnings credited. Rejected: Task didn\'t meet requirements. Understanding these statuses helps you track your progress and manage your workload effectively.',
+      answer: 'Available — Task is open and can be accepted. In Progress — You have accepted the task and are working on it. Submitted — Your proof has been submitted and is awaiting verification. Under Review — A human reviewer is examining your submission. Approved — Verified and earnings have been credited to your wallet. Rejected — Submission did not meet requirements (reason provided in notification). Flagged — Under investigation for a potential issue.',
     },
     {
       category: 'Platform & Features',
-      question: 'Can I cancel a task after starting it?',
-      answer: 'Yes, you can abandon a task before submitting proof of completion without penalty. However, once you submit verification proof, the task enters the review process and cannot be canceled. If the task is rejected, you won\'t receive payment but can attempt it again if it becomes available.',
+      question: 'Can I cancel a task after accepting it?',
+      answer: 'Yes, you can cancel most tasks before submitting proof. However, excessive cancellations negatively impact your task completion rate — one of the five factors in your profile rating calculation. If you encounter a genuine issue with a task (unclear instructions, broken link, etc.), contact support before cancelling. Cancelling tasks repeatedly, without contacting support, may result in temporary restrictions on high-value task access.',
     },
     {
       category: 'Platform & Features',
-      question: 'How do I choose which tasks to complete?',
-      answer: 'Tasks are displayed in your dashboard with details about payment, difficulty level, and time requirement. You can filter by category, payment amount, and estimated completion time. Popular tasks fill up quickly, so act fast if you see attractive opportunities. High-performing users get priority access to premium tasks.',
+      question: 'How does the profile rating system work?',
+      answer: 'Your profile rating is calculated from five weighted factors: task completion rate (the percentage of tasks you accept that you actually submit proof for), proof quality score (how accurately your proof matches requirements), approval rate (the percentage of your submissions that are verified as complete), consistency of activity (regular vs. erratic platform usage), and community standing (absence of violations or negative flags). All five factors contribute to your overall rating and your access tier.',
     },
     {
-      category: 'Troubleshooting',
-      question: 'Why can\'t I see any tasks available?',
-      answer: 'If no tasks appear: (1) Check your internet connection, (2) Refresh the page, (3) Verify your account is fully verified, (4) Ensure you meet all task requirements, (5) Contact support if the issue persists. During high-demand periods, tasks may fill up quickly, so check back regularly for new opportunities.',
+      category: 'Platform & Features',
+      question: 'How often are new tasks added?',
+      answer: 'New tasks are added to the platform multiple times throughout each day as brand and creator partnerships generate new engagement requirements. Task availability varies by category, time of day, and platform activity levels. Members who check their dashboard daily — particularly in the morning and early evening — consistently access more tasks than those who check infrequently.',
     },
     {
-      category: 'Troubleshooting',
-      question: 'The platform is running slow. What should I do?',
-      answer: 'Try these troubleshooting steps: (1) Clear your browser cache, (2) Close unnecessary tabs, (3) Try a different browser, (4) Check your internet speed, (5) Disable browser extensions, (6) Try again after some time if there\'s high traffic. Contact support if problems persist.',
+      category: 'Platform & Features',
+      question: 'Is there a mobile app for SRK Task?',
+      answer: 'SRK Task is currently accessible via web browser on desktop and mobile devices. A dedicated mobile application is in development. Updates on the mobile app launch will be communicated via the platform announcement board and member email notifications. In the meantime, srktask.com is fully responsive and functions well on mobile browsers.',
+    },
+    // Earnings Expectations and Disclaimers (5)
+    {
+      category: 'Earnings & Disclaimers',
+      question: 'Are earnings on SRK Task guaranteed?',
+      answer: 'No. Earnings on SRK Task are not guaranteed in any amount or frequency. Income depends on multiple variables outside SRK Task\'s control: task availability at any given time, your profile rating and access tier, the quality of your submissions, your account standing, and the consistency of your activity. SRK Task provides a platform and infrastructure for verified engagement work — it does not guarantee any specific outcome. For full details, see our Earnings Disclaimer page.',
     },
     {
-      category: 'Troubleshooting',
-      question: 'I forgot my password. How do I reset it?',
-      answer: 'Click "Forgot Password" on the login page and enter your email. You\'ll receive a reset link within minutes. Click the link to create a new password. If you don\'t receive the email, check your spam folder or contact support. Never share password reset links with anyone.',
+      category: 'Earnings & Disclaimers',
+      question: 'How do brands fund the tasks on this platform?',
+      answer: 'Brands and content creators who need verified human engagement for their social media content allocate specific marketing budgets to task campaigns on SRK Task. These are the same budgets that businesses use for influencer marketing, community management, and social media advertising. They choose SRK Task because our KYC-verified member base provides auditable, traceable, human engagement — something anonymous platforms cannot offer. The task payments to members come directly from these brand-funded campaign budgets.',
+    },
+    {
+      category: 'Earnings & Disclaimers',
+      question: 'What is the average earning per task?',
+      answer: 'Task payments vary widely depending on category, complexity, time required, and the brand\'s campaign budget. Simple social media engagement tasks typically pay at the lower end. Premium brand campaigns, detailed content reviews, and longer-form activities pay at the higher end. There is no single "average" that applies across all task types. Your earnings per task will increase as your profile rating rises and you unlock access to higher-tier tasks.',
+    },
+    {
+      category: 'Earnings & Disclaimers',
+      question: 'Can SRK Task be used as a primary income source?',
+      answer: 'SRK Task is designed and positioned as a supplemental income platform. It provides a legitimate, structured way for verified individuals to monetize their social media presence alongside their primary income. While top-performing, highly-active members may earn significant amounts, SRK Task should not be treated as a replacement for stable employment or a primary livelihood. Please make financial decisions based on realistic assessment of your own activity levels and the platform\'s variable nature.',
+    },
+    {
+      category: 'Earnings & Disclaimers',
+      question: 'What should I do if I have a complaint about a task or payment?',
+      answer: 'Contact our support team with full details of your complaint: your account details, the task ID, a description of the issue, and any supporting screenshots or documentation. We commit to responding to all complaints within 24 hours. For payment disputes, include your withdrawal request ID. For task rejection disputes, include your submission ID and the specific reason you believe the rejection was in error. All complaints are reviewed by a human team member.',
     },
   ];
 

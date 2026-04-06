@@ -7,74 +7,74 @@ export const HowItWorks = () => {
   const steps = [
     {
       number: '1',
-      title: 'Join SRK University',
-      description: 'Complete enrollment at The SRK University and pass the mandatory KYC (Know Your Customer) verification process. This ensures all users are verified and accountable.',
-      details: 'Your identity verification includes document uploads, address verification, and background checks. This typically takes 24-48 hours.',
+      title: 'Join SRK University and Complete KYC',
+      description: 'Before accessing SRK Task, complete enrollment at SRK University and pass mandatory KYC (Know Your Customer) verification using government-issued identity documents. This is what makes every member on SRK Task a verified, accountable individual.',
+      details: 'KYC typically takes 24-48 hours. You\'ll need a government-issued photo ID, proof of address, and a clear selfie. Use the exact name from your government ID during enrollment.',
       icon: Users,
     },
     {
       number: '2',
-      title: 'Link Your Account',
-      description: 'Once verified through SRK University, link your account to SRK Task using your university credentials. The integration is seamless and takes just a few minutes.',
-      details: 'Account linking is secure and encrypted. You\'ll receive a confirmation email once your accounts are successfully linked.',
+      title: 'Link Your SRK University Account to SRK Task',
+      description: 'Once your KYC is confirmed, linking your account to SRK Task is a one-time process taking under five minutes. Your verified identity, profile rating, and task history all live in one ecosystem.',
+      details: 'Visit srktask.com, click "Link Account", and authenticate using your SRK University credentials. Your SRK User profile is created automatically using your university verification data.',
       icon: CheckCircle,
     },
     {
       number: '3',
-      title: 'Browse Available Tasks',
-      description: 'Access your personalized task dashboard showing all available social influence tasks curated specifically for SRK members. Tasks are updated regularly with new opportunities.',
-      details: 'Filter tasks by category, payment amount, difficulty level, and estimated completion time. Popular tasks fill up fast, so check back frequently.',
+      title: 'Explore Your Personalized Task Dashboard',
+      description: 'Your SRK Task dashboard is personalized from day one. Tasks are matched to your social media platforms, engagement history, skill level, and preferences. Browse tasks filtered by category, difficulty, payment, and time estimate.',
+      details: 'Common task categories include social media engagement, content review, testimonials, surveys, brand awareness, and community participation. New tasks are added throughout the day. Check your dashboard at least twice daily for best availability.',
       icon: Zap,
     },
     {
       number: '4',
-      title: 'Complete Tasks Honestly',
-      description: 'Select a task and complete it according to the detailed instructions provided. Genuine engagement and authentic interaction are essential for task approval.',
-      details: 'Tasks range from social media engagement (likes, shares, comments) to content creation and follower growth activities. All work must be original and honest.',
+      title: 'Complete Tasks Honestly and Thoroughly',
+      description: 'Accept only tasks you can complete honestly. Read every task description carefully. Do not rush. Follow every instruction exactly. If you\'re asked to comment on a post, make it genuine and specific, not generic phrases.',
+      details: 'Every task is reviewed by both AI-assisted verification and human review. Quality matters more than volume. Authentic effort gets approved. Shortcuts get flagged. Any use of bots or VPNs results in immediate account suspension.',
       icon: CheckCircle,
     },
     {
       number: '5',
-      title: 'Submit Proof of Completion',
-      description: 'Submit proof that you\'ve completed the task. This might include screenshots, links, or other verification as requested. Our system uses AI-powered verification combined with human review.',
-      details: 'Clear, honest proof submissions are processed quickly. Suspicious submissions will be flagged for manual review, which may take longer.',
+      title: 'Submit Clear Proof of Completion',
+      description: 'After completing a task, submit your proof as specified in the task instructions. Proof may include screenshots, links to your public activity, written summaries, or other documentation. Good proof is clear, readable, and matches requirements exactly.',
+      details: 'Submit proof promptly after completion. Blurry screenshots, incomplete submissions, and delayed uploads are the most common causes of rejection. Take an extra 60 seconds to review your submission before uploading. Good habits prevent rejections.',
       icon: Shield,
     },
     {
       number: '6',
-      title: 'Earn & Withdraw',
-      description: 'Once verified, earnings are credited to your SRK Task wallet. Accumulate earnings and withdraw them whenever you reach the minimum threshold through your preferred payment method.',
-      details: 'Earnings typically appear in your wallet within 1-24 hours. Withdrawals are processed within 2-5 business days depending on your chosen payment method.',
+      title: 'Earn, Track, and Withdraw Your Earnings',
+      description: 'After verification and approval, earnings are credited to your SRK Task wallet within 1-24 hours. Track everything from your dashboard: pending earnings, approved earnings, available balance, and full withdrawal history. No hidden deductions.',
+      details: 'When your balance reaches the minimum withdrawal threshold, request a withdrawal to your bank account or digital wallet. Withdrawals are typically processed within 1-3 business days. SRK Task charges no platform fees on withdrawals.',
       icon: DollarSign,
     },
     {
       number: '7',
-      title: 'Level Up & Unlock Premium',
-      description: 'As you complete more tasks successfully, your profile rating increases, unlocking access to premium tasks with higher payments and exclusive opportunities.',
-      details: 'Top performers get priority access to lucrative tasks. Build your reputation through consistent, honest work to maximize earning potential.',
+      title: 'Build Your Reputation and Unlock Premium Opportunities',
+      description: 'Your profile rating is calculated from five factors: task completion rate, proof quality, approval rate, consistency, and community standing. Higher ratings unlock access to premium tasks with 2-3x higher payments and exclusive brand partnerships.',
+      details: 'Premium tier is where long-term earnings are built. Members who consistently perform well across 30-50 tasks typically see available task value increase significantly. The platform rewards genuine commitment, not volume alone.',
       icon: TrendingUp,
     },
   ];
 
   const features = [
     {
-      title: 'AI-Powered Verification',
-      description: 'Our proprietary AI system detects fraud and bot activity in real-time, ensuring platform integrity and protecting legitimate users.',
+      title: 'Real-Time Task Feed with Smart Matching',
+      description: 'Your task feed is personalized to your profiles, engagement history, skill level, and availability. Algorithm-matched tasks surface at the top before lower-relevance opportunities.',
       icon: Shield,
     },
     {
-      title: 'Instant Task Updates',
-      description: 'New tasks are added regularly throughout the day. Stay updated and never miss earning opportunities with instant notifications.',
+      title: 'Complete Earnings Transparency',
+      description: 'Your dashboard shows pending earnings, confirmed balances, full task history with payment status, and earnings breakdown by category. No hidden deductions, no surprises.',
       icon: Zap,
     },
     {
-      title: 'Secure Payments',
-      description: 'All transactions use 256-bit encryption and blockchain verification for maximum security. Your earnings are always protected.',
+      title: 'AI-Assisted & Human-Reviewed Verification',
+      description: 'Fast automated verification combines with human judgment for edge cases. If flagged by AI, request human review. Dual-layer approach ensures speed and fairness.',
       icon: DollarSign,
     },
     {
-      title: 'Transparent Earnings',
-      description: 'Complete visibility into your task history, earnings, and payment status. Know exactly how much you\'ve earned every step of the way.',
+      title: 'Multi-Layer Security Infrastructure',
+      description: '256-bit SSL encryption, multi-factor authentication, blockchain-verified transaction records, real-time anomaly detection, and automatic alerts. Your data protected like a financial platform.',
       icon: TrendingUp,
     },
   ];
@@ -108,8 +108,7 @@ export const HowItWorks = () => {
               How <span className="text-[#e1ba73]">It Works</span>
             </h1>
             <p className="text-xl text-gray-400">
-              Seven simple steps to start earning from your social influence. Transform your engagement 
-              into real income with SRK Task's transparent and secure platform.
+              Seven clear steps from SRK University enrollment to your first task withdrawal. Understanding the process thoroughly is the single most important factor in early success on the platform.
             </p>
           </motion.div>
         </div>

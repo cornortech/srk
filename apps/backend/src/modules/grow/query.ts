@@ -903,6 +903,17 @@ const getSrkGrowAffiliateVerificationRequest: AppRouteImplementationOrOptions<
   try {
     const srkUniversityUserId = query.srkUniversityUserId;
 
+    // Validate that the user ID is a valid ObjectId
+    if (!mongoose.isValidObjectId(srkUniversityUserId)) {
+      return {
+        status: 400,
+        body: {
+          success: false,
+          message: 'Invalid University User ID format',
+        },
+      };
+    }
+
     // check if srk university user exist wth this id
 
     const srkUniversityUserExist = await UserModel.findById(

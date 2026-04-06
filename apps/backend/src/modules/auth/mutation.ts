@@ -672,6 +672,7 @@ const rejectPaymentDetails: AppRouteImplementationOrOptions<
       },
     };
   } catch (error) {
+    console.log(error);
     return {
       status: 500,
       body: { success: false, message: 'Internal server error' },
@@ -681,9 +682,22 @@ const rejectPaymentDetails: AppRouteImplementationOrOptions<
 
 const approvePaymentDetails: AppRouteImplementationOrOptions<
   typeof authContract.approvePaymentDetails
-> = async ({ req, body }) => {
+> = async ({ req }) => {
   try {
-    const userExist = await UserModel.findById(req.params.userId);
+    const userId = req.params.userId;
+
+    // Validate ObjectId format
+    if (!mongoose.isValidObjectId(userId)) {
+      return {
+        status: 400,
+        body: {
+          success: false,
+          message: 'Invalid user ID format',
+        },
+      };
+    }
+
+    const userExist = await UserModel.findById(userId);
 
     if (!userExist) {
       return {
@@ -696,7 +710,7 @@ const approvePaymentDetails: AppRouteImplementationOrOptions<
     }
 
     const paymentDetailsExist = await CoursePaymentModel.findOne({
-      userId: req.params.userId,
+      userId: userId,
     });
 
     if (!paymentDetailsExist) {
@@ -719,95 +733,98 @@ const approvePaymentDetails: AppRouteImplementationOrOptions<
       };
     }
 
+    // Process referral earnings if user was referred
     if (userExist.referredBy) {
-      const referringUser = await UserModel.findById(userExist.referredBy)
-        .populate<{
-          packageId: {
-            _id: string;
-            title: string;
-            price: number;
-          } | null;
-        }>('packageId')
-        .populate<{
-          referredBy: {
-            packageId: string;
-            _id: string;
-          };
-        }>('referredBy');
+      try {
+        const referringUser = await UserModel.findById(userExist.referredBy)
+          .populate<{
+            packageId: {
+              _id: string;
+              title: string;
+              price: number;
+            } | null;
+          }>('packageId')
+          .populate<{
+            referredBy: {
+              packageId: string;
+              _id: string;
+            };
+          }>('referredBy');
 
-      if (!referringUser) {
-        return {
-          status: 404,
-          body: {
-            success: false,
-            message: 'Referring user not found',
-          },
-        };
+        if (!referringUser) {
+          console.warn(`Referring user not found for userId: ${userExist.referredBy}`);
+        } else if (!referringUser?.packageId) {
+          console.warn(`Referring user package not found for userId: ${userExist.referredBy}`);
+        } else {
+          const newUserPackage = await PackageModel.findById(userExist.packageId);
+
+          if (!newUserPackage) {
+            console.warn(`New user package not found: ${userExist.packageId}`);
+          } else {
+            const referredByUserEmailTemplate = EmailService.EmailTemplate({
+              heading: 'User enrolled with your referral code',
+              message: `
+              <p>Hi ${referringUser?.firstName},</p>
+              <p>${userExist.firstName} enrolled ${newUserPackage.title} package with your referral code .</p>
+              <p>You will get Srk Bonus after 24 hours.</p>
+             `,
+            });
+
+            EmailService.sendEmail({
+              email: referringUser?.email || '',
+              message: referredByUserEmailTemplate,
+              subject: 'User enrolled with your referral code',
+            });
+
+            let commissionPackageId = referringUser.packageId._id.toString();
+
+            if (newUserPackage.price < referringUser.packageId.price) {
+              commissionPackageId = newUserPackage._id.toString();
+            }
+
+            await calculateEarnings({
+              packageId: commissionPackageId || '',
+              referredBy: referringUser._id.toString(),
+              referredTo: userExist._id.toString(),
+              seniorId: referringUser.referredBy?._id?.toString() || '',
+              referringUserPackageId: referringUser.packageId._id.toString(),
+              seniorPackageId: referringUser?.referredBy?.packageId,
+              enrolledPackageId: newUserPackage._id.toString(),
+            });
+          }
+        }
+      } catch (referralError) {
+        console.error(`Error processing referral earnings for userId ${userId}:`, referralError);
+        // Continue with status update even if referral processing fails
       }
-
-      if (!referringUser?.packageId) {
-        return {
-          status: 400,
-          body: {
-            success: false,
-            message: "Couldn't find referring user's package",
-          },
-        };
-      }
-
-      const newUserPackage = await PackageModel.findById(userExist.packageId);
-
-      if (!newUserPackage) {
-        return {
-          status: 400,
-          body: { success: false, message: 'Package not found' },
-        };
-      }
-
-      const referredByUserEmailTemplate = EmailService.EmailTemplate({
-        heading: 'User enrolled with your referral code',
-        message: `
-        <p>Hi ${referringUser?.firstName},</p>
-        <p>${userExist.firstName} enrolled ${newUserPackage.title} package with your referral code .</p>
-        <p>You will get Srk Bonus after 24 hours.</p>
-       `,
-      });
-
-      EmailService.sendEmail({
-        email: referringUser?.email || '',
-        message: referredByUserEmailTemplate,
-        subject: 'User enrolled with your referral code',
-      });
-
-      let commissionPackageId = referringUser.packageId._id.toString();
-
-      if (newUserPackage.price < referringUser.packageId.price) {
-        commissionPackageId = newUserPackage._id.toString();
-      }
-
-      await calculateEarnings({
-        packageId: commissionPackageId || '',
-        referredBy: referringUser._id.toString(),
-        referredTo: userExist._id.toString(),
-        seniorId: referringUser.referredBy?._id?.toString() || '',
-        referringUserPackageId: referringUser.packageId._id.toString(),
-        seniorPackageId: referringUser?.referredBy?.packageId,
-        enrolledPackageId: newUserPackage._id.toString(),
-      });
     }
 
+    // Update user status to REGISTERED
     userExist.status = 'REGISTERED';
-    await userExist.save();
+    const saveResult = await userExist.save();
+
+    if (!saveResult) {
+      console.error(`Failed to save user status update for userId: ${userId}`);
+      return {
+        status: 500,
+        body: {
+          success: false,
+          message: 'Failed to update user status',
+        },
+      };
+    }
+
+    console.log(`Payment approved successfully for userId: ${userId}, new status: REGISTERED`);
 
     return {
       status: 200,
       body: {
         success: true,
-        message: 'Payment details approved successfully.c',
+        message: 'Payment details approved successfully.',
       },
     };
   } catch (error) {
-    console.log(`Error in approvePaymentDetails:`, error);
+    console.error(`Error in approvePaymentDetails:`, error);
     return {
       status: 500,
       body: { success: false, message: 'Internal server error' },

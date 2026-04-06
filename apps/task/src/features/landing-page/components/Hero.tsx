@@ -14,14 +14,14 @@ import { SpotlightCard } from '../../../components/ui/SpotLlightCard';
 export const Hero = () => {
   const steps = [
     {
-      title: 'CONNECT',
-      desc: 'Link SRK University Account',
+      title: 'ENROLL',
+      desc: 'Join SRK University',
       icon: Users,
       delay: 0.2,
     },
     { title: 'VERIFY', desc: 'Complete KYC Process', icon: Shield, delay: 0.4 },
-    { title: 'TASK', desc: 'Follow & Engage', icon: Target, delay: 0.6 },
-    { title: 'EARN', desc: 'Instant Wallet Credit', icon: Coins, delay: 0.8 },
+    { title: 'LINK', desc: 'Connect to SRK Task', icon: Target, delay: 0.6 },
+    { title: 'EARN', desc: 'Complete Tasks & Withdraw', icon: Coins, delay: 0.8 },
   ];
 
   const [activeStep, setActiveStep] = useState(0);
@@ -98,7 +98,7 @@ export const Hero = () => {
           >
             <Sparkles className="w-3.5 h-3.5 text-[#e1ba73] animate-pulse" />
             <span className="text-xs font-bold text-[#e1ba73] tracking-widest uppercase">
-              Welcome to SRK Task Portal
+              KYC-Verified Platform
             </span>
             <Sparkles className="w-3.5 h-3.5 text-[#e1ba73] animate-pulse" />
           </motion.div>
@@ -115,7 +115,7 @@ export const Hero = () => {
               animate={{ opacity: 1 }}
               transition={{ delay: 0.3 }}
             >
-              Earn Through
+              Turn Your Social Influence Into
             </motion.span>
             <motion.span
               className="block text-transparent bg-clip-text bg-gradient-to-r from-[#e1ba73] via-[#d4af37] to-[#b68938]"
@@ -131,7 +131,7 @@ export const Hero = () => {
                 ease: 'easeInOut',
               }}
             >
-              Tasks
+              Verified Income
             </motion.span>
           </motion.h1>
 
@@ -142,12 +142,10 @@ export const Hero = () => {
             className="space-y-2"
           >
             <p className="text-lg md:text-xl text-gray-400 max-w-lg mx-auto lg:mx-0 leading-relaxed font-medium">
-              Join thousands completing simple tasks.
-              <br />
-              Multiple schemes coming soon.
+              SRK Task connects verified SRK University members with real brands who pay for authentic social engagement. Complete verified tasks, build your reputation, and withdraw your earnings.
             </p>
             <p className="text-lg md:text-xl text-transparent bg-clip-text bg-gradient-to-r from-[#e1ba73] to-[#b68938] max-w-lg mx-auto lg:mx-0 leading-relaxed font-semibold">
-              Start your journey with SRK Group.
+              This is not a shortcut. This is legitimate, structured income.
             </p>
           </motion.div>
 
@@ -158,7 +156,7 @@ export const Hero = () => {
             className="flex flex-wrap justify-center lg:justify-start gap-4"
           >
             <MagneticButton className="shadow-[0_0_50px_rgba(225,186,115,0.5)]">
-              Join Now & Start Earning <ArrowRight size={20} className="ml-2" />
+              Explore Verified Opportunities <ArrowRight size={20} className="ml-2" />
             </MagneticButton>
           </motion.div>
 
@@ -182,10 +180,10 @@ export const Hero = () => {
             </div>
             <div className="text-left">
               <div className="text-white font-bold text-base">
-                50K+ Active Members
+                10,000+ Verified Members
               </div>
               <div className="text-sm text-[#b68938] font-semibold">
-                Verified by SRK University
+                Real Brands • Real Tasks • Real Earnings
               </div>
             </div>
           </motion.div>

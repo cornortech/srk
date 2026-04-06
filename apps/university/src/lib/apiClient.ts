@@ -551,3 +551,61 @@ export const updateWebinarApi = async (
   const response = await apiClient.put(`/webinar/${id}`, data);
   return response.data;
 };
+
+// QR Codes
+
+export type TQRCode = {
+  _id?: string;
+  name: string;
+  qr: string; // base64 or URL
+  isAvailable: boolean;
+  type?: string;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
+export type TCreateQRCodePayload = {
+  name: string;
+  qr: string;
+  type?: string;
+};
+
+export type TUpdateQRCodePayload = {
+  name?: string;
+  qr?: string;
+  isAvailable?: boolean;
+  type?: string;
+};
+
+export const getAllQRCodesApi = async () => {
+  const response = await apiClient.get('/qrcodes');
+  return response.data;
+};
+
+export const getAvailableQRCodesApi = async () => {
+  const response = await apiClient.get('/qrcodes/available');
+  return response.data;
+};
+
+export const getQRCodeByIdApi = async (id: string) => {
+  const response = await apiClient.get(`/qrcodes/${id}`);
+  return response.data;
+};
+
+export const createQRCodeApi = async (data: TCreateQRCodePayload) => {
+  const response = await apiClient.post('/qrcodes', data);
+  return response.data;
+};
+
+export const updateQRCodeApi = async (
+  id: string,
+  data: TUpdateQRCodePayload
+) => {
+  const response = await apiClient.put(`/qrcodes/${id}`, data);
+  return response.data;
+};
+
+export const deleteQRCodeApi = async (id: string) => {
+  const response = await apiClient.delete(`/qrcodes/${id}`);
+  return response.data;
+};

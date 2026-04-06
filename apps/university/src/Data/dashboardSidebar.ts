@@ -20,6 +20,7 @@ import {
   PiggyBankIcon,
   Undo2,
   Group,
+  Settings,
 } from 'lucide-react';
 
 export type TSidebarItem = {
@@ -145,6 +146,11 @@ export const AdminSidebarItems: TSidebarItem[] = [
     title: 'Srk Bonus',
     icon: Sparkle,
     href: '/admin/srk-bonus',
+  },
+  {
+    title: 'Settings',
+    icon: Settings,
+    href: '/admin/settings',
   },
 ];
 

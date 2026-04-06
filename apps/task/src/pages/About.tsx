@@ -224,6 +224,60 @@ export const About = () => {
           </div>
         </motion.div>
 
+        {/* Business Transparency - CRITICAL FOR AdSense */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="mb-24 p-8 rounded-2xl bg-gradient-to-b from-white/5 to-transparent border border-[#e1ba73]/30"
+        >
+          <h2 className="text-3xl font-bold mb-8">Business Transparency</h2>
+          <div className="grid md:grid-cols-2 gap-12">
+            <div>
+              <h3 className="text-xl font-bold text-[#e1ba73] mb-6">Our Business Identity</h3>
+              <div className="space-y-3 text-gray-300">
+                <p><span className="font-semibold">Platform Name:</span> SRK Task</p>
+                <p><span className="font-semibold">Operating Company:</span> SRK Industries</p>
+                <p><span className="font-semibold">Business Type:</span> Digital Engagement Platform</p>
+                <p><span className="font-semibold">Headquarters:</span> Kathmandu, Bagmati Province, Nepal</p>
+                <p><span className="font-semibold">Country:</span> Nepal</p>
+                <p><span className="font-semibold">Contact Email:</span> support@srktask.com</p>
+                <p><span className="font-semibold">Phone:</span> +977 976-9223013</p>
+                <p><span className="font-semibold">Website:</span> srktask.com</p>
+              </div>
+            </div>
+            <div>
+              <h3 className="text-xl font-bold text-[#e1ba73] mb-6">How Brands Fund Tasks</h3>
+              <p className="text-gray-300 mb-4 leading-relaxed">
+                Brands and content creators who want genuine social media engagement — real likes, authentic comments, honest reviews, and organic reach — pay SRK Task to connect them with verified human creators.
+              </p>
+              <ul className="space-y-2 text-gray-300">
+                <li className="flex gap-2">
+                  <span className="text-[#e1ba73] font-bold">•</span>
+                  <span>Brands submit tasks with defined budgets</span>
+                </li>
+                <li className="flex gap-2">
+                  <span className="text-[#e1ba73] font-bold">•</span>
+                  <span>SRK Task verifies legitimacy and payment</span>
+                </li>
+                <li className="flex gap-2">
+                  <span className="text-[#e1ba73] font-bold">•</span>
+                  <span>Members complete tasks honestly</span>
+                </li>
+                <li className="flex gap-2">
+                  <span className="text-[#e1ba73] font-bold">•</span>
+                  <span>AI and human review verifies completion</span>
+                </li>
+                <li className="flex gap-2">
+                  <span className="text-[#e1ba73] font-bold">•</span>
+                  <span>Members earn, brands get verified engagement</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </motion.div>
+
         {/* Part of SRK Ecosystem */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}

@@ -1,54 +1,22 @@
 import { initContract } from '@ts-rest/core';
 import { z } from 'zod';
-import {
-  appSettingsSchema,
-  updateAppSettingsSchema,
-  qrCodeSchema,
-  createQRCodeSchema,
-  updateQRCodeSchema,
-} from './schema';
 
 const c = initContract();
 
-export const appSettingsContract = c.router({
-  getAppSettings: {
-    method: 'GET',
-    path: '/app-settings',
-    responses: {
-      200: z.object({
-        success: z.boolean(),
-        data: appSettingsSchema,
-      }),
-      500: z.object({
-        success: z.boolean(),
-        message: z.string(),
-      }),
-    },
-    summary: 'Get application settings',
-  },
-  updateAppSettings: {
-    method: 'PATCH',
-    path: '/app-settings',
-    body: updateAppSettingsSchema,
-    responses: {
-      200: z.object({
-        success: z.boolean(),
-        message: z.string(),
-        data: appSettingsSchema,
-      }),
-      400: z.object({
-        success: z.boolean(),
-        message: z.string(),
-      }),
-      500: z.object({
-        success: z.boolean(),
-        message: z.string(),
-      }),
-    },
-    summary: 'Update application settings (Admin only)',
-  },
+// QR Code Schema
+const qrCodeSchema = z.object({
+  _id: z.string().optional(),
+  name: z.string().min(1, 'Name is required'),
+  qr: z.string().min(1, 'QR image is required'),
+  isAvailable: z.boolean().default(true),
+  createdAt: z.date().optional(),
+  updatedAt: z.date().optional(),
+});
 
-  // QR Code endpoints
+export type QRCodeType = z.infer<typeof qrCodeSchema>;
+
+// API Contract
+export const qrcodeContract = c.router({
   getAllQRCodes: {
     method: 'GET',
     path: '/qrcodes',
@@ -107,7 +75,10 @@ export const appSettingsContract = c.router({
   createQRCode: {
     method: 'POST',
     path: '/qrcodes',
-    body: createQRCodeSchema,
+    body: z.object({
+      name: z.string().min(1, 'Name is required'),
+      qr: z.string().min(1, 'QR image is required'),
+    }),
     responses: {
       201: z.object({
         success: z.boolean(),
@@ -129,7 +100,11 @@ export const appSettingsContract = c.router({
   updateQRCode: {
     method: 'PUT',
     path: '/qrcodes/:id',
-    body: updateQRCodeSchema,
+    body: z.object({
+      name: z.string().optional(),
+      qr: z.string().optional(),
+      isAvailable: z.boolean().optional(),
+    }),
     responses: {
       200: z.object({
         success: z.boolean(),

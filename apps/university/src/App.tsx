@@ -53,6 +53,7 @@ import PackageSinglePage from './pages/PackageDetails';
 import DisclaimerPage from './pages/Disclaimer';
 import CreateWebinar from './pages/admin/CreateWebinar';
 import AdminWebinarList from './components/admin/webinar/WebinarListTable/WebinarListTable';
+import AdminSettings from './pages/admin/Settings';
 import WebinarPage from './pages/affiliate/WebinarPage';
 import SrkBonusFlow from './pages/affiliate/SrkBonusFlow';
 import AdminSrkBonusFlow from './pages/admin/SrkBonusFlow';
@@ -214,6 +215,10 @@ const AppRouter = () => {
         {
           path: 'target',
           element: <AdminTourTargetUserPage />,
+        },
+        {
+          path: 'settings',
+          element: <AdminSettings />,
         },
       ],
     },

@@ -15,6 +15,7 @@
     "build:task:no-prerender": "nx build task",
     "build:grow": "nx build grow",
     "build:all": "nx run-many -t build",
+    "start:task:prod": "node server-task.js",
     "serve:task": "http-server dist/apps/task -p 4400 -o",
     "serve:university": "http-server dist/apps/university -p 4401 -o",
     "test:university": "nx test university",

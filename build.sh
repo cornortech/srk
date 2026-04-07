@@ -2,8 +2,8 @@
 set -e
 
 echo "🔧 Installing system dependencies for Puppeteer..."
-apt-get update -qq
-apt-get install -y -qq \
+sudo apt-get update -qq
+sudo apt-get install -y -qq \
   libglibmm-1.4-1v5 \
   libcupsimage2 \
   libcups2 \

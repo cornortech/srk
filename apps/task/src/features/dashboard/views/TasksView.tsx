@@ -38,8 +38,8 @@ interface TasksViewProps {
 const isWithinAllowedTime = (): boolean => {
   const now = new Date();
   const hours = now.getHours();
-  // Tasks are available between 7pm (19:00) and 11pm (23:00)
-  return hours >= 19 && hours < 23;
+  // Tasks are available between 7pm (19:00) and 12am (00:00)
+  return hours >= 19 && hours < 24;
 };
 
 export const TasksView: React.FC<TasksViewProps> = ({
@@ -170,12 +170,12 @@ export const TasksView: React.FC<TasksViewProps> = ({
               {!isTaskFeatureEnabled
                 ? 'Task feature is currently disabled by admin. Please check back later.'
                 : !isTaskTimeAllowed
-                  ? 'Tasks can only be done between 7:00 PM and 10:00 PM daily.'
-                  : 'You can complete tasks until 10:00 PM. Make the most of your time!'}
+                  ? 'Tasks can only be done between 7:00 PM and 12:00 AM daily.'
+                  : 'You can complete tasks until 12:00 AM. Make the most of your time!'}
             </p>
             {isTaskFeatureEnabled && (
               <p className="text-zinc-400 text-xs mt-1">
-                Time window: 7:00 PM - 10:00 PM
+                Time window: 7:00 PM - 12:00 AM
               </p>
             )}
           </div>

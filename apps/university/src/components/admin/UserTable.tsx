@@ -105,6 +105,9 @@ export default function UserTable({
         documentType={activeUser?.kycDetails?.documentType || ''}
         documentName={activeUser?.kycDetails?.documentNumber || ''}
         verificationImage={activeUser?.kycDetails?.verificationImage || ''}
+        leftThumbFingerprint={activeUser?.kycDetails?.leftThumbFingerprint || ''}
+        rightThumbFingerprint={activeUser?.kycDetails?.rightThumbFingerprint || ''}
+        signature={activeUser?.kycDetails?.signature || ''}
         onApprove={handleOnApprove}
         onClose={handleOnClose}
         onReject={handleOnReject}

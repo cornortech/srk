@@ -27,6 +27,18 @@ const kycSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    leftThumbFingerprint: {
+      type: String,
+      default: null,
+    },
+    rightThumbFingerprint: {
+      type: String,
+      default: null,
+    },
+    signature: {
+      type: String,
+      default: null,
+    },
     status: {
       type: String,
       default: "pending",

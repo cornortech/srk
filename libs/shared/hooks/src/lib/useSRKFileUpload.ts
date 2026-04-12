@@ -1,4 +1,4 @@
-import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
+import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage';
 import { storage } from '@srk/shared/firebase';
 import { v4 as uuidv4 } from 'uuid';
 import { useState } from 'react';
@@ -58,7 +58,7 @@ export const useSRKFileUpload = (appName: string) => {
 
       // Dynamic path: /prod/appName or /dev/appName
       const envPrefix =
-        import.meta.env.VITE_FIREBASE_ENV === 'prod' ? 'prod' : 'local';
+        import.meta.env.VITE_FIREBASE_ENV === 'prod' ? 'prod' : 'local_temp';
       const storageRef = ref(
         storage,
         `/${envPrefix}/${appName}/${fileType}/${uniqueFileName}`
@@ -150,6 +150,24 @@ export const useSRKFileUpload = (appName: string) => {
     setIsUploading(false);
   };
 
+  // Delete file from Firebase storage
+  const deleteFile = async (fileUrl: string): Promise<void> => {
+    try {
+      // Extract the file path from the download URL
+      const fileRef = ref(storage, fileUrl);
+      await deleteObject(fileRef);
+    } catch (error) {
+      console.error('Error deleting file from Firebase:', error);
+      throw error;
+    }
+  };
+
+  // Delete multiple files
+  const deleteMultipleFiles = async (fileUrls: string[]): Promise<void> => {
+    const deletePromises = fileUrls.map(url => deleteFile(url));
+    await Promise.all(deletePromises);
+  };
+
   return {
     uploadFile,
     uploadProgress,
@@ -158,6 +176,8 @@ export const useSRKFileUpload = (appName: string) => {
     activeUploads: getActiveUploads(),
     activeUploadCount: Object.keys(uploadProgress).length,
     resetProgress,
+    deleteFile,
+    deleteMultipleFiles,
   };
 };
 

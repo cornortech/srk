@@ -50,6 +50,7 @@ export const getAllQRCodes: AppRouteImplementationOrOptions<
           name: qr.name,
           qr: qr.qr,
           isAvailable: qr.isAvailable,
+          type: qr.type,
           createdAt: qr.createdAt,
           updatedAt: qr.updatedAt,
         })),
@@ -72,7 +73,7 @@ export const getAvailableQRCodes: AppRouteImplementationOrOptions<
   typeof appSettingsContract.getAvailableQRCodes
 > = async () => {
   try {
-    const qrCodes = await QRCodeModel.find({ isAvailable: true })
+    const qrCodes = await QRCodeModel.find()
       .sort({ createdAt: -1 })
       .lean();
 
@@ -84,6 +85,7 @@ export const getAvailableQRCodes: AppRouteImplementationOrOptions<
           _id: qr._id?.toString(),
           name: qr.name,
           qr: qr.qr,
+          type: qr.type,
           isAvailable: qr.isAvailable,
           createdAt: qr.createdAt,
           updatedAt: qr.updatedAt,
@@ -139,6 +141,7 @@ export const getQRCodeById: AppRouteImplementationOrOptions<
           _id: qrCode._id?.toString(),
           name: qrCode.name,
           qr: qrCode.qr,
+          type: qrCode.type,
           isAvailable: qrCode.isAvailable,
           createdAt: qrCode.createdAt,
           updatedAt: qrCode.updatedAt,

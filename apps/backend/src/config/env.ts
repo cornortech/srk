@@ -4,6 +4,9 @@ type TEnv = {
   FRONTEND_BASE_URL: string;
   SMTP_PW: string;
   APP_EMAIL: string;
+  FIREBASE_PROJECT_ID?: string;
+  FIREBASE_CLIENT_EMAIL?: string;
+  FIREBASE_PRIVATE_KEY?: string;
 };
 
 export const env: TEnv = {
@@ -12,4 +15,7 @@ export const env: TEnv = {
   FRONTEND_BASE_URL: process.env.FRONTEND_BASE_URL || "",
   APP_EMAIL: process.env.APP_EMAIL || "",
   SMTP_PW: process.env.SMTP_PW || "",
+  FIREBASE_PROJECT_ID: process.env.FIREBASE_PROJECT_ID,
+  FIREBASE_CLIENT_EMAIL: process.env.FIREBASE_CLIENT_EMAIL,
+  FIREBASE_PRIVATE_KEY: process.env.FIREBASE_PRIVATE_KEY,
 };

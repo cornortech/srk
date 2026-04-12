@@ -1,15 +1,41 @@
 import path from 'path';
 import { PDFDocument, rgb } from 'pdf-lib';
 import fs from 'fs';
-import cloudinary from 'cloudinary';
-
-cloudinary.v2.config({
-  cloud_name: 'doia6qktn',
-  api_key: '317337221342793',
-  api_secret: 'tv-B2nCOnNBOHrP7Gkqd-kcleBE',
-});
-
 import sharp from 'sharp';
+import { uploadFileToFirebaseStorage } from './firebaseAdminService';
+
+// Function to darken/invert signature image for visibility
+async function darkenSignatureImage(url: string): Promise<Uint8Array> {
+  if (!url) {
+    throw new Error('No signature URL provided');
+  }
+
+  const response = await fetch(url);
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch signature: ${response.status}`);
+  }
+
+  const buffer = await response.arrayBuffer();
+
+  if (!buffer || buffer.byteLength === 0) {
+    throw new Error('Signature buffer is empty');
+  }
+
+  try {
+    // Darken the signature by increasing contrast and reducing brightness
+    // This converts light signatures to dark ones visible on white background
+    const darkSignature = await sharp(Buffer.from(buffer))
+      .resize({ width: 200 })
+      .negate() // Invert colors (white becomes black)
+      .png({ quality: 20 })
+      .toBuffer();
+
+    return new Uint8Array(darkSignature);
+  } catch (err) {
+    throw new Error(`Signature processing failed: ${String(err)}`);
+  }
+}
 
 async function fetchAndCompressImage(url: string): Promise<Uint8Array> {
   if (!url) {
@@ -41,37 +67,28 @@ async function fetchAndCompressImage(url: string): Promise<Uint8Array> {
   }
 }
 
-// Function to upload a file to Cloudinary
-async function uploadFileToCloudinary(
-  filePath: string,
-  folder?: string
-): Promise<string> {
-  try {
-    const uploadResponse = await cloudinary.v2.uploader.upload(filePath, {
-      resource_type: 'raw',
-      folder: folder || '',
-      upload_preset: 'srkImg',
-    });
-
-    console.log('Uploaded file URL:', uploadResponse.secure_url);
-    return uploadResponse.secure_url;
-  } catch (error) {
-    console.error('Error uploading file:', error);
-    throw error;
-  }
-}
-
-// Function to modify the agreement PDF and then upload it to Cloudinary
+// Function to modify the agreement PDF and then upload it to Firebase Storage
 export async function modifyAndUploadAgreement(
   username: string,
   imageUrl: string,
   createdAt: string,
-  ref: string
+  ref: string,
+  templatePath?: string,
+  leftThumbfingerprint?: string,
+  rightThumbfingerprint?: string,
+  signatureUrl?: string
 ): Promise<string> {
   if (!imageUrl) return '';
   const modifiedPdfPath = `modifiedAgreement-${Date.now()}.pdf`;
   try {
-    const pdfPath = path.join(
+    console.log('=== PDF Generation Started ===');
+    console.log('Username:', username);
+    console.log('Verification Image URL:', imageUrl);
+    console.log('Left Thumbprint URL:', leftThumbfingerprint || 'NOT PROVIDED');
+    console.log('Right Thumbprint URL:', rightThumbfingerprint || 'NOT PROVIDED');
+    console.log('Signature URL:', signatureUrl || 'NOT PROVIDED');
+    
+    const pdfPath = templatePath || path.join(
       process.cwd(),
       'apps',
       'backend',
@@ -87,6 +104,11 @@ export async function modifyAndUploadAgreement(
 
     const pages = pdfDoc.getPages();
     const firstPage = pages[0];
+    
+    // Log page dimensions for coordinate debugging
+    const pageWidth = firstPage.getWidth();
+    const pageHeight = firstPage.getHeight();
+    console.log(`PDF Page Dimensions: Width=${pageWidth}, Height=${pageHeight}`);
 
     // Modify the PDF with text
     firstPage.drawText(username, {
@@ -110,7 +132,7 @@ export async function modifyAndUploadAgreement(
       color: rgb(0, 0, 0),
     });
 
-    // Fetch and embed the image into the PDF (optional)
+    // Fetch and embed the verification image (photo) into the PDF
     try {
       const imageBytes = await fetchAndCompressImage(imageUrl);
       if (imageBytes && imageBytes.length > 0) {
@@ -123,13 +145,82 @@ export async function modifyAndUploadAgreement(
         });
       }
     } catch (err) {
-      console.warn('Skipping image embedding due to error:', err);
+      console.warn('Skipping verification image embedding due to error:', err);
     }
 
-    // Save the modified PDF locally
+    // Fetch and embed left thumbprint into the PDF
+    if (leftThumbfingerprint) {
+      try {
+        console.log('Embedding left thumbprint from:', leftThumbfingerprint);
+        const leftThumbBytes = await fetchAndCompressImage(leftThumbfingerprint);
+        if (leftThumbBytes && leftThumbBytes.length > 0) {
+          const embeddedLeftThumb = await pdfDoc.embedPng(leftThumbBytes);
+          firstPage.drawImage(embeddedLeftThumb, {
+            x: 420,
+            y: 100,
+            width: 90,
+            height: 110,
+          });
+          console.log('Left thumbprint embedded successfully at x=420, y=100');
+        }
+      } catch (err) {
+        console.error('Error embedding left thumbprint:', err);
+      }
+    } else {
+      console.log('No left thumbprint URL provided');
+    }
+
+    // Fetch and embed right thumbprint into the PDF
+    if (rightThumbfingerprint) {
+      try {
+        console.log('Embedding right thumbprint from:', rightThumbfingerprint);
+        const rightThumbBytes = await fetchAndCompressImage(rightThumbfingerprint);
+        if (rightThumbBytes && rightThumbBytes.length > 0) {
+          const embeddedRightThumb = await pdfDoc.embedPng(rightThumbBytes);
+          firstPage.drawImage(embeddedRightThumb, {
+            x: 310,
+            y: 100,
+            width: 90,
+            height: 110,
+          });
+          console.log('Right thumbprint embedded successfully at x=310, y=100');
+        }
+      } catch (err) {
+        console.error('Error embedding right thumbprint:', err);
+      }
+    } else {
+      console.log('No right thumbprint URL provided');
+    }
+
+    // Fetch and embed signature into the PDF
+    if (signatureUrl) {
+      try {
+        console.log('Embedding signature from:', signatureUrl);
+        const signatureBytes = await darkenSignatureImage(signatureUrl);
+        if (signatureBytes && signatureBytes.length > 0) {
+          const embeddedSignature = await pdfDoc.embedPng(signatureBytes);
+          firstPage.drawImage(embeddedSignature, {
+            x: 20,
+            y: 120,
+            width: 150,
+            height: 80,
+          });
+          console.log('Signature embedded successfully at x=20, y=120 (darkened, positioned upper left)');
+        }
+      } catch (err) {
+        console.error('Error embedding signature:', err);
+      }
+    } else {
+      console.log('No signature URL provided');
+    }
+
+    // Save the modified PDF locally and upload to Firebase Storage
     const modifiedPdfBytes = await pdfDoc.save();
     fs.writeFileSync(modifiedPdfPath, modifiedPdfBytes);
-    const modifiedPdfUrl = await uploadFileToCloudinary(modifiedPdfPath, '');
+    
+    const fileBuffer = fs.readFileSync(modifiedPdfPath);
+    const fileName = `${username}-${Date.now()}.pdf`;
+    const modifiedPdfUrl = await uploadFileToFirebaseStorage(fileBuffer, fileName, 'agreements');
     
     // Clean up the temporary file
     if (fs.existsSync(modifiedPdfPath)) {
@@ -226,10 +317,13 @@ export async function createAffiliatePdfAndUpload(
       console.warn('Skipping image embedding due to error:', err);
     }
 
-    // Save the modified PDF locally
+    // Save the modified PDF locally and upload to Firebase Storage
     const modifiedPdfBytes = await pdfDoc.save();
     fs.writeFileSync(modifiedPdfPath, modifiedPdfBytes);
-    const modifiedPdfUrl = await uploadFileToCloudinary(modifiedPdfPath, '');
+    
+    const fileBuffer = fs.readFileSync(modifiedPdfPath);
+    const fileName = `${username}-affiliate-${Date.now()}.pdf`;
+    const modifiedPdfUrl = await uploadFileToFirebaseStorage(fileBuffer, fileName, 'agreements');
 
     // Clean up the temporary file
     if (fs.existsSync(modifiedPdfPath)) {

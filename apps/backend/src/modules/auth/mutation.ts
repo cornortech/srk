@@ -243,6 +243,7 @@ const register: AppRouteImplementationOrOptions<
         paymentMethod: body.paymentMethod || '',
         paymentType: body.paymentType || 'qr',
         paymentProofUrl: body.paymentProofUrl || '',
+        qrCodeId: body.qrCodeId,
       });
     }
 
@@ -525,12 +526,42 @@ const verifyKyc: AppRouteImplementationOrOptions<
 
     userExist.status = 'PORTAL_ACTIVATED';
 
+    // Get the course payment details to determine the QR code type
+    let templatePath: string | undefined;
+    try {
+      const coursePayment = await CoursePaymentModel.findOne({
+        userId: params.userId,
+      }).populate('qrCodeId');
+
+      if (coursePayment && coursePayment.qrCodeId) {
+        const qrCode = coursePayment.qrCodeId as any;
+        if (qrCode.type === 'srkIndustries') {
+          templatePath = `apps/backend/static/agreement/university-industries-agreement.pdf`;
+        } else if (qrCode.type === 'srkOrganization') {
+          templatePath = `apps/backend/static/agreement/task-organization-agreement.pdf`;
+        }
+        console.log(`QR Code Type: ${qrCode.type}, Template Path: ${templatePath}`);
+      }
+    } catch (err) {
+      console.warn('Error fetching course payment QR code details:', err);
+      // Continue with default template if error occurs
+    }
+
     const courseEnrollAgreementUrl = await modifyAndUploadAgreement(
       userExist.firstName,
       kycExist.verificationImage,
       moment(kycExist.createdAt).format('DD-MM-YYYY'),
-      userExist.referralCode || ''
+      userExist.referralCode || '',
+      templatePath,
+      kycExist.leftThumbFingerprint || undefined,
+      kycExist.rightThumbFingerprint || undefined,
+      kycExist.signature || undefined
     );
+    
+    console.log('=== KYC Verify - Biometric Data ===');
+    console.log('Left Thumb from KYC:', kycExist.leftThumbFingerprint);
+    console.log('Right Thumb from KYC:', kycExist.rightThumbFingerprint);
+    console.log('Signature from KYC:', kycExist.signature);
 
     kycExist.courseEnrollAgreement = courseEnrollAgreementUrl;
     await kycExist.save();

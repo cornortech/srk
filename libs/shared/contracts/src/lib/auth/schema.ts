@@ -38,6 +38,7 @@ export const RegisterSchema = z
     paymentType: z.enum(['qr', 'onlinePayment']).optional(),
     paymentMethod: z.enum(['esewa', 'khalti', 'bankTransfer']).optional(),
     purpose: z.enum(['affiliate', 'study']),
+    qrCodeId: z.string().optional(),
   })
   .refine(
     (data) => {

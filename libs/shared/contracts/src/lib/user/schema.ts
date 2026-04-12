@@ -54,6 +54,9 @@ export const getUserDetailsSchema = z.object({
       documentType: z.string().min(1, 'Document type is required'),
       documentNumber: z.string().min(1, 'Document number is required'),
       verificationImage: z.string().min(1, 'Verification image is required'),
+      leftThumbFingerprint: z.string().optional().nullable(),
+      rightThumbFingerprint: z.string().optional().nullable(),
+      signature: z.string().optional().nullable(),
     })
     .nullable(),
   affiliateBiometricDetails: z
@@ -206,6 +209,9 @@ export const getAllUsersSchema = z.array(
         documentType: z.string(),
         documentNumber: z.string(),
         verificationImage: z.string(),
+        leftThumbFingerprint: z.string().optional().nullable(),
+        rightThumbFingerprint: z.string().optional().nullable(),
+        signature: z.string().optional().nullable(),
       })
       .nullable(),
     paymentDetails: z

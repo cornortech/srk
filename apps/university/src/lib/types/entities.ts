@@ -74,6 +74,9 @@ export type TKyc = {
   createdAt: Date;
   updatedAt: Date;
   verificationImage: string;
+  leftThumbFingerprint?: string;
+  rightThumbFingerprint?: string;
+  signature?: string;
 };
 
 export type TCourse = {

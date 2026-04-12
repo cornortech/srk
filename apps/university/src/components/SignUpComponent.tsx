@@ -51,6 +51,7 @@ export type TPaymentDetails = {
   paymentProof: File | null;
   transactionId: string;
   paymentMethod?: TPaymentMethod;
+  qrCodeId?: string;
 };
 
 export function SignupComponent({
@@ -167,6 +168,7 @@ export function SignupComponent({
           paymentMethod: paymentDetails.paymentMethod,
           transactionId: paymentDetails.transactionId,
           purpose: data.purpose,
+          qrCodeId: paymentDetails.qrCodeId,
         });
       } catch (err) {
         console.log(err);

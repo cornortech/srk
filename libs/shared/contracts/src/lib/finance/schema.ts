@@ -50,6 +50,9 @@ export const upsertKYCDetailsSchema = z.object({
   documentType: z.string().min(1, 'Document type is required'),
   documentNumber: z.string().min(1, 'Document number is required'),
   verificationImage: z.string().min(1, 'Verification image is required'),
+  leftThumbFingerprint: z.string().optional(),
+  rightThumbFingerprint: z.string().optional(),
+  signature: z.string().optional(),
 });
 export const getFinanceDetailsOfUserSchema = z.object({
   todayEarnings: z.number(),

@@ -1,4 +1,4 @@
-import mongoose, { mongo } from "mongoose";
+import mongoose from "mongoose";
 
 const coursePaymentSchema = new mongoose.Schema(
   {
@@ -19,6 +19,10 @@ const coursePaymentSchema = new mongoose.Schema(
     },
     transactionId: {
       type: String,
+    },
+    qrCodeId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "QRCode",
     },
     rejectionReason: {
       type: String,

@@ -17,11 +17,8 @@ import {
   Card,
   CardBody,
   Progress,
-  Select,
-  SelectItem,
 } from '@nextui-org/react';
 import { Trash2, Image as ImageIcon } from 'lucide-react';
-import { PrimaryButton } from '../../ReusableComponents';
 import { useSRKFileUpload } from '@srk/shared/hooks';
 import { PaymentQRType } from '@srk/shared/contracts';
 import {
@@ -83,6 +80,16 @@ export const QRManagement = () => {
     setFormData(prev => ({
       ...prev,
       [name]: value,
+    }));
+  };
+
+  // Handle type select change
+  const handleTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setFormData(prev => ({
+      ...prev,
+      type: e.target.value as PaymentQRType,
     }));
   };
 
@@ -260,16 +267,21 @@ export const QRManagement = () => {
 
   return (
     <div className="w-full space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center mb-6">
         <div>
-          <h2 className="text-2xl font-bold text-white mb-2">QR Code Management</h2>
-          <p className="text-gray-400">Manage signup QR codes displayed on the frontend</p>
+          <h2 className="text-3xl font-bold text-white mb-1">QR Code Management</h2>
+          <p className="text-gray-400 text-sm">Manage payment QR codes for student enrollment</p>
         </div>
-        <PrimaryButton onclick={handleAddNew} label="Add New QR" />
+        <Button
+          onPress={handleAddNew}
+          className="bg-primary text-white font-semibold px-6 py-2 rounded-lg hover:opacity-90 transition-opacity"
+        >
+          + Add New QR
+        </Button>
       </div>
 
       {/* QR Codes List */}
-      <div className="bg-bgSecondary rounded-lg p-6">
+      <div className="bg-bgSecondary rounded-xl p-6 border border-gray-700 shadow-lg">
         {fetching ? (
           <Card className="bg-bgSecondary border border-gray-700">
             <CardBody className="flex items-center justify-center py-12">
@@ -286,50 +298,55 @@ export const QRManagement = () => {
             </CardBody>
           </Card>
         ) : (
-          <Table aria-label="QR Codes Table">
+          <Table aria-label="QR Codes Table" className="bg-bgSecondary">
             <TableHeader>
-              <TableColumn className="bg-gray-800">NAME</TableColumn>
-              <TableColumn className="bg-gray-800">QR CODE</TableColumn>
-              <TableColumn className="bg-gray-800">AVAILABLE</TableColumn>
-              <TableColumn className="bg-gray-800">ACTIONS</TableColumn>
+              <TableColumn className="bg-gray-800 text-white font-semibold">NAME</TableColumn>
+              <TableColumn className="bg-gray-800 text-white font-semibold">QR CODE</TableColumn>
+              <TableColumn className="bg-gray-800 text-white font-semibold">TYPE</TableColumn>
+              <TableColumn className="bg-gray-800 text-white font-semibold">AVAILABLE</TableColumn>
+              <TableColumn className="bg-gray-800 text-white font-semibold">ACTIONS</TableColumn>
             </TableHeader>
             <TableBody>
               {qrCodes.map((qr) => (
-                <TableRow key={qr._id} className="bg-bgPrimary hover:bg-gray-800">
-                  <TableCell className="text-white font-medium">{qr.name}</TableCell>
-                  <TableCell>
+                <TableRow key={qr._id} className="border-b border-gray-700 hover:bg-gray-800/50">
+                  <TableCell className="text-white font-medium py-4">{qr.name}</TableCell>
+                  <TableCell className="py-4">
                     {qr.qr && (
-                      <div className="w-16 h-16 rounded border border-gray-600">
+                      <div className="w-16 h-16 rounded-lg border border-gray-600 overflow-hidden shadow-md hover:shadow-lg transition-shadow">
                         <img
                           src={qr.qr}
                           alt={qr.name}
-                          className="w-full h-full object-cover rounded"
+                          className="w-full h-full object-cover"
                         />
                       </div>
                     )}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="text-gray-300 text-sm font-medium py-4">{qr.type || 'N/A'}</TableCell>
+                  <TableCell className="py-4">
                     <Switch
                       isSelected={qr.isAvailable}
                       onChange={() => handleToggleAvailability(qr._id)}
                       color="success"
+                      size="sm"
                     />
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="py-4">
                     <div className="flex gap-2">
                       <Button
                         isIconOnly
-                        className="bg-blue-600 hover:bg-blue-700"
+                        size="sm"
+                        className="bg-primary text-white hover:opacity-90 transition-opacity"
                         onPress={() => handleEdit(qr)}
                       >
                         Edit
                       </Button>
                       <Button
                         isIconOnly
+                        size="sm"
                         color="danger"
                         onPress={() => handleDelete(qr._id)}
                       >
-                        <Trash2 size={18} />
+                        <Trash2 size={16} />
                       </Button>
                     </div>
                   </TableCell>
@@ -341,42 +358,46 @@ export const QRManagement = () => {
       </div>
 
       {/* Add/Edit Modal */}
-      <Modal isOpen={isOpen} onClose={handleModalClose} size="2xl">
-        <ModalContent>
+      <Modal isOpen={isOpen} onClose={handleModalClose} size="2xl" backdrop="blur" className="bg-bgSecondary">
+        <ModalContent className="bg-bgSecondary">
           {() => (
             <>
-              <ModalHeader className="flex flex-col gap-1">
-                {editingId ? 'Edit QR Code' : 'Add New QR Code'}
+              <ModalHeader className="flex flex-col gap-1 text-white border-b border-gray-700 py-4">
+                <h3 className="text-xl font-bold">
+                  {editingId ? '✏️ Edit QR Code' : '➕ Add New QR Code'}
+                </h3>
               </ModalHeader>
-              <ModalBody className="gap-4 pb-6">
+              <ModalBody className="gap-6 py-6">
                 {/* QR Name Input */}
-                <Input
-                  label="QR Name"
-                  placeholder="e.g., Main Office, Branch 1"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  className="text-white"
-                  endContent={<span className="text-xs text-gray-400">Required</span>}
-                />
+                <div className="space-y-2">
+                  <label className="block text-sm font-semibold text-white">QR Code Name *</label>
+                  <Input
+                    placeholder="e.g., Main Office, Branch 1"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleInputChange}
+                    classNames={{
+                      input: "text-white bg-gray-800",
+                      label: "text-white",
+                    }}
+                    className="bg-gray-800 rounded-lg"
+                  />
+                </div>
 
                 {/* File Upload Area */}
                 <div className="space-y-3">
-                  <label className="block text-sm font-medium text-white">
-                    QR Code Image
-                  </label>
-                  <div className="relative border-2 border-dashed border-gray-600 rounded-lg p-6 text-center hover:border-primary transition-colors cursor-pointer">
+                  <label className="block text-sm font-semibold text-white">QR Code Image *</label>
+                  <div className="relative border-2 border-dashed border-gray-600 rounded-xl p-8 text-center hover:border-primary hover:bg-primary/5 transition-all duration-200 cursor-pointer">
                     <input
                       type="file"
                       accept="image/*"
                       onChange={handleFileUpload}
                       className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                     />
-                    <div className="space-y-2">
-                      <ImageIcon className="w-10 h-10 mx-auto text-gray-500" />
-                      <p className="text-sm text-gray-400">
-                        Click or drag QR code image here
-                      </p>
+                    <div className="space-y-2 pointer-events-none">
+                      <ImageIcon className="w-12 h-12 mx-auto text-primary opacity-70" />
+                      <p className="text-sm text-gray-300 font-medium">Click or drag QR code image</p>
+                      <p className="text-xs text-gray-500">Support: JPG, PNG, WebP</p>
                     </div>
                   </div>
                 </div>
@@ -384,8 +405,8 @@ export const QRManagement = () => {
                 {/* Preview */}
                 {previewImage && (
                   <div className="space-y-2">
-                    <label className="block text-sm font-medium text-white">Preview</label>
-                    <div className="w-40 h-40 rounded border border-gray-600 overflow-hidden">
+                    <label className="block text-sm font-semibold text-white">Preview</label>
+                    <div className="w-48 h-48 rounded-lg border border-gray-600 overflow-hidden shadow-lg">
                       <img
                         src={previewImage}
                         alt="QR Preview"
@@ -397,38 +418,36 @@ export const QRManagement = () => {
 
                 {/* Upload Progress */}
                 {isUploading && uploadProgress > 0 && (
-                  <div className="space-y-2">
+                  <div className="space-y-2 bg-gray-800 p-4 rounded-lg">
                     <div className="flex justify-between items-center">
-                      <span className="text-sm text-white font-medium">Uploading...</span>
-                      <span className="text-sm text-gray-400">{uploadProgress}%</span>
+                      <span className="text-sm text-white font-medium">Uploading to Firebase...</span>
+                      <span className="text-sm text-primary font-bold">{uploadProgress}%</span>
                     </div>
-                    <Progress value={uploadProgress} className="w-full" />
+                    <Progress value={uploadProgress} className="w-full" color="primary" />
                   </div>
                 )}
 
                 {/* Payment QR Type Select */}
-                <Select
-                  label="Payment QR Type"
-                  placeholder="Select payment QR type"
-                  selectedKeys={formData.type ? [formData.type] : []}
-                  onChange={(e) =>
-                    setFormData(prev => ({
-                      ...prev,
-                      type: e.target.value as PaymentQRType,
-                    }))
-                  }
-                  className="text-white"
-                >
-                  {Object.values(PaymentQRType).map((paymentType) => (
-                    <SelectItem key={paymentType} value={paymentType}>
-                      {paymentType}
-                    </SelectItem>
-                  ))}
-                </Select>
+                <div className="space-y-2">
+                  <label className="block text-sm font-semibold text-white">Payment QR Type *</label>
+                  <select
+                    value={formData.type}
+                    onChange={handleTypeChange}
+                    onMouseDown={(e) => e.stopPropagation()}
+                    className="w-full px-4 py-2 bg-gray-800 text-white border border-gray-700 rounded-lg focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-sm"
+                  >
+                    <option value="" disabled>Select payment QR type</option>
+                    {Object.values(PaymentQRType).map((paymentType) => (
+                      <option key={paymentType} value={paymentType}>
+                        {paymentType}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
                 {/* Is Available Toggle */}
-                <div className="flex items-center justify-between py-3 px-3 bg-gray-800 rounded">
-                  <span className="text-white font-medium">Available for Signup</span>
+                <div className="flex items-center justify-between py-4 px-4 bg-gray-800/50 rounded-lg border border-gray-700">
+                  <span className="text-white font-semibold">Available for Signup</span>
                   <Switch
                     isSelected={formData.isAvailable}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
@@ -438,27 +457,26 @@ export const QRManagement = () => {
                       }))
                     }
                     color="success"
+                    size="lg"
                   />
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex gap-3 pt-4">
+                <div className="flex gap-3 pt-6 border-t border-gray-700">
                   <Button
-                    color="danger"
-                    variant="light"
                     onPress={handleModalClose}
-                    className="flex-1"
+                    className="flex-1 bg-gray-700 text-white font-semibold hover:bg-gray-600 transition-colors"
                     isDisabled={loading || isUploading}
                   >
                     Cancel
                   </Button>
                   <Button
-                    className="flex-1 bg-primary text-white font-medium"
                     onPress={handleSubmit}
+                    className="flex-1 bg-primary text-white font-semibold hover:opacity-90 transition-opacity"
                     isLoading={loading || isUploading}
                     isDisabled={loading || isUploading}
                   >
-                    {isUploading ? 'Uploading...' : editingId ? 'Update QR Code' : 'Add QR Code'}
+                    {isUploading ? '⬆️ Uploading...' : editingId ? '💾 Update QR Code' : '✨ Add QR Code'}
                   </Button>
                 </div>
               </ModalBody>
@@ -468,31 +486,29 @@ export const QRManagement = () => {
       </Modal>
 
       {/* Delete Confirmation Modal */}
-      <Modal isOpen={isDeleteModalOpen} onClose={onDeleteModalClose} size="sm">
-        <ModalContent>
+      <Modal isOpen={isDeleteModalOpen} onClose={onDeleteModalClose} size="sm" backdrop="blur">
+        <ModalContent className="bg-bgSecondary">
           {() => (
             <>
-              <ModalHeader className="flex flex-col gap-1">
-                Confirm Delete
+              <ModalHeader className="flex flex-col gap-1 text-white border-b border-gray-700 py-4">
+                <h3 className="text-lg font-bold">🗑️ Confirm Delete</h3>
               </ModalHeader>
               <ModalBody className="py-6">
-                <p className="text-white">
+                <p className="text-gray-300 font-medium">
                   Are you sure you want to delete this QR code? This action cannot be undone.
                 </p>
               </ModalBody>
-              <div className="flex gap-3 p-6 pt-0">
+              <div className="flex gap-3 p-6 pt-0 border-t border-gray-700">
                 <Button
-                  color="default"
-                  variant="light"
                   onPress={onDeleteModalClose}
-                  className="flex-1"
+                  className="flex-1 bg-gray-700 text-white font-semibold hover:bg-gray-600 transition-colors"
                 >
                   Cancel
                 </Button>
                 <Button
                   color="danger"
-                  className="flex-1"
                   onPress={confirmDelete}
+                  className="flex-1 font-semibold"
                 >
                   Delete
                 </Button>

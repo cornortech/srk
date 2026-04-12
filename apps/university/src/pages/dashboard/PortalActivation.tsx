@@ -1,6 +1,8 @@
 import { Tab, Tabs } from "@nextui-org/react";
 import WebcamCapture from "../../components/affiliate/PortalActivation/FaceCapture";
 import KYCForm from "../../components/dashboard/bank && kyc/KycForm";
+import { FingerprintCapture } from "../../components/dashboard/kyc/FingerprintCapture";
+import { SignaturePad } from "../../components/dashboard/kyc/SignaturePad";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { TUserDataReponseData } from "../../lib/types";
@@ -16,10 +18,32 @@ const PortalActivationPage = () => {
   const [verificationImage, setVerficationImage] = useState<string | null>(
     null
   );
+  const [leftThumbFingerprint, setLeftThumbFingerprint] = useState<string>("");
+  const [rightThumbFingerprint, setRightThumbFingerprint] = useState<string>("");
+  const [signature, setSignature] = useState<string>("");
+
+  const tabSequence = ["details", "FingerPrints", "Signature", "Kyc_Details"];
 
   const handleTabChange = (key: React.Key) => {
     setSelectedTab(key.toString());
   };
+
+  const goToNextTab = () => {
+    const currentIndex = tabSequence.indexOf(selectedTab);
+    if (currentIndex < tabSequence.length - 1) {
+      setSelectedTab(tabSequence[currentIndex + 1]);
+    }
+  };
+
+  const goToPreviousTab = () => {
+    const currentIndex = tabSequence.indexOf(selectedTab);
+    if (currentIndex > 0) {
+      setSelectedTab(tabSequence[currentIndex - 1]);
+    }
+  };
+
+  const isFirstTab = selectedTab === tabSequence[0];
+  const isLastTab = selectedTab === tabSequence[tabSequence.length - 1];
 
   const { data: userData, refetch } = useQuery<TUserDataReponseData | null>({
     queryKey: ["user", userDetails?._id],
@@ -57,7 +81,7 @@ const PortalActivationPage = () => {
           )}
           <Tabs
             selectedKey={selectedTab}
-            onSelectionChange={handleTabChange}
+            onSelectionChange={userStatus === "KYC_VERIFICATION_PENDING" ? handleTabChange : undefined}
             className="outline-none"
             size="lg"
             fullWidth
@@ -78,9 +102,11 @@ const PortalActivationPage = () => {
                 }
                 verificationImage={verificationImage}
                 setVerificationImage={setVerficationImage}
-                handleTabChange={() => {
-                  handleTabChange("Kyc_Details");
-                }}
+                handleTabChange={goToNextTab}
+                showNavButtons={true}
+                onGoBack={goToPreviousTab}
+                isFirstTab={isFirstTab}
+                isLastTab={isLastTab}
               />
             </Tab>
             <Tab
@@ -88,20 +114,34 @@ const PortalActivationPage = () => {
               title="FingerPrint Verification"
               className=""
             >
-              {/* <WebcamCapture verificationImage={verificationImage} setVerificationImage={setVerficationImage}  handleTabChange={handleTabChange}/> */}
-              <div>
-                <h1 className="text-2xl font-bold text-white mb-4">
-                  FingerPrint Verification
-                </h1>
-                <p className="text-white">
-                  <span className="font-bold">Step 1:</span> Place your finger
-                  on the sensor
-                </p>
-              </div>
+              <FingerprintCapture
+                onSave={(leftThumb, rightThumb) => {
+                  setLeftThumbFingerprint(leftThumb);
+                  setRightThumbFingerprint(rightThumb);
+                }}
+                leftThumbInitial={leftThumbFingerprint || userData?.kycDetails?.leftThumbFingerprint || ""}
+                rightThumbInitial={rightThumbFingerprint || userData?.kycDetails?.rightThumbFingerprint || ""}
+                onGoNext={goToNextTab}
+                onGoBack={goToPreviousTab}
+                isFirstTab={isFirstTab}
+                isLastTab={isLastTab}
+                disableActions={userStatus === "KYC_VERIFICATION_PENDING"}
+              />
+            </Tab>
+            <Tab key="Signature" title="Digital Signature" className="">
+              <SignaturePad
+                onSave={(sig) => setSignature(sig)}
+                initialSignature={signature || userData?.kycDetails?.signature || ""}
+                onGoNext={goToNextTab}
+                onGoBack={goToPreviousTab}
+                isFirstTab={isFirstTab}
+                isLastTab={isLastTab}
+                disableActions={userStatus === "KYC_VERIFICATION_PENDING"}
+              />
             </Tab>
             <Tab key="Kyc_Details" title="KYC Details" className="">
               <KYCForm
-                handleRefetch={() => refetch()}
+                handleRefetch={refetch}
                 kycDetails={userData?.kycDetails || null}
                 newVerificationImageFile={
                   verificationImage
@@ -115,6 +155,12 @@ const PortalActivationPage = () => {
                     )
                     : undefined
                 }
+                leftThumbFingerprint={leftThumbFingerprint}
+                rightThumbFingerprint={rightThumbFingerprint}
+                signature={signature}
+                onGoBack={goToPreviousTab}
+                isFirstTab={isFirstTab}
+                isLastTab={isLastTab}
               />
             </Tab>
           </Tabs>

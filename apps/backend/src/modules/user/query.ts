@@ -121,6 +121,9 @@ export const getUserDetails: AppRouteImplementationOrOptions<
             rejectionReason: kycDetails.rejectionReason,
             status: kycDetails.status,
             verificationImage: kycDetails.verificationImage,
+            leftThumbFingerprint: kycDetails.leftThumbFingerprint || null,
+            rightThumbFingerprint: kycDetails.rightThumbFingerprint || null,
+            signature: kycDetails.signature || null,
           }
         : null,
       affiliateBiometricDetails: affiliateBiometricDetails
@@ -307,6 +310,9 @@ const getAllUsers: AppRouteImplementationOrOptions<
                 documentType: kycDetails.documentType,
                 documentNumber: kycDetails.documentNumber,
                 verificationImage: kycDetails.verificationImage,
+                leftThumbFingerprint: kycDetails.leftThumbFingerprint || null,
+                rightThumbFingerprint: kycDetails.rightThumbFingerprint || null,
+                signature: kycDetails.signature || null,
               }
             : null,
         };

@@ -50,6 +50,7 @@ export type TRegisterPayload = {
   paymentType: "qr" | "online";
   paymentMethod: "esewa" | "khalti" | "bankTransfer";
   purpose: "affiliate" | "study";
+  qrCodeId?: string;
 };
 
 export type TUserPayloadLS = {
@@ -123,6 +124,9 @@ export type TUpsertKYCDetails = {
   documentType: string;
   documentNumber: string;
   verificationImage: string;
+  leftThumbFingerprint?: string;
+  rightThumbFingerprint?: string;
+  signature?: string;
 };
 
 export type TEarningDetails = {

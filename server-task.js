@@ -3,7 +3,8 @@ const path = require('path');
 const fs = require('fs');
 
 const app = express();
-const PORT = process.env.PORT || 4400;
+const PORT = process.env.PORT || 8080;
+const HOST = process.env.HOST || '0.0.0.0';
 const DIST_DIR = path.join(__dirname, 'dist/apps/task');
 
 // Health Check Endpoint for DigitalOcean/Deployment
@@ -52,8 +53,8 @@ app.get('*', (req, res) => {
   res.status(404).send('Not Found');
 });
 
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
+app.listen(PORT, HOST, () => {
+  console.log(`🚀 Server running on http://${HOST}:${PORT}`);
   console.log(`📁 Serving: ${DIST_DIR}`);
   console.log(`✅ SSG Routes: /about, /contact, /blog, /faq, etc.`);
   console.log(`✅ SPA Routes: /dashboard, /affiliate, etc.`);

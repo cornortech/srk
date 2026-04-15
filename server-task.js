@@ -6,6 +6,11 @@ const app = express();
 const PORT = process.env.PORT || 4400;
 const DIST_DIR = path.join(__dirname, 'dist/apps/task');
 
+// Health Check Endpoint for DigitalOcean/Deployment
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok', app: 'task' });
+});
+
 // Serve static assets (CSS, JS, images, etc.)
 app.use(express.static(DIST_DIR, {
   maxAge: '1d',

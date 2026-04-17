@@ -39,7 +39,7 @@ const isWithinAllowedTime = (): boolean => {
   const now = new Date();
   const hours = now.getHours();
   // Tasks are available between 7pm (19:00) and 12am (00:00)
-  return hours >= 10 && hours < 24;
+  return hours >= 19 && hours < 24;
 };
 
 export const TasksView: React.FC<TasksViewProps> = ({

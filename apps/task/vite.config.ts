@@ -10,6 +10,8 @@ export default defineConfig(() => ({
 
   base: '/', // Required for SPA routing
 
+  publicDir: 'public', // Copy public folder contents to dist root
+
   server: {
     port: 4400,
     host: 'localhost',
@@ -18,7 +20,7 @@ export default defineConfig(() => ({
     port: 4400,
     host: 'localhost',
   },
-  plugins: [react(), nxViteTsPaths(), nxCopyAssetsPlugin(['*.md'])],
+  plugins: [react(), nxViteTsPaths(), nxCopyAssetsPlugin(['*.md', 'robots.txt', 'sitemap.xml', 'ads.txt'])],
 
   build: {
     outDir: '../../dist/apps/task',

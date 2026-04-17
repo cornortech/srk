@@ -25,13 +25,27 @@ export const VerificationUploadModal: React.FC<
   const [screenshot, setScreenshot] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
-  const { uploadFile, overallProgress } = useSRKFileUpload('task');
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const { uploadFile, overallProgress, activeUploads } = useSRKFileUpload('task');
   const { taskUserID } = useTaskAuthStore();
   const submitAction = api.srkTask.srkTaskActionSubmission.useMutation();
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      // Validate file size (max 10MB)
+      if (file.size > 10 * 1024 * 1024) {
+        setUploadError('File size exceeds 10MB. Please choose a smaller file.');
+        return;
+      }
+      
+      // Validate file type
+      if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+        setUploadError('Only JPG, PNG, and WebP formats are supported.');
+        return;
+      }
+
+      setUploadError(null);
       setScreenshot(file);
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -48,9 +62,19 @@ export const VerificationUploadModal: React.FC<
     }
 
     setIsUploading(true);
+    setUploadError(null);
 
     try {
-      const { url } = await uploadFile(screenshot, 'image');
+      const { url } = await uploadFile(
+        screenshot,
+        'image',
+        undefined, // onProgress callback
+        (error) => {
+          // Error callback
+          setUploadError(error);
+          addNotification(error, 'error');
+        }
+      );
 
       submitAction.mutate(
         {
@@ -64,21 +88,22 @@ export const VerificationUploadModal: React.FC<
           onSuccess: () => {
             setIsUploading(false);
             completeTask(task.id);
-            addNotification(`Proof submitted for ${task.type} task`, 'success');
-            setTimeout(() => onClose(), 1000);
+            addNotification(`✅ Proof submitted for ${task.type} task`, 'success');
+            setTimeout(() => onClose(), 1500);
           },
           onError: (error: any) => {
             setIsUploading(false);
-            addNotification(
-              `Submission failed: ${error.body?.message || 'Unknown error'}`,
-              'error'
-            );
+            const errorMsg = error?.body?.message || 'Unknown error';
+            setUploadError(errorMsg);
+            addNotification(`Submission failed: ${errorMsg}`, 'error');
           },
         }
       );
     } catch (error: any) {
       setIsUploading(false);
-      addNotification(`Upload failed: ${error.message}`, 'error');
+      const errorMsg = error.message || 'Upload failed';
+      setUploadError(errorMsg);
+      addNotification(`Upload failed: ${errorMsg}`, 'error');
     }
   };
 
@@ -143,15 +168,37 @@ export const VerificationUploadModal: React.FC<
 
             </DashboardGlassCard>
 
+            {/* Error Message */}
+            {uploadError && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="p-4 bg-red-500/10 border border-red-500/30 rounded-xl"
+              >
+                <p className="text-sm text-red-400 flex items-start gap-2">
+                  <span>⚠️</span>
+                  <span>{uploadError}</span>
+                </p>
+              </motion.div>
+            )}
+
             {/* Upload Area */}
             <div>
               <label className="block text-sm font-medium text-zinc-400 mb-2">
                 Upload Screenshot Proof
               </label>
               <div
-                className={`border-2 border-dashed ${preview ? 'border-amber-500/50' : 'border-white/10'
-                  } rounded-xl p-8 text-center hover:border-amber-500/30 transition-colors cursor-pointer`}
+                className={`border-2 border-dashed ${
+                  uploadError
+                    ? 'border-red-500/50'
+                    : preview
+                    ? 'border-amber-500/50'
+                    : 'border-white/10'
+                } rounded-xl p-8 text-center hover:border-amber-500/30 transition-colors cursor-pointer ${
+                  isUploading ? 'pointer-events-none opacity-60' : ''
+                }`}
                 onClick={() =>
+                  !isUploading &&
                   document.getElementById('screenshot-upload')?.click()
                 }
               >
@@ -160,7 +207,7 @@ export const VerificationUploadModal: React.FC<
                   id="screenshot-upload"
                   onChange={handleFileUpload}
                   className="hidden"
-                  accept=".jpg,.jpeg,.png"
+                  accept=".jpg,.jpeg,.png,.webp"
                   disabled={isUploading}
                 />
 
@@ -172,19 +219,21 @@ export const VerificationUploadModal: React.FC<
                       className="max-h-48 mx-auto rounded-lg object-contain"
                     />
                     <p className="text-sm text-amber-400">
-                      Screenshot ready for submission
+                      ✅ Screenshot ready for submission ({(screenshot?.size || 0) / 1024 / 1024}MB)
                     </p>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setScreenshot(null);
-                        setPreview(null);
-                      }}
-                      className="text-sm text-red-400 hover:text-red-300"
-                      disabled={isUploading}
-                    >
-                      Remove
-                    </button>
+                    {!isUploading && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setScreenshot(null);
+                          setPreview(null);
+                          setUploadError(null);
+                        }}
+                        className="text-sm text-red-400 hover:text-red-300"
+                      >
+                        × Remove
+                      </button>
+                    )}
                   </div>
                 ) : (
                   <>
@@ -192,7 +241,9 @@ export const VerificationUploadModal: React.FC<
                     <p className="text-zinc-400 mb-2">
                       Click to upload screenshot
                     </p>
-                    <p className="text-xs text-zinc-500">JPG, PNG • Max 5MB</p>
+                    <p className="text-xs text-zinc-500">
+                      JPG, PNG, WebP • Max 10MB
+                    </p>
                   </>
                 )}
               </div>
@@ -200,32 +251,59 @@ export const VerificationUploadModal: React.FC<
 
             {/* Upload Progress */}
             {isUploading && (
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm text-zinc-400">
-                  <span>Uploading...</span>
-                  <span>{overallProgress}%</span>
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="space-y-3 bg-amber-500/10 border border-amber-500/20 rounded-xl p-4"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="animate-spin">⚙️</div>
+                    <span className="text-sm font-medium text-amber-400">
+                      Uploading to Firebase...
+                    </span>
+                  </div>
+                  <span className="text-sm font-bold text-amber-400">
+                    {overallProgress}%
+                  </span>
                 </div>
                 <div className="w-full h-2 bg-zinc-800 rounded-full overflow-hidden">
                   <motion.div
-                    className="h-full bg-div-to-r from-amber-500 to-yellow-500"
+                    className="h-full bg-gradient-to-r from-amber-500 to-yellow-500"
                     initial={{ width: '0%' }}
                     animate={{ width: `${overallProgress}%` }}
                     transition={{ duration: 0.3 }}
                   />
                 </div>
-              </div>
+                <p className="text-xs text-zinc-400">
+                  {overallProgress < 100
+                    ? '📤 Compressing & uploading... If stuck at 0%, check your connection'
+                    : '✅ Upload complete, processing submission...'}
+                </p>
+              </motion.div>
             )}
 
             {/* Submit Button */}
             <MagneticButton
               onClick={handleSubmit}
-              disabled={!screenshot || isUploading}
+              disabled={!screenshot || isUploading || !!uploadError}
               className="w-full"
             >
               {isUploading ? (
                 <span className="flex items-center justify-center gap-2">
-                  <RefreshCw size={16} className="animate-spin" />
-                  Submitting...
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 1, repeat: Infinity }}
+                  >
+                    <RefreshCw size={16} />
+                  </motion.div>
+                  {overallProgress < 100
+                    ? `Uploading ${overallProgress}%...`
+                    : 'Processing...'}
+                </span>
+              ) : uploadError ? (
+                <span className="flex items-center justify-center gap-2">
+                  ⚠️ Error - Try Again
                 </span>
               ) : (
                 <span className="flex items-center justify-center gap-2">

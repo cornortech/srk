@@ -23,10 +23,12 @@ const WHITE_LISTED_ORIGINS = process.env.WHITE_LISTED_ORIGINS
 
 // CORS
 
-console.log('*** whitelisted origins ***', WHITE_LISTED_ORIGINS);
+console.log('[APP] Whitelisted origins:', WHITE_LISTED_ORIGINS);
 
+// Health check endpoint - MUST be before CORS for immediate response
 app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'OK' });
+  console.log('[HEALTH] Health check requested');
+  res.status(200).json({ status: 'OK', timestamp: new Date().toISOString() });
 });
 
 app.use(

@@ -4,7 +4,6 @@ import {
 } from '@ts-rest/express/src/lib/types';
 import mongoose from 'mongoose';
 import { balancePayoutModel } from '../../model/balancePayoutModel';
-import { financeContract } from '../../../../../libs/shared/contracts/src/lib/finance/contract';
 import { balanceModel } from '../../model/balanceModel';
 import { adminBalanceModel } from '../../model/adminBalanceModel';
 import bankStatement from '../../model/bankStatement';
@@ -13,9 +12,9 @@ import { AdminSrkBankModel } from '../../model/AdminSrkBankModel';
 import { UserModel } from '../../model/userModel';
 import { BankModel } from '../../model/bankModel';
 import { SrkUniversityBankModel } from '../../model/srkUniversityBankModel';
-import { TGetSrkBonusCashFlow } from '../../../../../libs/shared/contracts/src/lib/finance/schema';
 import { Types } from 'mongoose';
 import { EarningStatementModel } from '../../model/earningStatementModel';
+import { financeContract, TGetSrkBonusCashFlow } from '@srk/shared/contracts';
 
 const getAllBalancePayoutOfUser: AppRouteImplementationOrOptions<
   typeof financeContract.getAllBalancePayoutOfUser
@@ -491,6 +490,7 @@ const getAdminEarningDetails: AppRouteImplementationOrOptions<
       },
     };
   } catch (error) {
+    console.error('Error fetching admin earning details:', error);
     return {
       status: 500,
       body: {
@@ -554,6 +554,7 @@ const getBankStatementOfUser: AppRouteImplementation<
       ),
     };
   } catch (error) {
+    console.error('Error fetching bank statement:', error); 
     return {
       status: 500,
       body: {

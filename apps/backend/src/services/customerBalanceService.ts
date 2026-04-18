@@ -1,4 +1,6 @@
 import { balanceModel } from '../model/balanceModel';
+import { TourTargetModel } from '../model/TourTargetModel';
+import { TourTargetAchievementModel } from '../model/TourTargetAchievementModel';
 
 interface TUpdateCustomerBalance {
   userId: string;
@@ -16,33 +18,61 @@ class CustomerBalanceService {
     srkBonus = 0,
     totalEarnings = 0,
   }: TUpdateCustomerBalance): Promise<void> {
+    // Check if there's an active tour target
+    const activeTourTarget = await TourTargetModel.findOne({ isActive: true });
+
     const customerBalance = await balanceModel.findOne({ userId });
 
     if (!customerBalance) {
       // Create new customer balance entry if not found
       await balanceModel.create({
         userId,
-        balance,
-        // eventWallet, // when event status is on
-        // tourEventWallet: eventWallet, // when target status is on
-
-        tourEventWallet: 0,
-        srkBonus,
+        balance: activeTourTarget ? 0 : balance, // Only deposit to balance if no active tour
         totalEarnings,
-        // tourBalance: balance, // when target status is on
-        tourBalance: 0, //
+        srkBonus,
+        tourBalance: 0,
+        tourEventWallet: 0,
+        totalWithdraw: 0,
+        totalTds: 0,
       });
     } else {
-      customerBalance.balance += balance;
-
-      // customerBalance.eventWallet += eventWallet; // when event status is on
-      // customerBalance.tourEventWallet += eventWallet; // when target status is on
+      // Only deposit to balance if no active tour target
+      if (!activeTourTarget) {
+        customerBalance.balance += balance;
+      }
 
       customerBalance.srkBonus += srkBonus;
       customerBalance.totalEarnings += totalEarnings;
-      // customerBalance.tourBalance += balance; // when target status is on
 
       await customerBalance.save();
+    }
+
+    // If there's an active tour target, create/update tourTargetAchievement
+    if (activeTourTarget && balance > 0) {
+      let achievement = await TourTargetAchievementModel.findOne({
+        userId,
+        tourId: activeTourTarget._id,
+      });
+
+      if (!achievement) {
+        // Create new achievement record
+        achievement = await TourTargetAchievementModel.create({
+          userId,
+          tourId: activeTourTarget._id,
+          collectedAmount: balance,
+          status: 'in-progress',
+        });
+      } else {
+        // Update existing achievement record
+        achievement.collectedAmount += balance;
+        
+        // Check if target is reached
+        if (achievement.collectedAmount >= activeTourTarget.targetAmount) {
+          achievement.status = 'completed';
+        }
+
+        await achievement.save();
+      }
     }
   }
 }

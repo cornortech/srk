@@ -1,3 +1,4 @@
+require("dotenv").config();
 const mongoose = require("mongoose");
 const path = require("path");
 
@@ -25,7 +26,7 @@ const tourTargetSchema = new mongoose.Schema(
 const TourTargetModel = mongoose.model("TourTarget", tourTargetSchema);
 
 async function createPokhariaTourTarget() {
-  const MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost:27017/srk";
+  const MONGODB_URI = process.env.DATABASE_URL || process.env.MONGODB_URI || "mongodb://localhost:27017/srk";
   
   try {
     await mongoose.connect(MONGODB_URI);
@@ -49,6 +50,7 @@ async function createPokhariaTourTarget() {
         "Local Culture Tour",
         "Mountain Views",
       ],
+      isActive: true,
     });
 
     const savedTour = await pokharaTour.save();

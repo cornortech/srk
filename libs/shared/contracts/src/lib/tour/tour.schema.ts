@@ -13,6 +13,17 @@ export const getUserTourSchema = z.array(
   })
 );
 
+export const getActiveTourAchievementsSchema = z.array(
+  z.object({
+    userId: z.string(),
+    firstName: z.string(),
+    lastName: z.string(),
+    email: z.string().email(),
+    phoneNumber: z.string(),
+    collectedAmount: z.number(),
+  })
+);
+
 export const getTourTargetSchema = z.array(
   z.object({
     _id: z.string(),
@@ -26,6 +37,9 @@ export const getTourTargetSchema = z.array(
     rating: z.number().min(0).max(5),
     image: z.string(),
     features: z.array(z.string()),
+    isActive: z.boolean(),
+    collectedAmount: z.number(),
+    createdAt: z.string(),
   })
 );
 

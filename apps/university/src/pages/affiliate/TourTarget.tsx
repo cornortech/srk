@@ -11,13 +11,12 @@ import {
     MapPin,
     Target,
     Star,
+    Clock,
 } from "lucide-react"
 import { useQuery } from "@tanstack/react-query"
 import { tourApi } from "../../lib/api/tour/tour.api"
 import { TTourTarget } from "../../lib/types/entities"
 import useAuthStore from "../../store/useAuth"
-import { TEarningDetails } from "../../lib/types"
-import { getEarningDetailsofUserApi } from "../../lib/apiClient"
 
 
 export default function TourTargetsPage() {
@@ -25,23 +24,17 @@ export default function TourTargetsPage() {
 
     const { userDetails } = useAuthStore();
 
-    const { data: earningsData } = useQuery<TEarningDetails | null>({
-        queryKey: ["earnings"],
-        queryFn: async () => {
-            const userId = userDetails?._id;
-            if (!userId) return;
-            return getEarningDetailsofUserApi(userId);
-        },
-        enabled: !!userDetails?._id,
-    });
-
-
     const { data: tours } = useQuery<TTourTarget[]>({
         queryKey: ["tourTargets"],
         queryFn: async () => {
             return tourApi.getTourTargets()
-        }
+        },
+        enabled: !!userDetails?._id,
     })
+
+    if (tours) {
+        console.log('Tours loaded:', tours[0]?.createdAt, tours[0]?.duration);
+    }
 
 
 
@@ -55,6 +48,30 @@ export default function TourTargetsPage() {
                 return "danger"
             default:
                 return "default"
+        }
+    }
+
+    const isImageUrl = (str: string) => {
+        try {
+            const url = new URL(str);
+            return url.protocol === 'http:' || url.protocol === 'https:';
+        } catch {
+            return false;
+        }
+    }
+
+    const calculateRemainingDays = (createdAt: string, duration: number) => {
+        try {
+            if (!createdAt || duration <= 0) return 0;
+            const created = new Date(createdAt);
+            if (isNaN(created.getTime())) return 0; // Invalid date
+            const deadline = new Date(created.getTime() + duration * 24 * 60 * 60 * 1000);
+            const now = new Date();
+            const remaining = Math.ceil((deadline.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+            return Math.max(remaining, 0); // Return 0 if deadline has passed
+        } catch (error) {
+            console.error('Error calculating remaining days:', error, { createdAt, duration });
+            return 0;
         }
     }
 
@@ -79,20 +96,31 @@ export default function TourTargetsPage() {
                 {/* Existing Tours List */}
                 <div className="space-y-4">
                     <h2 className="text-xl font-semibold text-foreground">
-                        Targets -  ({tours.length})
+                        Targets -  ({tours.filter(tour => tour.isActive).length})
                     </h2>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {tours.map((tour) => (
-                            <Card key={tour._id} className="hover:shadow-lg transition-all">
+                        {tours.filter(tour => tour.isActive).map((tour) => (
+                            <Card key={tour._id} className={`hover:shadow-lg transition-all ${!tour.isActive ? 'opacity-75' : ''}`}>
                                 <CardHeader className="pb-2 flex justify-between items-start">
                                     <div className="flex items-center gap-3">
-                                        <span className="text-2xl">{tour.image}</span>
+                                        {isImageUrl(tour.image) ? (
+                                            <img
+                                                src={tour.image}
+                                                alt={tour.destination}
+                                                className="w-12 h-12 rounded-lg object-cover"
+                                            />
+                                        ) : (
+                                            <span className="text-2xl">{tour.image}</span>
+                                        )}
                                         <div>
                                             <h3 className="font-semibold">{tour.destination}</h3>
                                             <Badge color={getDifficultyColor(tour.difficulty)}>{tour.difficulty}</Badge>
                                         </div>
                                     </div>
+                                    <Badge color={tour.isActive ? "success" : "warning"}>
+                                        {tour.isActive ? "Active" : "Inactive"}
+                                    </Badge>
                                 </CardHeader>
 
                                 <CardBody className="space-y-3">
@@ -112,6 +140,10 @@ export default function TourTargetsPage() {
                                             <span className="text-muted-foreground">{tour.duration}</span>
                                         </div> */}
                                         <div className="flex items-center gap-2">
+                                            <Clock className="h-3 w-3 text-orange-500" />
+                                            <span className="text-muted-foreground">{calculateRemainingDays(tour.createdAt, tour.duration)} days remaining</span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
                                             <MapPin className="h-3 w-3 text-muted-foreground" />
                                             <span className="text-muted-foreground">{tour.accommodation}</span>
                                         </div>
@@ -123,15 +155,15 @@ export default function TourTargetsPage() {
                                     <div className="space-y-2">
                                         <div className="flex justify-between items-center">
                                             <span className="text-sm font-medium text-foreground">Progress</span>
-                                            <span className="text-sm font-bold text-primary">{calculateTargetProgress(earningsData?.tourBalance || 0, tour.targetAmount)}%</span>
+                                            <span className="text-sm font-bold text-primary">{calculateTargetProgress(tour.collectedAmount, tour.targetAmount)}%</span>
                                         </div>
-                                        <Progress value={calculateTargetProgress(earningsData?.tourBalance || 0, tour.targetAmount)} className="h-2" />
+                                        <Progress value={calculateTargetProgress(tour.collectedAmount, tour.targetAmount)} className="h-2" />
                                         <div className="flex justify-between text-xs text-muted-foreground">
-                                            <span>Earned - Nrs.{earningsData?.tourBalance}</span>
+                                            <span>Earned - Nrs.{tour.collectedAmount}</span>
                                             <span>Nrs.{tour.targetAmount.toLocaleString()}</span>
                                         </div>
                                         {/* {remainingAmount > 0 && ( */}
-                                        <p className="text-xs text-muted-foreground"> Nrs. {tour.targetAmount - (earningsData?.tourBalance || 0)} remaining</p>
+                                        <p className="text-xs text-muted-foreground"> Nrs. {tour.targetAmount - tour.collectedAmount} remaining</p>
                                         {/* )} */}
                                     </div>
 

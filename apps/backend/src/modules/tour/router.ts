@@ -6,4 +6,5 @@ const s = initServer();
 export const tourRouter = s.router(tourContract, {
   getUserTourTargets: tourQuery.getUserTourTargets,
   getTourTargets: tourQuery.getTourTargets,
+  getActiveTourAchievements: tourQuery.getActiveTourAchievements,
 });

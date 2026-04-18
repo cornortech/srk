@@ -134,5 +134,8 @@ export type TTourTarget = {
   rating: number;
   image: string;
   features: string[];
+  isActive: boolean;
+  collectedAmount: number;
+  createdAt: string;
 
 };

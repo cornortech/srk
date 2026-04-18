@@ -38,6 +38,7 @@ interface TourTarget {
     rating: number
     image: string
     features: string[]
+    isActive?: boolean
 }
 
 const existingTours: TourTarget[] = [
@@ -57,6 +58,7 @@ const existingTours: TourTarget[] = [
             "Adventure Sports",
             "Cultural Sites",
         ],
+        isActive: false,
     },
     {
         id: "everest",
@@ -69,6 +71,7 @@ const existingTours: TourTarget[] = [
         rating: 4.9,
         image: "🏔️",
         features: ["High Altitude Trek", "Sherpa Culture", "Stunning Views", "Adventure"],
+        isActive: true,
     },
 ]
 
@@ -184,7 +187,14 @@ export default function AdminTourTargetsPage() {
                 return "default"
         }
     }
-
+    const isImageUrl = (str: string) => {
+        try {
+            const url = new URL(str);
+            return url.protocol === 'http:' || url.protocol === 'https:';
+        } catch {
+            return false;
+        }
+    }
     return (
         <div className="min-h-screen bg-background">
             {/* Header */}
@@ -354,13 +364,26 @@ export default function AdminTourTargetsPage() {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {tours.map((tour) => (
-                            <Card key={tour.id} className="hover:shadow-lg transition-all">
+                            <Card key={tour.id} className={`hover:shadow-lg transition-all ${!tour.isActive ? 'opacity-75' : ''}`}>
                                 <CardHeader className="pb-2 flex justify-between items-start">
                                     <div className="flex items-center gap-3">
-                                        <span className="text-2xl">{tour.image}</span>
+                                        {isImageUrl(tour.image) ? (
+                                            <img
+                                                src={tour.image}
+                                                alt={tour.destination}
+                                                className=\"w-12 h-12 rounded-lg object-cover\"
+                                            />
+                                        ) : (
+                                            <span className=\"text-2xl\">{tour.image}</span>
+                                        )}
                                         <div>
                                             <h3 className="font-semibold">{tour.destination}</h3>
-                                            <Badge color={getDifficultyColor(tour.difficulty)}>{tour.difficulty}</Badge>
+                                            <div className=\"flex gap-2 mt-1\">
+                                                <Badge color={getDifficultyColor(tour.difficulty)}>{tour.difficulty}</Badge>
+                                                <Badge color={tour.isActive ? \"success\" : \"warning\"}>
+                                                    {tour.isActive ? \"Active\" : \"Inactive\"}
+                                                </Badge>
+                                            </div>
                                         </div>
                                     </div>
                                     <div className="flex gap-1">

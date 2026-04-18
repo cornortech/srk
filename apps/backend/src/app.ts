@@ -8,6 +8,7 @@ import cronJobInit from './utils/cronjob';
 import { router } from './modules';
 import ssoRouter from './modules/sso/router';
 import { apiContract } from '@srk/shared/contracts';
+import { JwtAuthMiddleware } from './utils/middleware';
 
 export const app = express();
 
@@ -53,6 +54,10 @@ app.use(
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerApiDocs));
 
 app.use(ssoRouter);
+
+// Apply JWT middleware to protected tour endpoints
+app.use('/tour/targets', JwtAuthMiddleware);
+// app.use('/tour/active-achievements', JwtAuthMiddleware);
 
 createExpressEndpoints(apiContract, router, app);
 cronJobInit();

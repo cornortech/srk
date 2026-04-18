@@ -1,6 +1,6 @@
 import { initContract } from "@ts-rest/core";
 import { ErrorSchema } from "../common";
-import {  getTourTargetSchema, getUserTourSchema } from "./tour.schema";
+import {  getTourTargetSchema, getUserTourSchema, createTourTargetSchema, tourTargetResponseSchema } from "./tour.schema";
 
 const c = initContract();
 

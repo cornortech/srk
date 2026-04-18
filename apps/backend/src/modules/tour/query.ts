@@ -1,7 +1,7 @@
 import { AppRouteImplementationOrOptions } from '@ts-rest/express/src/lib/types';
-import { tourContract } from '../../../../../libs/shared/contracts/src/lib/tour/tour.contract';
 import { balanceModel } from '../../model/balanceModel';
 import { TourTargetModel } from '../../model/TourTargetModel';
+import { tourContract } from '@srk/shared/contracts';
 
 const getUserTourTargets: AppRouteImplementationOrOptions<
   typeof tourContract.getUserTourTargets

@@ -28,3 +28,29 @@ export const getTourTargetSchema = z.array(
     features: z.array(z.string()),
   })
 );
+
+export const createTourTargetSchema = z.object({
+  destination: z.string(),
+  description: z.string(),
+  targetAmount: z.number(),
+  duration: z.number(),
+  accommodation: z.string(),
+  difficulty: z.enum(["Easy", "Medium", "Hard"]),
+  rating: z.number().min(0).max(5),
+  image: z.string(),
+  features: z.array(z.string()).optional(),
+});
+
+export const tourTargetResponseSchema = z.object({
+  _id: z.string(),
+  destination: z.string(),
+  description: z.string(),
+  targetAmount: z.number(),
+  currentAmount: z.number(),
+  duration: z.number(),
+  accommodation: z.string(),
+  difficulty: z.enum(["Easy", "Medium", "Hard"]),
+  rating: z.number().min(0).max(5),
+  image: z.string(),
+  features: z.array(z.string()),
+});

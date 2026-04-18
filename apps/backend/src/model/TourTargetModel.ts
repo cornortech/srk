@@ -12,6 +12,9 @@ export interface ITourTarget extends Document {
   rating: number;
   image: string;
   features: string[];
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const TourTargetSchema = new Schema<ITourTarget>(
@@ -30,6 +33,7 @@ const TourTargetSchema = new Schema<ITourTarget>(
     rating: { type: Number, default: 0, min: 0, max: 5 },
     image: { type: String, default: "" },
     features: [{ type: String }],
+    isActive: { type: Boolean, default: true },
   },
   { timestamps: true }
 );

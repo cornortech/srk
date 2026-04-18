@@ -1,6 +1,6 @@
 import { initContract } from "@ts-rest/core";
 import { ErrorSchema } from "../common";
-import {  getTourTargetSchema, getUserTourSchema, createTourTargetSchema, tourTargetResponseSchema } from "./tour.schema";
+import {  getTourTargetSchema, getUserTourSchema, createTourTargetSchema, tourTargetResponseSchema, getActiveTourAchievementsSchema } from "./tour.schema";
 
 const c = initContract();
 
@@ -26,5 +26,16 @@ export const tourContract = c.router({
       500: ErrorSchema,
     },
     summary: "Get tour targets",
+  },
+  getActiveTourAchievements: {
+    method: "GET",
+    path: "/tour/active-achievements",
+    responses: {
+      200: getActiveTourAchievementsSchema,
+      403: ErrorSchema,
+      404: ErrorSchema,
+      500: ErrorSchema,
+    },
+    summary: "Get achievements for the active tour with user details",
   },
 });

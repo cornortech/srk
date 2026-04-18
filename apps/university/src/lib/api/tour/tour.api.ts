@@ -15,12 +15,27 @@ export type TTourTargetUser = {
   tourEventWallet: number;
 };
 
+export type TActiveTourAchievement = {
+  userId: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber: string;
+  collectedAmount: number;
+};
+
 const getTourTargetUsers = async (): Promise<TTourTargetUser[]> => {
   const response = await apiClient.get("/tour");
+  return response.data;
+};
+
+const getActiveTourAchievements = async (): Promise<TActiveTourAchievement[]> => {
+  const response = await apiClient.get("/tour/active-achievements");
   return response.data;
 };
 
 export const tourApi = {
   getTourTargets,
   getTourTargetUsers,
+  getActiveTourAchievements,
 };

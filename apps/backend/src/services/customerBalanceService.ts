@@ -27,7 +27,7 @@ class CustomerBalanceService {
       // Create new customer balance entry if not found
       await balanceModel.create({
         userId,
-        balance: activeTourTarget ? 0 : balance, // Only deposit to balance if no active tour
+        balance: balance, 
         totalEarnings,
         srkBonus,
         tourBalance: 0,
@@ -37,10 +37,7 @@ class CustomerBalanceService {
       });
     } else {
       // Only deposit to balance if no active tour target
-      if (!activeTourTarget) {
-        customerBalance.balance += balance;
-      }
-
+      customerBalance.balance += balance;
       customerBalance.srkBonus += srkBonus;
       customerBalance.totalEarnings += totalEarnings;
 
@@ -65,7 +62,7 @@ class CustomerBalanceService {
       } else {
         // Update existing achievement record
         achievement.collectedAmount += balance;
-        
+
         // Check if target is reached
         if (achievement.collectedAmount >= activeTourTarget.targetAmount) {
           achievement.status = 'completed';

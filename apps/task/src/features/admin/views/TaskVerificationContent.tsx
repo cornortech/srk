@@ -1,15 +1,10 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Clock,
-  DollarSign,
-  CheckCircle,
-  X,
   ChevronLeft,
   ChevronRight,
   CheckSquare,
   Square,
-  Trash2,
   Eye,
   ArrowLeft,
   Mail,
@@ -21,7 +16,7 @@ import {
 import { RejectionModal } from '../components/modals/RejectionModal';
 import { BulkApprovalModal } from '../components/modals/BulkApprovalModal';
 import { GoldButton } from '../components/ui/GoldButton';
-import { CARD_BG, GOLD_PRIMARY, DARK_BG, TEXT_LIGHT } from '../constants/theme';
+import { CARD_BG } from '../constants/theme';
 import { api } from '../../../lib/api';
 
 export const TaskVerificationContent: React.FC = () => {
@@ -29,6 +24,7 @@ export const TaskVerificationContent: React.FC = () => {
   const [viewingUserName, setViewingUserName] = useState<string>('');
   const [page, setPage] = useState(1);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [selectCount, setSelectCount] = useState<number | ''>('');
   const [rejectionModal, setRejectionModal] = useState<{
     isOpen: boolean;
     submissionId: string | null;
@@ -196,6 +192,16 @@ export const TaskVerificationContent: React.FC = () => {
       setSelectedIds(new Set(submissions.map((s) => s._id)));
     }
   }, [selectedIds, submissions]);
+
+  const handleSelectCount = useCallback(() => {
+    if (selectCount === '' || selectCount <= 0) {
+      setSelectedIds(new Set());
+      return;
+    }
+    const count = Math.min(Number(selectCount), submissions.length);
+    const selectedList = submissions.slice(0, count).map((s) => s._id);
+    setSelectedIds(new Set(selectedList));
+  }, [selectCount, submissions]);
 
   const toggleSelect = useCallback((id: string) => {
     setSelectedIds((prev) => {
@@ -383,11 +389,11 @@ export const TaskVerificationContent: React.FC = () => {
                   </td>
                   <td className="py-4 px-6 text-center">
                     <div className="inline-flex items-center gap-2">
-                       <span className="text-emerald-400 font-bold">
-                         {user.approvedCount}
-                       </span>
-                       <span className="text-gray-600">/</span>
-                       <span className="text-gray-400 font-bold">{user.totalSubmissions}</span>
+                      <span className="text-emerald-400 font-bold">
+                        {user.approvedCount}
+                      </span>
+                      <span className="text-gray-600">/</span>
+                      <span className="text-gray-400 font-bold">{user.totalSubmissions}</span>
                     </div>
                   </td>
                   <td className="py-4 px-6 text-center">
@@ -516,19 +522,38 @@ export const TaskVerificationContent: React.FC = () => {
               </p>
             </div>
           </div>
-          <button
-            onClick={toggleSelectAll}
-            className="flex items-center gap-2 text-xs font-bold uppercase text-[#E1BA73] hover:text-white transition-all bg-[#E1BA73]/5 px-4 py-2 rounded-lg border border-[#E1BA73]/20 hover:border-[#E1BA73]/50"
-          >
-            {selectedIds.size === submissions.length ? (
-              <CheckSquare size={16} />
-            ) : (
-              <Square size={16} />
-            )}
-            {selectedIds.size === submissions.length
-              ? 'Deselect All'
-              : 'Select All'}
-          </button>
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              onClick={toggleSelectAll}
+              className="flex items-center gap-2 text-xs font-bold uppercase text-[#E1BA73] hover:text-white transition-all bg-[#E1BA73]/5 px-4 py-2 rounded-lg border border-[#E1BA73]/20 hover:border-[#E1BA73]/50"
+            >
+              {selectedIds.size === submissions.length ? (
+                <CheckSquare size={16} />
+              ) : (
+                <Square size={16} />
+              )}
+              {selectedIds.size === submissions.length
+                ? 'Deselect All'
+                : 'Select All'}
+            </button>
+            <div className="flex items-center gap-2">
+              <input
+                type="number"
+                min="0"
+                max={submissions.length}
+                value={selectCount}
+                onChange={(e) => setSelectCount(e.target.value === '' ? '' : Math.max(0, parseInt(e.target.value) || 0))}
+                placeholder="Count"
+                className="w-20 px-3 py-2 text-xs font-bold bg-gray-800 text-white rounded-lg border border-gray-600 focus:border-[#E1BA73] focus:outline-none transition-colors"
+              />
+              <button
+                onClick={handleSelectCount}
+                className="flex items-center gap-1 text-xs font-bold uppercase text-white transition-all bg-[#E1BA73]/20 px-3 py-2 rounded-lg border border-[#E1BA73]/30 hover:bg-[#E1BA73]/30 hover:border-[#E1BA73]/50"
+              >
+                Select
+              </button>
+            </div>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-6">
@@ -540,11 +565,10 @@ export const TaskVerificationContent: React.FC = () => {
             return (
               <div
                 key={submission._id}
-                className={`p-5 rounded-xl border transition-all relative ${
-                  isSelected
+                className={`p-5 rounded-xl border transition-all relative ${isSelected
                     ? 'border-[#E1BA73] shadow-[0_0_20px_rgba(225,186,115,0.15)] ring-1 ring-[#E1BA73]/30'
                     : 'border-gray-700/50 shadow-xl'
-                }`}
+                  }`}
                 style={{ background: CARD_BG }}
               >
                 {/* Selection Overlay */}

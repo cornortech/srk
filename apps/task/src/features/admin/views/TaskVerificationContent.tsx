@@ -25,6 +25,7 @@ export const TaskVerificationContent: React.FC = () => {
   const [page, setPage] = useState(1);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [selectCount, setSelectCount] = useState<number | ''>('');
+  const [userSearch, setUserSearch] = useState('');
   const [rejectionModal, setRejectionModal] = useState<{
     isOpen: boolean;
     submissionId: string | null;
@@ -117,6 +118,17 @@ export const TaskVerificationContent: React.FC = () => {
     });
     return Array.from(userMap.values());
   }, [usersData]);
+
+  const filteredPendingUsers = useMemo(() => {
+    const query = userSearch.trim().toLowerCase();
+    if (!query) return pendingUsers;
+
+    return pendingUsers.filter((user: { fullName?: string; email?: string }) => {
+      const fullName = (user.fullName || '').toLowerCase();
+      const email = (user.email || '').toLowerCase();
+      return fullName.includes(query) || email.includes(query);
+    });
+  }, [pendingUsers, userSearch]);
 
   const submissions = useMemo(() => submissionsData?.body?.data || [], [submissionsData]);
 
@@ -319,7 +331,7 @@ export const TaskVerificationContent: React.FC = () => {
 
     return (
       <div className="space-y-6">
-        <div className="flex justify-between items-center border-b border-[#E1BA73]/30 pb-4 text-white">
+        <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 border-b border-[#E1BA73]/30 pb-4 text-white">
           <div>
             <h2 className="text-xl sm:text-2xl font-bold flex items-center gap-2">
               <User size={24} className="text-[#E1BA73]" /> Pending Submission Users
@@ -328,8 +340,17 @@ export const TaskVerificationContent: React.FC = () => {
               Total Pending submissions: {usersData?.body?.totalSubmissionsCount || 0}
             </p>
             <p className="text-xs text-gray-500 uppercase tracking-wider font-bold mt-2">
-              Showing {pendingUsers.length} user on this page • {usersData?.body?.totalRecords || 0} unique submissions total
+              Showing {filteredPendingUsers.length} user on this page • {usersData?.body?.totalRecords || 0} unique submissions total
             </p>
+          </div>
+          <div className="w-full md:w-80">
+            <input
+              type="text"
+              value={userSearch}
+              onChange={(e) => setUserSearch(e.target.value)}
+              placeholder="Search by name or email"
+              className="w-full px-4 py-2.5 text-sm font-semibold bg-[#24201D] text-white rounded-lg border border-gray-700 focus:border-[#E1BA73] focus:outline-none placeholder:text-gray-500"
+            />
           </div>
         </div>
 
@@ -347,7 +368,7 @@ export const TaskVerificationContent: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-800">
-              {pendingUsers.map((user) => (
+              {filteredPendingUsers.map((user) => (
                 <tr
                   key={user._id}
                   className="hover:bg-white/5 transition-colors group"
@@ -411,6 +432,13 @@ export const TaskVerificationContent: React.FC = () => {
                   </td>
                 </tr>
               ))}
+              {filteredPendingUsers.length === 0 && (
+                <tr>
+                  <td colSpan={7} className="py-8 px-6 text-center text-sm text-gray-500 font-semibold">
+                    No users found for this search.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

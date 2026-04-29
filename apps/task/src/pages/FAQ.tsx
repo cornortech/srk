@@ -49,7 +49,7 @@ export const FAQ = () => {
     {
       category: 'Tasks & Earnings',
       question: 'How much can I realistically earn on SRK Task?',
-      answer: 'Earnings on SRK Task are not guaranteed and vary significantly based on your profile rating, the tasks you choose, how consistently you work, and the quality of your submissions. New members starting with easier tasks typically earn lower amounts per task. As your profile rating increases and you unlock premium tasks, the per-task earnings increase accordingly. SRK Task is a supplemental income platform — it rewards consistent, quality effort over time. Please read our Earnings Disclaimer for a full and honest explanation.',
+      answer: 'Earnings on SRK Task are not guaranteed and vary significantly based on your profile rating, the tasks you choose, how consistently you work, and the quality of your submissions. New members starting with easier tasks typically earn lower amounts per task. As your profile rating increases and you unlock premium tasks, the per-task earnings increase accordingly. SRK Task is a supplemental experience platform — it rewards consistent, quality effort over time. Please read our Earnings Disclaimer for a full and honest explanation.',
     },
     {
       category: 'Tasks & Earnings',
@@ -148,7 +148,7 @@ export const FAQ = () => {
     {
       category: 'Earnings & Disclaimers',
       question: 'Are earnings on SRK Task guaranteed?',
-      answer: 'No. Earnings on SRK Task are not guaranteed in any amount or frequency. Income depends on multiple variables outside SRK Task\'s control: task availability at any given time, your profile rating and access tier, the quality of your submissions, your account standing, and the consistency of your activity. SRK Task provides a platform and infrastructure for verified engagement work — it does not guarantee any specific outcome. For full details, see our Earnings Disclaimer page.',
+      answer: 'No. Earnings on SRK Task are not guaranteed in any amount or frequency. experience depends on multiple variables outside SRK Task\'s control: task availability at any given time, your profile rating and access tier, the quality of your submissions, your account standing, and the consistency of your activity. SRK Task provides a platform and infrastructure for verified engagement work — it does not guarantee any specific outcome. For full details, see our Earnings Disclaimer page.',
     },
     {
       category: 'Earnings & Disclaimers',
@@ -162,8 +162,8 @@ export const FAQ = () => {
     },
     {
       category: 'Earnings & Disclaimers',
-      question: 'Can SRK Task be used as a primary income source?',
-      answer: 'SRK Task is designed and positioned as a supplemental income platform. It provides a legitimate, structured way for verified individuals to monetize their social media presence alongside their primary income. While top-performing, highly-active members may earn significant amounts, SRK Task should not be treated as a replacement for stable employment or a primary livelihood. Please make financial decisions based on realistic assessment of your own activity levels and the platform\'s variable nature.',
+      question: 'Can SRK Task be used as a primary experience source?',
+      answer: 'SRK Task is designed and positioned as a supplemental experience platform. It provides a legitimate, structured way for verified individuals to monetize their social media presence alongside their primary experience. While top-performing, highly-active members may earn significant amounts, SRK Task should not be treated as a replacement for stable employment or a primary livelihood. Please make financial decisions based on realistic assessment of your own activity levels and the platform\'s variable nature.',
     },
     {
       category: 'Earnings & Disclaimers',

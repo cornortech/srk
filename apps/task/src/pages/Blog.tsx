@@ -25,18 +25,18 @@ export const Blog = () => {
     {
       id: '1',
       slug: 'earn-1000-monthly-task-platform',
-      title: 'How to Earn $1,000+ Monthly on Task Platforms: Complete Strategy',
-      excerpt: 'Discover proven strategies used by top earners to generate consistent $1,000+ monthly income from completing verified tasks.',
-      category: 'Earning Strategies',
+      title: 'How to Progress the value Monthly on Task Platforms: Complete Strategy',
+      excerpt: 'Discover proven strategies used by top earners to generate consistent $1,000+ monthly experience from completing verified tasks.',
+      category: 'Progress Strategies',
       date: 'March 18, 2026',
       author: 'SRK Task Team',
       readTime: '12 min',
       image: '📈',
-      content: `Earning $1,000 or more monthly on task platforms is entirely achievable with the right strategy and consistent effort. Many SRK Task members generate significant monthly income by understanding platform mechanics, optimizing their workflow, and scaling their operations strategically.
+      content: `Progress $1,000 or more monthly on task platforms is entirely achievable with the right strategy and consistent effort. Many SRK Task members generate significant monthly experience by understanding platform mechanics, optimizing their workflow, and scaling their operations strategically.
 
-## Understanding the Income Potential
+## Understanding the experience Potential
 
-Task platforms like SRK Task offer diverse earning opportunities ranging from simple social media engagement tasks ($0.50-$2) to premium tasks that pay $50-$200+. The income structure is designed so that users who build higher ratings and specialize in certain task types can significantly increase their hourly rate.
+Task platforms like SRK Task offer diverse Progress opportunities ranging from simple social media engagement tasks ($0.50-$2) to premium tasks that pay $50-$200+. The experience structure is designed so that users who build higher ratings and specialize in certain task types can significantly increase their hourly rate.
 
 ## The 5-Step Strategy to $1,000+ Monthly
 
@@ -66,7 +66,7 @@ Not all tasks pay equally. Analyze which categories generate the best hourly rat
 - Social media engagement: $2-$5 per task (5-15 minutes)
 - Survey completion: $3-$15 per task (5-20 minutes)
 
-If you're earning $2-3 per task but it takes 20 minutes, that's only $6-9 per hour. Focus instead on tasks paying $10-15 that take 15-20 minutes ($30-60 per hour).
+If you're Progress $2-3 per task but it takes 20 minutes, that's only $6-9 per hour. Focus instead on tasks paying $10-15 that take 15-20 minutes ($30-60 per hour).
 
 ### Step 3: Optimize Your Workflow (Week 5+)
 
@@ -109,7 +109,7 @@ Examples of premium tasks:
 
 If you complete just 3-5 premium tasks daily at $50 average, that's $150-250 daily.
 
-### Step 5: Build Multiple Income Streams
+### Step 5: Build Multiple experience Streams
 
 Advanced earners don't rely on single task types. They diversify:
 
@@ -118,11 +118,11 @@ Advanced earners don't rely on single task types. They diversify:
 - 50% time on medium-pay premium tasks (brand collaborations)
 - 20% time on highest-pay specialized tasks (video creation, consulting)
 
-This distribution manages risk (if one category has fewer tasks, you still earn from others) while maximizing income.
+This distribution manages risk (if one category has fewer tasks, you still earn from others) while maximizing experience.
 
 ## Scaling to $1,500+ Monthly
 
-Once you're consistently earning $1,000+:
+Once you're consistently Progress $1,000+:
 
 1. **Increase daily time** from 3-4 hours to 4-6 hours
 2. **Teach others** - referral bonuses for bringing new users
@@ -168,9 +168,9 @@ The difference? Consistency, optimization, and specialization.
 
 ## Conclusion
 
-Earning $1,000+ monthly on SRK Task is realistic with dedication and strategy. The platform provides the tools - your job is to use them efficiently. Start with foundations (high rating), identify your best-paying niches, and optimize your workflow. Most successful users reach $1,000+ monthly income within 2-3 months of consistent effort.
+Progress $1,000+ monthly on SRK Task is realistic with dedication and strategy. The platform provides the tools - your job is to use them efficiently. Start with foundations (high rating), identify your best-paying niches, and optimize your workflow. Most successful users reach $1,000+ monthly experience within 2-3 months of consistent effort.
 
-Remember: This isn't passive income. It requires work. But it's flexible work you can do from anywhere, on your schedule, which is why so many people choose task platforms.`,
+Remember: This isn't passive experience. It requires work. But it's flexible work you can do from anywhere, on your schedule, which is why so many people choose task platforms.`,
     },
     {
       id: '2',
@@ -182,7 +182,7 @@ Remember: This isn't passive income. It requires work. But it's flexible work yo
       author: 'SRK Task Team',
       readTime: '10 min',
       image: '❌',
-      content: `Task rejections are one of the fastest ways to damage your rating and reduce your earning potential. Understanding why rejections happen and how to prevent them is critical to success on SRK Task.
+      content: `Task rejections are one of the fastest ways to damage your rating and reduce your Progress potential. Understanding why rejections happen and how to prevent them is critical to success on SRK Task.
 
 ## Why Task Rejections Happen
 
@@ -388,14 +388,14 @@ If your task IS rejected:
     {
       id: '3',
       slug: 'best-time-complete-tasks-earn-more',
-      title: 'Best Times to Complete Tasks: When to Earn Maximum Money',
-      excerpt: 'Strategic timing can increase your earnings by 300%. Learn when tasks pay the most and when to schedule your work.',
-      category: 'Earning Strategies',
+      title: 'Best Times to Complete Tasks: When to Progress the maximum value',
+      excerpt: 'Strategic timing can increase your Progresss by 300%. Learn when tasks pay the most and when to schedule your work.',
+      category: 'Progress Strategies',
       date: 'March 14, 2026',
       author: 'SRK Task Team',
       readTime: '8 min',
       image: '⏰',
-      content: `Timing isn't just about meeting deadlines - it's about maximizing earnings. Strategic task scheduling can increase your hourly rate by up to 300%.
+      content: `Timing isn't just about meeting deadlines - it's about maximizing Progresss. Strategic task scheduling can increase your hourly rate by up to 300%.
 
 ## The Task Supply and Demand Cycle
 
@@ -408,7 +408,7 @@ Task availability and pay rates follow predictable patterns based on:
 
 ## Optimal Times to Complete Tasks
 
-### Peak Earning Hours (Best Rates)
+### Peak Progress Hours (Best Rates)
 
 **Tuesday-Thursday, 10 AM - 2 PM (IST):**
 - Premium tasks released during this window
@@ -442,7 +442,7 @@ Task availability and pay rates follow predictable patterns based on:
 
 ## Days Matter More Than You Think
 
-### Best Earning Days (Monday analysis shows)
+### Best Progress Days (Monday analysis shows)
 
 **Top Tier Performance Days:**
 1. **Tuesday**: Premium tasks, 15-25% higher pay
@@ -469,23 +469,23 @@ Task availability and pay rates follow predictable patterns based on:
 - Maximum effort and focus hours
 - Accept premium tasks aggressively
 - Dedicate 4-6 hours if possible
-- Expected earnings: 60% of weekly total
+- Expected Progresss: 60% of weekly total
 
 ### Friday (Semi-Peak)
 - Good task volume but declining quality
 - Mix of budget and premium tasks
-- Still strong earning day
-- Expected earnings: 20% of weekly total
+- Still strong Progress day
+- Expected Progresss: 20% of weekly total
 
 ### Saturday-Sunday (Recovery Days)
 - Reduced activity recommended
 - Complete only high-pay tasks
 - Use time to optimize next week
-- Expected earnings: 20% of weekly total
+- Expected Progresss: 20% of weekly total
 
-## Seasonal Patterns and Peak Earning Seasons
+## Seasonal Patterns and Peak Progress Seasons
 
-### Highest Earning Seasons
+### Highest Progress Seasons
 
 **March-April: Spring Campaign Season**
 - Brands launch new products
@@ -567,7 +567,7 @@ Get a competitive advantage:
 - Evening (6-9 PM) for volume tasks
 - Expected: $2,000-3,500+/month
 
-## Real Data: Earnings Variance by Timing
+## Real Data: Progresss Variance by Timing
 
 Analysis of 10,000 SRK Task completions:
 
@@ -588,12 +588,12 @@ Analysis of 10,000 SRK Task completions:
 ## Your Action Plan This Week
 
 1. **Install notifications** and test them
-2. **Log your earnings** by time of day for 1 week
+2. **Log your Progresss** by time of day for 1 week
 3. **Identify your personal peak times** (may vary based on your rating)
 4. **Mark Tuesday-Thursday 10-2 PM** as priority focus time
 5. **Compare results** - see the difference timing makes
 
-**Expected improvement:** 20-40% earnings increase just from optimized timing, no additional effort required.`,
+**Expected improvement:** 20-40% Progresss increase just from optimized timing, no additional effort required.`,
     },
     {
       id: '4',
@@ -689,7 +689,7 @@ The difference:
 - Regular, high-quality content
 - Niche authority recognized
 
-**Monetization:**
+**growth:**
 - Access to creator program tasks
 - Brand collaboration invitations
 - Sponsored post opportunities
@@ -823,7 +823,7 @@ Build relationships with:
 **Month 4:** Premium tasks unlocked, 3,000-5,000 followers
 **Month 5-6:** Authority built, 5,000-10,000+ followers
 
-By month 4-6, you can start earning $500-2,000+ monthly from premium brand tasks exclusively.
+By month 4-6, you can start Progress $500-2,000+ monthly from premium brand tasks exclusively.
 
 ## Your Action Plan
 
@@ -845,13 +845,13 @@ By month 4-6, you can start earning $500-2,000+ monthly from premium brand tasks
       id: '5',
       slug: 'security-tips-protect-account',
       title: 'Ultimate Security Guide: Protect Your SRK Task Account From Hackers',
-      excerpt: 'Comprehensive security guide to protect your account, earnings, and personal information from threats.',
+      excerpt: 'Comprehensive security guide to protect your account, Progresss, and personal information from threats.',
       category: 'Security & Safety',
       date: 'March 10, 2026',
       author: 'SRK Task Team',
       readTime: '9 min',
       image: '🔒',
-      content: `Your SRK Task account holds real earnings and personal information. A security breach doesn't just compromise your account - it can result in financial loss, identity theft, and personal data exposure. This comprehensive guide covers everything you need to protect yourself.
+      content: `Your SRK Task account holds real Progresss and personal information. A security breach doesn't just compromise your account - it can result in financial loss, identity theft, and personal data exposure. This comprehensive guide covers everything you need to protect yourself.
 
 ## The Real Risks
 
@@ -990,7 +990,7 @@ Phishing emails claim urgency:
 **Best practice:**
 - Use mobile data for sensitive account access
 - VPN creates encrypted tunnel (safe from interception)
-- Save important transactions for home network
+- Save important Activitys for home network
 
 ### 6. Account Monitoring
 
@@ -1125,7 +1125,7 @@ Phishing emails claim urgency:
 - Mark as phishing/spam
 - Delete after reporting
 
-Your security is our top priority. Following these practices ensures your account stays safe and your earnings protected.`,
+Your security is our top priority. Following these practices ensures your account stays safe and your Progresss protected.`,
     },
   ];
 
@@ -1166,8 +1166,8 @@ Your security is our top priority. Following these practices ensures your accoun
               SRK Task <span className="text-[#e1ba73]">Blog</span>
             </h1>
             <p className="text-xl text-gray-400">
-              Expert insights, earning strategies, and platform tips to help you maximize your SRK Task success. 
-              Learn from our community's best practices and real-world earning strategies.
+              Expert insights, Progress strategies, and platform tips to help you maximize your SRK Task success. 
+              Learn from our community's best practices and real-world Progress strategies.
             </p>
           </motion.div>
         </div>
@@ -1305,7 +1305,7 @@ Your security is our top priority. Following these practices ensures your accoun
               transition={{ delay: 0.2 }}
             >
               <div className="text-4xl font-bold text-[#e1ba73] mb-2">$500K+</div>
-              <p className="text-gray-400">Member Earnings</p>
+              <p className="text-gray-400">Member Progresss</p>
             </motion.div>
             <motion.div
               initial={{ opacity: 0, y: 20 }}

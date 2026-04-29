@@ -12,8 +12,8 @@ export const Features = () => {
     },
     {
       icon: DollarSign,
-      title: 'Transparent Earnings',
-      description: 'Complete visibility into your earnings, task history, and payment status. Track every rupee earned with detailed breakdowns. Know exactly how your money is being calculated and when it will be available.',
+      title: 'Transparent Learnings',
+      description: 'Complete visibility into your llearnings, task history, and payment status. Track every thing learned with detailed breakdowns. Know exactly how your money is being calculated and when it will be available.',
     },
     {
       icon: Shield,
@@ -33,17 +33,17 @@ export const Features = () => {
     {
       icon: Users,
       title: 'Community Support',
-      description: '24/7 support team ready to help with any questions or issues. Active community of verified users sharing tips and strategies. Learn from top performers and grow your earnings faster.',
+      description: '24/7 support team ready to help with any questions or issues. Active community of verified users sharing tips and strategies. Learn from top performers and grow your llearnings faster.',
     },
     {
       icon: Bell,
       title: 'Smart Notifications',
-      description: 'Customizable alerts for new tasks, earnings, and platform updates. Push notifications ensure you never miss high-paying opportunities. Set your preferences to get only the tasks you\'re interested in.',
+      description: 'Customizable alerts for new tasks, learnings, and platform updates. Push notifications ensure you never miss high-paying opportunities. Set your preferences to get only the tasks you\'re interested in.',
     },
     {
       icon: Award,
       title: 'Exclusive Rewards Program',
-      description: 'Earn bonus points for consistent performance and completing milestone achievements. Redeem points for extra earnings or premium features. Get special recognition as a top performer.',
+      description: 'Earn bonus points for consistent performance and completing milestone achievements. Redeem points for extra learnings or premium features. Get special recognition as a top performer.',
     },
     {
       icon: Lock,
@@ -58,7 +58,7 @@ export const Features = () => {
     {
       icon: BarChart3,
       title: 'Performance Analytics',
-      description: 'Detailed dashboard showing your completion rates and earnings trends. Visual charts help you optimize your strategy. Compare your progress with platform averages.',
+      description: 'Detailed dashboard showing your completion rates and learnings trends. Visual charts help you optimize your strategy. Compare your progress with platform averages.',
     },
     {
       icon: RefreshCw,
@@ -107,8 +107,8 @@ export const Features = () => {
               Powerful <span className="text-[#e1ba73]">Features</span>
             </h1>
             <p className="text-xl text-gray-400">
-              Everything you need to succeed and earn more on the world's fastest-growing 
-              social influence monetization platform designed exclusively for SRK University members.
+              Everything you need to succeed and learn more on the world's fastest-growing 
+              social influence growth platform designed exclusively for SRK University members.
             </p>
           </motion.div>
         </div>
@@ -189,7 +189,7 @@ export const Features = () => {
                   <CheckCircle className="text-[#e1ba73] flex-shrink-0" size={24} />
                   <div>
                     <h4 className="font-bold mb-1">Zero Bot Tolerance</h4>
-                    <p className="text-gray-400">Our AI system automatically detects and eliminates bot users, protecting your earnings.</p>
+                    <p className="text-gray-400">Our AI system automatically detects and eliminates bot users, protecting your learnings.</p>
                   </div>
                 </div>
               </div>
@@ -202,7 +202,7 @@ export const Features = () => {
               transition={{ duration: 0.6 }}
               className="space-y-6"
             >
-              <h3 className="text-2xl font-bold">Maximum Earning Potential</h3>
+              <h3 className="text-2xl font-bold">Maximum Learning Potential</h3>
               <div className="space-y-4">
                 <div className="flex gap-4">
                   <TrendingUp className="text-[#e1ba73] flex-shrink-0" size={24} />
@@ -270,10 +270,10 @@ export const Features = () => {
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <h2 className="text-4xl font-bold mb-6">Ready to Start Earning?</h2>
+            <h2 className="text-4xl font-bold mb-6">Ready to Start Learning?</h2>
             <p className="text-gray-400 mb-8 text-lg">
               Join thousands of verified SRK members already earning money through social influence. 
-              Start with SRK University enrollment and unlock your earning potential today.
+              Start with SRK University enrollment and unlock your learning potential today.
             </p>
             <Link
               to="/how-it-works"

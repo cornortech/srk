@@ -131,7 +131,7 @@ export const Hero = () => {
                 ease: 'easeInOut',
               }}
             >
-              Verified Income
+              Verified experience
             </motion.span>
           </motion.h1>
 
@@ -142,10 +142,10 @@ export const Hero = () => {
             className="space-y-2"
           >
             <p className="text-lg md:text-xl text-gray-400 max-w-lg mx-auto lg:mx-0 leading-relaxed font-medium">
-              SRK Task connects verified SRK University members with real brands who pay for authentic social engagement. Complete verified tasks, build your reputation, and withdraw your earnings.
+              SRK Task connects verified SRK University members with real brands who pay for authentic social engagement. Complete verified tasks, build your reputation, and withdraw your Progresss.
             </p>
             <p className="text-lg md:text-xl text-transparent bg-clip-text bg-gradient-to-r from-[#e1ba73] to-[#b68938] max-w-lg mx-auto lg:mx-0 leading-relaxed font-semibold">
-              This is not a shortcut. This is legitimate, structured income.
+              This is not a shortcut. This is legitimate, structured experience.
             </p>
           </motion.div>
 
@@ -155,9 +155,7 @@ export const Hero = () => {
             transition={{ duration: 0.6, delay: 0.6 }}
             className="flex flex-wrap justify-center lg:justify-start gap-4"
           >
-            <MagneticButton className="shadow-[0_0_50px_rgba(225,186,115,0.5)]">
-              Explore Verified Opportunities <ArrowRight size={20} className="ml-2" />
-            </MagneticButton>
+
           </motion.div>
 
           <motion.div
@@ -183,7 +181,7 @@ export const Hero = () => {
                 10,000+ Verified Members
               </div>
               <div className="text-sm text-[#b68938] font-semibold">
-                Real Brands • Real Tasks • Real Earnings
+                Real Brands • Real Tasks • Real Progresss
               </div>
             </div>
           </motion.div>

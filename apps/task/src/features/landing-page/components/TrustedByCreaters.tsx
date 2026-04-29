@@ -14,57 +14,39 @@ import {
 import { SpotlightCard } from '../../../components/ui/SpotLlightCard';
 
 export const TrustedByCreators = () => {
-  const reviews = [
-    {
-      name: 'Priya Sharma',
-      role: 'Lifestyle Influencer',
-      content:
-        'SRK Task completely changed how I monetize my 15k followers. The integration with the university ecosystem is seamless.',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Priya',
-      rating: 5,
-      stats: { tasks: 250, earnings: '₹12,500' },
-    },
-    {
-      name: 'Arjun Verma',
-      role: 'Student & Creator',
-      content:
-        "I've tried other platforms, but the payouts here are instant. Verified tasks mean I don't waste time on scams.",
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Arjun',
-      rating: 5,
-      stats: { tasks: 180, earnings: '₹9,000' },
-    },
-    {
-      name: 'Neha Gupta',
-      role: 'Digital Marketer',
-      content:
-        "The SRK Grow synergy is genius. I grow my profile and earn back the investment through tasks. It's a perfect loop.",
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Neha',
-      rating: 5,
-      stats: { tasks: 420, earnings: '₹21,000' },
-    },
-    {
-      name: 'Rohan Das',
-      role: 'Micro-Influencer',
-      content:
-        'Finally, a premium platform that respects creators. The UI is beautiful and the support team is actually helpful.',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Rohan',
-      rating: 5,
-      stats: { tasks: 310, earnings: '₹15,500' },
-    },
-    {
-      name: 'Kavita Singh',
-      role: 'Content Creator',
-      content:
-        'Consistent daily tasks and the payout transparency is unmatched. Highly recommended for anyone in the SRK ecosystem.',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Kavita',
-      rating: 5,
-      stats: { tasks: 560, earnings: '₹28,000' },
-    },
-  ];
+const reviews = [
+  {
+    name: 'Aman Kapoor',
+    role: 'Graphic Designer',
+    content:
+      'From SRK University, I learned Adobe Photoshop design, which completely transformed my career. The hands-on assignments helped me build real-world skills that led me to land a very good job. I am now working in a great position with continuous growth every day, and this would not have been possible without SRK University.',
+    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Aman',
+    rating: 5,
+    stats: { tasks: 220, Progresss: '₹14,000' },
+  },
+  {
+    name: 'Riya Mehta',
+    role: 'Illustrator',
+    content:
+      'LProgress Adobe Illustrator at SRK University was a game changer for me. The structured assignments and practical approach helped me master design skills that are actually used in the industry. Because of this, I secured a great job and continue to grow every day in my role. I truly owe this success to SRK University.',
+    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Riya',
+    rating: 5,
+    stats: { tasks: 190, Progresss: '₹11,500' },
+  },
+  {
+    name: 'Karan Malhotra',
+    role: 'Video Editor',
+    content:
+      'SRK University helped me master DaVinci Resolve with a practical lProgress approach that prepared me for real-world editing. The assignments pushed my creativity and built strong technical skills. Thanks to this, I landed a solid job in video editing and experience consistent career growth. This journey would not have been possible without SRK University.',
+    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Karan',
+    rating: 5,
+    stats: { tasks: 260, Progresss: '₹16,000' },
+  },
+];
 
   const badges = [
     { icon: ShieldCheck, label: '100% Verified', value: '50K+' },
-    { icon: Zap, label: 'Instant Payouts', value: '₹10L+' },
+    { icon: Zap, label: 'Instant Extracts', value: '10L+' },
     { icon: Clock, label: '24/7 Support', value: '99.9%' },
     { icon: Globe, label: 'Global Community', value: '120+' },
   ];
@@ -157,7 +139,7 @@ export const TrustedByCreators = () => {
             className="text-gray-400 text-lg md:text-xl max-w-2xl mx-auto font-medium"
           >
             Join thousands of verified creators who trust SRK Task for
-            consistent earnings and premium experience.
+            consistent Progresss and premium experience.
           </motion.p>
         </div>
 
@@ -222,7 +204,7 @@ export const TrustedByCreators = () => {
                     <div className="flex items-center gap-2">
                       <Wallet className="w-4 h-4 text-[#e1ba73]" />
                       <span className="text-sm text-gray-400">
-                        {review.stats.earnings} earned
+                        {review.stats.Progresss} earned
                       </span>
                     </div>
                   </div>

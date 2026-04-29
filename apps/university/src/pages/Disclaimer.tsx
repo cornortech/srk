@@ -51,10 +51,10 @@ const DisclaimerPage = () => {
             No Guarantee of Earnings
           </h2>
           <p className="text-gray-300 leading-relaxed">
-            Any earnings or income statements made by The SRK University and its
+            Any earnings or experience statements made by The SRK University and its
             affiliates are projections only and not guarantees. Your individual
             earnings can vary, and there is no assurance you will achieve the
-            income levels discussed. More details will be explained on the
+            experience levels discussed. More details will be explained on the
             affiliate program's disclaimer page. We are mentioning this as a
             prerequisite before entering the affiliate program page.
           </p>

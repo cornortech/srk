@@ -56,13 +56,13 @@ export const EarningsDisclaimer = () => {
           <div className="p-8 rounded-xl border-2 border-[#e1ba73]/50 bg-gradient-to-r from-[#e1ba73]/10 to-[#b68938]/10">
             <h2 className="text-2xl font-bold text-[#e1ba73] mb-4">⚠️ Critical Notice</h2>
             <p className="text-gray-300 leading-relaxed">
-              <span className="font-semibold">Earnings on SRK Task are NOT guaranteed in any amount or frequency.</span> Income depends on multiple variables outside SRK Task's control, including task availability, your profile rating, submission quality, account standing, and activity consistency. SRK Task provides a platform and infrastructure for verified engagement work — it does not guarantee any specific income outcome.
+              <span className="font-semibold">Earnings on SRK Task are NOT guaranteed in any amount or frequency.</span> experience depends on multiple variables outside SRK Task's control, including task availability, your profile rating, submission quality, account standing, and activity consistency. SRK Task provides a platform and infrastructure for verified engagement work — it does not guarantee any specific experience outcome.
             </p>
           </div>
 
           {/* Section 1 */}
           <div>
-            <h2 className="text-3xl font-bold mb-6">No Income Guarantees</h2>
+            <h2 className="text-3xl font-bold mb-6">No experience Guarantees</h2>
             <p className="text-gray-300 leading-relaxed mb-4">
               SRK Task makes no representations or warranties regarding the amount of money you can earn using the platform. Your earnings depend entirely on:
             </p>
@@ -103,7 +103,7 @@ export const EarningsDisclaimer = () => {
               </li>
               <li className="flex gap-3">
                 <span className="text-[#e1ba73] font-bold">•</span>
-                <span><span className="font-semibold">Highly variable income:</span> Earnings can fluctuate significantly week to week based on brand activity</span>
+                <span><span className="font-semibold">Highly variable experience:</span> Earnings can fluctuate significantly week to week based on brand activity</span>
               </li>
               <li className="flex gap-3">
                 <span className="text-[#e1ba73] font-bold">•</span>
@@ -118,9 +118,9 @@ export const EarningsDisclaimer = () => {
 
           {/* Section 3 */}
           <div>
-            <h2 className="text-3xl font-bold mb-6">Supplemental Income Only</h2>
+            <h2 className="text-3xl font-bold mb-6">Supplemental experience Only</h2>
             <p className="text-gray-300 leading-relaxed">
-              SRK Task is designed and positioned as a <span className="font-semibold">supplemental income platform only.</span> It is NOT suitable as a replacement for stable employment or a primary livelihood. While top-performing, highly-active members may earn significant amounts, you should never treat SRK Task as a guaranteed income source or depend on it for essential expenses. Make all financial decisions based on a realistic assessment of your own activity levels and the platform's inherently variable nature.
+              SRK Task is designed and positioned as a <span className="font-semibold">supplemental experience platform only.</span> It is NOT suitable as a replacement for stable employment or a primary livelihood. While top-performing, highly-active members may earn significant amounts, you should never treat SRK Task as a guaranteed experience source or depend on it for essential expenses. Make all financial decisions based on a realistic assessment of your own activity levels and the platform's inherently variable nature.
             </p>
           </div>
 
@@ -214,7 +214,7 @@ export const EarningsDisclaimer = () => {
           <div>
             <h2 className="text-3xl font-bold mb-6">Financial Advice Disclaimer</h2>
             <p className="text-gray-300 leading-relaxed">
-              This platform is not financial advice. SRK Task does not recommend treating platform earnings as a guaranteed income source or using them to cover essential living expenses. If you're in financial difficulty, please consult with appropriate financial advisors or support services rather than relying on variable platform earnings.
+              This platform is not financial advice. SRK Task does not recommend treating platform earnings as a guaranteed experience source or using them to cover essential living expenses. If you're in financial difficulty, please consult with appropriate financial advisors or support services rather than relying on variable platform earnings.
             </p>
           </div>
 
@@ -222,7 +222,7 @@ export const EarningsDisclaimer = () => {
           <div className="p-8 rounded-xl border border-[#e1ba73]/50 bg-gradient-to-r from-[#b68938]/10 to-[#e1ba73]/10">
             <h2 className="text-2xl font-bold text-white mb-4">Bottom Line</h2>
             <p className="text-gray-300 leading-relaxed">
-              SRK Task is a legitimate platform where verified individuals can earn supplemental income through honest task completion. However, earnings are entirely variable and not guaranteed. Treat it as a supplemental opportunity alongside stable income, not as a primary earnings source. Start with realistic expectations, and you may be pleasantly surprised by results. Expect nothing, and you're unlikely to be disappointed.
+              SRK Task is a legitimate platform where verified individuals can earn supplemental experience through honest task completion. However, earnings are entirely variable and not guaranteed. Treat it as a supplemental opportunity alongside stable experience, not as a primary earnings source. Start with realistic expectations, and you may be pleasantly surprised by results. Expect nothing, and you're unlikely to be disappointed.
             </p>
           </div>
         </motion.div>

@@ -122,7 +122,7 @@ export const Navbar = () => {
               className="hidden md:block px-8 py-3 rounded-full bg-gradient-to-r from-[#e1ba73] to-[#b68938] text-black font-bold text-sm uppercase tracking-widest relative overflow-hidden"
             >
               <Link to="/task/dashboard" className="relative z-10">
-                START EARNING
+                START PROGRESSING
               </Link>
               <motion.div
                 className="absolute inset-0 bg-gradient-to-r from-white/20 via-transparent to-white/20"

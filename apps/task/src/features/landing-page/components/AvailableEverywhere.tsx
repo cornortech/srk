@@ -70,8 +70,8 @@ export const AvailableEverywhere = () => {
     },
     {
       icon: Server,
-      title: 'Secure Payouts',
-      desc: 'Bank-grade encryption for all transactions.',
+      title: 'Secure Extracts',
+      desc: 'Bank-grade encryption for all Activitys.',
       delay: 0.3,
     },
   ];
@@ -312,7 +312,7 @@ export const AvailableEverywhere = () => {
 
                     <div>
                       <div className="text-gray-400 text-[9px] sm:text-[10px] lg:text-xs mb-0.5 sm:mb-1 uppercase tracking-wide">
-                        Total Earnings
+                        Total Progress
                       </div>
                       <motion.div
                         key={animatedBalance}
@@ -496,7 +496,7 @@ export const AvailableEverywhere = () => {
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.2 }}
             >
-              Your earning potential travels with you. Whether you're commuting,
+              Your Progress potential travels with you. Whether you're commuting,
               waiting, or relaxing, access thousands of verified tasks instantly
               from any device.
             </motion.p>

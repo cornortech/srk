@@ -21,30 +21,30 @@ const blogPostsData: BlogPost[] = [
   {
     id: '1',
     slug: 'earn-1000-monthly-task-platform',
-    title: 'How to Earn $1,000+ Monthly on Task Platforms: Complete Strategy',
-    excerpt: 'Discover proven strategies used by top earners to generate consistent $1,000+ monthly income from completing verified tasks.',
+    title: 'How to progress the value Monthly on Task Platforms: Complete Strategy',
+    excerpt: 'Discover proven strategies used by top earners to generate consistent value monthly experience from completing verified tasks.',
     category: 'Earning Strategies',
     date: 'March 18, 2026',
     author: 'SRK Task Team',
     readTime: '12 min',
     image: '📈',
-    content: `Earning $1,000 or more monthly on task platforms is entirely achievable with the right strategy and consistent effort. Many SRK Task members generate significant monthly income by understanding platform mechanics, optimizing their workflow, and scaling their operations strategically.
+    content: `Progressing values more monthly on task platforms is entirely achievable with the right strategy and consistent effort. Many SRK Task members generate significant monthly experience by understanding platform mechanics, optimizing their workflow, and scaling their operations strategically.
 
-## Understanding the Income Potential
+## Understanding the experience Potential
 
-Task platforms like SRK Task offer diverse earning opportunities ranging from simple social media engagement tasks ($0.50-$2) to premium tasks that pay $50-$200+. The income structure is designed so that users who build higher ratings and specialize in certain task types can significantly increase their hourly rate.
+Task platforms like SRK Task offer diverse learning opportunities ranging from simple social media engagement tasks (0.50-2) to premium tasks that pay 50-200+. The experience structure is designed so that users who build higher ratings and specialize in certain task types can significantly increase their hourly rate.
 
 ## The Real Path
 
 I started out like everyone else - doing every task I could find. Thought more tasks meant more money, right? Wrong. That's actually the slowest way to earn on these platforms.
 
-What I realized after talking to top earners is that strategy beats grind every single time.
+What I realized after talking to top learners is that strategy beats grind every single time.
 
 Your first priority should be building a 4.8+ star rating. Yes, ignore the money temporarily. A good rating literally unlocks 10x better tasks. Once you hit that threshold, the platform shows you different opportunities - brand partnerships, influencer growth campaigns, content creation gigs. All paying significantly more.
 
-The interesting part? The jump from $500 to $1,500 monthly doesn't come from working longer hours. It comes from being selective about which tasks you accept. The top earners I spoke to were actually working fewer hours but making way more money because they focused only on premium task types.
+The interesting part? The jump from 500 to 1,500 monthly doesn't come from working longer hours. It comes from being selective about which tasks you accept. The top earners I spoke to were actually working fewer hours but making way more money because they focused only on premium task types.
 
-One practical tip I picked up: Social media engagement tasks ($1-3 range) aren't worth your time if you can find brand partnerships ($20-50). Yes, some days have fewer options. But waiting for quality beats grinding on quantity tasks.`,
+One practical tip I picked up: Social media engagement tasks (1-3 range) aren't worth your time if you can find brand partnerships (20-50). Yes, some days have fewer options. But waiting for quality beats grinding on quantity tasks.`,
   },
   {
     id: '2',
@@ -98,7 +98,7 @@ Here's the thing though - rejections happen even to careful people. The platform
   {
     id: '3',
     slug: 'best-time-complete-tasks-earn-more',
-    title: 'Best Times to Complete Tasks: When to Earn Maximum Money',
+    title: 'Best Times to Complete Tasks: When to Progress maximum value',
     excerpt: 'Nobody talks about this, but timing can literally triple your hourly rate',
     category: 'Earning Strategies',
     date: 'March 14, 2026',
@@ -107,7 +107,7 @@ Here's the thing though - rejections happen even to careful people. The platform
     image: '⏰',
     content: `Here's something most people don't realize: The same task type pays completely different rates depending on when you look at it.
 
-I was grinding tasks at random times and averaging maybe $60/day. Then someone mentioned that they specifically worked certain hours and made $150+ on the same day. Same tasks, same platform, completely different results.
+I was grinding tasks at random times and averaging maybe 60/day. Then someone mentioned that they specifically worked certain hours and made 150+ on the same day. Same tasks, same platform, completely different results.
 
 That's when I started mapping task availability and payment rates by time.
 
@@ -141,13 +141,13 @@ On weekends, I basically don't use the platform. The ROI is terrible compared to
     id: '4',
     slug: 'building-social-media-presence-tasks',
     title: 'How to Build a Powerful Social Media Presence for Premium Tasks',
-    excerpt: 'The uncomfortable truth: Your Instagram followers determine your income ceiling',
+    excerpt: 'The uncomfortable truth: Your Instagram followers determine your experience ceiling',
     category: 'Platform Tips',
     date: 'March 12, 2026',
     author: 'SRK Task Team',
     readTime: '11 min',
     image: '📱',
-    content: `I met someone on SRK Task making $500/month who couldn't access the tasks that would pay her $3,000/month. The only difference? Account age and follower count.
+    content: `I met someone on SRK Task making 500/month who couldn't access the tasks that would pay her 3,000/month. The only difference? Account age and follower count.
 
 Premium brand tasks literally aren't available to accounts that don't meet certain criteria. It's not unfair - it's just how authentic influence works. Brands want to partner with real accounts, not new burners.
 
@@ -160,7 +160,7 @@ Brand creators checking your profile see:
 - Post history (do you actually use this account or is it dormant?)
 - Niche fit (does your content match what they're promoting?)
 
-The earning difference is dramatic. Someone with a 200-follower burner account? Locked out of brand deals. Someone with 5,000 followers and real engagement? Access to $500-2000/month opportunities.
+The earning difference is dramatic. Someone with a 200-follower burner account? Locked out of brand deals. Someone with 5,000 followers and real engagement? Access to 500-2000/month opportunities.
 
 I realized I was leaving enormous amounts of money on the table by not treating social media strategically.
 
@@ -176,7 +176,7 @@ The weird part? You don't need 100,000 followers. Brands actually prefer 3,000-1
 
 ## The Timeline Most People Don't Talk About
 
-If you build a 5,000-follower account from scratch, you're looking at 4-6 months of consistent posting. Not fun, but realistic. Then? Premium tasks that pay $1,000+ monthly become available to you.
+If you build a 5,000-follower account from scratch, you're looking at 4-6 months of consistent posting. Not fun, but realistic. Then? Premium tasks that pay value monthly become available to you.
 
 Some people outsource this (hiring engagement growth services) but honestly, that gets risky. Building it organically takes longer but is safer.
 
@@ -192,13 +192,13 @@ If you only have a 300-follower account, you're basically limited to basic engag
     id: '5',
     slug: 'security-tips-protect-account',
     title: 'Ultimate Security Guide: Protect Your SRK Task Account From Hackers',
-    excerpt: 'Comprehensive security guide to protect your account, earnings, and personal information from threats.',
+    excerpt: 'Comprehensive security guide to protect your account, learnings, and personal information from threats.',
     category: 'Security & Safety',
     date: 'March 10, 2026',
     author: 'SRK Task Team',
     readTime: '9 min',
     image: '🔒',
-    content: `I watched someone lose $8,000 in accumulated earnings because they got careless about account security. Took them 3 months to file a complaint with SRK support. Even worse? Only 40% got recovered.
+    content: `I watched someone lose 8,000 in accumulated earnings because they got careless about account security. Took them 3 months to file a complaint with SRK support. Even worse? Only 40% got recovered.
 
 That's not a scare tactic. That's reality.
 
@@ -218,7 +218,7 @@ The horrible truth is that most task workers think "just use a strong password" 
 
 ## What Most People Get Wrong
 
-- Thinking 2FA is optional (it's mandatory for $500+/month earners)
+- Thinking 2FA is optional (it's mandatory for 500+/month earners)
 - Keeping the same password everywhere
 - Not checking login activity
 - Storing passwords in email drafts or Notes apps
@@ -254,7 +254,7 @@ Can't access your email? You're locked out of SRK for potentially weeks. No back
 
 Solution: Use recovery codes. When you enable 2FA, SRK gives you 10 backup codes. Print them. Literally print them on paper. Store them somewhere physical and fireproof.
 
-I know that sounds paranoid. I know someone who lost 6 months of earnings access because they couldn't find their phone during 2FA setup. Paranoid would've been cheaper.
+I know that sounds paranoid. I know someone who lost 6 months of learnings access because they couldn't find their phone during 2FA setup. Paranoid would've been cheaper.
 
 ## One More Thing Nobody Wants to Hear
 
@@ -456,7 +456,7 @@ export const BlogPost = () => {
                     {relatedPost.excerpt}
                   </p>
                   <Link
-                    to={`/blog/${relatedPost.slug}`}
+                    to={`/blog/{relatedPost.slug}`}
                     className="text-[#e1ba73] text-sm font-bold hover:text-white transition-colors"
                   >
                     Read More →

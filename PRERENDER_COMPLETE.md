@@ -98,7 +98,7 @@ Your **Task App** and **University App** are now fully pre-rendered for Google A
     <p>SRK Task is a platform where you can earn money...</p>
     <!-- All blog post content -->
     <article>
-      <h1>How to Earn $1,000+ Monthly</h1>
+      <h1>How to progress the value Monthly</h1>
       <p>I started like everyone else - doing every task...</p>
       <!-- Complete article text -->
     </article>

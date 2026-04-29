@@ -111,10 +111,10 @@ const testimonialsSecondHalf = [
   },
   {
     quote:
-      "Passive income unlocked! The Affiliate Program at THE SRK UNIVERSITY is a game-changer! I learned how to promote products online and earn commissions effortlessly. The clear tutorials on link strategies and audience targeting were super easy to follow. The platform’s intuitive design kept me motivated. It’s perfect for anyone wanting extra income!",
+      "Passive experience unlocked! The Affiliate Program at THE SRK UNIVERSITY is a game-changer! I learned how to promote products online and earn commissions effortlessly. The clear tutorials on link strategies and audience targeting were super easy to follow. The platform’s intuitive design kept me motivated. It’s perfect for anyone wanting extra experience!",
     name: "Bishal Subedi",
     title: "Affiliate Program",
-    theme: "Passive income unlocked!",
+    theme: "Passive experience unlocked!",
     date: "2025-03-12",
   },
   {
@@ -123,7 +123,7 @@ const testimonialsSecondHalf = [
     name: "Dibya Chettri",
     title: "Affiliate Program",
     date: "2025-03-12",
-    theme: "Passive income unlocked!",
+    theme: "Passive experience unlocked!",
 
   },
   {
@@ -137,7 +137,7 @@ const testimonialsSecondHalf = [
   },
   {
     quote:
-      "Expert mentorship shines! The Affiliate Program’s learning experience at THE SRK UNIVERSITY is incredible! Seasoned industry mentors guide you through every step, sharing insider tips on affiliate success. Their expertise made complex strategies feel simple, and I’m now confidently building my income. Truly top-tier guidance!",
+      "Expert mentorship shines! The Affiliate Program’s learning experience at THE SRK UNIVERSITY is incredible! Seasoned industry mentors guide you through every step, sharing insider tips on affiliate success. Their expertise made complex strategies feel simple, and I’m now confidently building my experience. Truly top-tier guidance!",
     name: "Samip Chettri",
     title: "Affiliate Program",
     theme: "Expert mentorship shines!",

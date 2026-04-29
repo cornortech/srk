@@ -41,20 +41,20 @@ export const SynergySection = () => {
     {
       front: {
         title: 'SRK Task',
-        subtitle: 'Earning Platform',
+        subtitle: 'Progress Platform',
         icon: DollarSign,
         description:
           'Complete simple tasks and earn instantly. Every task creates value for creators.',
         gradient: 'from-[#b68938] via-[#d4af37] to-[#e1ba73]',
-        stats: ['Instant Payouts', '500+ Tasks Daily', 'Global Access'],
+        stats: ['Instant Extracts', '500+ Tasks Daily', 'Global Access'],
       },
       back: {
-        title: 'Verified Earnings',
+        title: 'Verified Progresss',
         description:
           'Every task is verified and processed through secure blockchain technology.',
         features: [
           'Instant Processing',
-          'Secure Transactions',
+          'Secure Activitys',
           'Real-time Tracking',
         ],
       },
@@ -69,8 +69,8 @@ export const SynergySection = () => {
       color: '#e1ba73',
     },
     {
-      value: '₹10L+',
-      label: 'Monthly Payouts',
+      value: '10L+',
+      label: 'Monthly Extracts',
       icon: WalletIcon,
       color: '#d4af37',
     },

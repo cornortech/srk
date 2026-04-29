@@ -92,7 +92,7 @@ export default function AffiliateProgram({ viewMode }: { viewMode: boolean }) {
               Ready to Start Earning?
             </h2>
             <p className="text-xl mb-8">
-              Join our affiliate program today and start earning passive income
+              Join our affiliate program today and start earning passive experience
             </p>
             <Link to={"/study/affiliate-activation"}>
               <Button className="px-10 font-semibold text-black bg-custom-gradient  py-6 rounded hover:bg-red-700 hover:animate-[shake_0.5s_ease-in-out] text-lg">

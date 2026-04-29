@@ -31,7 +31,7 @@ export function BalanceWithDrawModal({
   const [withDrawalAmount, setWithdrawalAmount] = useState(0);
   const navigate = useNavigate();
   const { show } = useAlert();
-  const { mutate } = useMutation({
+  const { mutate, isPending } = useMutation({
     mutationKey: ["payout"],
     mutationFn: async () => {
       const userId = userDetails?._id;
@@ -112,8 +112,13 @@ export function BalanceWithDrawModal({
         </ModalBody>
         {/* Footer Buttons */}
         <ModalFooter className="flex justify-end flex-col gap-2">
-          <Button onPress={handleCompletePayout} color="primary">
-            Requst for withdrawal
+          <Button 
+            onPress={handleCompletePayout} 
+            color="primary"
+            isLoading={isPending}
+            disabled={isPending}
+          >
+            {isPending ? "Processing..." : "Request for withdrawal"}
           </Button>
         </ModalFooter>
       </ModalContent>

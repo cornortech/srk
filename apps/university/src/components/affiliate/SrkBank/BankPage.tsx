@@ -289,6 +289,7 @@ const BankPage: React.FC = () => {
         title="Request Payout"
         totalAmountAvailable={earningDetails?.srkBankAmount || 0}
         onApprove={handlePayout}
+        isPending={isPending}
         onReject={() => setIsModalOpen(false)}
       />
     </div>

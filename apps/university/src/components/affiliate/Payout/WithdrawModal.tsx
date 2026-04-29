@@ -118,7 +118,7 @@ export function BalanceWithDrawModal({
             isLoading={isPending}
             disabled={isPending}
           >
-            Request for withdrawal
+            {isPending ? "Processing..." : "Request for withdrawal"}
           </Button>
         </ModalFooter>
       </ModalContent>

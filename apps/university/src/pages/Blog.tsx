@@ -67,7 +67,7 @@ export const Blog = () => {
       id: '5',
       slug: 'affiliate-marketing-success',
       title: 'How to Build a Profitable Affiliate Marketing Business',
-      excerpt: 'Proven strategies used by successful affiliates to generate consistent income through referrals.',
+      excerpt: 'Proven strategies used by successful affiliates to generate consistent experience through referrals.',
       category: 'Affiliate Marketing',
       date: 'March 12, 2026',
       author: 'Affiliate Manager',

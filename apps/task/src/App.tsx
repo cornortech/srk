@@ -23,6 +23,7 @@ import { GettingStarted } from './pages/GettingStarted';
 import { Help } from './pages/Help';
 import { Blog } from './pages/Blog';
 import { BlogPost } from './pages/BlogPost';
+import Articles from './pages/articles/ArticleFirst';
 
 const queryClient = new QueryClient();
 
@@ -66,6 +67,10 @@ const router = createBrowserRouter([
   {
     path: '/blog/:slug',
     element: <BlogPost />,
+  },
+  {
+    path:'/articles' , 
+    element: <Articles/>
   },
   {
     path: '/terms-and-conditions',

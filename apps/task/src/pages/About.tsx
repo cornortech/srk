@@ -73,7 +73,7 @@ export const About = () => {
               About <span className="text-[#e1ba73]">SRK Task</span>
             </h1>
             <p className="text-xl text-gray-400 leading-relaxed">
-              The premier social influence monetization platform, exclusively for SRK University members.
+              The premier social influence growth platform, exclusively for SRK University members.
               Turn your engagement into earnings within a verified, secure ecosystem.
             </p>
           </motion.div>
@@ -126,7 +126,7 @@ export const About = () => {
                 In a digital landscape saturated with bots and inauthentic interactions, SRK Task stands as a beacon of verified, human-driven engagement. Every member is a verified SRK University student who has completed mandatory KYC verification.
               </p>
               <p>
-                This creates an ecosystem where brands and creators can trust the authenticity of every interaction, and where members can earn real income through legitimate task completion.
+                This creates an ecosystem where brands and creators can trust the authenticity of every interaction, and where members can earn real experience through legitimate task completion.
               </p>
             </div>
             <div className="space-y-6 text-gray-300 leading-relaxed">
@@ -289,7 +289,7 @@ export const About = () => {
           <div className="max-w-3xl mx-auto p-12 rounded-3xl bg-gradient-to-b from-white/5 to-transparent border border-white/10">
             <h2 className="text-3xl font-bold mb-6">Part of the SRK Ecosystem</h2>
             <p className="text-gray-300 leading-relaxed mb-8">
-              SRK Task is proudly operated by <span className="text-[#e1ba73] font-semibold">SRK Industries</span> and works seamlessly with The SRK University to provide a comprehensive digital ecosystem for education, verification, and monetization.
+              SRK Task is proudly operated by <span className="text-[#e1ba73] font-semibold">SRK Industries</span> and works seamlessly with The SRK University to provide a comprehensive digital ecosystem for education, verification, and growth.
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <a

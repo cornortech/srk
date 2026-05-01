@@ -22,7 +22,7 @@ export const Help = () => {
       category: 'Tips & Tricks',
       date: 'March 15, 2026',
       readTime: '5 min read',
-      content: `Maximizing your earnings on SRK Task requires strategy, consistency, and quality work. Here are the proven methods used by top earners to increase their income significantly.
+      content: `Maximizing your earnings on SRK Task requires strategy, consistency, and quality work. Here are the proven methods used by top earners to increase their experience significantly.
 
 First, focus on building your profile rating. Every honest task completion improves your rating, which unlocks better-paying premium tasks. Top-rated users earn 3-4 times more than new users. The key is consistency - complete every task thoroughly and submit clear proof.
 

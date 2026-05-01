@@ -151,7 +151,7 @@ export const GettingStarted = () => {
         'Monitor your earnings and performance',
         'Share tips in the community forum',
       ],
-      tips: 'Top performers earn 3-4x more. Consistency and quality are key to maximizing your income.',
+      tips: 'Top performers earn 3-4x more. Consistency and quality are key to maximizing your experience.',
       icon: '📈',
     },
   ];

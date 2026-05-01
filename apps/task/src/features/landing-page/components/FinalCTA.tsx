@@ -96,10 +96,10 @@ export const FinalCTA = () => {
               backgroundClip: 'text',
             }}
           >
-            Ready to Claim Your
+            Ready to Dominate Your
             <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#e1ba73] via-white to-[#b68938]">
-              Reward?
+              Destiny?
             </span>
           </motion.h2>
 
@@ -110,7 +110,7 @@ export const FinalCTA = () => {
             className="text-xl text-gray-400 mb-10 max-w-2xl mx-auto leading-relaxed"
           >
             Join the fastest-growing community of social influencers and start
-            earning instantly through verified tasks. No experience required.
+            Progress instantly through verified tasks. No experience required.
             Start today.
           </motion.p>
 
@@ -120,10 +120,7 @@ export const FinalCTA = () => {
             transition={{ delay: 0.4 }}
             className="flex justify-center"
           >
-            <MagneticButton className="px-12 py-5 text-lg font-bold shadow-[0_0_80px_rgba(225,186,115,0.6)]">
-              Create Your Free Account Now{' '}
-              <Zap className="w-6 h-6 ml-3 animate-pulse" />
-            </MagneticButton>
+
           </motion.div>
 
           <motion.p

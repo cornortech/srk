@@ -34,7 +34,7 @@ export const MoneySection = () => {
                 The moment to seize control of your destiny and master the
                 ultimate transformative skill is now:
               </h2>
-              <h3>The craft of generating income online. </h3>
+              <h3>The craft of generating experience online. </h3>
               <h4>Embark on your journey today.</h4>
               <AnimationButton
                 onClick={() =>

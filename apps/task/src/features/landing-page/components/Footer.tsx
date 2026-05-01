@@ -22,7 +22,7 @@ export const Footer = () => {
   ];
   const resourceLinks = [
     { name: 'Security Guide', href: '/help' },
-    { name: 'Earning Strategies', href: '/blog' },
+    { name: 'Progress Strategies', href: '/blog' },
     { name: 'Community Forum', href: '#' },
     { name: 'Support Center', href: '/contact' },
   ];
@@ -50,7 +50,7 @@ export const Footer = () => {
             </div>
 
             <p className="text-gray-500 max-w-sm mb-8 leading-relaxed font-medium">
-              The premier platform for social influence monetization and
+              The premier platform for social influence growth and
               verified ecosystem growth. Built for the modern creator. Part of
               the SRK Ecosystem.
             </p>
@@ -71,9 +71,7 @@ export const Footer = () => {
             </div>
 
             <div className="flex items-center gap-4">
-              <MagneticButton className="px-5 py-2 text-sm">
-                Join the Network
-              </MagneticButton>
+
               <a
                 href={universityUrl}
                 target="_blank"
@@ -173,17 +171,7 @@ export const Footer = () => {
             © 2024 SRK Task. All rights reserved. | Optimized for the SRK
             Ecosystem.
           </p>
-          <div className="flex gap-6">
-            {socialLinks.map((social) => (
-              <a
-                key={social}
-                href="#"
-                className="text-xs text-gray-500 hover:text-white transition-colors uppercase tracking-widest font-bold"
-              >
-                {social}
-              </a>
-            ))}
-          </div>
+
         </div>
       </div>
     </footer>

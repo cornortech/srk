@@ -21,7 +21,7 @@ export const Hero = () => {
     },
     { title: 'VERIFY', desc: 'Complete KYC Process', icon: Shield, delay: 0.4 },
     { title: 'LINK', desc: 'Connect to SRK Task', icon: Target, delay: 0.6 },
-    { title: 'EARN', desc: 'Complete Tasks & Withdraw', icon: Coins, delay: 0.8 },
+    { title: 'IMPROVE', desc: 'Complete Tasks & Claim your progress', icon: Coins, delay: 0.8 },
   ];
 
   const [activeStep, setActiveStep] = useState(0);

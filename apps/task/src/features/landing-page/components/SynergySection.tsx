@@ -44,7 +44,7 @@ export const SynergySection = () => {
         subtitle: 'Progress Platform',
         icon: DollarSign,
         description:
-          'Complete simple tasks and earn instantly. Every task creates value for creators.',
+          'Complete simple tasks and progress instantly. Every task creates value for creators.',
         gradient: 'from-[#b68938] via-[#d4af37] to-[#e1ba73]',
         stats: ['Instant Extracts', '500+ Tasks Daily', 'Global Access'],
       },

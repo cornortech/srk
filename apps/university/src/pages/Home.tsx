@@ -1,4 +1,5 @@
 import { ProvideSection } from "../components/Home/WhatYouWillLearn";
+import { EzoicAd } from "../components/EzoicAd";
 import { FAQSection } from "../components/Home/FAQSection";
 import { TestimonialCarousel } from "../components/Home/TestimonialSection";
 import { EnrollSection } from "../components/Home/EnrollSection";
@@ -39,6 +40,9 @@ export const Home = () => {
         <TestimonialCarousel />
         <FAQSection />
         <EnrollSection />
+        <div className="w-full flex justify-center my-8">
+          <EzoicAd placementId={101} />
+        </div>
       </main>
     </div>
   );

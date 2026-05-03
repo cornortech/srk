@@ -15,11 +15,11 @@ import { Mail, Banknote } from "lucide-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { TAdminEarnings, TBankStatement } from "../../lib/types";
 import {
-  createSrkUniversityBankExtractApi,
+  createSrkUniversityBankPayoutApi,
   getAdminEarningDetailsApi,
   getAllSrkUniversityBankStatementApi,
 } from "../../lib/apiClient";
-import { ExtractEarning } from "../../components/admin/modal/ExtractEarning";
+import { PayoutEarning } from "../../components/admin/modal/PayoutEarning";
 import useAlert from "../../hooks/useAlert";
 
 const SrkUniversityBank: React.FC = () => {
@@ -43,7 +43,7 @@ const SrkUniversityBank: React.FC = () => {
   const { mutate: handleExtractMutation } = useMutation({
     mutationFn: async (amount: number) => {
       console.log(amount);
-      const res = await createSrkUniversityBankExtractApi(amount);
+      const res = await createSrkUniversityBankPayoutApi(amount);
       return res;
     },
     onSuccess: () => {
@@ -144,13 +144,12 @@ const SrkUniversityBank: React.FC = () => {
                   </TableCell>
                   <TableCell>{statement.type}</TableCell>
                   <TableCell
-                    className={`${
-                      statement.type === "Extract_request"
-                        ? "text-yellow-500"
-                        : statement.type === "Extract"
+                    className={`${statement.type === "Extract_request"
+                      ? "text-yellow-500"
+                      : statement.type === "Extract"
                         ? "text-red-500"
                         : "text-green-500"
-                    }`}
+                      }`}
                   >
                     Rs.{statement.amount.toFixed(2)}
                   </TableCell>
@@ -162,7 +161,7 @@ const SrkUniversityBank: React.FC = () => {
           </Table>
         </CardBody>
       </Card>
-      <ExtractEarning
+      <PayoutEarning
         isOpen={openBankExtractModal}
         onApprove={handleCofirmExtract}
         onClose={() => setOpenBankExtractModal(false)}

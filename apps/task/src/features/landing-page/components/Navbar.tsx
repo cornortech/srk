@@ -56,28 +56,9 @@ export const Navbar = () => {
               whileHover={{ scale: 1.05 }}
               transition={{ type: 'spring', stiffness: 400, damping: 10 }}
             >
-              <div className="relative">
-                <motion.div
-                  className="absolute -inset-2 bg-gradient-to-r from-[#e1ba73] to-[#b68938] rounded-full blur-lg"
-                  animate={{
-                    rotate: 360,
-                    scale: [1, 1.1, 1],
-                  }}
-                  transition={{
-                    rotate: { duration: 20, repeat: Infinity, ease: 'linear' },
-                    scale: { duration: 2, repeat: Infinity },
-                  }}
-                />
-                <div className="relative w-10 h-10 rounded-full bg-gradient-to-r from-[#e1ba73] to-[#b68938] flex items-center justify-center shadow-[0_0_40px_rgba(225,186,115,0.6)]">
-                  <span className="font-bold text-black text-lg">S</span>
-                </div>
-              </div>
-              <span className="text-2xl font-bold tracking-tight">
-                <span className="text-white">SRK</span>
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#e1ba73] to-[#b68938]">
-                  Task
-                </span>
-              </span>
+              <Link to="/" className="flex items-center gap-3">
+                <img src="/task-logo.png" alt="SRK Task" className="w-40 object-contain" />
+              </Link>
             </motion.div>
 
             <div className="hidden md:flex items-center gap-10">

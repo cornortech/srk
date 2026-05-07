@@ -41,13 +41,9 @@ export const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mb-20">
           <div className="col-span-1 md:col-span-2">
             <div className="flex items-center gap-3 mb-6">
-              <div className="relative">
-                <div className="absolute -inset-1 bg-gradient-to-r from-[#e1ba73] to-[#b68938] rounded-xl blur opacity-60" />
-                <div className="relative w-10 h-10 rounded-xl bg-gradient-to-r from-[#e1ba73] to-[#b68938] flex items-center justify-center font-bold text-black text-xl">
-                  S
-                </div>
-              </div>
-              <span className="text-2xl font-bold text-white">SRK Task</span>
+              <Link to="/" className="flex items-center gap-3">
+                <img src="/task-logo.png" alt="SRK Task" className="w-40 object-contain" />
+              </Link>
             </div>
 
             <p className="text-gray-500 max-w-sm mb-8 leading-relaxed font-medium">
@@ -169,7 +165,7 @@ export const Footer = () => {
 
         <div className="border-t border-white/5 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left">
           <p className="text-xs text-gray-600 font-medium">
-            © 2024 SRK Task. All rights reserved. | Optimized for the SRK
+            © 2026 SRK Task. All rights reserved. | Optimized for the SRK
             Ecosystem.
           </p>
 

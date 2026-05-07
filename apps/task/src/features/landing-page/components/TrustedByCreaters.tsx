@@ -16,7 +16,7 @@ import { SpotlightCard } from '../../../components/ui/SpotLlightCard';
 export const TrustedByCreators = () => {
 const reviews = [
   {
-    name: 'Aman Kapoor',
+    name: 'Nabin Sharma',
     role: 'Graphic Designer',
     content:
       'From SRK University, I learned Adobe Photoshop design, which completely transformed my career. The hands-on assignments helped me build real-world skills that led me to land a very good job. I am now working in a great position with continuous growth every day, and this would not have been possible without SRK University.',
@@ -25,7 +25,7 @@ const reviews = [
     stats: { tasks: 220, Progresss: '₹14,000' },
   },
   {
-    name: 'Riya Mehta',
+    name: 'Kiran Giri',
     role: 'Illustrator',
     content:
       'LProgress Adobe Illustrator at SRK University was a game changer for me. The structured assignments and practical approach helped me master design skills that are actually used in the industry. Because of this, I secured a great job and continue to grow every day in my role. I truly owe this success to SRK University.',
@@ -34,7 +34,7 @@ const reviews = [
     stats: { tasks: 190, Progresss: '₹11,500' },
   },
   {
-    name: 'Karan Malhotra',
+    name: 'Sudip Aacharya',
     role: 'Video Editor',
     content:
       'SRK University helped me master DaVinci Resolve with a practical lProgress approach that prepared me for real-world editing. The assignments pushed my creativity and built strong technical skills. Thanks to this, I landed a solid job in video editing and experience consistent career growth. This journey would not have been possible without SRK University.',
@@ -204,7 +204,7 @@ const reviews = [
                     <div className="flex items-center gap-2">
                       <Wallet className="w-4 h-4 text-[#e1ba73]" />
                       <span className="text-sm text-gray-400">
-                        {review.stats.Progresss} earned
+                        {review.stats.Progresss} Progress
                       </span>
                     </div>
                   </div>

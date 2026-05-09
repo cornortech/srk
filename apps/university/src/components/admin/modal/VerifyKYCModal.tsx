@@ -189,8 +189,8 @@ export function VerifyKYCModal({
         <ModalBody className="space-y-4">
           <div className="flex flex-col items-start gap-y-2">
             <h3 className="font-semibold">Verification Image</h3>
-            {verificationImage ? (
-              <a href={getUniversityAssetUrl(verificationImage)} target="_blank">
+              {verificationImage ? (
+              <a href={getUniversityAssetUrl(verificationImage)} target="_blank" rel="noreferrer">
                 <img
                   src={getUniversityAssetUrl(verificationImage)}
                   alt="Verification"
@@ -218,7 +218,7 @@ export function VerifyKYCModal({
               <div className="flex flex-col items-center gap-y-2">
                 <h3 className="font-semibold">Front Image</h3>
                 {frontImage ? (
-                  <a href={getUniversityAssetUrl(frontImage)} target="_blank">
+                  <a href={getUniversityAssetUrl(frontImage)} target="_blank" rel="noreferrer">
                     <img
                       src={getUniversityAssetUrl(frontImage)}
                       alt="Front"
@@ -232,7 +232,7 @@ export function VerifyKYCModal({
               <div className="flex flex-col items-center gap-y-2">
                 <h3 className="font-semibold">Back Image</h3>
                 {backImage ? (
-                  <a href={getUniversityAssetUrl(backImage)} target="_blank">
+                  <a href={getUniversityAssetUrl(backImage)} target="_blank" rel="noreferrer">
                     <img
                       src={getUniversityAssetUrl(backImage)}
                       alt="Back"
@@ -264,9 +264,9 @@ export function VerifyKYCModal({
               <div className="flex flex-col items-center gap-y-2">
                 <h3 className="font-semibold">Left Thumbprint</h3>
                 {leftThumbFingerprint ? (
-                  <a href={leftThumbFingerprint} target="_blank">
+                  <a href={getUniversityAssetUrl(leftThumbFingerprint)} target="_blank" rel="noreferrer">
                     <img
-                      src={leftThumbFingerprint}
+                      src={getUniversityAssetUrl(leftThumbFingerprint)}
                       alt="Left Thumbprint"
                       className="w-24 h-32 rounded-md object-cover border border-gray-300"
                     />
@@ -278,9 +278,9 @@ export function VerifyKYCModal({
               <div className="flex flex-col items-center gap-y-2">
                 <h3 className="font-semibold">Right Thumbprint</h3>
                 {rightThumbFingerprint ? (
-                  <a href={rightThumbFingerprint} target="_blank">
+                  <a href={getUniversityAssetUrl(rightThumbFingerprint)} target="_blank" rel="noreferrer">
                     <img
-                      src={rightThumbFingerprint}
+                      src={getUniversityAssetUrl(rightThumbFingerprint)}
                       alt="Right Thumbprint"
                       className="w-24 h-32 rounded-md object-cover border border-gray-300"
                     />
@@ -293,9 +293,9 @@ export function VerifyKYCModal({
             <div className="flex flex-col items-start gap-y-2">
               <h3 className="font-semibold">Digital Signature</h3>
               {signature ? (
-                <a href={signature} target="_blank">
+                <a href={getUniversityAssetUrl(signature)} target="_blank" rel="noreferrer">
                   <img
-                    src={signature}
+                    src={getUniversityAssetUrl(signature)}
                     alt="Digital Signature"
                     className="h-20 rounded-md object-cover border border-gray-300"
                   />

@@ -19,7 +19,7 @@ export function CourseDetails() {
       <div className="max-w-custom mx-auto px-6 flex items-center flex-col gap-8">
         <div className="flex md:flex-row-reverse flex-col py-8  gap-10">
           <div className="">
-            <Image src={course.img} alt="img" width={800} />
+            <Image src={getUniversityAssetUrl(course.img)} alt="img" width={800} />
           </div>
           <div className=" text-textPrimary mb-8 flex flex-col justify-center ">
             <div className="w-[80%]">

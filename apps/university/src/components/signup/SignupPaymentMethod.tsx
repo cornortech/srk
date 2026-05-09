@@ -4,6 +4,7 @@ import { TPaymentDetails } from "../SignUpComponent";
 import { QrPaymentMethodContent } from "./QrPaymentContent";
 import { TPaymentMethod } from "../../lib/types";
 import { getAvailableQRCodesApi, TQRCode } from "../../lib/apiClient";
+import { getUniversityAssetUrl } from "../../lib/cdn";
 
 export const SignupPaymentMethod = ({
   paymentAmount,
@@ -95,7 +96,7 @@ export const SignupPaymentMethod = ({
                   </div>
                   <div className="flex justify-center">
                     <img
-                      src={qrCode.qr}
+                      src={getUniversityAssetUrl(qrCode.qr)}
                       alt={qrCode.name}
                       className="w-full max-w-sm rounded-lg"
                     />

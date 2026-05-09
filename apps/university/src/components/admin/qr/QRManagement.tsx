@@ -28,6 +28,7 @@ import {
   deleteQRCodeApi,
   TQRCode,
 } from '../../../lib/apiClient';
+import { getUniversityAssetUrl } from '../../../lib/cdn';
 
 export const QRManagement = () => {
   const { isOpen, onOpen, onClose: onDisclosureClose } = useDisclosure();
@@ -314,7 +315,7 @@ export const QRManagement = () => {
                     {qr.qr && (
                       <div className="w-16 h-16 rounded-lg border border-gray-600 overflow-hidden shadow-md hover:shadow-lg transition-shadow">
                         <img
-                          src={qr.qr}
+                          src={getUniversityAssetUrl(qr.qr)}
                           alt={qr.name}
                           className="w-full h-full object-cover"
                         />
@@ -408,7 +409,7 @@ export const QRManagement = () => {
                     <label className="block text-sm font-semibold text-white">Preview</label>
                     <div className="w-48 h-48 rounded-lg border border-gray-600 overflow-hidden shadow-lg">
                       <img
-                        src={previewImage}
+                        src={typeof previewImage === 'string' && previewImage.startsWith('data:') ? previewImage : getUniversityAssetUrl(previewImage || '')}
                         alt="QR Preview"
                         className="w-full h-full object-cover"
                       />

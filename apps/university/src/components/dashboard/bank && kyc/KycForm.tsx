@@ -11,6 +11,7 @@ import { upsertKycDetailsApi } from "../../../lib/apiClient";
 import { TKyc } from "../../../lib/types/entities";
 import { useSRKFileUpload } from "@srk/shared/hooks";
 import { FileText, CheckCircle, Clock, AlertCircle } from "lucide-react";
+import { getUniversityAssetUrl } from "../../../../src/lib/cdn";
 
 const documentTypes = [
   { label: "Citizenship", value: "citizenship" },
@@ -372,7 +373,7 @@ export default function KYCForm({
                         src={
                           frontImage
                             ? URL.createObjectURL(frontImage)
-                            : kycDetails?.frontImage
+                            : getUniversityAssetUrl(kycDetails?.frontImage)
                         }
                         alt="Document Front Side"
                         className="w-full h-full object-cover"
@@ -431,7 +432,7 @@ export default function KYCForm({
                         src={
                           backImage
                             ? URL.createObjectURL(backImage)
-                            : kycDetails?.backImage
+                            : getUniversityAssetUrl(kycDetails?.backImage)
                         }
                         alt="Document Back Side"
                         className="w-full h-full object-cover"

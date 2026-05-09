@@ -1,7 +1,8 @@
 import React, { useEffect, useRef } from "react";
 import * as faceapi from "face-api.js";
-import { Button, Card, Spacer } from "@nextui-org/react";
+import { Button, Card } from "@nextui-org/react";
 import { CameraIcon, SkipBack, StepForward, CheckCircle } from "lucide-react";
+import { getUniversityAssetUrl } from "../../../lib/cdn";
 
 interface FaceCaptureProps {
   handleTabChange: () => void;
@@ -165,7 +166,7 @@ const WebcamCapture: React.FC<FaceCaptureProps> = ({
             <Card className="w-full">
               <div className="p-4">
                 <img
-                  src={viewImage}
+                  src={ viewImage.startsWith("data:") ? viewImage : getUniversityAssetUrl(viewImage) }
                   alt="Captured Selfie"
                   className="rounded-lg w-full object-cover max-h-96"
                 />

@@ -15,6 +15,7 @@ import {
 } from '@nextui-org/react';
 import { EllipsisVertical } from 'lucide-react';
 import { useState } from 'react';
+import { getUniversityAssetUrl } from '../../lib/cdn';
 import {
   chipColorsStatusMap,
   TBankRequest,
@@ -134,7 +135,7 @@ export default function BankRequest() {
                       <TableCell>{(page - 1) * 10 + index + 1}</TableCell>
                       <TableCell>
                         <Image
-                          src={user.profilePicture}
+                          src={getUniversityAssetUrl(user.profilePicture)}
                           width={30}
                           height={30}
                           className="object-cover"

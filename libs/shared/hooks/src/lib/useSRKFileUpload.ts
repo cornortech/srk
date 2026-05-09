@@ -91,7 +91,7 @@ export const useSRKFileUpload = (appName: string) => {
     fileType: 'video' | 'image',
     onProgress?: (progress: number, url?: string) => void,
     onError?: (error: string) => void
-  ): Promise<{ url: string }> => {
+  ): Promise<{ url: string; key: string }> => {
     const uploadId = uuidv4();
     setIsUploading(true);
 
@@ -135,7 +135,7 @@ export const useSRKFileUpload = (appName: string) => {
       }));
       setIsUploading(false);
       if (onProgress) onProgress(100, url);
-      return { url };
+      return { url, key };
     } catch (error) {
       const errorMsg = (error as Error)?.message || 'Upload failed';
       console.error(`❌ Upload error for ${uploadId}:`, errorMsg);

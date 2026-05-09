@@ -6,6 +6,7 @@ import { TUser } from "../../../lib/types/entities";
 import { updateUserDetailsApi } from "../../../lib/apiClient";
 import useAlert from "../../../hooks/useAlert";
 import { useSRKFileUpload } from '@srk/shared/hooks';
+import { getUniversityAssetUrl } from "../../../lib/cdn";
 
 interface UpdateProfilePictureProps {
   userData: TUser;
@@ -27,7 +28,7 @@ export const UpdateProfilePicture = ({
   };
 
   const { mutate } = useMutation({
-    mutationFn: async (url: string) => {
+    mutationFn: async (profilePicturePath: string) => {
       const userId = userDetails?._id;
       if (userId) {
         await updateUserDetailsApi({
@@ -39,7 +40,7 @@ export const UpdateProfilePicture = ({
             gender: userData.gender,
             lastName: userData.lastName,
             phoneNumber: userData.phoneNumber,
-            profilePicture: url,
+            profilePicture: profilePicturePath,
             isActive: userData.isActive,
           },
           userId,
@@ -58,12 +59,11 @@ export const UpdateProfilePicture = ({
 
   const handleSubmit = () => {
     if (file) {
-      uploadFile(file, "image", (progress, url) => {
+      uploadFile(file, "image", (progress) => {
         setProgress(progress);
-        if (url && progress === 100) {
-          setProgress(100);
-          mutate(url);
-        }
+      }).then(({ key }) => {
+        setProgress(100);
+        mutate(key);
       });
     }
   };
@@ -77,7 +77,7 @@ export const UpdateProfilePicture = ({
               src={
                 file
                   ? URL.createObjectURL(file)
-                  : userData.profilePicture ||
+                  : getUniversityAssetUrl(userData.profilePicture) ||
                     "https://digitalhealthskills.com/wp-content/uploads/2022/11/3da39-no-user-image-icon-27.png"
               }
               width={200}

@@ -151,12 +151,12 @@ export function SignupComponent({
     if (paymentDetails.paymentProof) {
       setIsRegisterring(true);
       try {
-        const { url } = await uploadFile(paymentDetails.paymentProof, "image");
+        const { key } = await uploadFile(paymentDetails.paymentProof, "image");
         mutateRegister({
           paymentType: "qr",
           email: data.email,
           gender: data.gender,
-          paymentProofUrl: url,
+          paymentProofUrl: key,
           dob: data.dateOfBirth,
           country: data.country,
           lastName: data.lastName,

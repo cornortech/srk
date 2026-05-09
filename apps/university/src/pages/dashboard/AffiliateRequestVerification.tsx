@@ -71,7 +71,7 @@ const AffiliateRequestVerification = () => {
     if (verificationImage) {
       // remove whitespaces
       const firstName = (userDetails?.firstName || "User").replace(/\s/g, "");
-      const { url } = await uploadFile(
+      const { key } = await uploadFile(
         methods.base64ToFile(
           verificationImage,
           `${Date.now()}-${firstName}-v-image.png`,
@@ -80,7 +80,7 @@ const AffiliateRequestVerification = () => {
         "image"
       );
 
-      verificationImageUrl = url;
+      verificationImageUrl = key;
     }
 
     upsertAffiliateBiometricDataMutation({

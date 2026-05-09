@@ -201,15 +201,15 @@ export default function KYCForm({
           updateUploadStatus(item.id, "uploading");
           
           try {
-            const { url } = await uploadFile(item.file, "image");
+            const { url, key } = await uploadFile(item.file, "image");
             uploadedFileUrls.push(url);
             
-            if (item.id === "front") frontUrlImage = url;
-            if (item.id === "back") backUrlImage = url;
-            if (item.id === "verification") verifiationImage = url;
-            if (item.id === "leftThumb") leftThumbUrl = url;
-            if (item.id === "rightThumb") rightThumbUrl = url;
-            if (item.id === "signature") signatureUrl = url;
+            if (item.id === "front") frontUrlImage = key;
+            if (item.id === "back") backUrlImage = key;
+            if (item.id === "verification") verifiationImage = key;
+            if (item.id === "leftThumb") leftThumbUrl = key;
+            if (item.id === "rightThumb") rightThumbUrl = key;
+            if (item.id === "signature") signatureUrl = key;
             
             updateUploadStatus(item.id, "completed");
             setCompletedUploads(prev => prev + 1);

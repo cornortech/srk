@@ -23,6 +23,7 @@ import useAlert from '../../hooks/useAlert';
 import { AxiosError } from 'axios';
 import moment from 'moment';
 import TablePagination from './Pagination';
+import { getUniversityAssetUrl } from '../../lib/cdn';
 
 interface UserTableProps {
   users: TAffiliateRequest[];

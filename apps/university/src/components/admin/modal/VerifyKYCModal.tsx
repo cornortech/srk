@@ -11,6 +11,7 @@ import {
   Textarea,
 } from "@nextui-org/react";
 import { useEffect, useState } from "react";
+import { getUniversityAssetUrl } from "../../../lib/cdn";
 import { Controller, useForm } from "react-hook-form";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { updateUserDetailsApi } from "../../../lib/apiClient";
@@ -189,9 +190,9 @@ export function VerifyKYCModal({
           <div className="flex flex-col items-start gap-y-2">
             <h3 className="font-semibold">Verification Image</h3>
             {verificationImage ? (
-              <a href={verificationImage} target="_blank">
+              <a href={getUniversityAssetUrl(verificationImage)} target="_blank">
                 <img
-                  src={verificationImage}
+                  src={getUniversityAssetUrl(verificationImage)}
                   alt="Verification"
                   className="w-20 h-20 rounded-md object-cover"
                 />

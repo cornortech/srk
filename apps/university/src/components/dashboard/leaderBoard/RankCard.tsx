@@ -1,5 +1,6 @@
 import { Avatar, Card } from "@nextui-org/react";
 import { TLeaderBoardData } from "../../../lib/types";
+import { getUniversityAssetUrl } from "../../../lib/cdn";
 
 interface IRankCardProps {
   users: TLeaderBoardData[];
@@ -39,7 +40,7 @@ export const RankCard = ({ users }: IRankCardProps) => {
           <div className="flex flex-col md:items-center md:space-y-4 md:text-center md:mt-4 md:flex-col">
             <div className="flex items-center gap-4 md:flex-col md:gap-0">
               <Avatar
-                src={performer.profilePicture}
+                src={getUniversityAssetUrl(performer.profilePicture)}
                 className="w-16 h-16 md:w-20 md:h-20"
                 alt={performer.username}
               />

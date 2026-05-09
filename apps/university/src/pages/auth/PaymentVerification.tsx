@@ -92,8 +92,8 @@ const PaymentVerificationAuthPage = () => {
       userDetailsData?.paymentDetails?.paymentProofUrl || "";
     if (paymentDetails.paymentProof) {
       // const { url } = await uploadFile(paymentDetails.paymentProof, "image");
-      const { url } = await uploadFile(paymentDetails.paymentProof, "image");
-      paymentProofUrl = url;
+      const { key } = await uploadFile(paymentDetails.paymentProof, "image");
+      paymentProofUrl = key;
     }
     makePaymentMutation(paymentProofUrl);
   };

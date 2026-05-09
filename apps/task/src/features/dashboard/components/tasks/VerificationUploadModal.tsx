@@ -65,9 +65,9 @@ export const VerificationUploadModal: React.FC<
     setUploadError(null);
 
     try {
-      const { url } = await uploadFile(
+      const { key } = await uploadFile(
         screenshot,
-        'image-task-submission' as unknown as 'image',
+        'image',
         undefined, // onProgress callback
         (error) => {
           // Error callback
@@ -81,7 +81,7 @@ export const VerificationUploadModal: React.FC<
           body: {
             actionTodoId: task.id,
             srkTaskUserId: taskUserID || '',
-            actionVerificationImageUrl: url,
+            actionVerificationImageUrl: key,
           },
         },
         {

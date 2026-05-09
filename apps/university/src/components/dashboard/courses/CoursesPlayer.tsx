@@ -14,6 +14,7 @@ import {
 } from "../../../lib/apiClient";
 import { TCourse, TCourseVideo } from "../../../lib/types/entities";
 import { useEffect, useState } from "react";
+import { getUniversityAssetUrl } from "../../../lib/cdn";
 
 export default function CoursePlayer() {
   const { courseId } = useParams();
@@ -101,7 +102,7 @@ export default function CoursePlayer() {
           onContextMenu={(e) => e.preventDefault()} // disables right-click
         >
           <video
-            src={currentVideo?.videoUrl || ""}
+            src={getUniversityAssetUrl(currentVideo?.videoUrl) || ""}
             className="absolute top-0 left-0 w-full h-full"
             controlsList="nodownload"
             controls

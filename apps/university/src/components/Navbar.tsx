@@ -24,6 +24,7 @@ import { Sidebar } from "./SideBar";
 import { useIsMobile } from "../hooks/useIsMobileView";
 import { useQuery } from "@tanstack/react-query";
 import { getUserDetailsApi } from "../lib/apiClient";
+import { getUniversityAssetUrl } from "../lib/cdn";
 import { TUserDataReponseData } from "../lib/types";
 
 interface NavbarProps {
@@ -259,7 +260,7 @@ const LoginUserMenu = () => {
     <Dropdown>
       <DropdownTrigger>
         <NavbarItem className="hidden md:flex gap-x-4 items-center cursor-pointer">
-          <Avatar src={userDetails?.profilePicture || ""} isBordered />
+          <Avatar src={getUniversityAssetUrl(userDetails?.profilePicture) || ""} isBordered />
           <div>
             <h1 className="font-bold">
               {userDetails?.firstName} {userDetails?.lastName}

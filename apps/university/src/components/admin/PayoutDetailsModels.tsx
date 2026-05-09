@@ -19,7 +19,7 @@ import {
 } from "../../lib/apiClient";
 import { AxiosError } from "axios";
 import useAlert from "../../hooks/useAlert";
-import useUploadFile from "../../hooks/useFileUpload";
+import { useSRKFileUpload } from '@srk/shared/hooks';
 
 type PayoutDetailsModalProps = {
   isOpen: boolean;
@@ -37,7 +37,7 @@ export function PayoutDetailsModal({
   const [proofFile, setProofFile] = useState<File | null>(null);
   const [rejectionReason, setRejectionReason] = useState("");
   const [isRejecting, setIsRejecting] = useState(false);
-  const { uploadFile } = useUploadFile();
+  const { uploadFile } = useSRKFileUpload('university');
   const [transactionNumber, setTransactionNumber] = useState("");
   const { show } = useAlert();
 

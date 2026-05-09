@@ -50,6 +50,10 @@ const kycSchema = new mongoose.Schema(
     rejectionReason: {
       type: String,
     },
+    kyc_approved_date: {
+      type: Date,
+      default: null,
+    },
   },
   {
     timestamps: true,

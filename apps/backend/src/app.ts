@@ -4,7 +4,7 @@ import { createExpressEndpoints } from '@ts-rest/express';
 import * as swaggerUi from 'swagger-ui-express';
 import cookieParser from 'cookie-parser';
 import swaggerApiDocs from './config/swagger';
-import cronJobInit from './utils/cronjob';
+// import cronJobInit from './utils/cronjob';
 import { router } from './modules';
 import ssoRouter from './modules/sso/router';
 import { apiContract } from '@srk/shared/contracts';
@@ -60,6 +60,6 @@ app.use('/tour/targets', JwtAuthMiddleware);
 // app.use('/tour/active-achievements', JwtAuthMiddleware);
 
 createExpressEndpoints(apiContract, router, app);
-cronJobInit();
+// cronJobInit();
 
 export default app;

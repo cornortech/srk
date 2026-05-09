@@ -12,7 +12,7 @@ import useAlert from "../../hooks/useAlert";
 import AlertBanner from "../../components/AlertBanner";
 import { TUserDataReponseData } from "../../lib/types";
 import { methods } from "../../lib/methods";
-import useUploadFile from "../../hooks/useFileUpload";
+import { useSRKFileUpload } from '@srk/shared/hooks';
 
 const AffiliateRequestVerification = () => {
   const [selectedTab, setSelectedTab] = useState("details");
@@ -21,7 +21,7 @@ const AffiliateRequestVerification = () => {
   );
   const { show } = useAlert();
   const navigate = useNavigate();
-  const { uploadFile } = useUploadFile();
+  const { uploadFile } = useSRKFileUpload('university');
   const { userDetails } = useAuthStore();
 
   const { data: userData } = useQuery<TUserDataReponseData | null>({

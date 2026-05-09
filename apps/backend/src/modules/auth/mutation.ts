@@ -520,6 +520,7 @@ const verifyKyc: AppRouteImplementationOrOptions<
       {
         $set: {
           status: 'approved',
+          kyc_approved_date: new Date(),
         },
       }
     );

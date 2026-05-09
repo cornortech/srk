@@ -16,14 +16,14 @@ import { useEffect, useState } from "react";
 import { TPaymentDetails } from "../../components/SignUpComponent";
 import useAlert from "../../hooks/useAlert";
 import AlertBanner from "../../components/AlertBanner";
-import useUploadFile from "../../hooks/useFileUpload";
+import { useSRKFileUpload } from '@srk/shared/hooks';
 
 
 const PaymentVerificationAuthPage = () => {
   const location = useLocation();
   const packageId = getQueryParam(location, "packageId");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { uploadFile } = useUploadFile();
+  const { uploadFile } = useSRKFileUpload('university');
   const { show } = useAlert();
   const [paymentDetails, setPaymentDetails] = useState<TPaymentDetails>({
     paymentMethod: undefined,

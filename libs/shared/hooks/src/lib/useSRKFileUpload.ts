@@ -1,7 +1,24 @@
-import { ref, uploadBytesResumable, getDownloadURL, deleteObject, StorageError } from 'firebase/storage';
-import { storage } from '@srk/shared/firebase';
+// import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage';
+// import { storage } from '@srk/shared/firebase';
+import { S3Client, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import { v4 as uuidv4 } from 'uuid';
 import { useState, useRef, useCallback } from 'react';
+
+// Cloudflare R2 S3 config
+const R2_ACCESS_KEY_ID = 'daf464fc116a11847575b6fbfbac26a0';
+const R2_SECRET_ACCESS_KEY = '6414fef2c8ca3715856b08ab2302d1d92e80b7cec32971acc0d85cef559fd4e4';
+const R2_ENDPOINT = 'https://5f09c9e5753d5a473d39fed1135fef46.r2.cloudflarestorage.com';
+const R2_BUCKET = 'srk'; // Change to your bucket name if different
+
+const s3Client = new S3Client({
+  region: 'auto',
+  endpoint: R2_ENDPOINT,
+  credentials: {
+    accessKeyId: R2_ACCESS_KEY_ID,
+    secretAccessKey: R2_SECRET_ACCESS_KEY,
+  },
+  forcePathStyle: true,
+});
 
 export interface UploadProgress {
   [uploadId: string]: {
@@ -66,7 +83,7 @@ const compressImage = async (file: File): Promise<File> => {
 export const useSRKFileUpload = (appName: string) => {
   const [uploadProgress, setUploadProgress] = useState<UploadProgress>({});
   const [isUploading, setIsUploading] = useState(false);
-  const uploadTasksRef = useRef<Map<string, ReturnType<typeof uploadBytesResumable>>>(new Map());
+  // const uploadTasksRef = useRef<Map<string, ReturnType<typeof uploadBytesResumable>>>(new Map());
   const progressTimeoutRef = useRef<Map<string, NodeJS.Timeout>>(new Map());
 
   const uploadFile = async (
@@ -79,7 +96,7 @@ export const useSRKFileUpload = (appName: string) => {
     setIsUploading(true);
 
     try {
-      // Compress images before upload to reduce Firebase load
+      // Compress images before upload to reduce Cloudflare load
       let fileToUpload = file;
       if (fileType === 'image' && file.size > 1024 * 1024) {
         console.log(`📦 Compressing image: ${file.name}`);
@@ -87,18 +104,41 @@ export const useSRKFileUpload = (appName: string) => {
         console.log(`✅ Compressed from ${file.size} to ${fileToUpload.size} bytes`);
       }
 
-      const url = await uploadFileToFirebaseWithRetry(
-        fileToUpload,
-        fileType,
-        uploadId,
-        onProgress,
-        onError
-      );
+      // Prepare S3 upload
+      const uniqueSuffix = `${Date.now()}-${uuidv4()}`;
+      const extension = file.name.split('.').pop();
+      const uniqueFileName = `${fileType}-${uniqueSuffix}.${extension}`;
+      const envPrefix = import.meta.env?.VITE_FIREBASE_ENV === 'prod' ? 'prod' : 'local_temp';
+      const key = `${envPrefix}/${appName}/${fileType}/${uniqueFileName}`;
+
+      // Convert File/Blob to ArrayBuffer
+      const arrayBuffer = await fileToUpload.arrayBuffer();
+      const params = {
+        Bucket: R2_BUCKET,
+        Key: key,
+        Body: new Uint8Array(arrayBuffer),
+        ContentType: fileToUpload.type,
+      };
+
+      // S3 upload (no progress events in browser, so just set 100% after upload)
+      await s3Client.send(new PutObjectCommand(params));
+      const url = `${R2_ENDPOINT}/${R2_BUCKET}/${key}`;
+
+      setUploadProgress((prev) => ({
+        ...prev,
+        [uploadId]: {
+          progress: 100,
+          fileName: file.name,
+          status: 'completed',
+          lastProgressTime: Date.now(),
+        },
+      }));
+      setIsUploading(false);
+      if (onProgress) onProgress(100, url);
       return { url };
     } catch (error) {
       const errorMsg = (error as Error)?.message || 'Upload failed';
       console.error(`❌ Upload error for ${uploadId}:`, errorMsg);
-      
       setUploadProgress((prev) => {
         const updated = { ...prev };
         delete updated[uploadId];
@@ -107,249 +147,14 @@ export const useSRKFileUpload = (appName: string) => {
         }
         return updated;
       });
-
-      // Clear any pending timeouts
-      const timeout = progressTimeoutRef.current.get(uploadId);
-      if (timeout) {
-        clearTimeout(timeout);
-        progressTimeoutRef.current.delete(uploadId);
-      }
-
       if (onError) onError(errorMsg);
       throw error;
     }
   };
 
-  const uploadFileToFirebaseWithRetry = (
-    file: File,
-    fileType: string,
-    uploadId: string,
-    onProgress?: (progress: number, url?: string) => void,
-    onError?: (error: string) => void,
-    retryCount = 0
-  ): Promise<string> => {
-    return new Promise<string>((resolve, reject) => {
-      const MAX_RETRIES = 2;
-      const UPLOAD_TIMEOUT = 90000; // 90 seconds timeout
-      const STALL_TIMEOUT = 15000; // 15 seconds without progress = stalled
-      let lastProgress = 0;
-      let uploadCompleted = false;
+  // REMOVED: uploadFileToFirebaseWithRetry (replaced by direct S3 upload above)
 
-      const cleanup = () => {
-        uploadTasksRef.current.delete(uploadId);
-        const timeout = progressTimeoutRef.current.get(uploadId);
-        if (timeout) {
-          clearTimeout(timeout);
-          progressTimeoutRef.current.delete(uploadId);
-        }
-      };
 
-      const handleStallTimeout = () => {
-        const currentProgress = uploadProgress[uploadId]?.progress || 0;
-        if (currentProgress === lastProgress && currentProgress < 100 && !uploadCompleted) {
-          console.warn(`⚠️ Upload stalled at ${currentProgress}% for ${uploadId}`);
-          
-          // Cancel the upload
-          const uploadTask = uploadTasksRef.current.get(uploadId);
-          if (uploadTask) {
-            uploadTask.cancel();
-          }
-
-          cleanup();
-          const errorMsg = 'Upload stalled - connection timeout. Retrying...';
-          
-          setUploadProgress((prev) => ({
-            ...prev,
-            [uploadId]: {
-              ...prev[uploadId],
-              status: 'failed',
-              error: errorMsg,
-            },
-          }));
-
-          if (retryCount < MAX_RETRIES) {
-            console.log(`🔄 Retrying upload (attempt ${retryCount + 2}/${MAX_RETRIES + 1})`);
-            uploadFileToFirebaseWithRetry(
-              file,
-              fileType,
-              uploadId,
-              onProgress,
-              onError,
-              retryCount + 1
-            ).then(resolve).catch(reject);
-          } else {
-            reject(new Error('Upload timeout after retries'));
-          }
-        } else {
-          lastProgress = currentProgress;
-          // Set another stall check
-          const newTimeout = setTimeout(handleStallTimeout, STALL_TIMEOUT);
-          progressTimeoutRef.current.set(uploadId, newTimeout);
-        }
-      };
-
-      // Initial stall timeout
-      const stallTimeout = setTimeout(handleStallTimeout, STALL_TIMEOUT);
-      progressTimeoutRef.current.set(uploadId, stallTimeout);
-
-      // Overall upload timeout
-      const uploadTimeoutHandle = setTimeout(() => {
-        if (!uploadCompleted) {
-          console.error(`❌ Upload timeout (${UPLOAD_TIMEOUT}ms) for ${uploadId}`);
-          const uploadTask = uploadTasksRef.current.get(uploadId);
-          if (uploadTask) {
-            uploadTask.cancel();
-          }
-          cleanup();
-          reject(new Error('Upload timeout'));
-        }
-      }, UPLOAD_TIMEOUT);
-
-      try {
-        const uniqueSuffix = `${Date.now()}-${uuidv4()}`;
-        const extension = file.name.split('.').pop();
-        const uniqueFileName = `${fileType}-${uniqueSuffix}.${extension}`;
-        const envPrefix = import.meta.env.VITE_FIREBASE_ENV === 'prod' ? 'prod' : 'local_temp';
-        const storageRef = ref(
-          storage,
-          `/${envPrefix}/${appName}/${fileType}/${uniqueFileName}`
-        );
-
-        const uploadTask = uploadBytesResumable(storageRef, file);
-        uploadTasksRef.current.set(uploadId, uploadTask);
-
-        uploadTask.on(
-          'state_changed',
-          (snapshot) => {
-            const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-            const roundedProgress = +progress.toFixed(0);
-
-            setUploadProgress((prev) => ({
-              ...prev,
-              [uploadId]: {
-                progress: roundedProgress,
-                fileName: file.name,
-                status: roundedProgress === 100 ? 'completed' : 'uploading',
-                lastProgressTime: Date.now(),
-              },
-            }));
-
-            if (onProgress) onProgress(roundedProgress);
-          },
-          (error: Error) => {
-            uploadCompleted = true;
-            clearTimeout(uploadTimeoutHandle);
-            cleanup();
-            const storageError = error as StorageError;
-            console.error(`❌ Firebase error for ${uploadId}:`, storageError.code, error.message);
-
-            const errorMsg = getErrorMessage(error);
-            setUploadProgress((prev) => ({
-              ...prev,
-              [uploadId]: {
-                ...prev[uploadId],
-                status: 'failed',
-                error: errorMsg,
-              },
-            }));
-
-            if (retryCount < MAX_RETRIES && isRetryableError(storageError.code)) {
-              console.log(`🔄 Retrying after error (attempt ${retryCount + 2}/${MAX_RETRIES + 1})`);
-              uploadFileToFirebaseWithRetry(
-                file,
-                fileType,
-                uploadId,
-                onProgress,
-                onError,
-                retryCount + 1
-              ).then(resolve).catch(reject);
-            } else {
-              if (onError) onError(errorMsg);
-              reject(error);
-            }
-          },
-          () => {
-            uploadCompleted = true;
-            clearTimeout(uploadTimeoutHandle);
-            
-            getDownloadURL(uploadTask.snapshot.ref)
-              .then((downloadURL) => {
-                setUploadProgress((prev) => ({
-                  ...prev,
-                  [uploadId]: {
-                    progress: 100,
-                    fileName: file.name,
-                    status: 'completed',
-                    lastProgressTime: Date.now(),
-                  },
-                }));
-
-                if (onProgress) onProgress(100, downloadURL);
-
-                setTimeout(() => {
-                  setUploadProgress((prev) => {
-                    const updated = { ...prev };
-                    delete updated[uploadId];
-                    if (Object.keys(updated).length === 0) {
-                      setIsUploading(false);
-                    }
-                    return updated;
-                  });
-                  cleanup();
-                }, 500);
-
-                resolve(downloadURL);
-              })
-              .catch((error) => {
-                console.error(`❌ Failed to get download URL for ${uploadId}:`, error);
-                cleanup();
-                reject(error);
-              });
-          }
-        );
-      } catch (error) {
-        clearTimeout(uploadTimeoutHandle);
-        cleanup();
-        reject(error);
-      }
-    });
-  };
-
-  // Utility functions
-  const isRetryableError = (errorCode?: string): boolean => {
-    const retryableCodes = [
-      'storage/retry-limit-exceeded',
-      'storage/network-error',
-      'storage/unauthorized',
-      'storage/unknown',
-    ];
-    return !errorCode || retryableCodes.includes(errorCode);
-  };
-
-  const getErrorMessage = (error: Error): string => {
-    const storageError = error as StorageError;
-    const code = storageError?.code;
-    const message = error?.message;
-
-    switch (code) {
-      case 'storage/unauthorized':
-        return 'Authentication failed. Please login again.';
-      case 'storage/canceled':
-        return 'Upload was canceled.';
-      case 'storage/unknown':
-        return 'Upload failed - connection issue. Retrying...';
-      case 'storage/retry-limit-exceeded':
-        return 'Upload failed after multiple retries. Please try again.';
-      case 'storage/invalid-argument':
-        return 'Invalid file. Please check and try again.';
-      case 'storage/server-unavailable':
-        return 'Firebase is temporarily unavailable. Retrying...';
-      case 'storage/timeout':
-        return 'Upload timeout. Retrying...';
-      default:
-        return message || 'Upload failed. Please try again.';
-    }
-  };
 
   // Calculate overall progress across all active uploads
   const getOverallProgress = (): number => {
@@ -375,24 +180,22 @@ export const useSRKFileUpload = (appName: string) => {
   const resetProgress = useCallback(() => {
     setUploadProgress({});
     setIsUploading(false);
-    uploadTasksRef.current.forEach((task) => {
-      try {
-        task.cancel();
-      } catch {
-        // Already cancelled
-      }
-    });
-    uploadTasksRef.current.clear();
     progressTimeoutRef.current.forEach((timeout) => clearTimeout(timeout));
     progressTimeoutRef.current.clear();
   }, []);
 
   const deleteFile = async (fileUrl: string): Promise<void> => {
+    // fileUrl is the full URL, extract the key after the bucket
     try {
-      const fileRef = ref(storage, fileUrl);
-      await deleteObject(fileRef);
+      const url = new URL(fileUrl);
+      // /bucket/key -> key
+      const key = url.pathname.split('/').slice(2).join('/');
+      await s3Client.send(new DeleteObjectCommand({
+        Bucket: R2_BUCKET,
+        Key: key,
+      }));
     } catch (error) {
-      console.error('Error deleting file from Firebase:', error);
+      console.error('Error deleting file from Cloudflare R2:', error);
       throw error;
     }
   };

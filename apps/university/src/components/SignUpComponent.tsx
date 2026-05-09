@@ -17,7 +17,7 @@ import {
 import { TPackage } from "../lib/types/entities";
 import useAlert from "../hooks/useAlert";
 import { SignupPaymentMethod } from "./signup/SignupPaymentMethod";
-import useUploadFile from "../hooks/useFileUpload";
+import { useSRKFileUpload } from '@srk/shared/hooks';
 
 const genderOptions = [
   { value: "Male", label: "Male" },
@@ -78,7 +78,7 @@ export function SignupComponent({
   });
   const { show } = useAlert();
   const navigate = useNavigate();
-  const { uploadFile } = useUploadFile();
+  const { uploadFile } = useSRKFileUpload('university');
 
   const {
     setValue,

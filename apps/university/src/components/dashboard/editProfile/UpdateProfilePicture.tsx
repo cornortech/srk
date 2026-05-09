@@ -5,7 +5,7 @@ import useAuthStore from "../../../store/useAuth";
 import { TUser } from "../../../lib/types/entities";
 import { updateUserDetailsApi } from "../../../lib/apiClient";
 import useAlert from "../../../hooks/useAlert";
-import useUploadFile from "../../../hooks/useFileUpload";
+import { useSRKFileUpload } from '@srk/shared/hooks';
 
 interface UpdateProfilePictureProps {
   userData: TUser;
@@ -15,7 +15,7 @@ export const UpdateProfilePicture = ({
 }: UpdateProfilePictureProps) => {
   const [file, setFile] = useState<File | null>(null);
   const { userDetails } = useAuthStore();
-  const { uploadFile } = useUploadFile();
+  const { uploadFile } = useSRKFileUpload('university');
   const { show } = useAlert();
   const [progress, setProgress] = useState(0);
 

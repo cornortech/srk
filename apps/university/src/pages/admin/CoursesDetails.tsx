@@ -27,7 +27,7 @@ import { TCourse, TCourseVideo } from "../../lib/types/entities";
 import { TUploadVideoPayload } from "../../lib/types";
 import useAlert from "../../hooks/useAlert";
 import { AxiosError } from "axios";
-import useUploadFile from "../../hooks/useFileUpload";
+import { useSRKFileUpload } from '@srk/shared/hooks';
 
 interface Video {
   url: string;
@@ -46,7 +46,7 @@ function CourseDetail() {
   const [chapters, setChapters] = useState<Chapter[]>([]);
   const [editableCourse, setEditableCourse] = useState<TCourse | null>(null);
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
-  const { uploadFile } = useUploadFile();
+  const { uploadFile } = useSRKFileUpload('university');
   const { show } = useAlert();
   console.log("chapters", chapters);
 

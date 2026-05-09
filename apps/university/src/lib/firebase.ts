@@ -1,6 +1,5 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { getStorage } from "firebase/storage";
 import { env } from "./env";
 
 const firebaseConfig = {
@@ -13,4 +12,4 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-export const storage = getStorage(app);
+// Note: File uploads now use Cloudflare R2 (S3) instead of Firebase Storage

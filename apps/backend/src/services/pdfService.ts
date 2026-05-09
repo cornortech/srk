@@ -45,7 +45,9 @@ async function fetchAndCompressImage(url: string): Promise<Uint8Array> {
   const response = await fetch(url);
 
   if (!response.ok) {
-    throw new Error(`Failed to fetch image: ${response.status} ${response.statusText}`);
+    throw new Error(
+      `Failed to fetch image: ${response.status} ${response.statusText}`
+    );
   }
 
   const buffer = await response.arrayBuffer();
@@ -85,17 +87,22 @@ export async function modifyAndUploadAgreement(
     console.log('Username:', username);
     console.log('Verification Image URL:', imageUrl);
     console.log('Left Thumbprint URL:', leftThumbfingerprint || 'NOT PROVIDED');
-    console.log('Right Thumbprint URL:', rightThumbfingerprint || 'NOT PROVIDED');
-    console.log('Signature URL:', signatureUrl || 'NOT PROVIDED');
-    
-    const pdfPath = templatePath || path.join(
-      process.cwd(),
-      'apps',
-      'backend',
-      'static',
-      'pdf',
-      'courseAgreement.pdf'
+    console.log(
+      'Right Thumbprint URL:',
+      rightThumbfingerprint || 'NOT PROVIDED'
     );
+    console.log('Signature URL:', signatureUrl || 'NOT PROVIDED');
+
+    const pdfPath =
+      templatePath ||
+      path.join(
+        process.cwd(),
+        'apps',
+        'backend',
+        'static',
+        'pdf',
+        'courseAgreement.pdf'
+      );
 
     console.log(`PDF Path: ${pdfPath}`);
 
@@ -104,11 +111,13 @@ export async function modifyAndUploadAgreement(
 
     const pages = pdfDoc.getPages();
     const firstPage = pages[0];
-    
+
     // Log page dimensions for coordinate debugging
     const pageWidth = firstPage.getWidth();
     const pageHeight = firstPage.getHeight();
-    console.log(`PDF Page Dimensions: Width=${pageWidth}, Height=${pageHeight}`);
+    console.log(
+      `PDF Page Dimensions: Width=${pageWidth}, Height=${pageHeight}`
+    );
 
     // Modify the PDF with text
     firstPage.drawText(username, {
@@ -152,7 +161,9 @@ export async function modifyAndUploadAgreement(
     if (leftThumbfingerprint) {
       try {
         console.log('Embedding left thumbprint from:', leftThumbfingerprint);
-        const leftThumbBytes = await fetchAndCompressImage(leftThumbfingerprint);
+        const leftThumbBytes = await fetchAndCompressImage(
+          leftThumbfingerprint
+        );
         if (leftThumbBytes && leftThumbBytes.length > 0) {
           const embeddedLeftThumb = await pdfDoc.embedPng(leftThumbBytes);
           firstPage.drawImage(embeddedLeftThumb, {
@@ -174,7 +185,9 @@ export async function modifyAndUploadAgreement(
     if (rightThumbfingerprint) {
       try {
         console.log('Embedding right thumbprint from:', rightThumbfingerprint);
-        const rightThumbBytes = await fetchAndCompressImage(rightThumbfingerprint);
+        const rightThumbBytes = await fetchAndCompressImage(
+          rightThumbfingerprint
+        );
         if (rightThumbBytes && rightThumbBytes.length > 0) {
           const embeddedRightThumb = await pdfDoc.embedPng(rightThumbBytes);
           firstPage.drawImage(embeddedRightThumb, {
@@ -205,7 +218,9 @@ export async function modifyAndUploadAgreement(
             width: 150,
             height: 80,
           });
-          console.log('Signature embedded successfully at x=20, y=120 (darkened, positioned upper left)');
+          console.log(
+            'Signature embedded successfully at x=20, y=120 (darkened, positioned upper left)'
+          );
         }
       } catch (err) {
         console.error('Error embedding signature:', err);
@@ -217,16 +232,20 @@ export async function modifyAndUploadAgreement(
     // Save the modified PDF locally and upload to Firebase Storage
     const modifiedPdfBytes = await pdfDoc.save();
     fs.writeFileSync(modifiedPdfPath, modifiedPdfBytes);
-    
+
     const fileBuffer = fs.readFileSync(modifiedPdfPath);
     const fileName = `${username}-${Date.now()}.pdf`;
-    const modifiedPdfUrl = await uploadFileToFirebaseStorage(fileBuffer, fileName, 'agreements');
-    
+    const modifiedPdfUrl = await uploadFileToFirebaseStorage(
+      fileBuffer,
+      fileName,
+      'agreements'
+    );
+
     // Clean up the temporary file
     if (fs.existsSync(modifiedPdfPath)) {
       fs.unlinkSync(modifiedPdfPath);
     }
-    
+
     return modifiedPdfUrl;
   } catch (error) {
     // Clean up the temporary file if it exists
@@ -234,6 +253,122 @@ export async function modifyAndUploadAgreement(
       fs.unlinkSync(modifiedPdfPath);
     }
     console.error('Error modifying or uploading PDF:', error);
+    throw error;
+  }
+}
+
+export async function generateAndUploadCertificate(
+  userFullName: string,
+  issuedDate: Date,
+  participantId: string
+): Promise<string> {
+  const modifiedPdfPath = `completionCertificate-${Date.now()}.pdf`;
+  try {
+    console.log('=== Certificate Generation Started ===');
+    console.log('User Full Name:', userFullName);
+    console.log('Issued Date:', issuedDate);
+    console.log('Participant ID:', participantId);
+
+    const certificatePath = path.join(
+      process.cwd(),
+      'apps',
+      'backend',
+      'static',
+      'certificate',
+      'course-completion-certificate.pdf'
+    );
+
+    console.log(`Certificate Path: ${certificatePath}`);
+
+    const existingPdfBytes = fs.readFileSync(certificatePath);
+    const pdfDoc = await PDFDocument.load(existingPdfBytes);
+
+    const pages = pdfDoc.getPages();
+    const firstPage = pages[0];
+
+    // Get page dimensions
+    const pageWidth = firstPage.getWidth();
+    const pageHeight = firstPage.getHeight();
+    console.log(
+      `Certificate Page Dimensions: Width=${pageWidth}, Height=${pageHeight}`
+    );
+
+    // Format date as "ISSUED ON: 15 MAY 2026"
+    const formattedDate = new Date(issuedDate)
+      .toLocaleDateString('en-US', {
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric',
+      })
+      .toUpperCase();
+
+    // Get current year for batch
+    const currentYear = new Date().getFullYear();
+    const batch = `B-${currentYear}`;
+
+    // Add participant name (centered near top)
+    firstPage.drawText(userFullName, {
+      x: pageWidth / 2 - userFullName.length * 4, // Approximate centering
+      y: pageHeight - 320,
+      size: 18,
+      color: rgb(0, 0, 0),
+    });
+
+    // Add "ISSUED ON:" date in the bottom section
+    firstPage.drawText(formattedDate, {
+      x: 180,
+      y: 180,
+      size: 11,
+      color: rgb(0, 0, 0),
+    });
+
+    // Add batch/cohort (current year)
+    firstPage.drawText(batch, {
+      x: 380,
+      y: 180,
+      size: 11,
+      color: rgb(0, 0, 0),
+    });
+
+    // Add participant ID (random number)
+    firstPage.drawText(participantId, {
+      x: 650,
+      y: 180,
+      size: 11,
+      color: rgb(0, 0, 0),
+    });
+
+    // Save the modified certificate locally and upload to Firebase Storage
+    const modifiedPdfBytes = await pdfDoc.save();
+    fs.writeFileSync(modifiedPdfPath, modifiedPdfBytes);
+
+    const fileBuffer = fs.readFileSync(modifiedPdfPath);
+    const fileName = `certificate-${userFullName}-${Date.now()}.pdf`;
+
+
+    
+
+    const certificateUrl = await uploadFileToFirebaseStorage(
+      fileBuffer,
+      fileName,
+      'certificates'
+    );
+
+
+
+    // Clean up the temporary file
+    if (fs.existsSync(modifiedPdfPath)) {
+      fs.unlinkSync(modifiedPdfPath);
+    }
+
+    console.log('=== Certificate Generation Completed ===');
+    return certificateUrl;
+  } catch (error) {
+    // Clean up the temporary file if it exists
+    if (fs.existsSync(modifiedPdfPath)) {
+      fs.unlinkSync(modifiedPdfPath);
+    }
+    console.error('Error generating or uploading certificate:', error);
     throw error;
   }
 }
@@ -320,16 +455,20 @@ export async function createAffiliatePdfAndUpload(
     // Save the modified PDF locally and upload to Firebase Storage
     const modifiedPdfBytes = await pdfDoc.save();
     fs.writeFileSync(modifiedPdfPath, modifiedPdfBytes);
-    
+
     const fileBuffer = fs.readFileSync(modifiedPdfPath);
     const fileName = `${username}-affiliate-${Date.now()}.pdf`;
-    const modifiedPdfUrl = await uploadFileToFirebaseStorage(fileBuffer, fileName, 'agreements');
+    const modifiedPdfUrl = await uploadFileToFirebaseStorage(
+      fileBuffer,
+      fileName,
+      'agreements'
+    );
 
     // Clean up the temporary file
     if (fs.existsSync(modifiedPdfPath)) {
       fs.unlinkSync(modifiedPdfPath);
     }
-    
+
     return modifiedPdfUrl;
   } catch (error) {
     // Clean up the temporary file if it exists

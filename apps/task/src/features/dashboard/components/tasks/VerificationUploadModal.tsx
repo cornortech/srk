@@ -73,6 +73,9 @@ export const VerificationUploadModal: React.FC<
           // Error callback
           setUploadError(error);
           addNotification(error, 'error');
+        },
+        {
+          keyPrefix: 'image-task-submission',
         }
       );
 

@@ -2,6 +2,7 @@ import { Check } from "lucide-react";
 import { AnimationButton } from "../ReusableComponents";
 import { useNavigate } from "react-router-dom";
 import { accessFeatures } from "../../Data/AccessFeatures";
+import { getUniversityAssetUrl } from "../../lib/cdn";
 
 
 
@@ -44,7 +45,7 @@ export default function YouWillGetAccess() {
               </div>
               <div className={`${index % 2 === 1 ? "md:order-first" : ""}`}>
                 <video preload="auto" autoPlay loop muted>
-                  <source src={feature.image} type="video/mp4" />
+                  <source src={getUniversityAssetUrl(feature.image)} type="video/mp4" />
                   Your browser does not support the video tag.
                 </video>
               </div>

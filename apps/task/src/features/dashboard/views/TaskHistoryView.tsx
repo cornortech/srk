@@ -16,6 +16,7 @@ import { DashboardGlassCard } from '../components/ui/DashboardGlassCard';
 import DashboardGradientText from '../components/ui/DashboardGradientText';
 import { api } from '../../../lib/api';
 import { useTaskAuthStore } from '../../../store/useTaskAuthStore';
+import { getTaskAssetUrl } from '../../../lib/cdn';
 
 export const TaskHistoryView: React.FC = () => {
   const { taskUserID } = useTaskAuthStore();
@@ -134,13 +135,13 @@ export const TaskHistoryView: React.FC = () => {
                         <div className="w-full md:w-32 h-32 md:h-24 rounded-xl overflow-hidden bg-black/40 border border-white/10 group relative">
                           {item.screenshotUrl ? (
                             <a
-                              href={item.screenshotUrl}
+                              href={getTaskAssetUrl(item.screenshotUrl)}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="block w-full h-full"
                             >
                               <img
-                                src={item.screenshotUrl}
+                                src={getTaskAssetUrl(item.screenshotUrl)}
                                 alt="Proof"
                                 className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
                               />

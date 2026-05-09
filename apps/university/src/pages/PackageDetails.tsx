@@ -7,6 +7,7 @@ import {
   getAllCoursesOfPackageApi,
   getPackageDetailsApi,
 } from "../lib/apiClient";
+import { getUniversityAssetUrl } from "../lib/cdn";
 
 export default function PackageSinglePage() {
   const navigate = useNavigate();
@@ -117,7 +118,7 @@ export default function PackageSinglePage() {
                   <CardBody className="p-0">
                     <Image
                       alt="Communication Skills Course"
-                      src={course.image}
+                      src={getUniversityAssetUrl(course.image)}
                       className="w-full object-cover h-[250px]"
                     />
                   </CardBody>

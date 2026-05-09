@@ -2,6 +2,7 @@ import React, { useCallback, useState } from 'react';
 import { GoldButton } from '../components/ui/GoldButton';
 import { CARD_BG } from '../constants/theme';
 import { api } from '../../../lib/api';
+import { getTaskAssetUrl } from '../../../lib/cdn';
 import { Loader2, X, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -228,7 +229,7 @@ export const VerificationContent: React.FC = React.memo(() => {
           >
             <div className="flex flex-col sm:flex-row items-start sm:items-center mb-4 gap-4">
               <img
-                src={request.imageUrl}
+                src={getTaskAssetUrl(request.imageUrl)}
                 alt={request.taskUserId.fullName}
                 className="w-12 h-12 sm:w-16 sm:h-16 rounded-full object-cover border-2 border-[#E1BA73] flex-shrink-0"
                 onError={(e) => {
@@ -277,7 +278,7 @@ export const VerificationContent: React.FC = React.memo(() => {
 
               <div className="pt-2 space-y-1">
                 <a
-                  href={request.kycDocumentUrl}
+                  href={getTaskAssetUrl(request.kycDocumentUrl)}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="block text-green-400 cursor-pointer hover:underline"
@@ -285,7 +286,7 @@ export const VerificationContent: React.FC = React.memo(() => {
                   📄 View KYC Document
                 </a>
                 <a
-                  href={request.imageUrl}
+                  href={getTaskAssetUrl(request.imageUrl)}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="block text-blue-400 cursor-pointer hover:underline"
@@ -293,7 +294,7 @@ export const VerificationContent: React.FC = React.memo(() => {
                   🖼️ View Photo
                 </a>
                 <a
-                  href={request.signatureUrl}
+                  href={getTaskAssetUrl(request.signatureUrl)}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="block text-purple-400 cursor-pointer hover:underline"

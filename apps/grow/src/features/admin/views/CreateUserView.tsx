@@ -281,7 +281,7 @@ export const CreateUserView: React.FC = () => {
         );
 
         const results = await Promise.all(uploadPromises);
-        const urls = results.map((result) => result.url);
+        const urls = results.map((result) => result.key);
 
         setFormData((prev) => ({
           ...prev,

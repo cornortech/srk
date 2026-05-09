@@ -77,15 +77,14 @@ export default function CreateCoursePage() {
     console.log(data, image);
 
     if (image) {
-      await uploadFile(image, "image", (progress, url) => {
+      await uploadFile(image, "image", (progress) => {
         setUploadingPercentage(progress);
-        if (url && progress === 100) {
-          createCourse({
-            description: data.description,
-            thumbnail: url,
-            title: data.title,
-          });
-        }
+      }).then(({ key }) => {
+        createCourse({
+          description: data.description,
+          thumbnail: key,
+          title: data.title,
+        });
       });
     }
   };

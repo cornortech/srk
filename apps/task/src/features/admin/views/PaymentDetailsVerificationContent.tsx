@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { api } from '../../../lib/api';
 import type { TSrkTaskUserPaymentDetailsRequest } from '@srk/shared/contracts';
+import { getTaskAssetUrl } from '../../../lib/cdn';
 
 interface ApiError {
   response?: {
@@ -391,12 +392,12 @@ export const PaymentDetailsVerificationContent: React.FC = () => {
                 </h4>
                 <div className="bg-gray-800/50 rounded-lg p-4">
                   <img
-                    src={selectedRequest.qrCodeUrl}
+                    src={getTaskAssetUrl(selectedRequest.qrCodeUrl)}
                     alt="Payment QR"
                     className="w-64 h-64 mx-auto rounded-lg border border-gray-700"
                   />
                   <a
-                    href={selectedRequest.qrCodeUrl}
+                    href={getTaskAssetUrl(selectedRequest.qrCodeUrl)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="mt-3 text-[#B68938] hover:text-[#E1BA73] text-sm flex items-center justify-center gap-2"

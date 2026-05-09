@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { X, ExternalLink } from 'lucide-react';
 import { StatusBadge } from '../components/ui/StatusBadge';
 import moment from 'moment';
+import { getGrowAssetUrl } from '../../../lib/cdn';
 
 interface AffiliateDetailsModalProps {
   isOpen: boolean;
@@ -83,7 +84,7 @@ export const AffiliateDetailsModal = ({
               {affiliateData.profilePicture && (
                 <div className="col-span-2 flex justify-center">
                   <img
-                    src={affiliateData.profilePicture}
+                    src={getGrowAssetUrl(affiliateData.profilePicture)}
                     alt="Profile"
                     className="w-24 h-24 rounded-full object-cover border-2 border-white/20"
                   />
@@ -137,13 +138,13 @@ export const AffiliateDetailsModal = ({
             </h3>
             <div className="relative group rounded-xl overflow-hidden border border-white/10">
               <img
-                src={affiliateData.verificationImageUrl}
+                src={getGrowAssetUrl(affiliateData.verificationImageUrl)}
                 alt="Verification Proof"
                 className="w-full h-64 object-cover opacity-60 group-hover:opacity-100 transition-opacity"
               />
               <div className="absolute inset-0 flex items-center justify-center">
                 <a
-                  href={affiliateData.verificationImageUrl}
+                  href={getGrowAssetUrl(affiliateData.verificationImageUrl)}
                   target="_blank"
                   rel="noreferrer"
                   className="p-3 bg-white rounded-full text-black hover:text-white hover:bg-[#b68938] transition-all opacity-0 group-hover:opacity-100"

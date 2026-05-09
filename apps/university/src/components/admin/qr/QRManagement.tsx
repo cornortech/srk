@@ -107,15 +107,15 @@ export const QRManagement = () => {
     }
   };
 
-  // Upload file to Firebase and get URL
+  // Upload file to Cloudflare R2 and get the stored object key
   const uploadQRImageToFirebase = async (file: File): Promise<string> => {
     try {
       const result = await uploadFile(file, 'image', (progress) => {
         setUploadProgress(progress);
       });
-      return result.url;
+      return result.key;
     } catch (error) {
-      console.error('Error uploading file to Firebase:', error);
+      console.error('Error uploading QR image:', error);
       throw error;
     }
   };
@@ -137,9 +137,9 @@ export const QRManagement = () => {
     setUploadProgress(0);
 
     try {
-      let qrUrl = formData.qr; // Use existing URL if updating without changing image
+      let qrUrl = formData.qr; // Use existing stored key if updating without changing image
 
-      // Upload to Firebase only if there's a new file
+      // Upload only if there's a new file
       if (currentFile) {
         qrUrl = await uploadQRImageToFirebase(currentFile);
       }
@@ -491,7 +491,9 @@ export const QRManagement = () => {
           {() => (
             <>
               <ModalHeader className="flex flex-col gap-1 text-white border-b border-gray-700 py-4">
-                <h3 className="text-lg font-bold">🗑️ Confirm Delete</h3>
+                <h3 className="text-lg font-bold">
+                  <span role="img" aria-label="delete">🗑️</span> Confirm Delete
+                </h3>
               </ModalHeader>
               <ModalBody className="py-6">
                 <p className="text-gray-300 font-medium">

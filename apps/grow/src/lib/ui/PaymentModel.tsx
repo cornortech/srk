@@ -82,11 +82,11 @@ const PaymentModel: React.FC<PaymentModalProps> = ({
 
     setIsProcessing(true);
     try {
-      const { url } = await uploadFile(screenshot, 'image');
+      const { key } = await uploadFile(screenshot, 'image');
 
       await onSubmit({
         transactionId,
-        paymentProofUrl: url,
+        paymentProofUrl: key,
         paymentMethod: selectedMethod,
       });
 

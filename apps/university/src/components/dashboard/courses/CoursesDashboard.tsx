@@ -7,6 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getAllCoursesOfPackageApi } from "../../../lib/apiClient";
 import useAuthStore from "../../../store/useAuth";
 import { TCourse } from "../../../lib/types/entities";
+import { getUniversityAssetUrl } from "../../../lib/cdn";
 
 export default function CoursesDashboard({
   dashboardType,
@@ -53,7 +54,7 @@ export default function CoursesDashboard({
               <CardBody
                 className={`p-0 bg-no-repeat bg-cover bg-center`}
                 style={{
-                  backgroundImage: `url(${course.image})`,
+                  backgroundImage: `url(${getUniversityAssetUrl(course.image)})`,
                 }}
               ></CardBody>
               <CardFooter className="flex-col gap-2 items-start">

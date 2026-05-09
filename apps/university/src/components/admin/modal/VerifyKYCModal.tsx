@@ -218,9 +218,9 @@ export function VerifyKYCModal({
               <div className="flex flex-col items-center gap-y-2">
                 <h3 className="font-semibold">Front Image</h3>
                 {frontImage ? (
-                  <a href={frontImage} target="_blank">
+                  <a href={getUniversityAssetUrl(frontImage)} target="_blank">
                     <img
-                      src={frontImage}
+                      src={getUniversityAssetUrl(frontImage)}
                       alt="Front"
                       className="w-20 h-20 rounded-md object-cover"
                     />
@@ -232,9 +232,9 @@ export function VerifyKYCModal({
               <div className="flex flex-col items-center gap-y-2">
                 <h3 className="font-semibold">Back Image</h3>
                 {backImage ? (
-                  <a href={backImage} target="_blank">
+                  <a href={getUniversityAssetUrl(backImage)} target="_blank">
                     <img
-                      src={backImage}
+                      src={getUniversityAssetUrl(backImage)}
                       alt="Back"
                       className="w-20 h-20 rounded-md object-cover"
                     />
@@ -249,7 +249,7 @@ export function VerifyKYCModal({
                 color="primary"
                 as="a"
                 target="_blank"
-                href={courseEnrollAgreementUrl}
+                href={getUniversityAssetUrl(courseEnrollAgreementUrl)}
               >
                 View Enrollment Agreement
               </Button>

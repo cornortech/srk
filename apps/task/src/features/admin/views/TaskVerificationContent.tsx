@@ -18,6 +18,7 @@ import { BulkApprovalModal } from '../components/modals/BulkApprovalModal';
 import { GoldButton } from '../components/ui/GoldButton';
 import { CARD_BG } from '../constants/theme';
 import { api } from '../../../lib/api';
+import { getTaskAssetUrl } from '../../../lib/cdn';
 
 export const TaskVerificationContent: React.FC = () => {
   const [viewingUserId, setViewingUserId] = useState<string | null>(null);
@@ -666,12 +667,12 @@ export const TaskVerificationContent: React.FC = () => {
                   </h4>
                   <div className="relative overflow-hidden rounded-lg border border-gray-700">
                     <img
-                      src={submission.screenshotUrl}
+                      src={getTaskAssetUrl(submission.screenshotUrl)}
                       alt="Verification"
                       className="w-full h-52 object-contain bg-black/50 transition-transform duration-500 group-hover:scale-105"
                     />
                     <a
-                      href={submission.screenshotUrl}
+                      href={getTaskAssetUrl(submission.screenshotUrl)}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-bold uppercase"

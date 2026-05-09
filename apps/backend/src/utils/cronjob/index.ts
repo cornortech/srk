@@ -5,6 +5,7 @@ import { CommissionTransactionModel } from "../../model/commissionTransactionMod
 import { KYCModel } from "../../model/kycModel";
 import EmailService from "../../services/emailService";
 import { generateAndUploadCertificate } from "../../services/pdfService";
+import { downloadFileFromR2, getR2AssetUrl } from "../../services/r2Service";
 
 async function addSrkBonusToSenior(
   referringUserId: string,
@@ -130,13 +131,16 @@ const sendCompletionCertificates = async () => {
         const participantId = Math.floor(Math.random() * 1000000).toString().padStart(6, '0');
 
         // Generate certificate
-        const certificateUrl = await generateAndUploadCertificate(
+        const certificateKey = await generateAndUploadCertificate(
           `${user.firstName} ${user.lastName}`,
           new Date(),
           participantId
         );
 
-        console.log(`Certificate generated: ${certificateUrl}`);
+        console.log(`Certificate generated: ${certificateKey}`);
+
+        // Download certificate from R2 for email attachment
+        const certificateBuffer = await downloadFileFromR2(certificateKey);
 
         // Send email with certificate attachment
         await EmailService.sendEmail({
@@ -161,7 +165,7 @@ const sendCompletionCertificates = async () => {
           attachment: [
             {
               filename: `certificate-${user.firstName}-${user.lastName}.pdf`,
-              path: certificateUrl,
+              content: certificateBuffer,
             }
           ]
         });

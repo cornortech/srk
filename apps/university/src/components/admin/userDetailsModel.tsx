@@ -65,7 +65,7 @@ export default function UserDetailsModal({
             <p>
               <strong>Agreement:</strong>{" "}
               <a
-                href={user.affiliateAgreementUrl}
+                href={getUniversityAssetUrl(user.affiliateAgreementUrl)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-blue-500 hover:underline"

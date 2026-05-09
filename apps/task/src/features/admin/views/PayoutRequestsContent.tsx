@@ -4,6 +4,7 @@ import { CARD_BG, GOLD_PRIMARY } from '../constants/theme';
 import { api } from '../../../lib/api';
 import { Loader2, X, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { getTaskAssetUrl } from '../../../lib/cdn';
 
 interface ApprovalModalProps {
   isOpen: boolean;
@@ -102,7 +103,7 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
                     <p className="text-xs text-gray-400 mb-2">Payment QR Code</p>
                     <div className="flex justify-center">
                       <img
-                        src={paymentDetails.qrCodeUrl}
+                        src={getTaskAssetUrl(paymentDetails.qrCodeUrl)}
                         alt="Payment QR Code"
                         className="w-48 h-48 rounded-lg border-2 border-[#E1BA73]/30 object-contain bg-white p-2"
                       />
@@ -118,12 +119,12 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
 
             <div className="space-y-4 mb-6">
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                    src={getTaskAssetUrl(selectedRequest.qrCodeUrl)}
                   Transaction ID *
                 </label>
                 <input
                   type="text"
-                  value={transactionId}
+                    href={getTaskAssetUrl(selectedRequest.qrCodeUrl)}
                   onChange={(e) => setTransactionId(e.target.value)}
                   placeholder="Enter transaction ID"
                   className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-[#E1BA73] transition-colors"

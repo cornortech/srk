@@ -18,6 +18,7 @@ import {
 import clsx from "clsx";
 import { AdminSidebarItems } from "../Data/dashboardSidebar";
 import { useLocation } from "react-router-dom";
+import { getUniversityAssetUrl } from "../lib/cdn";
 
 const user = {
   name: "John Doe",
@@ -90,7 +91,7 @@ export const AdminNavbar = () => {
         {isSignedIn ? (
           <Dropdown placement="bottom-end">
             <DropdownTrigger>
-              <Avatar as="button" name={user.name} size="lg" src={user.image} />
+              <Avatar as="button" name={user.name} size="lg" src={getUniversityAssetUrl(user.image)} />
             </DropdownTrigger>
             <DropdownMenu aria-label="Profile Actions" variant="flat">
               <DropdownItem key="profile" className="h-14 gap-2">

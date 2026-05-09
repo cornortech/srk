@@ -26,6 +26,7 @@ import {
     X,
 } from "lucide-react"
 import { useNavigate } from "react-router-dom"
+import { getUniversityAssetUrl } from "../../lib/cdn"
 
 interface TourTarget {
     id: string
@@ -369,7 +370,7 @@ export default function AdminTourTargetsPage() {
                                     <div className="flex items-center gap-3">
                                         {isImageUrl(tour.image) ? (
                                             <img
-                                                src={tour.image}
+                                                src={getUniversityAssetUrl(tour.image)}
                                                 alt={tour.destination}
                                                 className=\"w-12 h-12 rounded-lg object-cover\"
                                             />

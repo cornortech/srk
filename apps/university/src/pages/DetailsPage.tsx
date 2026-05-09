@@ -3,6 +3,7 @@ import { Clock, Users, Award, CheckCircle } from "lucide-react";
 import { Courses } from "../Data/CourseData";
 import { useNavigate, useParams } from "react-router-dom";
 import { AnimationButton } from "../components/ReusableComponents";
+import { getUniversityAssetUrl } from "../lib/cdn";
 
 export function CourseDetails() {
   const { courseId } = useParams();
@@ -82,7 +83,7 @@ export function CourseDetails() {
           <div>
             <div className="flex items-center mb-4">
               <Avatar
-                src={course?.instructor.avatar}
+                src={getUniversityAssetUrl(course?.instructor.avatar)}
                 className="w-16 h-16 mr-4"
               />
               <div>

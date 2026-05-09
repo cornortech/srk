@@ -90,7 +90,10 @@ export const useSRKFileUpload = (appName: string) => {
     file: File,
     fileType: 'video' | 'image',
     onProgress?: (progress: number, url?: string) => void,
-    onError?: (error: string) => void
+    onError?: (error: string) => void,
+    options?: {
+      keyPrefix?: string;
+    }
   ): Promise<{ url: string; key: string }> => {
     const uploadId = uuidv4();
     setIsUploading(true);
@@ -107,9 +110,10 @@ export const useSRKFileUpload = (appName: string) => {
       // Prepare S3 upload
       const uniqueSuffix = `${Date.now()}-${uuidv4()}`;
       const extension = file.name.split('.').pop();
-      const uniqueFileName = `${fileType}-${uniqueSuffix}.${extension}`;
+      const keyPrefix = options?.keyPrefix ?? fileType;
+      const uniqueFileName = `${keyPrefix}-${uniqueSuffix}.${extension}`;
       const envPrefix = import.meta.env?.VITE_FIREBASE_ENV === 'prod' ? 'prod' : 'local_temp';
-      const key = `${envPrefix}/${appName}/${fileType}/${uniqueFileName}`;
+      const key = `${envPrefix}/${appName}/${keyPrefix}/${uniqueFileName}`;
 
       // Convert File/Blob to ArrayBuffer
       const arrayBuffer = await fileToUpload.arrayBuffer();

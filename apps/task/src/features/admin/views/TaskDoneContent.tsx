@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { CARD_BG, GOLD_PRIMARY, GOLD_ACCENT } from '../constants/theme';
 import { api } from '../../../lib/api';
+import { getTaskAssetUrl } from '../../../lib/cdn';
 
 export const TaskDoneContent: React.FC = React.memo(() => {
   type TaskTabType = 'follow' | 'like';
@@ -218,7 +219,7 @@ export const TaskDoneContent: React.FC = React.memo(() => {
 
                   {task.screenshotUrl && (
                     <a
-                      href={task.screenshotUrl}
+                      href={getTaskAssetUrl(task.screenshotUrl)}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center gap-1 text-sm text-purple-400 hover:text-purple-300 transition-colors"

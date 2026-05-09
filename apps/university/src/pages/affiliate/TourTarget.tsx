@@ -106,7 +106,7 @@ export default function TourTargetsPage() {
                                     <div className="flex items-center gap-3">
                                         {isImageUrl(tour.image) ? (
                                             <img
-                                                src={tour.image}
+                                                src={getUniversityAssetUrl(tour.image)}
                                                 alt={tour.destination}
                                                 className="w-12 h-12 rounded-lg object-cover"
                                             />

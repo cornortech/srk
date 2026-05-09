@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { getGrowAssetUrl } from '../../../lib/cdn';
 
 interface DocumentViewerModalProps {
   isOpen: boolean;
@@ -72,7 +73,7 @@ export const DocumentViewerModal: React.FC<DocumentViewerModalProps> = ({
                     </p>
                   </div>
                   {/* <a
-                    href={documentUrl}
+                    href={getGrowAssetUrl(documentUrl)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="px-4 py-2 bg-[#b68938]/20 text-[#e1ba73] rounded-lg hover:bg-[#b68938]/30 transition-colors"
@@ -81,7 +82,7 @@ export const DocumentViewerModal: React.FC<DocumentViewerModalProps> = ({
                   </a> */}
 
                   <img
-                    src={documentUrl}
+                    src={getGrowAssetUrl(documentUrl)}
                     alt="Profile"
                     className="w-full h-[100vh] object-cover"
                   />

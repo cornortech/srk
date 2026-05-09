@@ -4,6 +4,7 @@ import { allPlatforms } from '../../../../data/dummyDashboardMockData';
 import { DashboardGlassCard } from '../ui/DashboardGlassCard';
 import { AlertTriangle, Coins, RefreshCw, X } from 'lucide-react';
 import MagneticButton from '../ui/DashboardMagneticButton';
+import { getTaskAssetUrl } from '../../../../lib/cdn';
 
 interface RejectedTaskReviewModalProps {
   task: RejectedTaskEntry;
@@ -118,7 +119,7 @@ export const RejectedTaskReviewModal: React.FC<
                 <h4 className="font-bold text-zinc-400 mb-2">Your Submission</h4>
                 <div className="aspect-video w-full bg-zinc-800 rounded-xl overflow-hidden border border-white/10">
                   <img
-                    src={task.uploadedProofUrl}
+                    src={getTaskAssetUrl(task.uploadedProofUrl)}
                     alt="Uploaded proof"
                     className="w-full h-full object-cover"
                   />

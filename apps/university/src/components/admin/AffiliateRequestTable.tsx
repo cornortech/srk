@@ -134,7 +134,7 @@ export default function AffiliateRequestTable({
                 </Chip>
               </TableCell>
               <TableCell>
-                <a href={user.affiliateAgreementUrl} target="_blank">
+                <a href={getUniversityAssetUrl(user.affiliateAgreementUrl)} target="_blank">
                   <SquareArrowOutUpRight size={15} />
                 </a>
               </TableCell>

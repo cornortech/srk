@@ -201,9 +201,9 @@ export const VerificationModal: React.FC<VerificationModalProps> = ({
       const response = await submitVerification({
         params: { srkUniversityId: universityID },
         body: {
-          documentUrl: docRes.url,
-          verificationImageUrl: selfieRes.url,
-          signatureUrl: sigRes.url,
+          documentUrl: docRes.key,
+          verificationImageUrl: selfieRes.key,
+          signatureUrl: sigRes.key,
           fullName: formData.fullName,
           dateOfBirth: formData.dob,
         },

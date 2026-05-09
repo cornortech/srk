@@ -2,7 +2,7 @@ import path from 'path';
 import { PDFDocument, rgb } from 'pdf-lib';
 import fs from 'fs';
 import sharp from 'sharp';
-import { uploadFileToFirebaseStorage } from './firebaseAdminService';
+import { uploadFileToR2 } from './r2Service';
 
 // Function to darken/invert signature image for visibility
 async function darkenSignatureImage(url: string): Promise<Uint8Array> {
@@ -69,7 +69,7 @@ async function fetchAndCompressImage(url: string): Promise<Uint8Array> {
   }
 }
 
-// Function to modify the agreement PDF and then upload it to Firebase Storage
+// Function to modify the agreement PDF and then upload it to Cloudflare R2
 export async function modifyAndUploadAgreement(
   username: string,
   imageUrl: string,
@@ -229,16 +229,16 @@ export async function modifyAndUploadAgreement(
       console.log('No signature URL provided');
     }
 
-    // Save the modified PDF locally and upload to Firebase Storage
+    // Save the modified PDF locally and upload to Cloudflare R2
     const modifiedPdfBytes = await pdfDoc.save();
     fs.writeFileSync(modifiedPdfPath, modifiedPdfBytes);
 
     const fileBuffer = fs.readFileSync(modifiedPdfPath);
     const fileName = `${username}-${Date.now()}.pdf`;
-    const modifiedPdfUrl = await uploadFileToFirebaseStorage(
+    const modifiedPdfKey = await uploadFileToR2(
       fileBuffer,
       fileName,
-      'agreements'
+      'pdf/agreements'
     );
 
     // Clean up the temporary file
@@ -246,7 +246,7 @@ export async function modifyAndUploadAgreement(
       fs.unlinkSync(modifiedPdfPath);
     }
 
-    return modifiedPdfUrl;
+    return modifiedPdfKey;
   } catch (error) {
     // Clean up the temporary file if it exists
     if (fs.existsSync(modifiedPdfPath)) {
@@ -338,20 +338,17 @@ export async function generateAndUploadCertificate(
       color: rgb(0, 0, 0),
     });
 
-    // Save the modified certificate locally and upload to Firebase Storage
+    // Save the modified certificate locally and upload to Cloudflare R2
     const modifiedPdfBytes = await pdfDoc.save();
     fs.writeFileSync(modifiedPdfPath, modifiedPdfBytes);
 
     const fileBuffer = fs.readFileSync(modifiedPdfPath);
     const fileName = `certificate-${userFullName}-${Date.now()}.pdf`;
 
-
-    
-
-    const certificateUrl = await uploadFileToFirebaseStorage(
+    const certificateKey = await uploadFileToR2(
       fileBuffer,
       fileName,
-      'certificates'
+      'pdf/certificates'
     );
 
 
@@ -362,7 +359,7 @@ export async function generateAndUploadCertificate(
     }
 
     console.log('=== Certificate Generation Completed ===');
-    return certificateUrl;
+    return certificateKey;
   } catch (error) {
     // Clean up the temporary file if it exists
     if (fs.existsSync(modifiedPdfPath)) {
@@ -452,16 +449,16 @@ export async function createAffiliatePdfAndUpload(
       console.warn('Skipping image embedding due to error:', err);
     }
 
-    // Save the modified PDF locally and upload to Firebase Storage
+    // Save the modified PDF locally and upload to Cloudflare R2
     const modifiedPdfBytes = await pdfDoc.save();
     fs.writeFileSync(modifiedPdfPath, modifiedPdfBytes);
 
     const fileBuffer = fs.readFileSync(modifiedPdfPath);
     const fileName = `${username}-affiliate-${Date.now()}.pdf`;
-    const modifiedPdfUrl = await uploadFileToFirebaseStorage(
+    const modifiedPdfKey = await uploadFileToR2(
       fileBuffer,
       fileName,
-      'agreements'
+      'pdf/agreements'
     );
 
     // Clean up the temporary file
@@ -469,7 +466,7 @@ export async function createAffiliatePdfAndUpload(
       fs.unlinkSync(modifiedPdfPath);
     }
 
-    return modifiedPdfUrl;
+    return modifiedPdfKey;
   } catch (error) {
     // Clean up the temporary file if it exists
     if (fs.existsSync(modifiedPdfPath)) {

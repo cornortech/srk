@@ -171,7 +171,7 @@ function CourseDetail() {
         />
       </div>
       <img
-        src={editableCourse?.image}
+        src={getUniversityAssetUrl(editableCourse?.image)}
         alt={editableCourse?.title}
         className="w-full h-64 object-cover rounded-lg mb-4"
       />

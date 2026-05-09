@@ -12,6 +12,7 @@ import {
 import { api } from '../../../lib/api';
 import { useTaskAuthStore } from '../../../store/useTaskAuthStore';
 import { useSRKFileUpload } from '@srk/shared/hooks';
+import { getTaskAssetUrl } from '../../../lib/cdn';
 
 interface ApiError {
   response?: {
@@ -135,10 +136,10 @@ export const PaymentDetailsView: React.FC<PaymentDetailsViewProps> = ({
       // Upload QR code if a new file is selected
       if (qrFile) {
         addNotification('Uploading QR code...', 'info');
-        const { url } = await uploadFile(qrFile, 'image', (progress) => {
+        const { key } = await uploadFile(qrFile, 'image', (progress) => {
           setUploadProgress(progress);
         });
-        qrCodeUrl = url;
+        qrCodeUrl = key;
       }
 
       // Submit to backend
@@ -309,7 +310,7 @@ export const PaymentDetailsView: React.FC<PaymentDetailsViewProps> = ({
                 <div className="mt-4">
                   <p className="text-gray-400 mb-2">Payment QR Code</p>
                   <img
-                    src={approvedDetails.qrCodeUrl}
+                    src={getTaskAssetUrl(approvedDetails.qrCodeUrl)}
                     alt="Payment QR"
                     className="w-48 h-48 rounded-lg border border-gray-700"
                   />

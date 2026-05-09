@@ -20,6 +20,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { resubmitGrowVerificationSchema } from '@srk/shared/contracts';
 import { useToast } from '../lib/contexts/ToastContext';
+import { getGrowAssetUrl } from '../lib/cdn';
 
 type TResubmitForm = z.infer<typeof resubmitGrowVerificationSchema>;
 
@@ -140,17 +141,11 @@ export const UserVerificationPage = () => {
 
     try {
       // 1. Upload new KYC files
-      // let newKycUrls: string[] = [];
-      // for (const file of kycFiles) {
-      //   const { url } = await uploadFile(file, 'image');
-      //   newKycUrls.push(url);
-      // }
-
       // 2. Upload new Payment Proof if changed
       let finalPaymentUrl = data.paymentURL;
       if (paymentProof) {
-        const { url } = await uploadFile(paymentProof, 'image');
-        finalPaymentUrl = url;
+        const { key } = await uploadFile(paymentProof, 'image');
+        finalPaymentUrl = key;
       }
 
       // 3. Combine
@@ -333,7 +328,7 @@ export const UserVerificationPage = () => {
                     {!paymentProof && watch('paymentURL') && (
                       <div className="mb-3 relative group rounded-xl overflow-hidden border border-white/10">
                         <img
-                          src={watch('paymentURL')}
+                          src={getGrowAssetUrl(watch('paymentURL'))}
                           alt="Current Proof"
                           className="w-full h-32 object-cover opacity-60 group-hover:opacity-100 transition-opacity"
                         />
@@ -342,7 +337,7 @@ export const UserVerificationPage = () => {
                             Current Upload
                           </span>
                           <a
-                            href={watch('paymentURL')}
+                            href={getGrowAssetUrl(watch('paymentURL'))}
                             target="_blank"
                             rel="noreferrer"
                             className="p-2 bg-white/10 rounded-full text-white hover:bg-[#b68938] transition-all opacity-0 group-hover:opacity-100"

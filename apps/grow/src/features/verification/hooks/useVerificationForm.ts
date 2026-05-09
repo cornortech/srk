@@ -8,7 +8,7 @@ export const useVerificationForm = (userId: string | undefined) => {
   const [showCamera, setShowCamera] = useState(false);
   const [capturedMedia, setCapturedMedia] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>('');
-  const [uploadedImageUrl, setUploadedImageUrl] = useState('');
+  const [uploadedImageKey, setUploadedImageKey] = useState('');
   const [mediaType, setMediaType] = useState<'photo' | 'video'>('photo');
   const [submissionStatus, setSubmissionStatus] = useState<
     'idle' | 'submitting' | 'success' | 'error'
@@ -44,7 +44,7 @@ export const useVerificationForm = (userId: string | undefined) => {
     affiliateVerificationMutation.mutate({
       body: {
         srkUniversityUserId: userId || '',
-        verificationImageUrl: uploadedImageUrl,
+          verificationImageUrl: uploadedImageKey,
       },
     });
   };
@@ -52,7 +52,7 @@ export const useVerificationForm = (userId: string | undefined) => {
   const handleResetForm = () => {
     setCapturedMedia(null);
     setPreviewUrl('');
-    setUploadedImageUrl('');
+    setUploadedImageKey('');
     setSubmissionStatus('idle');
     setShowCamera(false);
     setIsResubmitting(true);
@@ -74,13 +74,13 @@ export const useVerificationForm = (userId: string | undefined) => {
             `capture.${mediaType === 'photo' ? 'jpg' : 'webm'}`
           );
 
-      const uploadedUrl = await uploadFile(
+      const uploadedFile = await uploadFile(
         file,
         mediaType === 'photo' ? 'image' : 'video'
       );
 
       setCapturedMedia(file);
-      setUploadedImageUrl(uploadedUrl.url);
+      setUploadedImageKey(uploadedFile.key);
       setShowCamera(false);
       setSubmissionStatus('idle');
     } catch (err) {

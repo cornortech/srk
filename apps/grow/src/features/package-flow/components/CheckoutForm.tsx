@@ -33,8 +33,8 @@ interface CheckoutFormProps {
     discountAmount: number;
     finalAmountAfterDiscount: number;
   } | null;
-  // kycFiles: File[];
-  // setKycFiles: React.Dispatch<React.SetStateAction<File[]>>;
+  kycFiles: File[];
+  setKycFiles: React.Dispatch<React.SetStateAction<File[]>>;
   isUploadingKYC: boolean;
 }
 
@@ -56,8 +56,8 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
   promoError,
   promoSuccessMessage,
   discountDetails,
-  // kycFiles,
-  // setKycFiles,
+  kycFiles,
+  setKycFiles,
   isUploadingKYC,
 }) => {
   const [termsAccepted, setTermsAccepted] = useState(false);
@@ -69,16 +69,16 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
     watch,
   } = form;
 
-  // const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   if (e.target.files && e.target.files.length > 0) {
-  //     const newFiles = Array.from(e.target.files);
-  //     setKycFiles((prev) => [...prev, ...newFiles]);
-  //   }
-  // };
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const newFiles = Array.from(e.target.files);
+      setKycFiles((prev) => [...prev, ...newFiles]);
+    }
+  };
 
-  // const removeFile = (index: number) => {
-  //   setKycFiles((prev) => prev.filter((_, i) => i !== index));
-  // };
+  const removeFile = (index: number) => {
+    setKycFiles((prev) => prev.filter((_, i) => i !== index));
+  };
 
   const promoCodeValue = watch('userData.usedPromoCode');
 
@@ -497,7 +497,7 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
                 </p>
               )}
             </div>
-            {/* <div>
+            <div>
               <label className="block text-sm font-bold text-gray-400 mb-2 uppercase tracking-widest">
                 Upload KYC documents *
               </label>
@@ -530,7 +530,7 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
                 </div> */}
 
             {/* File List */}
-            {/* {kycFiles.length > 0 && (
+            {kycFiles.length > 0 && (
                   <div className="space-y-2">
                     {kycFiles.map((file, index) => (
                       <div
@@ -566,7 +566,7 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
                     {errors.userData.kycURL.message}
                   </p>
                 )}
-              </div> 
+              </div>
             </div>*/}
           </div>
 

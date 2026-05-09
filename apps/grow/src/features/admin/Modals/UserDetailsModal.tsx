@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { X, ExternalLink } from 'lucide-react';
 import { StatusBadge } from '../components/ui/StatusBadge';
 import moment from 'moment';
+import { getGrowAssetUrl } from '../../../lib/cdn';
 
 interface UserDetailsModalProps {
   isOpen: boolean;
@@ -248,13 +249,13 @@ export const UserDetailsModal = ({
                 <p className="text-sm text-gray-400 mb-2">Payment Proof</p>
                 <div className="relative group rounded-xl overflow-hidden border border-white/10">
                   <img
-                    src={userData.paymentData.paymentURL}
+                    src={getGrowAssetUrl(userData.paymentData.paymentURL)}
                     alt="Payment Proof"
                     className="w-full h-48 object-cover opacity-60 group-hover:opacity-100 transition-opacity"
                   />
                   <div className="absolute inset-0 flex items-center justify-center">
                     <a
-                      href={userData.paymentData.paymentURL}
+                      href={getGrowAssetUrl(userData.paymentData.paymentURL)}
                       target="_blank"
                       rel="noreferrer"
                       className="p-3 bg-white rounded-full text-black hover:text-white hover:bg-[#b68938] transition-all opacity-0 group-hover:opacity-100"
@@ -279,13 +280,13 @@ export const UserDetailsModal = ({
                   className="relative group rounded-xl overflow-hidden border border-white/10"
                 >
                   <img
-                    src={url}
+                    src={getGrowAssetUrl(url)}
                     alt={`KYC Document ${index + 1}`}
                     className="w-full h-32 object-cover opacity-60 group-hover:opacity-100 transition-opacity"
                   />
                   <div className="absolute inset-0 flex items-center justify-center">
                     <a
-                      href={url}
+                      href={getGrowAssetUrl(url)}
                       target="_blank"
                       rel="noreferrer"
                       className="p-2 bg-white rounded-full text-black hover:text-white hover:bg-[#b68938] transition-all opacity-0 group-hover:opacity-100"

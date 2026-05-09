@@ -91,7 +91,6 @@ const PaymentVerificationAuthPage = () => {
     let paymentProofUrl =
       userDetailsData?.paymentDetails?.paymentProofUrl || "";
     if (paymentDetails.paymentProof) {
-      // const { url } = await uploadFile(paymentDetails.paymentProof, "image");
       const { key } = await uploadFile(paymentDetails.paymentProof, "image");
       paymentProofUrl = key;
     }

@@ -3,9 +3,11 @@ const TASK_CDN_BASE_URL = 'https://cdn.thesrkuniversity.com';
 export const getTaskAssetUrl = (assetPath?: string | null): string => {
   if (!assetPath) return '';
 
-  if (/^https?:\/\//i.test(assetPath)) {
-    return assetPath;
+  const trimmedPath = assetPath.trim();
+
+  if (/^https?:\/\//i.test(trimmedPath)) {
+    return trimmedPath;
   }
 
-  return `${TASK_CDN_BASE_URL}/${assetPath.replace(/^\/+/, '')}`;
+  return `${TASK_CDN_BASE_URL}/${trimmedPath.replace(/^\/+/, '')}`;
 };

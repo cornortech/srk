@@ -351,7 +351,7 @@ export type TSubmitTaskOnboardingVerification = z.infer<
 export const srkTaskActionSubmissionBodySchema = z.object({
   actionTodoId: z.string(),
   srkTaskUserId: z.string(),
-  actionVerificationImageUrl: z.string().url(),
+  actionVerificationImageUrl: z.string(),
 });
 export type TSrkTaskActionSubmissionBody = z.infer<
   typeof srkTaskActionSubmissionBodySchema

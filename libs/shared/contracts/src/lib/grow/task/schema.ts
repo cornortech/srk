@@ -321,7 +321,7 @@ export type TBulkRejectSrkTaskSubmissions = z.infer<
 
 export const acceptSrkTaskUserEarningsPayoutSchema = z.object({
   transactionId: z.string(),
-  paymentScreenshotUrl: z.string().url(),
+  paymentScreenshotUrl: z.string(),
 });
 
 export type TACeeptSrkTaskUSserEarningsPayout = z.infer<
@@ -337,9 +337,9 @@ export type TRejectSrkTaskUserEarningsPayout = z.infer<
 >;
 
 export const submitTaskOnboardingVerificationSchema = z.object({
-  documentUrl: z.string().url(),
-  signatureUrl: z.string().url(),
-  verificationImageUrl: z.string().url(),
+  documentUrl: z.string(),
+  signatureUrl: z.string(),
+  verificationImageUrl: z.string(),
   fullName: z.string(),
   dateOfBirth: z.string(),
 });
@@ -623,7 +623,7 @@ export const submitSrkTaskPaymentDetailsRequestSchema = z.object({
   bankName: z.string().min(1, 'Bank name is required'),
   accountNumber: z.string().min(1, 'Account number is required'),
   branchName: z.string().min(1, 'Branch name is required'),
-  qrCodeUrl: z.string().url('Valid QR code URL is required'),
+  qrCodeUrl: z.string().min(1, 'Valid QR code URL is required'),
 });
 
 export type TSubmitSrkTaskPaymentDetailsRequest = z.infer<

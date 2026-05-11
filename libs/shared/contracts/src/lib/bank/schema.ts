@@ -26,8 +26,8 @@ const identificationDetailsSchema = z.object({
 });
 
 const documentsSchema = z.object({
-  ppSizePhoto: z.string().url().min(1, "Passport size photo is required"),
-  nationalIdCard: z.string().url().min(1, "National ID card is required"),
+  ppSizePhoto: z.string().min(1, "Passport size photo is required"),
+  nationalIdCard: z.string().min(1, "National ID card is required"),
 });
 
 export const createBankDetailsSchema = z.object({

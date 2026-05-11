@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const createWebinarSchema = z.object({
   title: z.string(),
-  meetUrl: z.string().url(),
+  meetUrl: z.string(),
   startTime: z
     .string()
     .refine((val) => !isNaN(Date.parse(val)), {
@@ -22,5 +22,5 @@ export const getWebinarSchema = z.object({
   startTime: z.date(),
   endTime: z.date(),
   title: z.string(),
-  meetUrl: z.string().url(),
+  meetUrl: z.string(),
 });

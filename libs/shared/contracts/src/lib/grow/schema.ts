@@ -20,16 +20,16 @@ export const createGrowSocialMediaEnrollmentSchema = z.object({
     growSocialMediaPackageTypeId: z.string(),
     growSocialMediaPackageSubTypeId: z.string(),
     socialMediaPlatform: z.string(),
-    profileLinkURL: z.array(z.string().url('Invalid Profile Url')).optional(),
+    profileLinkURL: z.array(z.string()).optional(),
   }),
   paymentData: z.object({
-    paymentURL: z.string().url('Invalid payment URL'),
+    paymentURL: z.string(),
     transactionId: z.string().min(1, 'Transaction ID is required'),
     paymentMethod: z.enum(['esewa', 'khalti', 'bankTransfer']),
   }),
   postEngagement: z
     .object({
-      postURLs: z.array(z.string().url('Invalid Post URL')).optional(),
+      postURLs: z.array(z.string()).optional(),
     })
     .optional(),
 });
@@ -47,7 +47,7 @@ export const getGrowSocialMediaEnrollmentByIdSchema = z.object({
     gender: z.enum(['Male', 'Female', 'Other']),
     phoneNumber: z.string().min(10, 'Phone number must be at least 10 digits'),
     country: z.string().min(1, 'Country is required'),
-    kycURL: z.string().url('Invalid KYC URL'),
+    kycURL: z.string(),
     usedPromoCode: z.string().optional(),
     status: z.string(),
   }),
@@ -55,9 +55,7 @@ export const getGrowSocialMediaEnrollmentByIdSchema = z.object({
     growSocialMediaPackageId: z.string(),
     growSocialMediaPackageTypeId: z.string(),
     growSocialMediaPackageSubTypeId: z.string(),
-    profileLinkURL: z.array(
-      z.string().url('Invalid Profile Link URL').optional()
-    ),
+    profileLinkURL: z.array(z.string().optional()),
     isActive: z.boolean().optional(),
     packageName: z.string().optional(),
     packageTypeName: z.string().optional(),
@@ -67,14 +65,14 @@ export const getGrowSocialMediaEnrollmentByIdSchema = z.object({
     noOfLikes: z.number().optional(),
     noOfVideos: z.number().optional(),
   }),
-  paymentData: z.object({
-    paymentURL: z.string().url('Invalid payment URL'),
+    paymentData: z.object({
+    paymentURL: z.string(),
     transactionId: z.string().min(1, 'Transaction ID is required'),
     paymentMethod: z.enum(['esewa', 'khalti', 'bankTransfer']),
     rejectionReason: z.string(),
   }),
   postEngagement: z.object({
-    postURLs: z.array(z.string().url('Invalid Post URL')).optional(),
+    postURLs: z.array(z.string()).optional(),
   }),
   createdAt: z.string(),
   updatedAt: z.string(),
@@ -188,7 +186,7 @@ export const getSrkGrowProfileResponseSchema = z.object({
     country: z.string().optional(),
     gender: z.string().optional(),
     promoCode: z.string().optional(),
-    profileLinkURL: z.array(z.string().url()).optional(),
+    profileLinkURL: z.array(z.string()).optional(),
     referredBy: z
       .object({
         name: z.string(),
@@ -221,7 +219,7 @@ export const getSrkGrowProfileResponseSchema = z.object({
       engagementPostURLs: z
         .array(
           z.object({
-            url: z.string().url(),
+            url: z.string(),
             likesAcquired: z.number(),
             likesTarget: z.number(),
             progress: z.number(), // percentage
@@ -232,7 +230,7 @@ export const getSrkGrowProfileResponseSchema = z.object({
       profileLinks: z
         .array(
           z.object({
-            url: z.string().url(),
+            url: z.string(),
             followersAcquired: z.number(),
             followersTarget: z.number(),
             progress: z.number(), // percentage
@@ -280,8 +278,8 @@ export type TResubmitGrowVerification = z.infer<
 
 export const createGrowSocialMediaTasksSchema = z.object({
   growSocialMediaPackageEnrollmentId: z.string(),
-  profileLinkURLs: z.array(z.string().url()).optional(),
-  postURLs: z.array(z.string().url()).optional(),
+  profileLinkURLs: z.array(z.string()).optional(),
+  postURLs: z.array(z.string()).optional(),
 });
 
 export type TCreateGrowSocialMediaTasks = z.infer<
@@ -300,7 +298,7 @@ export type TCreateGrowSrkAffiliateEarningPayoutRequest = z.infer<
 
 export const acceptGrowSrkAffiliateEarningPayoutRequestSchema = z.object({
   transactionId: z.string(),
-  paymentUrl: z.string().url().optional(),
+  paymentUrl: z.string().optional(),
 });
 
 export type TAcceptGrowSrkAffiliateEarningPayoutRequest = z.infer<

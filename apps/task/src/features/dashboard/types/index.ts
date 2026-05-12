@@ -19,7 +19,7 @@ export type DashboardView =
   | 'payout'
   | 'finance'
   | 'logout';
-export type TaskStatus = 'pending' | 'approved' | 'rejected';
+export type TaskStatus = 'pending' | 'approved' | 'rejected' | 'claimed';
 
 export interface Task {
   id: string;

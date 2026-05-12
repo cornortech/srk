@@ -26,7 +26,7 @@ class EmailService {
     email,
     attachment,
   }: TSendEmailProps) {
-    let transporter = nodemailer.createTransport({
+    const transporter = nodemailer.createTransport({
       host: "smtp.gmail.com",
       port: 465,
       secure: true,
@@ -36,7 +36,7 @@ class EmailService {
       },
     });
     // Create personalized HTML content for each recipient
-    let mailOptions: SendMailOptions = {
+    const mailOptions: SendMailOptions = {
       from: '"SRK University" <' + process.env.APP_EMAIL + ">",
       to: email,
       subject: subject,
@@ -53,7 +53,7 @@ class EmailService {
     }
 
     try {
-      let info = await transporter.sendMail(mailOptions);
+      const info = await transporter.sendMail(mailOptions);
       console.log(`Email sent : ${info.messageId}`);
     } catch (error) {
       console.log(`Error sending email :`, error);

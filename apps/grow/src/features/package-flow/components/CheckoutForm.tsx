@@ -527,9 +527,9 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
                       className="text-gray-400 group-hover:text-[#b68938] transition-colors"
                     />
                   </label>
-                </div> */}
+                  </div>
 
-            {/* File List */}
+              {/* File List */}
             {kycFiles.length > 0 && (
                   <div className="space-y-2">
                     {kycFiles.map((file, index) => (
@@ -567,7 +567,7 @@ export const CheckoutForm: React.FC<CheckoutFormProps> = ({
                   </p>
                 )}
               </div>
-            </div>*/}
+            </div>
           </div>
 
           {/* Terms & Conditions */}

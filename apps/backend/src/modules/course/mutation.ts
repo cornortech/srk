@@ -1,5 +1,5 @@
 import { AppRouteImplementationOrOptions } from '@ts-rest/express/src/lib/types';
-import { courseContract } from '../../../../../libs/shared/contracts/src/lib/course/contract';
+import { courseContract } from '@srk/shared/contracts';
 import { CourseModel } from '../../model/courseModel';
 import { CourseVideoModel } from '../../model/courseVideo';
 

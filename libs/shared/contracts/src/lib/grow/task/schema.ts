@@ -67,7 +67,7 @@ export const srkTaskActionSubmissionDetailsSchema = z.object({
     })
     .optional(),
   screenshotUrl: z.string(),
-  status: z.enum(['pending', 'approved', 'rejected']),
+  status: z.enum(['pending', 'approved', 'rejected', 'claimed']),
   rejectionReason: z.string().nullable(),
   createdAt: z.string(),
   updatedAt: z.string(),
@@ -85,7 +85,7 @@ export type TPaginatedSrkTaskActionSubmissionsByStatusForAdmin = z.infer<
 
 export const getSrkTaskActionSubmissionsByStatusForAdminQueryParams =
   commonPaginatedQueryParamsSchema.extend({
-    status: z.enum(['pending', 'approved', 'rejected']).optional(),
+    status: z.enum(['pending', 'approved', 'rejected', 'claimed']).optional(),
   });
 export type TGetSrkTaskActionSubmissionsByStatusForAdminQueryParams = z.infer<
   typeof getSrkTaskActionSubmissionsByStatusForAdminQueryParams
@@ -93,7 +93,7 @@ export type TGetSrkTaskActionSubmissionsByStatusForAdminQueryParams = z.infer<
 
 export const getSrkTaskActionSubmissionsByStatusForUserQueryParams =
   commonPaginatedQueryParamsSchema.extend({
-    status: z.enum(['pending', 'approved', 'rejected']).optional(),
+    status: z.enum(['pending', 'approved', 'rejected', 'claimed']).optional(),
   });
 export type TGetSrkTaskActionSubmissionsByStatusForUserQueryParams = z.infer<
   typeof getSrkTaskActionSubmissionsByStatusForUserQueryParams
@@ -110,7 +110,7 @@ export type TPaginatedSrkTaskActionSubmissionsByUser = z.infer<
 
 export const getSrkTaskActionSubmissionByStatusByUserQueryParams =
   commonPaginatedQueryParamsSchema.extend({
-    status: z.enum(['pending', 'approved', 'rejected']).optional(),
+    status: z.enum(['pending', 'approved', 'rejected', 'claimed']).optional(),
   });
 
 export type TGetSrkTaskActionSubmissionByStatusByUserQueryParams = z.infer<

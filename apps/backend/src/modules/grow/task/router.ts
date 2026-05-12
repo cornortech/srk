@@ -61,4 +61,6 @@ export const srkTaskRouter = s.router(srkTaskContract, {
     srkTaskQueryHandler.getAllPaymentDetailsRequestsForAdmin,
   reviewPaymentDetailsRequest:
     srkTaskMutationHandler.reviewPaymentDetailsRequest,
+    claimCoinsForTaskActionSubmission:
+    srkTaskMutationHandler.claimCoinsForTaskActionSubmission,
 });

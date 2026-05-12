@@ -313,6 +313,18 @@ export const srkTaskContract = c.router({
     },
     summary: 'Approve an action submission for srk task user by admin',
   },
+  claimCoinsForTaskActionSubmission: {
+    method: 'POST',
+    path: '/task/srk-task-action-claim-coins/:submissionId',
+    body: z.object({}),
+    responses: {
+      200: SuccessSchema,
+      400: ErrorSchema,
+      404: ErrorSchema,
+      500: ErrorSchema,
+    },
+    summary: 'Claim coins for an approved action submission',
+  },
   bulkApproveSrkTaskSubmissionsByAdmin: {
     method: 'POST',
     path: '/task/admin/bulk-approve-submissions',

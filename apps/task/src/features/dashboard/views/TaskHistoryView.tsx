@@ -15,6 +15,7 @@ import {
 import { DashboardGlassCard } from '../components/ui/DashboardGlassCard';
 import DashboardGradientText from '../components/ui/DashboardGradientText';
 import { api } from '../../../lib/api';
+import { useQueryClient } from '@tanstack/react-query';
 import { useTaskAuthStore } from '../../../store/useTaskAuthStore';
 import { getTaskAssetUrl } from '../../../lib/cdn';
 
@@ -22,11 +23,12 @@ export const TaskHistoryView: React.FC = () => {
   const { taskUserID } = useTaskAuthStore();
   const [page, setPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState<
-    'all' | 'pending' | 'approved' | 'rejected'
+    'all' | 'pending' | 'approved' | 'rejected' | 'claimed'
   >('all');
+  const [claimingSubmissionId, setClaimingSubmissionId] = useState<string | null>(null);
   const LIMIT = 8;
 
-  const { data: submissionsRes, isLoading } =
+  const { data: submissionsRes, isLoading, refetch } =
     api.srkTask.getAllSrkTasksActionSubmissionsByUser.useQuery(
       ['srk-task-submissions', taskUserID, page, statusFilter],
       {
@@ -39,6 +41,22 @@ export const TaskHistoryView: React.FC = () => {
       }
     );
 
+    const queryClient = useQueryClient();
+
+  const claimCoinsMutation =
+    api.srkTask.claimCoinsForTaskActionSubmission.useMutation({
+      onSuccess: async () => {
+        await refetch();
+        // Invalidate user analytics/profile so navbar balance updates
+        queryClient.invalidateQueries({ queryKey: ['getSrkTaskUserAnalytics', taskUserID || ''] });
+        queryClient.invalidateQueries({ queryKey: ['getSrkTaskUserProfile', taskUserID || ''] });
+        setClaimingSubmissionId(null);
+      },
+      onError: () => {
+        setClaimingSubmissionId(null);
+      },
+    });
+
   const submissions =
     submissionsRes?.status === 200 ? submissionsRes.body.data : [];
   const hasNextPage = submissions.length === LIMIT;
@@ -48,6 +66,11 @@ export const TaskHistoryView: React.FC = () => {
       case 'approved':
         return {
           color: 'text-green-400 bg-green-500/10 border-green-500/20',
+          icon: <CheckCircle2 size={14} />,
+        };
+      case 'claimed':
+        return {
+          color: 'text-amber-400 bg-amber-500/10 border-amber-500/20',
           icon: <CheckCircle2 size={14} />,
         };
       case 'rejected':
@@ -77,7 +100,7 @@ export const TaskHistoryView: React.FC = () => {
 
         {/* Filter Tabs */}
         <div className="flex flex-wrap gap-2 p-1 bg-white/5 rounded-lg border border-white/10">
-          {(['all', 'pending', 'approved', 'rejected'] as const).map(
+          {(['all', 'pending', 'approved', 'claimed', 'rejected'] as const).map(
             (status) => (
               <button
                 key={status}
@@ -91,7 +114,9 @@ export const TaskHistoryView: React.FC = () => {
                     : 'text-zinc-400 hover:text-white'
                 }`}
               >
-                {status.charAt(0).toUpperCase() + status.slice(1)}
+                {status === 'claimed'
+                  ? 'Claim'
+                  : status.charAt(0).toUpperCase() + status.slice(1)}
               </button>
             )
           )}
@@ -116,11 +141,10 @@ export const TaskHistoryView: React.FC = () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-4">
-              {submissions
-                .filter(item => statusFilter !== 'all' || item.status !== 'rejected')
-                .slice(0, statusFilter === 'rejected' ? 2 : submissions.length)
-                .map((item, idx) => {
+              {submissions.map((item, idx) => {
                 const statusConfig = getStatusConfig(item.status);
+                const canClaim = item.status === 'approved';
+                const isClaiming = claimingSubmissionId === item._id;
                 return (
                   <motion.div
                     key={item._id}
@@ -168,9 +192,9 @@ export const TaskHistoryView: React.FC = () => {
                               {item.description || 'Task Submission'}
                             </h4>
                             <div className="flex items-center gap-2 mt-1">
-                              {((item as any)['growEnrollmentId'] || (item as any)['growPackageTodoId']?.enrollment) && (
+                              {item.growPackageTodoId?.enrollment && (
                                 <span className="text-xs px-2 py-0.5 rounded-md bg-white/10 text-zinc-300">
-                                  {(item as any)['growEnrollmentId']?.socialMediaPlatform || (item as any)['growPackageTodoId']?.enrollment?.socialMediaPlatform}
+                                  {item.growPackageTodoId.enrollment.socialMediaPlatform}
                                 </span>
                               )}
                               <span className="text-xs text-zinc-500">
@@ -199,6 +223,25 @@ export const TaskHistoryView: React.FC = () => {
                               <span className="font-bold">Reason:</span>{' '}
                               {item.rejectionReason}
                             </p>
+                          </div>
+                        )}
+
+                        {canClaim && (
+                          <div className="mt-4 flex justify-end">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setClaimingSubmissionId(item._id);
+                                claimCoinsMutation.mutate({
+                                  params: { submissionId: item._id },
+                                  body: {},
+                                });
+                              }}
+                              disabled={isClaiming}
+                              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-amber-500 text-black font-semibold hover:bg-amber-400 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+                            >
+                              {isClaiming ? 'Claiming...' : 'Claim Coins'}
+                            </button>
                           </div>
                         )}
                       </div>

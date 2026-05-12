@@ -1,5 +1,5 @@
 import { initServer } from '@ts-rest/express';
-import { packageContract } from '../../../../../libs/shared/contracts/src/lib/package/contract';
+import { packageContract } from '@srk/shared/contracts';
 import { packageMutationHandler } from './mutation';
 import { packageQueryHandler } from './query';
 const s = initServer();

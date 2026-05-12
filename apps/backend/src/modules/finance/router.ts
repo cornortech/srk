@@ -1,5 +1,5 @@
 import { initServer } from '@ts-rest/express';
-import { financeContract } from '../../../../../libs/shared/contracts/src/index';
+import { financeContract } from '@srk/shared/contracts';
 import { financeMutationHandler } from './mutation';
 import { financeQueryHandler } from './query';
 const s = initServer();

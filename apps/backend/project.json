@@ -6,6 +6,7 @@
   "tags": [],
   "targets": {
     "build": {
+      "dependsOn": ["typecheck", "lint"],
       "executor": "@nx/esbuild:esbuild",
       "outputs": ["{options.outputPath}"],
       "defaultConfiguration": "production",
@@ -35,6 +36,12 @@
             }
           }
         }
+      }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc -p apps/backend/tsconfig.app.json --noEmit"
       }
     },
     "prune-lockfile": {

@@ -1,6 +1,6 @@
 import { initServer } from '@ts-rest/express';
-import { tourContract } from '../../../../../libs/shared/contracts/src/lib/tour/tour.contract';
 import { tourQuery } from './query';
+import { tourContract } from '@srk/shared/contracts';
 const s = initServer();
 
 export const tourRouter = s.router(tourContract, {

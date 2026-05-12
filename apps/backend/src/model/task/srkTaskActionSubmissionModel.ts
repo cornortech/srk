@@ -27,7 +27,7 @@ const srkTaskActionSubmissionSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ['pending', 'approved', 'rejected'],
+      enum: ['pending', 'approved', 'claimed', 'rejected'],
       default: 'pending',
       required: true,
     },

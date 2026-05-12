@@ -26,15 +26,14 @@ const createSocialTaskPackage: AppRouteImplementationOrOptions<
         success: true,
       },
     };
-  } catch (error) {
+  } catch (error: unknown) {
     console.error(error);
+    const errorMessage = error instanceof Error ? error.message : 'Internal server error';
     return {
       status: 500,
       body: {
         success: false,
-        message: error.message
-          ? `Internal server error: ${error.message}`
-          : 'Internal server error',
+        message: `Internal server error: ${errorMessage}`,
       },
     };
   }
@@ -85,15 +84,14 @@ const enrollSocialTaskPackage: AppRouteImplementationOrOptions<
         success: true,
       },
     };
-  } catch (error) {
+  } catch (error: unknown) {
     console.error(error);
+    const errorMessage = error instanceof Error ? error.message : 'Internal server error';
     return {
       status: 500,
       body: {
         success: false,
-        message: error.message
-          ? `Internal server error: ${error.message}`
-          : 'Internal server error',
+        message: `Internal server error: ${errorMessage}`,
       },
     };
   }
@@ -112,6 +110,7 @@ const acceptTaskEnrollmentRequest: AppRouteImplementationOrOptions<
         status: 500,
         body: {
           message: 'No Such Enrollment Found',
+          success: false,
         },
       };
     }
@@ -129,14 +128,13 @@ const acceptTaskEnrollmentRequest: AppRouteImplementationOrOptions<
         success: true,
       },
     };
-  } catch (error) {
-    console.log(error);
+  } catch (error: unknown) {
+    console.error(error);
+    const errorMessage = error instanceof Error ? error.message : 'Internal server error';
     return {
       status: 500,
       body: {
-        message: error.message
-          ? `Internal server error: ${error.message}`
-          : 'Internal server error',
+        message: `Internal server error: ${errorMessage}`,
         success: false,
       },
     };
@@ -156,6 +154,7 @@ const rejectTaskEnrollmentRequest: AppRouteImplementationOrOptions<
         status: 404,
         body: {
           message: 'No Such Enrollment Found',
+          success: false,
         },
       };
     }
@@ -172,14 +171,13 @@ const rejectTaskEnrollmentRequest: AppRouteImplementationOrOptions<
         success: false,
       },
     };
-  } catch (error) {
+  } catch (error: unknown) {
     console.log(error);
+    const errorMessage = error instanceof Error ? error.message : 'Internal server error';
     return {
       status: 500,
       body: {
-        message: error.message
-          ? `Internal server error: ${error.message}`
-          : 'Internal server error',
+        message: `Internal server error: ${errorMessage}`,
         success: false,
       },
     };
@@ -218,14 +216,13 @@ const createSocialLinks: AppRouteImplementationOrOptions<
         success: true,
       },
     };
-  } catch (error) {
+  } catch (error: unknown) {
     console.log(error);
+    const errorMessage = error instanceof Error ? error.message : 'Internal server error';
     return {
       status: 500,
       body: {
-        message: error.message
-          ? `Internal server error: ${error.message}`
-          : 'Internal server error',
+        message: `Internal server error: ${errorMessage}`,
         success: false,
       },
     };
@@ -262,14 +259,13 @@ const createSocialTaskFollowRequest: AppRouteImplementationOrOptions<
         success: true,
       },
     };
-  } catch (error) {
+  } catch (error: unknown) {
     console.log(error);
+    const errorMessage = error instanceof Error ? error.message : 'Internal server error';
     return {
       status: 500,
       body: {
-        message: error.message
-          ? `Internal server error: ${error.message}`
-          : 'Internal server error',
+        message: `Internal server error: ${errorMessage}`,
         success: false,
       },
     };
@@ -312,14 +308,13 @@ const approveSocialTaskFollowRequest: AppRouteImplementationOrOptions<
         success: false,
       },
     };
-  } catch (error) {
+  } catch (error: unknown) {
     console.log(error);
+    const errorMessage = error instanceof Error ? error.message : 'Internal server error';
     return {
       status: 500,
       body: {
-        message: error.message
-          ? `Internal server error: ${error.message}`
-          : 'Internal server error',
+        message: `Internal server error: ${errorMessage}`,
         success: false,
       },
     };
@@ -356,14 +351,13 @@ const rejectSocialTaskFollowRequest: AppRouteImplementationOrOptions<
         success: false,
       },
     };
-  } catch (error) {
+  } catch (error: unknown) {
     console.log(error);
+    const errorMessage = error instanceof Error ? error.message : 'Internal server error';
     return {
       status: 500,
       body: {
-        message: error.message
-          ? `Internal server error: ${error.message}`
-          : 'Internal server error',
+        message: `Internal server error: ${errorMessage}`,
         success: false,
       },
     };

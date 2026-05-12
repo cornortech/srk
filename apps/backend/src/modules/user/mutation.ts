@@ -1,9 +1,9 @@
 import { AppRouteImplementationOrOptions } from '@ts-rest/express/src/lib/types';
-import { userContract } from '../../../../../libs/shared/contracts/src/lib/user/contract';
 import { UserModel } from '../../model/userModel';
 import { BankModel } from '../../model/bankModel';
 import { KYCModel } from '../../model/kycModel';
 import AuthService from '../../services/authService';
+import { userContract } from '@srk/shared/contracts';
 
 const updateUserDetails: AppRouteImplementationOrOptions<
   typeof userContract.updateUserDetails

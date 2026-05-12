@@ -2,7 +2,7 @@ import { createExpressEndpoints } from '@ts-rest/express';
 import { ssoMutationHandler } from './mutation';
 import { Router } from 'express';
 import { JwtAuthMiddleware } from '../../utils/middleware';
-import { ssoContract } from '../../../../../libs/shared/contracts/src/lib/sso/contract';
+import { ssoContract } from '@srk/shared/contracts';
 
 const ssoRouter = Router();
 

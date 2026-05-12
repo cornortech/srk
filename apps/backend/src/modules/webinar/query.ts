@@ -1,6 +1,6 @@
 import { AppRouteImplementationOrOptions } from '@ts-rest/express/src/lib/types';
-import { webinarContract } from '../../../../../libs/shared/contracts/src/lib/webinar/contract';
 import { WebinarModel } from '../../model/webinarModel';
+import { webinarContract } from '@srk/shared/contracts';
 
 const getAllWebinar: AppRouteImplementationOrOptions<
   typeof webinarContract.getAllWebinars
@@ -21,6 +21,7 @@ const getAllWebinar: AppRouteImplementationOrOptions<
       })),
     };
   } catch (error) {
+    console.error(error);
     return {
       status: 500,
       body: {

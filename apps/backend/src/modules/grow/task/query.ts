@@ -1,8 +1,6 @@
 import mongoose from 'mongoose';
 import {
-  getAllTaskAffiliateResponseSchema,
   srkTaskContract,
-  taskContract,
 } from '@srk/shared/contracts';
 import { AppRouteImplementationOrOptions } from '@ts-rest/express/src/lib/types';
 import { srkTaskUserModel } from '../../../model/task/srkTaskUserModel';
@@ -137,13 +135,14 @@ const getAllSrkTasksActionSubmissionByStatusForAdmin: AppRouteImplementationOrOp
     };
   } catch (error) {
     console.error(error);
-    return {
-      status: 500,
-      body: {
-        success: false,
-        message: error.message || 'Internal server error',
-      },
-    };
+      const errorMessage = error instanceof Error ? error.message : 'Internal server error';
+      return {
+        status: 500,
+        body: {
+          success: false,
+          message: errorMessage,
+        },
+      };
   }
 };
 const getSrkTaskUserProfile: AppRouteImplementationOrOptions<
@@ -244,7 +243,7 @@ const getSrkTaskUserProfile: AppRouteImplementationOrOptions<
           phone: profile.srkUniversityUserId.phoneNumber,
           email: profile.srkUniversityUserId.email,
           isActivated: profile.isActivated,
-          kycStatus: latestKyc?.status,
+          kycStatus: latestKyc?.status ?? 'pending',
           createdAt: profile.createdAt.toLocaleString(),
         },
         taskData: {
@@ -258,15 +257,14 @@ const getSrkTaskUserProfile: AppRouteImplementationOrOptions<
     };
   } catch (error) {
     console.error(error);
-    return {
-      status: 500,
-      body: {
-        success: false,
-        message: error.message
-          ? `Internal server error: ${error.message}`
-          : 'Internal server error',
-      },
-    };
+      const errorMessage = error instanceof Error ? error.message : 'Internal server error';
+      return {
+        status: 500,
+        body: {
+          success: false,
+          message: `Internal server error: ${errorMessage}`,
+        },
+      };
   }
 };
 
@@ -530,15 +528,14 @@ const getSrkTaskUserAnalytics: AppRouteImplementationOrOptions<
     };
   } catch (error) {
     console.error(error);
-    return {
-      status: 500,
-      body: {
-        success: false,
-        message: error.message
-          ? `Internal server error: ${error.message}`
-          : 'Internal server error',
-      },
-    };
+      const errorMessage = error instanceof Error ? error.message : 'Internal server error';
+      return {
+        status: 500,
+        body: {
+          success: false,
+          message: `Internal server error: ${errorMessage}`,
+        },
+      };
   }
 };
 
@@ -746,15 +743,14 @@ const getAllSrkTaskUserEarningsLeaderboard: AppRouteImplementationOrOptions<
     };
   } catch (error) {
     console.error(error);
-    return {
-      status: 500,
-      body: {
-        success: false,
-        message: error.message
-          ? `Internal server error: ${error.message}`
-          : 'Internal server error',
-      },
-    };
+      const errorMessage = error instanceof Error ? error.message : 'Internal server error';
+      return {
+        status: 500,
+        body: {
+          success: false,
+          message: `Internal server error: ${errorMessage}`,
+        },
+      };
   }
 };
 
@@ -821,13 +817,15 @@ const getAllSrkTaskEarningPayoutsByAdmin: AppRouteImplementationOrOptions<
               fullName: taskUser?.fullName || 'Unknown User',
               email: taskUser?.srkUniversityUserId?.email || 'Unknown Email',
             },
-            paymentDetails: paymentDetails ? {
-              accountHolderName: paymentDetails.accountHolderName,
-              bankName: paymentDetails.bankName,
-              accountNumber: paymentDetails.accountNumber,
-              branchName: paymentDetails.branchName,
-              qrCodeUrl: paymentDetails.qrCodeUrl,
-            } : null,
+            paymentDetails: paymentDetails
+              ? {
+                  accountHolderName: paymentDetails.accountHolderName,
+                  bankName: paymentDetails.bankName,
+                  accountNumber: paymentDetails.accountNumber,
+                  branchName: paymentDetails.branchName,
+                  qrCodeUrl: paymentDetails.qrCodeUrl,
+                }
+              : null,
             transactionId: payout.transactionId || null,
             coinsUsed: payout.coinsUsed,
             tds: payout.tds,
@@ -843,13 +841,14 @@ const getAllSrkTaskEarningPayoutsByAdmin: AppRouteImplementationOrOptions<
     };
   } catch (error) {
     console.error(error);
-    return {
-      status: 500,
-      body: {
-        success: false,
-        message: error.message || 'Internal server error',
-      },
-    };
+      const errorMessage = error instanceof Error ? error.message : 'Internal server error';
+      return {
+        status: 500,
+        body: {
+          success: false,
+          message: errorMessage,
+        },
+      };
   }
 };
 
@@ -919,13 +918,14 @@ const getSrkTaskOnboardingVerificationRequestForAdmin: AppRouteImplementationOrO
     };
   } catch (error) {
     console.error(error);
-    return {
-      status: 500,
-      body: {
-        success: false,
-        message: error.message || 'Internal server error',
-      },
-    };
+      const errorMessage = error instanceof Error ? error.message : 'Internal server error';
+      return {
+        status: 500,
+        body: {
+          success: false,
+          message: errorMessage,
+        },
+      };
   }
 };
 
@@ -945,9 +945,20 @@ const getSrkTaskUserEarningsPayoutsByUser: AppRouteImplementationOrOptions<
     const limit = Number(query?.limit ?? 10);
     const skip = (page - 1) * limit;
     const status = query?.status;
+    const approvedPaymentDetails =
+      await srkTaskUserPaymentDetailsRequestModel.findOne({
+        srkTaskUserId: userId,
+        status: 'approved',
+        isActive: true,
+      });
 
-    const filter = { taskUserId: userId };
-    if (status) filter['status'] = status;
+    const filter: {
+      taskUserId: string;
+      status?: 'pending' | 'approved' | 'rejected' | 'claimed';
+    } = {
+      taskUserId: userId,
+    };
+    if (status) filter.status = status;
 
     const [totalRecords, payouts] = await Promise.all([
       srkTasksEarningsPayoutModel.countDocuments(filter),
@@ -987,6 +998,16 @@ const getSrkTaskUserEarningsPayoutsByUser: AppRouteImplementationOrOptions<
             tds: payout.tds,
             transactionId: payout.transactionId || null,
             status: payout.status,
+            paymentDetails: approvedPaymentDetails
+              ? {
+                  accountHolderName:
+                    approvedPaymentDetails.accountHolderName || '',
+                  bankName: approvedPaymentDetails.bankName || '',
+                  accountNumber: approvedPaymentDetails.accountNumber || '',
+                  branchName: approvedPaymentDetails.branchName || '',
+                  qrCodeUrl: approvedPaymentDetails.qrCodeUrl || '',
+                }
+              : null,
             paymentScreenshotUrl: payout.paymentScreenshotUrl || null,
             rejectionReason: payout.rejectionReason || null,
             createdAt: payout.createdAt.toISOString(),
@@ -997,13 +1018,14 @@ const getSrkTaskUserEarningsPayoutsByUser: AppRouteImplementationOrOptions<
     };
   } catch (error) {
     console.error(error);
-    return {
-      status: 500,
-      body: {
-        success: false,
-        message: error.message || 'Internal server error',
-      },
-    };
+      const errorMessage = error instanceof Error ? error.message : 'Internal server error';
+      return {
+        status: 500,
+        body: {
+          success: false,
+          message: errorMessage,
+        },
+      };
   }
 };
 
@@ -1047,8 +1069,8 @@ const getAllSrkTaskUserFinanceStatement: AppRouteImplementationOrOptions<
           growPackageTodoId: earning.growPackageTodoId?.toString() || '',
           description: earning.description,
           type: earning.type,
-          coin: earning.coin,
-          coinAfterTransaction: earning.coinAfterTransaction,
+          coin: earning.coin ?? 0,
+          coinAfterTransaction: earning.coinAfterTransaction ?? 0,
           createdAt: earning.createdAt
             ? new Date(earning.createdAt).toISOString()
             : '',
@@ -1060,13 +1082,14 @@ const getAllSrkTaskUserFinanceStatement: AppRouteImplementationOrOptions<
     };
   } catch (error) {
     console.error(error);
-    return {
-      status: 500,
-      body: {
-        success: false,
-        message: error.message || 'Internal server error',
-      },
-    };
+      const errorMessage = error instanceof Error ? error.message : 'Internal server error';
+      return {
+        status: 500,
+        body: {
+          success: false,
+          message: errorMessage,
+        },
+      };
   }
 };
 
@@ -1082,7 +1105,10 @@ const getAllSrkTasksActionSubmissionsByUser: AppRouteImplementationOrOptions<
     const skip = (page - 1) * limit;
     const status = query?.status;
 
-    const filter: any = { taskUserId };
+    const filter: {
+      taskUserId: mongoose.Types.ObjectId;
+      status?: 'pending' | 'approved' | 'rejected' | 'claimed';
+    } = { taskUserId };
     if (status) {
       filter.status = status;
     }
@@ -1094,6 +1120,10 @@ const getAllSrkTasksActionSubmissionsByUser: AppRouteImplementationOrOptions<
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
+        .populate({
+          path: 'taskUserId',
+          select: 'fullName email phoneNumber',
+        })
         .populate({
           path: 'growPackageTodoId',
           populate: {
@@ -1109,59 +1139,97 @@ const getAllSrkTasksActionSubmissionsByUser: AppRouteImplementationOrOptions<
     ]);
 
     const data = submissions.map((submission: any) => {
-      const e =
+      const enrollment =
         submission.growPackageTodoId?.growSocialMediaPackageEnrollmentId;
       return {
         _id: submission._id.toString(),
-        taskUserId: submission.taskUserId.toString(),
+        type: submission.type,
         description: submission.description,
-        growEnrollmentId: e
-          ? {
-              _id: e._id.toString(),
-              socialMediaPlatform: e.socialMediaPlatform,
-              profileLinkURL: e.profileLinkURL || [],
-              amount: e.amount,
-              isActive: e.isActive,
-              createdAt: e.createdAt?.toISOString?.() || '',
-              updatedAt: e.updatedAt?.toISOString?.() || '',
-              growSocialMediaPackageId: e.growSocialMediaPackageId
-                ? {
-                    _id: e.growSocialMediaPackageId._id?.toString?.() || '',
-                    name: e.growSocialMediaPackageId.name,
-                    description: e.growSocialMediaPackageId.description,
-                    socialMediaPlatforms:
-                      e.growSocialMediaPackageId.socialMediaPlatforms || [],
-                    amount: e.growSocialMediaPackageId.amount,
-                  }
-                : undefined,
-              growSocialMediaPackageTypeId: e.growSocialMediaPackageTypeId
-                ? {
-                    _id: e.growSocialMediaPackageTypeId._id?.toString?.() || '',
-                    name: e.growSocialMediaPackageTypeId.name,
-                    description: e.growSocialMediaPackageTypeId.description,
-                    amount: e.growSocialMediaPackageTypeId.amount,
-                  }
-                : undefined,
-              growSocialMediaPackageSubTypeId: e.growSocialMediaPackageSubTypeId
-                ? {
-                    _id:
-                      e.growSocialMediaPackageSubTypeId._id?.toString?.() || '',
-                    name: e.growSocialMediaPackageSubTypeId.name,
-                    description: e.growSocialMediaPackageSubTypeId.description,
-                    taskType: e.growSocialMediaPackageSubTypeId.taskType,
-                    noOfLikes: e.growSocialMediaPackageSubTypeId.noOfLikes,
-                    noOfVideos: e.growSocialMediaPackageSubTypeId.noOfVideos,
-                    noOfFollowers:
-                      e.growSocialMediaPackageSubTypeId.noOfFollowers,
-                  }
-                : undefined,
-            }
-          : undefined,
         screenshotUrl: submission.screenshotUrl,
         status: submission.status,
         rejectionReason: submission.rejectionReason || null,
         createdAt: submission.createdAt?.toISOString?.() || '',
         updatedAt: submission.updatedAt?.toISOString?.() || '',
+        taskUserId: submission.taskUserId
+          ? {
+              _id: submission.taskUserId._id.toString(),
+              fullName: submission.taskUserId.fullName || 'N/A',
+              email: submission.taskUserId.email || 'N/A',
+              phoneNumber: submission.taskUserId.phoneNumber || 'N/A',
+            }
+          : undefined,
+        growPackageTodoId: submission.growPackageTodoId
+          ? {
+              _id: submission.growPackageTodoId._id.toString(),
+              postUrl: submission.growPackageTodoId.postUrl || '',
+              profileUrl: submission.growPackageTodoId.profileUrl || '',
+              type: submission.growPackageTodoId.type,
+              platform: submission.growPackageTodoId.platform || '',
+              followCounts: submission.growPackageTodoId.followCounts || 0,
+              likeCounts: submission.growPackageTodoId.likeCounts || 0,
+              enrollment: enrollment
+                ? {
+                    _id: enrollment._id.toString(),
+                    socialMediaPlatform: enrollment.socialMediaPlatform || '',
+                    profileLinkURL: enrollment.profileLinkURL || [],
+                    amount: enrollment.amount || 0,
+                    isActive: enrollment.isActive || false,
+                    growSocialMediaPackageId: enrollment.growSocialMediaPackageId
+                      ? {
+                          _id:
+                            enrollment.growSocialMediaPackageId._id?.toString?.() ||
+                            '',
+                          name: enrollment.growSocialMediaPackageId.name || '',
+                          description:
+                            enrollment.growSocialMediaPackageId.description || '',
+                          socialMediaPlatforms:
+                            enrollment.growSocialMediaPackageId
+                              .socialMediaPlatforms || [],
+                          amount: enrollment.growSocialMediaPackageId.amount || 0,
+                        }
+                      : undefined,
+                    growSocialMediaPackageTypeId:
+                      enrollment.growSocialMediaPackageTypeId
+                        ? {
+                            _id:
+                              enrollment.growSocialMediaPackageTypeId._id?.toString?.() ||
+                              '',
+                            name:
+                              enrollment.growSocialMediaPackageTypeId.name || '',
+                            description:
+                              enrollment.growSocialMediaPackageTypeId
+                                .description || '',
+                            amount:
+                              enrollment.growSocialMediaPackageTypeId.amount || 0,
+                          }
+                        : undefined,
+                    growSocialMediaPackageSubTypeId:
+                      enrollment.growSocialMediaPackageSubTypeId
+                        ? {
+                            _id:
+                              enrollment.growSocialMediaPackageSubTypeId._id?.toString?.() ||
+                              '',
+                            name:
+                              enrollment.growSocialMediaPackageSubTypeId.name ||
+                              '',
+                            description:
+                              enrollment.growSocialMediaPackageSubTypeId
+                                .description || '',
+                            taskType:
+                              enrollment.growSocialMediaPackageSubTypeId.taskType ||
+                              '',
+                            noOfLikes:
+                              enrollment.growSocialMediaPackageSubTypeId.noOfLikes,
+                            noOfVideos:
+                              enrollment.growSocialMediaPackageSubTypeId.noOfVideos,
+                            noOfFollowers:
+                              enrollment.growSocialMediaPackageSubTypeId.noOfFollowers,
+                          }
+                        : undefined,
+                  }
+                : undefined,
+            }
+          : undefined,
       };
     });
 
@@ -1175,15 +1243,16 @@ const getAllSrkTasksActionSubmissionsByUser: AppRouteImplementationOrOptions<
         data,
       },
     };
-  } catch (error) {
+  } catch (error: unknown) {
     console.error(error);
-    return {
-      status: 500,
-      body: {
-        success: false,
-        message: error.message || 'Internal server error',
-      },
-    };
+      const errorMessage = error instanceof Error ? error.message : 'Internal server error';
+      return {
+        status: 500,
+        body: {
+          success: false,
+          message: errorMessage,
+        },
+      };
   }
 };
 
@@ -1327,13 +1396,14 @@ const getRejectedSrkTaskActionSubmissionsByUser: AppRouteImplementationOrOptions
     };
   } catch (error) {
     console.error(error);
-    return {
-      status: 500,
-      body: {
-        success: false,
-        message: error.message || 'Internal server error',
-      },
-    };
+      const errorMessage = error instanceof Error ? error.message : 'Internal server error';
+      return {
+        status: 500,
+        body: {
+          success: false,
+          message: errorMessage,
+        },
+      };
   }
 };
 
@@ -1410,9 +1480,9 @@ const getSrkTaskActionsByPlatforms: AppRouteImplementationOrOptions<
           username:
             action.growSocialMediaPackageEnrollmentId
               .growSocialMediaPackageUserId.fullName,
-          profileLinkURL: action.profileUrl,
+          profileLinkURL: action.profileUrl || null,
           taskType: action.type,
-          postUrl: action.postUrl,
+          postUrl: action.postUrl || null,
         })),
         totalRecords: totalSrkTodos,
         limit,
@@ -1422,13 +1492,14 @@ const getSrkTaskActionsByPlatforms: AppRouteImplementationOrOptions<
     };
   } catch (error) {
     console.error(error);
-    return {
-      status: 500,
-      body: {
-        success: false,
-        message: error.message || 'Internal server error',
-      },
-    };
+      const errorMessage = error instanceof Error ? error.message : 'Internal server error';
+      return {
+        status: 500,
+        body: {
+          success: false,
+          message: errorMessage,
+        },
+      };
   }
 };
 
@@ -1581,13 +1652,14 @@ const getAllSrkTaskUsersForAdmin: AppRouteImplementationOrOptions<
     };
   } catch (error) {
     console.error(error);
-    return {
-      status: 500,
-      body: {
-        success: false,
-        message: error.message || 'Internal server error',
-      },
-    };
+      const errorMessage = error instanceof Error ? error.message : 'Internal server error';
+      return {
+        status: 500,
+        body: {
+          success: false,
+          message: errorMessage,
+        },
+      };
   }
 };
 
@@ -1781,13 +1853,14 @@ const getAllPendingTaskSubmissionsByUserForAdmin: AppRouteImplementationOrOption
         data,
       },
     };
-  } catch (error) {
+  } catch (error: unknown) {
     console.error(error);
+    const errorMessage = error instanceof Error ? error.message : 'Internal server error';
     return {
       status: 500,
       body: {
         success: false,
-        message: error.message || 'Internal server error',
+        message: errorMessage,
       },
     };
   }
@@ -1892,13 +1965,14 @@ const getAllCompletedSrkTaskSubmissionsForAdmin: AppRouteImplementationOrOptions
         data: filteredData,
       },
     };
-  } catch (error) {
+  } catch (error: unknown) {
     console.error(error);
+    const errorMessage = error instanceof Error ? error.message : 'Internal server error';
     return {
       status: 500,
       body: {
         success: false,
-        message: error.message || 'Internal server error',
+        message: errorMessage,
       },
     };
   }
@@ -1929,7 +2003,7 @@ const getApprovedSrkTaskAffiliateVerificationRequest: AppRouteImplementationOrOp
     // 2️⃣ Not found → pending
     if (!verificationRecord) {
       return {
-        status: 200,
+        status: 404,
         body: {
           success: false,
           message: 'Not verified yet',
@@ -1941,30 +2015,42 @@ const getApprovedSrkTaskAffiliateVerificationRequest: AppRouteImplementationOrOp
         taskUserId: verificationRecord._id,
       });
 
+    const affiliateData: {
+      _id: string | mongoose.Types.ObjectId;
+      srkUniversityUserId: string;
+      fullName: string;
+      dob: string;
+      status: string;
+      isActivated: boolean;
+      createdAt: string;
+      updatedAt: string;
+    } = {
+      _id: verificationRecord._id.toString(),
+      srkUniversityUserId: verificationRecord.srkUniversityUserId.toString(),
+      fullName: verificationRecord.fullName,
+      dob: verificationRecord.dob,
+      isActivated: verificationRecord.isActivated,
+      status: srkTaskOnboardingVerificationRequestExists?.status || 'pending',
+      createdAt: verificationRecord.createdAt.toISOString(),
+      updatedAt: verificationRecord.updatedAt.toISOString(),
+    };
+
     return {
       status: 200,
       body: {
         success: true,
         message: 'Affiliate request found',
-        data: getAllTaskAffiliateResponseSchema.parse({
-          ...verificationRecord,
-          _id: verificationRecord._id.toString(),
-          srkUniversityUserId:
-            verificationRecord.srkUniversityUserId.toString(),
-          isActivated: verificationRecord.isActivated,
-          status: srkTaskOnboardingVerificationRequestExists.status,
-          createdAt: verificationRecord.createdAt.toISOString(),
-          updatedAt: verificationRecord.updatedAt.toISOString(),
-       }),
+        data: affiliateData,
       },
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.log(error);
+    const errorMessage = error instanceof Error ? error.message : 'Internal server error';
     return {
       status: 500,
       body: {
         success: false,
-        message: error.message ?? 'Internal server error',
+        message: errorMessage,
       },
     };
   }
@@ -2028,13 +2114,14 @@ const getUserPaymentDetails: AppRouteImplementationOrOptions<
         rejectedRequest: formatPaymentDetails(rejectedRequest),
       },
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching user payment details:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Failed to fetch payment details';
     return {
       status: 500,
       body: {
         success: false,
-        message: error.message || 'Failed to fetch payment details',
+        message: errorMessage,
       },
     };
   }
@@ -2089,6 +2176,7 @@ const getAllPaymentDetailsRequestsForAdmin: AppRouteImplementationOrOptions<
       rejectionReason: request.rejectionReason,
       reviewedBy: request.reviewedBy?.toString(),
       reviewedAt: request.reviewedAt?.toISOString(),
+      isActive: request.isActive,
       createdAt: request.createdAt.toISOString(),
       updatedAt: request.updatedAt.toISOString(),
     }));
@@ -2096,22 +2184,21 @@ const getAllPaymentDetailsRequestsForAdmin: AppRouteImplementationOrOptions<
     return {
       status: 200,
       body: {
+        page,
+        limit,
+        totalRecords,
+        totalPages: Math.ceil(totalRecords / limit),
         data,
-        pagination: {
-          currentPage: page,
-          totalPages: Math.ceil(totalRecords / limit),
-          totalRecords,
-          limit,
-        },
       },
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching payment details requests:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Failed to fetch payment details requests';
     return {
       status: 500,
       body: {
         success: false,
-        message: error.message || 'Failed to fetch payment details requests',
+        message: errorMessage,
       },
     };
   }

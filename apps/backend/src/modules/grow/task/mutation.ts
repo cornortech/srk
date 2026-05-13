@@ -733,6 +733,7 @@ const claimCoinsForTaskActionSubmission: AppRouteImplementationOrOptions<
 
     // Update submission status to claimed
     actionSubmission.status = 'claimed';
+    actionSubmission.hasClaimedEarning = true;
     await actionSubmission.save();
 
     const isFollowType = packageEnrollmentExist.type === 'follow';

@@ -31,6 +31,10 @@ const srkTaskActionSubmissionSchema = new mongoose.Schema(
       default: 'pending',
       required: true,
     },
+    hasClaimedEarning: {
+      type: Boolean,
+      default: false,
+    },
     rejectionReason: {
       type: String,
     },

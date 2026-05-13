@@ -10,6 +10,7 @@ export const srkTaskActionSubmissionDetailsSchema = z.object({
   _id: z.string(),
   type: z.enum(['follow', 'like']),
   description: z.string(),
+  hasClaimedEarning: z.boolean(),
   taskUserId: z
     .object({
       _id: z.string(),
@@ -404,13 +405,15 @@ export const srkTaskEarningRequestResponseSchema = z.object({
     fullName: z.string(),
     email: z.string(),
   }),
-  paymentDetails: z.object({
-    accountHolderName: z.string(),
-    bankName: z.string(),
-    accountNumber: z.string(),
-    branchName: z.string(),
-    qrCodeUrl: z.string(),
-  }).nullable(),
+  paymentDetails: z
+    .object({
+      accountHolderName: z.string(),
+      bankName: z.string(),
+      accountNumber: z.string(),
+      branchName: z.string(),
+      qrCodeUrl: z.string(),
+    })
+    .nullable(),
   transactionId: z.string().nullable(),
   coinsUsed: z.number(),
   tds: z.number(),

@@ -1150,6 +1150,7 @@ const getAllSrkTasksActionSubmissionsByUser: AppRouteImplementationOrOptions<
         rejectionReason: submission.rejectionReason || null,
         createdAt: submission.createdAt?.toISOString?.() || '',
         updatedAt: submission.updatedAt?.toISOString?.() || '',
+        hasClaimedEarning: submission.hasClaimedEarning ?? true,
         taskUserId: submission.taskUserId
           ? {
               _id: submission.taskUserId._id.toString(),
@@ -1306,6 +1307,7 @@ const getRejectedSrkTaskActionSubmissionsByUser: AppRouteImplementationOrOptions
         rejectionReason: submission.rejectionReason || null,
         createdAt: new Date(submission.createdAt).toISOString(),
         updatedAt: new Date(submission.updatedAt).toISOString(),
+        hasClaimedEarning: submission.hasClaimedEarning ?? true,
         growPackageTodoId: submission.growPackageTodoId
           ? {
               _id: submission.growPackageTodoId._id.toString(),
@@ -1743,6 +1745,7 @@ const getAllPendingTaskSubmissionsByUserForAdmin: AppRouteImplementationOrOption
           _id: submission._id.toString(),
           type: submission.type,
           description: submission.description,
+          hasClaimedEarning: submission.hasClaimedEarning ?? true,
           taskUserId: taskUser
             ? {
                 _id: taskUser._id.toString(),

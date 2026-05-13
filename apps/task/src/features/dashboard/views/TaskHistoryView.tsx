@@ -143,7 +143,8 @@ export const TaskHistoryView: React.FC = () => {
             <div className="grid grid-cols-1 gap-4">
               {submissions.map((item, idx) => {
                 const statusConfig = getStatusConfig(item.status);
-                const canClaim = item.status === 'approved';
+                const canClaim =
+                  item.status === 'approved' && item.hasClaimedEarning === false;
                 const isClaiming = claimingSubmissionId === item._id;
                 return (
                   <motion.div

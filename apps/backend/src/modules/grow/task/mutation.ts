@@ -17,7 +17,7 @@ const acceptSrkTaskUserEarningsPayout: AppRouteImplementationOrOptions<
 > = async ({ params, body }) => {
   try {
     const srkTaskUserPayoutExists = await srkTasksEarningsPayoutModel.findById(
-      params.payoutId,
+      params.payoutId
     );
 
     if (!srkTaskUserPayoutExists) {
@@ -83,7 +83,8 @@ const acceptSrkTaskUserEarningsPayout: AppRouteImplementationOrOptions<
     };
   } catch (error: unknown) {
     console.error(error);
-    const errorMessage = error instanceof Error ? error.message : 'Internal server error';
+    const errorMessage =
+      error instanceof Error ? error.message : 'Internal server error';
     return {
       status: 500,
       body: {
@@ -101,8 +102,7 @@ const rejectSrkTaskUserEarningsPayout: AppRouteImplementationOrOptions<
     const srkTaksUserEarningPayoutExists =
       await srkTasksEarningsPayoutModel.findById(params.payoutId);
 
-
-      if (!srkTaksUserEarningPayoutExists) {
+    if (!srkTaksUserEarningPayoutExists) {
       return {
         status: 404,
         body: {
@@ -163,14 +163,15 @@ const rejectSrkTaskUserEarningsPayout: AppRouteImplementationOrOptions<
         message: 'Task Payout rejected successfully',
       },
     };
-    } catch (error: unknown) {
+  } catch (error: unknown) {
     console.error(error);
-      const errorMessage = error instanceof Error ? error.message : 'Internal server error';
+    const errorMessage =
+      error instanceof Error ? error.message : 'Internal server error';
     return {
       status: 500,
       body: {
         success: false,
-          message: `Internal server error: ${errorMessage}`,
+        message: `Internal server error: ${errorMessage}`,
       },
     };
   }
@@ -181,7 +182,7 @@ const submitSrkTaskOnboardingVerification: AppRouteImplementationOrOptions<
 > = async ({ params, body }) => {
   try {
     const srkUniversityUserExist = await UserModel.findById(
-      params.srkUniversityId,
+      params.srkUniversityId
     );
 
     if (!srkUniversityUserExist) {
@@ -254,7 +255,7 @@ const submitSrkTaskOnboardingVerification: AppRouteImplementationOrOptions<
           fullName: body.fullName,
           dateOfBirth: body.dateOfBirth,
           status: 'pending',
-        },
+        }
       );
     }
 
@@ -265,14 +266,15 @@ const submitSrkTaskOnboardingVerification: AppRouteImplementationOrOptions<
         message: 'Onboarding verification submitted successfully',
       },
     };
-    } catch (error: unknown) {
+  } catch (error: unknown) {
     console.error(error);
-      const errorMessage = error instanceof Error ? error.message : 'Internal server error';
+    const errorMessage =
+      error instanceof Error ? error.message : 'Internal server error';
     return {
       status: 500,
       body: {
         success: false,
-          message: `Internal server error: ${errorMessage}`,
+        message: `Internal server error: ${errorMessage}`,
       },
     };
   }
@@ -302,7 +304,7 @@ const approveSrkTaskOnboardingVerificationByAdmin: AppRouteImplementationOrOptio
 
     const srkTaskUser = await srkTaskUserModel.findById(params.srkTaskUserId);
 
-    if(!srkTaskUser) {
+    if (!srkTaskUser) {
       return {
         status: 404,
         body: {
@@ -310,7 +312,6 @@ const approveSrkTaskOnboardingVerificationByAdmin: AppRouteImplementationOrOptio
           message: 'SRK Task User not found',
         },
       };
-
     }
 
     srkTaskUser.isActivated = true;
@@ -330,14 +331,15 @@ const approveSrkTaskOnboardingVerificationByAdmin: AppRouteImplementationOrOptio
         message: 'Onboarding verification approved successfully',
       },
     };
-    } catch (error: unknown) {
+  } catch (error: unknown) {
     console.error(error);
-      const errorMessage = error instanceof Error ? error.message : 'Internal server error';
+    const errorMessage =
+      error instanceof Error ? error.message : 'Internal server error';
     return {
       status: 500,
       body: {
         success: false,
-          message: `Internal server error: ${errorMessage}`,
+        message: `Internal server error: ${errorMessage}`,
       },
     };
   }
@@ -372,14 +374,15 @@ const rejectSrkTaskOnboardingVerificationByAdmin: AppRouteImplementationOrOption
         message: 'Onboarding verification rejected successfully',
       },
     };
-    } catch (error: unknown) {
+  } catch (error: unknown) {
     console.error(error);
-      const errorMessage = error instanceof Error ? error.message : 'Internal server error';
+    const errorMessage =
+      error instanceof Error ? error.message : 'Internal server error';
     return {
       status: 500,
       body: {
         success: false,
-          message: `Internal server error: ${errorMessage}`,
+        message: `Internal server error: ${errorMessage}`,
       },
     };
   }
@@ -519,14 +522,15 @@ const srkTaskActionSubmission: AppRouteImplementationOrOptions<
         message: 'SRK Task Action submitted successfully',
       },
     };
-    } catch (error: unknown) {
+  } catch (error: unknown) {
     console.error(error);
-      const errorMessage = error instanceof Error ? error.message : 'Internal server error';
+    const errorMessage =
+      error instanceof Error ? error.message : 'Internal server error';
     return {
       status: 500,
       body: {
         success: false,
-          message: `Internal server error: ${errorMessage}`,
+        message: `Internal server error: ${errorMessage}`,
       },
     };
   }
@@ -537,7 +541,7 @@ const approveSrkTaskActionSubmissionByAdmin: AppRouteImplementationOrOptions<
 > = async ({ params }) => {
   try {
     const actionSubmission = await srkTaskActionSubmissionModel.findById(
-      params.submissionId,
+      params.submissionId
     );
 
     if (!actionSubmission) {
@@ -566,7 +570,7 @@ const approveSrkTaskActionSubmissionByAdmin: AppRouteImplementationOrOptions<
     }
 
     const universityUser = await UserModel.findById(
-      srkTaskUserExist.srkUniversityUserId,
+      srkTaskUserExist.srkUniversityUserId
     ).populate<{ packageId: any }>('packageId');
 
     const packageName = universityUser?.packageId?.title || 'SRK Basic';
@@ -597,7 +601,7 @@ const approveSrkTaskActionSubmissionByAdmin: AppRouteImplementationOrOptions<
     }
 
     const srkGrowTodoExist = await growPackageTodoModel.findById(
-      actionSubmission.growPackageTodoId,
+      actionSubmission.growPackageTodoId
     );
 
     if (!srkGrowTodoExist) {
@@ -643,7 +647,7 @@ const approveSrkTaskActionSubmissionByAdmin: AppRouteImplementationOrOptions<
         ...(isFollowType
           ? { $inc: { followCounts: 1 } }
           : { $inc: { likeCounts: 1 } }),
-      },
+      }
     );
 
     return {
@@ -653,14 +657,15 @@ const approveSrkTaskActionSubmissionByAdmin: AppRouteImplementationOrOptions<
         message: 'Action submission approved successfully',
       },
     };
-    } catch (error: unknown) {
+  } catch (error: unknown) {
     console.error(error);
-      const errorMessage = error instanceof Error ? error.message : 'Internal server error';
+    const errorMessage =
+      error instanceof Error ? error.message : 'Internal server error';
     return {
       status: 500,
       body: {
         success: false,
-          message: `Internal server error: ${errorMessage}`,
+        message: `Internal server error: ${errorMessage}`,
       },
     };
   }
@@ -671,7 +676,7 @@ const claimCoinsForTaskActionSubmission: AppRouteImplementationOrOptions<
 > = async ({ params }) => {
   try {
     const actionSubmission = await srkTaskActionSubmissionModel.findById(
-      params.submissionId,
+      params.submissionId
     );
 
     if (!actionSubmission) {
@@ -696,7 +701,7 @@ const claimCoinsForTaskActionSubmission: AppRouteImplementationOrOptions<
 
     // Fetch the todo to get package enrollment info
     const srkGrowTodoExist = await growPackageTodoModel.findById(
-      actionSubmission.growPackageTodoId,
+      actionSubmission.growPackageTodoId
     );
 
     if (!srkGrowTodoExist) {
@@ -746,7 +751,7 @@ const claimCoinsForTaskActionSubmission: AppRouteImplementationOrOptions<
           currentCoins: 100,
         },
       },
-      { new: true },
+      { new: true }
     );
 
     if (!updatedBalance) {
@@ -761,6 +766,7 @@ const claimCoinsForTaskActionSubmission: AppRouteImplementationOrOptions<
 
     // Create earning statement
     await srkTaskEarningStatementModel.create({
+      taskActionSubmissionId: actionSubmission._id,
       taskUserId: actionSubmission.taskUserId,
       growPackageTodoId: actionSubmission.growPackageTodoId,
       description: `Earning from task action submission from ${actionType} a ${targetType} of ${userName}`,
@@ -776,14 +782,15 @@ const claimCoinsForTaskActionSubmission: AppRouteImplementationOrOptions<
         message: 'Coins claimed successfully',
       },
     };
-    } catch (error: unknown) {
+  } catch (error: unknown) {
     console.error(error);
-      const errorMessage = error instanceof Error ? error.message : 'Internal server error';
+    const errorMessage =
+      error instanceof Error ? error.message : 'Internal server error';
     return {
       status: 500,
       body: {
         success: false,
-          message: `Internal server error: ${errorMessage}`,
+        message: `Internal server error: ${errorMessage}`,
       },
     };
   }
@@ -794,7 +801,7 @@ const rejectSrkTaskActionSubmissionByAdmin: AppRouteImplementationOrOptions<
 > = async ({ params, body }) => {
   try {
     const actionSubmission = await srkTaskActionSubmissionModel.findById(
-      params.submissionId,
+      params.submissionId
     );
 
     if (!actionSubmission) {
@@ -818,14 +825,15 @@ const rejectSrkTaskActionSubmissionByAdmin: AppRouteImplementationOrOptions<
         message: 'Action submission rejected successfully',
       },
     };
-    } catch (error: unknown) {
+  } catch (error: unknown) {
     console.error(error);
-      const errorMessage = error instanceof Error ? error.message : 'Internal server error';
+    const errorMessage =
+      error instanceof Error ? error.message : 'Internal server error';
     return {
       status: 500,
       body: {
         success: false,
-          message: `Internal server error: ${errorMessage}`,
+        message: `Internal server error: ${errorMessage}`,
       },
     };
   }
@@ -840,7 +848,7 @@ const srkTaskEarningsPayoutRequest: AppRouteImplementationOrOptions<
 > = async ({ body }) => {
   try {
     const srkTaskUserExist = await srkTaskUserModel.findById(
-      body.srkTaskUserId,
+      body.srkTaskUserId
     );
 
     const srkTaskUserBalanceExist = await srkTaskUserBalanceModel.findOne({
@@ -905,7 +913,7 @@ const srkTaskEarningsPayoutRequest: AppRouteImplementationOrOptions<
           currentCoins: -body.coins,
         },
       },
-      { new: true },
+      { new: true }
     );
 
     await srkTaskEarningStatementModel.create({
@@ -924,14 +932,15 @@ const srkTaskEarningsPayoutRequest: AppRouteImplementationOrOptions<
         message: 'SRK Task Earnings Payout request submitted successfully',
       },
     };
-    } catch (error: unknown) {
+  } catch (error: unknown) {
     console.error(error);
-      const errorMessage = error instanceof Error ? error.message : 'Internal server error';
+    const errorMessage =
+      error instanceof Error ? error.message : 'Internal server error';
     return {
       status: 500,
       body: {
         success: false,
-          message: `Internal server error: ${errorMessage}`,
+        message: `Internal server error: ${errorMessage}`,
       },
     };
   }
@@ -993,14 +1002,17 @@ const submitPaymentDetailsRequest: AppRouteImplementationOrOptions<
         message: 'Payment details request submitted successfully',
       },
     };
-    } catch (error: unknown) {
+  } catch (error: unknown) {
     console.error('Error submitting payment details request:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Internal server error';
+    const errorMessage =
+      error instanceof Error ? error.message : 'Internal server error';
     return {
       status: 500,
       body: {
         success: false,
-          message: `${errorMessage || 'Failed to submit payment details request'}`,
+        message: `${
+          errorMessage || 'Failed to submit payment details request'
+        }`,
       },
     };
   }
@@ -1058,7 +1070,7 @@ const reviewPaymentDetailsRequest: AppRouteImplementationOrOptions<
           status: 'approved',
         },
         { isActive: false },
-        { session },
+        { session }
       );
     }
 
@@ -1073,15 +1085,18 @@ const reviewPaymentDetailsRequest: AppRouteImplementationOrOptions<
         message: `Payment details request ${status} successfully`,
       },
     };
-    } catch (error: unknown) {
+  } catch (error: unknown) {
     await session.abortTransaction();
     console.error('Error reviewing payment details request:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Internal server error';
+    const errorMessage =
+      error instanceof Error ? error.message : 'Internal server error';
     return {
       status: 500,
       body: {
         success: false,
-          message: `${errorMessage || 'Failed to review payment details request'}`,
+        message: `${
+          errorMessage || 'Failed to review payment details request'
+        }`,
       },
     };
   } finally {
@@ -1095,7 +1110,6 @@ const bulkApproveSrkTaskSubmissionsByAdmin: AppRouteImplementationOrOptions<
   const session = await mongoose.startSession();
   session.startTransaction();
   try {
-    const adminId = (req as any).user?._id || 'system';
     const { submissionIds } = body;
 
     const pendingSubmissions = await srkTaskActionSubmissionModel
@@ -1136,60 +1150,12 @@ const bulkApproveSrkTaskSubmissionsByAdmin: AppRouteImplementationOrOptions<
 
     let successfullyApproved = 0;
 
-
     for (const submission of pendingSubmissions) {
-     
       // 1. Update submission status
       submission.status = 'approved';
       await submission.save({ session });
       // dailyApprovedCounts.set(dayKey, currentDayCount + 1);
       successfullyApproved++;
-
-      // 2. Fetch associated todo to get reward amount
-      const todo = await growPackageTodoModel
-        .findById(submission.growPackageTodoId)
-        .populate({
-          path: 'growSocialMediaPackageEnrollmentId',
-          populate: [
-            { path: 'growSocialMediaPackageId' },
-            { path: 'growSocialMediaPackageTypeId' },
-            { path: 'growSocialMediaPackageSubTypeId' },
-          ],
-        })
-        .session(session);
-
-      if (!todo) continue;
-
-      // Logic to determine reward coins (respecting 100-coin-to-1-rupee if applicable)
-      // This is based on existing logic in approveSrkTaskActionSubmissionByAdmin
-      const rewardCoins = 100;
-
-      // 3. Update User Balance (Only increasing coins, not totalEarnings cash)
-      const userBalance = await srkTaskUserBalanceModel.findOneAndUpdate(
-        { taskUserId: submission.taskUserId },
-        {
-          $inc: {
-            totalCoinsEarned: rewardCoins,
-            currentCoins: rewardCoins,
-          },
-        },
-        { session, new: true, upsert: true },
-      );
-
-      // 4. Create Audit Log (Earning Statement)
-      await srkTaskEarningStatementModel.create(
-        [
-          {
-            taskUserId: submission.taskUserId,
-            growPackageTodoId: submission.growPackageTodoId,
-            description: `Bulk Approved by Admin ID: ${adminId} - ${submission.type} task`,
-            type: 'credit',
-            coin: rewardCoins,
-            coinAfterTransaction: userBalance.currentCoins,
-          },
-        ],
-        { session },
-      );
     }
 
     await session.commitTransaction();
@@ -1203,15 +1169,16 @@ const bulkApproveSrkTaskSubmissionsByAdmin: AppRouteImplementationOrOptions<
           : `Successfully approved ${successfullyApproved} submissions`, */
       },
     };
-    } catch (error: unknown) {
+  } catch (error: unknown) {
     console.error('Error bulk approving submissions:', error);
     await session.abortTransaction();
-      const errorMessage = error instanceof Error ? error.message : 'Internal server error';
+    const errorMessage =
+      error instanceof Error ? error.message : 'Internal server error';
     return {
       status: 500,
       body: {
         success: false,
-          message: `${errorMessage || 'Failed to bulk approve submissions'}`,
+        message: `${errorMessage || 'Failed to bulk approve submissions'}`,
       },
     };
   } finally {
@@ -1239,7 +1206,7 @@ const bulkRejectSrkTaskSubmissionsByAdmin: AppRouteImplementationOrOptions<
           rejectionReason: `${rejectionReason} (Bulk Rejected by Admin ID: ${adminId})`,
         },
       },
-      { session },
+      { session }
     );
 
     if (result.matchedCount === 0) {
@@ -1260,14 +1227,15 @@ const bulkRejectSrkTaskSubmissionsByAdmin: AppRouteImplementationOrOptions<
         message: `Successfully rejected ${result.modifiedCount} submissions`,
       },
     };
-    } catch (error: unknown) {
+  } catch (error: unknown) {
     await session.abortTransaction();
-      const errorMessage = error instanceof Error ? error.message : 'Internal server error';
+    const errorMessage =
+      error instanceof Error ? error.message : 'Internal server error';
     return {
       status: 500,
       body: {
         success: false,
-          message: `${errorMessage || 'Failed to bulk reject submissions'}`,
+        message: `${errorMessage || 'Failed to bulk reject submissions'}`,
       },
     };
   } finally {

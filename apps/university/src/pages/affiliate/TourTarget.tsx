@@ -17,6 +17,7 @@ import { useQuery } from "@tanstack/react-query"
 import { tourApi } from "../../lib/api/tour/tour.api"
 import { TTourTarget } from "../../lib/types/entities"
 import useAuthStore from "../../store/useAuth"
+import { getUniversityAssetUrl } from "../../lib/cdn"
 
 
 export default function TourTargetsPage() {

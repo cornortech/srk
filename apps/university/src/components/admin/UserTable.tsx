@@ -15,7 +15,7 @@ import { useMutation } from '@tanstack/react-query';
 import { rejectKycApi, verifyKycApi } from '../../lib/apiClient';
 import useAlert from '../../hooks/useAlert';
 import { AxiosError } from 'axios';
-import { ArrowLeft, ArrowRight, ViewIcon } from 'lucide-react';
+import { ViewIcon } from 'lucide-react';
 import TablePagination from './Pagination';
 
 interface UserTableProps {

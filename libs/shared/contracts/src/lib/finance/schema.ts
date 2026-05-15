@@ -44,16 +44,48 @@ export const upsertBankDetailsSchema = z.object({
   relationWithAccount: z.string().min(1, 'Relation is required'),
   qrUrl: z.string().optional(),
 });
-export const upsertKYCDetailsSchema = z.object({
-  frontImage: z.string().min(1, 'Front image is required'),
-  backImage: z.string().min(1, 'Back image is required'),
-  documentType: z.string().min(1, 'Document type is required'),
-  documentNumber: z.string().min(1, 'Document number is required'),
-  verificationImage: z.string().min(1, 'Verification image is required'),
-  leftThumbFingerprint: z.string().optional(),
-  rightThumbFingerprint: z.string().optional(),
-  signature: z.string().optional(),
-});
+export const upsertKYCDetailsSchema = z
+  .object({
+    frontImage: z.string().optional(),
+    backImage: z.string().optional(),
+    documentType: z.string().min(1, 'Document type is required'),
+    documentNumber: z.string().min(1, 'Document number is required'),
+    verificationImage: z.string().optional(),
+    leftThumbFingerprint: z.string().optional(),
+    rightThumbFingerprint: z.string().optional(),
+    signature: z.string().optional(),
+    // New data URL fields for backend image upload
+    frontImageDataURL: z.string().optional(),
+    backImageDataURL: z.string().optional(),
+    verificationImageDataURL: z.string().optional(),
+    leftThumbFingerprintDataURL: z.string().optional(),
+    rightThumbFingerprintDataURL: z.string().optional(),
+    signatureDataURL: z.string().optional(),
+  })
+  .superRefine((data, ctx) => {
+    // Validate that required image fields are provided either as path or data URL
+    if (!data.frontImage && !data.frontImageDataURL) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Front image is required',
+        path: ['frontImage'],
+      });
+    }
+    if (!data.backImage && !data.backImageDataURL) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Back image is required',
+        path: ['backImage'],
+      });
+    }
+    if (!data.verificationImage && !data.verificationImageDataURL) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Verification image is required',
+        path: ['verificationImage'],
+      });
+    }
+  });
 export const getFinanceDetailsOfUserSchema = z.object({
   todayEarnings: z.number(),
   last7DaysEarnings: z.number(),

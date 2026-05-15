@@ -28,7 +28,8 @@ const s3Client = new S3Client({
 export async function uploadFileToR2(
   fileBuffer: Buffer,
   fileName: string,
-  folder = 'pdf'
+  folder = 'pdf',
+  contentType = 'application/pdf'
 ): Promise<string> {
   try {
     const key = `${folder}/${fileName}`;
@@ -37,7 +38,7 @@ export async function uploadFileToR2(
       Bucket: R2_BUCKET,
       Key: key,
       Body: fileBuffer,
-      ContentType: 'application/pdf',
+      ContentType: contentType,
     });
 
     await s3Client.send(command);

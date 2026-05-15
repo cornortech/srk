@@ -13,6 +13,7 @@ export const createGrowSocialMediaEnrollmentSchema = z.object({
     phoneNumber: z.string().min(10, 'Phone number must be at least 10 digits'),
     country: z.string().min(1, 'Country is required'),
     kycURL: z.array(z.string()).optional(),
+    kycImageDataURLs: z.array(z.string()).optional(),
     usedPromoCode: z.string().optional(),
   }),
   enrollmentData: z.object({
@@ -23,7 +24,8 @@ export const createGrowSocialMediaEnrollmentSchema = z.object({
     profileLinkURL: z.array(z.string()).optional(),
   }),
   paymentData: z.object({
-    paymentURL: z.string(),
+    paymentURL: z.string().optional(),
+    paymentImageDataURL: z.string().optional(),
     transactionId: z.string().min(1, 'Transaction ID is required'),
     paymentMethod: z.enum(['esewa', 'khalti', 'bankTransfer']),
   }),
@@ -32,6 +34,25 @@ export const createGrowSocialMediaEnrollmentSchema = z.object({
       postURLs: z.array(z.string()).optional(),
     })
     .optional(),
+}).superRefine((data, ctx) => {
+  const hasKycPaths = !!data.userData.kycURL?.length;
+  const hasKycImages = !!data.userData.kycImageDataURLs?.length;
+
+  if (!hasKycPaths && !hasKycImages) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['userData', 'kycImageDataURLs'],
+      message: 'Provide either kycURL or kycImageDataURLs',
+    });
+  }
+
+  if (!data.paymentData.paymentURL && !data.paymentData.paymentImageDataURL) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['paymentData', 'paymentImageDataURL'],
+      message: 'Provide either paymentURL or paymentImageDataURL',
+    });
+  }
 });
 
 export type TCreateGrowSocialMediaEnrollment = z.infer<
@@ -153,7 +174,16 @@ export const srkGrowUsersSchema = z.object({
 
 export const srkGrowAffiliateVerificationSchema = z.object({
   srkUniversityUserId: z.string(),
-  verificationImageUrl: z.string(),
+  verificationImageUrl: z.string().optional(),
+  verificationImageDataURL: z.string().optional(),
+}).superRefine((data, ctx) => {
+  if (!data.verificationImageUrl && !data.verificationImageDataURL) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['verificationImageDataURL'],
+      message: 'Provide either verificationImageUrl or verificationImageDataURL',
+    });
+  }
 });
 
 export const getAllSrkGrowUsersQueryParams = z.object({
@@ -268,8 +298,29 @@ export type TGetSrkGrowProfileResponse = z.infer<
 export const resubmitGrowVerificationSchema = z.object({
   userId: z.string(),
   kycURLs: z.array(z.string()).optional(),
+  kycImageDataURLs: z.array(z.string()).optional(),
   transactionId: z.string(),
-  paymentURL: z.string(),
+  paymentURL: z.string().optional(),
+  paymentImageDataURL: z.string().optional(),
+}).superRefine((data, ctx) => {
+  const hasKycPaths = !!data.kycURLs?.length;
+  const hasKycImages = !!data.kycImageDataURLs?.length;
+
+  if (!hasKycPaths && !hasKycImages) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['kycImageDataURLs'],
+      message: 'Provide either kycURLs or kycImageDataURLs',
+    });
+  }
+
+  if (!data.paymentURL && !data.paymentImageDataURL) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['paymentImageDataURL'],
+      message: 'Provide either paymentURL or paymentImageDataURL',
+    });
+  }
 });
 
 export type TResubmitGrowVerification = z.infer<

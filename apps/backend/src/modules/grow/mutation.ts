@@ -15,6 +15,10 @@ import { growSrkAffiliateEarningStatementModel } from '../../model/grow/growSrkA
 import { growSrkAffiliateUserBalanceModel } from '../../model/grow/growSrkAffiliateUserBalanceModel';
 import { GrowSrkAffiliateEarningPayoutModel } from '../../model/grow/growSrkAffiliateEarningPayoutModel';
 import GrowAffiliateUserModel from '../../model/grow/growAffiliateUserModel';
+import {
+  uploadImageDataUrlToR2,
+  cleanupR2Uploads,
+} from '../../services/imageUploadService';
 
 export function calculatePackageDiscount(
   packageId: string,
@@ -41,6 +45,9 @@ export function calculatePackageDiscount(
 const createGrowSocialMediaEnrollment: AppRouteImplementationOrOptions<
   typeof growContract.createGrowSocialMediaEnrollment
 > = async ({ body }) => {
+  const uploadedR2Keys: string[] = [];
+  let isSuccessful = false;
+
   try {
     const { userData, enrollmentData, paymentData, postEngagement } = body;
 
@@ -163,6 +170,35 @@ const createGrowSocialMediaEnrollment: AppRouteImplementationOrOptions<
       };
     }
 
+    const uploadedKycKeys: string[] = [];
+    if (userData.kycImageDataURLs?.length) {
+      for (const kycImageDataUrl of userData.kycImageDataURLs) {
+        const key = await uploadImageDataUrlToR2(
+          kycImageDataUrl,
+          'grow/kyc',
+          'grow-kyc'
+        );
+        uploadedKycKeys.push(key);
+        uploadedR2Keys.push(key);
+      }
+    }
+
+    const finalKycURLs = [
+      ...(userData.kycURL ?? []),
+      ...uploadedKycKeys,
+    ];
+
+    let paymentAssetPath = paymentData.paymentURL ?? '';
+    if (paymentData.paymentImageDataURL) {
+      const paymentKey = await uploadImageDataUrlToR2(
+        paymentData.paymentImageDataURL,
+        'grow/payments',
+        'grow-payment'
+      );
+      paymentAssetPath = paymentKey;
+      uploadedR2Keys.push(paymentKey);
+    }
+
     // 4. Create user
     const hashedPassword = await AuthService.hashPassword(userData.password);
 
@@ -173,7 +209,7 @@ const createGrowSocialMediaEnrollment: AppRouteImplementationOrOptions<
       gender: userData.gender,
       phone: userData.phoneNumber,
       country: userData.country,
-      kycURL: userData.kycURL,
+      kycURL: finalKycURLs,
       promoCode: userData.usedPromoCode,
       userType: 'package',
       referredBy: growSocialMediaRefferalUser
@@ -210,7 +246,7 @@ const createGrowSocialMediaEnrollment: AppRouteImplementationOrOptions<
     // 6. Create payment record
     await growSocialMediaPackagePaymentModel.create({
       growPackageEnrollmentId: createSrkGrowPackageEnrollment._id,
-      paymentURL: paymentData.paymentURL,
+      paymentURL: paymentAssetPath,
       transactionId: paymentData.transactionId,
       paymentMethod: paymentData.paymentMethod,
     });
@@ -234,6 +270,7 @@ const createGrowSocialMediaEnrollment: AppRouteImplementationOrOptions<
       });
     }
 
+    isSuccessful = true;
     return {
       status: 201,
       body: {
@@ -253,6 +290,10 @@ const createGrowSocialMediaEnrollment: AppRouteImplementationOrOptions<
           : 'Internal server error',
       },
     };
+  } finally {
+    if (!isSuccessful && uploadedR2Keys.length) {
+      await cleanupR2Uploads(uploadedR2Keys);
+    }
   }
 };
 
@@ -506,15 +547,44 @@ const rejectSocialGrowEnrollmentRequest: AppRouteImplementationOrOptions<
 const resubmitGrowVerification: AppRouteImplementationOrOptions<
   typeof growContract.resubmitGrowVerification
 > = async ({ body }) => {
+  const uploadedR2Keys: string[] = [];
+  let isSuccessful = false;
+
   try {
-    const { userId, kycURLs, transactionId, paymentURL } = body;
+    const { userId, kycURLs, kycImageDataURLs, transactionId, paymentURL, paymentImageDataURL } = body;
+
+    const uploadedKycKeys: string[] = [];
+    if (kycImageDataURLs?.length) {
+      for (const kycImageDataUrl of kycImageDataURLs) {
+        const key = await uploadImageDataUrlToR2(
+          kycImageDataUrl,
+          'grow/kyc',
+          'grow-kyc-resubmit'
+        );
+        uploadedKycKeys.push(key);
+        uploadedR2Keys.push(key);
+      }
+    }
+
+    let paymentAssetPath = paymentURL ?? '';
+    if (paymentImageDataURL) {
+      const paymentKey = await uploadImageDataUrlToR2(
+        paymentImageDataURL,
+        'grow/payments',
+        'grow-payment-resubmit'
+      );
+      paymentAssetPath = paymentKey;
+      uploadedR2Keys.push(paymentKey);
+    }
+
+    const finalKycURLs = [...(kycURLs ?? []), ...uploadedKycKeys];
 
     // 1. Update User Profile
     const user = await growSocialMediaPackageUserModel.findByIdAndUpdate(
       userId,
       {
         $set: {
-          kycURL: kycURLs,
+          kycURL: finalKycURLs,
           status: 'verificationPending',
         },
       },
@@ -540,7 +610,7 @@ const resubmitGrowVerification: AppRouteImplementationOrOptions<
         {
           $set: {
             transactionId,
-            paymentURL,
+            paymentURL: paymentAssetPath,
             status: 'pending',
             rejectionReason: null,
           },
@@ -548,6 +618,7 @@ const resubmitGrowVerification: AppRouteImplementationOrOptions<
       );
     }
 
+    isSuccessful = true;
     return {
       status: 200,
       body: { success: true, message: 'Verification resubmitted successfully' },
@@ -558,6 +629,10 @@ const resubmitGrowVerification: AppRouteImplementationOrOptions<
       status: 500,
       body: { success: false, message: 'Internal server error' },
     };
+  } finally {
+    if (!isSuccessful && uploadedR2Keys.length) {
+      await cleanupR2Uploads(uploadedR2Keys);
+    }
   }
 };
 
@@ -727,6 +802,9 @@ const createGrowSocialMediaTasks: AppRouteImplementationOrOptions<
 const srkGrowAffiliateVerificationRequest: AppRouteImplementationOrOptions<
   typeof growContract.srkGrowAffiliateVerificationRequest
 > = async ({ body }) => {
+  const uploadedR2Keys: string[] = [];
+  let isSuccessful = false;
+
   try {
     const srkUniversityUserExist = await UserModel.findById(
       body.srkUniversityUserId
@@ -775,6 +853,17 @@ const srkGrowAffiliateVerificationRequest: AppRouteImplementationOrOptions<
       };
     }
 
+    let verificationImageAssetPath = body.verificationImageUrl ?? '';
+    if (body.verificationImageDataURL) {
+      const verificationImageKey = await uploadImageDataUrlToR2(
+        body.verificationImageDataURL,
+        'grow/affiliate-verification',
+        'grow-affiliate-verification'
+      );
+      verificationImageAssetPath = verificationImageKey;
+      uploadedR2Keys.push(verificationImageKey);
+    }
+
     // If rejected, allow resubmission by updating the existing request
     if (
       srkAffiliateVerificationExist &&
@@ -783,12 +872,13 @@ const srkGrowAffiliateVerificationRequest: AppRouteImplementationOrOptions<
       await growSrkAffiliateVerificationModel.findByIdAndUpdate(
         srkAffiliateVerificationExist._id,
         {
-          verificationImageUrl: body.verificationImageUrl,
+          verificationImageUrl: verificationImageAssetPath,
           status: 'pending',
           rejectionReason: undefined, // Clear the rejection reason
         }
       );
 
+      isSuccessful = true;
       return {
         status: 201,
         body: {
@@ -801,10 +891,11 @@ const srkGrowAffiliateVerificationRequest: AppRouteImplementationOrOptions<
 
     await growSrkAffiliateVerificationModel.create({
       srkUniversityUserId: body.srkUniversityUserId,
-      verificationImageUrl: body.verificationImageUrl,
+      verificationImageUrl: verificationImageAssetPath,
       status: 'pending',
     });
 
+    isSuccessful = true;
     return {
       status: 201,
       body: {
@@ -823,6 +914,10 @@ const srkGrowAffiliateVerificationRequest: AppRouteImplementationOrOptions<
         success: false,
       },
     };
+  } finally {
+    if (!isSuccessful && uploadedR2Keys.length) {
+      await cleanupR2Uploads(uploadedR2Keys);
+    }
   }
 };
 

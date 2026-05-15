@@ -13,7 +13,6 @@ import { z } from 'zod';
 import { useNavigate } from 'react-router-dom';
 import { GradientText } from '../features/verification/components/ui/GradientText';
 import { GlassCard } from '../features/verification/components/ui/GlassCard';
-import { useSRKFileUpload } from '@srk/shared/hooks';
 import { api } from '../lib/api';
 import useGrowAuthStore from '../store/useGrowAuthStore';
 import { useForm } from 'react-hook-form';
@@ -30,8 +29,15 @@ export const UserVerificationPage = () => {
   const toast = useToast();
   // const [kycFiles, setKycFiles] = useState<File[]>([]);
   const [paymentProof, setPaymentProof] = useState<File | null>(null);
-  const { uploadFile, isUploading: isUploadingFiles } =
-    useSRKFileUpload('grow');
+  const isUploadingFiles = false;
+
+  const fileToDataURL = (file: File): Promise<string> =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.onerror = () => reject(new Error('Failed to read file'));
+      reader.readAsDataURL(file);
+    });
 
   const {
     register,
@@ -141,11 +147,12 @@ export const UserVerificationPage = () => {
 
     try {
       // 1. Upload new KYC files
-      // 2. Upload new Payment Proof if changed
+      // 2. Prepare payment proof payload
       let finalPaymentUrl = data.paymentURL;
+      let paymentImageDataURL: string | undefined;
       if (paymentProof) {
-        const { key } = await uploadFile(paymentProof, 'image');
-        finalPaymentUrl = key;
+        paymentImageDataURL = await fileToDataURL(paymentProof);
+        finalPaymentUrl = '';
       }
 
       // 3. Combine
@@ -158,6 +165,7 @@ export const UserVerificationPage = () => {
           kycURLs: [],
           transactionId: data.transactionId,
           paymentURL: finalPaymentUrl,
+          paymentImageDataURL,
         },
       });
     } catch (error) {

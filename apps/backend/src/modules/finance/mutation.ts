@@ -11,6 +11,10 @@ import AdminSrkBankService from '../../services/adminSrkBankService';
 import EmailService from '../../services/emailService';
 import { SrkUniversityBankModel } from '../../model/srkUniversityBankModel';
 import { financeContract } from '@srk/shared/contracts';
+import {
+  uploadImageDataUrlToR2,
+  cleanupR2Uploads,
+} from '../../services/imageUploadService';
 
 const createBalancePayout: AppRouteImplementation<
   typeof financeContract.createBalancePayout
@@ -194,6 +198,9 @@ const upsertBankDetails: AppRouteImplementation<
 const upsertKYCDetails: AppRouteImplementation<
   typeof financeContract.upsertKYCDetails
 > = async ({ req, res }) => {
+  const uploadedR2Keys: string[] = [];
+  let isSuccessful = false;
+
   try {
     const userExist = await UserModel.findById(req.params.userId);
     if (!userExist) {
@@ -206,21 +213,106 @@ const upsertKYCDetails: AppRouteImplementation<
       };
     }
 
+    // Prepare KYC data object
+    const kycData: Record<string, unknown> = {
+      documentType: req.body.documentType,
+      documentNumber: req.body.documentNumber,
+    };
+
+    // Process front image data URL if provided
+    if (req.body.frontImageDataURL) {
+      const frontKey = await uploadImageDataUrlToR2(
+        req.body.frontImageDataURL,
+        'university/kyc',
+        'university-kyc-front'
+      );
+      kycData.frontImage = frontKey;
+      uploadedR2Keys.push(frontKey);
+    } else if (req.body.frontImage) {
+      kycData.frontImage = req.body.frontImage;
+    }
+
+    // Process back image data URL if provided
+    if (req.body.backImageDataURL) {
+      const backKey = await uploadImageDataUrlToR2(
+        req.body.backImageDataURL,
+        'university/kyc',
+        'university-kyc-back'
+      );
+      kycData.backImage = backKey;
+      uploadedR2Keys.push(backKey);
+    } else if (req.body.backImage) {
+      kycData.backImage = req.body.backImage;
+    }
+
+    // Process verification image data URL if provided
+    if (req.body.verificationImageDataURL) {
+      const verificationKey = await uploadImageDataUrlToR2(
+        req.body.verificationImageDataURL,
+        'university/kyc',
+        'university-kyc-verification'
+      );
+      kycData.verificationImage = verificationKey;
+      uploadedR2Keys.push(verificationKey);
+    } else if (req.body.verificationImage) {
+      kycData.verificationImage = req.body.verificationImage;
+    }
+
+    // Process optional biometric data URLs
+    if (req.body.leftThumbFingerprintDataURL) {
+      const leftThumbKey = await uploadImageDataUrlToR2(
+        req.body.leftThumbFingerprintDataURL,
+        'university/kyc',
+        'university-kyc-left-thumb'
+      );
+      kycData.leftThumbFingerprint = leftThumbKey;
+      uploadedR2Keys.push(leftThumbKey);
+    } else if (req.body.leftThumbFingerprint) {
+      kycData.leftThumbFingerprint = req.body.leftThumbFingerprint;
+    }
+
+    if (req.body.rightThumbFingerprintDataURL) {
+      const rightThumbKey = await uploadImageDataUrlToR2(
+        req.body.rightThumbFingerprintDataURL,
+        'university/kyc',
+        'university-kyc-right-thumb'
+      );
+      kycData.rightThumbFingerprint = rightThumbKey;
+      uploadedR2Keys.push(rightThumbKey);
+    } else if (req.body.rightThumbFingerprint) {
+      kycData.rightThumbFingerprint = req.body.rightThumbFingerprint;
+    }
+
+    if (req.body.signatureDataURL) {
+      const signatureKey = await uploadImageDataUrlToR2(
+        req.body.signatureDataURL,
+        'university/kyc',
+        'university-kyc-signature'
+      );
+      kycData.signature = signatureKey;
+      uploadedR2Keys.push(signatureKey);
+    } else if (req.body.signature) {
+      kycData.signature = req.body.signature;
+    }
+
+    // Create or update KYC record
     const kycDetailExist = await KYCModel.findOne({
       userId: req.params.userId,
     });
 
     if (kycDetailExist) {
-      await KYCModel.findByIdAndUpdate(kycDetailExist._id, req.body);
+      await KYCModel.findByIdAndUpdate(kycDetailExist._id, kycData);
     } else {
       await KYCModel.create({
         userId: req.params.userId,
-        ...req.body,
+        ...kycData,
       });
     }
+
     userExist.status = 'KYC_VERIFICATION_PENDING';
     await userExist.save();
 
+    isSuccessful = true;
     return {
       status: 200,
       body: {
@@ -229,7 +321,7 @@ const upsertKYCDetails: AppRouteImplementation<
       },
     };
   } catch (error) {
-    console.error(error);
+    console.error('upsertKYCDetails error:', error);
     return {
       status: 500,
       body: {
@@ -237,6 +329,11 @@ const upsertKYCDetails: AppRouteImplementation<
         message: 'Internal server error',
       },
     };
+  } finally {
+    // Cleanup R2 uploads if handler failed
+    if (!isSuccessful && uploadedR2Keys.length) {
+      await cleanupR2Uploads(uploadedR2Keys);
+    }
   }
 };
 

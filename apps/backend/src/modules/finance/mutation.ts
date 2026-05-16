@@ -11,10 +11,52 @@ import AdminSrkBankService from '../../services/adminSrkBankService';
 import EmailService from '../../services/emailService';
 import { SrkUniversityBankModel } from '../../model/srkUniversityBankModel';
 import { financeContract } from '@srk/shared/contracts';
+import { cleanupDataUrlUploads } from '../../utils/dataUrlUploadMiddleware';
+import sharp from 'sharp';
+import { randomUUID } from 'crypto';
 import {
-  uploadImageDataUrlToR2,
-  cleanupR2Uploads,
-} from '../../services/imageUploadService';
+  deleteFileFromR2,
+  downloadFileFromR2,
+  uploadFileToR2,
+} from '../../services/r2Service';
+
+const KYC_THUMBPRINT_FOLDER = 'university/kyc';
+
+async function readImageBufferFromAsset(
+  assetPathOrUrl: string
+): Promise<Buffer> {
+  if (/^https?:\/\//i.test(assetPathOrUrl)) {
+    const response = await fetch(assetPathOrUrl);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch image URL: ${response.status}`);
+    }
+    return Buffer.from(await response.arrayBuffer());
+  }
+
+  return downloadFileFromR2(assetPathOrUrl.replace(/^\/+/, ''));
+}
+
+async function enhanceAndUploadThumbprint(
+  assetPathOrUrl: string
+): Promise<string> {
+  const sourceBuffer = await readImageBufferFromAsset(assetPathOrUrl);
+
+  const enhancedBuffer = await sharp(sourceBuffer)
+    .resize({ width: 200, withoutEnlargement: true })
+    .grayscale()
+    .normalise()
+    .threshold(140)
+    .png({ quality: 100 })
+    .toBuffer();
+
+  const fileName = `university-kyc-thumb-enhanced-${Date.now()}-${randomUUID()}.png`;
+  return uploadFileToR2(
+    enhancedBuffer,
+    fileName,
+    KYC_THUMBPRINT_FOLDER,
+    'image/png'
+  );
+}
 
 const createBalancePayout: AppRouteImplementation<
   typeof financeContract.createBalancePayout
@@ -198,9 +240,7 @@ const upsertBankDetails: AppRouteImplementation<
 const upsertKYCDetails: AppRouteImplementation<
   typeof financeContract.upsertKYCDetails
 > = async ({ req, res }) => {
-  const uploadedR2Keys: string[] = [];
   let isSuccessful = false;
-
   try {
     const userExist = await UserModel.findById(req.params.userId);
     if (!userExist) {
@@ -214,84 +254,46 @@ const upsertKYCDetails: AppRouteImplementation<
     }
 
     // Prepare KYC data object
+    // Note: Any data: URLs in req.body have already been uploaded to R2 by middleware
     const kycData: Record<string, unknown> = {
       documentType: req.body.documentType,
       documentNumber: req.body.documentNumber,
     };
 
-    // Process front image data URL if provided
-    if (req.body.frontImageDataURL) {
-      const frontKey = await uploadImageDataUrlToR2(
-        req.body.frontImageDataURL,
-        'university/kyc',
-        'university-kyc-front'
-      );
-      kycData.frontImage = frontKey;
-      uploadedR2Keys.push(frontKey);
-    } else if (req.body.frontImage) {
+    // Assign image fields from already-processed body
+    if (req.body.frontImage) {
       kycData.frontImage = req.body.frontImage;
     }
-
-    // Process back image data URL if provided
-    if (req.body.backImageDataURL) {
-      const backKey = await uploadImageDataUrlToR2(
-        req.body.backImageDataURL,
-        'university/kyc',
-        'university-kyc-back'
-      );
-      kycData.backImage = backKey;
-      uploadedR2Keys.push(backKey);
-    } else if (req.body.backImage) {
+    if (req.body.backImage) {
       kycData.backImage = req.body.backImage;
     }
-
-    // Process verification image data URL if provided
-    if (req.body.verificationImageDataURL) {
-      const verificationKey = await uploadImageDataUrlToR2(
-        req.body.verificationImageDataURL,
-        'university/kyc',
-        'university-kyc-verification'
-      );
-      kycData.verificationImage = verificationKey;
-      uploadedR2Keys.push(verificationKey);
-    } else if (req.body.verificationImage) {
+    if (req.body.verificationImage) {
       kycData.verificationImage = req.body.verificationImage;
     }
+    const uploadedR2Keys = ((req as any).uploadedR2Keys ?? []) as string[];
+    const originalUploadedKeys = new Set(uploadedR2Keys);
 
-    // Process optional biometric data URLs
-    if (req.body.leftThumbFingerprintDataURL) {
-      const leftThumbKey = await uploadImageDataUrlToR2(
-        req.body.leftThumbFingerprintDataURL,
-        'university/kyc',
-        'university-kyc-left-thumb'
-      );
-      kycData.leftThumbFingerprint = leftThumbKey;
-      uploadedR2Keys.push(leftThumbKey);
-    } else if (req.body.leftThumbFingerprint) {
-      kycData.leftThumbFingerprint = req.body.leftThumbFingerprint;
+    let originalLeftThumbKey: string | undefined;
+    let originalRightThumbKey: string | undefined;
+
+    // Enhance thumbprints at KYC upsert time so PDF generation can use preprocessed images.
+    if (req.body.leftThumbFingerprint) {
+      const leftInput = String(req.body.leftThumbFingerprint);
+      originalLeftThumbKey = leftInput;
+      const enhancedLeft = await enhanceAndUploadThumbprint(leftInput);
+      uploadedR2Keys.push(enhancedLeft);
+      kycData.leftThumbFingerprint = enhancedLeft;
     }
 
-    if (req.body.rightThumbFingerprintDataURL) {
-      const rightThumbKey = await uploadImageDataUrlToR2(
-        req.body.rightThumbFingerprintDataURL,
-        'university/kyc',
-        'university-kyc-right-thumb'
-      );
-      kycData.rightThumbFingerprint = rightThumbKey;
-      uploadedR2Keys.push(rightThumbKey);
-    } else if (req.body.rightThumbFingerprint) {
-      kycData.rightThumbFingerprint = req.body.rightThumbFingerprint;
+    if (req.body.rightThumbFingerprint) {
+      const rightInput = String(req.body.rightThumbFingerprint);
+      originalRightThumbKey = rightInput;
+      const enhancedRight = await enhanceAndUploadThumbprint(rightInput);
+      uploadedR2Keys.push(enhancedRight);
+      kycData.rightThumbFingerprint = enhancedRight;
     }
 
-    if (req.body.signatureDataURL) {
-      const signatureKey = await uploadImageDataUrlToR2(
-        req.body.signatureDataURL,
-        'university/kyc',
-        'university-kyc-signature'
-      );
-      kycData.signature = signatureKey;
-      uploadedR2Keys.push(signatureKey);
-    } else if (req.body.signature) {
+    if (req.body.signature) {
       kycData.signature = req.body.signature;
     }
 
@@ -312,7 +314,21 @@ const upsertKYCDetails: AppRouteImplementation<
     userExist.status = 'KYC_VERIFICATION_PENDING';
     await userExist.save();
 
+    // Best-effort cleanup: remove just-uploaded raw thumb images after enhancement.
+    // Keep pre-existing references intact.
+    const cleanupCandidates = [
+      originalLeftThumbKey,
+      originalRightThumbKey,
+    ].filter(
+      (v): v is string =>
+        !!v && !/^https?:\/\//i.test(v) && originalUploadedKeys.has(v)
+    );
+    await Promise.allSettled(
+      cleanupCandidates.map((key) => deleteFileFromR2(key))
+    );
+
     isSuccessful = true;
+
     return {
       status: 200,
       body: {
@@ -330,9 +346,8 @@ const upsertKYCDetails: AppRouteImplementation<
       },
     };
   } finally {
-    // Cleanup R2 uploads if handler failed
-    if (!isSuccessful && uploadedR2Keys.length) {
-      await cleanupR2Uploads(uploadedR2Keys);
+    if (!isSuccessful) {
+      await cleanupDataUrlUploads(req);
     }
   }
 };

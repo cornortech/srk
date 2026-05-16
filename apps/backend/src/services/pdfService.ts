@@ -4,6 +4,16 @@ import fs from 'fs';
 import sharp from 'sharp';
 import { uploadFileToR2 } from './r2Service';
 
+const CLOUDFLARE_CDN_BASE_URL = 'https://cdn.thesrkuniversity.com';
+
+// Function to convert relative asset paths to full CDN URLs
+function getAssetUrl(assetPath?: string | null): string {
+  if (!assetPath) return '';
+  if (/^https?:\/\//i.test(assetPath)) return assetPath;
+  return `${CLOUDFLARE_CDN_BASE_URL}/${assetPath.replace(/^\/+/, '')}`;
+}
+
+
 // Function to darken/invert signature image for visibility
 async function darkenSignatureImage(url: string): Promise<Uint8Array> {
   if (!url) {
@@ -93,6 +103,12 @@ export async function modifyAndUploadAgreement(
     );
     console.log('Signature URL:', signatureUrl || 'NOT PROVIDED');
 
+  // Convert relative paths to full CDN URLs
+  const fullImageUrl = getAssetUrl(imageUrl);
+  const fullLeftThumbUrl = getAssetUrl(leftThumbfingerprint);
+  const fullRightThumbUrl = getAssetUrl(rightThumbfingerprint);
+  const fullSignatureUrl = getAssetUrl(signatureUrl);
+
     const pdfPath =
       templatePath ||
       path.join(
@@ -143,7 +159,7 @@ export async function modifyAndUploadAgreement(
 
     // Fetch and embed the verification image (photo) into the PDF
     try {
-      const imageBytes = await fetchAndCompressImage(imageUrl);
+      const imageBytes = await fetchAndCompressImage(fullImageUrl);
       if (imageBytes && imageBytes.length > 0) {
         const embeddedImage = await pdfDoc.embedPng(imageBytes);
         firstPage.drawImage(embeddedImage, {
@@ -161,9 +177,7 @@ export async function modifyAndUploadAgreement(
     if (leftThumbfingerprint) {
       try {
         console.log('Embedding left thumbprint from:', leftThumbfingerprint);
-        const leftThumbBytes = await fetchAndCompressImage(
-          leftThumbfingerprint
-        );
+        const leftThumbBytes = await fetchAndCompressImage(fullLeftThumbUrl);
         if (leftThumbBytes && leftThumbBytes.length > 0) {
           const embeddedLeftThumb = await pdfDoc.embedPng(leftThumbBytes);
           firstPage.drawImage(embeddedLeftThumb, {
@@ -185,9 +199,7 @@ export async function modifyAndUploadAgreement(
     if (rightThumbfingerprint) {
       try {
         console.log('Embedding right thumbprint from:', rightThumbfingerprint);
-        const rightThumbBytes = await fetchAndCompressImage(
-          rightThumbfingerprint
-        );
+        const rightThumbBytes = await fetchAndCompressImage(fullRightThumbUrl);
         if (rightThumbBytes && rightThumbBytes.length > 0) {
           const embeddedRightThumb = await pdfDoc.embedPng(rightThumbBytes);
           firstPage.drawImage(embeddedRightThumb, {
@@ -209,7 +221,7 @@ export async function modifyAndUploadAgreement(
     if (signatureUrl) {
       try {
         console.log('Embedding signature from:', signatureUrl);
-        const signatureBytes = await darkenSignatureImage(signatureUrl);
+        const signatureBytes = await darkenSignatureImage(fullSignatureUrl);
         if (signatureBytes && signatureBytes.length > 0) {
           const embeddedSignature = await pdfDoc.embedPng(signatureBytes);
           firstPage.drawImage(embeddedSignature, {
@@ -379,6 +391,9 @@ export async function createAffiliatePdfAndUpload(
 
   const modifiedPdfPath = `modifiedAffiliateAgreement-${Date.now()}.pdf`;
   // const modifiedPdfPath = `modifiedAffiliateAgreement.pdf`;
+  // Convert relative path to full CDN URL
+  const fullImageUrl = getAssetUrl(imageUrl);
+
 
   try {
     const pdfPath = path.join(
@@ -435,7 +450,7 @@ export async function createAffiliatePdfAndUpload(
 
     // Fetch and embed the image into the PDF (optional)
     try {
-      const imageBytes = await fetchAndCompressImage(imageUrl);
+      const imageBytes = await fetchAndCompressImage(fullImageUrl);
       if (imageBytes && imageBytes.length > 0) {
         const embeddedImage = await pdfDoc.embedPng(imageBytes);
         firstPage.drawImage(embeddedImage, {

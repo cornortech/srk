@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Check, PenTool, Trash2, Type } from 'lucide-react';
 import { Button } from '@nextui-org/react';
+import { getUniversityAssetUrl } from '../../../lib/cdn';
 
 interface SignaturePadProps {
   onSave: (signature: string) => void;
@@ -31,7 +32,7 @@ export const SignaturePad: React.FC<SignaturePadProps> = ({
   const [lineWidth, setLineWidth] = useState(2);
   const [hasSignature, setHasSignature] = useState(!!initialSignature);
   const [isSaved, setIsSaved] = useState(!!initialSignature);
-  const [savedSignatureData, setSavedSignatureData] = useState<string>(initialSignature || '');
+  const [savedSignatureData, setSavedSignatureData] = useState<string>(getUniversityAssetUrl(initialSignature) || '');
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -81,7 +82,7 @@ export const SignaturePad: React.FC<SignaturePadProps> = ({
       img.onerror = () => {
         console.error('Failed to load signature image');
       };
-      img.src = initialSignature;
+      img.src = getUniversityAssetUrl(initialSignature);
     }
   }, [initialSignature, isSaved, savedSignatureData]);
 

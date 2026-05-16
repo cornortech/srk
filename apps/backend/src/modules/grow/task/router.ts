@@ -2,8 +2,16 @@ import { initServer } from '@ts-rest/express';
 import { srkTaskContract } from '@srk/shared/contracts';
 import { srkTaskQueryHandler } from './query';
 import { srkTaskMutationHandler } from './mutation';
+import { createDataUrlUploadMiddleware } from '../../../utils/dataUrlUploadMiddleware';
 
 const s = initServer();
+
+const srkTaskActionSubmissionFieldMappings = {
+  actionVerificationImageUrl: {
+    folder: 'task/action-submissions',
+    prefix: 'task-action-submission',
+  },
+};
 
 export const srkTaskRouter = s.router(srkTaskContract, {
   getSrkTaskUserProfile: srkTaskQueryHandler.getSrkTaskUserProfile,
@@ -47,7 +55,12 @@ export const srkTaskRouter = s.router(srkTaskContract, {
     srkTaskMutationHandler.bulkApproveSrkTaskSubmissionsByAdmin,
   bulkRejectSrkTaskSubmissionsByAdmin:
     srkTaskMutationHandler.bulkRejectSrkTaskSubmissionsByAdmin,
-  srkTaskActionSubmission: srkTaskMutationHandler.srkTaskActionSubmission,
+  srkTaskActionSubmission: {
+    middleware: [
+      createDataUrlUploadMiddleware(srkTaskActionSubmissionFieldMappings),
+    ],
+    handler: srkTaskMutationHandler.srkTaskActionSubmission,
+  },
   getSrkTaskActionsByPlatforms:
     srkTaskQueryHandler.getSrkTaskActionsByPlatforms,
   getAllSrkTaskAffiliateVerificationRequest:

@@ -9,22 +9,25 @@ import { router } from './modules';
 import ssoRouter from './modules/sso/router';
 import { apiContract } from '@srk/shared/contracts';
 import { JwtAuthMiddleware } from './utils/middleware';
+import { env } from './config/env';
 
 export const app = express();
 
 app.set('trust proxy', 1);
 
-app.use(express.json());
+// Increase body size limits to allow base64 image uploads from the frontend
+app.use(express.json({ limit: '10mb' }));
 app.use(cookieParser());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true, limit: '10mb', parameterLimit: 100000 }));
 
-const WHITE_LISTED_ORIGINS = process.env.WHITE_LISTED_ORIGINS
-  ? process.env.WHITE_LISTED_ORIGINS.split(',')
+const WHITE_LISTED_ORIGINS = env.WHITE_LISTED_ORIGINS
+  ? env.WHITE_LISTED_ORIGINS.split(',')
   : [];
 
 // CORS
 
 console.log('[APP] Whitelisted origins:', WHITE_LISTED_ORIGINS);
+console.log('[APP] R2 prefix folder:', env.R2_PREFIX_FOLDER);
 
 // Root endpoint
 app.get('/', (req, res) => {

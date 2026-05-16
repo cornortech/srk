@@ -1,11 +1,12 @@
 import { S3Client, PutObjectCommand, DeleteObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
+import { env } from '../config/env';
 
 // Cloudflare R2 configuration
-const R2_ACCESS_KEY_ID = process.env.R2_ACCESS_KEY_ID || 'daf464fc116a11847575b6fbfbac26a0';
-const R2_SECRET_ACCESS_KEY = process.env.R2_SECRET_ACCESS_KEY || '6414fef2c8ca3715856b08ab2302d1d92e80b7cec32971acc0d85cef559fd4e4';
-const R2_ENDPOINT = process.env.R2_ENDPOINT || 'https://5f09c9e5753d5a473d39fed1135fef46.r2.cloudflarestorage.com';
-const R2_BUCKET = process.env.R2_BUCKET || 'srk';
-const CDN_BASE_URL = process.env.CDN_BASE_URL || 'https://cdn.thesrkuniversity.com';
+const R2_ACCESS_KEY_ID = env.R2_ACCESS_KEY_ID;
+const R2_SECRET_ACCESS_KEY = env.R2_SECRET_ACCESS_KEY;
+const R2_ENDPOINT = env.R2_ENDPOINT;
+const R2_BUCKET = env.R2_BUCKET;
+const CDN_BASE_URL = env.CDN_BASE_URL;
 
 // Initialize S3 client for Cloudflare R2
 const s3Client = new S3Client({
@@ -32,7 +33,7 @@ export async function uploadFileToR2(
   contentType = 'application/pdf'
 ): Promise<string> {
   try {
-    const key = `${folder}/${fileName}`;
+    const key = `${env.R2_PREFIX_FOLDER}/${folder}/${fileName}`;
     
     const command = new PutObjectCommand({
       Bucket: R2_BUCKET,

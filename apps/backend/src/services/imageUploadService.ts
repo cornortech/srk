@@ -1,5 +1,6 @@
 import { randomUUID } from 'crypto';
 import { deleteFileFromR2, uploadFileToR2 } from './r2Service';
+import { env } from '../config/env';
 
 export const MIME_EXTENSION_MAP: Record<string, string> = {
   'image/jpeg': 'jpg',
@@ -51,8 +52,11 @@ export const uploadImageDataUrlToR2 = async (
   folder: string,
   filePrefix: string
 ) => {
+  const rootFolder = env.R2_PREFIX_FOLDER;
   const { buffer, contentType, extension } = parseImageDataUrl(dataUrl);
   const fileName = `${filePrefix}-${Date.now()}-${randomUUID()}.${extension}`;
+  // Log the effective target (prefix + folder) so runtime shows srk/dev clearly
+  console.log(`[R2] Upload target: ${rootFolder}/${folder}/${fileName}`);
   return uploadFileToR2(buffer, fileName, folder, contentType);
 };
 

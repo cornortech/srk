@@ -73,12 +73,6 @@ export default function KYCForm({
 
   const { mutate } = useMutation({
     mutationFn: async (data: {
-      frontImageDataURL?: string;
-      backImageDataURL?: string;
-      verificationImageDataURL?: string;
-      leftThumbFingerprintDataURL?: string;
-      rightThumbFingerprintDataURL?: string;
-      signatureDataURL?: string;
       frontImage?: string;
       backImage?: string;
       verificationImage?: string;
@@ -153,19 +147,15 @@ export default function KYCForm({
 
       // Send data to backend
       mutate({
-        frontImageDataURL,
-        backImageDataURL,
-        verificationImageDataURL,
-        leftThumbFingerprintDataURL,
-        rightThumbFingerprintDataURL,
-        signatureDataURL,
-        // Keep existing paths if not updating
-        frontImage: kycDetails?.frontImage,
-        backImage: kycDetails?.backImage,
-        verificationImage: kycDetails?.verificationImage,
-        leftThumbFingerprint: kycDetails?.leftThumbFingerprint,
-        rightThumbFingerprint: kycDetails?.rightThumbFingerprint,
-        signature: kycDetails?.signature,
+        // Keep existing paths if not updating; send data URLs through the same fields for consistency
+        frontImage: frontImageDataURL ?? kycDetails?.frontImage,
+        backImage: backImageDataURL ?? kycDetails?.backImage,
+        verificationImage: verificationImageDataURL ?? kycDetails?.verificationImage,
+        leftThumbFingerprint:
+          leftThumbFingerprintDataURL ?? kycDetails?.leftThumbFingerprint,
+        rightThumbFingerprint:
+          rightThumbFingerprintDataURL ?? kycDetails?.rightThumbFingerprint,
+        signature: signatureDataURL ?? kycDetails?.signature,
       });
     } catch (error) {
       console.error("Error preparing submission:", error);
@@ -194,11 +184,6 @@ export default function KYCForm({
     userDetails?.status === "PORTAL_ACTIVATED";
 
   const isFormDisabled = disableForm || loading;
-
-
-  return (
-    <Card className="bg-bgSecondary w-full">
-      <CardBody className="w-full">
 
 
   return (

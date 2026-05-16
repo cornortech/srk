@@ -6,6 +6,7 @@ import AuthService from '../../services/authService';
 import crypto from 'crypto';
 import GrowAffiliateUserModel from '../../model/grow/growAffiliateUserModel';
 import { AutoCodeModel } from '../../model/autoCodeModel';
+import { env } from '../../config/env';
 
 /**
  * Generate a one-time SSO auto code
@@ -60,8 +61,7 @@ const getAutoCode: AppRouteImplementationOrOptions<
     // Generate redirect URL based on target app
     let redirectUrl: string;
     if (targetApp === 'task') {
-      const taskDomain =
-        process.env['TASK_FRONTEND_URL'] || 'http://localhost:4400';
+      const taskDomain = env.TASK_FRONTEND_URL || 'http://localhost:4400';
       redirectUrl = `${taskDomain}/callback?code=${code}`;
     } else if (
       targetApp === 'growaffiliate' ||
@@ -80,17 +80,14 @@ const getAutoCode: AppRouteImplementationOrOptions<
           redirectUrlQueryParams = `&affiliateId=${growAffiliateId}`;
         }
 
-        const growDomain =
-          process.env['GROW_FRONTEND_URL'] || 'http://localhost:4500';
+        const growDomain = env.GROW_FRONTEND_URL || 'http://localhost:4500';
         redirectUrl = `${growDomain}/callback?code=${code}${redirectUrlQueryParams}`;
       } else {
-        const growDomain =
-          process.env['GROW_FRONTEND_URL'] || 'http://localhost:4500';
+        const growDomain = env.GROW_FRONTEND_URL || 'http://localhost:4500';
         redirectUrl = `${growDomain}/callback?code=${code}`;
       }
     } else {
-      const bankDomain =
-        process.env['BANK_FRONTEND_URL'] || 'http://localhost:4300';
+      const bankDomain = env.BANK_FRONTEND_URL || 'http://localhost:4300';
       redirectUrl = `${bankDomain}/callback?code=${code}`;
     }
 
@@ -235,7 +232,7 @@ const exchangeCode: AppRouteImplementationOrOptions<
     ]);
 
     // Set cookies with proper configuration
-    const isProduction = process.env.NODE_ENV === 'production';
+    const isProduction = env.NODE_ENV === 'production';
 
     const accessTokenOptions: any = {
       maxAge: 15 * 60 * 1000, // 15 minutes
@@ -251,9 +248,9 @@ const exchangeCode: AppRouteImplementationOrOptions<
       secure: isProduction,
     };
 
-    if (process.env.COOKIE_DOMAIN) {
-      accessTokenOptions.domain = process.env.COOKIE_DOMAIN;
-      refreshTokenOptions.domain = process.env.COOKIE_DOMAIN;
+    if (env.COOKIE_DOMAIN) {
+      accessTokenOptions.domain = env.COOKIE_DOMAIN;
+      refreshTokenOptions.domain = env.COOKIE_DOMAIN;
     }
 
     res.cookie('access_token', accessToken, accessTokenOptions);

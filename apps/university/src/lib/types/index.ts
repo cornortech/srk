@@ -119,14 +119,20 @@ export type TUpsertBankDetails = {
 };
 
 export type TUpsertKYCDetails = {
-  frontImage: string;
-  backImage: string;
+  frontImage?: string;
+  backImage?: string;
   documentType: string;
   documentNumber: string;
-  verificationImage: string;
+  verificationImage?: string;
   leftThumbFingerprint?: string;
   rightThumbFingerprint?: string;
   signature?: string;
+  frontImageDataURL?: string;
+  backImageDataURL?: string;
+  verificationImageDataURL?: string;
+  leftThumbFingerprintDataURL?: string;
+  rightThumbFingerprintDataURL?: string;
+  signatureDataURL?: string;
 };
 
 export type TEarningDetails = {

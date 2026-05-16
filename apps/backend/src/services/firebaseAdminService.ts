@@ -1,20 +1,22 @@
 import * as admin from 'firebase-admin';
-import { env } from '../config/env';
+
+// Firebase config is intentionally read from process.env directly
+// (removed from centralized env.ts because Cloudflare R2 is used for uploads)
 
 // Initialize Firebase Admin SDK
 let firebaseApp: admin.app.App;
 
 function initializeFirebaseAdmin() {
   if (!firebaseApp) {
-    const privateKey = env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n');
-    
+    const privateKey = process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n');
+
     firebaseApp = admin.initializeApp({
       credential: admin.credential.cert({
-        projectId: env.FIREBASE_PROJECT_ID,
-        clientEmail: env.FIREBASE_CLIENT_EMAIL,
+        projectId: process.env.FIREBASE_PROJECT_ID,
+        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
         privateKey: privateKey,
       } as admin.ServiceAccount),
-      storageBucket: `${env.FIREBASE_PROJECT_ID}.firebasestorage.app`,
+      storageBucket: `${process.env.FIREBASE_PROJECT_ID}.firebasestorage.app`,
     });
   }
   return firebaseApp;

@@ -977,7 +977,7 @@ const loginSrkGrow: AppRouteImplementationOrOptions<
     ]);
 
     // Set cookies with proper configuration
-    const isProduction = process.env.NODE_ENV === 'production';
+    const isProduction = env.NODE_ENV === 'production';
 
     const accessTokenOptions: any = {
       maxAge: 15 * 60 * 1000, // 15 minutes
@@ -993,9 +993,9 @@ const loginSrkGrow: AppRouteImplementationOrOptions<
       secure: isProduction,
     };
 
-    if (process.env.COOKIE_DOMAIN) {
-      accessTokenOptions.domain = process.env.COOKIE_DOMAIN;
-      refreshTokenOptions.domain = process.env.COOKIE_DOMAIN;
+    if (env.COOKIE_DOMAIN) {
+      accessTokenOptions.domain = env.COOKIE_DOMAIN;
+      refreshTokenOptions.domain = env.COOKIE_DOMAIN;
     }
 
     res.cookie('access_token', accessToken, accessTokenOptions);
@@ -1064,7 +1064,7 @@ const refreshToken: AppRouteImplementationOrOptions<
     });
 
     // Set new access token cookie
-    const isProduction = process.env.NODE_ENV === 'production';
+    const isProduction = env.NODE_ENV === 'production';
     const accessTokenOptions: any = {
       maxAge: 15 * 60 * 1000, // 15 minutes
       httpOnly: true,
@@ -1072,8 +1072,8 @@ const refreshToken: AppRouteImplementationOrOptions<
       secure: isProduction,
     };
 
-    if (process.env.COOKIE_DOMAIN) {
-      accessTokenOptions.domain = process.env.COOKIE_DOMAIN;
+    if (env.COOKIE_DOMAIN) {
+      accessTokenOptions.domain = env.COOKIE_DOMAIN;
     }
 
     res.cookie('access_token', newAccessToken, accessTokenOptions);
@@ -1102,15 +1102,15 @@ const logout: AppRouteImplementationOrOptions<
 > = async ({ res }) => {
   try {
     // Clear both tokens
-    const isProduction = process.env.NODE_ENV === 'production';
+    const isProduction = env.NODE_ENV === 'production';
     const clearOptions: any = {
       httpOnly: true,
       sameSite: isProduction ? 'none' : 'lax',
       secure: isProduction,
     };
 
-    if (process.env.COOKIE_DOMAIN) {
-      clearOptions.domain = process.env.COOKIE_DOMAIN;
+    if (env.COOKIE_DOMAIN) {
+      clearOptions.domain = env.COOKIE_DOMAIN;
     }
 
     res.clearCookie('access_token', clearOptions);
@@ -1299,7 +1299,7 @@ const forgotPasswordSrkGrow: AppRouteImplementationOrOptions<
     await user.save();
 
     // Create reset URL
-    const resetUrl = `${process.env.GROW_FRONTEND_URL}/reset-password?token=${resetToken}`;
+    const resetUrl = `${env.GROW_FRONTEND_URL}/reset-password?token=${resetToken}`;
 
     // Send email
     const emailTemplate = EmailService.EmailTemplate({
@@ -1377,7 +1377,7 @@ const resetPasswordSrkGrow: AppRouteImplementationOrOptions<
         <p>If you didn't make this change, please contact support immediately.</p>
       `,
       link_name: 'Login Now',
-      link: `${process.env.GROW_FRONTEND_URL}/login`,
+      link: `${env.GROW_FRONTEND_URL}/login`,
     });
 
     await EmailService.sendEmail({

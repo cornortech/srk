@@ -2,16 +2,24 @@ import dotenv from "dotenv";
 dotenv.config();
 import { app } from "./app";
 import connectDB from "./config/database";
-import { env } from "./config/env";
+import { env, validateEnv } from "./config/env";
 
 
 async function startServer() {
   console.log("[STARTUP] Starting SRK Backend Server...");
+
+  try {
+    validateEnv();
+  } catch (error) {
+    console.error("[STARTUP] ✗ Startup validation failed:", error instanceof Error ? error.message : error);
+    process.exit(1);
+  }
+
   console.log("[STARTUP] Environment:", env.NODE_ENV || "development");
   console.log("[STARTUP] Port:", Number(env.PORT || 8080));
   console.log("[STARTUP] Database name:", env.DATABASE_NAME || '(default)');
   console.log("[STARTUP] R2 prefix folder:", env.R2_PREFIX_FOLDER);
-  
+
   try {
     console.log("[DATABASE] Attempting to connect to MongoDB...");
     await connectDB();
@@ -19,8 +27,6 @@ async function startServer() {
   } catch (error) {
     console.error("[DATABASE] ✗ Failed to connect to MongoDB:", error instanceof Error ? error.message : error);
     console.error("[DATABASE] Continuing server startup - will retry connection on demand");
-    // Continue starting the server even if DB connection fails
-    // Health checks will still pass, and the app can retry the connection
   }
 
   const PORT = Number(env.PORT || 4000);

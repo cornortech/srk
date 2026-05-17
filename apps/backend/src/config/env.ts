@@ -4,6 +4,7 @@ type TEnv = {
   DATABASE_URL: string;
   DATABASE_NAME: string;
   IS_PROD: boolean;
+  PROD?: string;
   JWT_SECRET: string;
   FRONTEND_BASE_URL: string;
   TASK_FRONTEND_URL: string;
@@ -22,6 +23,8 @@ type TEnv = {
   // Firebase credentials removed - Cloudflare R2 is used instead
 };
 
+const parseBooleanEnv = (value?: string): boolean => value === 'true';
+
 const getDatabaseNameFromUrl = (databaseUrl: string) => {
   if (!databaseUrl) return '';
 
@@ -34,11 +37,12 @@ const getDatabaseNameFromUrl = (databaseUrl: string) => {
 };
 
 export const env: TEnv = {
-  NODE_ENV: process.env.NODE_ENV || '',
-  PORT: process.env.PORT || '',
+  NODE_ENV: process.env.NODE_ENV || 'development',
+  PORT: process.env.PORT || '4000',
   DATABASE_URL: process.env.DATABASE_URL || '',
   DATABASE_NAME: getDatabaseNameFromUrl(process.env.DATABASE_URL || ''),
-  IS_PROD: (process.env.IS_PROD === 'true') || process.env.PROD === 'srk',
+  IS_PROD: parseBooleanEnv(process.env.IS_PROD) || process.env.PROD === 'srk',
+  PROD: process.env.PROD,
   JWT_SECRET: process.env.JWT_SECRET || '',
   FRONTEND_BASE_URL: process.env.FRONTEND_BASE_URL || '',
   TASK_FRONTEND_URL: process.env.TASK_FRONTEND_URL || '',
@@ -48,18 +52,12 @@ export const env: TEnv = {
   COOKIE_DOMAIN: process.env.COOKIE_DOMAIN,
   APP_EMAIL: process.env.APP_EMAIL || '',
   SMTP_PW: process.env.SMTP_PW || '',
-  R2_ACCESS_KEY_ID:
-    process.env.R2_ACCESS_KEY_ID || 'daf464fc116a11847575b6fbfbac26a0',
-  R2_SECRET_ACCESS_KEY:
-    process.env.R2_SECRET_ACCESS_KEY ||
-    '6414fef2c8ca3715856b08ab2302d1d92e80b7cec32971acc0d85cef559fd4e4',
-  R2_ENDPOINT:
-    process.env.R2_ENDPOINT ||
-    'https://5f09c9e5753d5a473d39fed1135fef46.r2.cloudflarestorage.com',
-  R2_BUCKET: process.env.R2_BUCKET || 'srk',
-  CDN_BASE_URL: process.env.CDN_BASE_URL || 'https://cdn.thesrkuniversity.com',
-  R2_PREFIX_FOLDER:
-    (process.env.IS_PROD === 'true' || process.env.PROD === 'srk') ? 'srk' : 'dev',
+  R2_ACCESS_KEY_ID: process.env.R2_ACCESS_KEY_ID || '',
+  R2_SECRET_ACCESS_KEY: process.env.R2_SECRET_ACCESS_KEY || '',
+  R2_ENDPOINT: process.env.R2_ENDPOINT || '',
+  R2_BUCKET: process.env.R2_BUCKET || '',
+  CDN_BASE_URL: process.env.CDN_BASE_URL || '',
+  R2_PREFIX_FOLDER: (parseBooleanEnv(process.env.IS_PROD) || process.env.PROD === 'srk') ? 'srk' : 'dev',
   // Firebase config intentionally omitted
 };
 
@@ -69,6 +67,7 @@ export function validateEnv() {
     'DATABASE_URL',
     'JWT_SECRET',
     'FRONTEND_BASE_URL',
+    'WHITE_LISTED_ORIGINS',
     'APP_EMAIL',
     'SMTP_PW',
     'R2_ACCESS_KEY_ID',

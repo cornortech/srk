@@ -6,7 +6,7 @@ import { DashboardGlassCard } from '../ui/DashboardGlassCard';
 import MagneticButton from '../ui/DashboardMagneticButton';
 import { api } from '../../../../lib/api';
 import { useTaskAuthStore } from '../../../../store/useTaskAuthStore';
-import { useSRKFileUpload } from '@srk/shared/hooks';
+// Sending image data URLs to backend; backend middleware will upload to R2
 import { Task } from '../../types';
 
 interface VerificationUploadModalProps {
@@ -26,7 +26,8 @@ export const VerificationUploadModal: React.FC<
   const [preview, setPreview] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
-  const { uploadFile, overallProgress, activeUploads } = useSRKFileUpload('task');
+  const overallProgress = 0;
+  const activeUploads: any[] = [];
   const { taskUserID } = useTaskAuthStore();
   const submitAction = api.srkTask.srkTaskActionSubmission.useMutation();
 
@@ -65,26 +66,13 @@ export const VerificationUploadModal: React.FC<
     setUploadError(null);
 
     try {
-      const { key } = await uploadFile(
-        screenshot,
-        'image',
-        undefined, // onProgress callback
-        (error) => {
-          // Error callback
-          setUploadError(error);
-          addNotification(error, 'error');
-        },
-        {
-          keyPrefix: 'image-task-submission',
-        }
-      );
-
+      // Send the image data URL directly to backend; middleware will handle upload
       submitAction.mutate(
         {
           body: {
             actionTodoId: task.id,
             srkTaskUserId: taskUserID || '',
-            actionVerificationImageUrl: key,
+            actionVerificationImageUrl: preview, // data URL
           },
         },
         {
@@ -104,9 +92,9 @@ export const VerificationUploadModal: React.FC<
       );
     } catch (error: any) {
       setIsUploading(false);
-      const errorMsg = error.message || 'Upload failed';
+      const errorMsg = error.message || 'Submission failed';
       setUploadError(errorMsg);
-      addNotification(`Upload failed: ${errorMsg}`, 'error');
+      addNotification(`Submission failed: ${errorMsg}`, 'error');
     }
   };
 

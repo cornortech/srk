@@ -9,7 +9,6 @@ import { useMutation } from "@tanstack/react-query";
 import useAuthStore from "../../../store/useAuth";
 import { upsertKycDetailsApi } from "../../../lib/apiClient";
 import { TKyc } from "../../../lib/types/entities";
-import { useSRKFileUpload } from "@srk/shared/hooks";
 import { FileText, CheckCircle, Clock, AlertCircle } from "lucide-react";
 import { getUniversityAssetUrl } from "../../../../src/lib/cdn";
 
@@ -34,6 +33,17 @@ interface KYCFormProps {
   isLastTab?: boolean;
 }
 
+/**
+ * Convert File to data URL (base64)
+ */
+const fileToDataURL = (file: File): Promise<string> =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result as string);
+    reader.onerror = () => reject(new Error("Failed to read file"));
+    reader.readAsDataURL(file);
+  });
+
 export default function KYCForm({
   handleRefetch,
   newVerificationImageFile,
@@ -56,66 +66,27 @@ export default function KYCForm({
   const [backImage, setBackImage] = useState<File | null>(null);
   const frontInputRef = useRef<HTMLInputElement>(null);
   const backInputRef = useRef<HTMLInputElement>(null);
-  const [completedUploads, setCompletedUploads] = useState(0);
-  const [totalUploads, setTotalUploads] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState<Map<string, "pending" | "uploading" | "completed" | "error">>(new Map());
-  const [uploadedUrls, setUploadedUrls] = useState<string[]>([]);
   const [isSubmitted, setIsSubmitted] = useState(false);
-
-  // Use SRK file upload hook for Firebase storage
-  const {
-    uploadFile,
-    isUploading,
-    deleteMultipleFiles,
-  } = useSRKFileUpload("university-kyc");
-
-  // Helper function to convert base64 to File
-  const base64ToFile = (base64String: string, filename: string): File | null => {
-    try {
-      const arr = base64String.split(',');
-      const mime = arr[0].match(/:(.*?);/)?.[1] || 'image/png';
-      const bstr = atob(arr[1]);
-      const n = bstr.length;
-      const u8arr = new Uint8Array(n);
-      for (let i = 0; i < n; i++) {
-        u8arr[i] = bstr.charCodeAt(i);
-      }
-      return new File([u8arr], filename, { type: mime });
-    } catch (e) {
-      console.error('Error converting base64 to file:', e);
-      return null;
-    }
-  };
-
-  // Helper to update progress for a specific upload item
-  const updateUploadStatus = (itemName: string, status: "pending" | "uploading" | "completed" | "error") => {
-    setUploadProgress(prev => new Map(prev).set(itemName, status));
-  };
 
   const { show } = useAlert();
 
   const { mutate } = useMutation({
     mutationFn: async (data: {
-      frontUrl: string;
-      backUrl: string;
-      verificationImage: string;
-      leftThumbUrl?: string;
-      rightThumbUrl?: string;
-      signatureUrl?: string;
+      frontImage?: string;
+      backImage?: string;
+      verificationImage?: string;
+      leftThumbFingerprint?: string;
+      rightThumbFingerprint?: string;
+      signature?: string;
     }) => {
       const userId = userDetails?._id;
       if (!userId) throw new Error("User ID not found");
 
       const res = await upsertKycDetailsApi(userId, {
-        backImage: data.backUrl,
-        frontImage: data.frontUrl,
         documentType,
         documentNumber,
-        verificationImage: data.verificationImage,
-        leftThumbFingerprint: data.leftThumbUrl || leftThumbFingerprint,
-        rightThumbFingerprint: data.rightThumbUrl || rightThumbFingerprint,
-        signature: data.signatureUrl || signature,
+        ...data,
       });
       return res;
     },
@@ -123,153 +94,73 @@ export default function KYCForm({
       setLoading(false);
       setBackImage(null);
       setFrontImage(null);
-      setCompletedUploads(0);
-      setTotalUploads(0);
-      setUploadProgress(new Map());
-      setUploadedUrls([]);
       show("KYC details updated successfully", "success");
       setIsSubmitted(true);
       // Refetch user data to update the status
       await handleRefetch();
     },
-    onError: async (error) => {
-      console.error("API Error, rolling back uploads:", error);
-      
-      // Rollback: Delete all uploaded files from Firebase
-      if (uploadedUrls.length > 0) {
-        try {
-          show("Upload completed but API failed. Rolling back files...", "error");
-          await deleteMultipleFiles(uploadedUrls);
-          console.log("Successfully rolled back uploaded files");
-          show("Files removed from storage. Please try again.", "error");
-        } catch (deleteError) {
-          console.error("Error rolling back files:", deleteError);
-          show("Failed to remove files from storage. Please contact support.", "error");
-        }
-      } else {
-        show("Failed to update KYC details", "error");
-      }
-      
+    onError: (error) => {
+      console.error("API Error:", error);
+      show("Failed to update KYC details", "error");
       setLoading(false);
-      setCompletedUploads(0);
-      setTotalUploads(0);
-      setUploadProgress(new Map());
-      setUploadedUrls([]);
       handleRefetch();
     },
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    let frontUrlImage = kycDetails?.frontImage || "";
-    let backUrlImage = kycDetails?.backImage || "";
-    let verifiationImage = kycDetails?.verificationImage || "";
-    let leftThumbUrl = kycDetails?.leftThumbFingerprint || "";
-    let rightThumbUrl = kycDetails?.rightThumbFingerprint || "";
-    let signatureUrl = kycDetails?.signature || "";
+    
+    // Validate required fields
+    if (!frontImage && !kycDetails?.frontImage) {
+      show("Please upload front image", "error");
+      return;
+    }
+    
+    if (!backImage && !kycDetails?.backImage) {
+      show("Please upload back image", "error");
+      return;
+    }
+    
+    if (!newVerificationImageFile && !kycDetails?.verificationImage) {
+      show("Please upload verification image", "error");
+      return;
+    }
 
     setLoading(true);
-    const uploadedFileUrls: string[] = [];
-
-    // Define all items that need to be uploaded
-    const uploadItems = [
-      frontImage && { id: "front", file: frontImage, name: "Front Image" },
-      backImage && { id: "back", file: backImage, name: "Back Image" },
-      newVerificationImageFile && { id: "verification", file: newVerificationImageFile, name: "Verification Image" },
-      leftThumbFingerprint && !leftThumbFingerprint.startsWith("http") && { id: "leftThumb", file: base64ToFile(leftThumbFingerprint, "left-thumb.png"), name: "Left Thumb Fingerprint" },
-      rightThumbFingerprint && !rightThumbFingerprint.startsWith("http") && { id: "rightThumb", file: base64ToFile(rightThumbFingerprint, "right-thumb.png"), name: "Right Thumb Fingerprint" },
-      signature && !signature.startsWith("http") && { id: "signature", file: base64ToFile(signature, "signature.png"), name: "Digital Signature" }
-    ].filter((item) => {
-      if (!item) return false;
-      if (typeof item === 'string') return false;
-      return item.file !== null;
-    }) as Array<{ id: string; file: File; name: string }>;
-
-    setTotalUploads(uploadItems.length);
-    setCompletedUploads(0);
-    
-    // Initialize progress tracking
-    const progressMap = new Map<string, "pending" | "uploading" | "completed" | "error">();
-    uploadItems.forEach(item => {
-      progressMap.set(item.id, "pending");
-    });
-    setUploadProgress(progressMap);
 
     try {
-      // Upload all items sequentially with tracking
-      for (const item of uploadItems) {
-        if (item.file) {
-          updateUploadStatus(item.id, "uploading");
-          
-          try {
-            const { url, key } = await uploadFile(item.file, "image");
-            uploadedFileUrls.push(url);
-            
-            if (item.id === "front") frontUrlImage = key;
-            if (item.id === "back") backUrlImage = key;
-            if (item.id === "verification") verifiationImage = key;
-            if (item.id === "leftThumb") leftThumbUrl = key;
-            if (item.id === "rightThumb") rightThumbUrl = key;
-            if (item.id === "signature") signatureUrl = key;
-            
-            updateUploadStatus(item.id, "completed");
-            setCompletedUploads(prev => prev + 1);
-          } catch (uploadError) {
-            console.error(`Error uploading ${item.name}:`, uploadError);
-            updateUploadStatus(item.id, "error");
-            throw new Error(`Failed to upload ${item.name}`);
-          }
-        }
-      }
+      // Convert new images to data URLs
+      const frontImageDataURL = frontImage ? await fileToDataURL(frontImage) : undefined;
+      const backImageDataURL = backImage ? await fileToDataURL(backImage) : undefined;
+      const verificationImageDataURL = newVerificationImageFile ? await fileToDataURL(newVerificationImageFile) : undefined;
+      
+      // Convert optional biometric data from base64 strings to data URLs if they're new (not URLs)
+      const leftThumbFingerprintDataURL = leftThumbFingerprint && !leftThumbFingerprint.startsWith("http") && leftThumbFingerprint.startsWith("data:") 
+        ? leftThumbFingerprint 
+        : undefined;
+      const rightThumbFingerprintDataURL = rightThumbFingerprint && !rightThumbFingerprint.startsWith("http") && rightThumbFingerprint.startsWith("data:")
+        ? rightThumbFingerprint
+        : undefined;
+      const signatureDataURL = signature && !signature.startsWith("http") && signature.startsWith("data:")
+        ? signature
+        : undefined;
 
-      // All uploads successful, now call the API
-      if (frontUrlImage && backUrlImage && verifiationImage) {
-        setUploadedUrls(uploadedFileUrls);
-        
-        mutate({
-          backUrl: backUrlImage,
-          frontUrl: frontUrlImage,
-          verificationImage: verifiationImage,
-          leftThumbUrl,
-          rightThumbUrl,
-          signatureUrl,
-        });
-      } else {
-        // Clean up if required files are missing
-        if (uploadedFileUrls.length > 0) {
-          await deleteMultipleFiles(uploadedFileUrls);
-        }
-        
-        setLoading(false);
-        setCompletedUploads(0);
-        setTotalUploads(0);
-        setUploadProgress(new Map());
-        show(
-          "Please upload all the images: verification image, document front and document back",
-          "error"
-        );
-      }
+      // Send data to backend
+      mutate({
+        // Keep existing paths if not updating; send data URLs through the same fields for consistency
+        frontImage: frontImageDataURL ?? kycDetails?.frontImage,
+        backImage: backImageDataURL ?? kycDetails?.backImage,
+        verificationImage: verificationImageDataURL ?? kycDetails?.verificationImage,
+        leftThumbFingerprint:
+          leftThumbFingerprintDataURL ?? kycDetails?.leftThumbFingerprint,
+        rightThumbFingerprint:
+          rightThumbFingerprintDataURL ?? kycDetails?.rightThumbFingerprint,
+        signature: signatureDataURL ?? kycDetails?.signature,
+      });
     } catch (error) {
-      console.error("Upload error:", error);
-      
-      // Rollback: Delete all uploaded files if anything fails
-      if (uploadedFileUrls.length > 0) {
-        try {
-          show("Upload failed. Rolling back files...", "error");
-          await deleteMultipleFiles(uploadedFileUrls);
-          console.log("Successfully rolled back uploaded files");
-        } catch (deleteError) {
-          console.error("Error rolling back files:", deleteError);
-          show("Files could not be rolled back. Please contact support.", "error");
-        }
-      }
-      
+      console.error("Error preparing submission:", error);
+      show("Failed to process images", "error");
       setLoading(false);
-      setCompletedUploads(0);
-      setTotalUploads(0);
-      setUploadProgress(new Map());
-      setUploadedUrls([]);
-      show("Upload failed. Please try again.", "error");
     }
   };
 
@@ -292,7 +183,7 @@ export default function KYCForm({
     userDetails?.status === "KYC_VERIFICATION_PENDING" ||
     userDetails?.status === "PORTAL_ACTIVATED";
 
-  const isFormDisabled = disableForm || isUploading || loading;
+  const isFormDisabled = disableForm || loading;
 
 
   return (
@@ -490,84 +381,13 @@ export default function KYCForm({
           </div>
 
           {/* Upload Progress Display */}
-          {(isUploading || loading || uploadProgress.size > 0) && (
-            <div className="space-y-4 p-4 bg-zinc-900/50 border border-zinc-700 rounded-lg">
-              <h4 className="text-sm font-semibold text-white">Upload Progress</h4>
-              
-              <div className="space-y-3">
-                {/* Progress Bar */}
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs text-zinc-400">
-                      {completedUploads} of {totalUploads} uploaded
-                    </span>
-                    <span className="text-xs font-semibold text-blue-400">
-                      {totalUploads > 0 ? Math.round((completedUploads / totalUploads) * 100) : 0}%
-                    </span>
-                  </div>
-                  <div className="w-full bg-zinc-800 rounded-full h-2 overflow-hidden">
-                    <div
-                      className="bg-gradient-to-r from-blue-500 to-blue-600 h-full transition-all duration-300"
-                      style={{ width: totalUploads > 0 ? `${(completedUploads / totalUploads) * 100}%` : '0%' }}
-                    />
-                  </div>
+          {loading && (
+            <div className="space-y-2 p-4 bg-zinc-900/50 border border-zinc-700 rounded-lg">
+              <div className="flex items-center gap-2">
+                <div className="animate-spin">
+                  <Clock size={16} className="text-blue-400" />
                 </div>
-
-                {/* Upload Status Items */}
-                <div className="space-y-2 max-h-48 overflow-y-auto">
-                  {[
-                    { id: "front", label: "Front Image", visible: !!frontImage },
-                    { id: "back", label: "Back Image", visible: !!backImage },
-                    { id: "verification", label: "Face Verification Image", visible: !!newVerificationImageFile },
-                    { id: "leftThumb", label: "Left Thumb Fingerprint", visible: !!leftThumbFingerprint && !leftThumbFingerprint.startsWith("http") },
-                    { id: "rightThumb", label: "Right Thumb Fingerprint", visible: !!rightThumbFingerprint && !rightThumbFingerprint.startsWith("http") },
-                    { id: "signature", label: "Digital Signature", visible: !!signature && !signature.startsWith("http") }
-                  ].map(item => {
-                    const status = uploadProgress.get(item.id);
-                    
-                    if (!item.visible) return null;
-
-                    return (
-                      <div key={item.id} className="flex items-center gap-3 p-2 bg-zinc-800/50 rounded border border-zinc-700">
-                        {status === "completed" && (
-                          <>
-                            <CheckCircle size={16} className="text-emerald-400 flex-shrink-0" />
-                            <span className="text-xs text-emerald-300 flex-1">{item.label}</span>
-                            <span className="text-xs text-emerald-400 font-semibold">Done</span>
-                          </>
-                        )}
-                        {status === "uploading" && (
-                          <>
-                            <div className="animate-spin">
-                              <Clock size={16} className="text-blue-400 flex-shrink-0" />
-                            </div>
-                            <span className="text-xs text-blue-300 flex-1">{item.label}</span>
-                            <span className="text-xs text-blue-400 font-semibold">Uploading...</span>
-                          </>
-                        )}
-                        {status === "pending" && (
-                          <>
-                            <div className="w-4 h-4 rounded-full border-2 border-zinc-600 flex-shrink-0" />
-                            <span className="text-xs text-zinc-400 flex-1">{item.label}</span>
-                            <span className="text-xs text-zinc-500">Pending</span>
-                          </>
-                        )}
-                        {status === "error" && (
-                          <>
-                            <AlertCircle size={16} className="text-red-400 flex-shrink-0" />
-                            <span className="text-xs text-red-300 flex-1">{item.label}</span>
-                            <span className="text-xs text-red-400 font-semibold">Error</span>
-                          </>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Summary */}
-              <div className="pt-2 border-t border-zinc-700 text-xs text-zinc-400">
-                <p>Status: {isUploading ? "Uploading files..." : loading ? "Processing..." : completedUploads === totalUploads ? "All files uploaded successfully!" : "Ready to upload"}</p>
+                <span className="text-sm text-blue-300">Processing your KYC details...</span>
               </div>
             </div>
           )}
@@ -580,14 +400,9 @@ export default function KYCForm({
                   color="primary"
                   className="w-fit"
                   size="lg"
-                  disabled={isUploading || loading}
+                  disabled={loading}
                 >
-                  {isUploading
-                    ? `Uploading... ${completedUploads}/${totalUploads}`
-                    : loading
-                      ? "Processing..."
-                      : "Submit Document"
-                  }
+                  {loading ? "Processing..." : "Submit Document"}
                 </Button>
               </div>
 

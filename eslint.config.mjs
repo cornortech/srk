@@ -40,7 +40,12 @@ export default [
       '**/*.cjs',
       '**/*.mjs',
     ],
-    // Override or add rules here
-    rules: {},
+    // Relax some rules to reduce noisy warnings during local development
+    rules: {
+      // Ignore unused function arguments named req/res/next and variables prefixed with _
+      '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^(req|res|next|_)', varsIgnorePattern: '^_' }],
+      // Allow `any` in many places for quicker iteration; consider enabling later
+      '@typescript-eslint/no-explicit-any': 'warn',
+    },
   },
 ];

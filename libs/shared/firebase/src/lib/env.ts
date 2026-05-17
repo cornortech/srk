@@ -24,6 +24,14 @@ export const env = {
   },
 
   // Environment
+  // Build-time production flag (Vite)
   isProduction: import.meta.env.PROD,
+  // Runtime/configurable production flag (supports VITE_IS_PROD or IS_PROD)
+  isProdFlag:
+    import.meta.env?.VITE_IS_PROD === 'true' ||
+    import.meta.env?.VITE_IS_PROD === '1' ||
+    import.meta.env?.IS_PROD === 'true' ||
+    import.meta.env?.IS_PROD === '1' ||
+    Boolean(import.meta.env.PROD),
   mode: import.meta.env.MODE,
 } as const;

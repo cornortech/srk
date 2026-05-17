@@ -3,7 +3,7 @@ import { env } from "./env";
 
 const connectToDatabase = async (): Promise<void> => {
   try {
-    const uri = env.DATABASE_URL || process.env.DATABASE_URL || "";
+    const uri = env.DATABASE_URL;
     if (!uri) {
       console.error('[DATABASE] ERROR: DATABASE_URL environment variable is not set');
       throw new Error("DATABASE_URL is not set");

@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { Fingerprint, Upload, X, Check } from 'lucide-react';
 import { Button } from '@nextui-org/react';
+import { getUniversityAssetUrl } from '../../../lib/cdn';
 
 interface FingerprintCaptureProps {
   onSave: (leftThumb: string, rightThumb: string) => void;
@@ -28,8 +29,8 @@ export const FingerprintCapture: React.FC<FingerprintCaptureProps> = ({
   
   const [leftThumb, setLeftThumb] = useState<string>(leftThumbInitial);
   const [rightThumb, setRightThumb] = useState<string>(rightThumbInitial);
-  const [leftPreview, setLeftPreview] = useState<string>(leftThumbInitial);
-  const [rightPreview, setRightPreview] = useState<string>(rightThumbInitial);
+  const [leftPreview, setLeftPreview] = useState<string>(getUniversityAssetUrl(leftThumbInitial));
+  const [rightPreview, setRightPreview] = useState<string>(getUniversityAssetUrl(rightThumbInitial));
 
   const handleFileChange = async (
     e: React.ChangeEvent<HTMLInputElement>,

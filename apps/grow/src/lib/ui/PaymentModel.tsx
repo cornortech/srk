@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, CheckCircle, Upload } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { UserDetails } from '../types/types';
-import { useSRKFileUpload } from '@srk/shared/hooks';
 
 interface PaymentModalProps {
   isOpen: boolean;
@@ -13,7 +12,7 @@ interface PaymentModalProps {
   packageName: string;
   onSubmit: (data: {
     transactionId: string;
-    paymentProofUrl: string;
+    paymentProofImageDataURL: string;
     paymentMethod: string;
   }) => Promise<void>;
 }
@@ -36,7 +35,6 @@ const PaymentModel: React.FC<PaymentModalProps> = ({
   const [isProcessing, setIsProcessing] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const navigate = useNavigate();
-  const { uploadFile } = useSRKFileUpload('grow');
   const paymentMethods = [
     {
       id: 'esewa' as PaymentMethod,
@@ -82,11 +80,16 @@ const PaymentModel: React.FC<PaymentModalProps> = ({
 
     setIsProcessing(true);
     try {
-      const { key } = await uploadFile(screenshot, 'image');
+      const paymentProofImageDataURL = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.onerror = () => reject(new Error('Failed to read payment screenshot'));
+        reader.readAsDataURL(screenshot);
+      });
 
       await onSubmit({
         transactionId,
-        paymentProofUrl: key,
+        paymentProofImageDataURL,
         paymentMethod: selectedMethod,
       });
 

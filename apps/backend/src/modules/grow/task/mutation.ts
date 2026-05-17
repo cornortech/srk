@@ -11,6 +11,7 @@ import { srkTaskUserBalanceModel } from '../../../model/task/srkTaskUserBalanceM
 import { srkTaskEarningStatementModel } from '../../../model/task/srkTaskEarningStatementModel';
 import { srkTaskUserPaymentDetailsRequestModel } from '../../../model/task/srkTaskUserPaymentDetailsRequestModel';
 import mongoose from 'mongoose';
+import { cleanupDataUrlUploads } from '../../../utils/dataUrlUploadMiddleware';
 
 const acceptSrkTaskUserEarningsPayout: AppRouteImplementationOrOptions<
   typeof srkTaskContract.acceptSrkTaskUserEarningsPayout
@@ -402,7 +403,8 @@ const PACKAGE_LIMITS: Record<string, number> = {
 
 const srkTaskActionSubmission: AppRouteImplementationOrOptions<
   typeof srkTaskContract.srkTaskActionSubmission
-> = async ({ body }) => {
+> = async ({ body, req }) => {
+  let isSuccessful = false;
   try {
     const srkTaskUserExist = await srkTaskUserModel
       .findById(body.srkTaskUserId)
@@ -515,6 +517,8 @@ const srkTaskActionSubmission: AppRouteImplementationOrOptions<
       });
     }
 
+    isSuccessful = true;
+
     return {
       status: 201,
       body: {
@@ -533,6 +537,10 @@ const srkTaskActionSubmission: AppRouteImplementationOrOptions<
         message: `Internal server error: ${errorMessage}`,
       },
     };
+  } finally {
+    if (!isSuccessful) {
+      await cleanupDataUrlUploads(req);
+    }
   }
 };
 

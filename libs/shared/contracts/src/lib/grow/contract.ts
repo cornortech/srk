@@ -24,6 +24,7 @@ import {
   getAllSrkGrowAffiliateUsersQueryParams,
   getAllSrkGrowAffiliateUsersResponseSchema,
   getGrowAffiliateVerificationResponseSchema,
+  resubmitGrowVerificationSchema,
 } from './schema';
 import { ErrorSchema, SuccessSchema } from '../common';
 import { z } from 'zod';
@@ -183,12 +184,7 @@ export const growContract = c.router({
   resubmitGrowVerification: {
     method: 'PUT',
     path: '/resubmit-verification',
-    body: z.object({
-      userId: z.string(),
-      kycURLs: z.array(z.string()),
-      transactionId: z.string(),
-      paymentURL: z.string(),
-    }),
+    body: resubmitGrowVerificationSchema,
     responses: {
       200: SuccessSchema,
       400: ErrorSchema,

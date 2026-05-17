@@ -11,6 +11,52 @@ import AdminSrkBankService from '../../services/adminSrkBankService';
 import EmailService from '../../services/emailService';
 import { SrkUniversityBankModel } from '../../model/srkUniversityBankModel';
 import { financeContract } from '@srk/shared/contracts';
+import { cleanupDataUrlUploads } from '../../utils/dataUrlUploadMiddleware';
+import sharp from 'sharp';
+import { randomUUID } from 'crypto';
+import {
+  deleteFileFromR2,
+  downloadFileFromR2,
+  uploadFileToR2,
+} from '../../services/r2Service';
+
+const KYC_THUMBPRINT_FOLDER = 'university/kyc';
+
+async function readImageBufferFromAsset(
+  assetPathOrUrl: string
+): Promise<Buffer> {
+  if (/^https?:\/\//i.test(assetPathOrUrl)) {
+    const response = await fetch(assetPathOrUrl);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch image URL: ${response.status}`);
+    }
+    return Buffer.from(await response.arrayBuffer());
+  }
+
+  return downloadFileFromR2(assetPathOrUrl.replace(/^\/+/, ''));
+}
+
+async function enhanceAndUploadThumbprint(
+  assetPathOrUrl: string
+): Promise<string> {
+  const sourceBuffer = await readImageBufferFromAsset(assetPathOrUrl);
+
+  const enhancedBuffer = await sharp(sourceBuffer)
+    .resize({ width: 200, withoutEnlargement: true })
+    .grayscale()
+    .normalise()
+    .threshold(140)
+    .png({ quality: 100 })
+    .toBuffer();
+
+  const fileName = `university-kyc-thumb-enhanced-${Date.now()}-${randomUUID()}.png`;
+  return uploadFileToR2(
+    enhancedBuffer,
+    fileName,
+    KYC_THUMBPRINT_FOLDER,
+    'image/png'
+  );
+}
 
 const createBalancePayout: AppRouteImplementation<
   typeof financeContract.createBalancePayout
@@ -194,6 +240,7 @@ const upsertBankDetails: AppRouteImplementation<
 const upsertKYCDetails: AppRouteImplementation<
   typeof financeContract.upsertKYCDetails
 > = async ({ req, res }) => {
+  let isSuccessful = false;
   try {
     const userExist = await UserModel.findById(req.params.userId);
     if (!userExist) {
@@ -206,20 +253,81 @@ const upsertKYCDetails: AppRouteImplementation<
       };
     }
 
+    // Prepare KYC data object
+    // Note: Any data: URLs in req.body have already been uploaded to R2 by middleware
+    const kycData: Record<string, unknown> = {
+      documentType: req.body.documentType,
+      documentNumber: req.body.documentNumber,
+    };
+
+    // Assign image fields from already-processed body
+    if (req.body.frontImage) {
+      kycData.frontImage = req.body.frontImage;
+    }
+    if (req.body.backImage) {
+      kycData.backImage = req.body.backImage;
+    }
+    if (req.body.verificationImage) {
+      kycData.verificationImage = req.body.verificationImage;
+    }
+    const uploadedR2Keys = ((req as any).uploadedR2Keys ?? []) as string[];
+    const originalUploadedKeys = new Set(uploadedR2Keys);
+
+    let originalLeftThumbKey: string | undefined;
+    let originalRightThumbKey: string | undefined;
+
+    // Enhance thumbprints at KYC upsert time so PDF generation can use preprocessed images.
+    if (req.body.leftThumbFingerprint) {
+      const leftInput = String(req.body.leftThumbFingerprint);
+      originalLeftThumbKey = leftInput;
+      const enhancedLeft = await enhanceAndUploadThumbprint(leftInput);
+      uploadedR2Keys.push(enhancedLeft);
+      kycData.leftThumbFingerprint = enhancedLeft;
+    }
+
+    if (req.body.rightThumbFingerprint) {
+      const rightInput = String(req.body.rightThumbFingerprint);
+      originalRightThumbKey = rightInput;
+      const enhancedRight = await enhanceAndUploadThumbprint(rightInput);
+      uploadedR2Keys.push(enhancedRight);
+      kycData.rightThumbFingerprint = enhancedRight;
+    }
+
+    if (req.body.signature) {
+      kycData.signature = req.body.signature;
+    }
+
+    // Create or update KYC record
     const kycDetailExist = await KYCModel.findOne({
       userId: req.params.userId,
     });
 
     if (kycDetailExist) {
-      await KYCModel.findByIdAndUpdate(kycDetailExist._id, req.body);
+      await KYCModel.findByIdAndUpdate(kycDetailExist._id, kycData);
     } else {
       await KYCModel.create({
         userId: req.params.userId,
-        ...req.body,
+        ...kycData,
       });
     }
+
     userExist.status = 'KYC_VERIFICATION_PENDING';
     await userExist.save();
+
+    // Best-effort cleanup: remove just-uploaded raw thumb images after enhancement.
+    // Keep pre-existing references intact.
+    const cleanupCandidates = [
+      originalLeftThumbKey,
+      originalRightThumbKey,
+    ].filter(
+      (v): v is string =>
+        !!v && !/^https?:\/\//i.test(v) && originalUploadedKeys.has(v)
+    );
+    await Promise.allSettled(
+      cleanupCandidates.map((key) => deleteFileFromR2(key))
+    );
+
+    isSuccessful = true;
 
     return {
       status: 200,
@@ -229,7 +337,7 @@ const upsertKYCDetails: AppRouteImplementation<
       },
     };
   } catch (error) {
-    console.error(error);
+    console.error('upsertKYCDetails error:', error);
     return {
       status: 500,
       body: {
@@ -237,6 +345,10 @@ const upsertKYCDetails: AppRouteImplementation<
         message: 'Internal server error',
       },
     };
+  } finally {
+    if (!isSuccessful) {
+      await cleanupDataUrlUploads(req);
+    }
   }
 };
 

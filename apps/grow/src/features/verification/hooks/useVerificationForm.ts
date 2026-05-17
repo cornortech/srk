@@ -1,14 +1,12 @@
 import { useState, useEffect } from 'react';
 import { api } from '../../../lib/api';
-import { useSRKFileUpload } from '@srk/shared/hooks';
 
 export const useVerificationForm = (userId: string | undefined) => {
-  const { uploadFile, isUploading } = useSRKFileUpload('grow');
   
   const [showCamera, setShowCamera] = useState(false);
   const [capturedMedia, setCapturedMedia] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>('');
-  const [uploadedImageKey, setUploadedImageKey] = useState('');
+  const [uploadedImageDataURL, setUploadedImageDataURL] = useState('');
   const [mediaType, setMediaType] = useState<'photo' | 'video'>('photo');
   const [submissionStatus, setSubmissionStatus] = useState<
     'idle' | 'submitting' | 'success' | 'error'
@@ -44,7 +42,7 @@ export const useVerificationForm = (userId: string | undefined) => {
     affiliateVerificationMutation.mutate({
       body: {
         srkUniversityUserId: userId || '',
-          verificationImageUrl: uploadedImageKey,
+          verificationImageDataURL: uploadedImageDataURL,
       },
     });
   };
@@ -52,7 +50,7 @@ export const useVerificationForm = (userId: string | undefined) => {
   const handleResetForm = () => {
     setCapturedMedia(null);
     setPreviewUrl('');
-    setUploadedImageKey('');
+    setUploadedImageDataURL('');
     setSubmissionStatus('idle');
     setShowCamera(false);
     setIsResubmitting(true);
@@ -74,13 +72,15 @@ export const useVerificationForm = (userId: string | undefined) => {
             `capture.${mediaType === 'photo' ? 'jpg' : 'webm'}`
           );
 
-      const uploadedFile = await uploadFile(
-        file,
-        mediaType === 'photo' ? 'image' : 'video'
-      );
+      const imageDataUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.onerror = () => reject(new Error('Failed to read captured media'));
+        reader.readAsDataURL(file);
+      });
 
       setCapturedMedia(file);
-      setUploadedImageKey(uploadedFile.key);
+      setUploadedImageDataURL(imageDataUrl);
       setShowCamera(false);
       setSubmissionStatus('idle');
     } catch (err) {
@@ -119,11 +119,11 @@ export const useVerificationForm = (userId: string | undefined) => {
     setShowCamera,
     capturedMedia,
     previewUrl,
-    uploadedImageUrl,
+    uploadedImageDataURL,
     mediaType,
     submissionStatus,
     isResubmitting,
-    isUploading,
+    isUploading: false,
     checkLoading,
     affiliateResp,
     affiliateVerificationMutation,

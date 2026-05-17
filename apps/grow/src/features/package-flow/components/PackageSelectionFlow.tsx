@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import {
   EngagementType,
@@ -10,7 +10,6 @@ import { StepProgress } from './StepProgress';
 import { CheckoutForm } from './CheckoutForm';
 import { EngagementStep, OptionStep, PlatformStep } from './StepViews';
 import { api } from '../../../lib/api';
-import { useSRKFileUpload } from '@srk/shared/hooks';
 import {
   createGrowSocialMediaEnrollmentSchema,
   TCreateGrowSocialMediaEnrollment,
@@ -100,8 +99,15 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
     finalAmountAfterDiscount: number;
   } | null>(null);
 
-  const { uploadFile, isUploading: isUploadingKYC } = useSRKFileUpload('grow');
-  const uploadedKycUrlsRef = useRef<string[]>([]);
+  const isUploadingKYC = false;
+
+  const fileToDataURL = (file: File): Promise<string> =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.onerror = () => reject(new Error('Failed to read file'));
+      reader.readAsDataURL(file);
+    });
 
   const validatePromo = api.grow.validateGrowUserPromoCode.useMutation({
     onSuccess: (data) => {
@@ -291,31 +297,18 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
       }
     }
 
-    try {
-      const uploadedKycKeys: string[] = [];
-      for (const file of kycFiles) {
-        const result = await uploadFile(file, 'image');
-        uploadedKycKeys.push(result.key);
-      }
-
-      setValue('userData.kycURL', uploadedKycKeys);
-      uploadedKycUrlsRef.current = uploadedKycKeys;
-    } catch (error) {
-      console.error('File upload failed', error);
-      toast.error('Failed to upload KYC documents. Please try again.');
-      return;
-    }
-
     setShowPaymentModal(true);
   };
 
   const handlePaymentSubmit = async (paymentData: {
     transactionId: string;
-    paymentProofUrl: string;
+    paymentProofImageDataURL: string;
     paymentMethod: string;
   }) => {
     try {
-      const kycUrls = uploadedKycUrlsRef.current;
+      const kycImageDataURLs = await Promise.all(
+        kycFiles.map((file) => fileToDataURL(file))
+      );
       const packageType = selectedPackage?.packageTypes[selectedTypeIndex];
       const packageSubType =
         packageType?.packageSubTypes?.[selectedSubTypeIndex];
@@ -336,7 +329,7 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
             country: watch('userData.country'),
             gender: watch('userData.gender') as any,
             password: watch('userData.password'),
-            kycURL: kycUrls,
+            kycImageDataURLs,
             usedPromoCode: watch('userData.usedPromoCode') || undefined,
           },
           enrollmentData: {
@@ -347,7 +340,7 @@ export const PackageSelectionFlow: React.FC<PackageSelectionFlowProps> = ({
             socialMediaPlatform: selectedPlatform!,
           },
           paymentData: {
-            paymentURL: paymentData.paymentProofUrl,
+            paymentImageDataURL: paymentData.paymentProofImageDataURL,
             transactionId: paymentData.transactionId,
             paymentMethod:
               paymentData.paymentMethod === 'bank'

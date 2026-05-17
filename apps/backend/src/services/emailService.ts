@@ -1,4 +1,4 @@
-import { env } from "process";
+import { env } from "../config/env";
 
 import nodemailer, { SendMailOptions } from "nodemailer";
 
@@ -32,12 +32,12 @@ class EmailService {
       secure: true,
       auth: {
         pass: env.SMTP_PW,
-        user: process.env.APP_EMAIL,
+        user: env.APP_EMAIL,
       },
     });
     // Create personalized HTML content for each recipient
     const mailOptions: SendMailOptions = {
-      from: '"SRK University" <' + process.env.APP_EMAIL + ">",
+      from: '"SRK University" <' + env.APP_EMAIL + ">",
       to: email,
       subject: subject,
       text: subject,

@@ -4,7 +4,6 @@ type TEnv = {
   DATABASE_URL: string;
   DATABASE_NAME: string;
   IS_PROD: boolean;
-  PROD?: string;
   JWT_SECRET: string;
   FRONTEND_BASE_URL: string;
   TASK_FRONTEND_URL: string;
@@ -41,15 +40,14 @@ export const env: TEnv = {
   PORT: process.env.PORT || '4000',
   DATABASE_URL: process.env.DATABASE_URL || '',
   DATABASE_NAME: getDatabaseNameFromUrl(process.env.DATABASE_URL || ''),
-  IS_PROD: parseBooleanEnv(process.env.IS_PROD) || process.env.PROD === 'srk',
-  PROD: process.env.PROD,
+  IS_PROD: parseBooleanEnv(process.env.IS_PROD),
   JWT_SECRET: process.env.JWT_SECRET || '',
   FRONTEND_BASE_URL: process.env.FRONTEND_BASE_URL || '',
   TASK_FRONTEND_URL: process.env.TASK_FRONTEND_URL || '',
   GROW_FRONTEND_URL: process.env.GROW_FRONTEND_URL || '',
-  WHITE_LISTED_ORIGINS: process.env.WHITE_LISTED_ORIGINS || '',
   BANK_FRONTEND_URL: process.env.BANK_FRONTEND_URL || '',
   COOKIE_DOMAIN: process.env.COOKIE_DOMAIN,
+  WHITE_LISTED_ORIGINS: process.env.WHITE_LISTED_ORIGINS || '',
   APP_EMAIL: process.env.APP_EMAIL || '',
   SMTP_PW: process.env.SMTP_PW || '',
   R2_ACCESS_KEY_ID: process.env.R2_ACCESS_KEY_ID || '',
@@ -57,7 +55,7 @@ export const env: TEnv = {
   R2_ENDPOINT: process.env.R2_ENDPOINT || '',
   R2_BUCKET: process.env.R2_BUCKET || '',
   CDN_BASE_URL: process.env.CDN_BASE_URL || '',
-  R2_PREFIX_FOLDER: (parseBooleanEnv(process.env.IS_PROD) || process.env.PROD === 'srk') ? 'srk' : 'dev',
+  R2_PREFIX_FOLDER: parseBooleanEnv(process.env.IS_PROD) ? 'srk' : 'dev',
   // Firebase config intentionally omitted
 };
 

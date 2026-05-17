@@ -279,6 +279,9 @@ export type TGetAllUsersAdmin = {
     documentType: string;
     documentNumber: string;
     verificationImage: string;
+    leftThumbFingerprint?: string;
+    rightThumbFingerprint?: string;
+    signature?: string;
   } | null;
   paymentDetails: {
     paymentProofUrl: string;

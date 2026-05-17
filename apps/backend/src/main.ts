@@ -2,12 +2,22 @@ import dotenv from "dotenv";
 dotenv.config();
 import { app } from "./app";
 import connectDB from "./config/database";
+import { validateEnv } from "./config/env";
 
 
 async function startServer() {
   console.log("[STARTUP] Starting SRK Backend Server...");
   console.log("[STARTUP] Environment:", process.env.NODE_ENV || "development");
   console.log("[STARTUP] Port:", Number(process.env.PORT || 8080));
+  try {
+    // Validate required environment variables before proceeding
+    validateEnv();
+    console.log('[STARTUP] Environment validation passed');
+  } catch (err) {
+    console.error('[STARTUP] Environment validation failed:', err instanceof Error ? err.message : err);
+    console.error('[STARTUP] Aborting startup due to missing configuration');
+    process.exit(1);
+  }
   
   try {
     console.log("[DATABASE] Attempting to connect to MongoDB...");

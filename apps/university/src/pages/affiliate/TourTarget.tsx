@@ -85,6 +85,14 @@ export default function TourTargetsPage() {
         return +Math.min((currentAmount / targetAmount) * 100, 100).toFixed(2)
     }
 
+    function calculateDisplayAmounts(collectedAmount: number, targetAmount: number) {
+        // Cap earned at target amount
+        const displayedEarned = Math.min(collectedAmount, targetAmount);
+        // Set remaining to 0 if threshold reached
+        const displayedRemaining = Math.max(0, targetAmount - collectedAmount);
+        return { displayedEarned, displayedRemaining };
+    }
+
 
     return (
         <div className="min-h-screen w-full bg-background">
@@ -160,11 +168,11 @@ export default function TourTargetsPage() {
                                         </div>
                                         <Progress value={calculateTargetProgress(tour.collectedAmount, tour.targetAmount)} className="h-2" />
                                         <div className="flex justify-between text-xs text-muted-foreground">
-                                            <span>Earned - Nrs.{tour.collectedAmount}</span>
+                                            <span>Earned - Nrs.{calculateDisplayAmounts(tour.collectedAmount, tour.targetAmount).displayedEarned}</span>
                                             <span>Nrs.{tour.targetAmount.toLocaleString()}</span>
                                         </div>
                                         {/* {remainingAmount > 0 && ( */}
-                                        <p className="text-xs text-muted-foreground"> Nrs. {tour.targetAmount - tour.collectedAmount} remaining</p>
+                                        <p className="text-xs text-muted-foreground"> Nrs. {calculateDisplayAmounts(tour.collectedAmount, tour.targetAmount).displayedRemaining} remaining</p>
                                         {/* )} */}
                                     </div>
 

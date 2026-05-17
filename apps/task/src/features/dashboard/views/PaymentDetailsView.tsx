@@ -318,7 +318,7 @@ export const PaymentDetailsView: React.FC<PaymentDetailsViewProps> = ({
               )}
             </div>
           </div>
-          {!pendingRequest && (
+          {!pendingRequest && !approvedDetails && (
             <button
               onClick={() => setIsEditing(true)}
               className="mt-4 px-4 py-2 rounded-lg bg-[#B68938] hover:bg-[#E1BA73] text-black font-medium transition-colors"

@@ -43,6 +43,15 @@ export const CoinExchangeView: React.FC<CoinExchangeViewProps> = ({
       }
     );
 
+  const { data: paymentDetailsData } = api.srkTask.getUserPaymentDetails.useQuery(
+    ['getUserPaymentDetails', taskUserID],
+    { params: { userId: taskUserID || '' } },
+    {
+      enabled: !!taskUserID,
+      queryKey: ['getUserPaymentDetails', taskUserID || ''],
+    }
+  );
+
   // 2. Mutation for requesting payout
   const { mutate: requestPayout, isPending: isSubmitting } =
     api.srkTask.srkTaskEarningsPayoutRequest.useMutation({
@@ -69,6 +78,10 @@ export const CoinExchangeView: React.FC<CoinExchangeViewProps> = ({
     return payoutsData.body.data.some((p: any) => p.status === 'pending');
   }, [payoutsData]);
 
+  const approvedPaymentDetails = paymentDetailsData?.body?.approvedDetails;
+  const canUsePaymentDetails =
+    !!approvedPaymentDetails && approvedPaymentDetails.isActive === true;
+
   const sliderMax = eligible;
 
   const isValidAmount = exchangeAmount > 0 && exchangeAmount <= eligible;
@@ -77,6 +90,7 @@ export const CoinExchangeView: React.FC<CoinExchangeViewProps> = ({
   const canRequest =
     isValidAmount &&
     meetsMinimum &&
+    canUsePaymentDetails &&
     !isPayoutPending &&
     !isSubmitting;
 
@@ -239,11 +253,13 @@ export const CoinExchangeView: React.FC<CoinExchangeViewProps> = ({
                   {isSubmitting && (
                     <Loader2 className="animate-spin" size={18} />
                   )}
-                  {isPayoutPending
-                    ? 'Request Submitted ✓'
-                    : canRequest
-                      ? `Request Rs. ${netAmount.toFixed(2)} Payout`
-                      : 'Cannot Request Payout'}
+                  {!canUsePaymentDetails
+                    ? 'Payment details not approved'
+                    : isPayoutPending
+                      ? 'Request Submitted ✓'
+                      : canRequest
+                        ? `Request Rs. ${netAmount.toFixed(2)} Payout`
+                        : 'Cannot Request Payout'}
                 </MagneticButton>
 
                 {/* Validation Messages */}
@@ -259,6 +275,14 @@ export const CoinExchangeView: React.FC<CoinExchangeViewProps> = ({
                   <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
                     <p className="text-red-400 text-sm">
                       Cannot exceed eligible balance of {eligible.toLocaleString()} coins
+                    </p>
+                  </div>
+                )}
+
+                {!canUsePaymentDetails && (
+                  <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
+                    <p className="text-red-400 text-sm">
+                      Payout requests are disabled until your payment details are approved and active.
                     </p>
                   </div>
                 )}

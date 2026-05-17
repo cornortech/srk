@@ -3,6 +3,7 @@
 import { S3Client, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import { v4 as uuidv4 } from 'uuid';
 import { useState, useRef, useCallback } from 'react';
+import { env as sharedEnv } from '@srk/shared/firebase';
 
 // Cloudflare R2 S3 config
 const R2_ACCESS_KEY_ID = 'daf464fc116a11847575b6fbfbac26a0';
@@ -112,7 +113,8 @@ export const useSRKFileUpload = (appName: string) => {
       const extension = file.name.split('.').pop();
       const keyPrefix = options?.keyPrefix ?? fileType;
       const uniqueFileName = `${keyPrefix}-${uniqueSuffix}.${extension}`;
-      const envPrefix = import.meta.env?.VITE_FIREBASE_ENV === 'prod' ? 'prod' : 'local_temp';
+      // Use shared env helper to determine prod/dev
+      const envPrefix = sharedEnv.isProdFlag ? 'prod' : 'dev';
       const key = `${envPrefix}/${appName}/${keyPrefix}/${uniqueFileName}`;
 
       // Convert File/Blob to ArrayBuffer

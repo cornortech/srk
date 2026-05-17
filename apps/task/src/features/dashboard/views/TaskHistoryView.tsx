@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { format } from 'date-fns';
 import {
   AlertCircle,
@@ -11,6 +11,8 @@ import {
   History,
   ImageIcon,
   Loader2,
+  X,
+  Gift,
 } from 'lucide-react';
 import { DashboardGlassCard } from '../components/ui/DashboardGlassCard';
 import DashboardGradientText from '../components/ui/DashboardGradientText';
@@ -26,6 +28,9 @@ export const TaskHistoryView: React.FC = () => {
     'all' | 'pending' | 'approved' | 'rejected' | 'claimed'
   >('all');
   const [claimingSubmissionId, setClaimingSubmissionId] = useState<string | null>(null);
+  const [showConfirmationModal, setShowConfirmationModal] = useState(false);
+  const [showCongratulationModal, setShowCongratulationModal] = useState(false);
+  const [selectedSubmissionForClaim, setSelectedSubmissionForClaim] = useState<any>(null);
   const LIMIT = 8;
 
   const { data: submissionsRes, isLoading, refetch } =
@@ -51,6 +56,8 @@ export const TaskHistoryView: React.FC = () => {
         queryClient.invalidateQueries({ queryKey: ['getSrkTaskUserAnalytics', taskUserID || ''] });
         queryClient.invalidateQueries({ queryKey: ['getSrkTaskUserProfile', taskUserID || ''] });
         setClaimingSubmissionId(null);
+        setShowConfirmationModal(false);
+        setShowCongratulationModal(true);
       },
       onError: () => {
         setClaimingSubmissionId(null);
@@ -232,11 +239,8 @@ export const TaskHistoryView: React.FC = () => {
                             <button
                               type="button"
                               onClick={() => {
-                                setClaimingSubmissionId(item._id);
-                                claimCoinsMutation.mutate({
-                                  params: { submissionId: item._id },
-                                  body: {},
-                                });
+                                setSelectedSubmissionForClaim(item);
+                                setShowConfirmationModal(true);
                               }}
                               disabled={isClaiming}
                               className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-amber-500 text-black font-semibold hover:bg-amber-400 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
@@ -275,6 +279,153 @@ export const TaskHistoryView: React.FC = () => {
           </div>
         </div>
       </DashboardGlassCard>
+
+      {/* Confirmation Modal */}
+      <AnimatePresence>
+        {showConfirmationModal && selectedSubmissionForClaim && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+            onClick={() => setShowConfirmationModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-gradient-to-br from-zinc-900 to-black border border-white/10 rounded-2xl p-8 max-w-md w-full shadow-2xl"
+            >
+              <div className="flex justify-between items-start mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-full bg-amber-500/20 flex items-center justify-center">
+                    <Gift className="text-amber-400" size={24} />
+                  </div>
+                  <h2 className="text-2xl font-bold text-white">Claim Coins</h2>
+                </div>
+                <button
+                  onClick={() => setShowConfirmationModal(false)}
+                  className="text-zinc-400 hover:text-white transition-colors"
+                >
+                  <X size={24} />
+                </button>
+              </div>
+
+              <div className="space-y-4 mb-6">
+                <div className="p-4 bg-white/5 rounded-lg border border-white/10">
+                  <p className="text-sm text-zinc-400 mb-1">You will receive</p>
+                  <p className="text-3xl font-bold text-amber-400">
+                    {selectedSubmissionForClaim.growPackageTodoId?.enrollment?.amount || '100'} Coins
+                  </p>
+                </div>
+
+                <div className="p-4 bg-white/5 rounded-lg border border-white/10">
+                  <p className="text-sm text-zinc-400 mb-2">Task Details</p>
+                  <div className="space-y-2">
+                    <p className="text-white font-medium text-sm">
+                      {selectedSubmissionForClaim.description || 'Task Submission'}
+                    </p>
+                    {selectedSubmissionForClaim.growPackageTodoId?.enrollment?.socialMediaPlatform && (
+                      <p className="text-xs text-zinc-400">
+                        Platform:{' '}
+                        <span className="text-amber-400">
+                          {selectedSubmissionForClaim.growPackageTodoId.enrollment.socialMediaPlatform}
+                        </span>
+                      </p>
+                    )}
+                    <p className="text-xs text-zinc-500">
+                      Submitted: {format(new Date(selectedSubmissionForClaim.createdAt), 'MMM dd, HH:mm')}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowConfirmationModal(false)}
+                  className="flex-1 px-4 py-2.5 rounded-lg bg-white/10 text-white font-semibold hover:bg-white/20 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    setClaimingSubmissionId(selectedSubmissionForClaim._id);
+                    claimCoinsMutation.mutate({
+                      params: { submissionId: selectedSubmissionForClaim._id },
+                      body: {},
+                    });
+                  }}
+                  disabled={claimCoinsMutation.isPending}
+                  className="flex-1 px-4 py-2.5 rounded-lg bg-amber-500 text-black font-semibold hover:bg-amber-400 disabled:opacity-60 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+                >
+                  {claimCoinsMutation.isPending ? (
+                    <>
+                      <Loader2 size={18} className="animate-spin" />
+                      Claiming...
+                    </>
+                  ) : (
+                    'Claim Now'
+                  )}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Congratulation Modal */}
+      <AnimatePresence>
+        {showCongratulationModal && selectedSubmissionForClaim && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              className="bg-gradient-to-br from-amber-500/20 to-orange-600/20 border border-amber-500/30 rounded-2xl p-8 max-w-md w-full shadow-2xl text-center"
+            >
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
+                className="w-16 h-16 rounded-full bg-amber-500/20 flex items-center justify-center mx-auto mb-4"
+              >
+                <CheckCircle2 className="text-amber-400" size={40} />
+              </motion.div>
+
+              <h2 className="text-3xl font-bold text-white mb-2">Congratulations! 🎉</h2>
+              <p className="text-zinc-300 mb-6">
+                You have successfully claimed{' '}
+                <span className="text-amber-400 font-bold">
+                  {selectedSubmissionForClaim.growPackageTodoId?.enrollment?.amount || '100'} Coins
+                </span>
+              </p>
+
+              <div className="p-4 bg-white/5 rounded-lg border border-white/10 mb-6">
+                <p className="text-sm text-zinc-400 mb-1">Updated Balance</p>
+                <p className="text-2xl font-bold text-green-400">
+                  +{selectedSubmissionForClaim.growPackageTodoId?.enrollment?.amount || '100'} Added
+                </p>
+              </div>
+
+              <button
+                onClick={() => {
+                  setShowCongratulationModal(false);
+                  setSelectedSubmissionForClaim(null);
+                }}
+                className="w-full px-4 py-2.5 rounded-lg bg-amber-500 text-black font-semibold hover:bg-amber-400 transition-colors"
+              >
+                Done
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

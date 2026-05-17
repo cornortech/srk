@@ -13,6 +13,7 @@ import { adminModel } from '../../model/adminModel';
 import { balanceModel } from '../../model/balanceModel';
 import { FinanceService } from '../../services/financeService';
 import { modifyAndUploadAgreement } from '../../services/pdfService';
+import { getR2AssetUrl } from '../../services/r2Service';
 import moment from 'moment';
 import { CoursePaymentModel } from '../../model/coursePayment';
 import { methods } from '../../utils/methods';
@@ -548,13 +549,13 @@ const verifyKyc: AppRouteImplementationOrOptions<
 
     const courseEnrollAgreementUrl = await modifyAndUploadAgreement(
       userExist.firstName,
-      kycExist.verificationImage,
+      getR2AssetUrl(kycExist.verificationImage),
       moment(kycExist.createdAt).format('DD-MM-YYYY'),
       userExist.referralCode || '',
       templatePath,
-      kycExist.leftThumbFingerprint || undefined,
-      kycExist.rightThumbFingerprint || undefined,
-      kycExist.signature || undefined
+      kycExist.leftThumbFingerprint ? getR2AssetUrl(kycExist.leftThumbFingerprint) : undefined,
+      kycExist.rightThumbFingerprint ? getR2AssetUrl(kycExist.rightThumbFingerprint) : undefined,
+      kycExist.signature ? getR2AssetUrl(kycExist.signature) : undefined
     );
     
     console.log('=== KYC Verify - Biometric Data ===');

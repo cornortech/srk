@@ -62,3 +62,24 @@ export const env: TEnv = {
     (process.env.IS_PROD === 'true' || process.env.PROD === 'srk') ? 'srk' : 'dev',
   // Firebase config intentionally omitted
 };
+
+// Validates required environment variables and throws an error listing missing ones.
+export function validateEnv() {
+  const requiredKeys: Array<keyof TEnv> = [
+    'DATABASE_URL',
+    'JWT_SECRET',
+    'FRONTEND_BASE_URL',
+    'APP_EMAIL',
+    'SMTP_PW',
+    'R2_ACCESS_KEY_ID',
+    'R2_SECRET_ACCESS_KEY',
+    'R2_ENDPOINT',
+    'R2_BUCKET',
+    'CDN_BASE_URL',
+  ];
+
+  const missing = requiredKeys.filter((k) => !env[k]);
+  if (missing.length > 0) {
+    throw new Error(`Missing required environment variables: ${missing.join(', ')}`);
+  }
+}

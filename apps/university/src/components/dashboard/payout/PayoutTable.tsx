@@ -19,6 +19,7 @@ import { TBalancePayout } from "../../../lib/types";
 import useAuthStore from "../../../store/useAuth";
 import { Link } from "lucide-react";
 import moment from "moment";
+import { getUniversityAssetUrl } from "../../../lib/cdn";
 
 export default function PayoutTable() {
   const [page, setPage] = React.useState(1);
@@ -84,10 +85,13 @@ export default function PayoutTable() {
                   {columnKey === "createdAt" ? (
                     <>{moment(value).format("lll")}</>
                   ) : columnKey === "paymentProofUrl" ? (
-                    value && value.startsWith("https") ? (
-                      <Link onClick={() => window.open(value, "_blank")} />
+                    value ? (
+                      <Link 
+                        className="cursor-pointer hover:text-blue-500" 
+                        onClick={() => window.open(getUniversityAssetUrl(value), "_blank")} 
+                      />
                     ) : (
-                      ""
+                      "-"
                     )
                   ) : columnKey === "status" ? (
                     <Chip color={statusChipColor} variant="flat">
@@ -159,10 +163,13 @@ export default function PayoutTable() {
                   {columnKey === "createdAt" ? (
                     <>{moment(value).format("lll")}</>
                   ) : columnKey === "paymentProofUrl" ? (
-                    value && value.startsWith("https") ? (
-                      <Link onClick={() => window.open(value, "_blank")} />
+                    value ? (
+                      <Link 
+                        className="cursor-pointer hover:text-blue-500" 
+                        onClick={() => window.open(getUniversityAssetUrl(value), "_blank")} 
+                      />
                     ) : (
-                      ""
+                      "-"
                     )
                   ) : columnKey === "status" ? (
                     <Chip

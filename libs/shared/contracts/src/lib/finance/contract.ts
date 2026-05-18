@@ -127,7 +127,6 @@ export const financeContract = c.router({
     method: 'POST',
     path: '/finance/approveBalancePayout/:payoutId',
     body: z.object({
-      paymentProofUrl: z.string(),
       transactionNumber: z.string(),
       paymentMethod: z.string(),
     }),

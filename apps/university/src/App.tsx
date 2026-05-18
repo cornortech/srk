@@ -66,6 +66,7 @@ import Features from './pages/Features';
 import GettingStarted from './pages/GettingStarted';
 import Help from './pages/Help';
 import HowItWorks from './pages/HowItWorks';
+import PaymentGateway from './pages/PaymentGateway';
 import AdminTourTargetUserPage from './pages/admin/TourTargetUserPage';
 import SRKGrowPortal from './pages/dashboard/GrowViewPage';
 
@@ -86,6 +87,7 @@ const AppRouter = () => {
         { path: '/course/:courseId', element: <CourseDetails /> },
         { path: '/about', element: <AboutPage /> },
         { path: '/contact', element: <ContactPage /> },
+        { path: '/payment-gateway', element: <PaymentGateway /> },
         { path: '/blog', element: <Blog /> },
         { path: '/blog/:slug', element: <BlogPost /> },
         { path: '/faq', element: <FAQ /> },

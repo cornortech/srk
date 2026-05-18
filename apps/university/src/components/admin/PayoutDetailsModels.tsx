@@ -1,4 +1,3 @@
-import { useState } from "react";
 import {
   Button,
   Image,
@@ -19,7 +18,6 @@ import {
 } from "../../lib/apiClient";
 import { AxiosError } from "axios";
 import useAlert from "../../hooks/useAlert";
-import { useSRKFileUpload } from '@srk/shared/hooks';
 import { getUniversityAssetUrl } from "../../lib/cdn";
 
 type PayoutDetailsModalProps = {
@@ -35,10 +33,8 @@ export function PayoutDetailsModal({
   onClose,
   handleRefetch,
 }: PayoutDetailsModalProps) {
-  const [proofFile, setProofFile] = useState<File | null>(null);
   const [rejectionReason, setRejectionReason] = useState("");
   const [isRejecting, setIsRejecting] = useState(false);
-  const { uploadFile } = useSRKFileUpload('university');
   const [transactionNumber, setTransactionNumber] = useState("");
   const { show } = useAlert();
 
@@ -51,19 +47,13 @@ export function PayoutDetailsModal({
   });
 
   const { mutate: approveMutation } = useMutation({
-    mutationFn: (proofUrl: string) => {
-      return approveBalancePayoutApi(
-        payout._id,
-        proofUrl,
-        "bank",
-        transactionNumber
-      );
+    mutationFn: () => {
+      return approveBalancePayoutApi(payout._id, "bank", transactionNumber);
     },
     onSuccess: () => {
       handleRefetch();
       show("Payout approved successfully", "success");
       setRejectionReason("");
-      setProofFile(null);
       onClose();
     },
     onError: (error: AxiosError<{ message: string }>) => {
@@ -79,7 +69,6 @@ export function PayoutDetailsModal({
       handleRefetch();
       show("Payout rejected successfully", "success");
       setRejectionReason("");
-      setProofFile(null);
       onClose();
     },
     onError: (error: AxiosError<{ message: string }>) => {
@@ -87,19 +76,8 @@ export function PayoutDetailsModal({
       show(error.response?.data?.message || "Failed to reject", "error");
     },
   });
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      setProofFile(e.target.files[0]);
-    }
-  };
-
   const handleCompletePayout = async () => {
-    if (!proofFile) {
-      alert("Please upload payment proof");
-      return;
-    }
-    const { key } = await uploadFile(proofFile, "image");
-    await approveMutation(key);
+    approveMutation();
   };
 
   const handleRejectPayout = async () => {
@@ -135,26 +113,6 @@ export function PayoutDetailsModal({
               value={payoutUserDetails?.bankDetails?.bankName}
               readOnly
             />
-          </div>
-
-          {/* Payment Proof Upload */}
-          <div>
-            {payout.status === "approved" ? (
-              <Button
-                onPress={() => window.open(getUniversityAssetUrl(payout.paymentProofUrl))}
-                color="primary"
-              >
-                View Payment Proof
-              </Button>
-            ) : (
-              payout.status === "pending" && (
-                <Input
-                  label="Payment Proof"
-                  type="file"
-                  onChange={handleFileChange}
-                />
-              )
-            )}
           </div>
 
           {/* Rejection Reason (Only Visible When Rejecting) */}

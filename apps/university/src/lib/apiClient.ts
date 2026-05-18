@@ -380,14 +380,12 @@ export const getBalancePayoutByStatus = async (
 
 export const approveBalancePayoutApi = async (
   payoutId: string,
-  paymentProofUrl: string,
   paymentMethod: string,
   transactionNumber: string
 ) => {
   const response = await apiClient.post(
     `/finance/approveBalancePayout/${payoutId}`,
     {
-      paymentProofUrl,
       paymentMethod,
       transactionNumber,
     }

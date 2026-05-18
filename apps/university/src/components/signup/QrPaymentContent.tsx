@@ -2,6 +2,7 @@ import { useRef } from "react";
 import { TPaymentMethod } from "../../lib/types";
 import { Button, Input, Select, SelectItem } from "@nextui-org/react";
 import { TPaymentDetails } from "../SignUpComponent";
+import { getUniversityAssetUrl } from "../../lib/cdn";
 
 export const QrPaymentMethodContent = ({
   setPaymentDetails,
@@ -96,7 +97,7 @@ export const QrPaymentMethodContent = ({
             src={
               paymentProofUrl
                 ? URL.createObjectURL(paymentProofUrl)
-                : prevImageUrl || ""
+                : getUniversityAssetUrl(prevImageUrl || "")
             }
             alt="payment-proof"
             className="w-[200px] h-[200px] object-cover"

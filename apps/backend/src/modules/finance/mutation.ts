@@ -12,51 +12,6 @@ import EmailService from '../../services/emailService';
 import { SrkUniversityBankModel } from '../../model/srkUniversityBankModel';
 import { financeContract } from '@srk/shared/contracts';
 import { cleanupDataUrlUploads } from '../../utils/dataUrlUploadMiddleware';
-import sharp from 'sharp';
-import { randomUUID } from 'crypto';
-import {
-  deleteFileFromR2,
-  downloadFileFromR2,
-  uploadFileToR2,
-} from '../../services/r2Service';
-
-const KYC_THUMBPRINT_FOLDER = 'university/kyc';
-
-async function readImageBufferFromAsset(
-  assetPathOrUrl: string
-): Promise<Buffer> {
-  if (/^https?:\/\//i.test(assetPathOrUrl)) {
-    const response = await fetch(assetPathOrUrl);
-    if (!response.ok) {
-      throw new Error(`Failed to fetch image URL: ${response.status}`);
-    }
-    return Buffer.from(await response.arrayBuffer());
-  }
-
-  return downloadFileFromR2(assetPathOrUrl.replace(/^\/+/, ''));
-}
-
-async function enhanceAndUploadThumbprint(
-  assetPathOrUrl: string
-): Promise<string> {
-  const sourceBuffer = await readImageBufferFromAsset(assetPathOrUrl);
-
-  const enhancedBuffer = await sharp(sourceBuffer)
-    .resize({ width: 200, withoutEnlargement: true })
-    .grayscale()
-    .normalise()
-    .threshold(140)
-    .png({ quality: 100 })
-    .toBuffer();
-
-  const fileName = `university-kyc-thumb-enhanced-${Date.now()}-${randomUUID()}.png`;
-  return uploadFileToR2(
-    enhancedBuffer,
-    fileName,
-    KYC_THUMBPRINT_FOLDER,
-    'image/png'
-  );
-}
 
 const createBalancePayout: AppRouteImplementation<
   typeof financeContract.createBalancePayout
@@ -168,7 +123,7 @@ const createBalancePayout: AppRouteImplementation<
         message: 'Balance payout created successfully',
       },
     };
-  } catch (error) {
+  } catch(error) {
     console.error(error);
     return {
       status: 500,
@@ -270,27 +225,13 @@ const upsertKYCDetails: AppRouteImplementation<
     if (req.body.verificationImage) {
       kycData.verificationImage = req.body.verificationImage;
     }
-    const uploadedR2Keys = ((req as any).uploadedR2Keys ?? []) as string[];
-    const originalUploadedKeys = new Set(uploadedR2Keys);
 
-    let originalLeftThumbKey: string | undefined;
-    let originalRightThumbKey: string | undefined;
-
-    // Enhance thumbprints at KYC upsert time so PDF generation can use preprocessed images.
     if (req.body.leftThumbFingerprint) {
-      const leftInput = String(req.body.leftThumbFingerprint);
-      originalLeftThumbKey = leftInput;
-      const enhancedLeft = await enhanceAndUploadThumbprint(leftInput);
-      uploadedR2Keys.push(enhancedLeft);
-      kycData.leftThumbFingerprint = enhancedLeft;
+      kycData.leftThumbFingerprint = req.body.leftThumbFingerprint;
     }
 
     if (req.body.rightThumbFingerprint) {
-      const rightInput = String(req.body.rightThumbFingerprint);
-      originalRightThumbKey = rightInput;
-      const enhancedRight = await enhanceAndUploadThumbprint(rightInput);
-      uploadedR2Keys.push(enhancedRight);
-      kycData.rightThumbFingerprint = enhancedRight;
+      kycData.rightThumbFingerprint = req.body.rightThumbFingerprint;
     }
 
     if (req.body.signature) {
@@ -313,19 +254,6 @@ const upsertKYCDetails: AppRouteImplementation<
 
     userExist.status = 'KYC_VERIFICATION_PENDING';
     await userExist.save();
-
-    // Best-effort cleanup: remove just-uploaded raw thumb images after enhancement.
-    // Keep pre-existing references intact.
-    const cleanupCandidates = [
-      originalLeftThumbKey,
-      originalRightThumbKey,
-    ].filter(
-      (v): v is string =>
-        !!v && !/^https?:\/\//i.test(v) && originalUploadedKeys.has(v)
-    );
-    await Promise.allSettled(
-      cleanupCandidates.map((key) => deleteFileFromR2(key))
-    );
 
     isSuccessful = true;
 
@@ -384,7 +312,6 @@ export const approveBalancePayout: AppRouteImplementation<
 
     await balancePayoutModel.findByIdAndUpdate(balancePayoutExist._id, {
       status: 'approved',
-      paymentProofUrl: req.body.paymentProofUrl,
       paymentMethod: req.body.paymentMethod,
       transactionNumber: req.body.transactionNumber,
     });
@@ -424,7 +351,7 @@ export const approveBalancePayout: AppRouteImplementation<
         message: 'Balance payout approved successfully',
       },
     };
-  } catch (error) {
+  } catch {
     return {
       status: 500,
       body: {
@@ -520,7 +447,7 @@ export const rejectBalancePayout: AppRouteImplementation<
         message: 'Balance payout rejected successfully',
       },
     };
-  } catch (error) {
+  } catch {
     return {
       status: 500,
       body: {
@@ -614,7 +541,7 @@ const srkBankPayoutRequest: AppRouteImplementation<
         message: 'Balance payout request sent successfully',
       },
     };
-  } catch (error) {
+  } catch(error) {
     console.log(error);
     return {
       status: 500,
@@ -717,7 +644,7 @@ const createSrkUniversityPayout: AppRouteImplementation<
         message: 'Srk university payout request sent successfully',
       },
     };
-  } catch (error) {
+  } catch {
     return {
       status: 500,
       body: {
@@ -797,7 +724,7 @@ const srkBankPayoutRequestForAdmin: AppRouteImplementation<
         success: true,
       },
     };
-  } catch (error) {
+  } catch(error) {
     console.log(error);
     return {
       status: 500,
@@ -852,7 +779,7 @@ const approveBankDetails: AppRouteImplementation<
         message: 'Bank details approved successfully',
       },
     };
-  } catch (error) {
+  } catch {
     return {
       status: 500,
       body: {

@@ -67,7 +67,6 @@ const acceptSrkTaskUserEarningsPayout: AppRouteImplementationOrOptions<
 
     srkTaskUserPayoutExists.status = 'approved';
     srkTaskUserPayoutExists.transactionId = body.transactionId;
-    srkTaskUserPayoutExists.paymentScreenshotUrl = body.paymentScreenshotUrl;
 
     await srkTaskUserPayoutExists.save();
 

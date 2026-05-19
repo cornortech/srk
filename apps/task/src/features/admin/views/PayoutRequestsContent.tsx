@@ -9,7 +9,7 @@ import { getTaskAssetUrl } from '../../../lib/cdn';
 interface ApprovalModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: (transactionId: string, paymentScreenshotUrl: string) => void;
+  onConfirm: (transactionId: string) => void;
   payoutAmount: number;
   username: string;
   paymentDetails: {
@@ -30,13 +30,11 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
   paymentDetails,
 }) => {
   const [transactionId, setTransactionId] = useState('');
-  const [paymentScreenshotUrl, setPaymentScreenshotUrl] = useState('');
 
   const handleSubmit = () => {
-    if (transactionId.trim() && paymentScreenshotUrl.trim()) {
-      onConfirm(transactionId, paymentScreenshotUrl);
+    if (transactionId.trim()) {
+      onConfirm(transactionId);
       setTransactionId('');
-      setPaymentScreenshotUrl('');
     }
   };
 
@@ -130,19 +128,6 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
                   className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-[#E1BA73] transition-colors"
                 />
               </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Payment Screenshot URL *
-                </label>
-                <input
-                  type="url"
-                  value={paymentScreenshotUrl}
-                  onChange={(e) => setPaymentScreenshotUrl(e.target.value)}
-                  placeholder="Enter payment screenshot URL"
-                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-[#E1BA73] transition-colors"
-                />
-              </div>
             </div>
 
             <div className="flex gap-3">
@@ -154,7 +139,7 @@ const ApprovalModal: React.FC<ApprovalModalProps> = ({
               </button>
               <button
                 onClick={handleSubmit}
-                disabled={!transactionId.trim() || !paymentScreenshotUrl.trim()}
+                disabled={!transactionId.trim()}
                 className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded-lg transition-colors font-semibold"
               >
                 <Check size={16} className="inline mr-1" /> Confirm Approval
@@ -365,13 +350,12 @@ export const PayoutRequestsContent: React.FC = React.memo(() => {
   }, []);
 
   const handleConfirmApproval = useCallback(
-    (transactionId: string, paymentScreenshotUrl: string) => {
+    (transactionId: string) => {
       if (approvalModal.payoutId) {
         approveMutation.mutate({
           params: { payoutId: approvalModal.payoutId },
           body: {
             transactionId,
-            paymentScreenshotUrl,
           },
         });
       }

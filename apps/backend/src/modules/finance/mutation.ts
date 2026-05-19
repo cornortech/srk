@@ -314,6 +314,7 @@ export const approveBalancePayout: AppRouteImplementation<
       status: 'approved',
       paymentMethod: req.body.paymentMethod,
       transactionNumber: req.body.transactionNumber,
+      paymentProofUrl: req.body.paymentProofUrl,
     });
 
     const srkBankExist = await SrkBankModel.findOne({

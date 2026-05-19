@@ -16,9 +16,9 @@ export const app = express();
 app.set('trust proxy', 1);
 
 // Increase body size limits to allow base64 image uploads from the frontend
-app.use(express.json({ limit: '10mb' }));
+app.use(express.json({ limit: '150mb' }));
 app.use(cookieParser());
-app.use(express.urlencoded({ extended: true, limit: '10mb', parameterLimit: 100000 }));
+app.use(express.urlencoded({ extended: true, limit: '150mb', parameterLimit: 100000 }));
 
 const WHITE_LISTED_ORIGINS = env.WHITE_LISTED_ORIGINS
   ? env.WHITE_LISTED_ORIGINS.split(',')

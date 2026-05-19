@@ -120,3 +120,6 @@ export async function downloadFileFromR2(key: string): Promise<Buffer> {
     throw error;
   }
 }
+
+// Export s3Client for use in other services (like hlsService)
+export { s3Client };

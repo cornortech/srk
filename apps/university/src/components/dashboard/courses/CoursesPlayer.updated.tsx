@@ -163,7 +163,7 @@ export default function CoursePlayer() {
               <div className="absolute top-0 left-0 w-full h-full">
                 <HLSVideoPlayer
                   playlistUrl={getVideoSource(currentVideo)}
-                  poster={getUniversityAssetUrl(courseDetails?.image)}
+                  poster={getUniversityAssetUrl(courseDetails?.img)}
                   onError={handleVideoError}
                 />
               </div>
@@ -175,9 +175,10 @@ export default function CoursePlayer() {
                 controlsList="nodownload"
                 controls
                 preload="metadata"
-                onError={(e) => {
-                  // Range request errors are normal - ignore them
-                  console.warn("Video element error (may be normal):", e);
+                onError={() => {
+                  handleVideoError(
+                    new Error("Failed to load video. Check your connection.")
+                  );
                 }}
               />
             )

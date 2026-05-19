@@ -95,6 +95,7 @@ export type TCourseVideo = {
   videoUrl: string;
   duration: number;
   thumbnailUrl: string;
+  hlsPlaylistUrl?: string;  // ✅ HLS streaming playlist URL for adaptive bitrate streaming
   createdAt: Date;
   updatedAt: Date;
 };

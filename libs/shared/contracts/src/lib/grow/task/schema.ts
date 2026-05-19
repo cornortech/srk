@@ -322,7 +322,6 @@ export type TBulkRejectSrkTaskSubmissions = z.infer<
 
 export const acceptSrkTaskUserEarningsPayoutSchema = z.object({
   transactionId: z.string(),
-  paymentScreenshotUrl: z.string(),
 });
 
 export type TACeeptSrkTaskUSserEarningsPayout = z.infer<

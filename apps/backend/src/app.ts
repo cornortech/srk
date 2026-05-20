@@ -7,6 +7,7 @@ import swaggerApiDocs from './config/swagger';
 // import cronJobInit from './utils/cronjob';
 import { router } from './modules';
 import ssoRouter from './modules/sso/router';
+import { cloudflareStreamRouter } from './modules/video/cloudflare-stream.controller';
 import { apiContract } from '@srk/shared/contracts';
 import { JwtAuthMiddleware } from './utils/middleware';
 import { env } from './config/env';
@@ -57,6 +58,9 @@ app.use(
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerApiDocs));
 
 app.use(ssoRouter);
+
+// Cloudflare Stream video upload endpoints
+app.use('/api/cloudflare-stream', cloudflareStreamRouter);
 
 // Apply JWT middleware to protected tour endpoints
 app.use('/tour/targets', JwtAuthMiddleware);

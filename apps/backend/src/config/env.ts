@@ -19,6 +19,8 @@ type TEnv = {
   R2_BUCKET: string;
   CDN_BASE_URL: string;
   R2_PREFIX_FOLDER: string;
+  CLOUDFLARE_ACCOUNT_ID?: string;
+  CLOUDFLARE_API_TOKEN?: string;
   // Firebase credentials removed - Cloudflare R2 is used instead
 };
 
@@ -56,6 +58,8 @@ export const env: TEnv = {
   R2_BUCKET: process.env.R2_BUCKET || '',
   CDN_BASE_URL: process.env.CDN_BASE_URL || '',
   R2_PREFIX_FOLDER: parseBooleanEnv(process.env.IS_PROD) ? 'srk' : 'dev',
+  CLOUDFLARE_ACCOUNT_ID: process.env.CLOUDFLARE_ACCOUNT_ID,
+  CLOUDFLARE_API_TOKEN: process.env.CLOUDFLARE_API_TOKEN,
   // Firebase config intentionally omitted
 };
 

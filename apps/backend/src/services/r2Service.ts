@@ -19,6 +19,8 @@ const s3Client = new S3Client({
   forcePathStyle: true,
 });
 
+export { s3Client };
+
 /**
  * Upload a file to Cloudflare R2
  * @param fileBuffer - The file buffer to upload

@@ -7,18 +7,34 @@ import swaggerApiDocs from './config/swagger';
 // import cronJobInit from './utils/cronjob';
 import { router } from './modules';
 import ssoRouter from './modules/sso/router';
+import logRouter from './modules/logs/router';
 import { apiContract } from '@srk/shared/contracts';
 import { JwtAuthMiddleware } from './utils/middleware';
 import { env } from './config/env';
+import { setupConsoleInterception, requestLoggingMiddleware, errorLoggingMiddleware } from './utils/consoleInterception';
+import { globalErrorHandler, notFoundHandler, asyncHandler } from './utils/errorHandler';
+import { logger } from './services/loggerService';
 
 export const app = express();
 
 app.set('trust proxy', 1);
 
+// Setup console interception for logging
+setupConsoleInterception();
+
 // Increase body size limits to allow base64 image uploads from the frontend
 app.use(express.json({ limit: '150mb' }));
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true, limit: '150mb', parameterLimit: 100000 }));
+
+// Add request logging middleware
+app.use(requestLoggingMiddleware());
+
+// Add request context middleware (for error handling)
+app.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
+  (req as any).startTime = Date.now();
+  next();
+});
 
 const WHITE_LISTED_ORIGINS = env.WHITE_LISTED_ORIGINS
   ? env.WHITE_LISTED_ORIGINS.split(',')
@@ -56,6 +72,9 @@ app.use(
 
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerApiDocs));
 
+// Logging routes
+app.use('/api', logRouter);
+
 app.use(ssoRouter);
 
 // Apply JWT middleware to protected tour endpoints
@@ -64,5 +83,11 @@ app.use('/tour/targets', JwtAuthMiddleware);
 
 createExpressEndpoints(apiContract, router, app);
 // cronJobInit();
+
+// 404 Handler - must be before error handler
+app.use(notFoundHandler());
+
+// Global Error Handler - must be last
+app.use(globalErrorHandler());
 
 export default app;

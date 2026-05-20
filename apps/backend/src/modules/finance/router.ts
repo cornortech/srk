@@ -3,6 +3,7 @@ import { financeContract } from '@srk/shared/contracts';
 import { financeMutationHandler } from './mutation';
 import { financeQueryHandler } from './query';
 import { createDataUrlUploadMiddleware } from '../../utils/dataUrlUploadMiddleware';
+import { withErrorHandling } from '../../utils/tsRestErrorHandler';
 
 const s = initServer();
 
@@ -17,32 +18,32 @@ const kycFieldMappings = {
 };
 
 export const financeRouter = s.router(financeContract, {
-  getSrkBankDetailsForAdmin: financeQueryHandler.getSrkBankDetailsForAdmin,
-  createBalancePayout: financeMutationHandler.createBalancePayout,
-  getAllBalancePayoutOfUser: financeQueryHandler.getAllBalancePayoutOfUser,
-  upsertBankDetails: financeMutationHandler.upsertBankDetails,
+  getSrkBankDetailsForAdmin: withErrorHandling(financeQueryHandler.getSrkBankDetailsForAdmin),
+  createBalancePayout: withErrorHandling(financeMutationHandler.createBalancePayout),
+  getAllBalancePayoutOfUser: withErrorHandling(financeQueryHandler.getAllBalancePayoutOfUser),
+  upsertBankDetails: withErrorHandling(financeMutationHandler.upsertBankDetails),
   upsertKYCDetails: {
     middleware: [createDataUrlUploadMiddleware(kycFieldMappings)],
-    handler: financeMutationHandler.upsertKYCDetails,
+    handler: withErrorHandling(financeMutationHandler.upsertKYCDetails),
   },
-  getFinanceDetailsOfUser: financeQueryHandler.getFinanceDetailsOfUser,
-  getEarningLeaderboard: financeQueryHandler.getEarningLeaderboard,
+  getFinanceDetailsOfUser: withErrorHandling(financeQueryHandler.getFinanceDetailsOfUser),
+  getEarningLeaderboard: withErrorHandling(financeQueryHandler.getEarningLeaderboard),
   getAllBalancePayoutsByStatus:
-    financeQueryHandler.getAllBalancePayoutsByStatus,
-  approveBalancePayout: financeMutationHandler.approveBalancePayout,
-  rejectBalancePayout: financeMutationHandler.rejectBalancePayout,
-  getAdminEarningDetails: financeQueryHandler.getAdminEarningDetails,
-  getBankStatementOfUser: financeQueryHandler.getBankStatementOfUser,
-  srkBankPayoutRequest: financeMutationHandler.srkBankPayoutRequest,
-  getBankStatementForAdmin: financeQueryHandler.getBankStatementForAdmin,
-  createSrkUniversityPayout: financeMutationHandler.createSrkUniversityPayout,
+    withErrorHandling(financeQueryHandler.getAllBalancePayoutsByStatus),
+  approveBalancePayout: withErrorHandling(financeMutationHandler.approveBalancePayout),
+  rejectBalancePayout: withErrorHandling(financeMutationHandler.rejectBalancePayout),
+  getAdminEarningDetails: withErrorHandling(financeQueryHandler.getAdminEarningDetails),
+  getBankStatementOfUser: withErrorHandling(financeQueryHandler.getBankStatementOfUser),
+  srkBankPayoutRequest: withErrorHandling(financeMutationHandler.srkBankPayoutRequest),
+  getBankStatementForAdmin: withErrorHandling(financeQueryHandler.getBankStatementForAdmin),
+  createSrkUniversityPayout: withErrorHandling(financeMutationHandler.createSrkUniversityPayout),
   getAllSrkUniversityBankStatement:
-    financeQueryHandler.getAllSrkUniversityBankStatement,
+    withErrorHandling(financeQueryHandler.getAllSrkUniversityBankStatement),
   srkBankPayoutRequestForAdmin:
-    financeMutationHandler.srkBankPayoutRequestForAdmin,
-  approveBankDetails: financeMutationHandler.approveBankDetails,
-  getBankTable: financeQueryHandler.getBankTable,
-  rejectBankRequest: financeMutationHandler.rejectBankRequest,
-  getTeamCashflowOfUser: financeQueryHandler.getTeamCashflowOfUser,
-  getSrkBonusFlowForAdmin: financeQueryHandler.getSrkBonusFlowForAdmin,
+    withErrorHandling(financeMutationHandler.srkBankPayoutRequestForAdmin),
+  approveBankDetails: withErrorHandling(financeMutationHandler.approveBankDetails),
+  getBankTable: withErrorHandling(financeQueryHandler.getBankTable),
+  rejectBankRequest: withErrorHandling(financeMutationHandler.rejectBankRequest),
+  getTeamCashflowOfUser: withErrorHandling(financeQueryHandler.getTeamCashflowOfUser),
+  getSrkBonusFlowForAdmin: withErrorHandling(financeQueryHandler.getSrkBonusFlowForAdmin),
 });

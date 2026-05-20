@@ -69,6 +69,7 @@ import HowItWorks from './pages/HowItWorks';
 import PaymentGateway from './pages/PaymentGateway';
 import AdminTourTargetUserPage from './pages/admin/TourTargetUserPage';
 import SRKGrowPortal from './pages/dashboard/GrowViewPage';
+import LogsPage from './pages/admin/Logs';
 
 const AppRouter = () => {
   const router = createBrowserRouter([
@@ -221,6 +222,10 @@ const AppRouter = () => {
         {
           path: 'settings',
           element: <AdminSettings />,
+        },
+        {
+          path: 'logs',
+          element: <LogsPage />,
         },
       ],
     },

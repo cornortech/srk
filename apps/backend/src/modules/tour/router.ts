@@ -1,10 +1,12 @@
 import { initServer } from '@ts-rest/express';
 import { tourQuery } from './query';
 import { tourContract } from '@srk/shared/contracts';
+import { withErrorHandling } from '../../utils/tsRestErrorHandler';
+
 const s = initServer();
 
 export const tourRouter = s.router(tourContract, {
-  getUserTourTargets: tourQuery.getUserTourTargets,
-  getTourTargets: tourQuery.getTourTargets,
-  getActiveTourAchievements: tourQuery.getActiveTourAchievements,
+  getUserTourTargets: withErrorHandling(tourQuery.getUserTourTargets),
+  getTourTargets: withErrorHandling(tourQuery.getTourTargets),
+  getActiveTourAchievements: withErrorHandling(tourQuery.getActiveTourAchievements),
 });

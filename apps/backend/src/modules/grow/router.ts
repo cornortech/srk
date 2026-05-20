@@ -2,51 +2,52 @@ import { initServer } from '@ts-rest/express';
 import { growContract } from '@srk/shared/contracts';
 import { growMutationHandler } from './mutation';
 import { growQueryHandler } from './query';
+import { withErrorHandling } from '../../utils/tsRestErrorHandler';
 
 const s = initServer();
 
 export const growRouter = s.router(growContract, {
   getAllGrowSocialMediaEnrollement:
-    growQueryHandler.getAllSrkGrowEnrollmentUser,
+    withErrorHandling(growQueryHandler.getAllSrkGrowEnrollmentUser),
   getGrowSocialMediaEnrollmentById:
-    growQueryHandler.getSrkGrowEnrollmentUserById,
-  getAllSrkGrowUsers: growQueryHandler.getAllSrkGrowUsers,
-  getAllSrkGrowAffiliateUsers: growQueryHandler.getAllSrkGrowAffiliateUsers,
+    withErrorHandling(growQueryHandler.getSrkGrowEnrollmentUserById),
+  getAllSrkGrowUsers: withErrorHandling(growQueryHandler.getAllSrkGrowUsers),
+  getAllSrkGrowAffiliateUsers: withErrorHandling(growQueryHandler.getAllSrkGrowAffiliateUsers),
   createGrowSocialMediaEnrollment:
-    growMutationHandler.createGrowSocialMediaEnrollment,
-  validateGrowUserPromoCode: growMutationHandler.validateGrowUserPromoCode,
+    withErrorHandling(growMutationHandler.createGrowSocialMediaEnrollment),
+  validateGrowUserPromoCode: withErrorHandling(growMutationHandler.validateGrowUserPromoCode),
   acceptSocialGrowEnrollmentRequest:
-    growMutationHandler.acceptSocialGrowEnrollmentRequest,
+    withErrorHandling(growMutationHandler.acceptSocialGrowEnrollmentRequest),
   rejectSocialGrowEnrollmentRequest:
-    growMutationHandler.rejectSocialGrowEnrollmentRequest,
-  getSrkGrowProfile: growQueryHandler.getSrkGrowProfile,
-  getGrowAffiliateUser: growQueryHandler.getGrowAffiliateUser,
-  resubmitGrowVerification: growMutationHandler.resubmitGrowVerification,
-  createGrowSocialMediaTasks: growMutationHandler.createGrowSocialMediaTasks,
+    withErrorHandling(growMutationHandler.rejectSocialGrowEnrollmentRequest),
+  getSrkGrowProfile: withErrorHandling(growQueryHandler.getSrkGrowProfile),
+  getGrowAffiliateUser: withErrorHandling(growQueryHandler.getGrowAffiliateUser),
+  resubmitGrowVerification: withErrorHandling(growMutationHandler.resubmitGrowVerification),
+  createGrowSocialMediaTasks: withErrorHandling(growMutationHandler.createGrowSocialMediaTasks),
   approveSrkGrowAffiliateVerificationRequest:
-    growMutationHandler.approveSrkGrowAffiliateVerificationRequest,
+    withErrorHandling(growMutationHandler.approveSrkGrowAffiliateVerificationRequest),
   rejectSrkGrowAffiliateVerificationRequest:
-    growMutationHandler.rejectSrkGrowAffiliateVerificationRequest,
+    withErrorHandling(growMutationHandler.rejectSrkGrowAffiliateVerificationRequest),
   getAllSrkGrowAffiliateVerificationRequest:
-    growQueryHandler.getAllSrkGrowAffiliateVerificationRequest,
+    withErrorHandling(growQueryHandler.getAllSrkGrowAffiliateVerificationRequest),
   srkGrowAffiliateVerificationRequest:
-    growMutationHandler.srkGrowAffiliateVerificationRequest,
+    withErrorHandling(growMutationHandler.srkGrowAffiliateVerificationRequest),
 
   // Affiliate Earning Payout Endpoints
   createGrowSrkAffiliateEarningPayoutRequest:
-    growMutationHandler.createGrowSrkAffiliateEarningPayoutRequest,
+    withErrorHandling(growMutationHandler.createGrowSrkAffiliateEarningPayoutRequest),
   acceptGrowSrkAffiliateEarningPayoutRequestByAdmin:
-    growMutationHandler.acceptGrowSrkAffiliateEarningPayoutRequestByAdmin,
+    withErrorHandling(growMutationHandler.acceptGrowSrkAffiliateEarningPayoutRequestByAdmin),
   rejectGrowSrkAffiliateEarningPayoutRequestByAdmin:
-    growMutationHandler.rejectGrowSrkAffiliateEarningPayoutRequestByAdmin,
+    withErrorHandling(growMutationHandler.rejectGrowSrkAffiliateEarningPayoutRequestByAdmin),
   getSrkGrowAffiliateEarningPayoutRequestByAdmin:
-    growQueryHandler.getSrkGrowAffiliateEarningPayoutRequestByAdmin,
+    withErrorHandling(growQueryHandler.getSrkGrowAffiliateEarningPayoutRequestByAdmin),
   getSrkGrowAffiliateEarningPayoutRequestByUser:
-    growQueryHandler.getSrkGrowAffiliateEarningPayoutRequestByUser,
+    withErrorHandling(growQueryHandler.getSrkGrowAffiliateEarningPayoutRequestByUser),
   getSrkGrowAffiliateVerificationRequest:
-    growQueryHandler.getSrkGrowAffiliateVerificationRequest,
-  getTaskMonitoring: growQueryHandler.getTaskMonitoring,
+    withErrorHandling(growQueryHandler.getSrkGrowAffiliateVerificationRequest),
+  getTaskMonitoring: withErrorHandling(growQueryHandler.getTaskMonitoring),
   toggleEnrollmentActiveStatus:
-    growMutationHandler.toggleEnrollmentActiveStatus,
-  getGlobalOverview: growQueryHandler.getGlobalOverview,
+    withErrorHandling(growMutationHandler.toggleEnrollmentActiveStatus),
+  getGlobalOverview: withErrorHandling(growQueryHandler.getGlobalOverview),
 });

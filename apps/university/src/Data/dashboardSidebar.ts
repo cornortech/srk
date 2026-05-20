@@ -21,6 +21,7 @@ import {
   Undo2,
   Group,
   Settings,
+  Activity,
 } from 'lucide-react';
 
 export type TSidebarItem = {
@@ -151,6 +152,11 @@ export const AdminSidebarItems: TSidebarItem[] = [
     title: 'Settings',
     icon: Settings,
     href: '/admin/settings',
+  },
+  {
+    title: 'System Logs',
+    icon: Activity,
+    href: '/admin/logs',
   },
 ];
 

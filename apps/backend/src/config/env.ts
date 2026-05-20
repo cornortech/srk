@@ -40,7 +40,7 @@ export const env: TEnv = {
   PORT: process.env.PORT || '4000',
   DATABASE_URL: process.env.DATABASE_URL || '',
   DATABASE_NAME: getDatabaseNameFromUrl(process.env.DATABASE_URL || ''),
-  IS_PROD: parseBooleanEnv(process.env.IS_PROD),
+  IS_PROD: process.env.NODE_ENV === 'production',
   JWT_SECRET: process.env.JWT_SECRET || '',
   FRONTEND_BASE_URL: process.env.FRONTEND_BASE_URL || '',
   TASK_FRONTEND_URL: process.env.TASK_FRONTEND_URL || '',
@@ -55,7 +55,7 @@ export const env: TEnv = {
   R2_ENDPOINT: process.env.R2_ENDPOINT || '',
   R2_BUCKET: process.env.R2_BUCKET || '',
   CDN_BASE_URL: process.env.CDN_BASE_URL || '',
-  R2_PREFIX_FOLDER: parseBooleanEnv(process.env.IS_PROD) ? 'srk' : 'dev',
+  R2_PREFIX_FOLDER: process.env.NODE_ENV === 'production' ? 'srk' : 'dev',
   // Firebase config intentionally omitted
 };
 

@@ -8,6 +8,8 @@ export const MIME_EXTENSION_MAP: Record<string, string> = {
   'image/png': 'png',
   'image/webp': 'webp',
   'image/gif': 'gif',
+  'image/heic': 'heic',
+  'image/heif': 'heif',
 };
 
 /**
@@ -17,15 +19,21 @@ export const MIME_EXTENSION_MAP: Record<string, string> = {
  * @throws Error if data URL is invalid or unsupported format
  */
 export const parseImageDataUrl = (dataUrl: string) => {
-  const match = dataUrl.match(/^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/);
+  // Trim whitespace and validate input
+  if (!dataUrl || typeof dataUrl !== 'string') {
+    throw new Error('Invalid image data URL: empty or not a string');
+  }
+
+  const trimmedUrl = dataUrl.trim();
+  const match = trimmedUrl.match(/^data:(image\/[a-zA-Z0-9.\-+]+);base64,(.+)$/i);
 
   if (!match) {
-    throw new Error('Invalid image data URL');
+    throw new Error('Invalid image data URL: must be in format "data:image/<type>;base64,<base64data>"');
   }
 
   const contentType = match[1].toLowerCase();
   if (!MIME_EXTENSION_MAP[contentType]) {
-    throw new Error(`Unsupported image type: ${contentType}`);
+    throw new Error(`Unsupported image type: ${contentType}. Supported formats: ${Object.keys(MIME_EXTENSION_MAP).join(', ')}`);
   }
 
   const buffer = Buffer.from(match[2], 'base64');

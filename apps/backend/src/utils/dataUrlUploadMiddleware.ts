@@ -34,6 +34,11 @@ export const createDataUrlUploadMiddleware = (
           const mapping = fieldMappings[key];
           if (mapping) {
             try {
+              // Debug logging for data URL fields
+              const urlPreview = (value as string).substring(0, 100);
+              const urlLength = (value as string).length;
+              console.log(`Processing ${key}: length=${urlLength}, preview=${urlPreview}...`);
+              
               const r2Key = await uploadImageDataUrlToR2(
                 value,
                 mapping.folder,

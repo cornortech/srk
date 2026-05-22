@@ -318,36 +318,46 @@ export async function generateAndUploadCertificate(
     const currentYear = new Date().getFullYear();
     const batch = `B-${currentYear}`;
 
-    // Add participant name (centered near top)
+    const fontBold = await pdfDoc.embedFont('Helvetica-Bold');
+    const fontRegular = await pdfDoc.embedFont('Helvetica');
+
+    const nameSize = 22;
+    const nameWidth = fontBold.widthOfTextAtSize(userFullName, nameSize);
+    
+    // Add participant name (centered above the line)
     firstPage.drawText(userFullName, {
-      x: pageWidth / 2 - userFullName.length * 4, // Approximate centering
-      y: pageHeight - 320,
-      size: 18,
-      color: rgb(0, 0, 0),
+      x: pageWidth / 2 - nameWidth / 2,
+      y: 460,
+      size: nameSize,
+      color: rgb(1, 1, 1),
+      font: fontBold,
     });
 
     // Add "ISSUED ON:" date in the bottom section
     firstPage.drawText(formattedDate, {
-      x: 180,
-      y: 180,
+      x: 135,
+      y: 200,
       size: 11,
-      color: rgb(0, 0, 0),
+      color: rgb(1, 1, 1),
+      font: fontRegular,
     });
 
     // Add batch/cohort (current year)
     firstPage.drawText(batch, {
-      x: 380,
-      y: 180,
+      x: 360,
+      y: 200,
       size: 11,
-      color: rgb(0, 0, 0),
+      color: rgb(1, 1, 1),
+      font: fontRegular,
     });
 
-    // Add participant ID (random number)
+    // Add participant ID
     firstPage.drawText(participantId, {
-      x: 650,
-      y: 180,
+      x: 525,
+      y: 200,
       size: 11,
-      color: rgb(0, 0, 0),
+      color: rgb(1, 1, 1),
+      font: fontRegular,
     });
 
     // Save the modified certificate locally and upload to Cloudflare R2

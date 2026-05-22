@@ -98,13 +98,12 @@ const sendCompletionCertificates = async () => {
 
     console.log('Looking for KYC approvals from:', tenDaysAgo);
 
-    // Find all KYCs that were approved exactly 10 days ago (with some tolerance)
-    // Status should be approved and kyc_approved_date should be around 10 days ago
+    // Find all KYCs that were approved 10 or more days ago
+    // Status should be approved and kyc_approved_date should be at least 10 days ago
     const kycRecords = await KYCModel.find({
       status: 'approved',
       kyc_approved_date: {
-        $gte: new Date(tenDaysAgo.getTime() - 24 * 60 * 60 * 1000), // 11 days ago
-        $lte: new Date(tenDaysAgo.getTime() + 24 * 60 * 60 * 1000), // 9 days ago
+        $lte: tenDaysAgo, // Approved 10 or more days ago
       },
     });
 

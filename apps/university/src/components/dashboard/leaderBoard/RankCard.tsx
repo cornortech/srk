@@ -55,7 +55,7 @@ export const RankCard = ({ users }: IRankCardProps) => {
                 <p>{performer.country}</p>
               </div>
               <div>
-                <p className="text-gray-400">Amount</p>
+                <p className="text-gray-400">Credits</p>
                 <p>{performer.totalEarnings}</p>
               </div>
             </div>

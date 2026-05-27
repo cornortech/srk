@@ -47,7 +47,7 @@ export default function AffiliateTimeline() {
       <div className="mx-auto px-4 text-center space-y-4">
         <p className="text-sm text-gray-400">5 Step Easy Process</p>
         <h1 className="text-4xl font-bold text-center mb-16">
-          Affiliate <span className="text-primary">Timeline</span>
+          Partner <span className="text-primary">Journey</span>
         </h1>
 
         <div className="relative max-w-5xl mx-auto">

@@ -70,7 +70,7 @@ export default function ProfileSection({
               endContent={<ArrowUpRight size={20} />}
               onPress={() => setWithDrawModalOpen(true)}
             >
-              Withdraw Funds
+              Transfer Credits
             </Button>
           </div>
         )}

@@ -1,10 +1,17 @@
-import { Check } from "lucide-react";
+import { Check, ArrowRight } from "lucide-react";
 import { AnimationButton } from "../ReusableComponents";
 import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { accessFeatures } from "../../Data/AccessFeatures";
 import { getUniversityAssetUrl } from "../../lib/cdn";
 
 
+
+const featureRoutes = [
+  { route: "/learn/structured-learning", caption: "how the curriculum is organised" },
+  { route: "/learn/live-mentorship", caption: "what live sessions look like" },
+  { route: "/learn/achiever-community", caption: "how the community drives your growth" },
+];
 
 export default function YouWillGetAccess() {
   const navigate = useNavigate();
@@ -42,6 +49,15 @@ export default function YouWillGetAccess() {
                     ))}
                   </ul>
                 )}
+                <div className="flex flex-col items-start gap-1 pt-2">
+                  <Link
+                    to={featureRoutes[index].route}
+                    className="group inline-flex items-center gap-2 px-5 py-2.5 border border-primary/40 text-primary/75 text-sm font-medium rounded transition-all duration-300 hover:border-primary hover:bg-primary hover:text-bgPrimary hover:scale-[1.04] hover:shadow-[0_0_20px_rgba(182,137,56,0.35)]"
+                  >
+                    Know in Details <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1" />
+                  </Link>
+                  <span className="text-[10px] text-white/25 pl-1">{featureRoutes[index].caption}</span>
+                </div>
               </div>
               <div className={`${index % 2 === 1 ? "md:order-first" : ""}`}>
                 <video preload="auto" autoPlay loop muted>

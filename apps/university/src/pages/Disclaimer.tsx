@@ -48,15 +48,16 @@ const DisclaimerPage = () => {
 
         <section className="mb-8">
           <h2 className="text-2xl font-semibold text-gray-100 mb-4">
-            No Guarantee of Earnings
+            No Guarantee of Learning Outcomes
           </h2>
           <p className="text-gray-300 leading-relaxed">
-            Any earnings or experience statements made by The SRK University and its
-            affiliates are projections only and not guarantees. Your individual
-            earnings can vary, and there is no assurance you will achieve the
-            experience levels discussed. More details will be explained on the
-            affiliate program's disclaimer page. We are mentioning this as a
-            prerequisite before entering the affiliate program page.
+            The knowledge and skills you develop through The SRK University
+            depend entirely on your individual effort, consistency, and
+            dedication to practice. Course completion does not automatically
+            produce mastery. Every student learns at a different pace and applies
+            knowledge differently. No specific career advancement, professional
+            placement, or skill level is promised or guaranteed by SRK Group
+            Private Limited or its instructors.
           </p>
         </section>
 
@@ -65,20 +66,18 @@ const DisclaimerPage = () => {
             Affiliate Disclaimer
           </h2>
           <p className="text-gray-300 leading-relaxed">
-            Our website offers an affiliate program. There are no specific terms
-            and conditions or disclaimers for the affiliate program. There is a
-            separate page for the affiliate program. You are allowed to enter
-            the official page for the affiliate program only after you have
-            purchased the course, followed by a different digital agreement. The
-            affiliate program is only for selective users (only those who have
-            purchased the course). If any of our affiliate users purchase the
-            course solely to get enrolled in the affiliate program and are
-            unable to be consistent or continue in the future, they cannot blame
-            the company or the previous affiliate partner. That is your own
-            responsibility. The company or the previous partner holds no
-            responsibility as you are solely responsible for your actions. If
-            you are enrolling in this course after seeing the earnings of other
-            affiliate partners, then you are responsible for that decision.
+            Our website offers a referral program for enrolled students. There
+            is a separate page with full terms for that program. You may access
+            the referral program page only after purchasing a course, following
+            a separate digital agreement. The program is available exclusively
+            to students who have purchased a course. If any student purchases a
+            course primarily to participate in the referral program and is
+            unable to remain consistent, they cannot hold the company or any
+            other student responsible. That responsibility lies entirely with the
+            individual. If you are enrolling in this course based on the
+            experience or progress shared by other students, understand that
+            individual learning outcomes vary based on effort, application, and
+            consistency. Your enrolment is your own informed decision.
           </p>
         </section>
 
@@ -103,17 +102,17 @@ const DisclaimerPage = () => {
             Purchase Disclaimer
           </h2>
           <p className="text-gray-300 leading-relaxed">
-            Your payment on our site is for the course content only. Becoming an
-            affiliate is free and optional with any product purchase. Purchasing
-            a course doesn't guarantee any quick returns. It is a long-term
-            process that may take a lot of time and effort from the students.
-            Just like how overnight study cannot lead you to secure exceptional
-            marks in your examination, the same applies here. If you are aiming
-            for a quick return just by purchasing the course, then you can
-            kindly step back, because as we said, it is a long-run game just
-            like it takes a decade to complete the study and become a doctor.
-            The same applies here; therefore, it won't be beneficial for you
-            with such a purpose since we are not responsible for your loss.
+            Your enrolment is for access to the course content and educational
+            materials only. Participating in the referral program is optional
+            and available after purchase. Completing a course does not
+            automatically produce expertise or professional readiness. Skill
+            development is a long-term commitment that requires consistent
+            practice, review, and real-world application. Just as a single year
+            of medical study does not produce a qualified doctor, completing a
+            course does not make a finished professional. Enrol because you are
+            genuinely committed to learning the craft and developing your skills
+            over time. We are not responsible for outcomes that result from a
+            lack of genuine engagement with the material.
           </p>
         </section>
 
@@ -200,13 +199,16 @@ const DisclaimerPage = () => {
 
         <section className="mb-8">
           <h2 className="text-2xl font-semibold text-gray-100 mb-4">
-            Testimonials and No Liabilities on Us
+            Student Experiences and No Liabilities on Us
           </h2>
           <p className="text-gray-300 leading-relaxed">
-            Testimonials on the site reflect personal experiences and may not
-            represent typical results. We do not guarantee future results or
-            success. The SRK University is not responsible for your actions or
-            outcomes based on our information.
+            Student experiences and progress stories shared on this site reflect
+            individual journeys and may not represent the typical learning
+            path. Every student's pace of development, depth of understanding,
+            and application of skills differs. We do not guarantee that any
+            specific learning outcome will be achieved. The SRK University is
+            not responsible for outcomes that arise from how you apply or
+            interpret what you learn through our courses.
           </p>
         </section>
 
@@ -223,23 +225,30 @@ const DisclaimerPage = () => {
 
         <section className="mb-8">
           <h2 className="text-2xl font-semibold text-gray-100 mb-4">
-            You Are Responsible for Your Actions
+            You Are Responsible for Your Learning
           </h2>
           <p className="text-gray-300 leading-relaxed">
-            You are responsible for your actions and the results of using our
-            information, products, and services. We are not liable for any
-            successes or failures related to your business.
+            You are responsible for how you engage with and apply the knowledge
+            and skills taught in our courses. The quality of your learning
+            experience is shaped by your own effort and commitment. We are not
+            liable for outcomes that arise from how you choose to use the
+            education we provide.
           </p>
         </section>
 
         <section className="mb-8">
           <h2 className="text-2xl font-semibold text-gray-100 mb-4">
-            Not a Get-Rich-Quick Program
+            A Commitment to Genuine Education
           </h2>
           <p className="text-gray-300 leading-relaxed">
-            The SRK University is not a get-rich-quick program. Achieving
-            financial success requires time, effort, and dedication. We do not
-            guarantee quick or easy wealth.
+            The SRK University is an educational platform built around the
+            long-term development of practical, industry-relevant skills.
+            Mastery in any discipline requires sustained effort, deliberate
+            practice, and time. We do not offer shortcuts to professional
+            competence, and we do not promise instant results from course
+            completion. Students who approach their learning with patience,
+            consistency, and genuine curiosity are the ones who benefit most
+            from what we offer.
           </p>
         </section>
 

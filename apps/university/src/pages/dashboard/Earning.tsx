@@ -3,7 +3,7 @@ import { Divider } from "@nextui-org/divider";
 import { EarningsChart } from "../../components/dashboard/earning/EarningCharts";
 import ProfileSection from "../../components/dashboard/earning/ProfileSection";
 import { Chip } from "@nextui-org/chip";
-import { DollarSign, Wallet, CreditCard, Gift, Calendar } from "lucide-react";
+import { BookMarked, Wallet, CreditCard, Gift, Calendar } from "lucide-react";
 import { ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getEarningDetailsofUserApi } from "../../lib/apiClient";
@@ -35,68 +35,61 @@ export default function EarningsDashboard() {
         </Card>
         <div className="lg:col-span-9 space-y-1 sm:space-y-3 lg:space-y-3 md:space-y-3">
           <div className="grid gap-1  sm:gap-3 lg:gap-6  grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-            <EarningCard
-              title="Today's Earning"
+            <CreditCard_
+              title="Today's Credits"
               amount={earningsData.todayEarnings}
-              icon={<DollarSign className="text-green-500" size={24} />}
+              icon={<BookMarked className="text-green-500" size={24} />}
               chipText="Today"
               chipColor="success"
             />
-            <EarningCard
-              title="7 Days Earning"
+            <CreditCard_
+              title="7-Day Credits"
               amount={earningsData.last7DaysEarnings}
               icon={<Calendar className="text-blue-500" size={24} />}
               chipText="This Week"
               chipColor="primary"
             />
-            <EarningCard
-              title="30 Days Earning"
+            <CreditCard_
+              title="30-Day Credits"
               amount={earningsData.last30DaysEarnings}
               icon={<Calendar className="text-purple-500" size={24} />}
               chipText="This Month"
               chipColor="secondary"
             />
-            <EarningCard
-              title="All Time Earning"
+            <CreditCard_
+              title="Total Credits"
               amount={earningsData.allTimeEarnings}
               icon={<Wallet className="text-yellow-500" size={24} />}
-              chipText="Total"
+              chipText="All Time"
               chipColor="warning"
             />
           </div>
           <div className="grid gap-1 sm:gap-3 lg:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-            <EarningCard
-              title="SRK Bonus"
+            <CreditCard_
+              title="SRK Milestone Bonus"
               amount={earningsData.srkBonus}
               icon={<Gift className="text-pink-500" size={24} />}
               chipText="Bonus"
               chipColor="danger"
             />
-            {/* <EarningCard
-              title="Event Wallet"
-              amount={earningsData.eventWallet}
-              icon={<Wallet className="text-indigo-500" size={24} />}
-              chipText="Events"
-              chipColor="primary"
-            /> */}
-            <EarningCard
-              title="Wallet Balance"
+            <CreditCard_
+              title="Available Credits"
               amount={earningsData.walletBalance}
               icon={<CreditCard className="text-green-500" size={24} />}
               chipText="Available"
               chipColor="success"
             />
-            <EarningCard
-              title="TDS Amount"
+            <CreditCard_
+              title="TDS Deduction"
               amount={earningsData.totalTds}
-              icon={<DollarSign className="text-red-500" size={24} />}
+              icon={<BookMarked className="text-red-500" size={24} />}
               chipText="Tax"
               chipColor="danger"
             />
           </div>
           <Card className="bg-bgSecondary">
             <CardHeader className="flex justify-between items-center">
-              <h2 className="text-xl font-bold text-white">Earnings Chart</h2>
+              <h2 className="text-xl font-bold text-white">Credits Overview</h2>
               <div className="flex gap-2">
                 <Chip color="primary" variant="flat" className="text-white">
                   Weekly
@@ -120,7 +113,7 @@ export default function EarningsDashboard() {
   );
 }
 
-type TEarningCard = {
+type TCreditCard = {
   title: string;
   amount: number;
   icon: ReactNode;
@@ -128,13 +121,13 @@ type TEarningCard = {
   chipColor: "success" | "primary" | "danger" | "secondary" | "warning";
 };
 
-function EarningCard({
+function CreditCard_({
   title,
   amount,
   icon,
   chipText,
   chipColor,
-}: TEarningCard) {
+}: TCreditCard) {
   return (
     <Card>
       <CardBody className="bg-bgSecondary flex flex-row items-center justify-between">

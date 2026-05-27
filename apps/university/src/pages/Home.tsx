@@ -17,6 +17,11 @@ import LogoScroller from "../components/Home/LogoScroll";
 import MetricScroller from "../components/Home/MetricsData";
 import BonusTimeline from "../components/Home/Bonuses";
 import { CourseOverviewSection } from "../components/Home/CourseOverviewSection";
+import WhyNowSection from "../components/Home/WhyNowSection";
+import ToolsSection from "../components/Home/ToolsSection";
+import ExclusiveAccessSection from "../components/Home/ExclusiveAccessSection";
+import CommitmentSection from "../components/Home/CommitmentSection";
+import SkillsGridSection from "../components/Home/SkillsGridSection";
 
 export const Home = () => {
   return (
@@ -28,16 +33,21 @@ export const Home = () => {
         <LogoScroller />
         <AudienceSection />
         <ComparisonSection />
+        <WhyNowSection />
+        <ToolsSection />
         <ProvideSection />
         <PackageSection />
         <MoneySection />
         <BonusTimeline />
         <WhyChooseSection />
         <CourseOverviewSection />
+        <ExclusiveAccessSection />
         <AccessSection />
         <OpportunitySection />
         <UpCommingCoureses />
         <TestimonialCarousel />
+        <CommitmentSection />
+        <SkillsGridSection />
         <FAQSection />
         <EnrollSection />
         <div className="w-full flex justify-center my-8">

@@ -1,74 +1,94 @@
-import './App.css';
-import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import { Home } from './pages/Home';
-import { SignUp } from './pages/SignUp';
-import { PackagePage } from './pages/Package';
-import { CourseDetails } from './pages/DetailsPage';
-import AboutPage from './pages/About';
-import ContactPage from './pages/Contact';
-import { Login } from './pages/Login';
-import { ForgotPassword } from './pages/ForgotPassword';
-import { ResetPassword } from './pages/ResetPassword';
-import EarningsDashboard from './pages/dashboard/Earning';
-import CoursesDashboard from './components/dashboard/courses/CoursesDashboard';
-import Leaderboard from './pages/dashboard/LearderBoard';
-import EditProfileTabs from './pages/dashboard/EditProfile';
-import { BankAndKYC } from './pages/dashboard/Bank&&KYC';
-import CoursePlayer from './components/dashboard/courses/CoursesPlayer';
-import ReferralPage from './components/dashboard/referral/ReferralPage';
-import CreateCoursePage from './pages/admin/CreateCourse';
-import CourseList from './pages/admin/Courses';
-import CourseDetail from './pages/admin/CoursesDetails';
-import { Invoice } from './pages/dashboard/Invoice';
-import PayoutsPage from './pages/dashboard/Payout';
-import { AddUsers } from './pages/admin/AddUsers';
-import { ListOfUsers } from './pages/admin/ListOfUers';
-import { PackageDetails } from './components/PackageDetails';
-import { LogoNavbar } from './components/logoNavbar';
-import AffiliateRequest from './pages/affiliate/AffiliateRequest';
-import { AffilateRequestList } from './pages/admin/AffiliateRequestList';
-import { AffilatePage } from './pages/affiliate/AffilatePage';
-import { AddPackage } from './pages/admin/AddPackage';
-import BalancePayouts from './pages/admin/BalancePayout';
-import AdminEarningDashboard from './pages/admin/Earning';
-import SrkBankPage from './pages/affiliate/SRKBank';
-import PortalActivationPage from './pages/dashboard/PortalActivation';
-import AffiliateDashboardLayout from './Layouts/AffiliateLayout';
-import AdminLayout from './Layouts/AdminLayout';
-import StudyDashboardLayout from './Layouts/StudyLayout';
-import LayoutWithNavbar from './Layouts/NavbarLayout';
-import AuthLayout from './Layouts/AuthLayout';
-import AffiliateRequestVerification from './pages/dashboard/AffiliateRequestVerification';
-import AdminSrkBankPage from './pages/admin/AdminSrkBankPage';
-import SrkUniversityBank from './pages/admin/UniversityBank';
-import TeamsPage from './pages/affiliate/Teams';
-import AffiliateTerms from './pages/affiliate/AffiliateTermsAndConditions';
-import TermsAndConditions from './pages/TermsAndCondition';
-import PrivacyRefundPolicy from './pages/Privacy';
-import BankRequest from './pages/admin/ BankRequest';
-import { VerificatinPendingPage } from './pages/admin/PaymentVerification';
-import PaymentVerificationAuthPage from './pages/auth/PaymentVerification';
-import PackageSinglePage from './pages/PackageDetails';
-import DisclaimerPage from './pages/Disclaimer';
-import CreateWebinar from './pages/admin/CreateWebinar';
-import AdminWebinarList from './components/admin/webinar/WebinarListTable/WebinarListTable';
-import AdminSettings from './pages/admin/Settings';
-import WebinarPage from './pages/affiliate/WebinarPage';
-import SrkBonusFlow from './pages/affiliate/SrkBonusFlow';
-import AdminSrkBonusFlow from './pages/admin/SrkBonusFlow';
-import SrkBonusFlowAdminUser from './pages/admin/SrkBonusFlowAdminUser';
-import TourTargetsPage from './pages/affiliate/TourTarget';
-import { Blog } from './pages/Blog';
-import { BlogPost } from './pages/BlogPost';
-import FAQ from './pages/FAQ';
-import Features from './pages/Features';
-import GettingStarted from './pages/GettingStarted';
-import Help from './pages/Help';
-import HowItWorks from './pages/HowItWorks';
-import PaymentGateway from './pages/PaymentGateway';
-import AdminTourTargetUserPage from './pages/admin/TourTargetUserPage';
-import SRKGrowPortal from './pages/dashboard/GrowViewPage';
+import "./App.css";
+import "aos/dist/aos.css";
+import AOS from "aos";
+import { useEffect } from "react";
+import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { Home } from "./pages/Home";
+import { SignUp } from "./pages/SignUp";
+import { PackagePage } from "./pages/Package";
+import { CourseDetails } from "./pages/DetailsPage";
+import AboutPage from "./pages/About";
+import ContactPage from "./pages/Contact";
+import { Login } from "./pages/Login";
+import { ForgotPassword } from "./pages/ForgotPassword";
+import { ResetPassword } from "./pages/ResetPassword";
+import EarningsDashboard from "./pages/dashboard/Earning";
+import CoursesDashboard from "./components/dashboard/courses/CoursesDashboard";
+import Leaderboard from "./pages/dashboard/LearderBoard";
+import EditProfileTabs from "./pages/dashboard/EditProfile";
+import { BankAndKYC } from "./pages/dashboard/Bank&&KYC";
+import CoursePlayer from "./components/dashboard/courses/CoursesPlayer";
+import ReferralPage from "./components/dashboard/referral/ReferralPage";
+import CreateCoursePage from "./pages/admin/CreateCourse";
+import CourseList from "./pages/admin/Courses";
+import CourseDetail from "./pages/admin/CoursesDetails";
+import { Invoice } from "./pages/dashboard/Invoice";
+import PayoutsPage from "./pages/dashboard/Payout";
+import { AddUsers } from "./pages/admin/AddUsers";
+import { ListOfUsers } from "./pages/admin/ListOfUers";
+import { PackageDetails } from "./components/PackageDetails";
+import { LogoNavbar } from "./components/logoNavbar";
+import AffiliateRequest from "./pages/affiliate/AffiliateRequest";
+import { AffilateRequestList } from "./pages/admin/AffiliateRequestList";
+import { AffilatePage } from "./pages/affiliate/AffilatePage";
+import { AddPackage } from "./pages/admin/AddPackage";
+import BalancePayouts from "./pages/admin/BalancePayout";
+import AdminEarningDashboard from "./pages/admin/Earning";
+import SrkBankPage from "./pages/affiliate/SRKBank";
+import PortalActivationPage from "./pages/dashboard/PortalActivation";
+import AffiliateDashboardLayout from "./Layouts/AffiliateLayout";
+import AdminLayout from "./Layouts/AdminLayout";
+import StudyDashboardLayout from "./Layouts/StudyLayout";
+import LayoutWithNavbar from "./Layouts/NavbarLayout";
+import AuthLayout from "./Layouts/AuthLayout";
+import AffiliateRequestVerification from "./pages/dashboard/AffiliateRequestVerification";
+import AdminSrkBankPage from "./pages/admin/AdminSrkBankPage";
+import SrkUniversityBank from "./pages/admin/UniversityBank";
+import TeamsPage from "./pages/affiliate/Teams";
+import AffiliateTerms from "./pages/affiliate/AffiliateTermsAndConditions";
+import TermsAndConditions from "./pages/TermsAndCondition";
+import PrivacyRefundPolicy from "./pages/Privacy";
+import BankRequest from "./pages/admin/ BankRequest";
+import { VerificatinPendingPage } from "./pages/admin/PaymentVerification";
+import PaymentVerificationAuthPage from "./pages/auth/PaymentVerification";
+import PackageSinglePage from "./pages/PackageDetails";
+import DisclaimerPage from "./pages/Disclaimer";
+import { Blog } from "./pages/Blog";
+import { BlogPost } from "./pages/BlogPost";
+import FAQ from "./pages/FAQ";
+import Features from "./pages/Features";
+import GettingStarted from "./pages/GettingStarted";
+import Help from "./pages/Help";
+import HowItWorks from "./pages/HowItWorks";
+import PaymentGateway from "./pages/PaymentGateway";
+import WhoIsItForPage from "./pages/learn/WhoIsItFor";
+import WhySRKUniversityPage from "./pages/learn/WhySRKUniversity";
+import CourseTracksPage from "./pages/learn/CourseTracks";
+import SeizeYourMomentPage from "./pages/learn/SeizeYourMoment";
+import MilestoneJourneyPage from "./pages/learn/MilestoneJourney";
+import AllReviewsPage from "./pages/learn/AllReviews";
+import WhyEnrollPage from "./pages/learn/WhyEnroll";
+import CreateWebinar from "./pages/admin/CreateWebinar";
+import AdminWebinarList from "./components/admin/webinar/WebinarListTable/WebinarListTable";
+import AdminSettings from "./pages/admin/Settings";
+import WebinarPage from "./pages/affiliate/WebinarPage";
+import SrkBonusFlow from "./pages/affiliate/SrkBonusFlow";
+import AdminSrkBonusFlow from "./pages/admin/SrkBonusFlow";
+import SrkBonusFlowAdminUser from "./pages/admin/SrkBonusFlowAdminUser";
+import TourTargetsPage from "./pages/affiliate/TourTarget";
+import AdminTourTargetUserPage from "./pages/admin/TourTargetUserPage";
+import SRKGrowPortal from "./pages/dashboard/GrowViewPage";
+import UncoverEssentialsPage from "./pages/learn/UncoverEssentials";
+import ExclusiveCommunityPage from "./pages/learn/ExclusiveCommunity";
+import LearnFromExpertsPage from "./pages/learn/LearnFromExperts";
+import StructuredLearningPage from "./pages/learn/StructuredLearning";
+import LiveMentorshipPage from "./pages/learn/LiveMentorship";
+import AchieverCommunityPage from "./pages/learn/AchieverCommunity";
+import UpcomingSkillsPage from "./pages/learn/UpcomingSkills";
+import ChooseYourPlanPage from "./pages/learn/ChooseYourPlan";
+import ArticlesPage from "./pages/Articles";
+import ArticlePage from "./pages/ArticlePage";
 
 const AppRouter = () => {
   const router = createBrowserRouter([
@@ -99,6 +119,23 @@ const AppRouter = () => {
         { path: '/privacy-policy', element: <PrivacyRefundPolicy /> },
         { path: '/termsAndCondition', element: <TermsAndConditions /> },
         { path: '/disclaimer', element: <DisclaimerPage /> },
+        { path: '/learn/who-is-it-for', element: <WhoIsItForPage /> },
+        { path: '/learn/why-srk-university', element: <WhySRKUniversityPage /> },
+        { path: '/learn/course-tracks', element: <CourseTracksPage /> },
+        { path: '/learn/seize-your-moment', element: <SeizeYourMomentPage /> },
+        { path: '/learn/milestone-journey', element: <MilestoneJourneyPage /> },
+        { path: '/learn/all-reviews', element: <AllReviewsPage /> },
+        { path: '/learn/why-enroll', element: <WhyEnrollPage /> },
+        { path: '/learn/uncover-essentials', element: <UncoverEssentialsPage /> },
+        { path: '/learn/exclusive-community', element: <ExclusiveCommunityPage /> },
+        { path: '/learn/learn-from-experts', element: <LearnFromExpertsPage /> },
+        { path: '/learn/structured-learning', element: <StructuredLearningPage /> },
+        { path: '/learn/live-mentorship', element: <LiveMentorshipPage /> },
+        { path: '/learn/achiever-community', element: <AchieverCommunityPage /> },
+        { path: '/learn/upcoming-skills', element: <UpcomingSkillsPage /> },
+        { path: '/learn/choose-your-plan', element: <ChooseYourPlanPage /> },
+        { path: '/articles', element: <ArticlesPage /> },
+        { path: '/articles/:slug', element: <ArticlePage /> },
       ],
     },
     {
@@ -231,6 +268,11 @@ const AppRouter = () => {
 
 function App() {
   const client = new QueryClient();
+
+  useEffect(() => {
+    AOS.init({ once: true, duration: 700, offset: 60, easing: "ease-out-cubic" });
+  }, []);
+
   return (
     <QueryClientProvider client={client}>
       <AppRouter />

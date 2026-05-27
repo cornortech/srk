@@ -94,7 +94,7 @@ export const whyChooseUsData: IWhyChooseUsSection[] = [
       },
       {
         text: "Unlock exclusive, bespoke strategies",
-        highlight: "from seasoned experts who’ve conquered the field.",
+        highlight: "from seasoned experts who've conquered the field.",
       },
     ],
     icon: "/dollar.png",

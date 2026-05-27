@@ -1,5 +1,7 @@
 import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { AnimationButton } from "../ReusableComponents";
+import { ArrowRight } from "lucide-react";
 
 export const MoneySection = () => {
   const proPackageId = import.meta.env.VITE_PRO_PACKAGE_ID;
@@ -36,11 +38,22 @@ export const MoneySection = () => {
               </h2>
               <h3>The craft of generating experience online. </h3>
               <h4>Embark on your journey today.</h4>
-              <AnimationButton
-                onClick={() =>
-                  navigate(`/auth/sign-up?packageId=${proPackageId}`)
-                }
-              />
+              <div className="flex flex-col items-center gap-4">
+                <AnimationButton
+                  onClick={() =>
+                    navigate(`/auth/sign-up?packageId=${proPackageId}`)
+                  }
+                />
+                <div className="flex flex-col items-center gap-1.5 mt-1">
+                  <Link
+                    to="/learn/seize-your-moment"
+                    className="group inline-flex items-center gap-2 px-5 py-2.5 border border-primary/40 text-primary/75 text-sm font-medium rounded transition-all duration-300 hover:border-primary hover:bg-primary hover:text-bgPrimary hover:scale-[1.04] hover:shadow-[0_0_20px_rgba(182,137,56,0.35)]"
+                  >
+                    Get to Know More <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1" />
+                  </Link>
+                  <span className="text-[10px] text-white/25">how skills transform your future</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>

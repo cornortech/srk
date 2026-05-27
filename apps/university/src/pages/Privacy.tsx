@@ -2,11 +2,11 @@
 import React from "react";
 import { Divider } from "@nextui-org/react";
 
-const PrivacyRefundPolicy: React.FC = () => {
+const PrivacyEnrolmentPolicy: React.FC = () => {
   return (
     <div className="p-6 max-w-4xl mx-auto">
       <h1 className="text-3xl font-bold mb-4">
-        Privacy Policy & Refund Policy
+        Privacy Policy & Enrolment Policy
       </h1>
 
       <Divider className="my-4" />
@@ -45,7 +45,8 @@ const PrivacyRefundPolicy: React.FC = () => {
       <ul className="list-disc pl-5">
         <li>
           To Provide and Improve Our Services: We use your information to
-          deliver our courses, process payments, and improve our offerings.
+          deliver our courses, process enrolments, and improve our educational
+          offerings.
         </li>
         <li>
           To Communicate with You: We may use your information to send you
@@ -95,32 +96,34 @@ const PrivacyRefundPolicy: React.FC = () => {
 
       <Divider className="my-4" />
 
-      <h2 className="text-xl font-semibold">Refund Policy</h2>
+      <h2 className="text-xl font-semibold">Enrolment Policy</h2>
       <p>
-        All purchases made through TheSRKUniversity.com are final and
-        non-refundable. We encourage you to carefully review course descriptions
-        and other relevant information before making a purchase. By completing a
-        purchase on our website, you acknowledge and agree that you will not be
-        eligible for a refund.
+        All enrolments made through TheSRKUniversity.com are final. We
+        encourage you to carefully review all course descriptions, curriculum
+        details, and learning objectives before enrolling. This gives you a
+        clear picture of the skills and knowledge each course is designed to
+        develop. By completing your enrolment, you acknowledge that you have
+        reviewed this information and are committed to engaging with the
+        educational content provided.
       </p>
 
-      <h3 className="text-lg font-medium mt-4">Exceptions</h3>
+      <h3 className="text-lg font-medium mt-4">Exceptional Circumstances</h3>
       <p>
-        In exceptional circumstances, such as technical issues that prevent you
-        from accessing the purchased course, you may contact our support team at
-        [contact email] to request assistance. Any refund requests will be
-        evaluated on a case-by-case basis and are granted at the sole discretion
-        of SRK Group Private Limited.
+        In exceptional circumstances, such as a technical issue that prevents
+        you from accessing the course content you enrolled in, you may contact
+        our support team at [contact email] to request assistance. Each
+        situation will be reviewed individually and resolved at the sole
+        discretion of SRK Group Private Limited.
       </p>
 
       <h3 className="text-lg font-medium mt-4">Contact Us</h3>
       <p>
-        If you have any questions or concerns about our Privacy Policy or Refund
-        Policy, please contact us at [contact email]. Our support team is here
-        to assist you and provide any necessary clarifications.
+        If you have any questions or concerns about our Privacy Policy or
+        Enrolment Policy, please contact us at [contact email]. Our support
+        team is here to assist you and provide any necessary clarifications.
       </p>
     </div>
   );
 };
 
-export default PrivacyRefundPolicy;
+export default PrivacyEnrolmentPolicy;

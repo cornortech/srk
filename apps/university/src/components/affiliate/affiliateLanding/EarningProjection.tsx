@@ -10,42 +10,42 @@ import {
 } from "@nextui-org/table";
 import { Accordion, AccordionItem } from "@nextui-org/accordion";
 
-const projectionData = [
-  { price: 2999, commission: "25%", affiliates: 1, earning: 749 },
-  { price: 2999, commission: "25%", affiliates: 10, earning: 7497 },
-  { price: 2999, commission: "25%", affiliates: 100, earning: 74975 },
+const overviewData = [
+  { price: 2999, benefit: "25%", partners: 1, credits: 749 },
+  { price: 2999, benefit: "25%", partners: 10, credits: 7497 },
+  { price: 2999, benefit: "25%", partners: 100, credits: 74975 },
 ];
 
 const faqData = [
   {
-    question: "Can I start as an affiliate without enrolling in a course?",
+    question: "Do I need to enrol in a course before becoming a partner?",
     answer:
-      "Yes, you can start as an affiliate without enrolling in any course. Our program is open to everyone who wants to promote our courses.",
+      "Yes, purchasing a course is required before joining the partner programme. This ensures that partners have genuine first-hand experience of the educational content they are recommending to others.",
   },
   {
-    question: "What is the payment process?",
+    question: "How are referral credits processed?",
     answer:
-      "We process payments through secure bank transfers. Once your earnings reach the minimum threshold, you can request a payout.",
+      "Referral credits are processed through secure bank transfer once they have been verified. Credits become eligible for transfer once they pass the review period.",
   },
   {
-    question: "When are payments made?",
+    question: "When are credits transferred?",
     answer:
-      "Payments are processed on a monthly basis, typically within the first week of each month for the previous month's earnings.",
+      "Credit transfers are reviewed on a regular basis, typically within 14 days following the review period for each referral.",
   },
   {
-    question: "What is the minimum payout amount?",
+    question: "What is the minimum credit transfer amount?",
     answer:
-      "The minimum payout amount is ₹500. Once your earnings reach this threshold, you can request a withdrawal.",
+      "The minimum credit transfer amount is NPR 500. Once your accumulated credits reach this level, you may request a transfer.",
   },
   {
-    question: "Do you offer custom coupons?",
+    question: "Do you offer custom referral codes?",
     answer:
-      "Yes, we provide custom coupon codes to our affiliates that they can share with their audience for special discounts.",
+      "Yes, each partner receives a unique referral code that they can share with their network. This code is used to track enrolments made through your recommendation.",
   },
   {
-    question: "Who gets the commission?",
+    question: "Who receives referral credits?",
     answer:
-      "The commission is paid to the affiliate whose referral link or coupon code was used during the purchase.",
+      "Referral credits are allocated to the partner whose referral link or code was used when the student enrolled in their course.",
   },
 ];
 
@@ -53,14 +53,14 @@ export default function EarningProjection() {
   return (
     <div className="min-h-screen text-gray-200 py-16">
       <div className="container mx-auto px-4">
-        {/* Earning Projection Section */}
+        {/* Partnership Overview Section */}
         <div className="mb-20">
           <h1 className="text-4xl font-bold text-center mb-12">
-            Earning <span className="text-primary">Projection</span>
+            Partnership <span className="text-primary">Overview</span>
           </h1>
 
           <Table
-            aria-label="Earning projection table"
+            aria-label="Partnership overview table"
             classNames={{
               wrapper: "bg-transparent",
               th: " text-white font-bold text-md",
@@ -69,18 +69,18 @@ export default function EarningProjection() {
             }}
           >
             <TableHeader>
-              <TableColumn>Course Price</TableColumn>
-              <TableColumn>Commission</TableColumn>
-              <TableColumn>No. of Affiliate</TableColumn>
-              <TableColumn>Earning</TableColumn>
+              <TableColumn>Course Enrolment Value</TableColumn>
+              <TableColumn>Referral Benefit</TableColumn>
+              <TableColumn>No. of Partners</TableColumn>
+              <TableColumn>Accumulated Credits</TableColumn>
             </TableHeader>
             <TableBody>
-              {projectionData.map((row, index) => (
+              {overviewData.map((row, index) => (
                 <TableRow key={index}>
                   <TableCell>₹{row.price}</TableCell>
-                  <TableCell>{row.commission}</TableCell>
-                  <TableCell>{row.affiliates}</TableCell>
-                  <TableCell>₹{row.earning}</TableCell>
+                  <TableCell>{row.benefit}</TableCell>
+                  <TableCell>{row.partners}</TableCell>
+                  <TableCell>₹{row.credits}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

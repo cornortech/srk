@@ -1,26 +1,26 @@
 export const AffiliteBeneifits = [
   {
     step: "Step 1",
-    title: "You Refer",
+    title: "You Share",
     description:
-      "Create a special tracking link with a 30-day cookie length and distribute it to your friends, classmates, and other students.",
+      "Create a unique tracking link and share it with your friends, classmates, and fellow learners who would benefit from the courses available at SRK University.",
   },
   {
     step: "Step 2",
-    title: "They Enrolled",
+    title: "They Enrol",
     description:
-      "Someone who clicked on your referral link came to this website. Now, if they enrol in any course for any fee within 30 days, you receive a commission.",
+      "Someone who clicked your referral link visits this website. If they enrol in any course within 30 days, your contribution to their learning journey is recorded.",
   },
   {
     step: "Step 3",
-    title: "You Earned Commission",
+    title: "You Receive Credits",
     description:
-      "You will receive a 25% commission of the total amount paid by your referral, and your earning is displayed on your referral dashboard.",
+      "You receive referral credits equal to 25% of the course enrolment value. Your accumulated credits are displayed in your partner dashboard.",
   },
   {
     step: "Step 4",
-    title: "Payment Transferred",
+    title: "Credits Transferred",
     description:
-      "We will process your commission to your bank account after cross-verification and 14 days cooling Period.",
+      "We process your accumulated credits to your registered bank account after cross-verification and a 14-day review period.",
   },
 ];

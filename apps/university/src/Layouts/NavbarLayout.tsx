@@ -1,4 +1,5 @@
-import { Outlet, useNavigate } from "react-router-dom";
+import { Outlet, useNavigate, useLocation } from "react-router-dom";
+import { useEffect } from "react";
 import { ReusableNavbar } from "../components/Navbar";
 import { menuItems } from "../Data/NavbarData";
 import { Footer } from "../components/Footer";
@@ -9,6 +10,11 @@ import AuthLocalStorage from "../lib/localstorage/auth";
 
 const LayoutWithNavbar = () => {
   const navigate = useNavigate();
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
   const userId = AuthLocalStorage.getUserData("user")?._id;
   const { setAuthDetails } = useAuthStore();
 

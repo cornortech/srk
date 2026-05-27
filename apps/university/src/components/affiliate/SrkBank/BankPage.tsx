@@ -60,16 +60,16 @@ const BankPage: React.FC = () => {
       refetchEarningDetails();
       navigate("/affiliate/payout");
       setIsModalOpen(false);
-      show("Payout request successful", "success");
+      show("Credit transfer request submitted", "success");
     },
     onError: (error: AxiosError<{ message: string }>) => {
-      show(error.response?.data?.message || "Payout request failed", "error");
+      show(error.response?.data?.message || "Credit transfer request failed", "error");
     },
   });
 
   const handlePayout = (amount: number) => {
     if (amount < 500) {
-      show("You can't payout less than Rs.500", "error");
+      show("Minimum credit transfer amount is Rs.500", "error");
       return;
     }
     if (userDetails?._id) {
@@ -110,7 +110,7 @@ const BankPage: React.FC = () => {
             <div className="flex items-center ">
               <Banknote size={20} className="mr-2" />
               <strong className="text-yellow-500">
-                Payout Pending: Rs.{" "}
+                Transfer Pending: Rs.{" "}
                 {earningDetails?.totalBankPayout?.toFixed(2)}
               </strong>
             </div>
@@ -132,7 +132,7 @@ const BankPage: React.FC = () => {
             <Spacer y={1} />
             {(earningDetails?.srkBankAmount || 0) > 0 && (
               <Button onPress={() => setIsModalOpen(true)} color="primary">
-                Request Payout
+                Request Credit Transfer
               </Button>
             )}
           </CardBody>
@@ -141,7 +141,7 @@ const BankPage: React.FC = () => {
         <PayoutEarning
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
-          title="Request Payout"
+          title="Request Credit Transfer"
           totalAmountAvailable={earningDetails?.srkBankAmount || 0}
           onApprove={handlePayout}
           isPending={isPending}
@@ -232,7 +232,7 @@ const BankPage: React.FC = () => {
           <Spacer y={1} />
           {(earningDetails?.srkBankAmount || 0) > 0 && (
             <Button onPress={() => setIsModalOpen(true)} color="primary">
-              Request Payout
+              Request Credit Transfer
             </Button>
           )}
         </CardBody>
@@ -286,7 +286,7 @@ const BankPage: React.FC = () => {
       <PayoutEarning
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title="Request Payout"
+        title="Request Credit Transfer"
         totalAmountAvailable={earningDetails?.srkBankAmount || 0}
         onApprove={handlePayout}
         isPending={isPending}

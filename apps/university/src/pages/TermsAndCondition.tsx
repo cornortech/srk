@@ -92,10 +92,10 @@ const TermsAndConditions: React.FC = () => {
 
       <Divider className="my-4" />
 
-      <h2 className="text-xl font-semibold">12. Affiliate Program Terms</h2>
+      <h2 className="text-xl font-semibold">12. Referral Program Terms</h2>
       <p>
-        Participants in our affiliate program must adhere to the terms outlined
-        in the Affiliate Agreement.
+        Participants in our student referral program must adhere to the terms
+        outlined in the Referral Program Agreement, accessible after enrolment.
       </p>
 
       <Divider className="my-4" />
@@ -142,8 +142,8 @@ const TermsAndConditions: React.FC = () => {
 
       <Divider className="my-4" />
 
-      <h2 className="text-xl font-semibold">19. Refund Policy</h2>
-      <p>All purchases are final and non-refundable.</p>
+      <h2 className="text-xl font-semibold">19. Enrolment Finality</h2>
+      <p>All enrolments are final. We encourage prospective students to review course details thoroughly before enrolling.</p>
 
       <Divider className="my-4" />
 

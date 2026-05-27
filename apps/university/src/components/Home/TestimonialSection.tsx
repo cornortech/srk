@@ -119,11 +119,13 @@
 // import "slick-carousel/slick/slick.css";
 // import "slick-carousel/slick/slick-theme.css";
 import { InfiniteMovingCardsDemo } from "./InfiniteCardDemo";
+import { Link } from "react-router-dom";
+import { ArrowRight } from "lucide-react";
 
 export function TestimonialCarousel() {
   return (
     <div
-      className="w-full bg-bgTernary  mx-auto px-8 py-4  my-12"
+      className="w-full bg-bgTernary  mx-auto px-8 py-4  mt-20 mb-12"
       data-aos="fade-right"
       data-aos-duration="1200"
     >
@@ -134,6 +136,16 @@ export function TestimonialCarousel() {
         <p>Voices of Success—See What Our Customers Have to Say!</p>
       </div>
       <InfiniteMovingCardsDemo />
+      {/* All reviews button */}
+      <div className="flex flex-col items-center gap-1.5 mt-8">
+        <Link
+          to="/learn/all-reviews"
+          className="group inline-flex items-center gap-2 px-5 py-2.5 border border-primary/40 text-primary/75 text-sm font-medium rounded transition-all duration-300 hover:border-primary hover:bg-primary hover:text-bgPrimary hover:scale-[1.04] hover:shadow-[0_0_20px_rgba(182,137,56,0.35)]"
+        >
+          Read All Reviews <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1" />
+        </Link>
+        <span className="text-[11px] text-white/25">see every student story in full</span>
+      </div>
     </div>
   );
 }

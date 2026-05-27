@@ -106,8 +106,8 @@ const AffiliateRequestVerification = () => {
           <AlertBanner
             type={kycStatus === "pending" ? "warning" : "danger"}
             message={` ${kycStatus === "pending"
-              ? "Affiliate request is pending . Admin will verify details soon."
-              : `Affiliate request is rejected . Reason : ${affiliateRequestReason}`
+              ? "Partner Programme application is pending. Admin will verify details soon."
+              : `Partner Programme application was not approved. Reason: ${affiliateRequestReason}`
               } `}
           />
         ) : (

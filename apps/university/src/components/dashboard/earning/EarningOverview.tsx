@@ -1,9 +1,8 @@
 import { Card, CardBody } from "@nextui-org/card";
-import { DollarSign, Users, Wallet } from "lucide-react";
+import { BookMarked, Users, Wallet } from "lucide-react";
 
 export default function EarningsOverview() {
-  // This data would typically come from an API
-  const earnings = {
+  const credits = {
     total: 10000,
     referral: 2000,
     wallet: 5000,
@@ -14,12 +13,12 @@ export default function EarningsOverview() {
       <Card className="bg-bgSecondary text-textPrimary">
         <CardBody className="flex flex-row items-center gap-4">
           <div className="p-2 rounded-full">
-            <DollarSign className="text-primary" size={24} />
+            <BookMarked className="text-primary" size={24} />
           </div>
           <div>
-            <h3 className="text-lg font-semibold">Total Earnings</h3>
+            <h3 className="text-lg font-semibold">Total Credits</h3>
             <p className="text-2xl font-bold">
-              ${earnings.total.toLocaleString()}
+              Rs.{credits.total.toLocaleString()}
             </p>
           </div>
         </CardBody>
@@ -30,9 +29,9 @@ export default function EarningsOverview() {
             <Users className="text-success" size={24} />
           </div>
           <div>
-            <h3 className="text-lg font-semibold">Referral Earnings</h3>
+            <h3 className="text-lg font-semibold">Referral Credits</h3>
             <p className="text-2xl font-bold">
-              ${earnings.referral.toLocaleString()}
+              Rs.{credits.referral.toLocaleString()}
             </p>
           </div>
         </CardBody>
@@ -43,9 +42,9 @@ export default function EarningsOverview() {
             <Wallet className="text-warning" size={24} />
           </div>
           <div>
-            <h3 className="text-lg font-semibold">Wallet Balance</h3>
+            <h3 className="text-lg font-semibold">Available Credits</h3>
             <p className="text-2xl font-bold">
-              ${earnings.wallet.toLocaleString()}
+              Rs.{credits.wallet.toLocaleString()}
             </p>
           </div>
         </CardBody>

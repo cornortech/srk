@@ -21,13 +21,13 @@ export const TableBoard = ({ users }: LeaderboardProps) => {
     ? [
         { key: "position", label: "RANK" },
         { key: "profile", label: "NAME" },
-        { key: "amount", label: "EARNING" },
+        { key: "amount", label: "CREDITS" },
       ]
     : [
         { key: "position", label: "PLACE" },
         { key: "profile", label: "PROFILE" },
         { key: "country", label: "COUNTRY" },
-        { key: "amount", label: "EARNING" },
+        { key: "amount", label: "CREDITS" },
       ];
 
   const [page] = React.useState(1);

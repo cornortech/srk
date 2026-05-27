@@ -127,11 +127,11 @@ export default function TourTargetsPage() {
                                         </div>
                                         <Progress value={calculateTargetProgress(earningsData?.tourBalance || 0, tour.targetAmount)} className="h-2" />
                                         <div className="flex justify-between text-xs text-muted-foreground">
-                                            <span>Earned - Nrs.{earningsData?.tourBalance}</span>
+                                            <span>Accumulated - Nrs.{earningsData?.tourBalance}</span>
                                             <span>Nrs.{tour.targetAmount.toLocaleString()}</span>
                                         </div>
                                         {/* {remainingAmount > 0 && ( */}
-                                        <p className="text-xs text-muted-foreground"> Nrs. {tour.targetAmount - (earningsData?.tourBalance || 0)} remaining</p>
+                                        <p className="text-xs text-muted-foreground"> Nrs. {tour.targetAmount - (earningsData?.tourBalance || 0)} still needed</p>
                                         {/* )} */}
                                     </div>
 

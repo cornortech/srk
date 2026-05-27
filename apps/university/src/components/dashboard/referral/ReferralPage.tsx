@@ -50,7 +50,7 @@ export default function ReferralPage() {
         <Card className="bg-bgSecondary p-8 text-white">
           <CardHeader className="flex gap-3">
             <div className="flex flex-col">
-              <p className="text-2xl font-semibold">Affiliate Link</p>
+              <p className="text-2xl font-semibold">Your Partner Link</p>
             </div>
           </CardHeader>
           <CardBody className="space-y-6">

@@ -111,36 +111,36 @@ const testimonialsSecondHalf = [
   },
   {
     quote:
-      "Passive income unlocked! The Affiliate Program at THE SRK UNIVERSITY is a game-changer! I learned how to promote products online and earn commissions effortlessly. The clear tutorials on link strategies and audience targeting were super easy to follow. The platform’s intuitive design kept me motivated. It’s perfect for anyone wanting extra income!",
+      "The learning experience at THE SRK UNIVERSITY is incredible! Seasoned industry mentors guide you through every step, sharing insider tips that made complex strategies feel simple. I am now confidently building my skills. Truly top-tier guidance from people who genuinely know what they are talking about!",
     name: "Bishal Subedi",
-    title: "Affiliate Program",
-    theme: "Passive income unlocked!",
+    title: "Partner Programme",
+    theme: "Expert mentorship shines!",
     date: "2025-03-12",
   },
   {
     quote:
-      "Money-making made simple! I’m amazed by THE SRK UNIVERSITY’s Affiliate Program! It taught me to build affiliate links and grow my earnings through blogs. The lessons are engaging, with practical tips I applied instantly. The mobile-friendly platform made learning flexible. This is a must for aspiring online entrepreneurs!",
+      "THE SRK UNIVERSITY’s programme is unmatched in quality! The course breaks down skill development with crystal-clear videos and real-world strategies. I have applied what I learned from week one. No other platform comes close to this level of practical, immediately applicable instruction.",
     name: "Dibya Chettri",
-    title: "Affiliate Program",
+    title: "Partner Programme",
     date: "2025-03-12",
-    theme: "Passive income unlocked!",
+    theme: "Best course out there!",
 
   },
   {
     quote:
-      "Best course out there! THE SRK UNIVERSITY’s Affiliate Program is unmatched in quality! The course breaks down affiliate marketing with crystal-clear videos and real-world strategies that outshine any competitor. I’m earning steady commissions thanks to its superior content. No other program comes close to this level of excellence!",
+      "Amazing learning experience! The curriculum taught me practical techniques I applied instantly. The mobile-friendly platform made learning flexible and accessible from anywhere. This is a must for anyone wanting to develop serious, marketable creative skills.",
     name: "Sanup KC",
-    title: "Affiliate Program",
-    theme: "Best course out there!",
+    title: "Partner Programme",
+    theme: "Skills that last a lifetime!",
     date: "2025-03-11",
 
   },
   {
     quote:
-      "Expert mentorship shines! The Affiliate Program’s learning experience at THE SRK UNIVERSITY is incredible! Seasoned industry mentors guide you through every step, sharing insider tips on affiliate success. Their expertise made complex strategies feel simple, and I’m now confidently building my income. Truly top-tier guidance!",
+      "The community at SRK University is genuinely supportive. I had questions at every stage and got clear, helpful answers every time. The combination of structured curriculum and real community support made the difference between giving up and actually finishing what I started.",
     name: "Samip Chettri",
-    title: "Affiliate Program",
-    theme: "Expert mentorship shines!",
+    title: "Partner Programme",
+    theme: "Community that lifts you up!",
     date: "2025-03-11",
   },
 ];

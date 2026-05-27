@@ -48,8 +48,8 @@ export function PayoutEarning({
             value={totalAmountAvailable.toString()}
           />
           <Input
-            label="Payout Amount"
-            placeholder="Enter payout amount"
+            label="Transfer Amount"
+            placeholder="Enter transfer amount"
             type="number"
             value={payoutAmount.toString()}
             onChange={handleAmountChange}
@@ -70,7 +70,7 @@ export function PayoutEarning({
                 onApprove(payoutAmount);
               }}
             >
-              {isPending ? "Processing..." : "Approve Payout"}
+              {isPending ? "Processing..." : "Approve Transfer"}
             </Button>
           </>
         </ModalFooter>

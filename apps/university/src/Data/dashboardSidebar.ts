@@ -31,7 +31,7 @@ export const studySidebarItems: TSidebarItem[] = [
   { title: "Courses", icon: Book, href: "/study/courses" },
   { title: "Invoice", icon: Receipt, href: "/study/invoice" },
   { title: "Edit Profile", icon: Edit, href: "/study/edit-profile" },
-  { title: "Affiliate Program", icon: Gift, href: "/study/affiliate-landing" },
+  { title: "Partner Programme", icon: Gift, href: "/study/affiliate-landing" },
 ];
 
 export const getStudySidebarItems = (
@@ -47,7 +47,7 @@ export const getStudySidebarItems = (
     { title: "Invoice", icon: Receipt, href: "/study/invoice" },
     { title: "Edit Profile", icon: Edit, href: "/study/edit-profile" },
     {
-      title: "Affiliate Program",
+      title: "Partner Programme",
       icon: Gift,
       href: AffiliateProgramHref,
     },

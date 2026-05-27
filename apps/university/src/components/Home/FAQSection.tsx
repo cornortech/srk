@@ -7,7 +7,7 @@ export function FAQSection() {
     {
       question: "Who will be the professors?",
       answer:
-        "Trainers in the course are Successful individual’s Each In their Own Profession And are handpicked by SRK official Himself.",
+        "Trainers in the course are Successful individual's Each In their Own Profession And are handpicked by SRK official Himself.",
     },
     {
       question: "Do I need money for all courses?",
@@ -41,11 +41,24 @@ export function FAQSection() {
   };
 
   return (
-    <div className="   pb-12 ">
-      <div className="mx-auto max-w-5xl">
-        <h2 className="mb-8 text-center text-3xl font-bold text-white md:text-4xl lg:text-5xl">
-          FREQUENTLY ASKED QUESTIONS
-        </h2>
+    <div className="relative bg-black py-20 px-4 overflow-hidden">
+
+      {/* Top double-line separator */}
+      <div className="absolute top-0 inset-x-0 pointer-events-none flex flex-col gap-[3px]">
+        <div className="h-px bg-gradient-to-r from-transparent via-primary/35 to-transparent" />
+        <div className="h-px bg-gradient-to-r from-transparent via-white/[0.04] to-transparent" />
+      </div>
+
+      <div className="mx-auto max-w-3xl">
+
+        <div className="text-center mb-10">
+          <p className="text-primary text-[11px] font-semibold uppercase tracking-[0.28em] mb-3">
+            Got Questions
+          </p>
+          <h2 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight">
+            FREQUENTLY ASKED QUESTIONS
+          </h2>
+        </div>
         <div className="flex flex-col gap-4">
           {faqs.map((faq, index) => (
             <div
@@ -115,6 +128,7 @@ export function FAQSection() {
           ))}
         </div>
       </div>
+
     </div>
   );
 }

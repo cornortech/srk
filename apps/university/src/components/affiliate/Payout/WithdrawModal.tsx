@@ -40,12 +40,12 @@ export function BalanceWithDrawModal({
       await createBalancePayoutApi(userId, withDrawalAmount);
     },
     onSuccess: () => {
-      show("Payout request successful", "success");
+      show("Credit transfer request submitted", "success");
       navigate("/affiliate/bank");
       onClose();
     },
     onError: (error: AxiosError<{ message: string }>) => {
-      show(error.response?.data?.message || "Payout request failed", "error");
+      show(error.response?.data?.message || "Credit transfer request failed", "error");
     },
   });
   const handleCompletePayout = async () => {
@@ -62,7 +62,7 @@ export function BalanceWithDrawModal({
     <Modal isOpen={isOpen} onClose={onClose} size="4xl">
       <ModalContent>
         <ModalHeader className="text-2xl font-bold">
-          Your Account Details
+          Credit Transfer Details
         </ModalHeader>
         <ModalBody className="space-y-4">
           <div className="flex flex-col gap-y-2">
@@ -87,15 +87,15 @@ export function BalanceWithDrawModal({
             </div>
           </div>
           <div className="flex flex-col gap-2">
-            <b className="text-red-500">15% TDS applied on withdrawal.</b>
+            <b className="text-red-500">15% TDS deducted on credit transfer.</b>
             <Input
-              label="Available for withdrawal"
+              label="Credits available for transfer"
               type="number"
               placeholder={balance.toFixed(2)}
               disabled
             />
             <Input
-              label="Withdrawal amount after TDS"
+              label="Transfer amount after TDS"
               type="number"
               placeholder={withDrawalAmountAfterTDS.toString()}
               disabled
@@ -103,7 +103,7 @@ export function BalanceWithDrawModal({
             <Input
               value={withDrawalAmount.toString()}
               onChange={(e) => setWithdrawalAmount(Number(e.target.value))}
-              label="Withdrawal Amount"
+              label="Transfer Amount"
               type="number"
               placeholder="0.00"
               variant="faded"
@@ -113,7 +113,7 @@ export function BalanceWithDrawModal({
         {/* Footer Buttons */}
         <ModalFooter className="flex justify-end flex-col gap-2">
           <Button onPress={handleCompletePayout} color="primary">
-            Requst for withdrawal
+            Request Credit Transfer
           </Button>
         </ModalFooter>
       </ModalContent>

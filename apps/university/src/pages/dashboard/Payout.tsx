@@ -3,7 +3,7 @@ import PayoutTable from "../../components/dashboard/payout/PayoutTable";
 export default function PayoutsPage() {
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl  font-bold mb-4 text-white">Payout History</h1>
+      <h1 className="text-2xl  font-bold mb-4 text-white">Credit Transfer History</h1>
       {/* <PayoutSummary /> */}
       <PayoutTable />
     </div>

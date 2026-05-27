@@ -118,7 +118,7 @@ export default function PayoutTable() {
   // Render table for larger viewports
   return (
     <Table
-      aria-label="Payout history table"
+      aria-label="Credit transfer history table"
       bottomContent={
         <div className="flex w-full justify-center">
           {/* <Pagination

@@ -20,7 +20,7 @@ export default function WithdrawalForm() {
     <form onSubmit={handleSubmit} className="space-y-4 ">
       <Input
         type="number"
-        label="Amount to Withdraw"
+        label="Amount to Transfer"
         placeholder="Enter amount"
         value={amount}
         onChange={(e) => setAmount(e.target.value)}
@@ -31,7 +31,7 @@ export default function WithdrawalForm() {
         }
       />
       <Button type="submit" color="primary" startContent={<Send size={16} />}>
-        Request Withdrawal
+        Request Transfer
       </Button>
     </form>
   );

@@ -1,5 +1,7 @@
 import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { AnimationButton } from "../ReusableComponents";
+import { ArrowRight } from "lucide-react";
 
 const BonusTimeline = () => {
   const milestones = [
@@ -7,7 +9,7 @@ const BonusTimeline = () => {
       month: "1st Month",
       title: "You Start Off as an Apprentice...",
       description:
-        "In your first month, you’ll unlock essential programs and gain access to the community, where you’ll receive guidance from experienced coaches and connect with fellow users who are further along in their journey.",
+        "In your first month, you'll unlock essential programs and gain access to the community, where you'll receive guidance from experienced coaches and connect with fellow users who are further along in their journey.",
       badge:
         "https://framerusercontent.com/images/plKaBkHMa06dVIe6HWAbN4Pbo.png?scale-down-to=512",
     },
@@ -15,7 +17,7 @@ const BonusTimeline = () => {
       month: "2nd Month",
       title: "Get Access to the 8-Figure Network",
       description:
-        "By month two, you’ll gain access to SRK University’s exclusive network, with monthly live calls featuring 8- and 9-figure entrepreneurs. Learn directly from those who’ve mastered the art of wealth-building, and get actionable insights that can help you achieve your goals faster.",
+        "By month two, you'll gain access to SRK University's exclusive network, with monthly live calls featuring 8- and 9-figure entrepreneurs. Learn directly from those who've mastered the art of wealth-building, and get actionable insights that can help you achieve your goals faster.",
       badge:
         "https://framerusercontent.com/images/YFix4Deko7x1GshIpktU9HpQTqw.png?scale-down-to=512",
     },
@@ -29,9 +31,9 @@ const BonusTimeline = () => {
     },
     {
       month: "4th Month",
-      title: "Join Monthly Live Calls with SRK University’s Expert",
+      title: "Join Monthly Live Calls with SRK University's Expert",
       description:
-        "Starting in month four, join monthly live calls with SRK University’s expert, where you can ask questions and receive personalized advice. Get your questions answered in real-time and receive mentorship to accelerate your growth. This is one of the program’s most valuable features.",
+        "Starting in month four, join monthly live calls with SRK University's expert, where you can ask questions and receive personalized advice. Get your questions answered in real-time and receive mentorship to accelerate your growth. This is one of the program's most valuable features.",
       badge:
         "https://framerusercontent.com/images/YpitNuObeF9iU8BVZHfVm7CPhc.png?scale-down-to=512",
     },
@@ -39,7 +41,7 @@ const BonusTimeline = () => {
       month: "6th Month",
       title: "Access Exclusives with Leaders of the Nation",
       description:
-        "By month six, connect to exclusive channels for interactions with the nation’s leading mentors, offering personalized wisdom and strategies from SRK University’s finest.",
+        "By month six, connect to exclusive channels for interactions with the nation's leading mentors, offering personalized wisdom and strategies from SRK University's finest.",
       badge:
         "https://framerusercontent.com/images/MQeeVeaUyDRbUIGFuyvbZtYSPw.png?scale-down-to=512",
     },
@@ -47,7 +49,7 @@ const BonusTimeline = () => {
       month: "12th Month",
       title: "Achieve Emperor Status with Exceptional Skills",
       description:
-        "In month twelve, attain ‘Emperor’ status, equipped with hands-on skills honed to perfection, ready to dominate your field with confidence and capability.",
+        "In month twelve, attain 'Emperor' status, equipped with hands-on skills honed to perfection, ready to dominate your field with confidence and capability.",
       badge:
         "https://framerusercontent.com/images/GOHVqZW4GaDzczOm3gPf6VkBgs.png?scale-down-to=512",
     },
@@ -129,6 +131,17 @@ const BonusTimeline = () => {
             </div>
           ))}
         </div>
+        {/* Know More button */}
+        <div className="flex flex-col items-center gap-1.5 mb-4">
+          <Link
+            to="/learn/milestone-journey"
+            className="group inline-flex items-center gap-2 px-5 py-2.5 border border-primary/40 text-primary/75 text-sm font-medium rounded transition-all duration-300 hover:border-primary hover:bg-primary hover:text-bgPrimary hover:scale-[1.04] hover:shadow-[0_0_20px_rgba(182,137,56,0.35)]"
+          >
+            Know More <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1" />
+          </Link>
+          <span className="text-[11px] text-white/25">see what you unlock each month</span>
+        </div>
+
         <AnimationButton
           onClick={() => {
             navigate(`/auth/sign-up?packageId=${VITE_PRO_PACKAGE_ID}`);

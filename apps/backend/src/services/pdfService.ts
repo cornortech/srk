@@ -1,5 +1,6 @@
 import path from 'path';
 import { PDFDocument, rgb } from 'pdf-lib';
+import fontkit from '@pdf-lib/fontkit';
 import fs from 'fs';
 import sharp from 'sharp';
 import { uploadFileToR2 } from './r2Service';
@@ -294,6 +295,7 @@ export async function generateAndUploadCertificate(
 
     const existingPdfBytes = fs.readFileSync(certificatePath);
     const pdfDoc = await PDFDocument.load(existingPdfBytes);
+    pdfDoc.registerFontkit(fontkit);
 
     const pages = pdfDoc.getPages();
     const firstPage = pages[0];
@@ -318,43 +320,50 @@ export async function generateAndUploadCertificate(
     const currentYear = new Date().getFullYear();
     const batch = `B-${currentYear}`;
 
-    const fontBold = await pdfDoc.embedFont('Helvetica-Bold');
+    // Embed Great Vibes cursive font for the name
+    const cursiveFontPath = path.join(
+      process.cwd(),
+      'apps', 'backend', 'static', 'fonts', 'GreatVibes-Regular.ttf'
+    );
+    const cursiveFontBytes = fs.readFileSync(cursiveFontPath);
+    const fontName = await pdfDoc.embedFont(cursiveFontBytes);
     const fontRegular = await pdfDoc.embedFont('Helvetica');
 
-    const nameSize = 22;
-    const nameWidth = fontBold.widthOfTextAtSize(userFullName, nameSize);
-    
-    // Add participant name (centered above the line)
+    // Gold colour matching the certificate's decorative elements
+    const gold = rgb(212 / 255, 175 / 255, 55 / 255);
+
+    const nameSize = 36;
+    const nameWidth = fontName.widthOfTextAtSize(userFullName, nameSize);
+
+    // Participant name — centered, gold, cursive (Great Vibes)
     firstPage.drawText(userFullName, {
       x: pageWidth / 2 - nameWidth / 2,
-      y: 460,
+      y: 455,
       size: nameSize,
-      color: rgb(1, 1, 1),
-      font: fontBold,
+      color: gold,
+      font: fontName,
     });
 
-    // Add "ISSUED ON:" date in the bottom section
+    // Footer values — placed just above their respective labels (y≈170)
     firstPage.drawText(formattedDate, {
       x: 135,
-      y: 200,
+      y: 170,
       size: 11,
       color: rgb(1, 1, 1),
       font: fontRegular,
     });
 
-    // Add batch/cohort (current year)
     firstPage.drawText(batch, {
       x: 360,
-      y: 200,
+      y: 170,
       size: 11,
       color: rgb(1, 1, 1),
       font: fontRegular,
     });
 
-    // Add participant ID
     firstPage.drawText(participantId, {
       x: 525,
-      y: 200,
+      y: 170,
       size: 11,
       color: rgb(1, 1, 1),
       font: fontRegular,

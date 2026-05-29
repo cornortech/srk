@@ -130,8 +130,10 @@ const sendCompletionCertificates = async () => {
         const participantId = Math.floor(Math.random() * 1000000).toString().padStart(6, '0');
 
         // Generate certificate
+        const toTitleCase = (s: string) =>
+          s.replace(/\b\w/g, (c) => c.toUpperCase());
         const certificateKey = await generateAndUploadCertificate(
-          `${user.firstName} ${user.lastName}`,
+          toTitleCase(`${user.firstName} ${user.lastName}`),
           new Date(),
           participantId
         );

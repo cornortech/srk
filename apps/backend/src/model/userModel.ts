@@ -42,6 +42,7 @@ export interface IUser extends Document {
   resetPasswordToken?: string;
   resetPasswordExpires?: Date;
   hasSendCompletionCertificate?: boolean;
+  certificateAssetUrl?: string;
 
   createdAt: Date;
   updatedAt: Date;
@@ -146,6 +147,9 @@ const userSchema = new mongoose.Schema<IUser>(
     hasSendCompletionCertificate: {
       type: Boolean,
       default: false,
+    },
+    certificateAssetUrl: {
+      type: String,
     },
   },
   {

@@ -87,7 +87,7 @@ class EmailService {
                 
                 ${
                   message
-                    ? `<p style="font-size: 16px; line-height: 1.5; margin-bottom: 10px;">${message}</p>`
+                    ? `<div style="font-size: 16px; line-height: 1.5; margin-bottom: 10px;">${message}</div>`
                     : ""
                 }
                 

@@ -35,7 +35,12 @@
     "script:get-user": "tsx apps/backend/src/scripts/getSrkUniversityUser.ts",
     "script:get-task-submissions": "tsx apps/backend/src/scripts/getSrkTaskActionSubmissions.ts",
     "script:update-task-coins": "tsx apps/backend/src/scripts/updateTaskUserCoins.ts",
-    "script:create-affiliates-srkbank": "tsx apps/backend/src/scripts/createAffiliatesSrkBank.ts"
+    "script:create-affiliates-srkbank": "tsx apps/backend/src/scripts/createAffiliatesSrkBank.ts",
+    "script:send-test-certificate": "tsx apps/backend/src/scripts/sendTestCertificate.ts",
+    "script:send-bulk-certificates": "tsx apps/backend/src/scripts/sendBulkCertificates.ts",
+    "script:check-certificate-status": "tsx apps/backend/src/scripts/checkCertificateStatus.ts",
+    "script:count-eligible-users": "tsx apps/backend/src/scripts/countEligibleUsers.ts",
+    "script:generate-course-enrollment-pdf": "tsx apps/backend/src/scripts/generateCourseEnrollmentPDF.ts"
   },
   "private": true,
   "devDependencies": {
@@ -110,6 +115,7 @@
     "@nextui-org/react": "^2.6.11",
     "@nextui-org/system": "^2.4.6",
     "@nextui-org/theme": "^2.4.5",
+    "@pdf-lib/fontkit": "^1.1.1",
     "@react-hook/media-query": "^1.1.1",
     "@tanstack/react-query": "^5.90.10",
     "@tensorflow/tfjs": "^4.22.0",

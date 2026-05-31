@@ -1,6 +1,7 @@
 import { Card, Button, CardBody } from "@nextui-org/react";
-import { Ban } from "lucide-react";
+import { Ban, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 export function ComparisonSection() {
   const navigate = useNavigate();
@@ -72,6 +73,16 @@ export function ComparisonSection() {
               </Card>
             </div>
           </div>
+        </div>
+
+        <div className="flex flex-col items-center gap-1.5 mt-10">
+          <Link
+            to="/learn/why-srk-university"
+            className="group inline-flex items-center gap-2 px-5 py-2.5 border border-primary/40 text-primary/75 text-sm font-medium rounded transition-all duration-300 hover:border-primary hover:bg-primary hover:text-bgPrimary hover:scale-[1.04] hover:shadow-[0_0_20px_rgba(182,137,56,0.35)]"
+          >
+            Know More <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1" />
+          </Link>
+          <span className="text-[11px] text-white/25">see how we deliver real value</span>
         </div>
       </section>
     </>

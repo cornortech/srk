@@ -316,7 +316,7 @@ export const TaskHistoryView: React.FC = () => {
                 <div className="p-4 bg-white/5 rounded-lg border border-white/10">
                   <p className="text-sm text-zinc-400 mb-1">You will receive</p>
                   <p className="text-3xl font-bold text-amber-400">
-                    {selectedSubmissionForClaim.growPackageTodoId?.enrollment?.amount || '100'} Coins
+                    100 Coins
                   </p>
                 </div>
 
@@ -402,7 +402,7 @@ export const TaskHistoryView: React.FC = () => {
               <p className="text-zinc-300 mb-6">
                 You have successfully claimed{' '}
                 <span className="text-amber-400 font-bold">
-                  {selectedSubmissionForClaim.growPackageTodoId?.enrollment?.amount || '100'} Coins
+                  100 Coins
                 </span>
               </p>
 

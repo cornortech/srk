@@ -1,9 +1,6 @@
 import React from 'react';
-import { motion } from 'framer-motion';
-import { ChevronRight, Coins, Wallet } from 'lucide-react';
+import { Coins, Menu, Wallet } from 'lucide-react';
 import { DashboardView as DashboardViewType } from '../types';
-import DashboardGradientText from '../components/ui/DashboardGradientText';
-import MagneticButton from '../components/ui/DashboardMagneticButton';
 import MobileMenu from './MobileMenu';
 import Sidebar from './Sidebar';
 
@@ -13,18 +10,12 @@ interface DashboardLayoutProps {
   setView: (view: 'landing' | 'dashboard') => void;
   balance: number;
   setDashView: (view: DashboardViewType) => void;
-  // Props for sidebar/mobile menu
   isApproved: boolean;
   eligible: number;
   isMenuOpen: boolean;
   setIsMenuOpen: (open: boolean) => void;
-  addNotification: (
-    message: string,
-    type: 'success' | 'error' | 'info'
-  ) => void;
+  addNotification: (message: string, type: 'success' | 'error' | 'info') => void;
   isActivated: boolean;
-  // title: string;
-  // desc: string;
 }
 
 export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
@@ -39,117 +30,87 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   setIsMenuOpen,
   addNotification,
   isActivated,
-  // title,
-  // desc,
-}) => {
-  return (
-    <div className="min-h-screen">
-      <div className="relative z-10">
-        {/* Header */}
-        <header className="border-b border-white/10 bg-black/20 backdrop-blur-xl sticky top-0 z-40">
-          <div className="max-w-7xl mx-auto px-6 py-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <motion.div
-                  whileHover={{ rotate: 360 }}
-                  transition={{ duration: 0.6 }}
-                  className="w-10 h-10 rounded-full bg-div-to-r from-[#b68938] to-[#e1ba73] flex items-center justify-center cursor-pointer"
-                  onClick={() => setView('landing')}
-                >
-                  <span className="font-bold text-black">S</span>
-                </motion.div>
-                <div>
-                  <h1 className="text-xl font-bold text-white">
-                    <DashboardGradientText>SRK Portal</DashboardGradientText>
-                  </h1>
-                  <p className="text-xs text-zinc-400">Earn Through Tasks</p>
-                </div>
-              </div>
+}) => (
+  <div className="min-h-screen bg-[#0a0705]">
 
-              <div className="flex items-center gap-4">
-                {/* Balance Display */}
-                <div className="hidden sm:flex items-center gap-2 px-4 py-2 bg-white/5 rounded-full group">
-                  <motion.div
-                    animate={{ rotate: [0, 360] }}
-                    transition={{
-                      duration: 20,
-                      repeat: Infinity,
-                      ease: 'linear',
-                    }}
-                  >
-                    <Coins size={16} className="text-amber-400" />
-                  </motion.div>
-                  <span className="text-white font-bold">
-                    {balance.toLocaleString()}
-                  </span>
-                  <span className="text-zinc-400 text-sm">Coins</span>
-                  <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                    <ChevronRight size={16} className="text-zinc-500" />
-                  </div>
-                </div>
+    {/* Header */}
+    <header className="sticky top-0 z-40 border-b border-white/[0.06] bg-[#0a0705]/95 backdrop-blur-sm">
+      <div className="max-w-7xl mx-auto px-5 h-15 flex items-center justify-between gap-4" style={{ height: '60px' }}>
 
-                {/* Withdraw Button - Only show if portal is activated */}
-                {isActivated && (
-                  <MagneticButton
-                    small
-                    onClick={() => setDashView('coinExchange')}
-                  >
-                    <Wallet size={16} /> Withdraw
-                  </MagneticButton>
-                )}
-              </div>
-            </div>
+        <button
+          onClick={() => setView('landing')}
+          className="flex items-center gap-3 hover:opacity-80 transition-opacity"
+        >
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#e1ba73] to-[#b68938] flex items-center justify-center shadow-[0_2px_8px_rgba(182,137,56,0.4)] flex-shrink-0">
+            <span className="font-black text-black text-sm select-none">S</span>
           </div>
-        </header>
-
-        <MobileMenu
-          isMenuOpen={isMenuOpen}
-          setIsMenuOpen={setIsMenuOpen}
-          balance={balance}
-          eligible={eligible}
-          isApproved={isApproved}
-          dashView={dashView}
-          setView={setView}
-          setDashView={setDashView}
-          addNotification={addNotification}
-          isActivated={isActivated}
-        />
-
-        <div className="max-w-7xl mx-auto px-6 py-8">
-          <div className="flex flex-col lg:flex-row gap-8">
-            {/* Sidebar */}
-            <div className="lg:w-64">
-              <Sidebar
-                dashView={dashView}
-                setDashView={setDashView}
-                isApproved={isApproved}
-                setView={setView}
-                balance={balance}
-                eligible={eligible}
-                addNotification={addNotification}
-                isActivated={isActivated}
-              />
-            </div>
-
-            {/* Main Content */}
-            <main className="flex-1 min-w-0">
-              {/* <div className="mb-8">
-                <motion.div
-                  key={dashView}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                >
-                  <h1 className="text-4xl font-bold text-white mb-2">
-                    <DashboardGradientText>{title}</DashboardGradientText>
-                  </h1>
-                  <p className="text-zinc-400">{desc}</p>
-                </motion.div>
-              </div> */}
-              {children}
-            </main>
+          <div className="hidden sm:flex flex-col items-start">
+            <span className="text-sm font-bold text-white leading-none">SRK Portal</span>
+            <span className="text-[10px] text-white/35 leading-none mt-0.5">Earn Through Tasks</span>
           </div>
+        </button>
+
+        <div className="flex items-center gap-2">
+          <div className="hidden sm:flex items-center gap-2 px-3 py-2 rounded-lg bg-white/[0.05] border border-white/[0.07]">
+            <Coins size={13} className="text-[#e1ba73]" />
+            <span className="text-sm font-bold text-white tabular-nums">{balance.toLocaleString()}</span>
+            <span className="text-xs text-white/35">coins</span>
+          </div>
+
+          {isActivated && (
+            <button
+              onClick={() => setDashView('coinExchange')}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-[#b68938]/15 border border-[#b68938]/30 text-[#e1ba73] text-sm font-semibold hover:bg-[#b68938]/25 transition-colors duration-150"
+            >
+              <Wallet size={13} />
+              <span className="hidden sm:inline">Withdraw</span>
+            </button>
+          )}
+
+          <button
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className="lg:hidden p-2 rounded-lg text-white/45 hover:text-white hover:bg-white/[0.06] transition-colors"
+          >
+            <Menu size={18} />
+          </button>
         </div>
       </div>
+    </header>
+
+    <MobileMenu
+      isMenuOpen={isMenuOpen}
+      setIsMenuOpen={setIsMenuOpen}
+      balance={balance}
+      eligible={eligible}
+      isApproved={isApproved}
+      dashView={dashView}
+      setView={setView}
+      setDashView={setDashView}
+      addNotification={addNotification}
+      isActivated={isActivated}
+    />
+
+    <div className="max-w-7xl mx-auto px-5 py-8">
+      <div className="flex flex-col lg:flex-row gap-6">
+
+        <div className="hidden lg:block lg:w-56 flex-shrink-0">
+          <Sidebar
+            dashView={dashView}
+            setDashView={setDashView}
+            isApproved={isApproved}
+            setView={setView}
+            balance={balance}
+            eligible={eligible}
+            addNotification={addNotification}
+            isActivated={isActivated}
+          />
+        </div>
+
+        <main className="flex-1 min-w-0">
+          {children}
+        </main>
+
+      </div>
     </div>
-  );
-};
+  </div>
+);

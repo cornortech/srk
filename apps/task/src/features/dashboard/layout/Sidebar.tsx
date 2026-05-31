@@ -1,22 +1,9 @@
 import {
-  BarChart3,
-  Coins,
-  CreditCard,
-  DollarSign,
-  FileClock,
-  History,
-  ListChecks,
-  Lock,
-  LogOut,
-  Shield,
-  Trophy,
-  UserCircle,
-  Wallet,
+  BarChart3, Coins, CreditCard, DollarSign, FileClock,
+  History, ListChecks, Lock, LogOut, Shield, Trophy, UserCircle, Wallet,
 } from 'lucide-react';
 import React from 'react';
-import { motion } from 'framer-motion';
 import { DashboardView } from '../types';
-import { DashboardGlassCard } from '../components/ui/DashboardGlassCard';
 import { api } from '../../../lib/api';
 import { useTaskAuthStore } from '../../../store/useTaskAuthStore';
 
@@ -27,215 +14,111 @@ interface SidebarProps {
   setView: (view: 'landing' | 'dashboard') => void;
   balance: number;
   eligible: number;
-  addNotification: (
-    message: string,
-    type: 'success' | 'error' | 'info'
-  ) => void;
+  addNotification: (message: string, type: 'success' | 'error' | 'info') => void;
   isActivated: boolean;
 }
 
+const navItems: {
+  view: DashboardView;
+  icon: React.FC<{ size?: number; className?: string }>;
+  label: string;
+  requiresApproval?: boolean;
+  requiresActivation?: boolean;
+}[] = [
+  { view: 'verification', icon: Shield, label: 'Verification' },
+  { view: 'analytics', icon: BarChart3, label: 'Analytics', requiresApproval: true },
+  { view: 'tasks', icon: ListChecks, label: 'Tasks', requiresApproval: true },
+  { view: 'taskHistory', icon: FileClock, label: 'Task History', requiresApproval: true },
+  { view: 'leaderboard', icon: Trophy, label: 'Leaderboard', requiresApproval: true },
+  { view: 'coinExchange', icon: DollarSign, label: 'Coin Exchange', requiresApproval: true, requiresActivation: true },
+  { view: 'finance', icon: History, label: 'Finance History', requiresApproval: true },
+  { view: 'paymentDetails', icon: CreditCard, label: 'Payment Details', requiresApproval: true },
+  { view: 'profile', icon: UserCircle, label: 'Profile', requiresApproval: true },
+  { view: 'payout', icon: Wallet, label: 'Legacy Payout', requiresApproval: true },
+  { view: 'logout', icon: LogOut, label: 'Logout' },
+];
+
 const Sidebar: React.FC<SidebarProps> = ({
-  dashView,
-  setDashView,
-  isApproved,
-  setView,
-  balance,
-  eligible,
-  addNotification,
-  isActivated,
+  dashView, setDashView, isApproved, setView, balance, eligible, addNotification, isActivated,
 }) => {
   const { taskUserID } = useTaskAuthStore();
 
-  // Fetch rejected tasks count
-  const { data: rejectedTasksData } =
-    api.srkTask.getRejectedSrkTaskActionSubmissionsByUser.useQuery(
-      ['getRejectedSrkTaskActionSubmissionsByUser', taskUserID],
-      {
-        params: { userId: taskUserID || '' },
-        query: { page: '1', limit: '1' }, // Only need count
-      },
-      {
-        enabled: !!taskUserID && isApproved,
-        queryKey: ['getRejectedSrkTaskActionSubmissionsByUser', taskUserID || ''],
-      }
-    );
+  const { data: rejectedTasksData } = api.srkTask.getRejectedSrkTaskActionSubmissionsByUser.useQuery(
+    ['getRejectedSrkTaskActionSubmissionsByUser', taskUserID],
+    { params: { userId: taskUserID || '' }, query: { page: '1', limit: '1' } },
+    { enabled: !!taskUserID && isApproved, queryKey: ['getRejectedSrkTaskActionSubmissionsByUser', taskUserID || ''] }
+  );
 
-  const rejectedTasksCount = rejectedTasksData?.body?.totalRecords || 0;
-  const navItems: {
-    view: DashboardView;
-    icon: React.FC<any>;
-    label: string;
-    requiresApproval?: boolean;
-    requiresActivation?: boolean;
-    badge?: number;
-  }[] = [
-    {
-      view: 'verification',
-      icon: Shield,
-      label: 'Verification',
-      badge: !isApproved ? 1 : undefined,
-    },
-    {
-      view: 'analytics',
-      icon: BarChart3,
-      label: 'Analytics',
-      requiresApproval: true,
-    },
-    {
-      view: 'tasks',
-      icon: ListChecks,
-      label: 'Tasks',
-      requiresApproval: true,
-      badge: rejectedTasksCount,
-    },
-    {
-      view: 'taskHistory',
-      icon: FileClock,
-      label: 'Task History',
-      requiresApproval: true,
-    },
-    {
-      view: 'leaderboard',
-      icon: Trophy,
-      label: 'Leaderboard',
-      requiresApproval: true,
-    },
-    {
-      view: 'coinExchange',
-      icon: DollarSign,
-      label: 'Coin Exchange',
-      requiresApproval: true,
-      requiresActivation: true,
-    },
-    {
-      view: 'finance',
-      icon: History,
-      label: 'Finance History',
-      requiresApproval: true,
-    },
-    {
-      view: 'paymentDetails',
-      icon: CreditCard,
-      label: 'Payment Details',
-      requiresApproval: true,
-    },
-    {
-      view: 'profile',
-      icon: UserCircle,
-      label: 'Profile',
-      requiresApproval: true,
-    },
-    {
-      view: 'payout',
-      icon: Wallet,
-      label: 'Legacy Payout',
-      requiresApproval: true,
-    },
-    { view: 'logout', icon: LogOut, label: 'Logout' },
-  ];
+  const rejectedCount = rejectedTasksData?.body?.totalRecords || 0;
+
+  const getBadge = (view: DashboardView) => {
+    if (view === 'verification' && !isApproved) return 1;
+    if (view === 'tasks' && rejectedCount > 0) return rejectedCount;
+    return undefined;
+  };
 
   return (
-    <aside className="w-full lg:w-64 shrink">
-      <DashboardGlassCard className="h-full p-6">
-        <div className="flex items-center gap-3 mb-8">
-          <motion.div
-            whileHover={{ rotate: 360 }}
-            transition={{ duration: 0.6 }}
-            className="w-12 h-12 rounded-full bg-div-to-r from-[#b68938] to-[#e1ba73] flex items-center justify-center"
-          >
-            <span className="font-bold text-black text-xl">S</span>
-          </motion.div>
-          <div>
-            <h1 className="text-xl font-bold text-white">SRK Portal</h1>
-            <p className="text-xs text-zinc-400">Earn Through Tasks</p>
-          </div>
-        </div>
-
-        <nav className="space-y-2">
-          {navItems
-            .filter((item) => {
-              // Hide coin exchange if not activated
-              if (item.requiresActivation && !isActivated) {
-                return false;
-              }
-              return true;
-            })
-            .map((item) => {
-              const Icon = item.icon;
-              const isDisabled = item.requiresApproval && !isApproved;
-              const isActive = dashView === item.view;
+    <aside className="flex flex-col gap-1">
+      <nav className="flex flex-col gap-0.5">
+        {navItems
+          .filter(item => !(item.requiresActivation && !isActivated))
+          .map(item => {
+            const Icon = item.icon;
+            const isDisabled = !!item.requiresApproval && !isApproved;
+            const isActive = dashView === item.view;
+            const isLogout = item.view === 'logout';
+            const badge = getBadge(item.view);
 
             return (
-              <motion.button
+              <button
                 key={item.view}
                 onClick={() => {
-                  if (!isDisabled && item.view !== 'logout') {
-                    setDashView(item.view);
-                  }
-                  if (item.view === 'logout') {
-                    setView('landing');
-                    addNotification('Logged out successfully', 'info');
-                  }
+                  if (isDisabled) return;
+                  if (isLogout) { setView('landing'); addNotification('Logged out', 'info'); return; }
+                  setDashView(item.view);
                 }}
-                whileHover={!isDisabled ? { x: 5 } : {}}
-                className={`
-                    w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all relative
-                    ${
-                      isActive
-                        ? 'bg-gradient-to-r from-[#b68938]/20 to-[#b68938]/10 text-white border border-white/10'
-                        : 'text-zinc-400 hover:text-white hover:bg-white/5'
-                    }
-                    ${isDisabled ? 'opacity-50 cursor-not-allowed' : ''}
-                    ${
-                      item.view === 'logout'
-                        ? 'mt-8 border-t border-white/10 pt-8'
-                        : ''
-                    }
-                  `}
                 disabled={isDisabled}
+                className={[
+                  'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm w-full text-left transition-all duration-150',
+                  isActive
+                    ? 'bg-[#b68938]/12 text-white font-semibold shadow-[inset_0_0_0_1px_rgba(182,137,56,0.2)]'
+                    : isLogout
+                    ? 'text-white/35 hover:text-red-400 hover:bg-red-500/[0.07] mt-2'
+                    : 'text-white/50 hover:text-white/85 hover:bg-white/[0.05]',
+                  isDisabled ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer',
+                ].join(' ')}
+                style={isActive ? { backgroundColor: 'rgba(182,137,56,0.12)' } : undefined}
               >
                 <Icon
-                  size={18}
-                  className={isActive ? 'from-[#ac9976] to-[#e1ba73]' : ''}
+                  size={15}
+                  className={`flex-shrink-0 ${isActive ? 'text-[#e1ba73]' : isLogout ? 'inherit' : ''}`}
                 />
-                <span className="text-sm font-medium">{item.label}</span>
+                <span>{item.label}</span>
 
-                {item.badge && (
-                  <span className="ml-auto px-2 py-1 bg-red-500 text-white text-xs rounded-full min-w-[20px] text-center">
-                    {item.badge}
+                {badge ? (
+                  <span className="ml-auto text-[10px] font-bold bg-red-500 text-white px-1.5 py-0.5 rounded-full min-w-[18px] text-center leading-none">
+                    {badge}
                   </span>
-                )}
-
-                {isDisabled && (
-                  <Lock size={14} className="ml-auto text-zinc-500" />
-                )}
-
-                {/* Active indicator */}
-                {isActive && (
-                  <motion.div
-                    layoutId="activeTab"
-                    className="absolute left-0 top-0 bottom-0 my-auto w-1 h-6 bg-amber-400 rounded-r-full"
-                  />
-                )}
-              </motion.button>
+                ) : isDisabled ? (
+                  <Lock size={11} className="ml-auto text-white/20 flex-shrink-0" />
+                ) : null}
+              </button>
             );
           })}
-        </nav>
+      </nav>
 
-        {/* Balance display */}
-        <div className="mt-8 p-4 bg-linear-to-r from-[#b68938]/10 to-[#e1ba73]/10 rounded-xl border border-white/10">
-          <p className="text-xs text-zinc-400 mb-1">Your Balance</p>
-          <div className="flex items-center gap-2">
-            <Coins size={16} className="text-amber-400" />
-            <p className="text-lg font-bold text-white">
-              {balance.toLocaleString()} Coins
-            </p>
-          </div>
-          <p className="text-xs text-zinc-500 mt-1">
-            Eligible: {eligible} Coins
-          </p>
+      {/* Balance block */}
+      <div className="mt-6 rounded-xl bg-gradient-to-br from-[#1a1408] to-[#111007] border border-[#b68938]/15 p-4">
+        <p className="text-[10px] font-semibold uppercase tracking-widest text-[#b68938]/60 mb-3">Balance</p>
+        <div className="flex items-center gap-2 mb-1">
+          <Coins size={14} className="text-[#e1ba73]" />
+          <span className="text-xl font-bold text-white tabular-nums">{balance.toLocaleString()}</span>
+          <span className="text-xs text-white/35">coins</span>
         </div>
-      </DashboardGlassCard>
+        {eligible > 0 && (
+          <p className="text-xs text-white/35">Eligible: {eligible.toLocaleString()} coins</p>
+        )}
+      </div>
     </aside>
   );
 };

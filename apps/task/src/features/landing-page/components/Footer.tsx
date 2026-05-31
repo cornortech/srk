@@ -1,175 +1,110 @@
-import { motion } from 'framer-motion';
-import { ArrowUpRight, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { MagneticButton } from '../../../components/ui/MagneticButton';
 
 export const Footer = () => {
   const universityUrl = import.meta.env.VITE_SRK_UNIVERSITY_URL || 'https://thesrkuniversity.com';
-  
-  const platformLinks = [
-    { name: 'How It Works', href: '/how-it-works' },
-    { name: 'Features', href: '/features' },
-    { name: 'Getting Started', href: '/getting-started' },
-    { name: 'FAQ', href: '/faq' },
+
+  const sections = [
+    {
+      title: 'Platform',
+      links: [
+        { name: 'How It Works', href: '/how-it-works' },
+        { name: 'Features', href: '/features' },
+        { name: 'Getting Started', href: '/getting-started' },
+        { name: 'FAQ', href: '/faq' },
+      ],
+    },
+    {
+      title: 'Company',
+      links: [
+        { name: 'About Us', href: '/about' },
+        { name: 'Blog', href: '/blog' },
+        { name: 'Articles', href: '/articles' },
+        { name: 'Help Center', href: '/help' },
+        { name: 'Contact', href: '/contact' },
+        { name: 'Privacy Policy', href: '/privacy-policy' },
+        { name: 'Terms & Conditions', href: '/terms-and-conditions' },
+      ],
+    },
+    {
+      title: 'Resources',
+      links: [
+        { name: 'Security Guide', href: '/help' },
+        { name: 'Progress Strategies', href: '/blog' },
+        { name: 'Support Center', href: '/contact' },
+      ],
+    },
   ];
-  const companyLinks = [
-    { name: 'About Us', href: '/about' },
-    { name: 'Blog', href: '/blog' },
-    { name: 'Articles' , href: '/articles'} , 
-    { name: 'Help Center', href: '/help' },
-    { name: 'Contact', href: '/contact' },
-    { name: 'Privacy Policy', href: '/privacy-policy' },
-    { name: 'Terms & Conditions', href: '/terms-and-conditions' },
-  ];
-  const resourceLinks = [
-    { name: 'Security Guide', href: '/help' },
-    { name: 'Progress Strategies', href: '/blog' },
-    { name: 'Community Forum', href: '#' },
-    { name: 'Support Center', href: '/contact' },
-  ];
-  const socialLinks = ['Twitter', 'Instagram', 'LinkedIn', 'Discord'];
-  const contactInfo = {
-    phone: '+977 976-9223013',
-    email: 'support@srktask.com',
-  };
 
   return (
-    <footer className="pt-32 pb-12 border-t border-white/5 relative overflow-hidden bg-black">
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#0a0705] to-black" />
+    <footer className="bg-[#0a0705] border-t border-white/[0.06] pt-16 pb-10">
+      <div className="max-w-7xl mx-auto px-6">
 
-      <div className="max-w-7xl mx-auto px-6 relative z-10">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mb-20">
-          <div className="col-span-1 md:col-span-2">
-            <div className="flex items-center gap-3 mb-6">
-              <Link to="/" className="flex items-center gap-3">
-                <img src="/task-logo.png" alt="SRK Task" className="w-40 object-contain" />
-              </Link>
-            </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 mb-14">
 
-            <p className="text-gray-500 max-w-sm mb-8 leading-relaxed font-medium">
-              The premier platform for social influence growth and
-              verified ecosystem growth. Built for the modern creator. Part of
-              the SRK Ecosystem.
+          <div className="lg:col-span-2">
+            <Link to="/">
+              <img src="/task-logo.png" alt="SRK Task" className="h-7 w-auto object-contain mb-5" />
+            </Link>
+            <p className="text-sm text-white/40 max-w-xs leading-relaxed mb-7">
+              The premier platform for social influence growth and verified
+              ecosystem progression. Part of the SRK Ecosystem.
             </p>
 
-            <div className="flex flex-col gap-4 mb-8">
+            <div className="space-y-3 mb-6">
               <div>
-                <p className="text-xs text-gray-400 font-semibold uppercase tracking-widest mb-1">Phone</p>
-                <a href="tel:+977976922301" className="text-[#e1ba73] font-bold hover:text-white transition-colors">
-                  {contactInfo.phone}
+                <p className="text-[10px] font-semibold uppercase tracking-widest text-white/25 mb-1">Phone</p>
+                <a href="tel:+9779769223013" className="text-sm font-semibold text-[#e1ba73] hover:text-white transition-colors">
+                  +977 976-9223013
                 </a>
               </div>
               <div>
-                <p className="text-xs text-gray-400 font-semibold uppercase tracking-widest mb-1">Email</p>
-                <a href="mailto:support@srktask.com" className="text-[#e1ba73] font-bold hover:text-white transition-colors">
-                  {contactInfo.email}
+                <p className="text-[10px] font-semibold uppercase tracking-widest text-white/25 mb-1">Email</p>
+                <a href="mailto:support@srktask.com" className="text-sm font-semibold text-[#e1ba73] hover:text-white transition-colors">
+                  support@srktask.com
                 </a>
               </div>
             </div>
 
-            <div className="flex items-center gap-4">
-
-              <a
-                href={universityUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm text-[#e1ba73] font-bold flex items-center gap-2 hover:text-white transition-colors group"
-              >
-                University Portal
-                <motion.div
-                  animate={{ x: [0, 5, 0] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                >
-                  <ChevronRight
-                    size={16}
-                    className="group-hover:translate-x-1 transition-transform"
-                  />
-                </motion.div>
-              </a>
-            </div>
+            <a
+              href={universityUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-xs font-semibold px-4 py-2 rounded-lg border border-[#b68938]/25 text-[#b68938]/70 hover:border-[#b68938]/50 hover:text-[#e1ba73] bg-[#b68938]/05 transition-all duration-150"
+            >
+              University Portal ↗
+            </a>
           </div>
 
-          <div className="col-span-1">
-            <h4 className="text-white font-bold mb-6 text-lg">Platform</h4>
-            <ul className="space-y-4 text-gray-500 text-sm font-medium">
-              {platformLinks.map((item) => (
-                <li key={item.name}>
-                  <Link
-                    to={item.href}
-                    className="hover:text-[#e1ba73] transition-colors flex items-center gap-1 group"
-                  >
-                    {item.name}
-                    <ArrowUpRight
-                      size={12}
-                      className="opacity-0 group-hover:opacity-100 transition-opacity"
-                    />
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="col-span-1">
-            <h4 className="text-white font-bold mb-6 text-lg">Company</h4>
-            <ul className="space-y-4 text-gray-500 text-sm font-medium">
-              {companyLinks.map((item) => (
-                <li key={item.name}>
-                  <Link
-                    to={item.href}
-                    className="hover:text-[#e1ba73] transition-colors flex items-center gap-1 group"
-                  >
-                    {item.name}
-                    <ArrowUpRight
-                      size={12}
-                      className="opacity-0 group-hover:opacity-100 transition-opacity"
-                    />
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="col-span-1">
-            <h4 className="text-white font-bold mb-6 text-lg">Resources</h4>
-            <ul className="space-y-4 text-gray-500 text-sm font-medium">
-              {resourceLinks.map((item) => (
-                <li key={item.name}>
-                  {item.href.startsWith('/') ? (
+          {sections.map(section => (
+            <div key={section.title}>
+              <h4 className="text-xs font-bold uppercase tracking-widest text-white/30 mb-5">
+                {section.title}
+              </h4>
+              <ul className="space-y-3">
+                {section.links.map(link => (
+                  <li key={link.name}>
                     <Link
-                      to={item.href}
-                      className="hover:text-[#e1ba73] transition-colors flex items-center gap-1 group"
+                      to={link.href}
+                      className="text-sm text-white/45 hover:text-white/80 transition-colors duration-150"
                     >
-                      {item.name}
-                      <ArrowUpRight
-                        size={12}
-                        className="opacity-0 group-hover:opacity-100 transition-opacity"
-                      />
+                      {link.name}
                     </Link>
-                  ) : (
-                    <a
-                      href={item.href}
-                      className="hover:text-[#e1ba73] transition-colors flex items-center gap-1 group"
-                    >
-                      {item.name}
-                      <ArrowUpRight
-                        size={12}
-                        className="opacity-0 group-hover:opacity-100 transition-opacity"
-                      />
-                    </a>
-                  )}
-                </li>
-              ))}
-            </ul>
-          </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </div>
 
-        <div className="border-t border-white/5 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left">
-          <p className="text-xs text-gray-600 font-medium">
-            © 2026 SRK Task. All rights reserved. | Optimized for the SRK
-            Ecosystem.
+        <div className="border-t border-white/[0.06] pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <p className="text-xs text-white/20">
+            © 2026 SRK Task. All rights reserved. Part of the SRK Ecosystem.
           </p>
-
+          <p className="text-xs text-white/15">
+            Powered by SRK University SSO
+          </p>
         </div>
+
       </div>
     </footer>
   );

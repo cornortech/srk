@@ -1,52 +1,45 @@
 import { AlertTriangle, CheckCircle, Info, X } from 'lucide-react';
 import React from 'react';
-import { motion } from 'framer-motion';
 
 const FloatingNotification: React.FC<{
   message: string;
   type: 'success' | 'error' | 'info';
   onClose: () => void;
 }> = ({ message, type, onClose }) => {
-  const getConfig = () => {
-    switch (type) {
-      case 'success':
-        return {
-          bg: 'bg-emerald-500/20',
-          border: 'border-emerald-500/30',
-          icon: <CheckCircle className="text-emerald-400" />,
-        };
-      case 'error':
-        return {
-          bg: 'bg-rose-500/20',
-          border: 'border-rose-500/30',
-          icon: <AlertTriangle className="text-rose-400" />,
-        };
-      default:
-        return {
-          bg: 'bg-blue-500/20',
-          border: 'border-blue-500/30',
-          icon: <Info className="text-blue-400" />,
-        };
-    }
+  const configs = {
+    success: {
+      border: 'border-emerald-500/30',
+      icon: <CheckCircle size={15} className="text-emerald-400 flex-shrink-0" />,
+      dot: 'bg-emerald-400',
+    },
+    error: {
+      border: 'border-red-500/30',
+      icon: <AlertTriangle size={15} className="text-red-400 flex-shrink-0" />,
+      dot: 'bg-red-400',
+    },
+    info: {
+      border: 'border-white/[0.12]',
+      icon: <Info size={15} className="text-white/50 flex-shrink-0" />,
+      dot: 'bg-white/40',
+    },
   };
 
-  const config = getConfig();
+  const c = configs[type];
 
   return (
-    <motion.div
-      initial={{ x: 100, opacity: 0 }}
-      animate={{ x: 0, opacity: 1 }}
-      exit={{ x: 100, opacity: 0 }}
-      className={`fixed top-6 right-6 ${config.bg} border ${config.border} backdrop-blur-lg rounded-xl p-4 min-w-[300px] z-50`}
+    <div
+      className={`fixed top-5 right-5 z-50 flex items-center gap-3 px-4 py-3 border ${c.border} bg-bgPrimary min-w-[280px] max-w-sm`}
     >
-      <div className="flex items-center gap-3">
-        <div className="p-2 rounded-lg bg-white/5">{config.icon}</div>
-        <p className="text-sm text-white flex-1">{message}</p>
-        <button onClick={onClose} className="p-1 hover:bg-white/10 rounded-lg">
-          <X size={16} />
-        </button>
-      </div>
-    </motion.div>
+      {c.icon}
+      <p className="text-sm text-white/80 flex-1 leading-snug">{message}</p>
+      <button
+        onClick={onClose}
+        className="p-0.5 text-white/30 hover:text-white/70 transition-colors flex-shrink-0"
+        aria-label="Dismiss"
+      >
+        <X size={14} />
+      </button>
+    </div>
   );
 };
 

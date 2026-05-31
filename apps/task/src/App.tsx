@@ -24,6 +24,7 @@ import { Help } from './pages/Help';
 import { Blog } from './pages/Blog';
 import { BlogPost } from './pages/BlogPost';
 import Articles from './pages/articles/ArticleFirst';
+import ArticlePage from './pages/articles/ArticlePage';
 
 const queryClient = new QueryClient();
 
@@ -69,8 +70,12 @@ const router = createBrowserRouter([
     element: <BlogPost />,
   },
   {
-    path:'/articles' , 
-    element: <Articles/>
+    path: '/articles',
+    element: <Articles />,
+  },
+  {
+    path: '/articles/:slug',
+    element: <ArticlePage />,
   },
   {
     path: '/terms-and-conditions',

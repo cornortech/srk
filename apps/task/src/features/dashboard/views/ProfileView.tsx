@@ -1,10 +1,6 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import React from 'react';
 import { Check, Crown, Shield, Star, Trophy, Zap } from 'lucide-react';
 import { AnalyticsData, DashboardView, UserProfile } from '../types';
-import { DashboardGlassCard } from '../components/ui/DashboardGlassCard';
-import MagneticButton from '../components/ui/DashboardMagneticButton';
-import DashboardGradientText from '../components/ui/DashboardGradientText';
 import DashboardStatusBadge from '../components/ui/DashboardStatusBadge';
 import { api } from '../../../lib/api';
 import { useTaskAuthStore } from '../../../store/useTaskAuthStore';
@@ -12,13 +8,17 @@ import { useTaskAuthStore } from '../../../store/useTaskAuthStore';
 interface ProfileViewProps {
   isApproved: boolean;
   setDashView: (view: DashboardView) => void;
-  profile: Omit<
-    UserProfile,
-    'avatar' | 'level' | 'xp' | 'nextLevelXP' | 'socialLinks'
-  > | null;
+  profile: Omit<UserProfile, 'avatar' | 'level' | 'xp' | 'nextLevelXP' | 'socialLinks'> | null;
   hasPurchased: boolean;
   completed: string[];
 }
+
+const achievements = [
+  { icon: Trophy, label: 'First task', achieved: true },
+  { icon: Zap, label: '7-day streak', achieved: true },
+  { icon: Crown, label: 'Top 10', achieved: false },
+  { icon: Star, label: 'Perfect week', achieved: true },
+];
 
 export const ProfileView: React.FC<ProfileViewProps> = ({
   isApproved,
@@ -28,11 +28,11 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
   completed,
 }) => {
   const { taskUserID } = useTaskAuthStore();
-  const { data: analyticsDataRes } =
-    api.srkTask.getSrkTaskUserAnalytics.useQuery(
-      ['getSrkTaskUserAnalytics', taskUserID],
-      { params: { userId: taskUserID || '' } }
-    );
+
+  const { data: analyticsDataRes } = api.srkTask.getSrkTaskUserAnalytics.useQuery(
+    ['getSrkTaskUserAnalytics', taskUserID],
+    { params: { userId: taskUserID || '' } }
+  );
 
   const { data: userProfileData } = api.srkTask.getSrkTaskUserProfile.useQuery(
     ['getSrkTaskUserProfile', taskUserID],
@@ -41,217 +41,166 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
 
   if (!isApproved) {
     return (
-      <DashboardGlassCard className="p-12 text-center">
-        <Shield size={48} className="text-yellow-400 mx-auto mb-4" />
-        <h3 className="text-2xl font-bold text-white mb-3">
-          Verification Required
+      <div className="border border-white/[0.08] p-12 text-center max-w-lg">
+        <div className="w-10 h-10 border border-amber-500/30 flex items-center justify-center mx-auto mb-5">
+          <Shield size={18} className="text-amber-400" />
+        </div>
+        <h3 className="text-base font-semibold text-white mb-2">
+          Verification required
         </h3>
-        <p className="text-zinc-400 mb-8">
+        <p className="text-sm text-white/40 mb-6">
           Complete identity verification to access profile features
         </p>
-        <MagneticButton onClick={() => setDashView('verification')}>
-          Go to Verification
-        </MagneticButton>
-      </DashboardGlassCard>
+        <button
+          onClick={() => setDashView('verification')}
+          className="px-5 py-2.5 bg-primary text-black text-sm font-semibold hover:bg-primary/90 transition-colors"
+        >
+          Go to verification
+        </button>
+      </div>
     );
   }
 
-  // const [socialLinks, _setSocialLinks] = useState(profile?.socialLinks);
-
-  const [isEditing, _setIsEditing] = useState(false);
-  console.log(isEditing);
-
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
+
+      {/* Page header */}
       <div>
-        <h1 className="text-4xl font-bold text-white mb-2">
-          <DashboardGradientText>Profile Settings</DashboardGradientText>
-        </h1>
-        <p className="text-zinc-400">
-          Manage your profile, social links, and preferences
+        <p className="text-xs font-medium uppercase tracking-widest text-primary/60 mb-2">
+          Account
         </p>
+        <h1 className="text-2xl font-semibold text-white tracking-tight">
+          Profile
+        </h1>
       </div>
 
-      <div className="grid lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 space-y-6">
-          {/* Profile Info Card */}
-          <DashboardGlassCard>
-            <div className="p-8">
-              <div className="flex items-center gap-6 mb-8">
-                <motion.div whileHover={{ scale: 1.05 }} className="relative">
-                  <img
-                    //TODO: kyc Image URL
-                    // src={profile?.avatar}
-                    alt={profile?.name}
-                    className="w-24 h-24 rounded-full border-4 border-white/10"
-                  />
-                  {/* <div className="absolute -bottom-2 -right-2 w-10 h-10 rounded-full bg-div-to-r from-amber-500 to-yellow-500 flex items-center justify-center">
-                    <span className="text-black font-bold">
-                      {profile?.level}
-                    </span>
-                  </div> */}
-                </motion.div>
-                <div className="flex-1">
-                  <h3 className="text-2xl font-bold text-white mb-2">
-                    {profile?.name}
-                  </h3>
-                  <div className="flex flex-wrap gap-2 mb-3">
-                    <DashboardStatusBadge
-                      status={isApproved ? 'Verified' : 'Pending'}
-                    />
-                    {hasPurchased && (
-                      <DashboardStatusBadge status="SRK Grow" pulse />
-                    )}
-                    {/* <DashboardStatusBadge status={`Level ${profile?.level}`} /> */}
-                  </div>
-                  <p className="text-zinc-400">
-                    {profile?.email} • {profile?.phone}
-                  </p>
-                  <p className="text-sm text-zinc-500 mt-1">
-                    Member since {profile?.joinDate}
-                  </p>
-                </div>
-              </div>
+      <div className="grid lg:grid-cols-3 gap-6">
 
-              {/* XP Progress */}
-              {/* <div className="space-y-2">
-                <div className="flex justify-between text-sm text-zinc-400">
-                  <span>Level Progress</span>
-                  <span>
-                    {profile?.xp} / {profile?.nextLevelXP} XP
-                  </span>
-                </div>
-                <div className="w-full h-2 bg-zinc-800 rounded-full overflow-hidden">
-                  <motion.div
-                    className="h-full bg-div-to-r from-purple-500 to-pink-500"
-                    initial={{ width: 0 }}
-                    animate={{
-                      width: `${(profile?.xp / profile?.nextLevelXP) * 100}%`,
-                    }}
-                    transition={{ duration: 1 }}
-                  />
-                </div>
-                <p className="text-xs text-zinc-500 text-center">
-                  {profile?.nextLevelXP - profile?.xp} XP needed for Level{' '}
-                  {profile?.level + 1}
-                </p>
-              </div> */}
+        {/* Main column */}
+        <div className="lg:col-span-2 space-y-4">
+
+          {/* Profile card */}
+          <div className="border border-white/[0.08] bg-bgSecondary/40">
+            <div className="px-6 py-4 border-b border-white/[0.06]">
+              <h3 className="text-sm font-semibold text-white">Profile info</h3>
             </div>
-          </DashboardGlassCard>
-          {/* Social Media Links */}
+            <div className="p-6 flex items-start gap-5">
+              <div className="w-14 h-14 border border-white/[0.1] bg-white/[0.04] flex items-center justify-center flex-shrink-0 text-xl font-semibold text-white/50">
+                {profile?.name?.charAt(0)?.toUpperCase() ?? '?'}
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="text-base font-semibold text-white mb-2 truncate">
+                  {profile?.name ?? '—'}
+                </h3>
+                <div className="flex flex-wrap gap-1.5 mb-3">
+                  <DashboardStatusBadge status={isApproved ? 'Verified' : 'Pending'} />
+                  {hasPurchased && <DashboardStatusBadge status="SRK Grow" />}
+                </div>
+                <p className="text-sm text-white/40">
+                  {profile?.email}
+                  {profile?.phone && ` · ${profile.phone}`}
+                </p>
+                {profile?.joinDate && (
+                  <p className="text-xs text-white/25 mt-1">
+                    Member since {profile.joinDate}
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
 
-          {/* Custom Task Request (SRK Grow Only) */}
         </div>
 
-        {/* Sidebar Stats */}
-        <div className="space-y-6">
-          <DashboardGlassCard>
-            <div className="p-6">
-              <h4 className="text-lg font-bold text-white mb-4">
-                Account Stats
-              </h4>
-              <div className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-zinc-400">Tasks Completed:</span>
-                  <span className="text-white font-bold">
-                    {completed.length}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-zinc-400">Success Rate:</span>
-                  <span className="text-green-400 font-bold">
-                    {Math.round(userProfileData?.body?.taskData?.successRate)}%
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-zinc-400">Avg Daily Earn:</span>
-                  <span className="text-amber-400 font-bold">
-                    {analyticsDataRes?.body?.tasksData?.averageDailyCoins}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-zinc-400">Total Earned:</span>
-                  <span className="text-purple-400 font-bold">
-                    {analyticsDataRes?.body?.coinsData?.allTimeCoins} Coins
-                  </span>
-                </div>
+        {/* Sidebar */}
+        <div className="space-y-4">
+
+          {/* Account stats */}
+          <div className="border border-white/[0.08] bg-bgSecondary/40">
+            <div className="px-5 py-4 border-b border-white/[0.06]">
+              <h4 className="text-sm font-semibold text-white">Account stats</h4>
+            </div>
+            <div className="divide-y divide-white/[0.04]">
+              <div className="flex items-center justify-between px-5 py-3.5">
+                <span className="text-sm text-white/50">Tasks completed</span>
+                <span className="text-sm font-semibold text-white tabular-nums">{completed.length}</span>
+              </div>
+              <div className="flex items-center justify-between px-5 py-3.5">
+                <span className="text-sm text-white/50">Success rate</span>
+                <span className="text-sm font-semibold text-emerald-400 tabular-nums">
+                  {Math.round(userProfileData?.body?.taskData?.successRate ?? 0)}%
+                </span>
+              </div>
+              <div className="flex items-center justify-between px-5 py-3.5">
+                <span className="text-sm text-white/50">Avg daily</span>
+                <span className="text-sm font-semibold text-primary tabular-nums">
+                  {analyticsDataRes?.body?.tasksData?.averageDailyCoins ?? 0}
+                  <span className="text-white/30 font-normal ml-1 text-xs">coins</span>
+                </span>
+              </div>
+              <div className="flex items-center justify-between px-5 py-3.5">
+                <span className="text-sm text-white/50">All time</span>
+                <span className="text-sm font-semibold text-white tabular-nums">
+                  {analyticsDataRes?.body?.coinsData?.allTimeCoins?.toLocaleString() ?? 0}
+                  <span className="text-white/30 font-normal ml-1 text-xs">coins</span>
+                </span>
               </div>
             </div>
-          </DashboardGlassCard>
+          </div>
 
-          <DashboardGlassCard>
-            <div className="p-6">
-              <h4 className="text-lg font-bold text-white mb-4">
-                Achievements
-              </h4>
-              <div className="space-y-3">
-                {[
-                  { icon: Trophy, label: 'First Task', achieved: true },
-                  { icon: Zap, label: '7 Day Streak', achieved: true },
-                  { icon: Crown, label: 'Top 10', achieved: false },
-                  { icon: Star, label: 'Perfect Week', achieved: true },
-                ].map((achievement, idx) => (
-                  <div key={idx} className="flex items-center gap-3">
+          {/* Achievements */}
+          <div className="border border-white/[0.08] bg-bgSecondary/40">
+            <div className="px-5 py-4 border-b border-white/[0.06]">
+              <h4 className="text-sm font-semibold text-white">Achievements</h4>
+            </div>
+            <div className="divide-y divide-white/[0.04]">
+              {achievements.map((a) => {
+                const Icon = a.icon;
+                return (
+                  <div key={a.label} className="flex items-center gap-3 px-5 py-3.5">
                     <div
-                      className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                        achievement.achieved
-                          ? 'bg-div-to-r from-amber-500/20 to-yellow-500/20'
-                          : 'bg-zinc-800/50'
+                      className={`w-7 h-7 border flex items-center justify-center flex-shrink-0 ${
+                        a.achieved ? 'border-primary/30 text-primary' : 'border-white/[0.06] text-white/20'
                       }`}
                     >
-                      <achievement.icon
-                        size={18}
-                        className={
-                          achievement.achieved
-                            ? 'text-amber-400'
-                            : 'text-zinc-600'
-                        }
-                      />
+                      <Icon size={13} />
                     </div>
-                    <div>
-                      <p className="text-sm font-medium text-white">
-                        {achievement.label}
-                      </p>
-                      <p className="text-xs text-zinc-500">
-                        {achievement.achieved ? 'Achieved' : 'Locked'}
+                    <div className="flex-1 min-w-0">
+                      <p className={`text-sm font-medium ${a.achieved ? 'text-white/85' : 'text-white/30'}`}>
+                        {a.label}
                       </p>
                     </div>
+                    <span className={`text-xs ${a.achieved ? 'text-primary/60' : 'text-white/20'}`}>
+                      {a.achieved ? 'Earned' : 'Locked'}
+                    </span>
                   </div>
-                ))}
-              </div>
+                );
+              })}
             </div>
-          </DashboardGlassCard>
+          </div>
 
+          {/* SRK Grow benefits */}
           {hasPurchased && (
-            <DashboardGlassCard gradient="purple">
-              <div className="p-6">
-                <div className="flex items-center gap-3 mb-4">
-                  <Crown size={20} className="text-purple-400" />
-                  <h4 className="text-lg font-bold text-white">
-                    SRK Grow Benefits
-                  </h4>
-                </div>
-                <ul className="space-y-2 text-sm text-zinc-300">
-                  <li className="flex items-center gap-2">
-                    <Check size={12} className="text-purple-400" />
-                    Priority task approval
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Check size={12} className="text-purple-400" />
-                    Higher coin rewards
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Check size={12} className="text-purple-400" />
-                    Custom task requests
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Check size={12} className="text-purple-400" />
-                    Advanced analytics
-                  </li>
-                </ul>
+            <div className="border border-primary/20 bg-primary/[0.04] p-5">
+              <div className="flex items-center gap-2.5 mb-4">
+                <Crown size={15} className="text-primary flex-shrink-0" />
+                <h4 className="text-sm font-semibold text-white">SRK Grow benefits</h4>
               </div>
-            </DashboardGlassCard>
+              <ul className="space-y-2">
+                {[
+                  'Priority task approval',
+                  'Higher coin rewards',
+                  'Custom task requests',
+                  'Advanced analytics',
+                ].map((benefit) => (
+                  <li key={benefit} className="flex items-center gap-2.5 text-sm text-white/55">
+                    <Check size={12} className="text-primary/70 flex-shrink-0" />
+                    {benefit}
+                  </li>
+                ))}
+              </ul>
+            </div>
           )}
+
         </div>
       </div>
     </div>

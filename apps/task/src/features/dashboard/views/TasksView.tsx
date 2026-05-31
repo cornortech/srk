@@ -1,29 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import {
-  // AlertTriangle,
-  // CheckCircle2,
-  ChevronRight,
-  Clock,
-  Coins,
-  // RefreshCw,
-  Share2,
-  Shield,
-  Users,
-} from 'lucide-react';
-import {
-  // allPlatforms,
-  followTasks,
-  likeTasks,
-} from '../../../data/dummyDashboardMockData';
-import {
-  DashboardView,
-  RejectedTaskEntry,
-  SocialPlatform,
-  TaskType,
-} from '../types';
-import { DashboardGlassCard } from '../components/ui/DashboardGlassCard';
-import MagneticButton from '../components/ui/DashboardMagneticButton';
-import DashboardGradientText from '../components/ui/DashboardGradientText';
+import React, { useEffect, useState } from 'react';
+import { ChevronRight, Clock, Coins, Share2, Shield, Users } from 'lucide-react';
+import { followTasks, likeTasks } from '../../../data/dummyDashboardMockData';
+import { DashboardView, RejectedTaskEntry, TaskType } from '../types';
 import { api } from '../../../lib/api';
 import { useTaskAuthStore } from '../../../store/useTaskAuthStore';
 
@@ -34,362 +12,169 @@ interface TasksViewProps {
   setReviewingRejectedTask: (task: RejectedTaskEntry) => void;
 }
 
-// Utility function to check if current time is within allowed window
 const isWithinAllowedTime = (): boolean => {
-  const now = new Date();
-  const hours = now.getHours();
-  // Tasks are available between 7pm (19:00) and 12am (00:00)
-  return hours >= 19 && hours < 24;
+  const h = new Date().getHours();
+  return h >= 19 && h < 24;
 };
+
+const categories = [
+  {
+    type: 'follow' as TaskType,
+    icon: Users,
+    label: 'Follow tasks',
+    count: followTasks.length,
+    coins: '100+',
+  },
+  {
+    type: 'like' as TaskType,
+    icon: Share2,
+    label: 'Like tasks',
+    count: likeTasks.length,
+    coins: '100+',
+  },
+];
 
 export const TasksView: React.FC<TasksViewProps> = ({
   isApproved,
   setDashView,
   setTaskCategory,
-  setReviewingRejectedTask,
 }) => {
   const { taskUserID } = useTaskAuthStore();
   const [isTaskTimeAllowed, setIsTaskTimeAllowed] = useState(isWithinAllowedTime());
 
-  // Fetch app settings from backend
   const { data: appSettingsData } = api.appSettings.getAppSettings.useQuery(
     ['getAppSettings'],
     {},
-    {
-      queryKey: ['getAppSettings'],
-      refetchInterval: 60000, // Refetch every minute
-    }
+    { queryKey: ['getAppSettings'], refetchInterval: 60000 }
   );
 
   const isTaskFeatureEnabled = appSettingsData?.body?.data?.taskFeatureEnabled ?? true;
-
-  // Tasks are allowed only if BOTH conditions are met:
-  // 1. Admin has enabled the task feature
-  // 2. Current time is within the allowed window (7pm-11pm)
   const areTasksAllowed = isTaskFeatureEnabled && isTaskTimeAllowed;
 
-  // Check time every minute
   useEffect(() => {
-    const interval = setInterval(() => {
-      setIsTaskTimeAllowed(isWithinAllowedTime());
-    }, 60000); // Check every minute
-
+    const interval = setInterval(() => setIsTaskTimeAllowed(isWithinAllowedTime()), 60000);
     return () => clearInterval(interval);
   }, []);
 
-  // Fetch rejected tasks from backend
-  const { data: rejectedTasksData } =
-    api.srkTask.getRejectedSrkTaskActionSubmissionsByUser.useQuery(
-      ['getRejectedSrkTaskActionSubmissionsByUser', taskUserID],
-      {
-        params: { userId: taskUserID || '' },
-        query: { page: '1', limit: '100' },
-      },
-      {
-        enabled: !!taskUserID && isApproved,
-        queryKey: ['getRejectedSrkTaskActionSubmissionsByUser', taskUserID || ''],
-      }
-    );
-
-  // Transform backend data to match RejectedTaskEntry type
-  const rejectedTasks: RejectedTaskEntry[] =
-    rejectedTasksData?.body?.data?.map((task) => {
-      const todoData = task.growPackageTodoId;
-      const enrollmentData = todoData?.enrollment;
-      const packageData = enrollmentData?.growSocialMediaPackageId;
-      const packageTypeData = enrollmentData?.growSocialMediaPackageTypeId;
-      const platform = todoData?.platform as SocialPlatform;
-
-      return {
-        id: task._id,
-        taskId: todoData?._id || '',
-        platform: platform || 'Instagram',
-        type: (task.type || 'follow') as TaskType,
-        title: `${task.type} on ${todoData?.platform || 'Unknown'}`,
-        desc: `${packageData?.name || 'Package'} - ${packageTypeData?.name || 'Type'}`,
-        coins: enrollmentData?.amount || 0,
-        difficulty: 'easy' as const,
-        estimatedTime: '2-3',
-        rejectionReason: task.rejectionReason || 'Task was rejected',
-        uploadedProofUrl: task.screenshotUrl || '',
-        date: new Date(task.createdAt).toLocaleDateString(),
-        adminComment: task.rejectionReason || '',
-        canRetry: true,
-        username: enrollmentData?.profileLinkURL?.[0] || '',
-        profileUrl: todoData?.profileUrl || '',
-        postUrl: todoData?.postUrl || '',
-      };
-    }) || [];
-
   if (!isApproved) {
     return (
-      <DashboardGlassCard className="p-12 text-center">
-        <Shield size={48} className="text-yellow-400 mx-auto mb-4" />
-        <h3 className="text-2xl font-bold text-white mb-3">
-          Verification Required
+      <div className="border border-white/[0.08] p-12 text-center max-w-lg">
+        <div className="w-10 h-10 border border-amber-500/30 flex items-center justify-center mx-auto mb-5">
+          <Shield size={18} className="text-amber-400" />
+        </div>
+        <h3 className="text-base font-semibold text-white mb-2">
+          Verification required
         </h3>
-        <p className="text-zinc-400 mb-8">
+        <p className="text-sm text-white/40 mb-6">
           Complete identity verification to access tasks
         </p>
-        <MagneticButton onClick={() => setDashView('verification')}>
-          Go to Verification
-        </MagneticButton>
-      </DashboardGlassCard>
+        <button
+          onClick={() => setDashView('verification')}
+          className="px-5 py-2.5 bg-primary text-black text-sm font-semibold hover:bg-primary/90 transition-colors"
+        >
+          Go to verification
+        </button>
+      </div>
     );
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
+
+      {/* Page header */}
       <div>
-        <h1 className="text-4xl font-bold text-white mb-2">
-          <DashboardGradientText>Earning Tasks</DashboardGradientText>
+        <p className="text-xs font-medium uppercase tracking-widest text-primary/60 mb-2">
+          Tasks
+        </p>
+        <h1 className="text-2xl font-semibold text-white tracking-tight">
+          Earning Tasks
         </h1>
-        <p className="text-zinc-400">
-          Complete tasks to earn coins. Click on any category to view available
-          tasks.
+        <p className="text-sm text-white/40 mt-1">
+          Complete tasks to earn coins. Select a category to begin.
         </p>
       </div>
 
-      {/* Time Restriction Notice */}
-      <DashboardGlassCard
-        className={`p-6 ${areTasksAllowed ? 'bg-emerald-500/10 border-emerald-500/30' : 'bg-amber-500/10 border-amber-500/30'}`}
+      {/* Time window status */}
+      <div
+        className={`flex items-center gap-4 px-5 py-4 border ${
+          areTasksAllowed
+            ? 'border-emerald-500/25 bg-emerald-500/[0.04]'
+            : 'border-amber-500/25 bg-amber-500/[0.04]'
+        }`}
       >
-        <div className="flex items-center gap-4">
-          <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${areTasksAllowed
-              ? 'bg-emerald-500/20 text-emerald-400'
-              : 'bg-amber-500/20 text-amber-400'
-            }`}>
-            <Clock size={24} />
-          </div>
-          <div className="flex-1">
-            <h3 className={`text-lg font-bold mb-1 ${areTasksAllowed ? 'text-emerald-400' : 'text-amber-400'
-              }`}>
-              {areTasksAllowed ? 'Tasks Are Available Now!' : 'Tasks Currently Unavailable'}
-            </h3>
-            <p className="text-zinc-300 text-sm">
-              {!isTaskFeatureEnabled
-                ? 'Task feature is currently disabled by admin. Please check back later.'
-                : !isTaskTimeAllowed
-                  ? 'Tasks can only be done between 7:00 PM and 12:00 AM daily.'
-                  : 'You can complete tasks until 12:00 AM. Make the most of your time!'}
-            </p>
-            {isTaskFeatureEnabled && (
-              <p className="text-zinc-400 text-xs mt-1">
-                Time window: 7:00 PM - 12:00 AM
-              </p>
-            )}
-          </div>
+        <div
+          className={`w-7 h-7 border flex items-center justify-center flex-shrink-0 ${
+            areTasksAllowed ? 'border-emerald-500/30 text-emerald-400' : 'border-amber-500/30 text-amber-400'
+          }`}
+        >
+          <Clock size={14} />
         </div>
-      </DashboardGlassCard>
+        <div className="flex-1 min-w-0">
+          <p className={`text-sm font-medium ${areTasksAllowed ? 'text-emerald-400' : 'text-amber-400'}`}>
+            {areTasksAllowed ? 'Tasks are available now' : 'Tasks currently unavailable'}
+          </p>
+          <p className="text-xs text-white/40 mt-0.5">
+            {!isTaskFeatureEnabled
+              ? 'Task feature is currently disabled by admin.'
+              : !isTaskTimeAllowed
+              ? 'Tasks are available daily between 7:00 PM and 12:00 AM.'
+              : 'You can complete tasks until 12:00 AM.'}
+          </p>
+        </div>
+        {isTaskFeatureEnabled && (
+          <span className="text-xs text-white/25 flex-shrink-0 tabular-nums">
+            7 PM – 12 AM
+          </span>
+        )}
+      </div>
 
-      {/* Video Feature Toggle */}
-      <div className="flex justify-end"></div>
-
-      {/* Video Feature Section */}
-      {/* {showVideoFeature && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-        ></motion.div>
-      )} */}
-
-      {/* Task Categories */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {[
-          {
-            type: 'follow' as TaskType,
-            icon: Users,
-            label: 'Follow Tasks',
-            color: 'from-emerald-500/20 to-green-500/20',
-            count: followTasks.length,
-          },
-          // {
-          //   type: 'watch' as TaskType,
-          //   icon: Play,
-          //   label: 'Watch Tasks',
-          //   color: 'from-blue-500/20 to-cyan-500/20',
-          //   count: watchTasks.length,
-          // },
-          {
-            type: 'like' as TaskType,
-            icon: Share2,
-            label: 'Like Tasks',
-            color: 'from-purple-500/20 to-pink-500/20',
-            count: likeTasks.length,
-          },
-        ].map((category) => {
-          const Icon = category.icon;
+      {/* Task category cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-white/[0.06] border border-white/[0.06]">
+        {categories.map((cat) => {
+          const Icon = cat.icon;
           return (
-            <DashboardGlassCard
-              key={category.type}
-              hover={areTasksAllowed}
-              gradient={
-                category.type === 'follow'
-                  ? 'green'
-                  : // : category.type === 'watch'
-                  // ? 'blue'
-                  'purple'
-              }
-              onClick={() => areTasksAllowed && setTaskCategory(category.type)}
-              className={`${areTasksAllowed
-                  ? 'cursor-pointer'
-                  // blur it and disable pointer events
-                  : 'cursor-not-allowed opacity-30  pointer-events-none blur-[1px]'
-                }`}
+            <button
+              key={cat.type}
+              onClick={() => areTasksAllowed && setTaskCategory(cat.type)}
+              disabled={!areTasksAllowed}
+              className={[
+                'group bg-bgPrimary text-left p-8 flex flex-col gap-6 transition-colors duration-150',
+                areTasksAllowed
+                  ? 'hover:bg-bgSecondary/40 cursor-pointer'
+                  : 'opacity-40 cursor-not-allowed',
+              ].join(' ')}
             >
-              <div className="p-8">
-                <div className="flex items-center gap-4 mb-6">
-                  <div
-                    className={`w-16 h-16 rounded-2xl bg-div-to-br ${category.color} flex items-center justify-center`}
-                  >
-                    <Icon
-                      size={28}
-                      className={
-                        category.type === 'follow'
-                          ? 'text-emerald-400'
-                          : // : category.type === 'watch'
-                          // ? 'text-blue-400'
-                          'text-purple-400'
-                      }
-                    />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold text-white">
-                      {category.label}
-                    </h3>
-                    <p className="text-zinc-400">
-                      {category.count} available tasks
-                    </p>
-                  </div>
+              <div className="flex items-start justify-between">
+                <div className="w-9 h-9 border border-white/[0.1] bg-white/[0.03] flex items-center justify-center">
+                  <Icon size={16} className="text-primary" />
                 </div>
-
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Coins size={20} className="text-amber-400" />
-                    <span className="text-lg font-bold text-amber-400">
-                      {/* {category.type === 'follow'
-                        ? '150+'
-                        : // : category.type === 'watch'
-                        // ? '200+'
-                        '120+'}{' '}
-                      Coins */}
-                      100+
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-2 text-sm text-zinc-400">
-                    <span>Click to view</span>
-                    <ChevronRight size={16} />
-                  </div>
-                </div>
+                <ChevronRight
+                  size={16}
+                  className="text-white/20 group-hover:text-white/50 transition-colors mt-1"
+                />
               </div>
-            </DashboardGlassCard>
+
+              <div>
+                <h3 className="text-base font-semibold text-white/90 mb-1">
+                  {cat.label}
+                </h3>
+                <p className="text-sm text-white/40">
+                  {cat.count} available
+                </p>
+              </div>
+
+              <div className="flex items-center gap-1.5 pt-3 border-t border-white/[0.06]">
+                <Coins size={13} className="text-primary" />
+                <span className="text-sm font-semibold text-white/70 tabular-nums">
+                  {cat.coins}
+                </span>
+                <span className="text-xs text-white/30">coins per task</span>
+              </div>
+            </button>
           );
         })}
       </div>
 
-      {/* Rejected Tasks Section */}
-      {/* {rejectedTasks.length > 0 ? (
-        <div className="mt-8">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h3 className="text-2xl font-bold text-white">Rejected Tasks</h3>
-              <p className="text-zinc-400">Review and retry these tasks</p>
-            </div>
-            <span className="px-3 py-1 bg-red-500/20 text-red-400 rounded-full text-sm font-medium">
-              {rejectedTasks.length} tasks need attention
-            </span>
-          </div>
-
-          <div className="space-y-4">
-            {rejectedTasks.slice(0, 3).map((task) => {
-              const platformInfo = allPlatforms.find(
-                (p) => p.platform === task.platform
-              );
-              return (
-                <DashboardGlassCard key={task.id} hover>
-                  <div className="p-6">
-                    <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                      <div className="flex items-start gap-4">
-                        <div
-                          className={`w-12 h-12 rounded-xl bg-div-to-br ${platformInfo?.gradient} flex items-center justify-center shrink`}
-                        >
-                          {platformInfo?.icon &&
-                            React.createElement(platformInfo.icon, {
-                              size: 20,
-                              className: platformInfo.color,
-                            })}
-                        </div>
-                        <div>
-                          <h4 className="text-lg font-bold text-white mb-2">
-                            {task.title}
-                          </h4>
-                          <p className="text-sm text-zinc-400 mb-2">
-                            {task.desc}
-                          </p>
-                          <div className="flex items-center gap-2">
-                            <AlertTriangle size={14} className="text-red-400" />
-                            <p className="text-sm text-red-400">
-                              {task.rejectionReason}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-                        <div className="flex items-center gap-2">
-                          <Coins size={20} className="text-amber-400" />
-                          <span className="text-xl font-bold text-amber-400">
-                            +100
-                          </span>
-                        </div>
-
-                        <MagneticButton
-                          small
-                          onClick={() => setReviewingRejectedTask(task)}
-                          className="px-6!"
-                        >
-                          <RefreshCw size={16} />
-                          Review
-                        </MagneticButton>
-                      </div>
-                    </div>
-                  </div>
-                </DashboardGlassCard>
-              );
-            })}
-
-            {rejectedTasks.length > 3 && (
-              <div className="text-center">
-                <button
-                  onClick={() => setDashView('tasks')}
-                  className="text-amber-400 hover:text-amber-300 transition-colors"
-                >
-                  View all {rejectedTasks.length} rejected tasks →
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      ) : (
-        <div className="mt-8">
-          <DashboardGlassCard className="p-12 text-center">
-            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-emerald-500/20 to-green-500/20 flex items-center justify-center mx-auto mb-6">
-              <CheckCircle2 size={40} className="text-emerald-400" />
-            </div>
-            <h3 className="text-2xl font-bold text-white mb-3">
-              All Clear! 🎉
-            </h3>
-            <p className="text-zinc-400 mb-2">
-              You don't have any rejected tasks at the moment.
-            </p>
-            <p className="text-sm text-zinc-500">
-              Keep up the great work! Complete more tasks to earn coins.
-            </p>
-          </DashboardGlassCard>
-        </div>
-      )} */}
     </div>
   );
 };

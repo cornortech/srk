@@ -1,9 +1,7 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 import { DollarSign, Shield, X } from 'lucide-react';
 import { NavLink } from '../types';
 import { NavItem } from '../components/ui/NavItem';
-import { DARK_BG, GOLD_ACCENT, GOLD_PRIMARY } from '../constants/theme';
 
 interface SidebarProps {
   isDesktop: boolean;
@@ -23,45 +21,37 @@ export const Sidebar: React.FC<SidebarProps> = ({
   selectedSection,
   setSelectedSection,
   onSrkBankClick,
-}) => (
-  <motion.div
-    initial={false}
-    animate={{
-      width: isDesktop ? (isSidebarOpen ? 300 : 0) : isSidebarOpen ? '100%' : 0,
-      x: isDesktop ? 0 : isSidebarOpen ? 0 : '-100%',
-    }}
-    transition={{ duration: 0.3 }}
-    className={`fixed ${
-      isDesktop ? 'sticky top-0 h-screen' : 'inset-0'
-    } flex-shrink-0 z-50 p-6 ${DARK_BG} border-r border-gray-700/50 shadow-2xl overflow-hidden`}
-    style={{
-      boxShadow: '8px 0 20px rgba(0,0,0,0.6)',
-    }}
-  >
-    <div className="h-full flex flex-col space-y-8">
-      <div className="flex items-center justify-between flex-shrink-0">
-        <div className="flex items-center gap-3">
-          <div
-            className="w-10 h-10 rounded-full flex items-center justify-center"
-            style={{
-              background: `linear-gradient(135deg, ${GOLD_PRIMARY}, ${GOLD_ACCENT})`,
-            }}
-          >
-            <Shield size={20} className="text-black" strokeWidth={3} />
+}) => {
+  if (!isSidebarOpen) return null;
+
+  return (
+    <div
+      className={`flex-shrink-0 z-50 ${
+        isDesktop
+          ? 'sticky top-0 h-screen w-[260px]'
+          : 'fixed inset-0 w-72'
+      } bg-bgPrimary border-r border-white/[0.06] flex flex-col`}
+    >
+      {/* Header */}
+      <div className="flex items-center justify-between px-5 h-14 border-b border-white/[0.06] flex-shrink-0">
+        <div className="flex items-center gap-2.5">
+          <div className="w-7 h-7 bg-primary flex items-center justify-center flex-shrink-0">
+            <Shield size={14} className="text-black" strokeWidth={2.5} />
           </div>
-          <span className="font-extrabold text-white text-xl tracking-wider">
-            ADMIN<span style={{ color: GOLD_PRIMARY }}>Task</span>
+          <span className="text-sm font-semibold text-white">
+            Admin<span className="text-primary">Task</span>
           </span>
         </div>
         <button
           onClick={() => setIsSidebarOpen(false)}
-          className="md:hidden text-white hover:text-[#E1BA73] p-2"
+          className="md:hidden p-1.5 text-white/40 hover:text-white transition-colors"
         >
-          <X size={24} />
+          <X size={16} />
         </button>
       </div>
 
-      <div className="flex-grow space-y-2 overflow-y-auto pr-2">
+      {/* Nav */}
+      <nav className="flex-1 overflow-y-auto py-3 px-2">
         {navLinks.map((link) => (
           <NavItem
             key={link.name}
@@ -74,14 +64,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
             }}
           />
         ))}
-      </div>
+      </nav>
 
-      <NavItem
-        icon={DollarSign}
-        name="SRK Bank"
-        isSelected={false}
-        onClick={onSrkBankClick}
-      />
+      {/* SRK Bank action */}
+      <div className="border-t border-white/[0.06] p-3 flex-shrink-0">
+        <NavItem
+          icon={DollarSign}
+          name="SRK Bank"
+          isSelected={false}
+          onClick={onSrkBankClick}
+        />
+      </div>
     </div>
-  </motion.div>
-);
+  );
+};

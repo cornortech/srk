@@ -1,5 +1,4 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 
 interface NavItemProps {
   icon: React.ElementType;
@@ -10,20 +9,17 @@ interface NavItemProps {
 
 export const NavItem: React.FC<NavItemProps> = React.memo(
   ({ icon: Icon, name, isSelected, onClick }) => (
-    <motion.button
+    <button
       onClick={onClick}
-      className={`flex items-center gap-4 p-4 rounded-xl w-full text-left transition-all duration-300 font-semibold uppercase tracking-wider ${
+      className={[
+        'flex items-center gap-2.5 px-3 py-2.5 text-sm w-full text-left border-l-2 transition-colors duration-150',
         isSelected
-          ? 'bg-[#1A1715] text-[#E1BA73] shadow-inner border border-[#E1BA73]/30'
-          : 'text-gray-400 hover:bg-[#1A1715]/50 hover:text-white'
-      }`}
-      whileHover={{ x: isSelected ? 0 : 4 }}
+          ? 'border-primary bg-white/[0.04] text-white'
+          : 'border-transparent text-white/45 hover:text-white/80 hover:bg-white/[0.03]',
+      ].join(' ')}
     >
-      <Icon
-        size={24}
-        className={isSelected ? 'text-[#E1BA73]' : 'text-gray-500'}
-      />
-      <span className="text-sm">{name}</span>
-    </motion.button>
+      <Icon size={15} className="flex-shrink-0" />
+      <span className="font-medium">{name}</span>
+    </button>
   )
 );

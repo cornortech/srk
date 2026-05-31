@@ -3,8 +3,6 @@ import { Ban, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 
-const GOLD = "182,137,56";
-
 export function ComparisonSection() {
   const navigate = useNavigate();
   const VITE_PRO_PACKAGE_ID = import.meta.env.VITE_PRO_PACKAGE_ID;
@@ -14,83 +12,9 @@ export function ComparisonSection() {
       <section className="bg-bgSecondary flex flex-col items-center justify-center p-8">
         <div className="w-full max-w-7xl">
 
-          <h2 className="text-3xl md:text-3xl font-bold text-center mb-0 text-white">
+          <h2 className="text-3xl md:text-3xl font-bold text-center mb-6 text-white">
             TWO PATHS, ONE CHOICE
           </h2>
-
-          {/* ── Curved Y-branch connector — md+ only ──────────────────────── */}
-          <div className="relative hidden md:block pointer-events-none" style={{ height: "72px" }}>
-
-            {/* SVG curves — preserveAspectRatio="none" scales paths to container width */}
-            <svg
-              className="absolute inset-0 w-full h-full"
-              viewBox="0 0 1000 72"
-              preserveAspectRatio="none"
-              fill="none"
-            >
-              {/* Left curved branch: cubic bezier, straight down then arcs left */}
-              <path
-                d="M 500 0 C 500 36 250 36 250 72"
-                stroke={`rgba(${GOLD},0.55)`}
-                strokeWidth="1.5"
-                strokeDasharray="5 5"
-              />
-              {/* Right curved branch: mirror */}
-              <path
-                d="M 500 0 C 500 36 750 36 750 72"
-                stroke={`rgba(${GOLD},0.55)`}
-                strokeWidth="1.5"
-                strokeDasharray="5 5"
-              />
-            </svg>
-
-            {/* Start dot — title center (CSS so it stays circular, not stretched) */}
-            <div
-              className="absolute animate-pulse"
-              style={{
-                top: "-3px",
-                left: "50%",
-                width: "7px",
-                height: "7px",
-                borderRadius: "50%",
-                transform: "translateX(-50%)",
-                background: `rgba(${GOLD},0.9)`,
-                boxShadow: `0 0 10px rgba(${GOLD},0.7), 0 0 3px rgba(${GOLD},1)`,
-              }}
-            />
-
-            {/* Left card entry dot */}
-            <div
-              style={{
-                position: "absolute",
-                bottom: "-3px",
-                left: "24.5%",
-                width: "6px",
-                height: "6px",
-                borderRadius: "50%",
-                transform: "translateX(-50%)",
-                background: `rgba(${GOLD},0.75)`,
-                boxShadow: `0 0 7px rgba(${GOLD},0.55)`,
-              }}
-            />
-
-            {/* Right card entry dot */}
-            <div
-              style={{
-                position: "absolute",
-                bottom: "-3px",
-                left: "75.5%",
-                width: "6px",
-                height: "6px",
-                borderRadius: "50%",
-                transform: "translateX(-50%)",
-                background: `rgba(${GOLD},0.75)`,
-                boxShadow: `0 0 7px rgba(${GOLD},0.55)`,
-              }}
-            />
-
-          </div>
-          {/* ──────────────────────────────────────────────────────────────── */}
 
           <div className="relative">
             <div className="grid md:grid-cols-2 gap-36 md:gap-8 relative">

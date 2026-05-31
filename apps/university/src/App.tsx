@@ -69,6 +69,23 @@ import HowItWorks from './pages/HowItWorks';
 import PaymentGateway from './pages/PaymentGateway';
 import AdminTourTargetUserPage from './pages/admin/TourTargetUserPage';
 import SRKGrowPortal from './pages/dashboard/GrowViewPage';
+import WhoIsItForPage from './pages/learn/WhoIsItFor';
+import WhySRKUniversityPage from './pages/learn/WhySRKUniversity';
+import CourseTracksPage from './pages/learn/CourseTracks';
+import SeizeYourMomentPage from './pages/learn/SeizeYourMoment';
+import MilestoneJourneyPage from './pages/learn/MilestoneJourney';
+import AllReviewsPage from './pages/learn/AllReviews';
+import WhyEnrollPage from './pages/learn/WhyEnroll';
+import UncoverEssentialsPage from './pages/learn/UncoverEssentials';
+import ExclusiveCommunityPage from './pages/learn/ExclusiveCommunity';
+import LearnFromExpertsPage from './pages/learn/LearnFromExperts';
+import StructuredLearningPage from './pages/learn/StructuredLearning';
+import LiveMentorshipPage from './pages/learn/LiveMentorship';
+import AchieverCommunityPage from './pages/learn/AchieverCommunity';
+import UpcomingSkillsPage from './pages/learn/UpcomingSkills';
+import ChooseYourPlanPage from './pages/learn/ChooseYourPlan';
+import ArticlesPage from './pages/Articles';
+import ArticlePage from './pages/ArticlePage';
 
 const AppRouter = () => {
   const router = createBrowserRouter([
@@ -99,6 +116,23 @@ const AppRouter = () => {
         { path: '/privacy-policy', element: <PrivacyRefundPolicy /> },
         { path: '/termsAndCondition', element: <TermsAndConditions /> },
         { path: '/disclaimer', element: <DisclaimerPage /> },
+        { path: '/learn/who-is-it-for', element: <WhoIsItForPage /> },
+        { path: '/learn/why-srk-university', element: <WhySRKUniversityPage /> },
+        { path: '/learn/course-tracks', element: <CourseTracksPage /> },
+        { path: '/learn/seize-your-moment', element: <SeizeYourMomentPage /> },
+        { path: '/learn/milestone-journey', element: <MilestoneJourneyPage /> },
+        { path: '/learn/all-reviews', element: <AllReviewsPage /> },
+        { path: '/learn/why-enroll', element: <WhyEnrollPage /> },
+        { path: '/learn/uncover-essentials', element: <UncoverEssentialsPage /> },
+        { path: '/learn/exclusive-community', element: <ExclusiveCommunityPage /> },
+        { path: '/learn/learn-from-experts', element: <LearnFromExpertsPage /> },
+        { path: '/learn/structured-learning', element: <StructuredLearningPage /> },
+        { path: '/learn/live-mentorship', element: <LiveMentorshipPage /> },
+        { path: '/learn/achiever-community', element: <AchieverCommunityPage /> },
+        { path: '/learn/upcoming-skills', element: <UpcomingSkillsPage /> },
+        { path: '/learn/choose-your-plan', element: <ChooseYourPlanPage /> },
+        { path: '/articles', element: <ArticlesPage /> },
+        { path: '/articles/:slug', element: <ArticlePage /> },
       ],
     },
     {

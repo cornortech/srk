@@ -7,7 +7,9 @@ import {
 } from "@nextui-org/react";
 import { Courses } from "../../Data/CourseData";
 import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { AnimationButton } from "../ReusableComponents";
+import { ArrowRight } from "lucide-react";
 
 export const ProvideSection = () => {
   const navigate = useNavigate();
@@ -64,6 +66,17 @@ export const ProvideSection = () => {
                 </PopoverContent>
               </Popover>
             ))}
+          </div>
+
+          <div className="flex flex-col items-center gap-2 mt-10 mb-4 py-6 border-t border-white/[0.06]">
+            <p className="text-white/35 text-[10px] uppercase tracking-widest mb-1">Explore in depth</p>
+            <Link
+              to="/learn/course-tracks"
+              className="group inline-flex items-center gap-2 px-6 py-3 border border-primary/40 text-primary/75 text-sm font-medium rounded transition-all duration-300 hover:border-primary hover:bg-primary hover:text-bgPrimary hover:scale-[1.04] hover:shadow-[0_0_20px_rgba(182,137,56,0.35)]"
+            >
+              Know More <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1" />
+            </Link>
+            <span className="text-[11px] text-white/25">explore what each course offers and where it takes you</span>
           </div>
 
           <div className="w-full flex items-center justify-center mt-2">

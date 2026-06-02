@@ -1,26 +1,26 @@
 export const AffiliteBeneifits = [
   {
     step: "Step 1",
-    title: "You Refer",
+    title: "You Share",
     description:
-      "Create a special tracking link with a 30-day cookie length and distribute it to your friends, classmates, and other students.",
+      "Create a personalised referral link and share it with your friends, classmates, and anyone who could benefit from quality skill-based education.",
   },
   {
     step: "Step 2",
-    title: "They Enrolled",
+    title: "They Enrol",
     description:
-      "Someone who clicked on your referral link came to this website. Now, if they enrol in any course for any fee within 30 days, you receive a commission.",
+      "A learner who clicked your link visits our platform. If they join any course within 30 days, your contribution is recorded on your partner dashboard.",
   },
   {
     step: "Step 3",
-    title: "You Earned Commission",
+    title: "Your Impact is Recognised",
     description:
-      "You will receive a 25% commission of the total amount paid by your referral, and your earning is displayed on your referral dashboard.",
+      "Your contribution is acknowledged and reflected on your partner dashboard, showing the number of learners you've helped join our community.",
   },
   {
     step: "Step 4",
-    title: "Payment Transferred",
+    title: "Contribution Processed",
     description:
-      "We will process your commission to your bank account after cross-verification and 14 days cooling Period.",
+      "After a 14-day review period, your verified contribution is processed and your partner profile is updated accordingly.",
   },
 ];

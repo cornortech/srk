@@ -1,51 +1,37 @@
 "use client";
 
-import {
-  Table,
-  TableHeader,
-  TableColumn,
-  TableBody,
-  TableRow,
-  TableCell,
-} from "@nextui-org/table";
 import { Accordion, AccordionItem } from "@nextui-org/accordion";
-
-const projectionData = [
-  { price: 2999, commission: "25%", affiliates: 1, earning: 749 },
-  { price: 2999, commission: "25%", affiliates: 10, earning: 7497 },
-  { price: 2999, commission: "25%", affiliates: 100, earning: 74975 },
-];
 
 const faqData = [
   {
-    question: "Can I start as an affiliate without enrolling in a course?",
+    question: "Can I join the programme without enrolling in a course?",
     answer:
-      "Yes, you can start as an affiliate without enrolling in any course. Our program is open to everyone who wants to promote our courses.",
+      "Yes, you can join as a partner without enrolling in any course. Our programme is open to everyone who wants to help promote quality education.",
   },
   {
-    question: "What is the payment process?",
+    question: "How does the recognition process work?",
     answer:
-      "We process payments through secure bank transfers. Once your earnings reach the minimum threshold, you can request a payout.",
+      "Once a learner you referred joins through your link, your contribution is recorded on your partner dashboard and reviewed by our team.",
   },
   {
-    question: "When are payments made?",
+    question: "How often are contributions reviewed?",
     answer:
-      "Payments are processed on a monthly basis, typically within the first week of each month for the previous month's earnings.",
+      "Contributions are reviewed on a regular cycle, typically within the first week of each month for the previous month's activity.",
   },
   {
-    question: "What is the minimum payout amount?",
+    question: "Is there a minimum activity threshold?",
     answer:
-      "The minimum payout amount is ₹500. Once your earnings reach this threshold, you can request a withdrawal.",
+      "Yes, there is a minimum activity threshold to qualify for recognition. Details are available in your partner dashboard once you join.",
   },
   {
-    question: "Do you offer custom coupons?",
+    question: "Do you offer custom referral links?",
     answer:
-      "Yes, we provide custom coupon codes to our affiliates that they can share with their audience for special discounts.",
+      "Yes, we provide personalised referral links to our partners that they can share with their audience.",
   },
   {
-    question: "Who gets the commission?",
+    question: "Who gets credited for a referral?",
     answer:
-      "The commission is paid to the affiliate whose referral link or coupon code was used during the purchase.",
+      "The partner whose referral link was used when a learner joined gets credited for that contribution.",
   },
 ];
 
@@ -53,38 +39,28 @@ export default function EarningProjection() {
   return (
     <div className="min-h-screen text-gray-200 py-16">
       <div className="container mx-auto px-4">
-        {/* Earning Projection Section */}
-        <div className="mb-20">
-          <h1 className="text-4xl font-bold text-center mb-12">
-            Earning <span className="text-primary">Projection</span>
-          </h1>
 
-          <Table
-            aria-label="Earning projection table"
-            classNames={{
-              wrapper: "bg-transparent",
-              th: " text-white font-bold text-md",
-              td: "text-default-900",
-              tr: "data-[odd=true]:bg-bgSecondary data-[odd=true]:text-white data-[even=true]:bg-white",
-            }}
-          >
-            <TableHeader>
-              <TableColumn>Course Price</TableColumn>
-              <TableColumn>Commission</TableColumn>
-              <TableColumn>No. of Affiliate</TableColumn>
-              <TableColumn>Earning</TableColumn>
-            </TableHeader>
-            <TableBody>
-              {projectionData.map((row, index) => (
-                <TableRow key={index}>
-                  <TableCell>₹{row.price}</TableCell>
-                  <TableCell>{row.commission}</TableCell>
-                  <TableCell>{row.affiliates}</TableCell>
-                  <TableCell>₹{row.earning}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+        {/* How It Works Section */}
+        <div className="mb-20 text-center">
+          <h1 className="text-4xl font-bold text-center mb-4">
+            How Your <span className="text-primary">Contribution</span> Works
+          </h1>
+          <p className="text-gray-400 max-w-2xl mx-auto mb-12">
+            Every learner you introduce to SRK University strengthens our
+            educational community. Here's how your impact grows over time.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+            {[
+              { label: "1 Learner Referred", note: "Your journey begins — every great community starts with one." },
+              { label: "10 Learners Referred", note: "You're making a real difference — a growing circle of skilled individuals." },
+              { label: "100 Learners Referred", note: "You've helped build something significant — a thriving learning network." },
+            ].map((item, i) => (
+              <div key={i} className="bg-bgSecondary rounded-xl p-6 border border-white/[0.06] flex flex-col gap-3">
+                <p className="text-primary font-bold text-lg">{item.label}</p>
+                <p className="text-gray-400 text-sm">{item.note}</p>
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* FAQ Section */}

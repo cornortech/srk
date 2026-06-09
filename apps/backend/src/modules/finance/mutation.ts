@@ -17,32 +17,31 @@ const createBalancePayout: AppRouteImplementation<
   typeof financeContract.createBalancePayout
 > = async ({ req }) => {
   try {
-    const balanceExist = await balanceModel.findOne({
-      userId: req.body.userId,
-    });
+    const userId = req.body.userId;
 
-    const srkBankExist = await SrkBankModel.findOne({
-      userId: req.body.userId,
-    });
+    let [balanceExist, srkBankExist, userExist] = await Promise.all([
+      balanceModel.findOne({ userId }),
+      SrkBankModel.findOne({ userId }),
+      UserModel.findOne({ _id: userId }),
+    ]);
 
-    if (!balanceExist) {
+    if (!userExist || !userExist.affiliateEnabled) {
       return {
-        status: 404,
+        status: 403,
         body: {
           success: false,
-          message: 'User balance not found',
+          message: 'User is not authorized for withdrawals',
         },
       };
     }
 
+    // Auto-heal missing records for users approved before these records were created
+    if (!balanceExist) {
+      balanceExist = await balanceModel.create({ userId });
+    }
+
     if (!srkBankExist) {
-      return {
-        status: 404,
-        body: {
-          success: false,
-          message: 'User balance not found',
-        },
-      };
+      srkBankExist = await SrkBankModel.create({ userId, amount: 0, status: 'pending' });
     }
     if (req.body.amount <= 0) {
       return {
@@ -67,7 +66,7 @@ const createBalancePayout: AppRouteImplementation<
     const withdrawAmount = +(req.body.amount - tdsAmount).toFixed(2);
 
     await balanceModel.updateOne(
-      { userId: req.body.userId },
+      { userId },
       {
         $inc: {
           balance: -req.body.amount,
@@ -87,9 +86,7 @@ const createBalancePayout: AppRouteImplementation<
     );
 
     const updatedSrkBank = await SrkBankModel.findOneAndUpdate(
-      {
-        userId: req.body.userId,
-      },
+      { userId },
       {
         $inc: {
           amount: withdrawAmount,

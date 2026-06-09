@@ -84,6 +84,20 @@ const approveAffiliateRequest: AppRouteImplementationOrOptions<
       };
     }
 
+    // Ensure supporting records exist regardless of current affiliateEnabled state
+    const [srkBankExist, userBalanceExist] = await Promise.all([
+      SrkBankModel.findOne({ userId }),
+      balanceModel.findOne({ userId }),
+    ]);
+
+    if (!srkBankExist) {
+      await SrkBankModel.create({ userId, amount: 0, status: 'pending' });
+    }
+
+    if (!userBalanceExist) {
+      await balanceModel.create({ userId });
+    }
+
     if (userExist.affiliateEnabled) {
       return {
         status: 400,
@@ -95,21 +109,6 @@ const approveAffiliateRequest: AppRouteImplementationOrOptions<
     existingAffiliateRequest.status = 'approved';
 
     await Promise.all([existingAffiliateRequest.save(), userExist.save()]);
-
-    const srkBankExist = await SrkBankModel.findOne({ userId });
-    if (!srkBankExist) {
-      await SrkBankModel.create({ userId, amount: 0, status: 'pending' });
-    }
-
-    const userBalanceExist = await balanceModel.findOne({ userId });
-    if (!userBalanceExist) {
-      try {
-        await balanceModel.create({ userId });
-      } catch (err) {
-        console.error('Failed to create balance document:', err);
-        // Optional: return error or continue if you want approval to succeed anyway
-      }
-    }
 
     EmailService.sendEmail({
       email: userExist.email,

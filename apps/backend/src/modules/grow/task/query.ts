@@ -1443,7 +1443,7 @@ const getSrkTaskActionsByPlatforms: AppRouteImplementationOrOptions<
     if (srkTaskUserId) {
       const taskUserId = new mongoose.Types.ObjectId(srkTaskUserId);
       const submissions = await srkTaskActionSubmissionModel
-        .find({ taskUserId, status: { $in: ['approved', 'pending'] } })
+        .find({ taskUserId, status: { $in: ['pending', 'approved', 'claimed'] } })
         .select('growPackageTodoId')
         .lean();
       submittedTodoIds = submissions.map((s) => s.growPackageTodoId);

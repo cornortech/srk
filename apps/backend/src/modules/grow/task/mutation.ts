@@ -440,6 +440,19 @@ const srkTaskActionSubmission: AppRouteImplementationOrOptions<
 
     if (
       existingSubmissionExist &&
+      existingSubmissionExist.status === 'claimed'
+    ) {
+      return {
+        status: 400,
+        body: {
+          success: false,
+          message: 'You have already completed and claimed this task.',
+        },
+      };
+    }
+
+    if (
+      existingSubmissionExist &&
       existingSubmissionExist.status === 'approved'
     ) {
       return {

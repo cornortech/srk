@@ -35,7 +35,12 @@
     "script:get-user": "tsx apps/backend/src/scripts/getSrkUniversityUser.ts",
     "script:get-task-submissions": "tsx apps/backend/src/scripts/getSrkTaskActionSubmissions.ts",
     "script:update-task-coins": "tsx apps/backend/src/scripts/updateTaskUserCoins.ts",
-    "script:create-affiliates-srkbank": "tsx apps/backend/src/scripts/createAffiliatesSrkBank.ts"
+    "script:create-affiliates-srkbank": "tsx apps/backend/src/scripts/createAffiliatesSrkBank.ts",
+    "script:fix-affiliates-balance": "tsx apps/backend/src/scripts/fixAffiliatesMissingBalanceRecords.ts",
+    "migrate:firebase-videos": "tsx apps/backend/src/scripts/migrateFirebaseVideosToR2.ts",
+    "migrate:firebase-videos:dry-run": "tsx apps/backend/src/scripts/migrateFirebaseVideosToR2.ts --dry-run",
+    "migrate:firebase-images": "tsx apps/backend/src/scripts/migrateFirebaseImagesToR2.ts",
+    "migrate:firebase-images:dry-run": "tsx apps/backend/src/scripts/migrateFirebaseImagesToR2.ts --dry-run"
   },
   "private": true,
   "devDependencies": {

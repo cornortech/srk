@@ -19,11 +19,14 @@ const createBalancePayout: AppRouteImplementation<
   try {
     const userId = req.body.userId;
 
-    let [balanceExist, srkBankExist, userExist] = await Promise.all([
+    const results = await Promise.all([
       balanceModel.findOne({ userId }),
       SrkBankModel.findOne({ userId }),
       UserModel.findOne({ _id: userId }),
     ]);
+    let balanceExist = results[0];
+    let srkBankExist = results[1];
+    const userExist = results[2];
 
     if (!userExist || !userExist.affiliateEnabled) {
       return {

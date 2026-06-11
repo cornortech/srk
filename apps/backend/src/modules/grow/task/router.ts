@@ -68,6 +68,8 @@ export const srkTaskRouter = s.router(srkTaskContract, {
   getRejectedSrkTaskActionSubmissionsByUser:
     srkTaskQueryHandler.getRejectedSrkTaskActionSubmissionsByUser,
   getUserPaymentDetails: srkTaskQueryHandler.getUserPaymentDetails,
+  getSrkTaskSubmissionAnalyticsForAdmin:
+    srkTaskQueryHandler.getSrkTaskSubmissionAnalyticsForAdmin,
   submitPaymentDetailsRequest:
     srkTaskMutationHandler.submitPaymentDetailsRequest,
   getAllPaymentDetailsRequestsForAdmin:

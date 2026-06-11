@@ -2207,6 +2207,65 @@ const getAllPaymentDetailsRequestsForAdmin: AppRouteImplementationOrOptions<
   }
 };
 
+const getSrkTaskSubmissionAnalyticsForAdmin: AppRouteImplementationOrOptions<
+  typeof srkTaskContract.getSrkTaskSubmissionAnalyticsForAdmin
+> = async () => {
+  try {
+    const now = new Date();
+    const startOfToday = new Date(now);
+    startOfToday.setHours(0, 0, 0, 0);
+    const start7DaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+    const start30DaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+
+    const [
+      totalApproved, totalRejected, totalPending, totalAll,
+      todayApproved, todayRejected, todayPending, todayAll,
+      last7Approved, last7Rejected, last7Pending, last7All,
+      last30Approved, last30Rejected, last30Pending, last30All,
+    ] = await Promise.all([
+      srkTaskActionSubmissionModel.countDocuments({ status: 'approved' }),
+      srkTaskActionSubmissionModel.countDocuments({ status: 'rejected' }),
+      srkTaskActionSubmissionModel.countDocuments({ status: 'pending' }),
+      srkTaskActionSubmissionModel.countDocuments({}),
+      srkTaskActionSubmissionModel.countDocuments({ status: 'approved', createdAt: { $gte: startOfToday } }),
+      srkTaskActionSubmissionModel.countDocuments({ status: 'rejected', createdAt: { $gte: startOfToday } }),
+      srkTaskActionSubmissionModel.countDocuments({ status: 'pending', createdAt: { $gte: startOfToday } }),
+      srkTaskActionSubmissionModel.countDocuments({ createdAt: { $gte: startOfToday } }),
+      srkTaskActionSubmissionModel.countDocuments({ status: 'approved', createdAt: { $gte: start7DaysAgo } }),
+      srkTaskActionSubmissionModel.countDocuments({ status: 'rejected', createdAt: { $gte: start7DaysAgo } }),
+      srkTaskActionSubmissionModel.countDocuments({ status: 'pending', createdAt: { $gte: start7DaysAgo } }),
+      srkTaskActionSubmissionModel.countDocuments({ createdAt: { $gte: start7DaysAgo } }),
+      srkTaskActionSubmissionModel.countDocuments({ status: 'approved', createdAt: { $gte: start30DaysAgo } }),
+      srkTaskActionSubmissionModel.countDocuments({ status: 'rejected', createdAt: { $gte: start30DaysAgo } }),
+      srkTaskActionSubmissionModel.countDocuments({ status: 'pending', createdAt: { $gte: start30DaysAgo } }),
+      srkTaskActionSubmissionModel.countDocuments({ createdAt: { $gte: start30DaysAgo } }),
+    ]);
+
+    return {
+      status: 200,
+      body: {
+        success: true,
+        data: {
+          total: { approved: totalApproved, rejected: totalRejected, pending: totalPending, all: totalAll },
+          today: { approved: todayApproved, rejected: todayRejected, pending: todayPending, all: todayAll },
+          last7Days: { approved: last7Approved, rejected: last7Rejected, pending: last7Pending, all: last7All },
+          last30Days: { approved: last30Approved, rejected: last30Rejected, pending: last30Pending, all: last30All },
+        },
+      },
+    };
+  } catch (error) {
+    console.error(error);
+    const errorMessage = error instanceof Error ? error.message : 'Internal server error';
+    return {
+      status: 500,
+      body: {
+        success: false,
+        message: errorMessage,
+      },
+    };
+  }
+};
+
 export const srkTaskQueryHandler = {
   getSrkTaskActionsByPlatforms,
   getSrkTaskUserProfile,
@@ -2225,4 +2284,5 @@ export const srkTaskQueryHandler = {
   getAllCompletedSrkTaskSubmissionsForAdmin,
   getUserPaymentDetails,
   getAllPaymentDetailsRequestsForAdmin,
+  getSrkTaskSubmissionAnalyticsForAdmin,
 };

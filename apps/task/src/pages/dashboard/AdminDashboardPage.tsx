@@ -11,6 +11,7 @@ import {
   CheckCircle,
   Settings,
   CreditCard,
+  BarChart3,
 } from 'lucide-react';
 import { useIsDesktop } from '../../features/admin/hooks/useIsDesktop';
 import { NavLink, Payout } from '../../features/admin/types';
@@ -23,6 +24,7 @@ import { AllUsersContent } from '../../features/admin/views/AllUsersContent';
 import { LeaderboardContent } from '../../features/admin/views/LeaderboardContent';
 import { AppSettingsContent } from '../../features/admin/views/AppSettingsContent';
 import { PaymentDetailsVerificationContent } from '../../features/admin/views/PaymentDetailsVerificationContent';
+import { TaskAnalyticsContent } from '../../features/admin/views/TaskAnalyticsContent';
 import {
   DARK_BG,
   GOLD_PRIMARY,
@@ -85,6 +87,11 @@ export const AdminDashboard: React.FC = () => {
       name: 'Leaderboard',
       icon: Trophy,
       content: <LeaderboardContent />,
+    },
+    {
+      name: 'Task Analytics',
+      icon: BarChart3,
+      content: <TaskAnalyticsContent />,
     },
     {
       name: 'App Settings',

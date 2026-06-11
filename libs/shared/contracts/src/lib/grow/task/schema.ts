@@ -667,6 +667,30 @@ export const getUserPaymentDetailsResponseSchema = z.object({
   rejectedRequest: srkTaskUserPaymentDetailsRequestSchema.nullable(),
 });
 
+// Task Submission Analytics Schema
+const submissionCountsSchema = z.object({
+  approved: z.number(),
+  rejected: z.number(),
+  pending: z.number(),
+  all: z.number(),
+});
+
+export const srkTaskSubmissionAnalyticsDataSchema = z.object({
+  total: submissionCountsSchema,
+  today: submissionCountsSchema,
+  last7Days: submissionCountsSchema,
+  last30Days: submissionCountsSchema,
+});
+
+export const getSrkTaskSubmissionAnalyticsResponseSchema = z.object({
+  success: z.boolean(),
+  data: srkTaskSubmissionAnalyticsDataSchema,
+});
+
+export type TGetSrkTaskSubmissionAnalyticsResponse = z.infer<
+  typeof getSrkTaskSubmissionAnalyticsResponseSchema
+>;
+
 export type TGetUserPaymentDetailsResponse = z.infer<
   typeof getUserPaymentDetailsResponseSchema
 >;

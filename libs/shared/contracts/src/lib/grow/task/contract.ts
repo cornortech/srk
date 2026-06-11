@@ -21,6 +21,7 @@ import {
   paginatedSrkTaskPaymentDetailsRequestsSchema,
   getSrkTaskPaymentDetailsRequestsQueryParams,
   reviewSrkTaskPaymentDetailsRequestSchema,
+  getSrkTaskSubmissionAnalyticsResponseSchema,
 } from './schema';
 
 import { paginatedSrkTaskEarningRequestsByUserSchema } from './schema';
@@ -427,5 +428,15 @@ export const srkTaskContract = c.router({
       500: ErrorSchema,
     },
     summary: 'Approve or reject payment details request',
+  },
+
+  getSrkTaskSubmissionAnalyticsForAdmin: {
+    method: 'GET',
+    path: '/task/admin/task-submission-analytics',
+    responses: {
+      200: getSrkTaskSubmissionAnalyticsResponseSchema,
+      500: ErrorSchema,
+    },
+    summary: 'Get task submission analytics (approved/rejected/pending counts) for admin',
   },
 });

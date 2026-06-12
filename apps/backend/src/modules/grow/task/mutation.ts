@@ -438,41 +438,12 @@ const srkTaskActionSubmission: AppRouteImplementationOrOptions<
       taskUserId: body.srkTaskUserId,
     });
 
-    if (
-      existingSubmissionExist &&
-      existingSubmissionExist.status === 'claimed'
-    ) {
+    if (existingSubmissionExist) {
       return {
         status: 400,
         body: {
           success: false,
-          message: 'You have already completed and claimed this task.',
-        },
-      };
-    }
-
-    if (
-      existingSubmissionExist &&
-      existingSubmissionExist.status === 'approved'
-    ) {
-      return {
-        status: 400,
-        body: {
-          success: false,
-          message: 'Action has already been approved',
-        },
-      };
-    }
-
-    if (
-      existingSubmissionExist &&
-      existingSubmissionExist.status === 'pending'
-    ) {
-      return {
-        status: 400,
-        body: {
-          success: false,
-          message: 'Action submission is already pending.',
+          message: 'You have already submitted this task and cannot submit it again.',
         },
       };
     }

@@ -6,6 +6,19 @@ import { uploadFileToR2 } from './r2Service';
 
 const CLOUDFLARE_CDN_BASE_URL = 'https://cdn.thesrkuniversity.com';
 
+// Strip characters outside the WinAnsi (Windows-1252) printable range so
+// pdf-lib's StandardFont encoder doesn't throw on invisible Unicode control
+// chars (e.g. U+202C POP DIRECTIONAL FORMATTING) that users can paste into
+// name fields from RTL-aware apps.
+function sanitizeForPdf(text: string): string {
+  return Array.from(text)
+    .filter((char) => {
+      const code = char.codePointAt(0) ?? 0;
+      return code >= 0x20 && code <= 0xff;
+    })
+    .join('');
+}
+
 // Function to convert relative asset paths to full CDN URLs
 function getAssetUrl(assetPath?: string | null): string {
   if (!assetPath) return '';
@@ -136,21 +149,21 @@ export async function modifyAndUploadAgreement(
     );
 
     // Modify the PDF with text
-    firstPage.drawText(username, {
+    firstPage.drawText(sanitizeForPdf(username), {
       x: 76,
       y: 550,
       size: 16,
       color: rgb(0, 0, 0),
     });
 
-    firstPage.drawText(createdAt, {
+    firstPage.drawText(sanitizeForPdf(createdAt), {
       x: 492,
       y: 712,
       size: 16,
       color: rgb(0, 0, 0),
     });
 
-    firstPage.drawText(ref, {
+    firstPage.drawText(sanitizeForPdf(ref), {
       x: 50,
       y: 710,
       size: 16,
@@ -318,16 +331,18 @@ export async function generateAndUploadCertificate(
     const currentYear = new Date().getFullYear();
     const batch = `B-${currentYear}`;
 
+    const safeUserFullName = sanitizeForPdf(userFullName);
+
     // Add participant name (centered near top)
-    firstPage.drawText(userFullName, {
-      x: pageWidth / 2 - userFullName.length * 4, // Approximate centering
+    firstPage.drawText(safeUserFullName, {
+      x: pageWidth / 2 - safeUserFullName.length * 4, // Approximate centering
       y: pageHeight - 320,
       size: 18,
       color: rgb(0, 0, 0),
     });
 
     // Add "ISSUED ON:" date in the bottom section
-    firstPage.drawText(formattedDate, {
+    firstPage.drawText(sanitizeForPdf(formattedDate), {
       x: 180,
       y: 180,
       size: 11,
@@ -335,7 +350,7 @@ export async function generateAndUploadCertificate(
     });
 
     // Add batch/cohort (current year)
-    firstPage.drawText(batch, {
+    firstPage.drawText(sanitizeForPdf(batch), {
       x: 380,
       y: 180,
       size: 11,
@@ -343,7 +358,7 @@ export async function generateAndUploadCertificate(
     });
 
     // Add participant ID (random number)
-    firstPage.drawText(participantId, {
+    firstPage.drawText(sanitizeForPdf(participantId), {
       x: 650,
       y: 180,
       size: 11,
@@ -413,35 +428,38 @@ export async function createAffiliatePdfAndUpload(
     const pages = pdfDoc.getPages();
     const firstPage = pages[0];
 
+    const safeUsername = sanitizeForPdf(username);
+    const safeCreatedAt = sanitizeForPdf(createdAt);
+    const safeRef = sanitizeForPdf(ref);
+
     // Modify the PDF with text
-    firstPage.drawText(username, {
+    firstPage.drawText(safeUsername, {
       x: 73,
       y: 555,
       size: 16,
       color: rgb(0, 0, 0),
     });
-    // Modify the PDF with text
-    firstPage.drawText(username, {
+    firstPage.drawText(safeUsername, {
       x: 50,
       y: 205,
       size: 16,
       color: rgb(0, 0, 0),
     });
 
-    firstPage.drawText(createdAt, {
+    firstPage.drawText(safeCreatedAt, {
       x: 492,
       y: 712,
       size: 16,
       color: rgb(0, 0, 0),
     });
-    firstPage.drawText(createdAt, {
+    firstPage.drawText(safeCreatedAt, {
       x: 310,
       y: 205,
       size: 16,
       color: rgb(0, 0, 0),
     });
 
-    firstPage.drawText(ref, {
+    firstPage.drawText(safeRef, {
       x: 50,
       y: 710,
       size: 16,

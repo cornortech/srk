@@ -9,7 +9,6 @@ import { TUserDataReponseData } from "../../lib/types";
 import useAuthStore from "../../store/useAuth";
 import { getUserDetailsApi } from "../../lib/apiClient";
 import { LogoNavbar } from "../../components/logoNavbar";
-import { methods } from "../../lib/methods";
 import AlertBanner from "../../components/AlertBanner";
 
 const PortalActivationPage = () => {
@@ -143,18 +142,7 @@ const PortalActivationPage = () => {
               <KYCForm
                 handleRefetch={refetch}
                 kycDetails={userData?.kycDetails || null}
-                newVerificationImageFile={
-                  verificationImage
-                    ? methods.base64ToFile(
-                      verificationImage || "",
-                      // remove spaces and special characters
-                      `${userData?.userDetails?.firstName
-                        .replace(/\s+/g, "-")
-                        .replace(/[^a-zA-Z0-9-_]/g, "")}-kyc-verification-image.png`,
-                      "image/png"
-                    )
-                    : undefined
-                }
+                verificationImageDataURL={verificationImage || undefined}
                 leftThumbFingerprint={leftThumbFingerprint}
                 rightThumbFingerprint={rightThumbFingerprint}
                 signature={signature}

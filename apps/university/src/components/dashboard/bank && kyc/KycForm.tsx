@@ -22,7 +22,7 @@ const documentTypes = [
 ];
 
 interface KYCFormProps {
-  newVerificationImageFile?: File;
+  verificationImageDataURL?: string;
   kycDetails: TKyc | null;
   handleRefetch: () => void;
   leftThumbFingerprint?: string;
@@ -33,9 +33,6 @@ interface KYCFormProps {
   isLastTab?: boolean;
 }
 
-/**
- * Convert File to data URL (base64)
- */
 const fileToDataURL = (file: File): Promise<string> =>
   new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -46,7 +43,7 @@ const fileToDataURL = (file: File): Promise<string> =>
 
 export default function KYCForm({
   handleRefetch,
-  newVerificationImageFile,
+  verificationImageDataURL,
   kycDetails,
   leftThumbFingerprint = "",
   rightThumbFingerprint = "",
@@ -121,7 +118,7 @@ export default function KYCForm({
       return;
     }
     
-    if (!newVerificationImageFile && !kycDetails?.verificationImage) {
+    if (!verificationImageDataURL && !kycDetails?.verificationImage) {
       show("Please upload verification image", "error");
       return;
     }
@@ -129,32 +126,25 @@ export default function KYCForm({
     setLoading(true);
 
     try {
-      // Convert new images to data URLs
       const frontImageDataURL = frontImage ? await fileToDataURL(frontImage) : undefined;
       const backImageDataURL = backImage ? await fileToDataURL(backImage) : undefined;
-      const verificationImageDataURL = newVerificationImageFile ? await fileToDataURL(newVerificationImageFile) : undefined;
-      
-      // Convert optional biometric data from base64 strings to data URLs if they're new (not URLs)
-      const leftThumbFingerprintDataURL = leftThumbFingerprint && !leftThumbFingerprint.startsWith("http") && leftThumbFingerprint.startsWith("data:") 
-        ? leftThumbFingerprint 
+
+      const leftThumbFingerprintDataURL = leftThumbFingerprint && leftThumbFingerprint.startsWith("data:")
+        ? leftThumbFingerprint
         : undefined;
-      const rightThumbFingerprintDataURL = rightThumbFingerprint && !rightThumbFingerprint.startsWith("http") && rightThumbFingerprint.startsWith("data:")
+      const rightThumbFingerprintDataURL = rightThumbFingerprint && rightThumbFingerprint.startsWith("data:")
         ? rightThumbFingerprint
         : undefined;
-      const signatureDataURL = signature && !signature.startsWith("http") && signature.startsWith("data:")
+      const signatureDataURL = signature && signature.startsWith("data:")
         ? signature
         : undefined;
 
-      // Send data to backend
       mutate({
-        // Keep existing paths if not updating; send data URLs through the same fields for consistency
         frontImage: frontImageDataURL ?? kycDetails?.frontImage,
         backImage: backImageDataURL ?? kycDetails?.backImage,
         verificationImage: verificationImageDataURL ?? kycDetails?.verificationImage,
-        leftThumbFingerprint:
-          leftThumbFingerprintDataURL ?? kycDetails?.leftThumbFingerprint,
-        rightThumbFingerprint:
-          rightThumbFingerprintDataURL ?? kycDetails?.rightThumbFingerprint,
+        leftThumbFingerprint: leftThumbFingerprintDataURL ?? kycDetails?.leftThumbFingerprint,
+        rightThumbFingerprint: rightThumbFingerprintDataURL ?? kycDetails?.rightThumbFingerprint,
         signature: signatureDataURL ?? kycDetails?.signature,
       });
     } catch (error) {

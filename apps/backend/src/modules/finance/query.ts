@@ -726,6 +726,28 @@ const getBankTable: AppRouteImplementationOrOptions<
       queryReq.status = { $in: statusArray };
     }
 
+    // Build database-level search filter so pagination is accurate
+    if (search) {
+      const searchRegex = new RegExp(search, 'i');
+      const matchingUsers = await UserModel.find({
+        $or: [
+          { email: searchRegex },
+          { firstName: searchRegex },
+          { lastName: searchRegex },
+        ],
+      }).select('_id');
+      const matchingUserIds = matchingUsers.map((u) => u._id);
+
+      queryReq.$or = [
+        { userId: { $in: matchingUserIds } },
+        { accountHolderName: searchRegex },
+        { accountNumber: searchRegex },
+        { bankName: searchRegex },
+      ];
+    }
+
+    const totalRequest = await BankModel.countDocuments(queryReq);
+
     const bankTable = await BankModel.find(queryReq)
       .sort({ createdAt: -1 })
       .skip(skip)
@@ -735,6 +757,7 @@ const getBankTable: AppRouteImplementationOrOptions<
           _id: string;
           firstName: string;
           lastName: string;
+          email: string;
           profilePicture: string;
           packageId: {
             _id: string;
@@ -749,28 +772,7 @@ const getBankTable: AppRouteImplementationOrOptions<
         },
       });
 
-    // Filter results if search is provided (after population)
-    let filteredBankTable = bankTable;
-    if (search) {
-      const searchRegex = new RegExp(search, 'i');
-      filteredBankTable = bankTable.filter((bank) => {
-        const username = `${bank.userId.firstName} ${bank.userId.lastName}`;
-        return (
-          searchRegex.test(username) ||
-          searchRegex.test(bank.accountHolderName) ||
-          searchRegex.test(bank.accountNumber) ||
-          searchRegex.test(bank.bankName)
-        );
-      });
-    }
-
-    // Count total after filtering
-    const totalRequest = search
-      ? filteredBankTable.length
-      : await BankModel.countDocuments(queryReq);
-
-    // Format response
-    const formattedBankTable = filteredBankTable.map((bank) => ({
+    const formattedBankTable = bankTable.map((bank) => ({
       username: `${bank.userId.firstName} ${bank.userId.lastName}`,
       profilePicture: bank.userId.profilePicture,
       _id: bank._id.toString(),

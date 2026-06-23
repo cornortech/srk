@@ -14,7 +14,7 @@ import {
   Input,
 } from '@nextui-org/react';
 import { EllipsisVertical } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { getUniversityAssetUrl } from '../../lib/cdn';
 import {
   chipColorsStatusMap,
@@ -33,6 +33,8 @@ import TablePagination from '../../components/admin/Pagination';
 export default function BankRequest() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [selectedUser, setSelectedUser] = useState<TBankRequest | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const handleOpenModal = (user: TBankRequest) => {
@@ -40,16 +42,27 @@ export default function BankRequest() {
     setIsModalOpen(true);
   };
 
+  useEffect(() => {
+    if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    debounceTimer.current = setTimeout(() => {
+      setDebouncedSearch(search);
+      setPage(1);
+    }, 400);
+    return () => {
+      if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    };
+  }, [search]);
+
   const { data: bankRequest, refetch, isLoading } = useQuery<
     TBankRequestByStatus | undefined
   >({
-    queryKey: ['bank-requests', page, search],
+    queryKey: ['bank-requests', page, debouncedSearch],
     queryFn: async () => {
       const data = await getBankRequestApi(
         ['pending', 'approved', 'rejected'],
         page,
         10,
-        search || undefined
+        debouncedSearch || undefined
       );
       return data;
     },
@@ -104,7 +117,7 @@ export default function BankRequest() {
         <CardHeader className="text-xl font-bold flex flex-row gap-x-4">
           <h1>Bank Details Requests</h1>
           <Input
-            placeholder="Search by name, bank, or account"
+            placeholder="Search by email, name, bank, or account"
             className="w-1/2 self-end ml-auto"
             value={search}
             onChange={(e) => setSearch(e.target.value)}

@@ -180,7 +180,10 @@ export const PaymentDetailsView: React.FC<PaymentDetailsViewProps> = ({
       </motion.div>
 
       {/* Rejected Request Notice */}
-      {rejectedRequest && !pendingRequest && !approvedDetails && (
+      {rejectedRequest && !pendingRequest && (
+        !approvedDetails ||
+        new Date(rejectedRequest.createdAt) > new Date(approvedDetails.createdAt)
+      ) && (
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -225,7 +228,17 @@ export const PaymentDetailsView: React.FC<PaymentDetailsViewProps> = ({
                 </p>
               </div>
               <button
-                onClick={() => setIsEditing(true)}
+                onClick={() => {
+                  setFormData({
+                    accountHolderName: rejectedRequest.accountHolderName,
+                    bankName: rejectedRequest.bankName,
+                    accountNumber: rejectedRequest.accountNumber,
+                    branchName: rejectedRequest.branchName,
+                    qrCodeUrl: rejectedRequest.qrCodeUrl,
+                  });
+                  setQrPreview(getTaskAssetUrl(rejectedRequest.qrCodeUrl));
+                  setIsEditing(true);
+                }}
                 className="mt-4 px-4 py-2 rounded-lg bg-[#B68938] hover:bg-[#E1BA73] text-black font-medium transition-colors"
               >
                 Submit New Details
@@ -318,9 +331,19 @@ export const PaymentDetailsView: React.FC<PaymentDetailsViewProps> = ({
               )}
             </div>
           </div>
-          {!pendingRequest && !approvedDetails && (
+          {!pendingRequest && (
             <button
-              onClick={() => setIsEditing(true)}
+              onClick={() => {
+                setFormData({
+                  accountHolderName: approvedDetails.accountHolderName,
+                  bankName: approvedDetails.bankName,
+                  accountNumber: approvedDetails.accountNumber,
+                  branchName: approvedDetails.branchName,
+                  qrCodeUrl: approvedDetails.qrCodeUrl,
+                });
+                setQrPreview(getTaskAssetUrl(approvedDetails.qrCodeUrl));
+                setIsEditing(true);
+              }}
               className="mt-4 px-4 py-2 rounded-lg bg-[#B68938] hover:bg-[#E1BA73] text-black font-medium transition-colors"
             >
               Update Payment Details

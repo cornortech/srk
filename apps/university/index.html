@@ -3,9 +3,12 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <!-- Ezoic Privacy Scripts -->
-    <script data-cfasync="false" src="https://cmp.gatekeeperconsent.com/min.js"></script>
-    <script data-cfasync="false" src="https://the.gatekeeperconsent.com/cmp.min.js"></script>
+    <!-- Preload LCP hero image for fastest possible paint -->
+    <link rel="preload" as="image" href="/team/landingImage1.jpg" fetchpriority="high" />
+
+    <!-- Ezoic Privacy Scripts (deferred to not block render) -->
+    <script data-cfasync="false" defer src="https://cmp.gatekeeperconsent.com/min.js"></script>
+    <script data-cfasync="false" defer src="https://the.gatekeeperconsent.com/cmp.min.js"></script>
 
     <!-- Ezoic Header Script -->
     <script async src="//www.ezojs.com/ezoic/sa.min.js"></script>
@@ -13,7 +16,7 @@
       window.ezstandalone = window.ezstandalone || {};
       ezstandalone.cmd = ezstandalone.cmd || [];
     </script>
-    <script src="//ezoicanalytics.com/analytics.js"></script>
+    <script async defer src="//ezoicanalytics.com/analytics.js"></script>
 
     <!-- Google AdSense -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7145379318898250"
@@ -40,7 +43,7 @@
     <meta property="og:description"
       content="Join The SRK University and explore quality education, affiliate programs, and entrepreneur training packages like SRK Pro, Lite, Premium & Basic." />
     <meta property="og:image" content="https://thesrkuniversity.com/logo.png" />
-    <meta property="og:url" content="https://yourdomain.com" />
+    <meta property="og:url" content="https://thesrkuniversity.com/" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="The SRK University" />
 
@@ -53,8 +56,10 @@
       content="https://thesrkuniversity.com/logo.png" />
     <meta name="twitter:site" content="@thesrkuniversity" />
 
-    <!-- AOS Animation Styles -->
-    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+    <!-- AOS Animation Styles (preconnect to reduce DNS lookup time) -->
+    <link rel="preconnect" href="https://unpkg.com" />
+    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" media="print" onload="this.media='all'" />
+    <noscript><link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" /></noscript>
 
     <!-- Canonical URL -->
     <link rel="canonical" href="https://thesrkuniversity.com/" />
@@ -62,9 +67,6 @@
   <body>
     <div id="root"></div>
     <script type="module" src="./src/main.tsx"></script>
-    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
-    <script>
-      AOS.init();
-    </script>
+    <script defer src="https://unpkg.com/aos@next/dist/aos.js" onload="AOS.init()"></script>
   </body>
 </html>

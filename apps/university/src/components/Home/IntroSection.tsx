@@ -10,7 +10,9 @@ export const IntroSection = () => {
         src="/team/landingImage1.jpg"
         alt="Landing Image"
         className="absolute inset-0 w-full h-full object-cover animate-zoom-in"
-        loading="lazy"
+        loading="eager"
+        fetchPriority="high"
+        decoding="sync"
       />
 
       {/* Overlay to Darken Background Slightly */}

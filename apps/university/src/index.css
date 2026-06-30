@@ -51,3 +51,21 @@
   -ms-overflow-style: none;  /* IE and old Edge */
   scrollbar-width: none;     /* Firefox */
 }
+
+/* GPU-accelerate animations to reduce INP/TBT */
+.animate-zoom-in,
+.animate-fade-in,
+.animate-scroll,
+.animate-spin-slow {
+  will-change: transform;
+}
+
+/* Ensure images reserve space before loading (prevents CLS) */
+img {
+  content-visibility: auto;
+}
+
+/* Reserve space for images with explicit dimensions */
+img[width][height] {
+  aspect-ratio: attr(width) / attr(height);
+}

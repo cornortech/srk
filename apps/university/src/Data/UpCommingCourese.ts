@@ -8,7 +8,7 @@ export const upCommingCourses = [
     slogan:
       "Launch Your Own Brand! Master Amazon Private Label strategies and build a profitable eCommerce business today!",
     level: "Beginner",
-    img: "/coursesAmazonLabel.png",
+    img: "/coursesAmazonLabel_c.jpg",
   },
   {
     id: "3",
@@ -19,7 +19,7 @@ export const upCommingCourses = [
     slogan:
       "Scale Your Amazon Business! Learn the secrets of Amazon Wholesale and start selling profitable products efficiently.",
     level: "Intermediate",
-    img: "/coursesAmazonWholeSale.png",
+    img: "/coursesAmazonWholeSale_c.jpg",
   },
   {
     id: "4",
@@ -30,7 +30,7 @@ export const upCommingCourses = [
     slogan:
       "Dominate Daraz! Learn to build a successful online store and grow your eCommerce business.",
     level: "Beginner",
-    img: "/CoursesDarazLocal.png",
+    img: "/CoursesDarazLocal_c.jpg",
   },
   {
     id: "5",
@@ -41,7 +41,7 @@ export const upCommingCourses = [
     slogan:
       "Start Your Online Store! Join Shopify Mastery and build a high-converting eCommerce website today!",
     level: "Beginner",
-    img: "/coursesShopify.png",
+    img: "/coursesShopify_c.jpg",
   },
   {
     id: "6",
@@ -52,7 +52,7 @@ export const upCommingCourses = [
     slogan:
       "Build Beautiful Websites! Learn WordPress Web Development and create high-performing websites with ease.",
     level: "Beginner",
-    img: "/coursesWordpress.png",
+    img: "/coursesWordpress_c.jpg",
   },
   {
     id: "7",
@@ -63,7 +63,7 @@ export const upCommingCourses = [
     slogan:
       "Code Your Future! Join Full Stack Web Development and become a skilled developer with hands-on projects.",
     level: "Intermediate",
-    img: "/coureseWebDevelopment.png",
+    img: "/coureseWebDevelopment_c.jpg",
   },
   // {
   //   id: "8",

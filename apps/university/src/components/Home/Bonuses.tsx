@@ -91,6 +91,10 @@ const BonusTimeline = () => {
                   <img
                     src={milestone.badge}
                     alt={`${milestone.month} Badge`}
+                    width={48}
+                    height={48}
+                    loading="lazy"
+                    decoding="async"
                     className="w-12 h-12"
                   />
                   <p className="text-gray-400 text-xs text-center mt-1 uppercase">
@@ -122,6 +126,10 @@ const BonusTimeline = () => {
                 <img
                   src={milestone.badge}
                   alt={`${milestone.month} Badge`}
+                  width={64}
+                  height={64}
+                  loading="lazy"
+                  decoding="async"
                   className="w-16 h-16"
                 />
                 <p className="text-gray-400 text-sm text-center mt-2 uppercase">

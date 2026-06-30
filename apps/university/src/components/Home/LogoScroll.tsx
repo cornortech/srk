@@ -30,12 +30,17 @@ const LogoScroller = () => {
           <img
             key={index}
             src={logo}
-            alt={`Logo ${index}`}
+            alt={`Media partner ${(index % logos.length) + 1}`}
+            width={120}
+            height={40}
+            loading="lazy"
+            decoding="async"
             style={{
-              height: "40px", // Adjust height as needed
-              margin: "0 20px", // Space between logos
+              height: "40px",
+              width: "auto",
+              margin: "0 20px",
               display: "inline-block",
-              filter: "grayscale(100%) opacity(0.7)", // Match the faded effect in your image
+              filter: "grayscale(100%) opacity(0.7)",
             }}
           />
         ))}

@@ -29,5 +29,10 @@ export const EzoicAd: React.FC<EzoicAdProps> = ({ placementId }) => {
     };
   }, [placementId]);
 
-  return <div id={`ezoic-pub-ad-placeholder-${placementId}`}></div>;
+  return (
+    <div
+      id={`ezoic-pub-ad-placeholder-${placementId}`}
+      style={{ minHeight: '280px', minWidth: '300px', width: '100%' }}
+    />
+  );
 };

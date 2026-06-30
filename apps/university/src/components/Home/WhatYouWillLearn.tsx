@@ -56,7 +56,7 @@ export const ProvideSection = () => {
                     >
                       <div className="w-full h-full bg-black bg-opacity-5"></div>
                     </div> */}
-                      <img src={course.img} alt="" />
+                      <img src={course.img} alt={course.title} width={600} height={400} loading="lazy" className="w-full h-auto" style={{aspectRatio:'3/2'}} />
                     </Card>
                   </div>
                 </PopoverTrigger>

@@ -53,8 +53,9 @@ module.exports = {
         },
       },
       animation: {
-        "zoom-in": "zoomIn 5s ease-out forwards",
-        "fade-in": "fadeIn 1.5s ease-out forwards",
+        "zoom-in": "zoomIn 3s ease-out forwards",
+        "fade-in": "fadeIn 1s ease-out forwards",
+        "spin-slow": "spin 8s linear infinite",
         scroll:
           "scroll var(--animation-duration, 40s) var(--animation-direction, forwards) linear infinite",
       },

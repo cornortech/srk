@@ -76,12 +76,13 @@ export function ReusableNavbar({
             <div className="flex gap-2 items-center">
               <picture>
                 <img
-                  alt="logo"
+                  alt="SRK University"
                   src="/logo/transparentLogo.png"
-                  loading="lazy"
-                  role="presentation"
+                  loading="eager"
                   fetchPriority="high"
+                  decoding="sync"
                   width={100}
+                  height={60}
                 />
               </picture>
             </div>

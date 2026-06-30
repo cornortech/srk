@@ -119,6 +119,10 @@ const TradingSchool: React.FC<{
             <img
               src={"/logo/transparentLogo.png"}
               alt={imageAlt}
+              width={320}
+              height={320}
+              loading="lazy"
+              decoding="async"
               className="w-full h-full object-contain relative z-10"
             />
           </div>

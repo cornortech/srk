@@ -3,7 +3,6 @@ import { IntroSection } from "../components/Home/IntroSection";
 import MetricScroller from "../components/Home/MetricsData";
 import LogoScroller from "../components/Home/LogoScroll";
 import { AudienceSection } from "../components/Home/AudienceSection";
-import { EzoicAd } from "../components/EzoicAd";
 
 // Lazy-load everything below the fold to reduce initial JS execution
 const ComparisonSection = lazy(() => import("../components/Home/Comparison").then(m => ({ default: m.ComparisonSection })));
@@ -79,9 +78,6 @@ export const Home = () => {
         <LazySection height="500px"><TestimonialCarousel /></LazySection>
         <LazySection height="300px"><FAQSection /></LazySection>
         <LazySection height="300px"><EnrollSection /></LazySection>
-        <div className="w-full flex justify-center my-8">
-          <EzoicAd placementId={101} />
-        </div>
       </main>
     </div>
   );

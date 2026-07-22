@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { CircleUser } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -20,7 +20,10 @@ import clsx from "clsx";
 import useAuthStore from "../store/useAuth";
 import useAlert from "../hooks/useAlert";
 import AuthLocalStorage from "../lib/localstorage/auth";
-import { Sidebar } from "./SideBar";
+// Only rendered for logged-in users on mobile — lazy-loaded so anonymous
+// visitors (the common case for the public homepage) don't pay for its
+// code in the critical bundle.
+const Sidebar = lazy(() => import("./SideBar").then((m) => ({ default: m.Sidebar })));
 import { useIsMobile } from "../hooks/useIsMobileView";
 import { useQuery } from "@tanstack/react-query";
 import { getUserDetailsApi } from "../lib/apiClient";
@@ -156,12 +159,14 @@ export function ReusableNavbar({
         <NavbarMenu className="bg-bgPrimary">
           {userDetails ? (
             <>
-              <Sidebar
-                handleCloseMenu={handleCloseMenu}
-                showInMobileView={true}
-                sideBarName=""
-                sidebarType={dashboardType}
-              />
+              <Suspense fallback={null}>
+                <Sidebar
+                  handleCloseMenu={handleCloseMenu}
+                  showInMobileView={true}
+                  sideBarName=""
+                  sidebarType={dashboardType}
+                />
+              </Suspense>
               <LoginUserMenu />
             </>
           ) : (

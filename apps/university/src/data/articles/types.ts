@@ -1,7 +1,8 @@
 export interface ArticleBlock {
-  type: "h2" | "h3" | "p" | "ul" | "ol";
+  type: "h2" | "h3" | "p" | "ul" | "ol" | "image";
   text?: string;
   items?: string[];
+  src?: string;
 }
 
 export interface Article {
@@ -11,6 +12,7 @@ export interface Article {
   topicSlug: string;
   excerpt: string;
   readTime: string;
+  image: string;
   content: ArticleBlock[];
 }
 
@@ -24,4 +26,5 @@ export const topicMeta: Record<string, { label: string; color: string }> = {
   "ai-automation": { label: "AI & Automation", color: "text-primary" },
   "indesign": { label: "Adobe InDesign", color: "text-primary" },
   "communication": { label: "Communication Skills", color: "text-primary" },
+  "student-success": { label: "Student Success", color: "text-primary" },
 };

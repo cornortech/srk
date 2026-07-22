@@ -1,4 +1,5 @@
 import { ArrowLeft, Star, Quote } from "lucide-react";
+import { useAOS } from "../../lib/aos";
 import { Link } from "react-router-dom";
 
 const allReviews = [
@@ -27,6 +28,7 @@ const packageColors: Record<string, string> = {
 };
 
 export default function AllReviewsPage() {
+  useAOS();
   const packageCounts = allReviews.reduce<Record<string, number>>((acc, r) => {
     acc[r.package] = (acc[r.package] || 0) + 1;
     return acc;

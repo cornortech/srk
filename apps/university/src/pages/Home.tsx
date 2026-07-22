@@ -3,6 +3,7 @@ import { IntroSection } from "../components/Home/IntroSection";
 import MetricScroller from "../components/Home/MetricsData";
 import LogoScroller from "../components/Home/LogoScroll";
 import { AudienceSection } from "../components/Home/AudienceSection";
+import { useAOS } from "../lib/aos";
 
 // Lazy-load everything below the fold to reduce initial JS execution
 const ComparisonSection = lazy(() => import("../components/Home/Comparison").then(m => ({ default: m.ComparisonSection })));
@@ -40,6 +41,10 @@ function LazySection({ children, height }: { children: React.ReactNode; height?:
     if (ref.current) observer.observe(ref.current);
     return () => observer.disconnect();
   }, []);
+
+  // Below-fold sections are the only place Home renders data-aos elements,
+  // so load AOS lazily here instead of unconditionally on every page load.
+  useAOS();
 
   return (
     <div ref={ref}>

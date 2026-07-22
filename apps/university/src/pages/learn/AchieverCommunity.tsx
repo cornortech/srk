@@ -1,4 +1,5 @@
 import { ArrowLeft, Users, Star, Target, Heart, Handshake, Trophy, CheckCircle } from "lucide-react";
+import { useAOS } from "../../lib/aos";
 import { Link } from "react-router-dom";
 
 const communityValues = [
@@ -53,6 +54,7 @@ const achieverTraits = [
 ];
 
 export default function AchieverCommunityPage() {
+  useAOS();
   return (
     <div className="min-h-screen bg-bgPrimary text-textPrimary">
       {/* Hero */}

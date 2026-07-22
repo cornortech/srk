@@ -1,9 +1,11 @@
 import { useState } from "react";
+import { useAOS } from "../lib/aos";
 import { Link } from "react-router-dom";
 import { ArrowRight, Clock, BookOpen } from "lucide-react";
 import { allArticles, topics } from "../data/articles";
 
 export default function ArticlesPage() {
+  useAOS();
   const [activeTopic, setActiveTopic] = useState<string>("all");
 
   const filtered =
@@ -87,6 +89,13 @@ export default function ArticlesPage() {
                 data-aos="fade-up"
                 data-aos-duration="600"
               >
+                <img
+                  src={featured.image}
+                  alt={featured.title}
+                  className="w-full md:w-72 aspect-[16/10] md:aspect-auto object-cover flex-shrink-0"
+                  loading="eager"
+                />
+
                 {/* Left accent bar */}
                 <div className="h-1 md:h-auto md:w-px bg-primary/40 group-hover:bg-primary/70 transition-colors duration-200 flex-shrink-0" />
 
@@ -127,11 +136,18 @@ export default function ArticlesPage() {
                     <Link
                       key={article.slug}
                       to={`/articles/${article.slug}`}
-                      className="group bg-bgPrimary hover:bg-bgSecondary/40 transition-colors duration-150 flex flex-col p-7"
+                      className="group bg-bgPrimary hover:bg-bgSecondary/40 transition-colors duration-150 flex flex-col"
                       data-aos="fade-up"
                       data-aos-duration="600"
                       data-aos-delay={String((i % 3) * 55)}
                     >
+                      <img
+                        src={article.image}
+                        alt={article.title}
+                        className="w-full aspect-[16/10] object-cover"
+                        loading="lazy"
+                      />
+                      <div className="flex flex-col flex-1 p-7">
                       <p className="text-xs font-medium uppercase tracking-widest text-primary/60 mb-4">
                         {article.topic}
                       </p>
@@ -149,6 +165,7 @@ export default function ArticlesPage() {
                         <span className="flex items-center gap-1.5 text-primary/45 text-xs font-medium group-hover:text-primary group-hover:gap-2.5 transition-all duration-200">
                           Read <ArrowRight className="w-3 h-3" />
                         </span>
+                      </div>
                       </div>
                     </Link>
                   ))}

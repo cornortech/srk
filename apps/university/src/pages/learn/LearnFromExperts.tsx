@@ -1,4 +1,5 @@
 import { ArrowLeft, Award, Mic, Eye, Lightbulb, TrendingUp, CheckCircle } from "lucide-react";
+import { useAOS } from "../../lib/aos";
 import { Link } from "react-router-dom";
 
 const teachingPrinciples = [
@@ -48,6 +49,7 @@ const mentorApproach = [
 ];
 
 export default function LearnFromExpertsPage() {
+  useAOS();
   return (
     <div className="min-h-screen bg-bgPrimary text-textPrimary">
       {/* Hero */}

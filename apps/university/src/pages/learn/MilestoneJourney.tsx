@@ -1,4 +1,5 @@
 import { ArrowLeft, CheckCircle } from "lucide-react";
+import { useAOS } from "../../lib/aos";
 import { Link } from "react-router-dom";
 
 const milestones = [
@@ -95,6 +96,7 @@ const milestones = [
 ];
 
 export default function MilestoneJourneyPage() {
+  useAOS();
   return (
     <div className="min-h-screen bg-bgPrimary text-textPrimary">
       {/* Hero */}

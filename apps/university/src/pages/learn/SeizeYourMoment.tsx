@@ -1,4 +1,5 @@
 import { ArrowLeft, CheckCircle, Clock, Target, Zap, BookOpen } from "lucide-react";
+import { useAOS } from "../../lib/aos";
 import { Link } from "react-router-dom";
 
 const realities = [
@@ -67,6 +68,7 @@ const learningPrinciples = [
 ];
 
 export default function SeizeYourMomentPage() {
+  useAOS();
   return (
     <div className="min-h-screen bg-bgPrimary text-textPrimary">
       {/* Hero */}

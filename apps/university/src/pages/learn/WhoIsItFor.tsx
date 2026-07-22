@@ -1,4 +1,5 @@
 import { BookOpen, Crown, Briefcase, Building2, CheckCircle, ArrowLeft } from "lucide-react";
+import { useAOS } from "../../lib/aos";
 import { Link } from "react-router-dom";
 
 const audiences = [
@@ -77,6 +78,7 @@ const audiences = [
 ];
 
 export default function WhoIsItForPage() {
+  useAOS();
   return (
     <div className="min-h-screen bg-bgPrimary text-textPrimary">
       {/* Hero */}

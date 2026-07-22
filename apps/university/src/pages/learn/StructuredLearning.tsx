@@ -1,4 +1,5 @@
 import { ArrowLeft, Map, BarChart2, Clock, Repeat, CheckCircle, ArrowRight } from "lucide-react";
+import { useAOS } from "../../lib/aos";
 import { Link } from "react-router-dom";
 
 const pathwayStages = [
@@ -47,6 +48,7 @@ const structureFeatures = [
 ];
 
 export default function StructuredLearningPage() {
+  useAOS();
   return (
     <div className="min-h-screen bg-bgPrimary text-textPrimary">
       {/* Hero */}

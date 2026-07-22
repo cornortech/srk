@@ -1,4 +1,5 @@
 import { useParams, Link, Navigate } from "react-router-dom";
+import { useAOS } from "../lib/aos";
 import { ArrowLeft, Clock, BookOpen, ChevronRight } from "lucide-react";
 import { allArticles } from "../data/articles";
 import type { ArticleBlock } from "../data/articles";
@@ -49,6 +50,17 @@ function renderBlock(block: ArticleBlock, i: number) {
       </ul>
     );
   }
+  if (block.type === "image") {
+    return (
+      <img
+        key={i}
+        src={block.src}
+        alt=""
+        loading="lazy"
+        className="w-full aspect-[16/9] object-cover border border-white/[0.08] my-8"
+      />
+    );
+  }
   if (block.type === "ol") {
     return (
       <ol key={i} className="mb-6 flex flex-col gap-2.5 pl-1 list-none">
@@ -70,6 +82,7 @@ function renderBlock(block: ArticleBlock, i: number) {
 }
 
 export default function ArticlePage() {
+  useAOS();
   const { slug } = useParams<{ slug: string }>();
   const article = allArticles.find((a) => a.slug === slug);
 
@@ -176,11 +189,18 @@ export default function ArticlePage() {
                 <Link
                   key={a.slug}
                   to={`/articles/${a.slug}`}
-                  className="group bg-bgPrimary hover:bg-bgSecondary/40 transition-colors duration-150 flex flex-col p-6"
+                  className="group bg-bgPrimary hover:bg-bgSecondary/40 transition-colors duration-150 flex flex-col"
                   data-aos="fade-up"
                   data-aos-duration="500"
                   data-aos-delay={String(i * 60)}
                 >
+                  <img
+                    src={a.image}
+                    alt={a.title}
+                    className="w-full aspect-[16/10] object-cover"
+                    loading="lazy"
+                  />
+                  <div className="flex flex-col flex-1 p-6">
                   <p className="text-xs font-medium uppercase tracking-widest text-primary/60 mb-3">
                     {a.topic}
                   </p>
@@ -190,6 +210,7 @@ export default function ArticlePage() {
                   <div className="flex items-center gap-1.5 pt-4 border-t border-white/[0.06]">
                     <Clock className="w-3 h-3 text-white/25" />
                     <span className="text-xs text-white/30">{a.readTime}</span>
+                  </div>
                   </div>
                 </Link>
               ))}

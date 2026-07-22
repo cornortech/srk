@@ -1,4 +1,5 @@
 import { ArrowLeft, CheckCircle, Layers, TrendingUp, Users } from "lucide-react";
+import { useAOS } from "../../lib/aos";
 import { Link } from "react-router-dom";
 
 const tracks = [
@@ -205,6 +206,7 @@ const tracks = [
 ];
 
 export default function CourseTracksPage() {
+  useAOS();
   return (
     <div className="min-h-screen bg-bgPrimary text-textPrimary">
       {/* Hero */}

@@ -1,4 +1,5 @@
 import { ArrowLeft, Video, Clock, MessageSquare, CalendarDays, CheckCircle, Radio } from "lucide-react";
+import { useAOS } from "../../lib/aos";
 import { Link } from "react-router-dom";
 
 const sessionFormats = [
@@ -59,6 +60,7 @@ const whatInstructorsCover = [
 ];
 
 export default function LiveMentorshipPage() {
+  useAOS();
   return (
     <div className="min-h-screen bg-bgPrimary text-textPrimary">
       {/* Hero */}

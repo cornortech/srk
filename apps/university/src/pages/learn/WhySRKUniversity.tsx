@@ -1,4 +1,5 @@
 import { ArrowLeft, CheckCircle, Users, BookOpen, Award, Clock, Layers, Shield } from "lucide-react";
+import { useAOS } from "../../lib/aos";
 import { Link } from "react-router-dom";
 
 const pillars = [
@@ -47,6 +48,7 @@ const courses = [
 ];
 
 export default function WhySRKUniversityPage() {
+  useAOS();
   return (
     <div className="min-h-screen bg-bgPrimary text-textPrimary">
       {/* Hero */}

@@ -1,4 +1,5 @@
 import { ArrowLeft, Check, BookOpen, Users, Award, Clock, Headphones, Zap } from "lucide-react";
+import { useAOS } from "../../lib/aos";
 import { Link } from "react-router-dom";
 
 const plans = [
@@ -73,6 +74,7 @@ const faqs = [
 ];
 
 export default function ChooseYourPlanPage() {
+  useAOS();
   return (
     <div className="min-h-screen bg-bgPrimary text-textPrimary">
 

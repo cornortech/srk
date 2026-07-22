@@ -1,4 +1,5 @@
 import { ArrowLeft, Layers, Globe, Cpu, Palette, TrendingUp, Plus, CheckCircle, ArrowRight } from "lucide-react";
+import { useAOS } from "../../lib/aos";
 import { Link } from "react-router-dom";
 
 const expansionPrinciples = [
@@ -56,6 +57,7 @@ const memberBenefits = [
 ];
 
 export default function UpcomingSkillsPage() {
+  useAOS();
   return (
     <div className="min-h-screen bg-bgPrimary text-textPrimary">
       {/* Hero */}

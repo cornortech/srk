@@ -1,4 +1,5 @@
 import { ArrowLeft, CheckCircle, BookOpen, Users, Award, Clock, MessageCircle, Layers } from "lucide-react";
+import { useAOS } from "../../lib/aos";
 import { Link } from "react-router-dom";
 
 const includes = [
@@ -29,6 +30,7 @@ const learningPath = [
 ];
 
 export default function WhyEnrollPage() {
+  useAOS();
   return (
     <div className="min-h-screen bg-bgPrimary text-textPrimary">
       {/* Hero */}

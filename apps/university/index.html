@@ -6,9 +6,6 @@
     <!-- Preload LCP hero image for fastest possible paint -->
     <link rel="preload" as="image" href="/team/landingImage1.jpg" fetchpriority="high" />
 
-    <!-- Google AdSense -->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7145379318898250"
-     crossorigin="anonymous"></script>
     <!-- Basic Meta Tags -->
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -44,17 +41,63 @@
       content="https://thesrkuniversity.com/logo.png" />
     <meta name="twitter:site" content="@thesrkuniversity" />
 
-    <!-- AOS Animation Styles (preconnect to reduce DNS lookup time) -->
-    <link rel="preconnect" href="https://unpkg.com" />
-    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" media="print" onload="this.media='all'" />
-    <noscript><link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" /></noscript>
-
     <!-- Canonical URL -->
     <link rel="canonical" href="https://thesrkuniversity.com/" />
   </head>
   <body>
     <div id="root"></div>
+    <!--
+      Static first-paint skeleton, "/" only: this app is a client-rendered SPA, so
+      without this the browser has nothing to paint until the JS bundle downloads,
+      parses and executes React (this is why LCP/FCP were red in PageSpeed Insights).
+      Painting the real hero markup here lets FCP/LCP happen as soon as the (already
+      preloaded) hero image + CSS arrive, fully decoupled from JS load time. React's
+      createRoot().render() replaces #root's contents on mount, so this is swapped
+      out for the real IntroSection automatically with no extra code needed.
+    -->
+    <script>
+      (function () {
+        if (location.pathname !== '/') return;
+        document.getElementById('root').innerHTML =
+          '<div class="fixed h-32 top-0 z-50 bg-black w-full border-b border-primary flex items-center px-6">' +
+            '<img src="/logo/transparentLogo.png" alt="SRK University" width="100" height="60" />' +
+          '</div>' +
+          '<div class="mt-32">' +
+            '<section class="relative h-[500px] sm:h-[600px] md:h-[700px] xl:h-[90vh] overflow-hidden">' +
+              '<img src="/team/landingImage1.jpg" alt="Landing Image" class="absolute inset-0 w-full h-full object-cover" fetchpriority="high" />' +
+              '<div class="absolute inset-0 bg-black bg-opacity-50"></div>' +
+              '<div class="absolute inset-0 bg-gradient-to-r from-black via-black/25 to-black/25 opacity-60 pointer-events-none"></div>' +
+              '<div class="relative z-10 w-full max-w-7xl mx-auto px-6 flex flex-col items-start justify-center h-full text-left">' +
+                '<h1 class="text-white text-sm font-semibold mb-2 tracking-widest">Welcome to The SRK University</h1>' +
+                '<h2 class="text-white text-3xl font-bold mb-4">THE REVOLUTION OF ENTREPRENEURSHIP</h2>' +
+                '<h2 class="text-white text-xl sm:text-2xl md:text-3xl font-semibold mb-6">UNLOCK THE TOOLS TO MASTERY &amp; CONFIDENCE</h2>' +
+                '<p class="text-gray-300 text-base md:text-lg mb-8 max-w-lg">The SRK University empowers entrepreneurs with hands-on guidance, expert-led training, and a thriving community&mdash;all in one place.</p>' +
+                '<div class="inline-flex items-center justify-center px-10 font-semibold text-white bg-yellow-600 w-48 py-3 text-lg">Get Started Now</div>' +
+                '<p class="text-gray-400 text-sm mt-4">Secure your access today and start your journey.</p>' +
+              '</div>' +
+            '</section>' +
+          '</div>';
+      })();
+    </script>
     <script type="module" src="./src/main.tsx"></script>
-    <script defer src="https://unpkg.com/aos@next/dist/aos.js" onload="AOS.init()"></script>
+    <!--
+      Google AdSense: loaded after window "load" (idle) instead of eagerly in <head>,
+      so it stops competing with the critical-path JS/CSS/hero-image requests for
+      bandwidth and main-thread time during the LCP/FCP window. Ads still appear
+      within ~1-2s of the page being interactive.
+    -->
+    <script>
+      window.addEventListener('load', function () {
+        var loadAds = function () {
+          var s = document.createElement('script');
+          s.async = true;
+          s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7145379318898250';
+          s.crossOrigin = 'anonymous';
+          document.head.appendChild(s);
+        };
+        if ('requestIdleCallback' in window) requestIdleCallback(loadAds, { timeout: 3000 });
+        else setTimeout(loadAds, 1500);
+      });
+    </script>
   </body>
 </html>

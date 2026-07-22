@@ -1,4 +1,5 @@
 import { ArrowLeft, Users, MessageCircle, Trophy, Star, Shield, Globe } from "lucide-react";
+import { useAOS } from "../../lib/aos";
 import { Link } from "react-router-dom";
 
 const communityPillars = [
@@ -59,6 +60,7 @@ const howItWorks = [
 ];
 
 export default function ExclusiveCommunityPage() {
+  useAOS();
   return (
     <div className="min-h-screen bg-bgPrimary text-textPrimary">
       {/* Hero */}

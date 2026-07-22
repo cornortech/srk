@@ -2,7 +2,17 @@
   "permissions": {
     "allow": [
       "Bash(node -e ' *)",
-      "Bash(pkill -f \"vite preview\")"
+      "Bash(pkill -f \"vite preview\")",
+      "Bash(git rev-list *)",
+      "Bash(git push *)",
+      "Bash(git fetch *)",
+      "Bash(git stash *)",
+      "Bash(git checkout *)",
+      "Bash(git merge *)",
+      "Bash(cp /tmp/gstatic1.jpg pagodaLogo-unidentified.png)",
+      "Bash(cp /tmp/gstatic2.jpg kathmanduPost.png)",
+      "Bash(cp /tmp/gstatic3.jpg news24-duplicate.png)",
+      "Bash(npx lighthouse *)"
     ]
   }
 }

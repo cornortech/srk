@@ -4,13 +4,18 @@ import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { Home } from './pages/Home';
 
-// Eagerly load layouts (small, needed for all routes)
+// Eagerly load layouts actually needed for the public homepage.
 import LayoutWithNavbar from './Layouts/NavbarLayout';
 import AuthLayout from './Layouts/AuthLayout';
-import AffiliateDashboardLayout from './Layouts/AffiliateLayout';
-import AdminLayout from './Layouts/AdminLayout';
-import StudyDashboardLayout from './Layouts/StudyLayout';
 import { LogoNavbar } from './components/logoNavbar';
+
+// Dashboard layouts are only reachable by logged-in users on /affiliate,
+// /admin and /study — they (and the Sidebar they statically import) were
+// previously eagerly bundled into the critical chunk every visitor had to
+// download, despite being dead code for anonymous homepage traffic.
+const AffiliateDashboardLayout = lazy(() => import('./Layouts/AffiliateLayout'));
+const AdminLayout = lazy(() => import('./Layouts/AdminLayout'));
+const StudyDashboardLayout = lazy(() => import('./Layouts/StudyLayout'));
 
 // Lazy load all non-home pages to reduce initial bundle
 const SignUp = lazy(() => import('./pages/SignUp').then(m => ({ default: m.SignUp })));
@@ -159,7 +164,7 @@ const AppRouter = () => {
     },
     {
       path: '/affiliate',
-      element: <AffiliateDashboardLayout />,
+      element: <Suspense fallback={<PageLoader />}><AffiliateDashboardLayout /></Suspense>,
       children: [
         { index: true, element: <Suspense fallback={<PageLoader />}><EarningsDashboard /></Suspense> },
         { path: 'request', element: <Suspense fallback={<PageLoader />}><AffiliateRequest /></Suspense> },
@@ -186,7 +191,7 @@ const AppRouter = () => {
     },
     {
       path: '/study',
-      element: <StudyDashboardLayout />,
+      element: <Suspense fallback={<PageLoader />}><StudyDashboardLayout /></Suspense>,
       children: [
         { index: true, element: <Suspense fallback={<PageLoader />}><CoursesDashboard dashboardType="study" /></Suspense> },
         {
@@ -228,7 +233,7 @@ const AppRouter = () => {
     },
     {
       path: '/admin',
-      element: <AdminLayout />,
+      element: <Suspense fallback={<PageLoader />}><AdminLayout /></Suspense>,
       children: [
         { index: true, element: <Suspense fallback={<PageLoader />}><AdminEarningDashboard /></Suspense> },
         { path: 'courses/create', element: <Suspense fallback={<PageLoader />}><CreateCoursePage /></Suspense> },

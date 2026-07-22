@@ -1,9 +1,15 @@
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { IntroSection } from "../components/Home/IntroSection";
 import MetricScroller from "../components/Home/MetricsData";
-import LogoScroller from "../components/Home/LogoScroll";
 import { AudienceSection } from "../components/Home/AudienceSection";
 import { useAOS } from "../lib/aos";
+
+// LogoScroller pulls ~20 logo images from 9 different third-party domains
+// (each needing its own DNS/TCP/TLS handshake). It sits just below the hero,
+// so an IntersectionObserver won't meaningfully delay it — it's deferred
+// until after window "load" instead, so it never competes with the hero
+// image / critical JS for bandwidth during the LCP window.
+const LogoScroller = lazy(() => import("../components/Home/LogoScroll"));
 
 // Lazy-load everything below the fold to reduce initial JS execution
 const ComparisonSection = lazy(() => import("../components/Home/Comparison").then(m => ({ default: m.ComparisonSection })));
@@ -59,6 +65,36 @@ function LazySection({ children, height }: { children: React.ReactNode; height?:
   );
 }
 
+// Unlike LazySection (which waits for scroll proximity), this waits for the
+// page to finish loading, regardless of scroll position — for content that's
+// visible near the fold but must not compete with the hero image for
+// bandwidth while LCP is still being measured.
+function DeferredSection({ children, height }: { children: React.ReactNode; height?: string }) {
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    const start = () => {
+      if ("requestIdleCallback" in window) {
+        window.requestIdleCallback(() => setReady(true), { timeout: 2000 });
+      } else {
+        setTimeout(() => setReady(true), 1000);
+      }
+    };
+    if (document.readyState === "complete") {
+      start();
+    } else {
+      window.addEventListener("load", start, { once: true });
+      return () => window.removeEventListener("load", start);
+    }
+  }, []);
+
+  return ready ? (
+    <Suspense fallback={<SectionPlaceholder height={height} />}>{children}</Suspense>
+  ) : (
+    <SectionPlaceholder height={height} />
+  );
+}
+
 export const Home = () => {
   return (
     <div className="w-full h-full text-textPrimary text-center bg-bgPrimary">
@@ -66,7 +102,7 @@ export const Home = () => {
         {/* Above fold — render immediately */}
         <IntroSection />
         <MetricScroller />
-        <LogoScroller />
+        <DeferredSection height="120px"><LogoScroller /></DeferredSection>
         <AudienceSection />
 
         {/* Below fold — lazy loaded when scrolled near */}

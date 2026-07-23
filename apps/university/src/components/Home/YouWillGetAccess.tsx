@@ -1,5 +1,5 @@
 import { Check } from "lucide-react";
-import { AnimationButton } from "../ReusableComponents";
+import { AnimationButton } from "../AnimationButton";
 import { useNavigate } from "react-router-dom";
 import { accessFeatures } from "../../Data/AccessFeatures";
 import { getUniversityAssetUrl } from "../../lib/cdn";

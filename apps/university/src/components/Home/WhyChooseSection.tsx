@@ -1,4 +1,4 @@
-import { AnimationButton } from "../ReusableComponents";
+import { AnimationButton } from "../AnimationButton";
 import { useNavigate } from "react-router-dom";
 import { whyChooseUsData } from "../../Data/WhyChooseUsData";
 import TradingSchool from "./Test";

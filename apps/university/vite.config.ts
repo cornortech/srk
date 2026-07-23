@@ -32,7 +32,10 @@ export default defineConfig(() => ({
         manualChunks: {
           'vendor-react': ['react', 'react-dom', 'react-router-dom'],
           'vendor-query': ['@tanstack/react-query'],
-          'vendor-ui': ['framer-motion', 'lucide-react'],
+          // framer-motion deliberately excluded: it's only used by lazy-loaded
+          // routes now (Navbar/Footer were switched to CSS animations), so
+          // forcing it into this eagerly-loaded chunk would undo that.
+          'vendor-ui': ['lucide-react'],
         },
       },
     },

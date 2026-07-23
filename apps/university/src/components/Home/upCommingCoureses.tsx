@@ -6,7 +6,7 @@ import {
   PopoverTrigger,
 } from "@nextui-org/react";
 import { upCommingCourses } from "../../Data/UpCommingCourese";
-import { AnimationButton } from "../ReusableComponents";
+import { AnimationButton } from "../AnimationButton";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";

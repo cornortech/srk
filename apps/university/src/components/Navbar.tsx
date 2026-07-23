@@ -1,7 +1,6 @@
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { CircleUser } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
 import {
   Navbar,
   NavbarBrand,
@@ -112,18 +111,7 @@ export function ReusableNavbar({
                   <span className="absolute left-0 bottom-[-5px]  border border-yellow-500 w-full duration-150"></span>
                 )}
                 {hovered === index && (
-                  <motion.div
-                    layoutId="underline"
-                    className="absolute left-0 bottom-[-5px] h-[2px] bg-yellow-500 duration-150"
-                    initial={{ width: 0 }}
-                    animate={{ width: "100%" }}
-                    exit={{ width: 0 }}
-                    transition={{
-                      type: "spring",
-                      stiffness: 300,
-                      damping: 30,
-                    }}
-                  />
+                  <div className="absolute left-0 bottom-[-5px] h-[2px] bg-yellow-500 animate-underline-grow" />
                 )}
               </Link>
             </NavbarItem>
@@ -180,17 +168,7 @@ export function ReusableNavbar({
                   >
                     {item.label}
                     {location.pathname === item.href && (
-                      <motion.div
-                        layoutId="underline"
-                        className="absolute left-0 bottom-0 h-[2px] bg-yellow-500"
-                        initial={{ width: 0 }}
-                        animate={{ width: "100%" }}
-                        transition={{
-                          type: "spring",
-                          stiffness: 300,
-                          damping: 30,
-                        }}
-                      />
+                      <div className="absolute left-0 bottom-0 h-[2px] bg-yellow-500 animate-underline-grow" />
                     )}
                   </Link>
                 </NavbarMenuItem>

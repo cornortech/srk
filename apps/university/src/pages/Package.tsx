@@ -7,7 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Package } from "../components/Home/package";
 import { getAllPackagesApi } from "../lib/apiClient";
 import { TPackage } from "../lib/types/entities";
-import { AnimationButton } from "../components/ReusableComponents";
+import { AnimationButton } from "../components/AnimationButton";
 import { useNavigate } from "react-router-dom";
 
 export const PackagePage = () => {

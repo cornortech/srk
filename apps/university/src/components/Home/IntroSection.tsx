@@ -7,7 +7,9 @@ export const IntroSection = () => {
     <section className="relative h-[500px] sm:h-[600px] md:h-[700px] xl:h-[90vh] overflow-hidden ">
       {/* Background Image */}
       <img
-        src="/team/landingImage1.jpg"
+        src="/team/landingImage1-1920.webp"
+        srcSet="/team/landingImage1-640.webp 640w, /team/landingImage1-1080.webp 1080w, /team/landingImage1-1920.webp 1920w"
+        sizes="100vw"
         alt="Landing Image"
         className="absolute inset-0 w-full h-full object-cover animate-zoom-in"
         loading="eager"

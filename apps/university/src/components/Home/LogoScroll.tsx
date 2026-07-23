@@ -1,23 +1,26 @@
 const LogoScroller = () => {
   // Self-hosted (previously hotlinked from 8 different third-party domains,
   // each costing a separate DNS/TCP/TLS handshake on top of bandwidth
-  // contention with the hero image during the LCP window).
+  // contention with the hero image during the LCP window), and re-encoded
+  // as WebP at 2x their 40px display height (originals were 60-150KB full
+  // size logos rendered at 40px tall — ~93% smaller combined with no
+  // visible quality loss at display size).
   // NOTE: "news24-duplicate.png" duplicates News24.png above (same brand,
   // both were in the original hotlinked list) and "pagodaLogo-unidentified.png"
   // came from a Google Image Search thumbnail cache with no clear source —
   // worth reviewing/replacing with a proper asset.
   const logos = [
-    "/news/Annapurna.png",
-    "/news/onlineKhabar.png",
-    "/news/News24.png",
-    "/news/himalayanTimes.png",
-    "/news/ratopati.png",
-    "/news/sagarmathaTv.png",
-    "/news/atv.png",
-    "/news/ap1tv.png",
-    "/news/pagodaLogo-unidentified.png",
-    "/news/kathmanduPost.png",
-    "/news/news24-duplicate.png",
+    "/news/Annapurna.webp",
+    "/news/onlineKhabar.webp",
+    "/news/News24.webp",
+    "/news/himalayanTimes.webp",
+    "/news/ratopati.webp",
+    "/news/sagarmathaTv.webp",
+    "/news/atv.webp",
+    "/news/ap1tv.webp",
+    "/news/pagodaLogo-unidentified.webp",
+    "/news/kathmanduPost.webp",
+    "/news/news24-duplicate.webp",
   ];
 
   return (

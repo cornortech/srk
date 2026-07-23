@@ -78,6 +78,7 @@ export function ReusableNavbar({
           <Link to="/">
             <div className="flex gap-2 items-center">
               <picture>
+                <source srcSet="/logo/transparentLogo.webp" type="image/webp" />
                 <img
                   alt="SRK University"
                   src="/logo/transparentLogo.png"

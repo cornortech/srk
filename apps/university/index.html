@@ -3,8 +3,13 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <!-- Preload LCP hero image for fastest possible paint -->
-    <link rel="preload" as="image" href="/team/landingImage1.jpg" fetchpriority="high" />
+    <!-- Preload LCP hero image for fastest possible paint (responsive WebP,
+         matches the srcset/sizes on the real <img> in IntroSection.tsx) -->
+    <link rel="preload" as="image"
+      href="/team/landingImage1-1920.webp"
+      imagesrcset="/team/landingImage1-640.webp 640w, /team/landingImage1-1080.webp 1080w, /team/landingImage1-1920.webp 1920w"
+      imagesizes="100vw"
+      fetchpriority="high" />
 
     <!-- Basic Meta Tags -->
     <meta charset="UTF-8" />
@@ -54,17 +59,25 @@
       preloaded) hero image + CSS arrive, fully decoupled from JS load time. React's
       createRoot().render() replaces #root's contents on mount, so this is swapped
       out for the real IntroSection automatically with no extra code needed.
+      This is a fallback only: when built with `npm run build:university`,
+      scripts/prerender-university-simple.ts already fills #root with real,
+      complete prerendered content, and the guard below leaves it untouched.
     -->
     <script>
       (function () {
         if (location.pathname !== '/') return;
-        document.getElementById('root').innerHTML =
+        var root = document.getElementById('root');
+        // If this page was served pre-rendered (npm run build:university),
+        // #root already has real, complete content — never overwrite it
+        // with the thin skeleton below.
+        if (root.children.length > 0) return;
+        root.innerHTML =
           '<div class="fixed h-32 top-0 z-50 bg-black w-full border-b border-primary flex items-center px-6">' +
-            '<img src="/logo/transparentLogo.png" alt="SRK University" width="100" height="60" />' +
+            '<img src="/logo/transparentLogo.webp" alt="SRK University" width="100" height="60" />' +
           '</div>' +
           '<div class="mt-32">' +
             '<section class="relative h-[500px] sm:h-[600px] md:h-[700px] xl:h-[90vh] overflow-hidden">' +
-              '<img src="/team/landingImage1.jpg" alt="Landing Image" class="absolute inset-0 w-full h-full object-cover" fetchpriority="high" />' +
+              '<img src="/team/landingImage1-1920.webp" srcset="/team/landingImage1-640.webp 640w, /team/landingImage1-1080.webp 1080w, /team/landingImage1-1920.webp 1920w" sizes="100vw" alt="Landing Image" class="absolute inset-0 w-full h-full object-cover" fetchpriority="high" />' +
               '<div class="absolute inset-0 bg-black bg-opacity-50"></div>' +
               '<div class="absolute inset-0 bg-gradient-to-r from-black via-black/25 to-black/25 opacity-60 pointer-events-none"></div>' +
               '<div class="relative z-10 w-full max-w-7xl mx-auto px-6 flex flex-col items-start justify-center h-full text-left">' +

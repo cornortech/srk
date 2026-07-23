@@ -1,6 +1,6 @@
 import { Divider } from "@nextui-org/react";
 import { accessFeatures } from "../../Data/AccessFeatures";
-import { AnimationButton } from "../ReusableComponents";
+import { AnimationButton } from "../AnimationButton";
 import TradingSchool from "./Test";
 
 const AccessSection = () => {

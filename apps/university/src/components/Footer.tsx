@@ -7,18 +7,10 @@ import {
   Youtube,
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
 
 export function Footer() {
   const affiliateLink = "/affiliate-landing";
 
-  const shakeAnimation = {
-    x: [-5, 5, -5, 5, -5, 0], // Back and forth motion
-    transition: {
-      duration: 0.8, // Total duration of the shake
-      repeat: Infinity, // Repeat the animation indefinitely
-    },
-  };
   return (
     <footer className="bg-bgPrimary text-gray-400 py-14">
       <div className="max-w-custom mx-auto p-16 rounded-2xl border-[0.5px] border-gray-700 filter drop-shadow-[0_35px_35px_rgba(0,0.5,0)] ">
@@ -87,12 +79,11 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <motion.button
-                  {...shakeAnimation}
-                  className="inline-block bg-primary text-black px-4 py-1 rounded  transition-colors"
+                <button
+                  className="inline-block bg-primary text-black px-4 py-1 rounded transition-colors animate-shake"
                 >
                   <a href="/">Home</a>
-                </motion.button>
+                </button>
               </li>
             </ul>
           </div>

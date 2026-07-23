@@ -69,3 +69,41 @@ img {
 img[width][height] {
   aspect-ratio: attr(width) / attr(height);
 }
+
+/* CSS replacements for the two framer-motion animations that were in the
+   always-loaded Navbar/Footer, so framer-motion (only otherwise used by
+   lazy-loaded routes) no longer ships in the critical bundle. */
+@keyframes nav-underline-grow {
+  from {
+    width: 0%;
+  }
+  to {
+    width: 100%;
+  }
+}
+.animate-underline-grow {
+  animation: nav-underline-grow 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
+    transform: translateX(-5px);
+  }
+  20%,
+  40%,
+  60%,
+  80% {
+    transform: translateX(5px);
+  }
+}
+.animate-shake {
+  animation: shake 0.8s ease-in-out infinite;
+}

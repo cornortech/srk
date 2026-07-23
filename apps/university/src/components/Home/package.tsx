@@ -6,7 +6,8 @@ import {
   Divider,
 } from "@nextui-org/react";
 import { Check, ArrowRight } from "lucide-react";
-import { AnimationButton, PrimaryButton } from "../ReusableComponents";
+import { PrimaryButton } from "../ReusableComponents";
+import { AnimationButton } from "../AnimationButton";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import clsx from "clsx";

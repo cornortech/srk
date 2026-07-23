@@ -2,7 +2,7 @@ import { Avatar, Accordion, AccordionItem, Image } from "@nextui-org/react";
 import { Clock, Users, Award, CheckCircle } from "lucide-react";
 import { Courses } from "../Data/CourseData";
 import { useNavigate, useParams } from "react-router-dom";
-import { AnimationButton } from "../components/ReusableComponents";
+import { AnimationButton } from "../components/AnimationButton";
 import { getUniversityAssetUrl } from "../lib/cdn";
 
 export function CourseDetails() {

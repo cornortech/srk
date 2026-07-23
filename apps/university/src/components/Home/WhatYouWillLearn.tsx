@@ -8,7 +8,7 @@ import {
 import { Courses } from "../../Data/CourseData";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
-import { AnimationButton } from "../ReusableComponents";
+import { AnimationButton } from "../AnimationButton";
 import { ArrowRight } from "lucide-react";
 
 export const ProvideSection = () => {

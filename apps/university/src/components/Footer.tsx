@@ -25,7 +25,7 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* EXPLORE Section */}
           <div className="flex flex-col items-center md:items-start">
-            <Image src="/logo.png" width={140} />
+            <Image src="/logo-280.webp" width={140} />
           </div>
 
           <div>

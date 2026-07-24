@@ -14,7 +14,7 @@ export const IntroSection = () => {
         className="absolute inset-0 w-full h-full object-cover animate-zoom-in"
         loading="eager"
         fetchPriority="high"
-        decoding="sync"
+        decoding="async"
       />
 
       {/* Overlay to Darken Background Slightly */}

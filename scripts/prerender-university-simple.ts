@@ -11,6 +11,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import http from 'http';
 import puppeteer, { Browser, Page } from 'puppeteer';
+import Beasties from 'beasties';
 
 const DIST_DIR = path.resolve(__dirname, '../dist/apps/university');
 const PORT = 3334;
@@ -274,6 +275,44 @@ async function serveAndPrerender(): Promise<void> {
                 // ignore
               }
             }
+          }
+        }
+
+        // Critical CSS inlining: the single global Tailwind stylesheet is
+        // ~34KB and was render-blocking FCP by ~1.6s (confirmed via
+        // PageSpeed Insights) since the browser can't paint anything until
+        // it's downloaded, even though the HTML already has real content.
+        // Beasties inlines just the CSS rules actually used by each
+        // prerendered page directly into <head> (zero network request) and
+        // defers the full stylesheet non-blocking (media=print swap) for
+        // the rest of the app.
+        console.log('\n🎨 Inlining critical CSS...');
+        const pagesToInline = [
+          '/',
+          ...PAGES_TO_RENDER.filter((p) => p !== '/'),
+          ...BLOG_SLUGS.map((slug) => `/blog/${slug}`),
+        ];
+        for (const pathname of pagesToInline) {
+          const filePath =
+            pathname === '/'
+              ? path.join(DIST_DIR, 'index.html')
+              : path.join(DIST_DIR, pathname.replace(/\/$/, ''), 'index.html');
+          if (!fs.existsSync(filePath)) continue;
+          try {
+            const beasties = new Beasties({
+              path: DIST_DIR,
+              preload: 'swap',
+              compress: true,
+              logLevel: 'silent',
+            });
+            const html = fs.readFileSync(filePath, 'utf-8');
+            const inlined = await beasties.process(html);
+            fs.writeFileSync(filePath, inlined, 'utf-8');
+            console.log(`  ✓ ${pathname}`);
+          } catch (error) {
+            console.error(
+              `  ⚠ Skipped ${pathname}: ${error instanceof Error ? error.message : String(error)}`
+            );
           }
         }
 

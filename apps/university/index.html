@@ -94,23 +94,59 @@
     </script>
     <script type="module" src="./src/main.tsx"></script>
     <!--
-      Google AdSense: loaded after window "load" (idle) instead of eagerly in <head>,
-      so it stops competing with the critical-path JS/CSS/hero-image requests for
-      bandwidth and main-thread time during the LCP/FCP window. Ads still appear
-      within ~1-2s of the page being interactive.
+      Google AdSense: deferred until the browser has actually recorded an LCP
+      candidate, not just until window "load". AdSense's own scripts
+      (adsbygoogle.js -> show_ads_impl.js, ~190KB) are heavy enough that even
+      loading them right at window "load" was measurably delaying LCP by
+      competing for bandwidth/main-thread time. Waiting for a real LCP entry
+      first means ads never load until there's already something painted to
+      compete with. Falls back to window "load" + timeout if the LCP API is
+      unavailable or never fires for this page.
+
+      Also skipped entirely when navigator.webdriver is set (the prerender
+      crawl in scripts/prerender-university-simple.ts runs on Puppeteer,
+      which sets this): that script waits for the page to fully settle
+      before capturing HTML, so a loaded ad -- iframe, network calls tied to
+      the prerender server's own localhost URL and all -- would get baked
+      into the static snapshot and shipped to every real visitor as dead,
+      broken markup. Skipping it here means real visitors still get ads
+      loaded fresh and properly deferred on their own page load.
     -->
     <script>
-      window.addEventListener('load', function () {
-        var loadAds = function () {
-          var s = document.createElement('script');
-          s.async = true;
-          s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7145379318898250';
-          s.crossOrigin = 'anonymous';
-          document.head.appendChild(s);
+      (function () {
+        if (navigator.webdriver) return;
+        var triggered = false;
+        var trigger = function () {
+          if (triggered) return;
+          triggered = true;
+          var loadAds = function () {
+            var s = document.createElement('script');
+            s.async = true;
+            s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7145379318898250';
+            s.crossOrigin = 'anonymous';
+            document.head.appendChild(s);
+          };
+          if ('requestIdleCallback' in window) requestIdleCallback(loadAds, { timeout: 2000 });
+          else setTimeout(loadAds, 500);
         };
-        if ('requestIdleCallback' in window) requestIdleCallback(loadAds, { timeout: 3000 });
-        else setTimeout(loadAds, 1500);
-      });
+
+        if ('PerformanceObserver' in window) {
+          try {
+            var po = new PerformanceObserver(function () {
+              trigger();
+            });
+            po.observe({ type: 'largest-contentful-paint', buffered: true });
+          } catch (e) {
+            window.addEventListener('load', trigger);
+          }
+        } else {
+          window.addEventListener('load', trigger);
+        }
+        // Belt-and-braces: never wait forever if LCP never fires.
+        window.addEventListener('load', function () {
+          setTimeout(trigger, 4000);
+        });
+      })();
     </script>
   </body>
 </html>

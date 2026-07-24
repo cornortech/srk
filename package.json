@@ -78,6 +78,7 @@
     "@vitest/ui": "^4.0.0",
     "ajv": "^8.0.0",
     "autoprefixer": "^10.4.22",
+    "beasties": "^0.4.3",
     "esbuild": "^0.27.0",
     "eslint": "^9.8.0",
     "eslint-config-prettier": "^10.0.0",

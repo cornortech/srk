@@ -1,7 +1,6 @@
 import { Image } from "@nextui-org/react";
 import {
   ContactRound,
-  Facebook,
   Instagram,
   MessageCircleQuestion,
   Youtube,
@@ -155,15 +154,22 @@ export function Footer() {
                 </a>
               </li>
               <li className="flex gap-4 pt-2">
-                <Link to="#" className="hover:text-white transition-colors">
+                <a
+                  href="https://www.instagram.com/thesrkuniversity/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-white transition-colors"
+                >
                   <Instagram className="w-5 h-5" />
-                </Link>
-                <Link to="#" className="hover:text-white transition-colors">
-                  <Facebook className="w-5 h-5" />
-                </Link>
-                <Link to="#" className="hover:text-white transition-colors">
+                </a>
+                <a
+                  href="https://youtube.com/@thesrkuniversity.com1"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-white transition-colors"
+                >
                   <Youtube className="w-5 h-5" />
-                </Link>
+                </a>
               </li>
             </ul>
           </div>

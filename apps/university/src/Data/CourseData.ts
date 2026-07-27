@@ -3,7 +3,7 @@ export const Courses = [
     id: "1",
     title: "Premiere Pro Mastery",
     description:
-      "Master the art of video editing with Adobe Premiere Pro. Learn how to create professional-quality videos, from basic editing techniques to advanced post-production workflows. Perfect for content creators, filmmakers, and aspiring editors.",
+      "Master advanced video editing, audio enhancement, project management, and smooth transitions through practical projects.",
     duration: "10 weeks",
     slogan:
       "Edit Like a Pro! Join Premiere Pro Mastery to create stunning videos, master transitions, effects, and storytelling techniques—unlock your creative potential today!",
@@ -59,7 +59,7 @@ export const Courses = [
     id: "2",
     title: "Photoshop Essentials",
     description:
-      "Dive into the world of graphic design with Adobe Photoshop. Learn how to create stunning visuals, manipulate images, and design professional-quality graphics for personal and commercial use.",
+      "Build your Photoshop skills through practical lessons. Edit photos, retouch images, and create professional graphics with confidence.",
     duration: "8 weeks",
     slogan:
       "Transform your creativity into stunning visuals! Enroll in Photoshop Essentials and master the tools to design, edit, and create like a pro—unlock your artistic potential today!",
@@ -115,7 +115,7 @@ export const Courses = [
     id: "3",
     title: "Digital Marketing Mastery",
     description:
-      "Learn the essentials of digital marketing, including SEO, social media marketing, and Google Ads. Gain the skills to drive traffic, generate leads, and optimize campaigns for success.",
+      "Learn how to use SEO, Social Media, Paid Ads, and Content Marketing in real-world situations. Find out how to create, run, and improve digital marketing campaigns effectively.",
     duration: "12 weeks",
     slogan:
       "Boost Your Career! Join Digital Marketing Mastery to learn SEO, social media strategies, and analytics—drive growth, build brands, and master online marketing success",
@@ -168,7 +168,7 @@ export const Courses = [
     id: "4",
     title: "After Effects for Motion Graphics",
     description:
-      "Unlock the power of motion design with Adobe After Effects. Learn how to create stunning animations, visual effects, and dynamic videos that captivate audiences.",
+      "Develop professional motion graphics, animation, and visual effects in the context of practical projects that enhance your creativity.",
     duration: "12 weeks",
     slogan:
       "Bring Ideas to Life! Master After Effects for Motion Graphics and create stunning animations, visual effects, and dynamic designs—unlock your creativity today!",
@@ -282,7 +282,7 @@ export const Courses = [
     id: "6",
     title: "Davinci Basic",
     description:
-      "Gain essential computer skills, including operating systems, productivity software, and internet usage. Ideal for beginners and those looking to enhance their computer proficiency.",
+      "Learn how to edit videos using DaVinci Resolve. Discover how to use colour correction, audio editing, and get some practical editing skills with hands-on projects.",
     duration: "10 weeks",
     slogan:
       "Empower Your Future! Enroll in davinci Basic to master essential skills, boost productivity, and stay ahead in today's tech-driven world!",
@@ -310,7 +310,7 @@ export const Courses = [
     id: "7",
     title: "After Effects",
     description:
-      "Dive into the world of graphic design with Adobe Photoshop. Learn how to create stunning visuals, manipulate images, and design professional-quality graphics for personal and commercial use.",
+      "Create advanced animations, visual effects, and motion graphics. Build your skills through practical projects.",
     duration: "8 weeks",
     slogan:
       "Transform your creativity into stunning visuals! Enroll in After Effects and master the tools to design, edit, and create like a pro—unlock your artistic potential today!",
@@ -366,7 +366,7 @@ export const Courses = [
     id: "8",
     title: "Adobe Indesign",
     description:
-      "Dive into the world of graphic design with Adobe Photoshop. Learn how to create stunning visuals, manipulate images, and design professional-quality graphics for personal and commercial use.",
+      "Learn to design print and digital publications using Adobe InDesign. Acquire the necessary skills and experience through specific examples of applications.",
     duration: "8 weeks",
     slogan:
       "Transform your creativity into stunning visuals! Enroll in Adobe Indesign and master the tools to design, edit, and create like a pro—unlock your artistic potential today!",

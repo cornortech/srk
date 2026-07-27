@@ -35,23 +35,20 @@ export const IntroSection = () => {
 
         {/* Main Heading */}
         <h2 className="text-white text-3xl sm:text-3xl md:text-3xl lg:text-3xl font-bold mb-4 animate-fade-in">
-          THE REVOLUTION OF ENTREPRENEURSHIP
-        </h2>
-
-        {/* Subheading */}
-        <h2 className="text-white text-xl sm:text-2xl md:text-3xl font-semibold mb-6 animate-fade-in">
-          UNLOCK THE TOOLS TO MASTERY & CONFIDENCE
+          PRACTICAL LEARNING FOR FUTURE SUCCESS
         </h2>
 
         {/* Description */}
         <p className="text-gray-300 text-base md:text-lg mb-8 max-w-lg animate-fade-in">
-          The SRK University empowers entrepreneurs with hands-on guidance,
-          expert-led training, and a thriving community—all in one place.
+          Develop important skills with flexible online courses and guidance
+          from experts. The SRK University assists you with the development
+          of knowledge, its application, and preparation for academic,
+          career, and business success.
         </p>
 
         {/* Call to Action Button */}
         <PrimaryButton
-          label="Get Started Now"
+          label="Enroll Now"
           radius="none"
           className="bg-yellow-600 hover:bg-yellow-700 text-white w-48 py-3 text-lg animate-fade-in"
           onclick={() => {
@@ -63,7 +60,7 @@ export const IntroSection = () => {
 
         {/* Subtext for the Button */}
         <p className="text-gray-400 text-sm mt-4 animate-fade-in">
-          Secure your access today and start your journey.
+          Begin learning today and invest in your future.
         </p>
       </div>
     </section>

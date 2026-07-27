@@ -4,14 +4,14 @@ import { useNavigate } from "react-router-dom";
 
 export default function OpportunitySection() {
   const features = [
-    "Access to 10 courses",
+    "Access to 10 professional courses",
     "Course completion certificates",
-    "Complimentary access to advanced training systems",
-    "24/7 exclusive, dedicated support system",
-    "Personalized coaching sessions by distinguished, certified coaches",
-    "10+ Pro Tips and Mentorship",
-    "Live Sessions",
-    "Access to all items from the Ultimate SRK VIP collection",
+    "Advanced learning resources",
+    "24/7 learner support",
+    "Personalized coaching sessions",
+    "Expert mentorship",
+    "Live learning sessions",
+    "Access to SRK VIP learning resources",
   ];
   const navigate = useNavigate();
   const proPackageId = import.meta.env.VITE_PRO_PACKAGE_ID;
@@ -21,11 +21,13 @@ export default function OpportunitySection() {
       <div className="absolute inset-0 bg-black bg-opacity-65 z-10"></div>
       <div className="relative z-10 space-y-4 mb-8 text-center">
         <h1 className="text-xl font-semibold text-primary">
-          Don't Miss Out –{" "}
+          Start Learning with the Right Resources
         </h1>
-        <h2 className="text-2xl font-bold">
-          Act Now Before the Opportunity Disappears!
-        </h2>
+        <p className="text-2xl font-bold">
+          Select SRK University and acquire new skills in practical courses
+          and from experienced teachers. Learn at your own speed and acquire
+          knowledge that will help you to reach your goals.
+        </p>
       </div>
 
       <div
@@ -36,13 +38,8 @@ export default function OpportunitySection() {
         <div className="w-[80%] lg:w-[29rem] py-4">
           <div className="space-y-2 text-center">
             <h2 className="text-3xl font-bold tracking-tight leading-tight">
-              OPPORTUNITY
-              <br />
-              WON'T LAST
+              MEMBERSHIP INCLUDES
             </h2>
-            <p className="text-lg text-gray-300">
-              Or Take a Bold Step Toward Your Goals.
-            </p>
           </div>
           <div className="border mt-8 border-gray-300 border-opacity-75"></div>
           {/* Pricing Section */}
@@ -73,12 +70,12 @@ export default function OpportunitySection() {
           {/* Cancel Notice */}
           <div className="flex items-center justify-center gap-2 mt-4 text-sm text-gray-300">
             <X className="h-4 w-4" />
-            <span className="text-lg font-bold">Cancel anytime, risk-free</span>
+            <span className="text-lg font-bold">Cancel your membership anytime</span>
           </div>
 
           {/* Monthly Price */}
           <div className="text-center text-primary my-4 font-semibold">
-            $50/month forever
+            Continue your membership for $50 per month
           </div>
 
           <div className="w-full flex flex-col space-y-4">

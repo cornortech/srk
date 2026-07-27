@@ -5,12 +5,12 @@ export const CourseOverviewSection = () => (
       <div className="flex items-center justify-center w-full h-full">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-44 gap-y-8">
           {[
-            "Introduction to key concepts",
-            "Hands-on practical exercises",
+            "Introduction to core concepts",
+            "Practical learning activities",
             "Advanced techniques and strategies",
-            "Real-world case studies",
-            "Personalized feedback and support",
-            "Certificate of completion",
+            "Real-world projects and case studies",
+            "Ongoing support and guidance",
+            "Certificate after successful completion",
           ].map((item, index) => (
             <div key={index} className="flex items-center">
               <div className="bg-primary rounded-full p-2 mr-4">

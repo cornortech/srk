@@ -7,49 +7,49 @@ const BonusTimeline = () => {
   const milestones = [
     {
       month: "1st Month",
-      title: "You Start Off as an Apprentice...",
+      title: "Build a Strong Foundation",
       description:
-        "In your first month, you’ll unlock essential programs and gain access to the community, where you’ll receive guidance from experienced coaches and connect with fellow users who are further along in their journey.",
+        "Start with essential learning modules that introduce core concepts, practical skills, and a structured roadmap for success. Join the SRK University community and begin your journey with confidence.",
       badge:
         "https://framerusercontent.com/images/plKaBkHMa06dVIe6HWAbN4Pbo.png?scale-down-to=512",
     },
     {
       month: "2nd Month",
-      title: "Get Access to the 8-Figure Network",
+      title: "Learn from Industry Leaders",
       description:
-        "By month two, you’ll gain access to SRK University’s exclusive network, with monthly live calls featuring 8- and 9-figure entrepreneurs. Learn directly from those who’ve mastered the art of wealth-building, and get actionable insights that can help you achieve your goals faster.",
+        "Attend live learning sessions, hear from industry experts and learn through engaging conversations and networking.",
       badge:
         "https://framerusercontent.com/images/YFix4Deko7x1GshIpktU9HpQTqw.png?scale-down-to=512",
     },
     {
       month: "3rd Month",
-      title: "Master All Areas of Your Life",
+      title: "Advance Your Personal and Professional Growth",
       description:
-        "In month three, unlock a bundle of lifestyle programs designed to elevate every aspect of your life—health, relationships, style, and more. Get access to Detox 101 for holistic wellness and The Perfect Fit to upgrade your appearance with expert fashion guidance.",
+        "Learn practical workplace and leadership skills. Build better communication, improve productivity, and gain knowledge that supports your career growth.",
       badge:
         "https://framerusercontent.com/images/n5kZjDcBi59NvLAWTe6LWsf4WTk.png?scale-down-to=512",
     },
     {
       month: "4th Month",
-      title: "Join Monthly Live Calls with SRK University’s Expert",
+      title: "Receive Expert Guidance",
       description:
-        "Starting in month four, join monthly live calls with SRK University’s expert, where you can ask questions and receive personalized advice. Get your questions answered in real-time and receive mentorship to accelerate your growth. This is one of the program’s most valuable features.",
+        "Join live sessions and ask your questions directly. Learn from experienced instructors and receive practical guidance that helps you keep improving.",
       badge:
         "https://framerusercontent.com/images/YpitNuObeF9iU8BVZHfVm7CPhc.png?scale-down-to=512",
     },
     {
       month: "6th Month",
-      title: "Access Exclusives with Leaders of the Nation",
+      title: "Expand Your Professional Network",
       description:
-        "By month six, connect to exclusive channels for interactions with the nation’s leading mentors, offering personalized wisdom and strategies from SRK University’s finest.",
+        "Make meaningful relationships with mentors, industry professionals and other students, and connect with them to discuss practical solutions for growth.",
       badge:
         "https://framerusercontent.com/images/MQeeVeaUyDRbUIGFuyvbZtYSPw.png?scale-down-to=512",
     },
     {
       month: "12th Month",
-      title: "Achieve Emperor Status with Exceptional Skills",
+      title: "Graduate with Confidence",
       description:
-        "In month twelve, attain ‘Emperor’ status, equipped with hands-on skills honed to perfection, ready to dominate your field with confidence and capability.",
+        "Have practical skills and confidence to finish your learning journey. Demonstrate an understanding of what you've learned to a chosen career, business, or future learning objectives.",
       badge:
         "https://framerusercontent.com/images/GOHVqZW4GaDzczOm3gPf6VkBgs.png?scale-down-to=512",
     },
@@ -65,14 +65,17 @@ const BonusTimeline = () => {
         {/* Header Section */}
         <div className="text-center mb-12">
           <p className="text-primary text-sm uppercase tracking-wider mb-2">
-            Along the Way
+            Your Learning Journey
           </p>
           <h2 className="text-4xl md:text-5xl font-bold">
-            Unlock Exclusive Bonuses...
+            Your Learning Journey at The SRK University
           </h2>
           <p className="text-gray-400 mt-4 text-lg">
-            After completing each month inside of SRK University, you unlock
-            exclusive bonuses...
+            Build your skills through a structured learning journey. Each
+            stage introduces practical lessons, expert guidance, and
+            valuable learning resources. Continue learning with live
+            sessions, mentorship, and activities that help you apply your
+            knowledge with confidence.
           </p>
         </div>
 

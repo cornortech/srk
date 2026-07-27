@@ -87,16 +87,12 @@ export const ProvideSection = () => {
               // tabIndex={0}
             >
               <h2 className="text-2xl text-textPrimary font-bold text-center">
-                Exciting New Skills Are On The Way!
+                Continue Building New Skills
               </h2>
               <p className="text-gray-300 mt-y mb-8 text-center">
-                <span className="font-semibold text-xl">
-                  {" "}
-                  Thesrkuniversity.com{" "}
-                </span>
-                offers a continually growing array of opportunities. We're
-                always adding groundbreaking skills to help you stay ahead in
-                your field.
+                Education is a continuous process, and we are too. We are
+                continually adding new courses to our library that meet the
+                needs of industry and new career opportunities.
               </p>
               <AnimationButton
                 onClick={() => {

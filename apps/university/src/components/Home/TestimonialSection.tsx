@@ -129,9 +129,12 @@ export function TestimonialCarousel() {
     >
       <div className="mb-8">
         <h2 className="text-3xl font-bold text-center mb-2 text-textPrimary">
-          What Our Customers Say
+          Real Feedback from Our Learning Community
         </h2>
-        <p>Voices of Success—See What Our Customers Have to Say!</p>
+        <p>
+          Discover how learners have strengthened their skills and achieved
+          their goals through The SRK University.
+        </p>
       </div>
       <InfiniteMovingCardsDemo />
     </div>

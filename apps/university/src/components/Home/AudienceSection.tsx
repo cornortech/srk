@@ -8,34 +8,39 @@ export function AudienceSection() {
       icon: <BookOpen className="w-8 h-8" />,
       title: "BEGINNERS",
       description:
-        "Jumpstart your journey with step-by-step guidance, practical resources, and supportive community",
+        "Start with simple, step-by-step lessons. Learn the basics through practical activities and improve your skills at your own pace.",
     },
     {
       icon: <Crown className="w-8 h-8" />,
-      title: "PROFESSIONALS",
+      title: "WORKING PROFESSIONALS",
       description:
-        "Learn how to launch a profitable online business while keeping your full-time job.",
+        "Enhance your knowledge without interrupting your career. Develop skills applicable across the industry that are flexible, continually sought after, and promote further professional growth.",
     },
     {
       icon: <Briefcase className="w-8 h-8" />,
       title: "ENTREPRENEURS",
       description:
-        "Expand your toolkit with insights and tactics from experts who have been where you are.",
+        "Understand how to manage your business. Improve your planning and make better business decisions.",
     },
     {
       icon: <Building2 className="w-8 h-8" />,
       title: "BUSINESS OWNERS",
       description:
-        "Modernize your approach and find new ways to scale and optimize your existing business.",
+        "Grow your business by learning practical advice on marketing, planning, and managing daily work. Take the knowledge you gain and use it confidently in your business.",
     },
   ];
 
   return (
     <section className="bg-bgPrimary flex flex-col items-center justify-center pt-6 pb-10 px-4 sm:px-6">
       <div className="w-full max-w-7xl">
-        <h2 className="text-2xl sm:text-3xl font-bold text-center mb-8">
-          WHO IS THESRKUNIVERSITY FOR?
+        <h2 className="text-2xl sm:text-3xl font-bold text-center mb-2">
+          WHO CAN LEARN AT THE SRK UNIVERSITY?
         </h2>
+        <p className="text-default-500 text-sm sm:text-base text-center max-w-2xl mx-auto mb-8">
+          Courses for new learners, experienced workers, business starters,
+          and business leaders. Learn abilities that help with both personal
+          growth and career success.
+        </p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {audiences.map((item, index) => (

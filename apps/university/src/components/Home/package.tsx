@@ -106,7 +106,7 @@ export function PackageSection() {
       <div className="w-full bg-bgSecondary pb-6 py-4">
         <div className="max-w-[1450px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-4">
-            <h2 className="text-3xl font-extrabold text-white mb-4">Choose Your Learning Journey</h2>
+            <h2 className="text-3xl font-extrabold text-white mb-4">Select the Learning Plan That Fits You</h2>
             <div className="w-full grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-16 justify-center items-stretch p-8">
               {[1, 2, 3].map((i) => (
                 <div key={i} className="w-full md:w-80 bg-bgSecondary border border-primary/20 rounded-xl h-96 animate-pulse" />
@@ -132,7 +132,7 @@ export function PackageSection() {
         <div className="max-w-[1450px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-4">
             <h2 className="text-3xl font-extrabold text-[#ffffff] mb-4">
-              Choose Your Learning Journey
+              Select the Learning Plan That Fits You
             </h2>
             <Package packages={packages} />
             <p className="mt-2 text-xl text-[#ddb66e]">

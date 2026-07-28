@@ -21,13 +21,11 @@ export default function OpportunitySection() {
       <div className="absolute inset-0 bg-black bg-opacity-65 z-10"></div>
       <div className="relative z-10 space-y-4 mb-8 text-center">
         <h1 className="text-xl font-semibold text-primary">
-          Start Learning with the Right Resources
+          Don't Miss Out –{" "}
         </h1>
-        <p className="text-2xl font-bold">
-          Select SRK University and acquire new skills in practical courses
-          and from experienced teachers. Learn at your own speed and acquire
-          knowledge that will help you to reach your goals.
-        </p>
+        <h2 className="text-2xl font-bold">
+          Act Now Before the Opportunity Disappears!
+        </h2>
       </div>
 
       <div

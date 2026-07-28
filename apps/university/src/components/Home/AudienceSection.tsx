@@ -12,9 +12,9 @@ export function AudienceSection() {
     },
     {
       icon: <Crown className="w-8 h-8" />,
-      title: "WORKING PROFESSIONALS",
+      title: "PROFESSIONALS",
       description:
-        "Enhance your knowledge without interrupting your career. Develop skills applicable across the industry that are flexible, continually sought after, and promote further professional growth.",
+        "Develop your skills without interrupting your career. Gain real-world, relevant skills to boost your future career success."
     },
     {
       icon: <Briefcase className="w-8 h-8" />,
@@ -26,7 +26,7 @@ export function AudienceSection() {
       icon: <Building2 className="w-8 h-8" />,
       title: "BUSINESS OWNERS",
       description:
-        "Grow your business by learning practical advice on marketing, planning, and managing daily work. Take the knowledge you gain and use it confidently in your business.",
+        "Develop your own business skills to market, manage, and grow with confidence.",
     },
   ];
 

@@ -11,10 +11,14 @@ export const EnrollSection = () => {
     <section className="py-8 px-4 sm:px-6 h-full flex flex-col gap-12 items-center bg-bgSecondary">
       <section className="w-full">
         <div className="max-w-5xl mx-auto text-center">
+          <p className="text-primary text-sm sm:text-base font-semibold uppercase tracking-wider mb-3">
+            Start Building Your Skills Today
+          </p>
           <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-6 sm:mb-8 leading-snug sm:leading-tight">
-            <span className="text-white">Start Building </span>
-            <span className="text-primary">Your Skills</span>
-            <span className="text-white"> Today</span>
+            <span className="text-white">ENROLL </span>
+            <span className="text-primary">TODAY</span>
+            <span className="text-white"> AND BEGIN YOUR NEW JOURNEY </span>
+            <span className="text-primary">TOMORROW</span>
           </h1>
 
           <p className="text-gray-300 text-base sm:text-lg leading-relaxed">

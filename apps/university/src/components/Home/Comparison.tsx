@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 
 export function ComparisonSection() {
   const navigate = useNavigate();
-  const  VITE_PRO_PACKAGE_ID = import.meta.env.VITE_PRO_PACKAGE_ID
+  const VITE_PRO_PACKAGE_ID = import.meta.env.VITE_PRO_PACKAGE_ID
 
   return (
     <>
@@ -23,6 +23,7 @@ export function ComparisonSection() {
                 radius="sm"
               >
                 <CardBody className="text-center space-y-6">
+
                   <p className="text-[#C4A24C] text-xl">TRADITIONAL EDUCATION</p>
                   <h2 className="text-5xl md:text-6xl font-bold text-white">
                     $15,000+
@@ -53,7 +54,7 @@ export function ComparisonSection() {
                 <CardBody className="text-center space-y-6">
                   <p className="text-white/90 text-xl">PRACTICAL ONLINE LEARNING</p>
                   <h2 className="text-5xl md:text-6xl font-bold text-white">
-                    Starting from $100
+                    $100
                   </h2>
                   <p className="text-black text-lg leading-relaxed">
                     Gain instant access to industry-based courses designed to

@@ -5,30 +5,29 @@ export function FAQSection() {
 
   const faqs = [
     {
-      question: "Who will be the professors?",
+      question: "Who teaches the courses?",
       answer:
-        "Trainers in the course are Successful individual’s Each In their Own Profession And are handpicked by SRK official Himself.",
+        "Our courses are delivered by experienced instructors with practical knowledge and industry experience.",
     },
     {
-      question: "Do I need money for all courses?",
+      question: "Do I need to purchase every course separately?",
       answer:
-        " Yes, you do need money for all courses . But , the price may differ  according to the package you choose.",
+        "No. Your access depends on the membership plan you choose. Each plan includes a different selection of courses and learning resources.",
     },
     {
-      question: "How long do I have access to the course?",
+      question: "How long can I access my courses?",
       answer:
-        "You have access to the course for 120 days , once you purchase it , irrespective of the package you choose. ",
+        "Course access is based on your selected membership plan. Please refer to your plan details for complete information.",
     },
     {
-      question:
-        " What do i need to do in order to get course for lifetime ,with one time purchase ?",
+      question: "Is lifetime access available?",
       answer:
-        " you need to get enrolled in the affiliate partnership program to get courses free for lifetime , once purchased.",
+        "Lifetime access may be available with selected plans or special offers. Please contact our team for the latest information.",
     },
     {
-      question: "How do I get support if I have questions?",
+      question: "How can I get support if I need help?",
       answer:
-        "We have a dedicated support team and a community forum where you can ask questions and get help from instructors and fellow students.",
+        "Our support team is available to assist you with technical questions, course access, and general learning support.",
     },
   ];
 

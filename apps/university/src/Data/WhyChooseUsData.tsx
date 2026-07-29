@@ -20,44 +20,44 @@ export interface IWhyChooseUsSection {
 export const whyChooseUsData: IWhyChooseUsSection[] = [
   {
     id: 1,
-    title: "Uncover",
-    titleHighlight: "Essential Lessons",
+    title: "Learn Practical Skills",
+    titleHighlight: "That Matter",
     image: "/videos/131212Animation1.mp4",
     imageAlt: "Learning platform preview",
     features: [
       {
-        text: "Experience a tailored,",
-        highlight: "state-of-the-art learning platform.",
+        text: "Study through a simple and modern learning platform designed for a better learning experience.",
+        highlight: "",
       },
       {
-        text: "Ascend to become ultimately ",
-        highlight: " skilled faster than you ever dreamed of.",
+        text: "Build valuable skills with step-by-step lessons and practical activities.",
+        highlight: "",
       },
       {
-        text: "Master skills",
-        highlight: "to achieve financial independence.",
+        text: "Develop skills that support your career, business, and personal growth.",
+        highlight: "",
       },
     ],
     icon: "/education.png", // String is still valid with React.ReactNode
   },
   {
     id: 2,
-    title: "Join an",
-    titleHighlight: "EXCLUSIVE COMMUNITY",
+    title: "Join a Supportive",
+    titleHighlight: "Learning Community",
     image: "/videos/131212Animation2.mp4",
     imageAlt: "Community preview",
     features: [
       {
-        text: "Share your achievements with",
-        highlight: "those who genuinely understand.",
+        text: "Connect with learners who share your goals and interests.",
+        highlight: "",
       },
       {
-        text: "Forge valuable ",
-        highlight: "connections with driven, like-minded individuals.",
+        text: "Learn together by sharing ideas, experiences, and knowledge.",
+        highlight: "",
       },
       {
-        text: "Network with a vibrant",
-        highlight: "community of numerous members.",
+        text: "Build meaningful connections in a positive and encouraging environment.",
+        highlight: "",
       },
     ],
     reverse: true,
@@ -79,22 +79,22 @@ export const whyChooseUsData: IWhyChooseUsSection[] = [
   },
   {
     id: 3,
-    title: "LEARN FROM THE",
-    titleHighlight: "Pinnacle of the Industry",
+    title: "Learn from Experienced",
+    titleHighlight: "Professionals",
     image: "/videos/131212Animation3.mp4",
     imageAlt: "Learning from experts preview",
     features: [
       {
-        text: "Gain direct access to industry giants",
-        highlight: "who have achieved unparalleled triumph.",
+        text: "Learn from instructors with real industry experience.",
+        highlight: "",
       },
       {
-        text: "Receive comprehensive",
-        highlight: "mentorship meticulously tailored to your growth.",
+        text: "Receive practical guidance throughout your learning journey.",
+        highlight: "",
       },
       {
-        text: "Unlock exclusive, bespoke strategies",
-        highlight: "from seasoned experts who’ve conquered the field.",
+        text: "Explore proven methods and real-world knowledge that you can apply with confidence.",
+        highlight: "",
       },
     ],
     icon: "/dollar.png",

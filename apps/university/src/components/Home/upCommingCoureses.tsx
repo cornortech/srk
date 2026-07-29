@@ -20,12 +20,12 @@ export const UpCommingCoureses = () => {
       <div className="w-full flex items-center justify-center ">
         <div className="my-2 space-y-4 w-[80%] md:w-1/2 ">
           <h2 className="text-4xl text-textPrimary font-bold text-center">
-            Exciting New Skills on the Horizon
+            Continue Building New Skills
           </h2>
           <p className="text-gray-300 mt-y mb-8 text-center">
-            <span className="text-bold"> TheSrkUniversity.com</span> offers a
-            continually growing array of opportunities. We're always adding
-            groundbreaking skills to help you stay ahead in your field..
+            Education is a continuous process, and we are too. We are
+            continually adding new courses to our library that meet the
+            needs of industry and new career opportunities.
           </p>
         </div>
       </div>

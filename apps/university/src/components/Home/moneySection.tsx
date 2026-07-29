@@ -20,24 +20,17 @@ export const MoneySection = () => {
             data-aos-duration="1200"
           >
             <h1 className="text-4xl font-semibold ">
-              <span className="font-bold ">HERE'S THE BITTER REALITY:</span>{" "}
-              TIME IS YOUR ADVERSARY
+              Build Skills That Create Long-Term Value
             </h1>
             <div className="space-y-4 text-lg  lg:w-[40rem]">
               <h2 className="text-gray-300">
-                While you fret over financial burdens, visionaries and
-                innovators are amassing wealth by the second.
+                Learning is a way to grow both personally and
+                professionally. At The SRK University, you will gain useful
+                knowledge, improve your abilities, and develop your skills,
+                all of which will support you in reaching your future goals.
+                Each program is tailored to educate you with confidence and
+                to apply your education to the places that matter most.
               </h2>
-              <h2 className="text-gray-200 font-semibold">
-                Opportunities are rare and this could be your final shot at
-                grasping one.
-              </h2>
-              <h2 className="text-gray-300">
-                The moment to seize control of your destiny and master the
-                ultimate transformative skill is now:
-              </h2>
-              <h3>The craft of generating experience online. </h3>
-              <h4>Embark on your journey today.</h4>
               <AnimationButton
                 onClick={() =>
                   navigate(`/auth/sign-up?packageId=${proPackageId}`)

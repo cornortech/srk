@@ -3,10 +3,10 @@ export const upCommingCourses = [
     id: "2",
     title: "Amazon Private Label",
     description:
-      "Learn how to build and scale your own brand on Amazon using private label strategies. Understand product research, sourcing, branding, and marketing to create a successful eCommerce business.",
+      "Discover how to create and operate a successful private label brand on Amazon, from sourcing products to growing your brand.",
     duration: "8 weeks",
     slogan:
-      "Launch Your Own Brand! Master Amazon Private Label strategies and build a profitable eCommerce business today!",
+      "Discover how to create and operate a successful private label brand on Amazon, from sourcing products to growing your brand.",
     level: "Beginner",
     img: "/coursesAmazonLabel_c.jpg",
   },
@@ -14,32 +14,32 @@ export const upCommingCourses = [
     id: "3",
     title: "Amazon Wholesale",
     description:
-      "Master the art of selling wholesale products on Amazon. Learn how to source profitable products, work with suppliers, and optimize your listings to maximize sales.",
+      "Understand wholesale sourcing, inventory management, and selling strategies for long-term business growth.",
     duration: "6 weeks",
     slogan:
-      "Scale Your Amazon Business! Learn the secrets of Amazon Wholesale and start selling profitable products efficiently.",
+      "Understand wholesale sourcing, inventory management, and selling strategies for long-term business growth.",
     level: "Intermediate",
     img: "/coursesAmazonWholeSale_c.jpg",
   },
   {
     id: "4",
-    title: "Daraz Local eCommerce",
+    title: "Daraz eCommerce",
     description:
-      "Discover the strategies to sell successfully on Daraz, one of the biggest eCommerce platforms in Asia. Learn product research, listing optimization, and marketing techniques.",
+      "Develop practical skills to launch, manage, and grow your online business on Daraz.",
     duration: "6 weeks",
     slogan:
-      "Dominate Daraz! Learn to build a successful online store and grow your eCommerce business.",
+      "Develop practical skills to launch, manage, and grow your online business on Daraz.",
     level: "Beginner",
     img: "/CoursesDarazLocal_c.jpg",
   },
   {
     id: "5",
-    title: "Shopify Mastery",
+    title: "Shopify",
     description:
-      "Create and scale a Shopify store from scratch. Learn how to set up your store, design an engaging website, and implement winning marketing strategies.",
+      "Build and manage professional online stores while learning essential eCommerce practices.",
     duration: "10 weeks",
     slogan:
-      "Start Your Online Store! Join Shopify Mastery and build a high-converting eCommerce website today!",
+      "Build and manage professional online stores while learning essential eCommerce practices.",
     level: "Beginner",
     img: "/coursesShopify_c.jpg",
   },
@@ -47,10 +47,10 @@ export const upCommingCourses = [
     id: "6",
     title: "WordPress Web Development",
     description:
-      "Learn how to create stunning and functional websites using WordPress. Master theme customization, plugin integration, and SEO optimization to build professional websites.",
+      "Create responsive websites and manage digital content using WordPress tools and features.",
     duration: "8 weeks",
     slogan:
-      "Build Beautiful Websites! Learn WordPress Web Development and create high-performing websites with ease.",
+      "Create responsive websites and manage digital content using WordPress tools and features.",
     level: "Beginner",
     img: "/coursesWordpress_c.jpg",
   },
@@ -58,10 +58,10 @@ export const upCommingCourses = [
     id: "7",
     title: "Full Stack Web Development",
     description:
-      "Become a full-stack developer by mastering front-end and back-end technologies. Learn HTML, CSS, JavaScript, React, Node.js, Express, and databases.",
+      "Learn front-end and back-end development to build complete web applications through practical projects.",
     duration: "12 weeks",
     slogan:
-      "Code Your Future! Join Full Stack Web Development and become a skilled developer with hands-on projects.",
+      "Learn front-end and back-end development to build complete web applications through practical projects.",
     level: "Intermediate",
     img: "/coureseWebDevelopment_c.jpg",
   },

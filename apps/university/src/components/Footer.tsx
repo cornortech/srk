@@ -176,7 +176,7 @@ export function Footer() {
         </div>
         <div className=" mt-8 rounded-xl bg-gray-800">
           <div className=" p-4 flex flex-col sm:flex-row justify-between items-center text-sm">
-            <p>@ THE SRK University 2025. All Right Reserved</p>
+            <p>@ THE SRK University 2026. All Right Reserved</p>
             <div className="flex gap-4 mt-2 sm:mt-0">
               <Link
                 to="/privacy-policy"

@@ -13,9 +13,9 @@ export function WhyChooseSection() {
     "/learn/learn-from-experts",
   ];
   const sectionCaptions = [
-    "dive into the foundational lessons",
-    "explore how the community works",
-    "meet the mentors behind the curriculum",
+    "discover how our learning platform works",
+    "see how our community helps you learn and grow",
+    "meet the experts behind our courses",
   ];
 
   return (

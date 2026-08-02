@@ -3,9 +3,8 @@ import { Card, CardBody, CardHeader, Link } from "@nextui-org/react";
 import {
   Mail,
   Phone,
-  Facebook,
-  Twitter,
-  LinkedinIcon as LinkedIn,
+  Instagram,
+  Youtube,
   Contact,
   MailIcon,
   Subtitles,
@@ -121,14 +120,21 @@ export default function ContactPage() {
               </CardHeader>
               <CardBody>
                 <div className="flex space-x-4">
-                  <Link href="#" aria-label="Facebook">
-                    <Facebook className="w-6 h-6 text-primary hover:text-textPrimary transition-colors" />
+                  <Link
+                    href="https://www.instagram.com/thesrkuniversity/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Instagram"
+                  >
+                    <Instagram className="w-6 h-6 text-primary hover:text-textPrimary transition-colors" />
                   </Link>
-                  <Link href="#" aria-label="Twitter">
-                    <Twitter className="w-6 h-6 text-primary hover:text-textPrimary transition-colors" />
-                  </Link>
-                  <Link href="#" aria-label="LinkedIn">
-                    <LinkedIn className="w-6 h-6 text-primary hover:text-textPrimary transition-colors" />
+                  <Link
+                    href="https://youtube.com/@thesrkuniversity.com1"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Youtube"
+                  >
+                    <Youtube className="w-6 h-6 text-primary hover:text-textPrimary transition-colors" />
                   </Link>
                 </div>
               </CardBody>

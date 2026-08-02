@@ -10,7 +10,7 @@ export const MoneySection = () => {
   return (
     <>
       <div
-        className={`w-full h-full sm:h-[80vh] bg-[url('/dollar.jpg')] bg-cover bg-no-repeat bg-left `}
+        className={`w-full h-full sm:h-[80vh] bg-[url('/dollar.webp')] bg-cover bg-no-repeat bg-left `}
       >
         <div className="w-full h-full bg-black bg-opacity-75   ">
           <div

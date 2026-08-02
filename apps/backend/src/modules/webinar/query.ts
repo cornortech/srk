@@ -15,9 +15,10 @@ const getAllWebinar: AppRouteImplementationOrOptions<
       body: webinarData.map((webinar) => ({
         _id: webinar._id.toString(),
         title: webinar.title,
-        startTime: webinar.startTime,
-        endTime: webinar.endTime,
+        hasFinished: webinar.hasFinished,
         meetUrl: webinar.meetUrl,
+        youtubeUrl: webinar.youtubeUrl,
+        thumbnail: webinar.thumbnail,
       })),
     };
   } catch (error) {

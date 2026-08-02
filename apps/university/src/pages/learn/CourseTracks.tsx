@@ -6,7 +6,7 @@ const tracks = [
   {
     id: "photoshop",
     name: "Adobe Photoshop",
-    img: "/courses/photoshop.png",
+    img: "/courses/photoshop.webp",
     category: "Visual Design",
     level: "Beginner",
     duration: "8 weeks",
@@ -31,7 +31,7 @@ const tracks = [
   {
     id: "graphic-design",
     name: "Graphic Design Foundations",
-    img: "/courses/graphicDesign.png",
+    img: "/courses/graphicDesign.webp",
     category: "Visual Design",
     level: "Beginner",
     duration: "14 weeks",
@@ -56,7 +56,7 @@ const tracks = [
   {
     id: "premiere-pro",
     name: "Premiere Pro Mastery",
-    img: "/courses/pr.png",
+    img: "/courses/pr.webp",
     category: "Video Production",
     level: "Intermediate",
     duration: "10 weeks",
@@ -81,7 +81,7 @@ const tracks = [
   {
     id: "after-effects",
     name: "After Effects for Motion Graphics",
-    img: "/courses/AE.png",
+    img: "/courses/AE.webp",
     category: "Animation & Motion",
     level: "Advanced",
     duration: "12 weeks",
@@ -106,7 +106,7 @@ const tracks = [
   {
     id: "davinci",
     name: "DaVinci Resolve",
-    img: "/courses/davinci.png",
+    img: "/courses/davinci.webp",
     category: "Video Production",
     level: "Beginner",
     duration: "10 weeks",
@@ -131,7 +131,7 @@ const tracks = [
   {
     id: "digital-marketing",
     name: "Digital Marketing Mastery",
-    img: "/courses/digitalMarketing.png",
+    img: "/courses/digitalMarketing.webp",
     category: "Marketing",
     level: "Intermediate",
     duration: "12 weeks",
@@ -156,7 +156,7 @@ const tracks = [
   {
     id: "indesign",
     name: "Adobe InDesign",
-    img: "/courses/Id.png",
+    img: "/courses/Id.webp",
     category: "Publishing & Layout",
     level: "Intermediate",
     duration: "8 weeks",
@@ -181,7 +181,7 @@ const tracks = [
   {
     id: "communication",
     name: "Communication Skills",
-    img: "/coursesCommunicationSkill.png",
+    img: "/coursesCommunicationSkill.webp",
     category: "Professional Development",
     level: "Beginner",
     duration: "6 weeks",

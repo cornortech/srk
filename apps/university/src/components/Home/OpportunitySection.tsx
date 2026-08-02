@@ -17,7 +17,7 @@ export default function OpportunitySection() {
   const proPackageId = import.meta.env.VITE_PRO_PACKAGE_ID;
 
   return (
-    <div className="relative h-[1020px]  flex flex-col items-center p-4 bg-[url('/team/sidelookDark.jpg')] bg-no-repeat  bg-cover bg-center ">
+    <div className="relative h-[1020px]  flex flex-col items-center p-4 bg-[url('/team/sidelookDark.webp')] bg-no-repeat  bg-cover bg-center ">
       <div className="absolute inset-0 bg-black bg-opacity-65 z-10"></div>
       <div className="relative z-10 space-y-4 mb-8 text-center">
         <h1 className="text-xl font-semibold text-primary">

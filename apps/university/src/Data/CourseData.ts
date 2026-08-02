@@ -8,7 +8,7 @@ export const Courses = [
     slogan:
       "Edit Like a Pro! Join Premiere Pro Mastery to create stunning videos, master transitions, effects, and storytelling techniques—unlock your creative potential today!",
     level: "Intermediate",
-    img: "/courses/pr_c.jpg",
+    img: "/courses/pr_c.webp",
     students: 1500,
     rating: 4.8,
     time: "2h 30m",
@@ -64,7 +64,7 @@ export const Courses = [
     slogan:
       "Transform your creativity into stunning visuals! Enroll in Photoshop Essentials and master the tools to design, edit, and create like a pro—unlock your artistic potential today!",
     level: "Beginner",
-    img: "/courses/photoshop_c.jpg",
+    img: "/courses/photoshop_c.webp",
     students: 2200,
     rating: 4.9,
     time: "3h 45m",
@@ -121,7 +121,7 @@ export const Courses = [
       "Boost Your Career! Join Digital Marketing Mastery to learn SEO, social media strategies, and analytics—drive growth, build brands, and master online marketing success",
 
     level: "Intermediate",
-    img: "/courses/digitalMarketing_c.jpg",
+    img: "/courses/digitalMarketing_c.webp",
     students: 2000,
     rating: 4.7,
     time: "4h 30m",
@@ -174,7 +174,7 @@ export const Courses = [
       "Bring Ideas to Life! Master After Effects for Motion Graphics and create stunning animations, visual effects, and dynamic designs—unlock your creativity today!",
 
     level: "Advanced",
-    img: "/courses/AE_c.jpg",
+    img: "/courses/AE_c.webp",
     students: 1800,
     rating: 4.8,
     time: "3h 30m",
@@ -231,7 +231,7 @@ export const Courses = [
       "Build Your Creative Future! Enroll in Graphic Design Foundations to master design principles, typography, and layouts—turn your ideas into professional designs today!",
 
     level: "Beginner",
-    img: "/courses/graphicDesign_c.jpg",
+    img: "/courses/graphicDesign_c.webp",
     students: 2500,
     rating: 4.7,
     time: "4h 45m",
@@ -288,7 +288,7 @@ export const Courses = [
       "Empower Your Future! Enroll in davinci Basic to master essential skills, boost productivity, and stay ahead in today's tech-driven world!",
 
     level: "Beginner",
-    img: "/courses/davinci_c.jpg",
+    img: "/courses/davinci_c.webp",
     students: 3000,
     rating: 4.6,
     time: "3h 25m",
@@ -315,7 +315,7 @@ export const Courses = [
     slogan:
       "Transform your creativity into stunning visuals! Enroll in After Effects and master the tools to design, edit, and create like a pro—unlock your artistic potential today!",
     level: "Beginner",
-    img: "/courses/AI_c.jpg",
+    img: "/courses/AI_c.webp",
     students: 2200,
     rating: 4.9,
     time: "3h 45m",
@@ -371,7 +371,7 @@ export const Courses = [
     slogan:
       "Transform your creativity into stunning visuals! Enroll in Adobe Indesign and master the tools to design, edit, and create like a pro—unlock your artistic potential today!",
     level: "Beginner",
-    img: "/courses/Id_c.jpg",
+    img: "/courses/Id_c.webp",
     students: 2200,
     rating: 4.9,
     time: "3h 45m",
@@ -427,7 +427,7 @@ export const Courses = [
     slogan:
       "Master the art of communication! Build confidence, express ideas clearly, and connect with others effectively—unlock your full potential today!",
     level: "Beginner",
-    img: "/coursesCommunicationSkill_c.jpg",
+    img: "/coursesCommunicationSkill_c.webp",
     students: 3100,
     rating: 4.8,
     time: "2h 30m",

@@ -6,18 +6,29 @@ import {
   ModalFooter,
   Button,
   Input,
+  Switch,
+  Image,
 } from "@nextui-org/react";
 import React, { useEffect, useState } from "react";
 import { useDisclosure } from "@nextui-org/react";
 import { z } from "zod";
 import { TWebinar } from "../../../lib/types/entities";
+import { useSRKFileUpload } from "@srk/shared/hooks";
+import { getUniversityAssetUrl } from "../../../lib/cdn";
+import useAlert from "../../../hooks/useAlert";
 
-const webinarSchema = z.object({
-  title: z.string().min(1, "Title is required"),
-  meetUrl: z.string().url("Invalid URL"),
-  startTime: z.string().min(1, "Start time required"),
-  endTime: z.string().min(1, "End time required"),
-});
+const webinarSchema = z
+  .object({
+    title: z.string().min(1, "Title is required"),
+    hasFinished: z.boolean(),
+    meetUrl: z.string().optional(),
+    youtubeUrl: z.string().optional(),
+    thumbnail: z.string().optional(),
+  })
+  .refine((data) => (data.hasFinished ? !!data.youtubeUrl : !!data.meetUrl), {
+    message: "Provide a YouTube URL for a finished webinar, or a meeting URL for an upcoming one",
+    path: ["meetUrl"],
+  });
 
 type UpdateWebinarModalProps = {
   webinar: TWebinar;
@@ -32,10 +43,15 @@ export default function UpdateWebinarModal({
 }: UpdateWebinarModalProps) {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [formData, setFormData] = useState<TWebinar>(webinar);
+  const [newThumbnail, setNewThumbnail] = useState<File | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isUploading, setIsUploading] = useState(false);
+  const { uploadFile } = useSRKFileUpload("university");
+  const { show } = useAlert();
 
   useEffect(() => {
     setFormData(webinar);
+    setNewThumbnail(null);
     setErrors({});
   }, [webinar]);
 
@@ -43,8 +59,30 @@ export default function UpdateWebinarModal({
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  const handleSubmit = () => {
-    const result = webinarSchema.safeParse(formData);
+  const handleSubmit = async () => {
+    let thumbnail = formData.thumbnail;
+
+    if (newThumbnail) {
+      try {
+        setIsUploading(true);
+        const { key } = await uploadFile(newThumbnail, "image");
+        thumbnail = key;
+      } catch {
+        show("Failed to upload thumbnail", "error");
+        setIsUploading(false);
+        return;
+      }
+      setIsUploading(false);
+    }
+
+    const candidate = {
+      ...formData,
+      thumbnail,
+      meetUrl: formData.hasFinished ? undefined : formData.meetUrl,
+      youtubeUrl: formData.hasFinished ? formData.youtubeUrl : undefined,
+    };
+
+    const result = webinarSchema.safeParse(candidate);
     if (!result.success) {
       const fieldErrors: Record<string, string> = {};
       result.error.errors.forEach((err) => {
@@ -54,7 +92,7 @@ export default function UpdateWebinarModal({
       return;
     }
 
-    onUpdate(formData);
+    onUpdate(candidate);
     onClose();
   };
 
@@ -78,46 +116,71 @@ export default function UpdateWebinarModal({
                   isInvalid={!!errors.title}
                   errorMessage={errors.title}
                 />
-                <Input
-                  name="meetUrl"
-                  label="Meeting URL"
-                  value={formData.meetUrl}
-                  onChange={handleChange}
-                  isInvalid={!!errors.meetUrl}
-                  errorMessage={errors.meetUrl}
-                />
-                <Input
-                  name="startTime"
-                  label="Start Time"
-                  type="datetime-local"
-                  value={
-                    formData.startTime
-                      ? new Date(formData.startTime).toISOString().slice(0, 16)
-                      : ""
-                  }
-                  onChange={handleChange}
-                  isInvalid={!!errors.startTime}
-                  errorMessage={errors.startTime}
-                />
-                <Input
-                  name="endTime"
-                  label="End Time"
-                  type="datetime-local"
-                  value={
-                    formData.endTime
-                      ? new Date(formData.endTime).toISOString().slice(0, 16)
-                      : ""
-                  }
-                  onChange={handleChange}
-                  isInvalid={!!errors.endTime}
-                  errorMessage={errors.endTime}
-                />
+
+                <div className="flex flex-col gap-2">
+                  <p className="text-sm font-medium">Thumbnail</p>
+                  <Image
+                    src={
+                      newThumbnail
+                        ? URL.createObjectURL(newThumbnail)
+                        : getUniversityAssetUrl(formData.thumbnail)
+                    }
+                    alt={formData.title}
+                    className="w-full aspect-video object-cover"
+                    width={500}
+                    height={280}
+                  />
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) setNewThumbnail(file);
+                    }}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between py-2 px-3 bg-default-100 rounded-lg">
+                  <span className="text-sm font-medium">Webinar has finished</span>
+                  <Switch
+                    isSelected={formData.hasFinished}
+                    onValueChange={(value) =>
+                      setFormData((prev) => ({ ...prev, hasFinished: value }))
+                    }
+                    color="success"
+                    size="sm"
+                  />
+                </div>
+
+                {formData.hasFinished ? (
+                  <Input
+                    name="youtubeUrl"
+                    label="YouTube URL"
+                    value={formData.youtubeUrl || ""}
+                    onChange={handleChange}
+                    isInvalid={!!errors.youtubeUrl}
+                    errorMessage={errors.youtubeUrl}
+                  />
+                ) : (
+                  <Input
+                    name="meetUrl"
+                    label="Meeting URL"
+                    value={formData.meetUrl || ""}
+                    onChange={handleChange}
+                    isInvalid={!!errors.meetUrl}
+                    errorMessage={errors.meetUrl}
+                  />
+                )}
               </ModalBody>
               <ModalFooter>
                 <Button variant="light" onPress={onClose}>
                   Cancel
                 </Button>
-                <Button color="primary" onPress={handleSubmit}>
+                <Button
+                  color="primary"
+                  onPress={handleSubmit}
+                  isLoading={isUploading}
+                >
                   Update
                 </Button>
               </ModalFooter>

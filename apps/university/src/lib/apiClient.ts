@@ -528,10 +528,11 @@ export const getAllWebinarsApi = async () => {
 };
 
 export type TCreateWebinarPayload = {
-  meetUrl: string;
-  startTime: Date;
-  endTime: Date;
   title: string;
+  hasFinished: boolean;
+  meetUrl?: string;
+  youtubeUrl?: string;
+  thumbnail?: string;
 };
 
 export const createWebinarApi = async (data: TCreateWebinarPayload) => {

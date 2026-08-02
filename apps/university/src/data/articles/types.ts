@@ -1,5 +1,5 @@
 export interface ArticleBlock {
-  type: "h2" | "h3" | "p" | "ul" | "ol" | "image";
+  type: "h2" | "h3" | "h4" | "p" | "ul" | "ol" | "image";
   text?: string;
   items?: string[];
   src?: string;

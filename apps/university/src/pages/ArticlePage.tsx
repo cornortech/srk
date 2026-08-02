@@ -1,5 +1,6 @@
 import { useParams, Link, Navigate } from "react-router-dom";
 import { useAOS } from "../lib/aos";
+import { useSEO } from "../lib/useSEO";
 import { ArrowLeft, Clock, BookOpen, ChevronRight } from "lucide-react";
 import { allArticles } from "../data/articles";
 import type { ArticleBlock } from "../data/articles";
@@ -23,6 +24,16 @@ function renderBlock(block: ArticleBlock, i: number) {
       >
         {block.text}
       </h3>
+    );
+  }
+  if (block.type === "h4") {
+    return (
+      <h4
+        key={i}
+        className="text-white/80 font-semibold text-sm mt-6 mb-2 leading-snug"
+      >
+        {block.text}
+      </h4>
     );
   }
   if (block.type === "p") {
@@ -85,6 +96,14 @@ export default function ArticlePage() {
   useAOS();
   const { slug } = useParams<{ slug: string }>();
   const article = allArticles.find((a) => a.slug === slug);
+
+  useSEO({
+    title: article
+      ? `${article.title} | SRK University`
+      : "Article Not Found | SRK University",
+    description: article?.excerpt ?? "",
+    path: `/articles/${slug ?? ""}`,
+  });
 
   if (!article) return <Navigate to="/articles" replace />;
 

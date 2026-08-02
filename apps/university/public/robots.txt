@@ -1,0 +1,57 @@
+# The SRK University - robots.txt
+# AdSense & SEO Optimization
+
+User-agent: *
+Allow: /
+
+User-agent: Googlebot
+Allow: /
+
+User-agent: Googlebot-Image
+Allow: /
+
+User-agent: AdsBot-Google
+Allow: /
+
+User-agent: AdsBot-Google-Mobile
+Allow: /
+
+# Disallow private/authenticated areas
+Disallow: /admin
+Disallow: /auth
+Disallow: /affiliate
+Disallow: /study
+Disallow: /srkgrowportal
+Disallow: /webcam
+Disallow: /payment-gateway
+
+# Public content (high priority for AdSense)
+Allow: /articles
+Allow: /blog
+Allow: /about
+Allow: /contact
+Allow: /faq
+Allow: /features
+Allow: /getting-started
+Allow: /help
+Allow: /how-it-works
+Allow: /packages
+Allow: /privacy-policy
+Allow: /terms-and-conditions
+Allow: /disclaimer
+Allow: /affiliate-terms
+
+Sitemap: https://thesrkuniversity.com/sitemap.xml
+
+# Block bad bots
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: SemrushBot
+Disallow: /
+
+User-agent: DotBot
+Disallow: /

@@ -6,13 +6,12 @@ const createWebinar: AppRouteImplementationOrOptions<
   typeof webinarContract.createWebinar
 > = async ({ req, body }) => {
   try {
-    console.log(body.meetUrl);
-
     await WebinarModel.create({
       title: body.title,
-      startTime: body.startTime,
-      endTime: body.endTime,
+      hasFinished: body.hasFinished,
       meetUrl: body.meetUrl,
+      youtubeUrl: body.youtubeUrl,
+      thumbnail: body.thumbnail,
     });
 
     return {
@@ -78,9 +77,10 @@ const updateWebinar: AppRouteImplementationOrOptions<
       id,
       {
         title: body.title,
-        startTime: body.startTime,
-        endTime: body.endTime,
+        hasFinished: body.hasFinished,
         meetUrl: body.meetUrl,
+        youtubeUrl: body.youtubeUrl,
+        thumbnail: body.thumbnail,
       },
       { new: true }
     );

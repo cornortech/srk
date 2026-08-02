@@ -6,11 +6,11 @@ import {
   CardHeader,
   CardBody,
   Input,
-  Textarea,
   Button,
   Divider,
+  Switch,
 } from "@nextui-org/react";
-import { CalendarIcon, Video, Clock, FileText } from "lucide-react";
+import { Video, Youtube } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import {
   createWebinarApi,
@@ -19,36 +19,32 @@ import {
 import { AxiosError } from "axios";
 import useAlert from "../../../../hooks/useAlert";
 import { useNavigate } from "react-router-dom";
+import { useSRKFileUpload } from "@srk/shared/hooks";
+import FileUpload from "../../../FileUplaod";
 
 export default function CreateWebinarForm() {
   const [formData, setFormData] = useState({
+    title: "",
+    hasFinished: false,
     meetUrl: "",
-    startDateTime: "",
-    endDateTime: "",
-    purpose: "",
+    youtubeUrl: "",
   });
+  const [thumbnail, setThumbnail] = useState<File | null>(null);
+  const [uploadingPercentage, setUploadingPercentage] = useState(0);
   const { show } = useAlert();
   const navigate = useNavigate();
-  const { mutateAsync } = useMutation({
+  const { uploadFile } = useSRKFileUpload("university");
+
+  const { mutateAsync, isPending } = useMutation({
     mutationFn: async (data: TCreateWebinarPayload) => {
       return createWebinarApi(data);
     },
-    onSuccess: (data) => {
-      console.log("Webinar created successfully:", data);
-      // Optionally reset form or show success message
+    onSuccess: () => {
       navigate("/admin/webinar");
       show("Webinar created successfully", "success");
-      setFormData({
-        meetUrl: "",
-        startDateTime: "",
-        endDateTime: "",
-        purpose: "",
-      });
     },
     onError: (error: AxiosError<{ message: string }>) => {
-      console.error("Error creating webinar:", error);
-      // Optionally show error message
-      show("Failed to create webinar: ", "error");
+      show(error.response?.data.message || "Failed to create webinar", "error");
     },
   });
 
@@ -59,15 +55,24 @@ export default function CreateWebinarForm() {
     }));
   };
 
-  const handleSubmit = (event: React.FormEvent) => {
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    mutateAsync({
-      meetUrl: formData.meetUrl,
-      startTime: new Date(formData.startDateTime),
-      endTime: new Date(formData.endDateTime),
-      title: formData.purpose,
+    if (!thumbnail) {
+      show("Please upload a thumbnail image", "error");
+      return;
+    }
+
+    const { key } = await uploadFile(thumbnail, "image", (progress) => {
+      setUploadingPercentage(progress);
     });
-    console.log("Webinar Data:", formData);
+
+    mutateAsync({
+      title: formData.title,
+      hasFinished: formData.hasFinished,
+      meetUrl: formData.hasFinished ? undefined : formData.meetUrl,
+      youtubeUrl: formData.hasFinished ? formData.youtubeUrl : undefined,
+      thumbnail: key,
+    });
   };
 
   return (
@@ -89,97 +94,79 @@ export default function CreateWebinarForm() {
           <Divider />
 
           <CardBody as="form" onSubmit={handleSubmit} className="space-y-6">
-            {/* Meet URL */}
             <Input
               isRequired
-              type="url"
-              label="Google Meet URL"
+              type="text"
+              label="Title"
               labelPlacement="outside"
-              placeholder="https://meet.google.com/xxx-xxxx-xxx"
-              value={formData.meetUrl}
-              onChange={(e) => handleInputChange("meetUrl", e.target.value)}
-              startContent={<Video className="w-4 h-4 text-default-500" />}
+              placeholder="Enter webinar title"
+              value={formData.title}
+              onChange={(e) => handleInputChange("title", e.target.value)}
             />
-            {/* Date/Time Grid using Tailwind */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Input
-                isRequired
-                type="datetime-local"
-                label="Start Date & Time"
-                labelPlacement="outside"
-                value={formData.startDateTime}
-                onChange={(e) =>
-                  handleInputChange("startDateTime", e.target.value)
+
+            <FileUpload
+              label="webinar thumbnail"
+              onImageUpload={(file) => setThumbnail(file)}
+              image={thumbnail}
+            />
+
+            <div className="flex items-center justify-between py-2 px-4 bg-default-100 rounded-lg">
+              <div>
+                <p className="font-medium">Webinar has finished</p>
+                <p className="text-sm text-default-500">
+                  Toggle on once the webinar is over to attach a YouTube
+                  recording instead of a meeting link
+                </p>
+              </div>
+              <Switch
+                isSelected={formData.hasFinished}
+                onValueChange={(value) =>
+                  setFormData((prev) => ({ ...prev, hasFinished: value }))
                 }
-                startContent={
-                  <CalendarIcon className="w-4 h-4 text-default-500" />
-                }
-              />
-              <Input
-                isRequired
-                type="datetime-local"
-                label="End Date & Time"
-                labelPlacement="outside"
-                value={formData.endDateTime}
-                onChange={(e) =>
-                  handleInputChange("endDateTime", e.target.value)
-                }
-                startContent={<Clock className="w-4 h-4 text-default-500" />}
+                color="success"
               />
             </div>
-            {/* Purpose */}
-            <Textarea
-              isRequired
-              label="Purpose of Webinar"
-              labelPlacement="outside"
-              placeholder="Describe the purpose, agenda, and key topics..."
-              value={formData.purpose}
-              onChange={(e) => handleInputChange("purpose", e.target.value)}
-              startContent={<FileText className="w-4 h-4 text-default-500" />}
-              minRows={4}
-            />
+
+            {formData.hasFinished ? (
+              <Input
+                isRequired
+                type="url"
+                label="YouTube URL"
+                labelPlacement="outside"
+                placeholder="https://youtube.com/watch?v=xxxx"
+                value={formData.youtubeUrl}
+                onChange={(e) =>
+                  handleInputChange("youtubeUrl", e.target.value)
+                }
+                startContent={<Youtube className="w-4 h-4 text-default-500" />}
+              />
+            ) : (
+              <Input
+                isRequired
+                type="url"
+                label="Zoom / Google Meet URL"
+                labelPlacement="outside"
+                placeholder="https://meet.google.com/xxx-xxxx-xxx"
+                value={formData.meetUrl}
+                onChange={(e) => handleInputChange("meetUrl", e.target.value)}
+                startContent={<Video className="w-4 h-4 text-default-500" />}
+              />
+            )}
+
             <div className="flex gap-4">
-              <Button color="primary" type="submit" fullWidth>
-                Create Webinar
+              <Button
+                color="primary"
+                type="submit"
+                fullWidth
+                isLoading={isPending}
+              >
+                {uploadingPercentage > 0 && uploadingPercentage < 100
+                  ? `Uploading thumbnail ${uploadingPercentage}%`
+                  : "Create Webinar"}
               </Button>
             </div>
           </CardBody>
         </Card>
-
-        {/* Preview Section */}
-        {(formData.meetUrl || formData.purpose) && (
-          <Card className="mt-8">
-            <CardHeader>
-              <div className="text-lg font-semibold">Preview</div>
-            </CardHeader>
-            <Divider />
-            <CardBody>
-              {formData.purpose && (
-                <div className="mb-4">
-                  <h4 className="font-semibold">Webinar Purpose</h4>
-                  <p className="text-sm text-gray-600">{formData.purpose}</p>
-                </div>
-              )}
-              {formData.startDateTime && formData.endDateTime && (
-                <div className="mb-4">
-                  <h4 className="font-semibold">Schedule</h4>
-                  <p className="text-sm text-gray-600">
-                    {new Date(formData.startDateTime).toLocaleString()} –{" "}
-                    {new Date(formData.endDateTime).toLocaleString()}
-                  </p>
-                </div>
-              )}
-              {formData.meetUrl && (
-                <div>
-                  <h4 className="font-semibold">Meeting Link</h4>
-                  <p className="text-sm text-blue-600 break-all">
-                    {formData.meetUrl}
-                  </p>
-                </div>
-              )}
-            </CardBody>
-          </Card>
-        )}
       </div>
     </div>
   );

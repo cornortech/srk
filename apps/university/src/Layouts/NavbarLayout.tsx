@@ -1,4 +1,4 @@
-import { Outlet, useNavigate } from "react-router-dom";
+import { Outlet, ScrollRestoration, useNavigate } from "react-router-dom";
 import { ReusableNavbar } from "../components/Navbar";
 import { menuItems } from "../Data/NavbarData";
 import { Footer } from "../components/Footer";
@@ -74,6 +74,7 @@ const LayoutWithNavbar = () => {
       </div>
       <Footer />
       <ScrollToTop />
+      <ScrollRestoration />
     </>
   );
 };

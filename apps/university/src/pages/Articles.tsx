@@ -1,11 +1,18 @@
 import { useState } from "react";
 import { useAOS } from "../lib/aos";
+import { useSEO } from "../lib/useSEO";
 import { Link } from "react-router-dom";
 import { ArrowRight, Clock, BookOpen } from "lucide-react";
 import { allArticles, topics } from "../data/articles";
 
 export default function ArticlesPage() {
   useAOS();
+  useSEO({
+    title: "Articles & Guides | SRK University",
+    description:
+      "Explore expert guides on Premiere Pro, Photoshop, digital marketing, After Effects, graphic design, DaVinci Resolve, AI & automation, and more from SRK University.",
+    path: "/articles",
+  });
   const [activeTopic, setActiveTopic] = useState<string>("all");
 
   const filtered =

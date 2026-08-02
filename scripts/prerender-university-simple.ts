@@ -12,9 +12,11 @@ import * as path from 'path';
 import http from 'http';
 import puppeteer, { Browser, Page } from 'puppeteer';
 import Beasties from 'beasties';
+import { allArticles } from '../apps/university/src/data/articles';
 
 const DIST_DIR = path.resolve(__dirname, '../dist/apps/university');
 const PORT = 3334;
+const SITE_URL = 'https://thesrkuniversity.com';
 
 // Pages to pre-render
 const PAGES_TO_RENDER = [
@@ -27,6 +29,7 @@ const PAGES_TO_RENDER = [
   '/getting-started',
   '/help',
   '/blog',
+  '/articles',
   '/terms-and-conditions',
   '/privacy-policy',
   '/disclaimer',
@@ -39,6 +42,52 @@ const BLOG_SLUGS = [
   'digital-marketing-skills-2026',
   'entrepreneurship-startup-guide',
 ];
+
+// Article slugs, sourced from the actual article data so this list can
+// never drift out of sync with what's really on /articles.
+const ARTICLE_SLUGS = allArticles.map((article) => article.slug);
+
+function generateSitemap(): string {
+  const lastmod = new Date().toISOString().split('T')[0];
+  const staticEntries: Array<[string, string, string]> = [
+    ['/', 'weekly', '1.0'],
+    ['/articles', 'weekly', '0.9'],
+    ['/blog', 'weekly', '0.8'],
+    ['/about', 'monthly', '0.8'],
+    ['/features', 'monthly', '0.8'],
+    ['/how-it-works', 'monthly', '0.8'],
+    ['/getting-started', 'monthly', '0.8'],
+    ['/faq', 'monthly', '0.7'],
+    ['/help', 'monthly', '0.7'],
+    ['/contact', 'monthly', '0.6'],
+    ['/privacy-policy', 'yearly', '0.3'],
+    ['/terms-and-conditions', 'yearly', '0.3'],
+    ['/disclaimer', 'yearly', '0.3'],
+    ['/affiliate-terms', 'yearly', '0.3'],
+  ];
+
+  const dynamicEntries: Array<[string, string, string]> = [
+    ...BLOG_SLUGS.map(
+      (slug): [string, string, string] => [`/blog/${slug}`, 'monthly', '0.6']
+    ),
+    ...ARTICLE_SLUGS.map(
+      (slug): [string, string, string] => [`/articles/${slug}`, 'monthly', '0.7']
+    ),
+  ];
+
+  const urls = [...staticEntries, ...dynamicEntries]
+    .map(
+      ([loc, changefreq, priority]) => `  <url>
+    <loc>${SITE_URL}${loc}</loc>
+    <lastmod>${lastmod}</lastmod>
+    <changefreq>${changefreq}</changefreq>
+    <priority>${priority}</priority>
+  </url>`
+    )
+    .join('\n');
+
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>\n`;
+}
 
 async function savePageAsStatic(
   pathname: string,
@@ -278,6 +327,57 @@ async function serveAndPrerender(): Promise<void> {
           }
         }
 
+        // Pre-render articles
+        console.log('\n📰 Articles:');
+        for (const slug of ARTICLE_SLUGS) {
+          let pageInstance: Page | null = null;
+          try {
+            const pathname = `/articles/${slug}`;
+            const url = `${baseUrl}${pathname}`;
+            console.log(`  • Rendering ${pathname}...`);
+
+            pageInstance = await browser.newPage();
+
+            const response = await pageInstance.goto(url, {
+              waitUntil: 'networkidle2',
+              timeout: 10000,
+            });
+
+            if (!response || !response.ok()) {
+              throw new Error(`Navigation failed: ${response?.status()}`);
+            }
+
+            // Wait for content to be in DOM
+            await pageInstance.waitForFunction(
+              () => document.body.innerText.length > 100,
+              { timeout: 5000 }
+            );
+
+            await new Promise((r) => setTimeout(r, 1000));
+
+            const html = await pageInstance.content();
+
+            if (html.includes('<div id="root"></div>')) {
+              throw new Error('Page did not render - only got app shell');
+            }
+
+            await savePageAsStatic(pathname, html);
+            console.log(`    ✓ Saved (${html.length} bytes)`);
+          } catch (error) {
+            console.error(
+              `    ❌ Error: ${error instanceof Error ? error.message : String(error)}`
+            );
+          } finally {
+            if (pageInstance) {
+              try {
+                await pageInstance.close();
+              } catch (e) {
+                // ignore
+              }
+            }
+          }
+        }
+
         // Critical CSS inlining: the single global Tailwind stylesheet is
         // ~34KB and was render-blocking FCP by ~1.6s (confirmed via
         // PageSpeed Insights) since the browser can't paint anything until
@@ -291,6 +391,7 @@ async function serveAndPrerender(): Promise<void> {
           '/',
           ...PAGES_TO_RENDER.filter((p) => p !== '/'),
           ...BLOG_SLUGS.map((slug) => `/blog/${slug}`),
+          ...ARTICLE_SLUGS.map((slug) => `/articles/${slug}`),
         ];
         for (const pathname of pagesToInline) {
           const filePath =
@@ -316,11 +417,21 @@ async function serveAndPrerender(): Promise<void> {
           }
         }
 
+        // Sitemap: written fresh every build from the same ARTICLE_SLUGS
+        // list used for pre-rendering, so it can't drift out of sync with
+        // what's actually indexable on the site.
+        console.log('\n🗺️  Generating sitemap.xml...');
+        fs.writeFileSync(path.join(DIST_DIR, 'sitemap.xml'), generateSitemap(), 'utf-8');
+        console.log('  ✓ sitemap.xml written');
+
         console.log('\n✨ Pre-rendering complete!\n');
         console.log('📊 Results:');
         console.log(`  ✓ Generated ${PAGES_TO_RENDER.length} static pages`);
         console.log(`  ✓ Generated ${BLOG_SLUGS.length} blog post pages`);
-        console.log(`  ✓ Total: ${PAGES_TO_RENDER.length + BLOG_SLUGS.length} pages\n`);
+        console.log(`  ✓ Generated ${ARTICLE_SLUGS.length} article pages`);
+        console.log(
+          `  ✓ Total: ${PAGES_TO_RENDER.length + BLOG_SLUGS.length + ARTICLE_SLUGS.length} pages\n`
+        );
         console.log('🔍 Google crawler will now see:');
         console.log('  ✓ Fully rendered HTML with all React content');
         console.log('  ✓ Complete page text (no JavaScript required)');

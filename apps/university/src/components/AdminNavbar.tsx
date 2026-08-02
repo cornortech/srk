@@ -23,7 +23,7 @@ import { getUniversityAssetUrl } from "../lib/cdn";
 const user = {
   name: "John Doe",
   email: "john@example.com",
-  image: "/instructor.jpg",
+  image: "/instructor.webp",
 };
 
 export const AdminNavbar = () => {

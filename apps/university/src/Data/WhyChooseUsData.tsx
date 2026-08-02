@@ -38,7 +38,7 @@ export const whyChooseUsData: IWhyChooseUsSection[] = [
         highlight: "",
       },
     ],
-    icon: "/education.png", // String is still valid with React.ReactNode
+    icon: "/education.webp", // String is still valid with React.ReactNode
   },
   {
     id: 2,
@@ -97,6 +97,6 @@ export const whyChooseUsData: IWhyChooseUsSection[] = [
         highlight: "",
       },
     ],
-    icon: "/dollar.png",
+    icon: "/dollar.webp",
   },
 ];

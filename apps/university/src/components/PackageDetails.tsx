@@ -29,7 +29,7 @@ export const PackageDetails = () => {
   if (!data) return;
 
   return (
-    <div className="w-ful h-screen flex items-center justify-center bg-[url('/srklaptop.jpg')] bg-center bg-cover bg-no-repeat">
+    <div className="w-ful h-screen flex items-center justify-center bg-[url('/srklaptop.webp')] bg-center bg-cover bg-no-repeat">
       <Card className="w-full md:w-72 bg-bgSecondary filter drop-shadow-[0_2px_6px_#b68938]  text-textPrimary hover:scale-105 duration-500 cursor-pointer mt-24">
         <CardHeader className="flex flex-col items-start px-4 p pt-6 pb-4 space-y-3">
           <h2 className="text-2xl font-bold text-textSecondary">{data.name}</h2>

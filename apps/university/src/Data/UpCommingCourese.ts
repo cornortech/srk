@@ -8,7 +8,7 @@ export const upCommingCourses = [
     slogan:
       "Discover how to create and operate a successful private label brand on Amazon, from sourcing products to growing your brand.",
     level: "Beginner",
-    img: "/coursesAmazonLabel_c.jpg",
+    img: "/coursesAmazonLabel_c.webp",
   },
   {
     id: "3",
@@ -19,7 +19,7 @@ export const upCommingCourses = [
     slogan:
       "Understand wholesale sourcing, inventory management, and selling strategies for long-term business growth.",
     level: "Intermediate",
-    img: "/coursesAmazonWholeSale_c.jpg",
+    img: "/coursesAmazonWholeSale_c.webp",
   },
   {
     id: "4",
@@ -30,7 +30,7 @@ export const upCommingCourses = [
     slogan:
       "Develop practical skills to launch, manage, and grow your online business on Daraz.",
     level: "Beginner",
-    img: "/CoursesDarazLocal_c.jpg",
+    img: "/CoursesDarazLocal_c.webp",
   },
   {
     id: "5",
@@ -41,7 +41,7 @@ export const upCommingCourses = [
     slogan:
       "Build and manage professional online stores while learning essential eCommerce practices.",
     level: "Beginner",
-    img: "/coursesShopify_c.jpg",
+    img: "/coursesShopify_c.webp",
   },
   {
     id: "6",
@@ -52,7 +52,7 @@ export const upCommingCourses = [
     slogan:
       "Create responsive websites and manage digital content using WordPress tools and features.",
     level: "Beginner",
-    img: "/coursesWordpress_c.jpg",
+    img: "/coursesWordpress_c.webp",
   },
   {
     id: "7",
@@ -63,7 +63,7 @@ export const upCommingCourses = [
     slogan:
       "Learn front-end and back-end development to build complete web applications through practical projects.",
     level: "Intermediate",
-    img: "/coureseWebDevelopment_c.jpg",
+    img: "/coureseWebDevelopment_c.webp",
   },
   // {
   //   id: "8",
@@ -74,6 +74,6 @@ export const upCommingCourses = [
   //   slogan:
   //     "Speak with Confidence! Join Communication Skills and master the art of effective interaction.",
   //   level: "Beginner",
-  //   img: "/coursesCommunicationSkill.png",
+  //   img: "/coursesCommunicationSkill.webp",
   // },
 ];

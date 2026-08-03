@@ -1,6 +1,8 @@
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, User, Clock } from 'lucide-react';
 import { useEffect } from 'react';
+import { Card, CardBody } from '@nextui-org/react';
+import { PrimaryButton } from '../components/ReusableComponents';
 
 interface BlogPostType {
   id: string;
@@ -282,21 +284,21 @@ export const BlogPost = () => {
     return content.split('\n').map((line, index) => {
       if (line.startsWith('## ')) {
         return (
-          <h2 key={index} className="text-2xl font-bold mt-8 mb-4">
+          <h2 key={index} className="text-2xl font-bold mt-8 mb-4 text-primary">
             {line.replace('## ', '')}
           </h2>
         );
       }
       if (line.startsWith('### ')) {
         return (
-          <h3 key={index} className="text-xl font-bold mt-6 mb-3">
+          <h3 key={index} className="text-xl font-bold mt-6 mb-3 text-primary">
             {line.replace('### ', '')}
           </h3>
         );
       }
       if (line.startsWith('- ')) {
         return (
-          <li key={index} className="ml-6 mb-2 text-gray-300">
+          <li key={index} className="ml-6 mb-2 text-textPrimary/70">
             {line.replace('- ', '')}
           </li>
         );
@@ -305,7 +307,7 @@ export const BlogPost = () => {
         return <div key={index} className="h-3" />;
       }
       return (
-        <p key={index} className="text-gray-300 mb-3 leading-relaxed">
+        <p key={index} className="text-textPrimary/70 mb-3 leading-relaxed">
           {line}
         </p>
       );
@@ -313,13 +315,13 @@ export const BlogPost = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 text-white">
+    <div className="min-h-screen bg-bgPrimary text-textPrimary">
       {/* Header */}
-      <div className="sticky top-0 bg-slate-900/80 backdrop-blur border-b border-orange-400/20 z-50">
+      <div className="sticky top-0 bg-bgPrimary/90 backdrop-blur border-b border-primary/20 z-50">
         <div className="max-w-4xl mx-auto px-4 py-4">
           <Link
             to="/blog"
-            className="inline-flex items-center gap-2 text-orange-400 hover:text-orange-300 transition-colors"
+            className="inline-flex items-center gap-2 text-primary hover:text-textPrimary transition-colors"
           >
             <ArrowLeft size={20} />
             <span>Back to Blog</span>
@@ -328,17 +330,17 @@ export const BlogPost = () => {
       </div>
 
       {/* Hero Section */}
-      <div className="bg-gradient-to-b from-orange-600 to-orange-500 py-16 px-4">
+      <div className="bg-bgSecondary py-16 px-4">
         <div className="max-w-4xl mx-auto">
           <div className="text-4xl mb-6">{post.image}</div>
           <div className="flex items-center gap-3 mb-6">
-            <span className="bg-orange-700 text-orange-100 px-3 py-1 rounded-full text-xs font-bold">
+            <span className="bg-primary/20 text-primary px-3 py-1 rounded-full text-xs font-bold">
               {post.category}
             </span>
-            <span className="text-orange-100 text-sm">{post.date}</span>
+            <span className="text-textPrimary/50 text-sm">{post.date}</span>
           </div>
-          <h1 className="text-4xl font-bold mb-4">{post.title}</h1>
-          <div className="flex items-center gap-6 text-orange-100 text-sm">
+          <h1 className="text-4xl font-bold mb-4 text-textPrimary">{post.title}</h1>
+          <div className="flex items-center gap-6 text-textPrimary/60 text-sm">
             <div className="flex items-center gap-2">
               <User size={16} />
               <span>{post.author}</span>
@@ -358,18 +360,17 @@ export const BlogPost = () => {
         </div>
 
         {/* CTA */}
-        <div className="mt-16 p-8 bg-gradient-to-r from-orange-500/10 to-orange-600/10 border border-orange-400/30 rounded-lg text-center">
-          <h2 className="text-2xl font-bold mb-4">Ready to Learn More?</h2>
-          <p className="text-gray-300 mb-6">
-            Join thousands of students learning at SRK University.
-          </p>
-          <Link
-            to="/packages"
-            className="inline-block bg-orange-500 hover:bg-orange-600 text-white font-bold px-8 py-3 rounded-lg transition-colors"
-          >
-            Browse Courses
-          </Link>
-        </div>
+        <Card className="bg-bgSecondary text-textPrimary mt-16 p-4">
+          <CardBody className="text-center">
+            <h2 className="text-2xl font-bold mb-4 text-primary">Ready to Learn More?</h2>
+            <p className="text-textPrimary/70 mb-6">
+              Join thousands of students learning at SRK University.
+            </p>
+            <Link to="/packages" className="mx-auto">
+              <PrimaryButton label="Browse Courses" />
+            </Link>
+          </CardBody>
+        </Card>
       </div>
     </div>
   );

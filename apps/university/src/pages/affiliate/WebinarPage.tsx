@@ -75,9 +75,9 @@ export default function WebinarPage() {
               <Image
                 src={getUniversityAssetUrl(webinar.thumbnail)}
                 alt={webinar.title}
-                className="w-full aspect-video object-cover"
+                className="w-full h-36 object-cover"
                 width={500}
-                height={280}
+                height={144}
                 radius="none"
               />
               <CardBody className="flex flex-col gap-3">

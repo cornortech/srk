@@ -1,5 +1,7 @@
 import { CheckCircle, BookOpen, Users } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { Card, CardBody } from '@nextui-org/react';
+import { PrimaryButton } from '../components/ReusableComponents';
 
 export const GettingStarted = () => {
   const steps = [
@@ -91,44 +93,40 @@ export const GettingStarted = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 text-white">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-orange-500 to-orange-600 py-16 px-4">
-        <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-5xl font-bold mb-4">Getting Started with SRK University</h1>
-          <p className="text-xl text-orange-100">
-            10 simple steps to begin your learning journey
-          </p>
-        </div>
-      </div>
+    <div className="min-h-screen bg-bgPrimary text-textPrimary p-4 sm:p-8">
+      <div className="max-w-4xl mx-auto sm:py-10">
+        <h1 className="text-4xl pt-8 pb-4 font-bold text-center text-textPrimary">
+          Getting Started with SRK University
+        </h1>
+        <p className="text-center text-textPrimary/70 mb-16 text-lg">
+          10 simple steps to begin your learning journey
+        </p>
 
-      <div className="max-w-4xl mx-auto px-4 py-16">
         {/* Steps */}
         <div className="mb-16">
           <h2 className="text-3xl font-bold mb-8 flex items-center gap-2">
-            <BookOpen className="text-orange-400" />
+            <BookOpen className="text-primary" />
             Your 10-Step Learning Path
           </h2>
 
           <div className="space-y-6">
-            {steps.map((step, index) => (
-              <div
-                key={step.number}
-                className="flex gap-6 bg-slate-700/50 border border-orange-400/20 rounded-lg p-6 hover:border-orange-400/50 transition-colors"
-              >
-                <div className="flex-shrink-0">
-                  <div className="flex items-center justify-center w-12 h-12 rounded-full bg-orange-500 text-white font-bold text-sm">
-                    {step.number}
+            {steps.map((step) => (
+              <Card key={step.number} className="bg-bgSecondary text-textPrimary">
+                <CardBody className="flex flex-row gap-6 p-6">
+                  <div className="flex-shrink-0">
+                    <div className="flex items-center justify-center w-12 h-12 rounded-full bg-custom-gradient text-black font-bold text-sm">
+                      {step.number}
+                    </div>
                   </div>
-                </div>
-                <div className="flex-grow">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-2xl">{step.icon}</span>
-                    <h3 className="text-xl font-bold">{step.title}</h3>
+                  <div className="flex-grow">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-2xl">{step.icon}</span>
+                      <h3 className="text-xl font-bold">{step.title}</h3>
+                    </div>
+                    <p className="text-textPrimary/70">{step.description}</p>
                   </div>
-                  <p className="text-gray-300">{step.description}</p>
-                </div>
-              </div>
+                </CardBody>
+              </Card>
             ))}
           </div>
         </div>
@@ -136,48 +134,49 @@ export const GettingStarted = () => {
         {/* Best Practices */}
         <div className="mb-16">
           <h2 className="text-3xl font-bold mb-8 flex items-center gap-2">
-            <Users className="text-orange-400" />
+            <Users className="text-primary" />
             Best Practices for Success
           </h2>
 
           <div className="grid md:grid-cols-2 gap-8">
             {tips.map((tip, index) => (
-              <div key={index} className="bg-slate-700/50 border border-orange-400/20 rounded-lg p-6">
-                <h3 className="text-xl font-bold mb-4 text-orange-400">{tip.category}</h3>
-                <ul className="space-y-3">
-                  {tip.items.map((item, itemIndex) => (
-                    <li key={itemIndex} className="flex items-start gap-2">
-                      <CheckCircle className="text-orange-400 flex-shrink-0 mt-1" size={16} />
-                      <span className="text-gray-300">{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+              <Card key={index} className="bg-bgSecondary text-textPrimary">
+                <CardBody className="p-6">
+                  <h3 className="text-xl font-bold mb-4 text-primary">{tip.category}</h3>
+                  <ul className="space-y-3">
+                    {tip.items.map((item, itemIndex) => (
+                      <li key={itemIndex} className="flex items-start gap-2">
+                        <CheckCircle className="text-primary flex-shrink-0 mt-1" size={16} />
+                        <span className="text-textPrimary/70">{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </CardBody>
+              </Card>
             ))}
           </div>
         </div>
 
         {/* Support Section */}
-        <div className="bg-gradient-to-r from-orange-500/10 to-orange-600/10 border border-orange-400/30 rounded-lg p-8 text-center">
-          <h2 className="text-2xl font-bold mb-4">Need Help Getting Started?</h2>
-          <p className="text-gray-300 mb-6">
-            Our support team is available 24/7 to help you with any questions
-          </p>
-          <div className="flex gap-4 justify-center flex-wrap">
-            <Link
-              to="/contact"
-              className="inline-block bg-orange-500 hover:bg-orange-600 text-white font-bold px-8 py-3 rounded-lg transition-colors"
-            >
-              Contact Support
-            </Link>
-            <Link
-              to="/faq"
-              className="inline-block bg-slate-700 border border-orange-400/30 hover:border-orange-400 text-white font-bold px-8 py-3 rounded-lg transition-colors"
-            >
-              View FAQ
-            </Link>
-          </div>
-        </div>
+        <Card className="bg-bgSecondary text-textPrimary p-4">
+          <CardBody className="text-center">
+            <h2 className="text-2xl font-bold mb-4 text-primary">Need Help Getting Started?</h2>
+            <p className="text-textPrimary/70 mb-6">
+              Our support team is available 24/7 to help you with any questions
+            </p>
+            <div className="flex gap-4 justify-center flex-wrap">
+              <Link to="/contact">
+                <PrimaryButton label="Contact Support" />
+              </Link>
+              <Link
+                to="/faq"
+                className="inline-flex items-center bg-bgPrimary border border-primary/40 hover:border-primary text-textPrimary font-bold px-10 py-2 rounded-xl transition-colors"
+              >
+                View FAQ
+              </Link>
+            </div>
+          </CardBody>
+        </Card>
       </div>
     </div>
   );

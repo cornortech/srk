@@ -1,5 +1,6 @@
 import { BookOpen, MessageSquare, Mail, Phone } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { Card, CardBody } from '@nextui-org/react';
 
 export const Help = () => {
   const helpResources = [
@@ -57,18 +58,15 @@ export const Help = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 text-white">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-orange-500 to-orange-600 py-16 px-4">
-        <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-5xl font-bold mb-4">Help Center</h1>
-          <p className="text-xl text-orange-100">
-            We're here to help you succeed
-          </p>
-        </div>
-      </div>
+    <div className="min-h-screen bg-bgPrimary text-textPrimary p-4 sm:p-8">
+      <div className="max-w-6xl mx-auto sm:py-10">
+        <h1 className="text-4xl pt-8 pb-4 font-bold text-center text-textPrimary">
+          Help Center
+        </h1>
+        <p className="text-center text-textPrimary/70 mb-16 text-lg">
+          We're here to help you succeed
+        </p>
 
-      <div className="max-w-6xl mx-auto px-4 py-16">
         {/* Support Channels */}
         <h2 className="text-3xl font-bold mb-8">Get Support</h2>
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
@@ -79,80 +77,88 @@ export const Help = () => {
                 key={index}
                 href={resource.link}
                 target={resource.link.startsWith('mailto:') || resource.link.startsWith('tel:') ? '_self' : undefined}
-                className="bg-slate-700/50 border border-orange-400/20 rounded-lg p-6 hover:border-orange-400/50 hover:bg-slate-700/70 transition-all group"
+                className="group"
               >
-                <div className="w-12 h-12 rounded-lg bg-orange-500 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                  <Icon className="text-white" size={24} />
-                </div>
-                <h3 className="font-bold mb-2">{resource.title}</h3>
-                <p className="text-gray-400 text-sm">{resource.description}</p>
+                <Card className="bg-bgSecondary text-textPrimary h-full hover:ring-1 hover:ring-primary/50 transition-all">
+                  <CardBody className="p-6">
+                    <div className="w-12 h-12 rounded-lg bg-custom-gradient flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                      <Icon className="text-black" size={24} />
+                    </div>
+                    <h3 className="font-bold mb-2">{resource.title}</h3>
+                    <p className="text-textPrimary/60 text-sm">{resource.description}</p>
+                  </CardBody>
+                </Card>
               </a>
             );
           })}
         </div>
 
         {/* Contact Information */}
-        <div className="bg-gradient-to-r from-orange-500/10 to-orange-600/10 border border-orange-400/30 rounded-lg p-8 mb-16">
-          <h2 className="text-2xl font-bold mb-6 text-center">Direct Contact</h2>
-          <div className="grid md:grid-cols-2 gap-8">
-            <div className="text-center">
-              <p className="text-gray-400 mb-2 text-sm uppercase tracking-widest font-bold">Phone</p>
-              <a href="tel:+977976922301" className="text-orange-400 font-bold text-2xl hover:text-orange-300 transition-colors">
-                +977 976-9223013
-              </a>
-              <p className="text-gray-500 text-sm mt-2">Available Monday-Sunday, 9 AM - 9 PM</p>
+        <Card className="bg-bgSecondary text-textPrimary mb-16 p-4">
+          <CardBody>
+            <h2 className="text-2xl font-bold mb-6 text-center text-primary">Direct Contact</h2>
+            <div className="grid md:grid-cols-2 gap-8">
+              <div className="text-center">
+                <p className="text-textPrimary/50 mb-2 text-sm uppercase tracking-widest font-bold">Phone</p>
+                <a href="tel:+977976922301" className="text-primary font-bold text-2xl hover:text-textPrimary transition-colors">
+                  +977 976-9223013
+                </a>
+                <p className="text-textPrimary/40 text-sm mt-2">Available Monday-Sunday, 9 AM - 9 PM</p>
+              </div>
+              <div className="text-center">
+                <p className="text-textPrimary/50 mb-2 text-sm uppercase tracking-widest font-bold">Email</p>
+                <a href="mailto:support@srkuniversity.com" className="text-primary font-bold text-2xl hover:text-textPrimary transition-colors">
+                  support@srkuniversity.com
+                </a>
+                <p className="text-textPrimary/40 text-sm mt-2">Response within 24 hours</p>
+              </div>
             </div>
-            <div className="text-center">
-              <p className="text-gray-400 mb-2 text-sm uppercase tracking-widest font-bold">Email</p>
-              <a href="mailto:support@srkuniversity.com" className="text-orange-400 font-bold text-2xl hover:text-orange-300 transition-colors">
-                support@srkuniversity.com
-              </a>
-              <p className="text-gray-500 text-sm mt-2">Response within 24 hours</p>
-            </div>
-          </div>
-        </div>
+          </CardBody>
+        </Card>
 
         {/* Common Issues */}
         <h2 className="text-3xl font-bold mb-8">Common Issues & Solutions</h2>
         <div className="space-y-4 mb-16">
           {commonIssues.map((issue, index) => (
-            <div
-              key={index}
-              className="bg-slate-700/50 border border-orange-400/20 rounded-lg p-6 hover:border-orange-400/50 transition-colors"
-            >
-              <h3 className="font-bold text-lg mb-2">{issue.question}</h3>
-              <p className="text-gray-300">{issue.answer}</p>
-            </div>
+            <Card key={index} className="bg-bgSecondary text-textPrimary">
+              <CardBody className="p-6">
+                <h3 className="font-bold text-lg mb-2">{issue.question}</h3>
+                <p className="text-textPrimary/70">{issue.answer}</p>
+              </CardBody>
+            </Card>
           ))}
         </div>
 
         {/* Additional Resources */}
         <div className="grid md:grid-cols-3 gap-8">
-          <Link
-            to="/faq"
-            className="bg-slate-700/50 border border-orange-400/20 rounded-lg p-8 hover:border-orange-400/50 transition-colors text-center"
-          >
-            <span className="text-4xl block mb-4" role="img" aria-label="FAQ">❓</span>
-            <h3 className="text-xl font-bold mb-2">FAQs</h3>
-            <p className="text-gray-400">Browse our frequently asked questions</p>
+          <Link to="/faq">
+            <Card className="bg-bgSecondary text-textPrimary h-full hover:ring-1 hover:ring-primary/50 transition-all">
+              <CardBody className="p-8 text-center">
+                <span className="text-4xl block mb-4" role="img" aria-label="FAQ">❓</span>
+                <h3 className="text-xl font-bold mb-2">FAQs</h3>
+                <p className="text-textPrimary/60">Browse our frequently asked questions</p>
+              </CardBody>
+            </Card>
           </Link>
 
-          <Link
-            to="/blog"
-            className="bg-slate-700/50 border border-orange-400/20 rounded-lg p-8 hover:border-orange-400/50 transition-colors text-center"
-          >
-            <span className="text-4xl block mb-4" role="img" aria-label="Blog">📚</span>
-            <h3 className="text-xl font-bold mb-2">Blog</h3>
-            <p className="text-gray-400">Read helpful tips and guides</p>
+          <Link to="/blog">
+            <Card className="bg-bgSecondary text-textPrimary h-full hover:ring-1 hover:ring-primary/50 transition-all">
+              <CardBody className="p-8 text-center">
+                <span className="text-4xl block mb-4" role="img" aria-label="Blog">📚</span>
+                <h3 className="text-xl font-bold mb-2">Blog</h3>
+                <p className="text-textPrimary/60">Read helpful tips and guides</p>
+              </CardBody>
+            </Card>
           </Link>
 
-          <Link
-            to="/getting-started"
-            className="bg-slate-700/50 border border-orange-400/20 rounded-lg p-8 hover:border-orange-400/50 transition-colors text-center"
-          >
-            <span className="text-4xl block mb-4" role="img" aria-label="Getting Started">🚀</span>
-            <h3 className="text-xl font-bold mb-2">Getting Started</h3>
-            <p className="text-gray-400">Learn the basics quickly</p>
+          <Link to="/getting-started">
+            <Card className="bg-bgSecondary text-textPrimary h-full hover:ring-1 hover:ring-primary/50 transition-all">
+              <CardBody className="p-8 text-center">
+                <span className="text-4xl block mb-4" role="img" aria-label="Getting Started">🚀</span>
+                <h3 className="text-xl font-bold mb-2">Getting Started</h3>
+                <p className="text-textPrimary/60">Learn the basics quickly</p>
+              </CardBody>
+            </Card>
           </Link>
         </div>
       </div>

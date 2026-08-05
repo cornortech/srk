@@ -98,28 +98,27 @@ export default function WebinarPage() {
               </CardBody>
               <CardFooter className="justify-end">
                 {webinar.hasFinished ? (
-                  <a
+                  <Button
+                    as="a"
                     href={webinar.youtubeUrl}
                     target="_blank"
                     rel="noopener noreferrer"
+                    color="primary"
+                    endContent={<Youtube className="w-4 h-4" />}
                   >
-                    <Button color="primary" endContent={<Youtube className="w-4 h-4" />}>
-                      Watch Recording
-                    </Button>
-                  </a>
+                    Watch Recording
+                  </Button>
                 ) : (
-                  <a
+                  <Button
+                    as="a"
                     href={webinar.meetUrl}
                     target="_blank"
                     rel="noopener noreferrer"
+                    color="primary"
+                    endContent={<VideoIcon className="w-4 h-4" />}
                   >
-                    <Button
-                      color="primary"
-                      endContent={<VideoIcon className="w-4 h-4" />}
-                    >
-                      Join Now
-                    </Button>
-                  </a>
+                    Join Now
+                  </Button>
                 )}
               </CardFooter>
             </Card>

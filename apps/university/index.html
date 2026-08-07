@@ -51,47 +51,54 @@
   </head>
   <body>
     <div id="root"></div>
+
     <!--
-      Static first-paint skeleton, "/" only: this app is a client-rendered SPA, so
-      without this the browser has nothing to paint until the JS bundle downloads,
-      parses and executes React (this is why LCP/FCP were red in PageSpeed Insights).
-      Painting the real hero markup here lets FCP/LCP happen as soon as the (already
-      preloaded) hero image + CSS arrive, fully decoupled from JS load time. React's
-      createRoot().render() replaces #root's contents on mount, so this is swapped
-      out for the real IntroSection automatically with no extra code needed.
-      This is a fallback only: when built with `npm run build:university`,
-      scripts/prerender-university-simple.ts already fills #root with real,
-      complete prerendered content, and the guard below leaves it untouched.
+      Persistent hero, "/" only: lives OUTSIDE #root on purpose. React's
+      createRoot() (this app deliberately doesn't use hydrateRoot — NextUI's
+      react-aria internals mint non-deterministic useId()s that make real
+      hydration unreliable here, see main.tsx) always tears out and rebuilds
+      #root's contents on mount. Anything inside #root gets a fresh paint the
+      moment JS takes over, which resets the browser's LCP measurement even
+      though the visual result looks identical. Keeping the hero as one
+      self-contained block (image + overlay + text + button, nothing split
+      across it and React) outside #root means React's remount never touches
+      it, so the very first paint stays the element LCP is measured against.
+
+      Positioned absolute (not fixed) at top:8rem to match the fixed navbar's
+      height (the "mt-32" offset used throughout the app) without
+      participating in #root's own layout flow — it scrolls away normally,
+      it just isn't a flow sibling. IntroSection.tsx reserves the matching
+      empty space in #root so content below it lines up correctly, and
+      claims/releases this element via src/lib/persistentHero.ts: shown once
+      per page load, replaced by React's normal render the moment the user
+      navigates away (or back).
+
+      Removed immediately, synchronously, for every other route (including
+      pages served this same index.html as an SPA-routing fallback) so nobody
+      gets a flash of the wrong page's hero.
     -->
+    <div id="persistent-hero" style="position: absolute; top: 8rem; left: 0; right: 0; z-index: 1;"
+      class="relative h-[500px] sm:h-[600px] md:h-[700px] xl:h-[90vh] overflow-hidden">
+      <img src="/team/landingImage1-1920.webp"
+        srcset="/team/landingImage1-640.webp 640w, /team/landingImage1-1080.webp 1080w, /team/landingImage1-1920.webp 1920w"
+        sizes="100vw" alt="Landing Image" class="absolute inset-0 w-full h-full object-cover animate-zoom-in"
+        loading="eager" fetchpriority="high" decoding="async" />
+      <div class="absolute inset-0 bg-black/60"></div>
+      <div class="relative z-10 w-full max-w-7xl mx-auto px-6 flex flex-col items-start justify-center h-full text-left">
+        <h1 class="text-white text-sm font-semibold mb-2 tracking-widest">Welcome to The SRK University</h1>
+        <h2 class="text-white text-3xl font-bold mb-4">PRACTICAL LEARNING FOR FUTURE SUCCESS</h2>
+        <p class="text-gray-300 text-base md:text-lg mb-8 max-w-lg">Develop important skills with flexible online courses and guidance from experts. The SRK University assists you with the development of knowledge, its application, and preparation for academic, career, and business success.</p>
+        <a href="/auth/sign-up?packageId=%VITE_PRO_PACKAGE_ID%"
+          class="inline-flex items-center justify-center px-10 font-semibold text-white bg-yellow-600 w-48 py-3 text-lg">Enroll Now</a>
+        <p class="text-gray-400 text-sm mt-4">Begin learning today and invest in your future.</p>
+      </div>
+    </div>
     <script>
-      (function () {
-        if (location.pathname !== '/') return;
-        var root = document.getElementById('root');
-        // If this page was served pre-rendered (npm run build:university),
-        // #root already has real, complete content — never overwrite it
-        // with the thin skeleton below.
-        if (root.children.length > 0) return;
-        root.innerHTML =
-          '<div class="fixed h-32 top-0 z-50 bg-black w-full border-b border-primary flex items-center px-6">' +
-            '<img src="/logo/transparentLogo.webp" alt="SRK University" width="100" height="60" />' +
-          '</div>' +
-          '<div class="mt-32">' +
-            '<section class="relative h-[500px] sm:h-[600px] md:h-[700px] xl:h-[90vh] overflow-hidden">' +
-              '<img src="/team/landingImage1-1920.webp" srcset="/team/landingImage1-640.webp 640w, /team/landingImage1-1080.webp 1080w, /team/landingImage1-1920.webp 1920w" sizes="100vw" alt="Landing Image" class="absolute inset-0 w-full h-full object-cover" fetchpriority="high" />' +
-              '<div class="absolute inset-0 bg-black bg-opacity-50"></div>' +
-              '<div class="absolute inset-0 bg-gradient-to-r from-black via-black/25 to-black/25 opacity-60 pointer-events-none"></div>' +
-              '<div class="relative z-10 w-full max-w-7xl mx-auto px-6 flex flex-col items-start justify-center h-full text-left">' +
-                '<h1 class="text-white text-sm font-semibold mb-2 tracking-widest">Welcome to The SRK University</h1>' +
-                '<h2 class="text-white text-3xl font-bold mb-4">THE REVOLUTION OF ENTREPRENEURSHIP</h2>' +
-                '<h2 class="text-white text-xl sm:text-2xl md:text-3xl font-semibold mb-6">UNLOCK THE TOOLS TO MASTERY &amp; CONFIDENCE</h2>' +
-                '<p class="text-gray-300 text-base md:text-lg mb-8 max-w-lg">The SRK University empowers entrepreneurs with hands-on guidance, expert-led training, and a thriving community&mdash;all in one place.</p>' +
-                '<div class="inline-flex items-center justify-center px-10 font-semibold text-white bg-yellow-600 w-48 py-3 text-lg">Get Started Now</div>' +
-                '<p class="text-gray-400 text-sm mt-4">Secure your access today and start your journey.</p>' +
-              '</div>' +
-            '</section>' +
-          '</div>';
-      })();
+      if (location.pathname !== '/') {
+        document.getElementById('persistent-hero').remove();
+      }
     </script>
+
     <script type="module" src="./src/main.tsx"></script>
     <!--
       Google AdSense: deferred until the browser has actually recorded an LCP
@@ -114,6 +121,14 @@
     -->
     <script>
       (function () {
+        // AdSense isn't approved yet and Auto ads is off — this script (and
+        // the ~190KB it pulls in behind it) is currently pure LCP/TBT cost
+        // with zero benefit, since no ads are being shown either way. Flip
+        // this back to true once you're approved and ready to monetize —
+        // everything else below (LCP-gated, crawl-safe loading) still works
+        // unchanged.
+        var ADSENSE_ENABLED = false;
+        if (!ADSENSE_ENABLED) return;
         if (navigator.webdriver) return;
         var triggered = false;
         var trigger = function () {

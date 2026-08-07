@@ -1,10 +1,28 @@
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { PrimaryButton } from "../ReusableComponents";
+import { claimPersistentHero, releasePersistentHero } from "../../lib/persistentHero";
+
+const HERO_HEIGHT_CLASSES = "h-[500px] sm:h-[600px] md:h-[700px] xl:h-[90vh]";
 
 export const IntroSection = () => {
   const navigate = useNavigate();
+  const [usingPersistent] = useState(claimPersistentHero);
+
+  useEffect(() => {
+    if (!usingPersistent) return;
+    return () => releasePersistentHero();
+  }, [usingPersistent]);
+
+  if (usingPersistent) {
+    // The real hero is already visible — static markup living outside
+    // #root (see index.html's #persistent-hero). This reserves the same
+    // flow space so everything below it lines up correctly.
+    return <div className={HERO_HEIGHT_CLASSES} />;
+  }
+
   return (
-    <section className="relative h-[500px] sm:h-[600px] md:h-[700px] xl:h-[90vh] overflow-hidden ">
+    <section className={`relative ${HERO_HEIGHT_CLASSES} overflow-hidden`}>
       {/* Background Image */}
       <img
         src="/team/landingImage1-1920.webp"
@@ -17,14 +35,8 @@ export const IntroSection = () => {
         decoding="async"
       />
 
-      {/* Overlay to Darken Background Slightly */}
-      <div className="absolute inset-0 bg-black bg-opacity-50"></div>
-
-      {/* Blurred Yellow Light Effect Centered Vertically on the Right */}
-      <div className="absolute bg-yellow-500 blur-[300px] w-[400px] h-[400px] right-[-200px] top-1/2 -translate-y-1/2 rotate-45"></div>
-
-      {/* Gradient Overlay: Dark on the Left, Bright Golden on the Right */}
-      <div className="absolute inset-0 bg-gradient-to-r from-black via-black/25 to-black/25 opacity-60 pointer-events-none"></div>
+      {/* Overlay to Darken Background */}
+      <div className="absolute inset-0 bg-black/60"></div>
 
       {/* Content Aligned to the Left */}
       <div className="relative z-10 w-full max-w-7xl mx-auto px-6 flex flex-col items-start justify-center h-full text-left">

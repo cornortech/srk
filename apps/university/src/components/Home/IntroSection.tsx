@@ -24,10 +24,10 @@ export const IntroSection = () => {
   return (
     <section className={`relative ${HERO_HEIGHT_CLASSES} overflow-hidden`}>
       {/* Background Image */}
+      {/* Fixed size, not responsive srcset — see the comment on the
+          matching preload link in index.html for why. */}
       <img
-        src="/team/landingImage1-1920.webp"
-        srcSet="/team/landingImage1-640.webp 640w, /team/landingImage1-1080.webp 1080w, /team/landingImage1-1920.webp 1920w"
-        sizes="100vw"
+        src="/team/landingImage1-1080.webp"
         alt="Landing Image"
         className="absolute inset-0 w-full h-full object-cover animate-zoom-in"
         loading="eager"

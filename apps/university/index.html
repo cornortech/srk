@@ -3,12 +3,21 @@
 <!DOCTYPE html>
 <html lang="en" class="dark" style="color-scheme: dark">
   <head>
-    <!-- Preload LCP hero image for fastest possible paint (responsive WebP,
-         matches the srcset/sizes on the real <img> in IntroSection.tsx) -->
+    <!-- Preload LCP hero image for fastest possible paint. Deliberately a
+         single fixed size, not responsive srcset/sizes: Chrome's preload
+         scanner has to guess which srcset candidate a "100vw" sizes value
+         resolves to before layout is known, and that guess doesn't always
+         match what the actual rendered <img> picks — confirmed via direct
+         network tracing against the live site, this was causing BOTH the
+         640w and 1080w files to download on some devices, competing for
+         the same constrained mobile bandwidth. One size everywhere
+         guarantees exactly one fetch. 1080w chosen for mobile (the
+         PageSpeed Insights target); it sits under a 60% dark overlay, so
+         the softer edge on very high-DPR/wide desktop screens isn't
+         noticeable. Must match the <img> src in IntroSection.tsx and the
+         #persistent-hero block below. -->
     <link rel="preload" as="image"
-      href="/team/landingImage1-1920.webp"
-      imagesrcset="/team/landingImage1-640.webp 640w, /team/landingImage1-1080.webp 1080w, /team/landingImage1-1920.webp 1920w"
-      imagesizes="100vw"
+      href="/team/landingImage1-1080.webp"
       fetchpriority="high" />
 
     <!-- Basic Meta Tags -->
@@ -79,9 +88,8 @@
     -->
     <div id="persistent-hero" style="position: absolute; top: 8rem; left: 0; right: 0; z-index: 1;"
       class="relative h-[500px] sm:h-[600px] md:h-[700px] xl:h-[90vh] overflow-hidden">
-      <img src="/team/landingImage1-1920.webp"
-        srcset="/team/landingImage1-640.webp 640w, /team/landingImage1-1080.webp 1080w, /team/landingImage1-1920.webp 1920w"
-        sizes="100vw" alt="Landing Image" class="absolute inset-0 w-full h-full object-cover animate-zoom-in"
+      <img src="/team/landingImage1-1080.webp"
+        alt="Landing Image" class="absolute inset-0 w-full h-full object-cover animate-zoom-in"
         loading="eager" fetchpriority="high" decoding="async" />
       <div class="absolute inset-0 bg-black/60"></div>
       <div class="relative z-10 w-full max-w-7xl mx-auto px-6 flex flex-col items-start justify-center h-full text-left">

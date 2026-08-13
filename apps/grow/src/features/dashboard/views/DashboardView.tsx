@@ -10,6 +10,7 @@ import React, { useState } from 'react';
 import { GlassCard } from '../components/ui/GlassCard';
 import { formatRupees } from '../../../lib/utils/formatters';
 import { api } from '../../../lib/api';
+import { useCountUp } from '../../../hooks/useCountUp';
 
 interface DashboardViewProps {
   userID: string;
@@ -80,12 +81,27 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   const consistencyDays =
     getAffiliateUserDashboardStats?.body.activeDaysStreak ?? 0;
 
+  const todayEarnings =
+    getAffiliateUserDashboardStats?.body.todayEarnings?.totalEarnings ?? 0;
+  const last7DaysEarnings =
+    getAffiliateUserDashboardStats?.body.last7DaysEarnings?.totalEarnings ?? 0;
+  const allTimeEarnings =
+    getAffiliateUserDashboardStats?.body.allTimeEarnings ?? 0;
+  const last28DaysEarnings =
+    getAffiliateUserDashboardStats?.body.last28DaysEarnings?.totalEarnings ??
+    0;
+
+  const animatedToday = useCountUp(todayEarnings);
+  const animatedWallet = useCountUp(balance);
+  const animatedLast7Days = useCountUp(last7DaysEarnings);
+  const animatedAllTime = useCountUp(allTimeEarnings);
+  const animatedLast28Days = useCountUp(last28DaysEarnings);
+  const animatedConsistencyDays = useCountUp(consistencyDays);
+
   const stats = [
     {
       label: 'Today',
-      value: formatRupees(
-        getAffiliateUserDashboardStats?.body.todayEarnings?.totalEarnings ?? 0
-      ),
+      value: formatRupees(animatedToday),
       variant: 'gold' as CardVariant,
       change: `+${getAffiliateUserDashboardStats?.body.todayEarnings?.growthPercentage ??
         0
@@ -95,9 +111,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     },
     {
       label: 'Wallet',
-      value: formatRupees(
-        getAffiliateUserDashboardStats?.body.currentBalance ?? 0
-      ),
+      value: formatRupees(animatedWallet),
       variant: 'emerald' as CardVariant,
       info: balance > 10 ? 'Available for withdrawal' : 'No funds',
       icon: <WalletIcon className="w-4 h-4" />,
@@ -105,10 +119,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     },
     {
       label: '7 Days',
-      value: formatRupees(
-        getAffiliateUserDashboardStats?.body.last7DaysEarnings?.totalEarnings ??
-        0
-      ),
+      value: formatRupees(animatedLast7Days),
       variant: 'violet' as CardVariant,
       change: `+${getAffiliateUserDashboardStats?.body.last7DaysEarnings
         ?.growthPercentage ?? 0
@@ -118,9 +129,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     },
     {
       label: 'All Time',
-      value: formatRupees(
-        getAffiliateUserDashboardStats?.body.allTimeEarnings ?? 0
-      ),
+      value: formatRupees(animatedAllTime),
       variant: 'gold' as CardVariant,
       icon: (
         <svg
@@ -137,10 +146,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     },
     {
       label: '28 Days',
-      value: formatRupees(
-        getAffiliateUserDashboardStats?.body.last28DaysEarnings
-          ?.totalEarnings ?? 0
-      ),
+      value: formatRupees(animatedLast28Days),
       variant: 'blue' as CardVariant,
       change: `+${getAffiliateUserDashboardStats?.body.last28DaysEarnings
         ?.growthPercentage ?? 0
@@ -163,7 +169,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
     },
     {
       label: 'Consistency',
-      value: `${consistencyDays} Days`,
+      value: `${Math.round(animatedConsistencyDays)} Days`,
       variant: 'emerald' as CardVariant,
       info: 'Active streak',
       icon: (

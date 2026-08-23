@@ -156,9 +156,9 @@ const PrivacyRefundPolicy: React.FC = () => {
       <p>
         Google&rsquo;s advertising requirements can be summed up by
         Google&rsquo;s Advertising Principles. They are put in place to
-        provide a positive experience for users. We may use Google AdSense
-        Advertising on our website. Google, as a third party vendor, uses
-        cookies to serve ads on our site. Google&rsquo;s use of the DART
+        provide a positive experience for users. We may use Google
+        advertising services on our website. Google, as a third party vendor,
+        uses cookies to serve ads on our site. Google&rsquo;s use of the DART
         cookie enables it to serve ads to our users based on their visit to
         our site and other sites on the Internet. Users may opt out of the
         use of the DART cookie by visiting the Google ad and content
@@ -420,14 +420,13 @@ const PrivacyRefundPolicy: React.FC = () => {
         practices.
       </p>
 
-      <h3 className="text-lg font-medium mt-4">Google AdSense &amp; Advertising</h3>
+      <h3 className="text-lg font-medium mt-4">Google &amp; Advertising</h3>
       <p>
-        We may use Google AdSense and similar third-party advertising
-        vendors on our website. These vendors, including Google, use cookies
-        to serve ads based on your prior visits to our website and other
-        sites on the internet. Users may opt out of personalized advertising
-        by visiting Google's Ads Settings and the Google Advertising
-        Principles page.
+        We may use Google and similar third-party advertising vendors on our
+        website. These vendors, including Google, use cookies to serve ads
+        based on your prior visits to our website and other sites on the
+        internet. Users may opt out of personalized advertising by visiting
+        Google's Ads Settings and the Google Advertising Principles page.
       </p>
 
       <h3 className="text-lg font-medium mt-4">GDPR Compliance</h3>

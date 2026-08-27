@@ -113,8 +113,9 @@ export const useSRKFileUpload = (appName: string) => {
       const extension = file.name.split('.').pop();
       const keyPrefix = options?.keyPrefix ?? fileType;
       const uniqueFileName = `${keyPrefix}-${uniqueSuffix}.${extension}`;
-      // Use shared env helper to determine prod/dev
-      const envPrefix = sharedEnv.isProdFlag ? 'prod' : 'dev';
+      // Must match the backend's R2_PREFIX_FOLDER convention (env.ts), or the
+      // CDN (which only serves the "srk" namespace in prod) 404s on these uploads.
+      const envPrefix = sharedEnv.isProdFlag ? 'srk' : 'dev';
       const key = `${envPrefix}/${appName}/${keyPrefix}/${uniqueFileName}`;
 
       // Convert File/Blob to ArrayBuffer

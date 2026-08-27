@@ -1,8 +1,25 @@
 
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark" style="color-scheme: dark">
   <head>
+    <!-- Preload LCP hero image for fastest possible paint. Deliberately a
+         single fixed size, not responsive srcset/sizes: Chrome's preload
+         scanner has to guess which srcset candidate a "100vw" sizes value
+         resolves to before layout is known, and that guess doesn't always
+         match what the actual rendered <img> picks — confirmed via direct
+         network tracing against the live site, this was causing BOTH the
+         640w and 1080w files to download on some devices, competing for
+         the same constrained mobile bandwidth. One size everywhere
+         guarantees exactly one fetch. 1080w chosen for mobile (the
+         PageSpeed Insights target); it sits under a 60% dark overlay, so
+         the softer edge on very high-DPR/wide desktop screens isn't
+         noticeable. Must match the <img> src in IntroSection.tsx and the
+         #persistent-hero block below. -->
+    <link rel="preload" as="image"
+      href="/team/landingImage1-1080.webp"
+      fetchpriority="high" />
+
     <!-- Basic Meta Tags -->
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -19,12 +36,13 @@
     <meta name="robots" content="index, follow" />
     <meta name="theme-color" content="#1A237E" />
 
+
     <!-- Open Graph / Facebook -->
     <meta property="og:title" content="The SRK University" />
     <meta property="og:description"
       content="Join The SRK University and explore quality education, affiliate programs, and entrepreneur training packages like SRK Pro, Lite, Premium & Basic." />
     <meta property="og:image" content="https://thesrkuniversity.com/logo.png" />
-    <meta property="og:url" content="https://yourdomain.com" />
+    <meta property="og:url" content="https://thesrkuniversity.com/" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="The SRK University" />
 
@@ -37,18 +55,121 @@
       content="https://thesrkuniversity.com/logo.png" />
     <meta name="twitter:site" content="@thesrkuniversity" />
 
-    <!-- AOS Animation Styles -->
-    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
-
     <!-- Canonical URL -->
     <link rel="canonical" href="https://thesrkuniversity.com/" />
   </head>
   <body>
     <div id="root"></div>
-    <script type="module" src="./src/main.tsx"></script>
-    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+
+    <!--
+      Persistent hero, "/" only: lives OUTSIDE #root on purpose. React's
+      createRoot() (this app deliberately doesn't use hydrateRoot — NextUI's
+      react-aria internals mint non-deterministic useId()s that make real
+      hydration unreliable here, see main.tsx) always tears out and rebuilds
+      #root's contents on mount. Anything inside #root gets a fresh paint the
+      moment JS takes over, which resets the browser's LCP measurement even
+      though the visual result looks identical. Keeping the hero as one
+      self-contained block (image + overlay + text + button, nothing split
+      across it and React) outside #root means React's remount never touches
+      it, so the very first paint stays the element LCP is measured against.
+
+      Positioned absolute (not fixed) at top:8rem to match the fixed navbar's
+      height (the "mt-32" offset used throughout the app) without
+      participating in #root's own layout flow — it scrolls away normally,
+      it just isn't a flow sibling. IntroSection.tsx reserves the matching
+      empty space in #root so content below it lines up correctly, and
+      claims/releases this element via src/lib/persistentHero.ts: shown once
+      per page load, replaced by React's normal render the moment the user
+      navigates away (or back).
+
+      Removed immediately, synchronously, for every other route (including
+      pages served this same index.html as an SPA-routing fallback) so nobody
+      gets a flash of the wrong page's hero.
+    -->
+    <div id="persistent-hero" style="position: absolute; top: 8rem; left: 0; right: 0; z-index: 1;"
+      class="relative h-[500px] sm:h-[600px] md:h-[700px] xl:h-[90vh] overflow-hidden">
+      <img src="/team/landingImage1-1080.webp"
+        alt="Landing Image" class="absolute inset-0 w-full h-full object-cover animate-zoom-in"
+        loading="eager" fetchpriority="high" decoding="async" />
+      <div class="absolute inset-0 bg-black/60"></div>
+      <div class="relative z-10 w-full max-w-7xl mx-auto px-6 flex flex-col items-start justify-center h-full text-left">
+        <h1 class="text-white text-sm font-semibold mb-2 tracking-widest">Welcome to The SRK University</h1>
+        <h2 class="text-white text-3xl font-bold mb-4">PRACTICAL LEARNING FOR FUTURE SUCCESS</h2>
+        <p class="text-gray-300 text-base md:text-lg mb-8 max-w-lg">Develop important skills with flexible online courses and guidance from experts. The SRK University assists you with the development of knowledge, its application, and preparation for academic, career, and business success.</p>
+        <a href="/auth/sign-up?packageId=%VITE_PRO_PACKAGE_ID%"
+          class="inline-flex items-center justify-center px-10 font-semibold text-black bg-custom-gradient w-48 py-3 text-lg">Enroll Now</a>
+        <p class="text-gray-400 text-sm mt-4">Begin learning today and invest in your future.</p>
+      </div>
+    </div>
     <script>
-      AOS.init();
+      if (location.pathname !== '/') {
+        document.getElementById('persistent-hero').remove();
+      }
+    </script>
+
+    <script type="module" src="./src/main.tsx"></script>
+    <!--
+      Google AdSense: deferred until the browser has actually recorded an LCP
+      candidate, not just until window "load". AdSense's own scripts
+      (adsbygoogle.js -> show_ads_impl.js, ~190KB) are heavy enough that even
+      loading them right at window "load" was measurably delaying LCP by
+      competing for bandwidth/main-thread time. Waiting for a real LCP entry
+      first means ads never load until there's already something painted to
+      compete with. Falls back to window "load" + timeout if the LCP API is
+      unavailable or never fires for this page.
+
+      Also skipped entirely when navigator.webdriver is set (the prerender
+      crawl in scripts/prerender-university-simple.ts runs on Puppeteer,
+      which sets this): that script waits for the page to fully settle
+      before capturing HTML, so a loaded ad -- iframe, network calls tied to
+      the prerender server's own localhost URL and all -- would get baked
+      into the static snapshot and shipped to every real visitor as dead,
+      broken markup. Skipping it here means real visitors still get ads
+      loaded fresh and properly deferred on their own page load.
+    -->
+    <script>
+      (function () {
+        // AdSense isn't approved yet and Auto ads is off — this script (and
+        // the ~190KB it pulls in behind it) is currently pure LCP/TBT cost
+        // with zero benefit, since no ads are being shown either way. Flip
+        // this back to true once you're approved and ready to monetize —
+        // everything else below (LCP-gated, crawl-safe loading) still works
+        // unchanged.
+        var ADSENSE_ENABLED = false;
+        if (!ADSENSE_ENABLED) return;
+        if (navigator.webdriver) return;
+        var triggered = false;
+        var trigger = function () {
+          if (triggered) return;
+          triggered = true;
+          var loadAds = function () {
+            var s = document.createElement('script');
+            s.async = true;
+            s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7145379318898250';
+            s.crossOrigin = 'anonymous';
+            document.head.appendChild(s);
+          };
+          if ('requestIdleCallback' in window) requestIdleCallback(loadAds, { timeout: 2000 });
+          else setTimeout(loadAds, 500);
+        };
+
+        if ('PerformanceObserver' in window) {
+          try {
+            var po = new PerformanceObserver(function () {
+              trigger();
+            });
+            po.observe({ type: 'largest-contentful-paint', buffered: true });
+          } catch (e) {
+            window.addEventListener('load', trigger);
+          }
+        } else {
+          window.addEventListener('load', trigger);
+        }
+        // Belt-and-braces: never wait forever if LCP never fires.
+        window.addEventListener('load', function () {
+          setTimeout(trigger, 4000);
+        });
+      })();
     </script>
   </body>
 </html>

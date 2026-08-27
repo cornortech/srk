@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Card, CardBody, CardHeader, Input } from '@nextui-org/react';
 import UserTable from '../../components/admin/UserTable';
 import { useQuery } from '@tanstack/react-query';
@@ -8,9 +8,22 @@ import { getUsersByStatus } from '../../lib/apiClient';
 export const ListOfUsers = () => {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const { data: users } = useQuery<TGetUserByStatusByResponse>({
-    queryKey: ['users', page],
+  useEffect(() => {
+    if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    debounceTimer.current = setTimeout(() => {
+      setDebouncedSearch(search);
+      setPage(1);
+    }, 400);
+    return () => {
+      if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    };
+  }, [search]);
+
+  const { data: users, isLoading } = useQuery<TGetUserByStatusByResponse>({
+    queryKey: ['users', page, debouncedSearch],
     queryFn: async () =>
       getUsersByStatus(
         [
@@ -21,22 +34,12 @@ export const ListOfUsers = () => {
           'KYC_VERIFICATION_REJECTED',
         ],
         page,
-        10
+        10,
+        debouncedSearch || undefined
       ),
   });
 
-  if (!users?.data) return <div>Loading...</div>;
-
-  const userLists = users?.data || []
-
-  const filteredUsers = userLists.filter((user) => {
-    const searchTerm = search.toLowerCase();
-    return (
-      user.email.toLowerCase().includes(searchTerm) ||
-      user.firstName.toLowerCase().includes(searchTerm) ||
-      user.lastName.toLowerCase().includes(searchTerm)
-    );
-  });
+  const userLists = users?.data || [];
 
   return (
     <div className="container mx-auto py-4">
@@ -44,19 +47,25 @@ export const ListOfUsers = () => {
         <CardHeader className="text-xl font-bold flex flex-row gap-x-4">
           <h1>Users</h1>
           <Input
-            placeholder="Search users"
+            placeholder="Search by email, name"
             className="w-1/2 self-end ml-auto"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
         </CardHeader>
         <CardBody>
-          <UserTable
-            users={filteredUsers}
-            page={users.page}
-            totalPages={users.totalPages}
-            onPageChange={(p) => setPage(p)}
-          />
+          {isLoading && !users ? (
+            <div className="flex justify-center items-center py-10">
+              <div>Loading...</div>
+            </div>
+          ) : (
+            <UserTable
+              users={userLists}
+              page={users?.page || 1}
+              totalPages={users?.totalPages || 1}
+              onPageChange={(p) => setPage(p)}
+            />
+          )}
         </CardBody>
       </Card>
     </div>

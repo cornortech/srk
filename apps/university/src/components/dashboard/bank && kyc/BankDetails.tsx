@@ -12,8 +12,8 @@ import useAuthStore from "../../../store/useAuth";
 import useAlert from "../../../hooks/useAlert";
 import { useRef, useState } from "react";
 import AlertBanner from "../../AlertBanner";
-import useUploadFile from "../../../hooks/useFileUpload";
-// import useUploadFile from "../../../hooks/useFileUpload";
+import { useSRKFileUpload } from '@srk/shared/hooks';
+import { getUniversityAssetUrl } from "../../../lib/cdn";
 
 const accountTypes = [
   { label: "Savings Account", value: "savings" },
@@ -43,7 +43,7 @@ export default function BankDetailsForm({
   handleRefetch,
 }: BankDetailsFormProps) {
   const { userDetails } = useAuthStore();
-  const { uploadFile } = useUploadFile();
+  const { uploadFile } = useSRKFileUpload('university');
   const { show } = useAlert();
   const {
     register,
@@ -94,8 +94,8 @@ export default function BankDetailsForm({
     let qrUrl = bankDetails?.qrUrl;
 
     if (qrImage) {
-      const { url } = await uploadFile(qrImage, "image");
-      qrUrl = url;
+      const { key } = await uploadFile(qrImage, "image");
+      qrUrl = key;
     }
 
     if (!qrUrl) {
@@ -292,7 +292,11 @@ export default function BankDetailsForm({
         >
           {qrImage || bankDetails?.qrUrl ? (
             <img
-              src={qrImage ? URL.createObjectURL(qrImage) : bankDetails?.qrUrl}
+              src={
+                qrImage
+                  ? URL.createObjectURL(qrImage)
+                  : getUniversityAssetUrl(bankDetails?.qrUrl)
+              }
               alt="Document Front Side"
               className="w-full h-full object-cover object-center"
             />

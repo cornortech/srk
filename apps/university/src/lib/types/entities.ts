@@ -74,6 +74,9 @@ export type TKyc = {
   createdAt: Date;
   updatedAt: Date;
   verificationImage: string;
+  leftThumbFingerprint?: string;
+  rightThumbFingerprint?: string;
+  signature?: string;
 };
 
 export type TCourse = {
@@ -111,10 +114,11 @@ export type TCoursePayment = {
 
 export type TWebinar = {
   _id: string;
-  meetUrl: string;
-  startTime: Date;
-  endTime: Date;
   title: string;
+  hasFinished: boolean;
+  meetUrl?: string;
+  youtubeUrl?: string;
+  thumbnail?: string;
   createdAt?: Date; // This will be automatically managed by the `timestamps` option in the schema
   updatedAt?: Date; // This will be automatically managed as well
 };
@@ -131,5 +135,8 @@ export type TTourTarget = {
   rating: number;
   image: string;
   features: string[];
+  isActive: boolean;
+  collectedAmount: number;
+  createdAt: string;
 
 };

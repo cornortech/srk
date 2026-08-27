@@ -44,7 +44,13 @@ export function LoginComponent() {
           redirectionUrl: res.user.redirectionUrl,
         });
         show("Login successfull", "success");
-        navigate(res.user.redirectionUrl);
+        
+        // Handle cross-domain redirects for multi-domain admin SSO
+        if (res.user.redirectionUrl.startsWith('http://') || res.user.redirectionUrl.startsWith('https://')) {
+          window.location.href = res.user.redirectionUrl;
+        } else {
+          navigate(res.user.redirectionUrl);
+        }
         // if (res.user.status === "PORTAL_ACTIVATED") {
         //   navigate("/study");
         // } else if (
@@ -125,12 +131,17 @@ export function LoginComponent() {
         </div>
         <PrimaryButton label="Login" className="w-full " type="submit" />
 
-        <p className="text-textPrimary">
-          If you don’t have an account{" "}
-          <Link to="/packages">
-            <span className="text-primary underline">Signup</span>
+        <div className="flex justify-between items-center text-sm">
+          <p className="text-textPrimary">
+            If you don't have an account{' '}
+            <Link to="/packages">
+              <span className="text-primary underline">Signup</span>
+            </Link>
+          </p>
+          <Link to="/auth/forgot-password">
+            <span className="text-primary underline">Forgot Password?</span>
           </Link>
-        </p>
+        </div>
       </form>
     </div>
   );

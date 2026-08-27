@@ -10,6 +10,7 @@ import { useMediaQuery } from "@react-hook/media-query";
 import { Avatar } from "@nextui-org/react";
 import React from "react";
 import { TLeaderBoardData } from "../../../lib/types";
+import { getUniversityAssetUrl } from "../../../lib/cdn";
 
 interface LeaderboardProps {
   users: TLeaderBoardData[];
@@ -52,7 +53,7 @@ export const TableBoard = ({ users }: LeaderboardProps) => {
         return (
           <div className="flex items-center gap-3">
             <Avatar
-              src={performer.profilePicture}
+              src={getUniversityAssetUrl(performer.profilePicture)}
               className="w-10 h-10"
               alt={performer.username}
             />

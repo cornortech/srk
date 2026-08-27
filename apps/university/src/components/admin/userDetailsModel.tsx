@@ -11,6 +11,7 @@ import {
 } from "@nextui-org/react";
 import { TAffiliateRequest } from "../../lib/types";
 import { useState } from "react";
+import { getUniversityAssetUrl } from "../../lib/cdn";
 
 interface UserDetailsModalProps {
   user: TAffiliateRequest | null;
@@ -37,7 +38,7 @@ export default function UserDetailsModal({
         <ModalBody>
           <div className="flex items-center gap-4 mb-4">
             <Image
-              src={user.profilePicture}
+              src={getUniversityAssetUrl(user.profilePicture)}
               alt={`${user.firstName} ${user.lastName}`}
               className="rounded-full object-cover"
               width={60}
@@ -64,7 +65,7 @@ export default function UserDetailsModal({
             <p>
               <strong>Agreement:</strong>{" "}
               <a
-                href={user.affiliateAgreementUrl}
+                href={getUniversityAssetUrl(user.affiliateAgreementUrl)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-blue-500 hover:underline"
@@ -80,7 +81,7 @@ export default function UserDetailsModal({
               <strong>Verification Image:</strong>
             </p>
             <Image
-              src={user.verificationImage}
+              src={getUniversityAssetUrl(user.verificationImage)}
               alt="Verification"
               className="w-20 h-20 rounded-md object-cover"
             />
@@ -95,7 +96,7 @@ export default function UserDetailsModal({
                   <strong>Left :</strong>
                 </p>
                 <Image
-                  src={user.leftThumbPrint}
+                  src={getUniversityAssetUrl(user.leftThumbPrint)}
                   alt="Left Thumb Print"
                   className="w-20 h-20 rounded-md object-cover"
                 />
@@ -105,7 +106,7 @@ export default function UserDetailsModal({
                   <strong>Right :</strong>
                 </p>
                 <Image
-                  src={user.rightThumbPrint}
+                  src={getUniversityAssetUrl(user.rightThumbPrint)}
                   alt="Right Thumb Print"
                   className="w-20 h-20 rounded-md object-cover"
                 />

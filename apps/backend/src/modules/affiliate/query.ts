@@ -1,5 +1,5 @@
 import { AppRouteImplementationOrOptions } from '@ts-rest/express/src/lib/types';
-import { affiliateContract } from '../../contract/affiliate/contract';
+import { affiliateContract } from '@srk/shared/contracts';
 import { affiliateRequestModel } from '../../model/affiliateRequestModel';
 import { UserModel } from '../../model/userModel';
 import { affiliateBiometricModel } from '../../model/affiliateVerificationModel';
@@ -15,18 +15,36 @@ const getAllAffiliateRequestsByStatus: AppRouteImplementationOrOptions<
     const page = query?.page ? parseInt(query.page, 10) : 1;
     const limit = query?.limit ? parseInt(query.limit, 10) : 10;
 
-    const queryReq: Record<string, any> = {};
+    const queryReq: Record<string, any> = {
+      status: {
+        $in: status,
+      },
+    };
 
-    const totalRequest = await affiliateRequestModel.countDocuments(queryReq);
+    // Add search functionality - apply BEFORE pagination
+    if (query?.search) {
+      const searchRegex = new RegExp(query.search, 'i');
+      
+      // Find matching users first
+      const matchingUsers = await UserModel.find({
+        $or: [
+          { email: searchRegex },
+          { firstName: searchRegex },
+          { lastName: searchRegex },
+        ],
+      }).select('_id');
+
+      const matchingUserIds = matchingUsers.map((u) => u._id);
+      
+      // Add user filter to query
+      queryReq.userId = { $in: matchingUserIds };
+    }
 
     const skip = (page - 1) * limit;
 
+    // Query with ALL filters, then paginate
     const affiliateRequests = await affiliateRequestModel
-      .find({
-        status: {
-          $in: status,
-        },
-      })
+      .find(queryReq)
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
@@ -41,6 +59,9 @@ const getAllAffiliateRequestsByStatus: AppRouteImplementationOrOptions<
           phoneNumber: string;
         };
       }>('userId');
+
+    // Count total with the same filter (no need to filter again after population)
+    const totalRequest = await affiliateRequestModel.countDocuments(queryReq);
 
     const formattedRequest = await Promise.all(
       affiliateRequests.map(async (request) => {

@@ -19,7 +19,8 @@ import {
 } from "../../lib/apiClient";
 import { AxiosError } from "axios";
 import useAlert from "../../hooks/useAlert";
-import useUploadFile from "../../hooks/useFileUpload";
+import { useSRKFileUpload } from '@srk/shared/hooks';
+import { getUniversityAssetUrl } from "../../lib/cdn";
 
 type PayoutDetailsModalProps = {
   isOpen: boolean;
@@ -37,7 +38,7 @@ export function PayoutDetailsModal({
   const [proofFile, setProofFile] = useState<File | null>(null);
   const [rejectionReason, setRejectionReason] = useState("");
   const [isRejecting, setIsRejecting] = useState(false);
-  const { uploadFile } = useUploadFile();
+  const { uploadFile } = useSRKFileUpload('university');
   const [transactionNumber, setTransactionNumber] = useState("");
   const { show } = useAlert();
 
@@ -97,8 +98,8 @@ export function PayoutDetailsModal({
       alert("Please upload payment proof");
       return;
     }
-    const { url } = await uploadFile(proofFile, "image");
-    await approveMutation(url);
+    const { key } = await uploadFile(proofFile, "image");
+    await approveMutation(key);
   };
 
   const handleRejectPayout = async () => {
@@ -140,7 +141,7 @@ export function PayoutDetailsModal({
           <div>
             {payout.status === "approved" ? (
               <Button
-                onPress={() => window.open(payout.paymentProofUrl)}
+                onPress={() => window.open(getUniversityAssetUrl(payout.paymentProofUrl))}
                 color="primary"
               >
                 View Payment Proof
@@ -176,11 +177,11 @@ export function PayoutDetailsModal({
             <div className="cursor-pointer">
               <h1 className="font-medium text-medium">QR Code</h1>
               <Image
-                onClick={() => window.open(payout.qrUrl, "_blank")}
+                onClick={() => window.open(getUniversityAssetUrl(payout.qrUrl), "_blank")}
                 width={100}
                 height={100}
                 className="object-cover"
-                src={payout.qrUrl}
+                src={getUniversityAssetUrl(payout.qrUrl)}
               />
             </div>
           ) : (

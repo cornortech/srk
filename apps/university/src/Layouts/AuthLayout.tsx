@@ -1,4 +1,4 @@
-import { Outlet, useNavigate } from "react-router-dom";
+import { Outlet, ScrollRestoration, useNavigate } from "react-router-dom";
 import { getUserDetailsApi } from "../lib/apiClient";
 import { useQuery } from "@tanstack/react-query";
 import AuthLocalStorage from "../lib/localstorage/auth";
@@ -47,6 +47,7 @@ const AuthLayout = () => {
   return (
     <>
       <Outlet />
+      <ScrollRestoration />
     </>
   );
 };

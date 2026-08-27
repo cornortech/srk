@@ -1,0 +1,79 @@
+# SRK Task Platform - robots.txt
+# AdSense & SEO Optimization
+
+# Allow all bots
+User-agent: *
+Allow: /
+
+# Allow specific crawlers for AdSense
+User-agent: Googlebot
+Allow: /
+
+User-agent: Googlebot-Image
+Allow: /
+
+User-agent: AdsBot-Google
+Allow: /
+
+User-agent: AdsBot-Google-Mobile
+Allow: /
+
+# Disallow sensitive pages
+Disallow: /admin/
+Disallow: /dashboard/
+Disallow: /user/profile/
+Disallow: /payment/
+Disallow: /settings/
+Disallow: /kyc/
+Disallow: /verification/
+Disallow: /api/
+Disallow: /.next/
+Disallow: /__*
+Disallow: /*?*sort=
+Disallow: /*?*filter=
+Disallow: /*?*page=*&
+Disallow: /search?
+
+# Allow public pages (high priority for AdSense)
+Allow: /
+Allow: /about/
+Allow: /blog/
+Allow: /blog-post/
+Allow: /contact/
+Allow: /earnings-disclaimer/
+Allow: /faq/
+Allow: /features/
+Allow: /getting-started/
+Allow: /help/
+Allow: /how-it-works/
+Allow: /privacy-policy/
+Allow: /terms-and-conditions/
+Allow: /pages/
+
+# Crawl delay (optional - 1 second)
+Crawl-delay: 1
+Request-rate: 1/1s
+
+# Sitemap location
+Sitemap: https://srktask.com/sitemap.xml
+
+# Block bad bots
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: SemrushBot
+Disallow: /
+
+User-agent: DotBot
+Disallow: /
+
+User-agent: MBCrawler
+Disallow: /
+
+# Allow monitoring bots
+User-agent: Uptimerobot
+Allow: /
+

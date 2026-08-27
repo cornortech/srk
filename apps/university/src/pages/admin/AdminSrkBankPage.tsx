@@ -14,6 +14,7 @@ import {
 import { Mail, Banknote } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { TBankStatement } from "../../lib/types";
+import { getUniversityAssetUrl } from "../../lib/cdn";
 import {
   getAdminSrkBankDetailsApi,
   getAdminSrkBankStatementApi,
@@ -121,7 +122,7 @@ const AdminSrkBankPage: React.FC = () => {
                   </TableCell>
                   <TableCell>
                     <div className="flex gap-x-2 items-center">
-                      <Avatar src={statement?.profilePicture} />
+                      <Avatar src={getUniversityAssetUrl(statement?.profilePicture)} />
                       {statement?.username}
                     </div>
                   </TableCell>

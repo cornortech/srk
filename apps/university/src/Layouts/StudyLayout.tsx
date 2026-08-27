@@ -1,4 +1,4 @@
-import { Outlet, useNavigate } from "react-router-dom";
+import { Outlet, ScrollRestoration, useNavigate } from "react-router-dom";
 import { Sidebar } from "../components/SideBar";
 import { Footer } from "../components/Footer";
 import { useEffect } from "react";
@@ -78,6 +78,7 @@ const StudyDashboardLayout = () => {
         <Outlet />
       </div>
       <Footer />
+      <ScrollRestoration />
     </>
   );
 };

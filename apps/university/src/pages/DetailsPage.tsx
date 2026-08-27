@@ -2,7 +2,8 @@ import { Avatar, Accordion, AccordionItem, Image } from "@nextui-org/react";
 import { Clock, Users, Award, CheckCircle } from "lucide-react";
 import { Courses } from "../Data/CourseData";
 import { useNavigate, useParams } from "react-router-dom";
-import { AnimationButton } from "../components/ReusableComponents";
+import { AnimationButton } from "../components/AnimationButton";
+import { getUniversityAssetUrl } from "../lib/cdn";
 
 export function CourseDetails() {
   const { courseId } = useParams();
@@ -18,7 +19,7 @@ export function CourseDetails() {
       <div className="max-w-custom mx-auto px-6 flex items-center flex-col gap-8">
         <div className="flex md:flex-row-reverse flex-col py-8  gap-10">
           <div className="">
-            <Image src={course.img} alt="img" width={800} />
+            <Image src={getUniversityAssetUrl(course.img)} alt="img" width={800} />
           </div>
           <div className=" text-textPrimary mb-8 flex flex-col justify-center ">
             <div className="w-[80%]">
@@ -82,7 +83,7 @@ export function CourseDetails() {
           <div>
             <div className="flex items-center mb-4">
               <Avatar
-                src={course?.instructor.avatar}
+                src={getUniversityAssetUrl(course?.instructor.avatar)}
                 className="w-16 h-16 mr-4"
               />
               <div>

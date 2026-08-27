@@ -23,7 +23,7 @@ import { PayoutEarning } from "../../components/admin/modal/PayoutEarning";
 import useAlert from "../../hooks/useAlert";
 
 const SrkUniversityBank: React.FC = () => {
-  const [openBankPayoutModal, setOpenBankPayoutModal] = useState(false);
+  const [openBankExtractModal, setOpenBankExtractModal] = useState(false);
   const { show } = useAlert();
 
   const { data: earningDetails } = useQuery<TAdminEarnings | null>({
@@ -40,27 +40,27 @@ const SrkUniversityBank: React.FC = () => {
     },
   });
 
-  const { mutate: handlePayoutMutation } = useMutation({
+  const { mutate: handleExtractMutation } = useMutation({
     mutationFn: async (amount: number) => {
       console.log(amount);
       const res = await createSrkUniversityBankPayoutApi(amount);
       return res;
     },
     onSuccess: () => {
-      show("Payout request successful", "success");
-      setOpenBankPayoutModal(false);
+      show("Extract request successful", "success");
+      setOpenBankExtractModal(false);
     },
     onError: () => {
-      show("Payout request failed", "error");
+      show("Extract request failed", "error");
     },
   });
 
-  const handleCofirmPayout = (payoutAmount: number) => {
-    if (payoutAmount <= 0) {
-      show("Payout amount must be greater than 0", "error");
+  const handleCofirmExtract = (ExtractAmount: number) => {
+    if (ExtractAmount <= 0) {
+      show("Extract amount must be greater than 0", "error");
       return;
     }
-    handlePayoutMutation(payoutAmount);
+    handleExtractMutation(ExtractAmount);
   };
 
   if (!bankStatementData) return <>loading..</>;
@@ -86,7 +86,7 @@ const SrkUniversityBank: React.FC = () => {
             <Banknote size={20} className="mr-2" />
             <h1>
               <strong className="text-yellow-500">
-                Pending Payout Amount: Rs.
+                Pending Extract Amount: Rs.
                 {earningDetails?.srkUniversityPendingAmount?.toFixed(2)}
               </strong>
             </h1>
@@ -110,11 +110,11 @@ const SrkUniversityBank: React.FC = () => {
             <strong>Relation with Account:</strong> self
           </div>
           <Spacer y={1} />
-          {/* <Button onPress={handlePayout} color="primary">
-            Request Payout
+          {/* <Button onPress={handleExtract} color="primary">
+            Request Extract
           </Button> */}
-          <Button onPress={() => setOpenBankPayoutModal(true)}>
-            Ask for payout
+          <Button onPress={() => setOpenBankExtractModal(true)}>
+            Ask for Extract
           </Button>
         </CardBody>
       </Card>
@@ -133,7 +133,7 @@ const SrkUniversityBank: React.FC = () => {
             <TableHeader className="">
               <TableColumn>Date</TableColumn>
               <TableColumn>Type</TableColumn>
-              <TableColumn>Transaction Amount</TableColumn>
+              <TableColumn>Activity Amount</TableColumn>
               <TableColumn>Description</TableColumn>
             </TableHeader>
             <TableBody className="">
@@ -144,13 +144,12 @@ const SrkUniversityBank: React.FC = () => {
                   </TableCell>
                   <TableCell>{statement.type}</TableCell>
                   <TableCell
-                    className={`${
-                      statement.type === "payout_request"
-                        ? "text-yellow-500"
-                        : statement.type === "payout"
+                    className={`${statement.type === "Extract_request"
+                      ? "text-yellow-500"
+                      : statement.type === "Extract"
                         ? "text-red-500"
                         : "text-green-500"
-                    }`}
+                      }`}
                   >
                     Rs.{statement.amount.toFixed(2)}
                   </TableCell>
@@ -163,13 +162,13 @@ const SrkUniversityBank: React.FC = () => {
         </CardBody>
       </Card>
       <PayoutEarning
-        isOpen={openBankPayoutModal}
-        onApprove={handleCofirmPayout}
-        onClose={() => setOpenBankPayoutModal(false)}
+        isOpen={openBankExtractModal}
+        onApprove={handleCofirmExtract}
+        onClose={() => setOpenBankExtractModal(false)}
         onReject={() => {
-          setOpenBankPayoutModal(false);
+          setOpenBankExtractModal(false);
         }}
-        title="Srk Bank Payout Request"
+        title="Srk Bank Extract Request"
         totalAmountAvailable={earningDetails?.srkUniversityAmount || 0}
       />
     </div>

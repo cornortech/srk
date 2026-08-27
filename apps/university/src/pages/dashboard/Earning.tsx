@@ -9,6 +9,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getEarningDetailsofUserApi } from "../../lib/apiClient";
 import useAuthStore from "../../store/useAuth";
 import { TEarningDetails } from "../../lib/types";
+import { useCountUp } from "../../hooks/useCountUp";
 
 export default function EarningsDashboard() {
   const { userDetails } = useAuthStore();
@@ -135,13 +136,15 @@ function EarningCard({
   chipText,
   chipColor,
 }: TEarningCard) {
+  const animatedAmount = useCountUp(amount ?? 0);
+
   return (
     <Card>
       <CardBody className="bg-bgSecondary flex flex-row items-center justify-between">
         <div className="flex flex-col">
           <p className="text-small text-default-500">{title}</p>
           <p className="text-2xl text-white font-bold">
-            Rs.{amount?.toFixed(0)}
+            Rs.{animatedAmount.toFixed(0)}
           </p>
           <Chip color={chipColor} variant="flat" size="sm" className="mt-2">
             {chipText}

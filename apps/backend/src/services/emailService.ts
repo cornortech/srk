@@ -1,4 +1,4 @@
-import { env } from "process";
+import { env } from "../config/env";
 
 import nodemailer, { SendMailOptions } from "nodemailer";
 
@@ -26,18 +26,18 @@ class EmailService {
     email,
     attachment,
   }: TSendEmailProps) {
-    let transporter = nodemailer.createTransport({
+    const transporter = nodemailer.createTransport({
       host: "smtp.gmail.com",
       port: 465,
       secure: true,
       auth: {
         pass: env.SMTP_PW,
-        user: process.env.APP_EMAIL,
+        user: env.APP_EMAIL,
       },
     });
     // Create personalized HTML content for each recipient
-    let mailOptions: SendMailOptions = {
-      from: '"SRK University" <' + process.env.APP_EMAIL + ">",
+    const mailOptions: SendMailOptions = {
+      from: '"SRK University" <' + env.APP_EMAIL + ">",
       to: email,
       subject: subject,
       text: subject,
@@ -53,7 +53,7 @@ class EmailService {
     }
 
     try {
-      let info = await transporter.sendMail(mailOptions);
+      const info = await transporter.sendMail(mailOptions);
       console.log(`Email sent : ${info.messageId}`);
     } catch (error) {
       console.log(`Error sending email :`, error);

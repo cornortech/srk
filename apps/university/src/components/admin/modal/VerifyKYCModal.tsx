@@ -11,6 +11,7 @@ import {
   Textarea,
 } from "@nextui-org/react";
 import { useEffect, useState } from "react";
+import { getUniversityAssetUrl } from "../../../lib/cdn";
 import { Controller, useForm } from "react-hook-form";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { updateUserDetailsApi } from "../../../lib/apiClient";
@@ -29,6 +30,9 @@ interface VerifyKYCModalProps {
   documentName: string;
   frontImage: string;
   backImage: string;
+  leftThumbFingerprint?: string;
+  rightThumbFingerprint?: string;
+  signature?: string;
   onApprove: () => void;
   onReject: (reason: string) => void;
   isApproving: boolean;
@@ -55,6 +59,9 @@ export function VerifyKYCModal({
   documentName,
   frontImage,
   backImage,
+  leftThumbFingerprint,
+  rightThumbFingerprint,
+  signature,
   onApprove,
   onReject,
   isApproving,
@@ -182,10 +189,10 @@ export function VerifyKYCModal({
         <ModalBody className="space-y-4">
           <div className="flex flex-col items-start gap-y-2">
             <h3 className="font-semibold">Verification Image</h3>
-            {verificationImage ? (
-              <a href={verificationImage} target="_blank">
+              {verificationImage ? (
+              <a href={getUniversityAssetUrl(verificationImage)} target="_blank" rel="noreferrer">
                 <img
-                  src={verificationImage}
+                  src={getUniversityAssetUrl(verificationImage)}
                   alt="Verification"
                   className="w-20 h-20 rounded-md object-cover"
                 />
@@ -211,9 +218,9 @@ export function VerifyKYCModal({
               <div className="flex flex-col items-center gap-y-2">
                 <h3 className="font-semibold">Front Image</h3>
                 {frontImage ? (
-                  <a href={frontImage} target="_blank">
+                  <a href={getUniversityAssetUrl(frontImage)} target="_blank" rel="noreferrer">
                     <img
-                      src={frontImage}
+                      src={getUniversityAssetUrl(frontImage)}
                       alt="Front"
                       className="w-20 h-20 rounded-md object-cover"
                     />
@@ -225,9 +232,9 @@ export function VerifyKYCModal({
               <div className="flex flex-col items-center gap-y-2">
                 <h3 className="font-semibold">Back Image</h3>
                 {backImage ? (
-                  <a href={backImage} target="_blank">
+                  <a href={getUniversityAssetUrl(backImage)} target="_blank" rel="noreferrer">
                     <img
-                      src={backImage}
+                      src={getUniversityAssetUrl(backImage)}
                       alt="Back"
                       className="w-20 h-20 rounded-md object-cover"
                     />
@@ -242,11 +249,61 @@ export function VerifyKYCModal({
                 color="primary"
                 as="a"
                 target="_blank"
-                href={courseEnrollAgreementUrl}
+                href={getUniversityAssetUrl(courseEnrollAgreementUrl)}
               >
                 View Enrollment Agreement
               </Button>
             )}
+          </div>
+          <Divider />
+
+          {/* Fingerprint and Signature Section */}
+          <div className="space-y-3">
+            <h3 className="font-semibold text-lg">Biometric Details</h3>
+            <div className="flex flex-row justify-start gap-x-4">
+              <div className="flex flex-col items-center gap-y-2">
+                <h3 className="font-semibold">Left Thumbprint</h3>
+                {leftThumbFingerprint ? (
+                  <a href={getUniversityAssetUrl(leftThumbFingerprint)} target="_blank" rel="noreferrer">
+                    <img
+                      src={getUniversityAssetUrl(leftThumbFingerprint)}
+                      alt="Left Thumbprint"
+                      className="w-24 h-32 rounded-md object-cover border border-gray-300"
+                    />
+                  </a>
+                ) : (
+                  "-"
+                )}
+              </div>
+              <div className="flex flex-col items-center gap-y-2">
+                <h3 className="font-semibold">Right Thumbprint</h3>
+                {rightThumbFingerprint ? (
+                  <a href={getUniversityAssetUrl(rightThumbFingerprint)} target="_blank" rel="noreferrer">
+                    <img
+                      src={getUniversityAssetUrl(rightThumbFingerprint)}
+                      alt="Right Thumbprint"
+                      className="w-24 h-32 rounded-md object-cover border border-gray-300"
+                    />
+                  </a>
+                ) : (
+                  "-"
+                )}
+              </div>
+            </div>
+            <div className="flex flex-col items-start gap-y-2">
+              <h3 className="font-semibold">Digital Signature</h3>
+              {signature ? (
+                <a href={getUniversityAssetUrl(signature)} target="_blank" rel="noreferrer">
+                  <img
+                    src={getUniversityAssetUrl(signature)}
+                    alt="Digital Signature"
+                    className="h-20 rounded-md object-cover border border-gray-300"
+                  />
+                </a>
+              ) : (
+                "-"
+              )}
+            </div>
           </div>
           <Divider />
 

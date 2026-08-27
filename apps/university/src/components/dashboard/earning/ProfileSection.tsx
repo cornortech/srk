@@ -11,6 +11,7 @@ import { getUserDetailsApi } from "../../../lib/apiClient";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { BalanceWithDrawModal } from "../../affiliate/Payout/WithdrawModal";
+import { getUniversityAssetUrl } from "../../../lib/cdn";
 
 export default function ProfileSection({
   walletBalance,
@@ -38,7 +39,7 @@ export default function ProfileSection({
   return (
     <div className="flex flex-col items-center  text-center">
       <Avatar
-        src={userDetails.profilePicture}
+        src={getUniversityAssetUrl(userDetails.profilePicture)}
         className="w-24 h-24 text-large"
         fallback={<User size={24} />}
       />

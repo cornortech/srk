@@ -1,17 +1,26 @@
 const LogoScroller = () => {
-  // Array of logo URLs or paths (you can replace these with your actual logo paths)
+  // Self-hosted (previously hotlinked from 8 different third-party domains,
+  // each costing a separate DNS/TCP/TLS handshake on top of bandwidth
+  // contention with the hero image during the LCP window), and re-encoded
+  // as WebP at 2x their 40px display height (originals were 60-150KB full
+  // size logos rendered at 40px tall — ~93% smaller combined with no
+  // visible quality loss at display size).
+  // NOTE: "news24-duplicate.png" duplicates News24.png above (same brand,
+  // both were in the original hotlinked list) and "pagodaLogo-unidentified.png"
+  // came from a Google Image Search thumbnail cache with no clear source —
+  // worth reviewing/replacing with a proper asset.
   const logos = [
-    "/news/Annapurna.png",
-    "/news/onlineKhabar.png",
-    "/news/News24.png",
-    "https://connect.poscraft.co.uk/images/1419/Company/7948756c267c47c98831ed141f51775a.png",
-    "https://english.ratopati.com/build/img/logo-rp.png",
-    "https://play-lh.googleusercontent.com/hPKWXwjSL-hmYLaDGXz6UZzAtcsx1YbvRKcdcB182IxLbjV42BKMaa-J5Lknt8DFOPcu",
-    "https://res.cloudinary.com/dpqvbxdpf/image/upload/h_720,c_scale,f_auto/v1643280266/uploads/CoverPic/egpfm32kxt6glzigfmun.png",
-    "https://upload.wikimedia.org/wikipedia/en/c/c6/AP1_TV_LOGO.png",
-    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTSp8A1bfZfwSBPzBydtfxBA9mj41kYk10QkpsZdF2cddt-g24HNLSqxwFNQ587-_5VOGM&usqp=CAU",
-    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRyQb61Qa_X0EUlfVpUgSTGm3P8W2s4ncwVGA&s",
-    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS6IZGRsGD1TzNWmhI_meR5ypo4BmF6CpMr3OKiv7aYvsQyEc6ShmOvXHUoubof0atqNcY&usqp=CAU",
+    "/news/Annapurna.webp",
+    "/news/onlineKhabar.webp",
+    "/news/News24.webp",
+    "/news/himalayanTimes.webp",
+    "/news/ratopati.webp",
+    "/news/sagarmathaTv.webp",
+    "/news/atv.webp",
+    "/news/ap1tv.webp",
+    "/news/pagodaLogo-unidentified.webp",
+    "/news/kathmanduPost.webp",
+    "/news/news24-duplicate.webp",
   ];
 
   return (
@@ -30,12 +39,17 @@ const LogoScroller = () => {
           <img
             key={index}
             src={logo}
-            alt={`Logo ${index}`}
+            alt={`Media partner ${(index % logos.length) + 1}`}
+            width={120}
+            height={40}
+            loading="lazy"
+            decoding="async"
             style={{
-              height: "40px", // Adjust height as needed
-              margin: "0 20px", // Space between logos
+              height: "40px",
+              width: "auto",
+              margin: "0 20px",
               display: "inline-block",
-              filter: "grayscale(100%) opacity(0.7)", // Match the faded effect in your image
+              filter: "grayscale(100%) opacity(0.7)",
             }}
           />
         ))}

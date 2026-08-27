@@ -50,6 +50,7 @@ export type TRegisterPayload = {
   paymentType: "qr" | "online";
   paymentMethod: "esewa" | "khalti" | "bankTransfer";
   purpose: "affiliate" | "study";
+  qrCodeId?: string;
 };
 
 export type TUserPayloadLS = {
@@ -118,11 +119,20 @@ export type TUpsertBankDetails = {
 };
 
 export type TUpsertKYCDetails = {
-  frontImage: string;
-  backImage: string;
+  frontImage?: string;
+  backImage?: string;
   documentType: string;
   documentNumber: string;
-  verificationImage: string;
+  verificationImage?: string;
+  leftThumbFingerprint?: string;
+  rightThumbFingerprint?: string;
+  signature?: string;
+  frontImageDataURL?: string;
+  backImageDataURL?: string;
+  verificationImageDataURL?: string;
+  leftThumbFingerprintDataURL?: string;
+  rightThumbFingerprintDataURL?: string;
+  signatureDataURL?: string;
 };
 
 export type TEarningDetails = {
@@ -275,6 +285,9 @@ export type TGetAllUsersAdmin = {
     documentType: string;
     documentNumber: string;
     verificationImage: string;
+    leftThumbFingerprint?: string;
+    rightThumbFingerprint?: string;
+    signature?: string;
   } | null;
   paymentDetails: {
     paymentProofUrl: string;

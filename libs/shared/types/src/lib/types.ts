@@ -26,3 +26,9 @@ export interface ErrorResponse {
   message: string;
   statusCode: number;
 }
+
+// QR Code Type Enums
+export enum PaymentQRType {
+  SRK_INDUSTRIES = 'srkIndustries',
+  SRK_ORGANIZATION = 'srkOrganization',
+}

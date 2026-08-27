@@ -9,6 +9,7 @@ import {
   Textarea,
 } from "@nextui-org/react";
 import { useState } from "react";
+import { getUniversityAssetUrl } from "../../../lib/cdn";
 
 interface VerifyBankRequestModalProps {
   userId: string;
@@ -79,7 +80,7 @@ export function VerifyBankRequestModal({
             <h3 className="font-semibold">Profile Picture</h3>
             {profilePicture ? (
               <img
-                src={profilePicture}
+                src={getUniversityAssetUrl(profilePicture)}
                 alt="Profile"
                 className="w-20 h-20 rounded-md object-cover"
               />
@@ -128,16 +129,16 @@ export function VerifyBankRequestModal({
               </div>
             </div>
             <div className=" flex-1 justify-start flex flex-col gap-2">
-              <a href={qrUrl} target="_blank">
+              <a href={getUniversityAssetUrl(qrUrl)} target="_blank">
                 <img
-                  src={qrUrl}
+                  src={getUniversityAssetUrl(qrUrl)}
                   alt="QR Code"
                   className="w-full  h-[300px] object-cover"
                 />
               </a>
               <Button
                 color="primary"
-                onPress={() => window.open(qrUrl, "_blank")}
+                onPress={() => window.open(getUniversityAssetUrl(qrUrl), "_blank")}
               >
                 View QR Code
               </Button>

@@ -1,7 +1,8 @@
-import { Outlet, useNavigate } from "react-router-dom";
+import { Outlet, ScrollRestoration, useNavigate } from "react-router-dom";
 import { ReusableNavbar } from "../components/Navbar";
 import { menuItems } from "../Data/NavbarData";
 import { Footer } from "../components/Footer";
+import { ScrollToTop } from "../components/ScrollToTop";
 import { useQuery } from "@tanstack/react-query";
 import { getUserDetailsApi } from "../lib/apiClient";
 import useAuthStore from "../store/useAuth";
@@ -72,6 +73,8 @@ const LayoutWithNavbar = () => {
         <Outlet />
       </div>
       <Footer />
+      <ScrollToTop />
+      <ScrollRestoration />
     </>
   );
 };

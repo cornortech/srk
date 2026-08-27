@@ -21,6 +21,7 @@ import { data } from 'react-router-dom';
 // Reusable Axios instance
 export const apiClient = axios.create({
   baseURL: import.meta.env.VITE_BACKEND_ROOT_URL, // Backend base URL
+  withCredentials: true, // Important for sending cookies with requests
   headers: {
     'Content-Type': 'application/json',
   },
@@ -118,7 +119,8 @@ export const getAllUsersApi = async () => {
 export const getUsersByStatus = async (
   status: string | TUserStatus[],
   page = 1, // default page
-  limit = 10 // default limit
+  limit = 10, // default limit
+  search?: string // optional search parameter
 ) => {
   const statusArray = Array.isArray(status) ? status : [status]; // Ensure array
 
@@ -127,6 +129,7 @@ export const getUsersByStatus = async (
       status: statusArray, // Axios will handle array properly
       page,
       limit,
+      ...(search && { search }), // Only include search if it's provided
     },
   });
 
@@ -235,7 +238,8 @@ export const requestAffiliateProgramApi = async (userId: string) => {
 export const getAllAffiliateRequestsByStatusApi = async (
   status: string | string[],
   page = 1,
-  limit = 10
+  limit = 10,
+  search?: string
 ) => {
   const statusArray = Array.isArray(status) ? status : [status];
 
@@ -246,6 +250,7 @@ export const getAllAffiliateRequestsByStatusApi = async (
         status: statusArray,
         page,
         limit,
+        ...(search && { search }),
       },
     }
   );
@@ -354,7 +359,8 @@ export const getPayoutOfUserApi = async (userId: string) => {
 export const getBalancePayoutByStatus = async (
   status: string[],
   page = 1,
-  limit = 10
+  limit = 10,
+  globalSearch?: string
 ) => {
   const statusArray = Array.isArray(status) ? status : [status];
 
@@ -365,6 +371,7 @@ export const getBalancePayoutByStatus = async (
         status: statusArray,
         page,
         limit,
+        ...(globalSearch && { globalSearch }),
       },
     }
   );
@@ -480,7 +487,8 @@ export const uploadVideoApi = async (data: TUploadVideoPayload) => {
 export const getBankRequestApi = async (
   status: string[],
   page = 1,
-  limit = 10
+  limit = 10,
+  search?: string
 ) => {
   const statusArray = Array.isArray(status) ? status : [status]; // Ensure array
 
@@ -489,6 +497,7 @@ export const getBankRequestApi = async (
       status: statusArray,
       page,
       limit,
+      ...(search && { search }),
     },
   });
   return response.data;
@@ -519,10 +528,11 @@ export const getAllWebinarsApi = async () => {
 };
 
 export type TCreateWebinarPayload = {
-  meetUrl: string;
-  startTime: Date;
-  endTime: Date;
   title: string;
+  hasFinished: boolean;
+  meetUrl?: string;
+  youtubeUrl?: string;
+  thumbnail?: string;
 };
 
 export const createWebinarApi = async (data: TCreateWebinarPayload) => {
@@ -540,5 +550,63 @@ export const updateWebinarApi = async (
   id: string
 ) => {
   const response = await apiClient.put(`/webinar/${id}`, data);
+  return response.data;
+};
+
+// QR Codes
+
+export type TQRCode = {
+  _id?: string;
+  name: string;
+  qr: string; // base64 or URL
+  isAvailable: boolean;
+  type?: string;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
+export type TCreateQRCodePayload = {
+  name: string;
+  qr: string;
+  type?: string;
+};
+
+export type TUpdateQRCodePayload = {
+  name?: string;
+  qr?: string;
+  isAvailable?: boolean;
+  type?: string;
+};
+
+export const getAllQRCodesApi = async () => {
+  const response = await apiClient.get('/qrcodes');
+  return response.data;
+};
+
+export const getAvailableQRCodesApi = async () => {
+  const response = await apiClient.get('/qrcodes/available');
+  return response.data;
+};
+
+export const getQRCodeByIdApi = async (id: string) => {
+  const response = await apiClient.get(`/qrcodes/${id}`);
+  return response.data;
+};
+
+export const createQRCodeApi = async (data: TCreateQRCodePayload) => {
+  const response = await apiClient.post('/qrcodes', data);
+  return response.data;
+};
+
+export const updateQRCodeApi = async (
+  id: string,
+  data: TUpdateQRCodePayload
+) => {
+  const response = await apiClient.put(`/qrcodes/${id}`, data);
+  return response.data;
+};
+
+export const deleteQRCodeApi = async (id: string) => {
+  const response = await apiClient.delete(`/qrcodes/${id}`);
   return response.data;
 };

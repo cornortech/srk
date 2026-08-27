@@ -9,7 +9,8 @@ import { useMutation } from "@tanstack/react-query";
 import useAuthStore from "../../../store/useAuth";
 import { upsertKycDetailsApi } from "../../../lib/apiClient";
 import { TKyc } from "../../../lib/types/entities";
-import useUploadFile from "../../../hooks/useFileUpload";
+import { FileText, CheckCircle, Clock, AlertCircle } from "lucide-react";
+import { getUniversityAssetUrl } from "../../../../src/lib/cdn";
 
 const documentTypes = [
   { label: "Citizenship", value: "citizenship" },
@@ -21,15 +22,35 @@ const documentTypes = [
 ];
 
 interface KYCFormProps {
-  newVerificationImageFile?: File;
+  verificationImageDataURL?: string;
   kycDetails: TKyc | null;
   handleRefetch: () => void;
+  leftThumbFingerprint?: string;
+  rightThumbFingerprint?: string;
+  signature?: string;
+  onGoBack?: () => void;
+  isFirstTab?: boolean;
+  isLastTab?: boolean;
 }
+
+const fileToDataURL = (file: File): Promise<string> =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result as string);
+    reader.onerror = () => reject(new Error("Failed to read file"));
+    reader.readAsDataURL(file);
+  });
 
 export default function KYCForm({
   handleRefetch,
-  newVerificationImageFile,
+  verificationImageDataURL,
   kycDetails,
+  leftThumbFingerprint = "",
+  rightThumbFingerprint = "",
+  signature = "",
+  onGoBack,
+  isFirstTab = false,
+  isLastTab = false,
 }: KYCFormProps) {
   const { userDetails } = useAuthStore();
   const [documentType, setDocumentType] = useState(
@@ -42,113 +63,94 @@ export default function KYCForm({
   const [backImage, setBackImage] = useState<File | null>(null);
   const frontInputRef = useRef<HTMLInputElement>(null);
   const backInputRef = useRef<HTMLInputElement>(null);
-  const [completedUploads, setCompletedUploads] = useState(0);
-  const [totalUploads, setTotalUploads] = useState(0);
   const [loading, setLoading] = useState(false);
-
-  // Enhanced upload hook with progress tracking
-  const {
-    uploadFile,
-    isUploading,
-  } = useUploadFile();
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
   const { show } = useAlert();
 
   const { mutate } = useMutation({
     mutationFn: async (data: {
-      frontUrl: string;
-      backUrl: string;
-      verificationImage: string;
+      frontImage?: string;
+      backImage?: string;
+      verificationImage?: string;
+      leftThumbFingerprint?: string;
+      rightThumbFingerprint?: string;
+      signature?: string;
     }) => {
       const userId = userDetails?._id;
-      if (!userId) return;
+      if (!userId) throw new Error("User ID not found");
 
       const res = await upsertKycDetailsApi(userId, {
-        backImage: data.backUrl,
-        frontImage: data.frontUrl,
         documentType,
         documentNumber,
-        verificationImage: data.verificationImage,
+        ...data,
       });
       return res;
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       setLoading(false);
       setBackImage(null);
       setFrontImage(null);
-      setCompletedUploads(0);
-      setTotalUploads(0);
-      handleRefetch();
       show("KYC details updated successfully", "success");
+      setIsSubmitted(true);
+      // Refetch user data to update the status
+      await handleRefetch();
     },
-    onError: () => {
+    onError: (error) => {
+      console.error("API Error:", error);
       show("Failed to update KYC details", "error");
       setLoading(false);
-      setCompletedUploads(0);
-      setTotalUploads(0);
       handleRefetch();
     },
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    let frontUrlImage = kycDetails?.frontImage;
-    let backUrlImage = kycDetails?.backImage;
-    let verifiationImage = kycDetails?.verificationImage;
+    
+    // Validate required fields
+    if (!frontImage && !kycDetails?.frontImage) {
+      show("Please upload front image", "error");
+      return;
+    }
+    
+    if (!backImage && !kycDetails?.backImage) {
+      show("Please upload back image", "error");
+      return;
+    }
+    
+    if (!verificationImageDataURL && !kycDetails?.verificationImage) {
+      show("Please upload verification image", "error");
+      return;
+    }
 
     setLoading(true);
 
-    // Count files that need to be uploaded
-    const filesToUpload = [
-      frontImage && { file: frontImage, name: "Front Image" },
-      backImage && { file: backImage, name: "Back Image" },
-      newVerificationImageFile && { file: newVerificationImageFile, name: "Verification Image" }
-    ].filter(Boolean);
-
-    setTotalUploads(filesToUpload.length);
-    setCompletedUploads(0);
-
     try {
-      // Upload files sequentially with proper tracking
-      if (frontImage) {
-        const { url: front } = await uploadFile(frontImage, "image");
-        frontUrlImage = front;
-        setCompletedUploads(prev => prev + 1);
-      }
+      const frontImageDataURL = frontImage ? await fileToDataURL(frontImage) : undefined;
+      const backImageDataURL = backImage ? await fileToDataURL(backImage) : undefined;
 
-      if (backImage) {
-        const { url: back } = await uploadFile(backImage, "image");
-        backUrlImage = back;
-        setCompletedUploads(prev => prev + 1);
-      }
+      const leftThumbFingerprintDataURL = leftThumbFingerprint && leftThumbFingerprint.startsWith("data:")
+        ? leftThumbFingerprint
+        : undefined;
+      const rightThumbFingerprintDataURL = rightThumbFingerprint && rightThumbFingerprint.startsWith("data:")
+        ? rightThumbFingerprint
+        : undefined;
+      const signatureDataURL = signature && signature.startsWith("data:")
+        ? signature
+        : undefined;
 
-      if (newVerificationImageFile) {
-        const { url: vImage } = await uploadFile(newVerificationImageFile, "image");
-        verifiationImage = vImage;
-        setCompletedUploads(prev => prev + 1);
-      }
-
-
-      if (frontUrlImage && backUrlImage && verifiationImage) {
-        mutate({
-          backUrl: backUrlImage,
-          frontUrl: frontUrlImage,
-          verificationImage: verifiationImage,
-        });
-      } else {
-        setLoading(false);
-        setCompletedUploads(0);
-        setTotalUploads(0);
-        show(
-          "Please upload all the images verification image, document front and document back",
-          "error"
-        );
-      }
+      mutate({
+        frontImage: frontImageDataURL ?? kycDetails?.frontImage,
+        backImage: backImageDataURL ?? kycDetails?.backImage,
+        verificationImage: verificationImageDataURL ?? kycDetails?.verificationImage,
+        leftThumbFingerprint: leftThumbFingerprintDataURL ?? kycDetails?.leftThumbFingerprint,
+        rightThumbFingerprint: rightThumbFingerprintDataURL ?? kycDetails?.rightThumbFingerprint,
+        signature: signatureDataURL ?? kycDetails?.signature,
+      });
     } catch (error) {
+      console.error("Error preparing submission:", error);
+      show("Failed to process images", "error");
       setLoading(false);
-      setCompletedUploads(0);
-      setTotalUploads(0);
-      show("Upload failed. Please try again.", "error");
     }
   };
 
@@ -167,21 +169,42 @@ export default function KYCForm({
   };
 
   const disableForm =
+    isSubmitted ||
     userDetails?.status === "KYC_VERIFICATION_PENDING" ||
     userDetails?.status === "PORTAL_ACTIVATED";
 
-  const isFormDisabled = disableForm || isUploading || loading;
+  const isFormDisabled = disableForm || loading;
 
 
   return (
     <Card className="bg-bgSecondary w-full">
       <CardBody className="w-full">
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <h2 className="text-xl font-semibold text-white">
-            Upload your document for account activation
-          </h2>
+        {/* Header */}
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-12 h-12 rounded-lg bg-emerald-500/20 flex items-center justify-center">
+            <FileText size={24} className="text-emerald-400" />
+          </div>
+          <div>
+            <h3 className="text-xl font-bold text-white">KYC Details</h3>
+            <p className="text-sm text-zinc-400">Complete your KYC by uploading identity documents</p>
+          </div>
+        </div>
 
-          {/* Upload Progress Display */}
+        {/* Instructions */}
+        <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-4 space-y-2 mb-6">
+          <h4 className="text-sm font-semibold text-emerald-300">Document Upload Requirements:</h4>
+          <ul className="text-sm text-emerald-200 space-y-1 ml-4">
+            <li className="list-disc">Upload clear, legible photos of both sides of your document</li>
+            <li className="list-disc">Ensure the entire document is visible in the frame</li>
+            <li className="list-disc">Good lighting and no glare on the document</li>
+            <li className="list-disc">Accepted formats: JPG, PNG, PDF</li>
+          </ul>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Document Type & Number Section */}
+          <div className="space-y-4">
+            <h4 className="text-sm font-semibold text-white">Document Information</h4>
     
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Select
@@ -207,131 +230,184 @@ export default function KYCForm({
               disabled={isFormDisabled}
             />
           </div>
+          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Front Side Upload */}
-            <div className="space-y-2">
-              <div
-                className={`aspect-video bg-default-100 border border-dashed border-white rounded-lg overflow-hidden transition-colors ${isFormDisabled
-                  ? 'cursor-not-allowed opacity-50'
-                  : 'cursor-pointer hover:bg-default-200'
+          {/* Document Images Upload Section */}
+          <div className="space-y-4">
+            <h4 className="text-sm font-semibold text-white">Document Images</h4>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Front Side Upload */}
+              <div className="space-y-3">
+                <label className="text-sm font-medium text-white">Front Side</label>
+                <div
+                  className={`aspect-video bg-zinc-900/50 border-2 border-dashed rounded-lg overflow-hidden transition-all ${
+                    isFormDisabled
+                      ? 'cursor-not-allowed opacity-50 border-zinc-700'
+                      : 'cursor-pointer border-zinc-600 hover:border-blue-500 hover:bg-zinc-900/80'
                   }`}
-                onClick={() => !isFormDisabled && frontInputRef.current?.click()}
-              >
-                {frontImage || kycDetails?.frontImage ? (
-                  <Image
-                    src={
-                      frontImage
-                        ? URL.createObjectURL(frontImage)
-                        : kycDetails?.frontImage
-                    }
-                    alt="Document Front Side"
-                    className="w-full h-full object-cover object-center"
-                  />
-                ) : (
-                  <div className="w-full h-full flex flex-col items-center justify-center text-default-500 bg-bgSecondary">
-                    <svg
-                      className="w-12 h-12"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                  onClick={() => !isFormDisabled && frontInputRef.current?.click()}
+                >
+                  {frontImage ||kycDetails?.frontImage ? (
+                    <div className="relative w-full h-full group">
+                      <Image
+                        src={
+                          frontImage
+                            ? URL.createObjectURL(frontImage)
+                            : getUniversityAssetUrl(kycDetails?.frontImage)
+                        }
+                        alt="Document Front Side"
+                        className="w-full h-full object-cover"
                       />
-                    </svg>
-                    <p className="mt-2">Click to upload front side</p>
-                  </div>
-                )}
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                        <div className="flex items-center gap-1 text-emerald-400 opacity-0 group-hover:opacity-100 transition-opacity bg-black/70 px-3 py-1 rounded">
+                          <CheckCircle size={14} />
+                          <span className="text-xs font-medium">Uploaded</span>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="w-full h-full flex flex-col items-center justify-center text-zinc-400 gap-2">
+                      <svg
+                        className="w-10 h-10"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 4v16m8-8H4"
+                        />
+                      </svg>
+                      <p className="text-sm font-medium">Click to upload</p>
+                    </div>
+                  )}
+                </div>
+                <input
+                  ref={frontInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => handleChangeFileInput("front", e)}
+                  name="front"
+                  className="hidden"
+                  disabled={isFormDisabled}
+                />
               </div>
-              <p className="text-center font-medium text-textPrimary">
-                Document Front Side
-              </p>
-              <input
-                ref={frontInputRef}
-                type="file"
-                accept="image/*"
-                onChange={(e) => handleChangeFileInput("front", e)}
-                name="front"
-                className="hidden"
-                disabled={isFormDisabled}
-              />
-            </div>
 
-            {/* Back Side Upload */}
-            <div className="space-y-2">
-              <div
-                className={`aspect-video bg-default-100 border border-dashed border-white rounded-lg overflow-hidden transition-colors ${isFormDisabled
-                  ? 'cursor-not-allowed opacity-50'
-                  : 'cursor-pointer hover:bg-default-200'
+              {/* Back Side Upload */}
+              <div className="space-y-3">
+                <label className="text-sm font-medium text-white">Back Side</label>
+                <div
+                  className={`aspect-video bg-zinc-900/50 border-2 border-dashed rounded-lg overflow-hidden transition-all ${
+                    isFormDisabled
+                      ? 'cursor-not-allowed opacity-50 border-zinc-700'
+                      : 'cursor-pointer border-zinc-600 hover:border-blue-500 hover:bg-zinc-900/80'
                   }`}
-                onClick={() => !isFormDisabled && backInputRef.current?.click()}
-              >
-                {backImage || kycDetails?.backImage ? (
-                  <Image
-                    src={
-                      backImage
-                        ? URL.createObjectURL(backImage)
-                        : kycDetails?.backImage
-                    }
-                    alt="Document Back Side"
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full flex flex-col items-center bg-bgSecondary justify-center text-default-500">
-                    <svg
-                      className="w-12 h-12"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                  onClick={() => !isFormDisabled && backInputRef.current?.click()}
+                >
+                  {backImage || kycDetails?.backImage ? (
+                    <div className="relative w-full h-full group">
+                      <Image
+                        src={
+                          backImage
+                            ? URL.createObjectURL(backImage)
+                            : getUniversityAssetUrl(kycDetails?.backImage)
+                        }
+                        alt="Document Back Side"
+                        className="w-full h-full object-cover"
                       />
-                    </svg>
-                    <p className="mt-2">Click to upload back side</p>
-                  </div>
-                )}
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                        <div className="flex items-center gap-1 text-emerald-400 opacity-0 group-hover:opacity-100 transition-opacity bg-black/70 px-3 py-1 rounded">
+                          <CheckCircle size={14} />
+                          <span className="text-xs font-medium">Uploaded</span>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="w-full h-full flex flex-col items-center justify-center text-zinc-400 gap-2">
+                      <svg
+                        className="w-10 h-10"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 4v16m8-8H4"
+                        />
+                      </svg>
+                      <p className="text-sm font-medium">Click to upload</p>
+                    </div>
+                  )}
+                </div>
+                <input
+                  ref={backInputRef}
+                  type="file"
+                  name="back"
+                  accept="image/*"
+                  onChange={(e) => handleChangeFileInput("back", e)}
+                  disabled={isFormDisabled}
+                  className="hidden"
+                />
               </div>
-              <p className="text-center text-textPrimary font-medium">
-                Document Back Side
-              </p>
-              <input
-                ref={backInputRef}
-                type="file"
-                name="back"
-                accept="image/*"
-                onChange={(e) => handleChangeFileInput("back", e)}
-                disabled={isFormDisabled}
-                className="hidden"
-              />
             </div>
           </div>
 
+          {/* Tips */}
+          <div className="p-3 bg-zinc-900/50 border border-zinc-800 rounded-lg">
+            <h4 className="text-xs uppercase tracking-wider font-bold text-zinc-400 mb-2">
+              Tips for document upload:
+            </h4>
+            <ul className="text-xs text-zinc-500 space-y-1">
+              <li>✓ Use high-quality, well-lit photos</li>
+              <li>✓ Keep documents straight and fully visible</li>
+              <li>✓ Avoid glare and shadows on documents</li>
+              <li>✓ Ensure all text is clearly readable</li>
+            </ul>
+          </div>
+
+          {/* Upload Progress Display */}
+          {loading && (
+            <div className="space-y-2 p-4 bg-zinc-900/50 border border-zinc-700 rounded-lg">
+              <div className="flex items-center gap-2">
+                <div className="animate-spin">
+                  <Clock size={16} className="text-blue-400" />
+                </div>
+                <span className="text-sm text-blue-300">Processing your KYC details...</span>
+              </div>
+            </div>
+          )}
+
           {!disableForm && (
-            <div className="flex justify-start">
-              <Button
-                type="submit"
-                color="primary"
-                className="w-fit"
-                size="lg"
-                disabled={isUploading || loading}
-              >
-                {isUploading
-                  ? `Uploading... ${completedUploads}/${totalUploads}`
-                  : loading
-                    ? "Processing..."
-                    : "Submit Document"
-                }
-              </Button>
+            <div className="space-y-4">
+              <div className="flex justify-start">
+                <Button
+                  type="submit"
+                  color="primary"
+                  className="w-fit"
+                  size="lg"
+                  disabled={loading}
+                >
+                  {loading ? "Processing..." : "Submit Document"}
+                </Button>
+              </div>
+
+              {/* Navigation Buttons */}
+              <div className="flex gap-3 pt-4 border-t border-zinc-700">
+                <Button
+                  onClick={onGoBack}
+                  disabled={isFirstTab}
+                  color="primary"
+                  variant="bordered"
+                  size="lg"
+                >
+                  ← Go Back
+                </Button>
+              </div>
             </div>
           )}
         </form>

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Outlet, useNavigate } from "react-router-dom";
+import { Outlet, ScrollRestoration, useNavigate } from "react-router-dom";
 import { AdminNavbar } from "../components/AdminNavbar";
 import { Sidebar } from "../components/SideBar";
 import AuthLocalStorage from "../lib/localstorage/auth";
@@ -32,6 +32,7 @@ const AdminLayout = () => {
           <Outlet />
         </main>
       </div>
+      <ScrollRestoration />
     </>
   );
 };

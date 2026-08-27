@@ -1,0 +1,11 @@
+
+
+
+[ ] - dont allow users to update the bank details once its approved (SRK TASK USER DASHBOARD)
+[ ] - dont allow users to make payout request if the bank details is not verfied ( SRK TASK USER DASHBOARD)
+[ ] - test kyc upload and srk task submission upload 
+
+
+
+proper update on above authorities of each day
+work on one product at a time

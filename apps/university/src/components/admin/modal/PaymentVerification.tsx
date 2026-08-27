@@ -10,6 +10,7 @@ import {
 } from "@nextui-org/react";
 import { useState } from "react";
 import { TGetAllUsersAdmin } from "../../../lib/types";
+import { getUniversityAssetUrl } from "../../../lib/cdn";
 
 interface IPaymentVerification {
   isOpen: boolean;
@@ -48,9 +49,9 @@ export function PaymentVerification({
           <div className="flex flex-col items-start gap-y-2">
             <h3 className="font-semibold">Verification Image</h3>
             {user.paymentDetails?.paymentProofUrl ? (
-              <a href={user.paymentDetails?.paymentProofUrl} target="_blank">
+              <a href={getUniversityAssetUrl(user.paymentDetails?.paymentProofUrl)} target="_blank">
                 <img
-                  src={user.paymentDetails?.paymentProofUrl}
+                  src={getUniversityAssetUrl(user.paymentDetails?.paymentProofUrl)}
                   alt="Verification"
                   className="w-20 h-20 rounded-md object-cover"
                 />

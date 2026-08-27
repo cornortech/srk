@@ -1,6 +1,8 @@
 import React from "react";
 import { PrimaryButton } from "../ReusableComponents";
 import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
+import { ArrowRight } from "lucide-react";
 
 // Define interfaces
 interface Feature {
@@ -32,7 +34,9 @@ type FeatureType = IAccessFeature | IWhyChooseUsSection;
 const TradingSchool: React.FC<{
   feature: FeatureType;
   index: number;
-}> = ({ feature, index }) => {
+  knowMoreRoute?: string;
+  knowMoreCaption?: string;
+}> = ({ feature, index, knowMoreRoute, knowMoreCaption }) => {
   // Safely extract properties
   const title = "title" in feature ? feature.title : "";
   const titleHighlight =
@@ -92,6 +96,19 @@ const TradingSchool: React.FC<{
             radius="sm"
             className="bg-yellow-600 hover:bg-yellow-700 text-white md:w-48 w-full py-6 text-lg animate-fade-in"
           />
+          {knowMoreRoute && (
+            <div className="flex flex-col items-start gap-1 mt-2">
+              <Link
+                to={knowMoreRoute}
+                className="group inline-flex items-center gap-2 px-5 py-2.5 border border-primary/40 text-primary/75 text-sm font-medium rounded transition-all duration-300 hover:border-primary hover:bg-primary hover:text-bgPrimary hover:scale-[1.04] hover:shadow-[0_0_20px_rgba(182,137,56,0.35)]"
+              >
+                Know More <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1" />
+              </Link>
+              {knowMoreCaption && (
+                <span className="text-[10px] text-white/25 pl-1">{knowMoreCaption}</span>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Right Section: Image */}
@@ -102,6 +119,10 @@ const TradingSchool: React.FC<{
             <img
               src={"/logo/transparentLogo.png"}
               alt={imageAlt}
+              width={320}
+              height={320}
+              loading="lazy"
+              decoding="async"
               className="w-full h-full object-contain relative z-10"
             />
           </div>

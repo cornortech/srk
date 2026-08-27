@@ -1,6 +1,7 @@
-import { initServer } from "@ts-rest/express";
-import { authContract } from "../../contract/auth/contract";
-import { authMutationHandler } from "./mutation";
+import { initServer } from '@ts-rest/express';
+import { authContract } from '@srk/shared/contracts';
+import { authMutationHandler } from './mutation';
+
 const s = initServer();
 
 export const authRouter = s.router(authContract, {
@@ -11,4 +12,11 @@ export const authRouter = s.router(authContract, {
   rejectPaymentDetails: authMutationHandler.rejectPaymentDetails,
   approvePaymentDetails: authMutationHandler.approvePaymentDetails,
   editPaymentDetails: authMutationHandler.editPaymentDetails,
+  loginSrkGrow: authMutationHandler.loginSrkGrow,
+  logout: authMutationHandler.logout,
+  refreshToken: authMutationHandler.refreshToken,
+  forgotPassword: authMutationHandler.forgotPassword,
+  resetPassword: authMutationHandler.resetPassword,
+  forgotPasswordSrkGrow: authMutationHandler.forgotPasswordSrkGrow,
+  resetPasswordSrkGrow: authMutationHandler.resetPasswordSrkGrow,
 });

@@ -2,6 +2,7 @@ import { useRef } from "react";
 import { TPaymentMethod } from "../../lib/types";
 import { Button, Input, Select, SelectItem } from "@nextui-org/react";
 import { TPaymentDetails } from "../SignUpComponent";
+import { getUniversityAssetUrl } from "../../lib/cdn";
 
 export const QrPaymentMethodContent = ({
   setPaymentDetails,
@@ -55,39 +56,14 @@ export const QrPaymentMethodContent = ({
   };
 
   return (
-    <div className="w-full  space-y-6">
-      <div>
-        <h1 className="text-3xl font-medium">Scan the QR code</h1>
-      </div>
-      <div>
-        <input
-          type="file"
-          onChange={handleFileChange}
-          className="hidden"
-          ref={fileInputRef}
-        />
-        <img src="/qr/qrPayment.jpg" alt="qr-code" />
-        <div className="my-2 text-center flex flex-col gap-y-3">
-          {/* Please send the exactly Rs.{paymentAmount}. If you are not able to
-          scan the QR code, please contact our customer care.
-           */}
-          <b className="text-2xl ">
-            {" "}
-            Please pay Rs.{paymentAmount} exactly on the QR code.
-          </b>
-          <b className="text-red-500">
-            Note: Don't pay amount which is lower or higher then package price.
-            please pay exact amount otherwise your id will not active and we
-            will not accept any refund.
-          </b>
-          <b className="text-red-500">
-            नोटः प्याकेज मूल्य भन्दा कम वा बढी रकम नतिर्नुहोस्। कृपया सही रकम
-            तिर्नुहोस् अन्यथा तपाईंको आईडी सक्रिय हुनेछैन र हामी कुनै पनि फिर्ती
-            स्वीकार गर्दैनौं।
-          </b>
-        </div>
-      </div>
-      <div className="flex flex-col gap-y-2 ">
+    <div className="w-full space-y-6">
+      <input
+        type="file"
+        onChange={handleFileChange}
+        className="hidden"
+        ref={fileInputRef}
+      />
+      <div className="flex flex-col gap-y-2">
         <Input
           placeholder="Enter transaction ID"
           label="Transaction ID"
@@ -121,7 +97,7 @@ export const QrPaymentMethodContent = ({
             src={
               paymentProofUrl
                 ? URL.createObjectURL(paymentProofUrl)
-                : prevImageUrl || ""
+                : getUniversityAssetUrl(prevImageUrl || "")
             }
             alt="payment-proof"
             className="w-[200px] h-[200px] object-cover"

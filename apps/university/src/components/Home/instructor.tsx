@@ -9,31 +9,31 @@ const instructors = [
     id: 1,
     name: "Dr. Emily Carter",
     faculty: "Computer Science",
-    img: "/instructor.jpg",
+    img: "/instructor.webp",
   },
   {
     id: 2,
     name: "Prof. James Wilson",
     faculty: "Business Administration",
-    img: "/instructor.jpg",
+    img: "/instructor.webp",
   },
   {
     id: 3,
     name: "Dr. Olivia Brown",
     faculty: "Data Science",
-    img: "/instructor.jpg",
+    img: "/instructor.webp",
   },
   {
     id: 4,
     name: "Mr. David Johnson",
     faculty: "Graphic Design",
-    img: "/instructor.jpg",
+    img: "/instructor.webp",
   },
   {
     id: 5,
     name: "Ms. Sophia Taylor",
     faculty: "Marketing",
-    img: "/instructor.jpg",
+    img: "/instructor.webp",
   },
 ];
 

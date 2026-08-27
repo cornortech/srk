@@ -172,7 +172,7 @@ cd my-workspace
 npm install
 ```
 
-This will install all dependencies for both frontend and backend applications, as well as shared libraries.
+This will install all required dependencies for both frontend and backend applications, as well as shared libraries.
 
 ### 3. Set Up Environment Variables
 

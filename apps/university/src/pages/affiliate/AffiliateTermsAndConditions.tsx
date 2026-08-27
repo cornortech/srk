@@ -72,7 +72,7 @@ const AffiliateTerms = () => {
           </p>
           <p>
             Affiliates must provide truthful and clear information, including
-            income disclosures, to avoid misleading potential customers.
+            experience disclosures, to avoid misleading potential customers.
           </p>
 
           <h2 className="text-xl font-semibold mt-4">Intellectual Property</h2>

@@ -10,24 +10,24 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { useMediaQuery } from "@react-hook/media-query";
 import { useNavigate } from "react-router-dom";
-import { tourApi, TTourTargetUser } from "../../lib/api/tour/tour.api";
+import { tourApi, TActiveTourAchievement } from "../../lib/api/tour/tour.api";
 
 const columns = [
     { key: "firstName", label: "First Name" },
     { key: "lastName", label: "Last Name" },
     { key: "email", label: "Email" },
     { key: "phoneNumber", label: "Phone Number" },
-    { key: "tourBalance", label: "Tour Balance (Nrs.)" },
+    { key: "collectedAmount", label: "Collected Amount (Nrs.)" },
 ];
 
 export default function AdminTourTargetUserPage() {
     const isMobile = useMediaQuery("(max-width: 768px)");
     const navigate = useNavigate();
 
-    const { data: users } = useQuery<TTourTargetUser[]>({
-        queryKey: ["getTourTargetUsers"],
+    const { data: users } = useQuery<TActiveTourAchievement[]>({
+        queryKey: ["getActiveTourAchievements"],
         queryFn: async () => {
-            const data = await tourApi.getTourTargetUsers();
+            const data = await tourApi.getActiveTourAchievements();
             return data;
         },
     });
@@ -62,18 +62,12 @@ export default function AdminTourTargetUserPage() {
                                                 ? item.email
                                                 : column.key === "phoneNumber"
                                                     ? item.phoneNumber
-                                                    : column.key === "tourBalance"
-                                                        ? `Nrs. ${item.tourEventWallet.toFixed(2)}`
+                                                    : column.key === "collectedAmount"
+                                                        ? `Nrs. ${item.collectedAmount.toFixed(2)}`
                                                         : "N/A"}
                                 </span>
                             </div>
                         ))}
-                        <Button
-                            size="sm"
-                            onClick={() => navigate(`/admin/tour-target-user/${item.userId}`)}
-                        >
-                            View Details
-                        </Button>
                     </div>
                 ))}
             </div>
@@ -83,16 +77,15 @@ export default function AdminTourTargetUserPage() {
     // ------------------- 💻 Desktop view -------------------
     return (
         <div className="p-4 w-full">
-            <h1 className="text-2xl font-bold mb-4 text-white">Tour Target Users</h1>
-            <Table aria-label="Tour Target Users Table">
+            <h1 className="text-2xl font-bold mb-4 text-white">Active Tour Target Achievements</h1>
+            <Table aria-label="Active Tour Target Achievements Table">
                 <TableHeader>
                     <TableColumn>SN</TableColumn>
                     <TableColumn>First Name</TableColumn>
                     <TableColumn>Last Name</TableColumn>
                     <TableColumn>Email</TableColumn>
                     <TableColumn>Phone Number</TableColumn>
-                    <TableColumn>Tour Balance (Nrs.)</TableColumn>
-                    <TableColumn>Action</TableColumn>
+                    <TableColumn>Collected Amount (Nrs.)</TableColumn>
                 </TableHeader>
                 <TableBody>
                     {users.map((user, index) => (
@@ -102,17 +95,7 @@ export default function AdminTourTargetUserPage() {
                             <TableCell>{user.lastName ?? "N/A"}</TableCell>
                             <TableCell>{user.email ?? "N/A"}</TableCell>
                             <TableCell>{user.phoneNumber ?? "N/A"}</TableCell>
-                            <TableCell>{user.tourEventWallet.toFixed(2) ?? "0.00"}</TableCell>
-                            <TableCell>
-                                <button
-                                    className="text-blue-500 hover:underline"
-                                    onClick={() =>
-                                        navigate(`/admin/tour-target-user/${user.userId}`)
-                                    }
-                                >
-                                    View Details
-                                </button>
-                            </TableCell>
+                            <TableCell>Nrs. {user.collectedAmount.toFixed(2) ?? "0.00"}</TableCell>
                         </TableRow>
                     ))}
                 </TableBody>

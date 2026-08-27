@@ -7,33 +7,32 @@ interface IAccessFeature {
 
 export const accessFeatures: IAccessFeature[] = [
   {
-    title: "STRUCTURED LEARNING PATHWAYS",
+    title: "WELL-STRUCTURED LEARNING PROGRAMS",
     description:
-      "Unlock access to over 100 meticulously curated video courses and comprehensive tutorials covering essential modern business principles and effective income-generating strategies.",
+      "Access a growing library of courses, tutorials, and learning resources designed to help you build practical skills and stay updated with modern industry practices.",
     image: "/videos/LightBlackAnimation1.mp4",
     points: [
-      "User-friendly program for financial advancement",
-      "Cultivate invaluable skills for enhanced earning potential",
-      "Cutting-edge learning platform",
+      "Easy-to-follow learning modules",
+      "Practical skills for career and business growth",
+      "Flexible online learning anytime, anywhere",
     ],
   },
   {
-    title: "LIVE DAILY SESSIONS WITH EXPERT MENTORS",
+    title: "INTERACTIVE LIVE LEARNING SESSIONS",
     description:
-      "Our instructors, who have successfully implemented the methods they teach in real-world business scenarios, are committed and insightful professionals. They will provide structured lessons, daily updates, and continual mentorship throughout your learning journey. Whether you're earning your first income or scaling your business, TheSRKUniversity.com offers thorough support.",
+      "Join live sessions with experienced instructors, ask questions, receive practical guidance, and learn through real discussions that make every lesson more valuable.",
     image: "/videos/LightBlackAnimation2.mp4",
     points: [],
   },
   {
-    title: "A COMMUNITY OF LIKE-MINDED ACHIEVERS",
-    description:
-      " Engage in a supportive online environment where individuals are driven to achieve financial prosperity.",
+    title: "A COMMUNITY THAT GROWS TOGETHER",
+    description: "",
     image: "/videos/LightBlackAnimation3.mp4",
 
     points: [
-      "Connect with others who are pursuing similar goals",
-      "Forge valuable relationships with people who share your interests",
-      "Celebrate your milestones with a community that values personal growth",
+      "Connect with learners from different backgrounds.",
+      "Share ideas, experiences, and practical knowledge.",
+      "Learn in a supportive community that encourages continuous growth.",
     ],
   },
 ];

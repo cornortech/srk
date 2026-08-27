@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node -e ' *)",
+      "Bash(pkill -f \"vite preview\")",
+      "Bash(git rev-list *)",
+      "Bash(git push *)",
+      "Bash(git fetch *)",
+      "Bash(git stash *)",
+      "Bash(git checkout *)",
+      "Bash(git merge *)",
+      "Bash(cp /tmp/gstatic1.jpg pagodaLogo-unidentified.png)",
+      "Bash(cp /tmp/gstatic2.jpg kathmanduPost.png)",
+      "Bash(cp /tmp/gstatic3.jpg news24-duplicate.png)",
+      "Bash(npx lighthouse *)",
+      "Bash(npx --yes lighthouse http://localhost:4173/ --output=json --output-path=/tmp/lh-baseline.json --chrome-flags=\"--headless=new --no-sandbox\" --preset=perf --form-factor=mobile --screenEmulation.mobile --throttling-method=simulate --only-categories=performance --quiet)",
+      "Bash(python3 -c ' *)",
+      "Bash(npx --yes lighthouse http://localhost:4173/ --output=json --output-path=/tmp/lh-baseline-devtools.json --chrome-flags=\"--headless=new --no-sandbox\" --preset=perf --form-factor=mobile --screenEmulation.mobile --throttling-method=devtools --only-categories=performance --quiet)",
+      "Bash(kill %1)",
+      "Bash(pkill -f \"serve -l 4173\")"
+    ]
+  }
+}

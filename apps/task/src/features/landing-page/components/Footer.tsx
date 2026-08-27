@@ -1,0 +1,176 @@
+import { motion } from 'framer-motion';
+import { ArrowUpRight, ChevronRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { MagneticButton } from '../../../components/ui/MagneticButton';
+
+export const Footer = () => {
+  const universityUrl = import.meta.env.VITE_SRK_UNIVERSITY_URL || 'https://thesrkuniversity.com';
+  
+  const platformLinks = [
+    { name: 'How It Works', href: '/how-it-works' },
+    { name: 'Features', href: '/features' },
+    { name: 'Getting Started', href: '/getting-started' },
+    { name: 'FAQ', href: '/faq' },
+  ];
+  const companyLinks = [
+    { name: 'About Us', href: '/about' },
+    { name: 'Blog', href: '/blog' },
+    { name: 'Articles' , href: '/articles'} , 
+    { name: 'Help Center', href: '/help' },
+    { name: 'Contact', href: '/contact' },
+    { name: 'Privacy Policy', href: '/privacy-policy' },
+    { name: 'Terms & Conditions', href: '/terms-and-conditions' },
+  ];
+  const resourceLinks = [
+    { name: 'Security Guide', href: '/help' },
+    { name: 'Progress Strategies', href: '/blog' },
+    { name: 'Community Forum', href: '#' },
+    { name: 'Support Center', href: '/contact' },
+  ];
+  const socialLinks = ['Twitter', 'Instagram', 'LinkedIn', 'Discord'];
+  const contactInfo = {
+    phone: '+977 976-9223013',
+    email: 'support@srktask.com',
+  };
+
+  return (
+    <footer className="pt-32 pb-12 border-t border-white/5 relative overflow-hidden bg-black">
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#0a0705] to-black" />
+
+      <div className="max-w-7xl mx-auto px-6 relative z-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mb-20">
+          <div className="col-span-1 md:col-span-2">
+            <div className="flex items-center gap-3 mb-6">
+              <Link to="/" className="flex items-center gap-3">
+                <img src="/task-logo.png" alt="SRK Task" className="w-40 object-contain" />
+              </Link>
+            </div>
+
+            <p className="text-gray-500 max-w-sm mb-8 leading-relaxed font-medium">
+              The premier platform for social influence growth and
+              verified ecosystem growth. Built for the modern creator. Part of
+              the SRK Ecosystem.
+            </p>
+
+            <div className="flex flex-col gap-4 mb-8">
+              <div>
+                <p className="text-xs text-gray-400 font-semibold uppercase tracking-widest mb-1">Phone</p>
+                <a href="tel:+977976922301" className="text-[#e1ba73] font-bold hover:text-white transition-colors">
+                  {contactInfo.phone}
+                </a>
+              </div>
+              <div>
+                <p className="text-xs text-gray-400 font-semibold uppercase tracking-widest mb-1">Email</p>
+                <a href="mailto:support@srktask.com" className="text-[#e1ba73] font-bold hover:text-white transition-colors">
+                  {contactInfo.email}
+                </a>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-4">
+
+              <a
+                href={universityUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-[#e1ba73] font-bold flex items-center gap-2 hover:text-white transition-colors group"
+              >
+                University Portal
+                <motion.div
+                  animate={{ x: [0, 5, 0] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                >
+                  <ChevronRight
+                    size={16}
+                    className="group-hover:translate-x-1 transition-transform"
+                  />
+                </motion.div>
+              </a>
+            </div>
+          </div>
+
+          <div className="col-span-1">
+            <h4 className="text-white font-bold mb-6 text-lg">Platform</h4>
+            <ul className="space-y-4 text-gray-500 text-sm font-medium">
+              {platformLinks.map((item) => (
+                <li key={item.name}>
+                  <Link
+                    to={item.href}
+                    className="hover:text-[#e1ba73] transition-colors flex items-center gap-1 group"
+                  >
+                    {item.name}
+                    <ArrowUpRight
+                      size={12}
+                      className="opacity-0 group-hover:opacity-100 transition-opacity"
+                    />
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="col-span-1">
+            <h4 className="text-white font-bold mb-6 text-lg">Company</h4>
+            <ul className="space-y-4 text-gray-500 text-sm font-medium">
+              {companyLinks.map((item) => (
+                <li key={item.name}>
+                  <Link
+                    to={item.href}
+                    className="hover:text-[#e1ba73] transition-colors flex items-center gap-1 group"
+                  >
+                    {item.name}
+                    <ArrowUpRight
+                      size={12}
+                      className="opacity-0 group-hover:opacity-100 transition-opacity"
+                    />
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="col-span-1">
+            <h4 className="text-white font-bold mb-6 text-lg">Resources</h4>
+            <ul className="space-y-4 text-gray-500 text-sm font-medium">
+              {resourceLinks.map((item) => (
+                <li key={item.name}>
+                  {item.href.startsWith('/') ? (
+                    <Link
+                      to={item.href}
+                      className="hover:text-[#e1ba73] transition-colors flex items-center gap-1 group"
+                    >
+                      {item.name}
+                      <ArrowUpRight
+                        size={12}
+                        className="opacity-0 group-hover:opacity-100 transition-opacity"
+                      />
+                    </Link>
+                  ) : (
+                    <a
+                      href={item.href}
+                      className="hover:text-[#e1ba73] transition-colors flex items-center gap-1 group"
+                    >
+                      {item.name}
+                      <ArrowUpRight
+                        size={12}
+                        className="opacity-0 group-hover:opacity-100 transition-opacity"
+                      />
+                    </a>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        <div className="border-t border-white/5 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left">
+          <p className="text-xs text-gray-600 font-medium">
+            © 2026 SRK Task. All rights reserved. | Optimized for the SRK
+            Ecosystem.
+          </p>
+
+        </div>
+      </div>
+    </footer>
+  );
+};

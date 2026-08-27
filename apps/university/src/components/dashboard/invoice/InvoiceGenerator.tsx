@@ -3,6 +3,7 @@
 import { Button, Card, CardBody, CardHeader } from "@nextui-org/react";
 import { jsPDF } from "jspdf";
 import { Download } from "lucide-react";
+import { getUniversityAssetUrl } from "../../../lib/cdn";
 
 interface InvoiceData {
   invoiceNumber: string;
@@ -23,7 +24,19 @@ interface InvoiceGeneratorProps {
 }
 
 export default function InvoiceGenerator({ data }: InvoiceGeneratorProps) {
-  const generateInvoice = (data: InvoiceData) => {
+  const fetchImageAsDataUrl = async (imageUrl: string) => {
+    const response = await fetch(imageUrl);
+    const blob = await response.blob();
+
+    return await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  };
+
+  const generateInvoice = async (data: InvoiceData) => {
     const doc = new jsPDF();
 
     // Set default font
@@ -35,7 +48,8 @@ export default function InvoiceGenerator({ data }: InvoiceGeneratorProps) {
     doc.text("SRK PRIVATE  LIMITED", 105, 30, { align: "center" });
 
     // Add logo
-    doc.addImage("/logo.png", "PNG", 20, 15, 28, 28);
+    const logoDataUrl = await fetchImageAsDataUrl(getUniversityAssetUrl("/logo.png"));
+    doc.addImage(logoDataUrl, "PNG", 20, 15, 28, 28);
 
     // Invoice Title and Details
     doc.setFontSize(18);
@@ -89,8 +103,8 @@ export default function InvoiceGenerator({ data }: InvoiceGeneratorProps) {
     doc.save(`invoice-${data.invoiceNumber}.pdf`);
   };
 
-  const handleDownloadInvoice = () => {
-    generateInvoice(data);
+  const handleDownloadInvoice = async () => {
+    await generateInvoice(data);
   };
 
   const dummyPackages = [

@@ -1,17 +1,18 @@
 import { Card, Button, CardBody } from "@nextui-org/react";
-import { Ban } from "lucide-react";
+import { Ban, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 export function ComparisonSection() {
   const navigate = useNavigate();
-  const  VITE_PRO_PACKAGE_ID = import.meta.env.VITE_PRO_PACKAGE_ID
+  const VITE_PRO_PACKAGE_ID = import.meta.env.VITE_PRO_PACKAGE_ID
 
   return (
     <>
       <section className="bg-bgSecondary  flex flex-col items-center justify-center p-8 ">
         <div className="max-w-7xl">
           <h2 className="text-3xl md:text-3xl font-bold text-center mb-12 text-white">
-            TWO PATHS, ONE CHOICE
+            A SMARTER WAY TO LEARN
           </h2>
 
           <div className="relative">
@@ -22,14 +23,15 @@ export function ComparisonSection() {
                 radius="sm"
               >
                 <CardBody className="text-center space-y-6">
-                  <p className="text-[#C4A24C] text-xl">PAY</p>
+
+                  <p className="text-[#C4A24C] text-xl">TRADITIONAL EDUCATION</p>
                   <h2 className="text-5xl md:text-6xl font-bold text-white">
                     $15,000+
                   </h2>
                   <p className="text-gray-300 text-lg leading-relaxed">
-                    Invest years and thousands on a traditional degree, only to
-                    find yourself among countless others with similar
-                    qualifications.
+                    Many degree programs require a significant financial
+                    investment and several years of study before you can
+                    apply your knowledge in the real world.
                   </p>
                   <Button
                     className="w-full bg-transparent border border-[#C4A24C] cursor-default text-[#C4A24C] py-4"
@@ -50,15 +52,15 @@ export function ComparisonSection() {
               {/* Right Card */}
               <Card className="bg-custom-gradient p-8" radius="sm">
                 <CardBody className="text-center space-y-6">
-                  <p className="text-white/90 text-xl">PAY</p>
+                  <p className="text-white/90 text-xl">PRACTICAL ONLINE LEARNING</p>
                   <h2 className="text-5xl md:text-6xl font-bold text-white">
                     $100
                   </h2>
                   <p className="text-black text-lg leading-relaxed">
-                    Gain instant access to cutting-edge online strategies that
-                    are working right now. Equip yourself with the latest
-                    actionable insights and real-world tactics to accelerate
-                    your growth.
+                    Gain instant access to industry-based courses designed to
+                    help you develop desirable skills with hands-on lessons
+                    and scenarios. Do things at your own speed; apply
+                    learning as soon as possible.
                   </p>
                   <Button
                     className="w-full bg-bgSecondary hover:bg-gray-900 text-[#C4A24C] py-4 font-semibold"
@@ -72,6 +74,16 @@ export function ComparisonSection() {
               </Card>
             </div>
           </div>
+        </div>
+
+        <div className="flex flex-col items-center gap-1.5 mt-10">
+          <Link
+            to="/learn/why-srk-university"
+            className="group inline-flex items-center gap-2 px-5 py-2.5 border border-primary/40 text-primary/75 text-sm font-medium rounded transition-all duration-300 hover:border-primary hover:bg-primary hover:text-bgPrimary hover:scale-[1.04] hover:shadow-[0_0_20px_rgba(182,137,56,0.35)]"
+          >
+            Know More <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1" />
+          </Link>
+          <span className="text-[11px] text-white/25">see how we deliver real value</span>
         </div>
       </section>
     </>

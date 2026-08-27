@@ -27,6 +27,19 @@ export default defineConfig(() => ({
     commonjsOptions: {
       transformMixedEsModules: true,
     },
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+          'vendor-query': ['@tanstack/react-query'],
+          // framer-motion deliberately excluded: it's only used by lazy-loaded
+          // routes now (Navbar/Footer were switched to CSS animations), so
+          // forcing it into this eagerly-loaded chunk would undo that.
+          'vendor-ui': ['lucide-react'],
+        },
+      },
+    },
+    chunkSizeWarningLimit: 600,
   },
 
   test: {

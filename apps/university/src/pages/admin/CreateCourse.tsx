@@ -14,7 +14,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { createCourseApi, getAllPackagesApi } from "../../lib/apiClient";
 import { TPackage } from "../../lib/types/entities";
 import useAlert from "../../hooks/useAlert";
-import useUploadFile from "../../hooks/useFileUpload";
+import { useSRKFileUpload } from '@srk/shared/hooks';
 
 // interface Instructor {
 //   name: string;
@@ -31,7 +31,7 @@ interface CourseFormValues {
 export default function CreateCoursePage() {
   const [image, setImage] = useState<File | null>(null);
   const [selectedPackage, setSelectedPackage] = useState<string[]>([]);
-  const { uploadFile } = useUploadFile();
+  const { uploadFile } = useSRKFileUpload('university');
   const { show } = useAlert();
   const [uploadingPercentage, setUploadingPercentage] = useState(0);
   const { data: AllPackages } = useQuery<TPackage[] | undefined>({
@@ -77,15 +77,14 @@ export default function CreateCoursePage() {
     console.log(data, image);
 
     if (image) {
-      await uploadFile(image, "image", (progress, url) => {
+      await uploadFile(image, "image", (progress) => {
         setUploadingPercentage(progress);
-        if (url && progress === 100) {
-          createCourse({
-            description: data.description,
-            thumbnail: url,
-            title: data.title,
-          });
-        }
+      }).then(({ key }) => {
+        createCourse({
+          description: data.description,
+          thumbnail: key,
+          title: data.title,
+        });
       });
     }
   };

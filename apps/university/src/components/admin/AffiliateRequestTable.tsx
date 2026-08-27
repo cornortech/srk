@@ -11,10 +11,10 @@ import {
   // Tab,
 } from '@nextui-org/react';
 import { EllipsisVertical, SquareArrowOutUpRight } from 'lucide-react';
-import UserDetailsModal from './userDetailsModel';
 import { useState } from 'react';
-import { chipColorsStatusMap, TAffiliateRequest } from '../../lib/types';
 import { useMutation } from '@tanstack/react-query';
+import UserDetailsModal from './userDetailsModel';
+import { chipColorsStatusMap, TAffiliateRequest } from '../../lib/types';
 import {
   approveAffiliateRequestApi,
   rejectAffiliateRequestApi,
@@ -23,6 +23,7 @@ import useAlert from '../../hooks/useAlert';
 import { AxiosError } from 'axios';
 import moment from 'moment';
 import TablePagination from './Pagination';
+import { getUniversityAssetUrl } from '../../lib/cdn';
 
 interface UserTableProps {
   users: TAffiliateRequest[];
@@ -133,7 +134,7 @@ export default function AffiliateRequestTable({
                 </Chip>
               </TableCell>
               <TableCell>
-                <a href={user.affiliateAgreementUrl} target="_blank">
+                <a href={getUniversityAssetUrl(user.affiliateAgreementUrl)} target="_blank">
                   <SquareArrowOutUpRight size={15} />
                 </a>
               </TableCell>

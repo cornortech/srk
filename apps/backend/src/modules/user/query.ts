@@ -1,5 +1,4 @@
 import { AppRouteImplementationOrOptions } from '@ts-rest/express/src/lib/types';
-import { userContract } from '../../contract/user/contract';
 import { UserModel } from '../../model/userModel';
 import { BankModel } from '../../model/bankModel';
 import { KYCModel } from '../../model/kycModel';
@@ -7,6 +6,7 @@ import { affiliateBiometricModel } from '../../model/affiliateVerificationModel'
 import { affiliateRequestModel } from '../../model/affiliateRequestModel';
 import { methods } from '../../utils/methods';
 import { CoursePaymentModel } from '../../model/coursePayment';
+import { userContract } from '@srk/shared/contracts';
 
 export const getUserDetails: AppRouteImplementationOrOptions<
   typeof userContract.getUserDetails
@@ -121,6 +121,9 @@ export const getUserDetails: AppRouteImplementationOrOptions<
             rejectionReason: kycDetails.rejectionReason,
             status: kycDetails.status,
             verificationImage: kycDetails.verificationImage,
+            leftThumbFingerprint: kycDetails.leftThumbFingerprint || null,
+            rightThumbFingerprint: kycDetails.rightThumbFingerprint || null,
+            signature: kycDetails.signature || null,
           }
         : null,
       affiliateBiometricDetails: affiliateBiometricDetails
@@ -191,6 +194,16 @@ const getAllUsers: AppRouteImplementationOrOptions<
     // Status array filter
     if (query?.status) {
       queryReq.status = { $in: query.status };
+    }
+
+    // Search filter - search across email, firstName, and lastName
+    if (query?.search) {
+      const searchRegex = new RegExp(query.search, 'i'); // case-insensitive
+      queryReq.$or = [
+        { email: searchRegex },
+        { firstName: searchRegex },
+        { lastName: searchRegex },
+      ];
     }
 
     // Count total users matching filters
@@ -297,6 +310,9 @@ const getAllUsers: AppRouteImplementationOrOptions<
                 documentType: kycDetails.documentType,
                 documentNumber: kycDetails.documentNumber,
                 verificationImage: kycDetails.verificationImage,
+                leftThumbFingerprint: kycDetails.leftThumbFingerprint || null,
+                rightThumbFingerprint: kycDetails.rightThumbFingerprint || null,
+                signature: kycDetails.signature || null,
               }
             : null,
         };

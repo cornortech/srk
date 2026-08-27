@@ -17,7 +17,7 @@ import {
 import { TPackage } from "../lib/types/entities";
 import useAlert from "../hooks/useAlert";
 import { SignupPaymentMethod } from "./signup/SignupPaymentMethod";
-import useUploadFile from "../hooks/useFileUpload";
+import { useSRKFileUpload } from '@srk/shared/hooks';
 
 const genderOptions = [
   { value: "Male", label: "Male" },
@@ -51,6 +51,7 @@ export type TPaymentDetails = {
   paymentProof: File | null;
   transactionId: string;
   paymentMethod?: TPaymentMethod;
+  qrCodeId?: string;
 };
 
 export function SignupComponent({
@@ -77,7 +78,7 @@ export function SignupComponent({
   });
   const { show } = useAlert();
   const navigate = useNavigate();
-  const { uploadFile } = useUploadFile();
+  const { uploadFile } = useSRKFileUpload('university');
 
   const {
     setValue,
@@ -150,12 +151,12 @@ export function SignupComponent({
     if (paymentDetails.paymentProof) {
       setIsRegisterring(true);
       try {
-        const { url } = await uploadFile(paymentDetails.paymentProof, "image");
+        const { key } = await uploadFile(paymentDetails.paymentProof, "image");
         mutateRegister({
           paymentType: "qr",
           email: data.email,
           gender: data.gender,
-          paymentProofUrl: url,
+          paymentProofUrl: key,
           dob: data.dateOfBirth,
           country: data.country,
           lastName: data.lastName,
@@ -167,6 +168,7 @@ export function SignupComponent({
           paymentMethod: paymentDetails.paymentMethod,
           transactionId: paymentDetails.transactionId,
           purpose: data.purpose,
+          qrCodeId: paymentDetails.qrCodeId,
         });
       } catch (err) {
         console.log(err);

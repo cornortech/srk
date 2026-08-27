@@ -6,17 +6,18 @@ const webinarSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    startTime: {
-      type: Date,
-      required: true,
-    },
-    endTime: {
-      type: Date,
-      required: true,
+    hasFinished: {
+      type: Boolean,
+      default: false,
     },
     meetUrl: {
       type: String,
-      required: true,
+    },
+    youtubeUrl: {
+      type: String,
+    },
+    thumbnail: {
+      type: String,
     },
   },
   {

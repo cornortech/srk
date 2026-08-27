@@ -3,9 +3,9 @@
 import { Button } from "@nextui-org/button";
 import { Chip } from "@nextui-org/chip";
 import { Card, CardHeader, CardBody } from "@nextui-org/card";
-import { PlayCircle } from "lucide-react";
+import { PlayCircle, RotateCw } from "lucide-react";
 import { Link, useLocation, useParams } from "react-router-dom";
-import { BreadcrumbItem, Breadcrumbs } from "@nextui-org/react";
+import { BreadcrumbItem, Breadcrumbs, Spinner } from "@nextui-org/react";
 import clsx from "clsx";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -14,14 +14,20 @@ import {
 } from "../../../lib/apiClient";
 import { TCourse, TCourseVideo } from "../../../lib/types/entities";
 import { useEffect, useState } from "react";
+import { getUniversityAssetUrl } from "../../../lib/cdn";
 
 export default function CoursePlayer() {
   const { courseId } = useParams();
   const location = useLocation();
   const [currentVideo, setCurrentVideo] = useState<TCourseVideo | null>(null);
+  const [isVideoLoading, setIsVideoLoading] = useState(true);
+  const [hasVideoError, setHasVideoError] = useState(false);
+  const [videoRetryKey, setVideoRetryKey] = useState(0);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [hasWatched] = useState(false);
-  const { data: courseDetails } = useQuery<TCourse | null>({
+  const { data: courseDetails, isLoading: isCourseLoading } = useQuery<
+    TCourse | null
+  >({
     queryKey: ["courseDetails", courseId],
     queryFn: async () => {
       if (!courseId) return;
@@ -30,7 +36,9 @@ export default function CoursePlayer() {
     },
   });
 
-  const { data: chaptersData } = useQuery<TCourseVideo[]>({
+  const { data: chaptersData, isLoading: isChaptersLoading } = useQuery<
+    TCourseVideo[]
+  >({
     queryKey: ["chapters", courseId],
     queryFn: async () => {
       if (!courseId) return;
@@ -59,6 +67,19 @@ export default function CoursePlayer() {
       setCurrentVideo(chaptersData[0]);
     }
   }, [chaptersData]);
+
+  useEffect(() => {
+    setIsVideoLoading(true);
+    setHasVideoError(false);
+  }, [currentVideo?._id, videoRetryKey]);
+
+  if (isCourseLoading || isChaptersLoading) {
+    return (
+      <div className="flex items-center justify-center py-24">
+        <Spinner size="lg" color="primary" />
+      </div>
+    );
+  }
 
   if (!courseDetails) return null;
 
@@ -97,15 +118,49 @@ export default function CoursePlayer() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Video Player */}
         <div
-          className="relative pt-[50.25%] w-full rounded-lg overflow-hidden md:col-span-2"
+          className="relative pt-[50.25%] w-full rounded-lg overflow-hidden md:col-span-2 bg-black"
           onContextMenu={(e) => e.preventDefault()} // disables right-click
         >
-          <video
-            src={currentVideo?.videoUrl || ""}
-            className="absolute top-0 left-0 w-full h-full"
-            controlsList="nodownload"
-            controls
-          />
+          {currentVideo ? (
+            <video
+              key={`${currentVideo._id}-${videoRetryKey}`}
+              src={getUniversityAssetUrl(currentVideo.videoUrl)}
+              className="absolute top-0 left-0 w-full h-full"
+              controlsList="nodownload"
+              controls
+              onLoadedData={() => setIsVideoLoading(false)}
+              onWaiting={() => setIsVideoLoading(true)}
+              onPlaying={() => setIsVideoLoading(false)}
+              onError={() => {
+                setIsVideoLoading(false);
+                setHasVideoError(true);
+              }}
+            />
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center text-textPrimary">
+              No videos available for this course yet.
+            </div>
+          )}
+
+          {currentVideo && isVideoLoading && !hasVideoError && (
+            <div className="absolute inset-0 flex items-center justify-center bg-black/40 pointer-events-none">
+              <Spinner size="lg" color="primary" />
+            </div>
+          )}
+
+          {currentVideo && hasVideoError && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-black/90 text-white text-center px-4">
+              <span>This video couldn&apos;t be loaded.</span>
+              <Button
+                size="sm"
+                color="primary"
+                startContent={<RotateCw className="w-4 h-4" />}
+                onPress={() => setVideoRetryKey((key) => key + 1)}
+              >
+                Retry
+              </Button>
+            </div>
+          )}
         </div>
 
         {/* Chapter List */}

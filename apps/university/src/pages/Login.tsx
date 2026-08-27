@@ -3,7 +3,7 @@ import { LogoNavbar } from "../components/logoNavbar";
 
 export const Login = () => {
   return (
-    // <div className="relative w-full h-screen  bg-[url('/srklaptop.jpg')] bg-cover bg-no-repeat bg-center ">
+    // <div className="relative w-full h-screen  bg-[url('/srklaptop.webp')] bg-cover bg-no-repeat bg-center ">
     <div className="relative w-full h-screen ">
       <LogoNavbar />
       <div>

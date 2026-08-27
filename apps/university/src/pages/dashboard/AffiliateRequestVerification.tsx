@@ -12,7 +12,7 @@ import useAlert from "../../hooks/useAlert";
 import AlertBanner from "../../components/AlertBanner";
 import { TUserDataReponseData } from "../../lib/types";
 import { methods } from "../../lib/methods";
-import useUploadFile from "../../hooks/useFileUpload";
+import { useSRKFileUpload } from '@srk/shared/hooks';
 
 const AffiliateRequestVerification = () => {
   const [selectedTab, setSelectedTab] = useState("details");
@@ -21,7 +21,7 @@ const AffiliateRequestVerification = () => {
   );
   const { show } = useAlert();
   const navigate = useNavigate();
-  const { uploadFile } = useUploadFile();
+  const { uploadFile } = useSRKFileUpload('university');
   const { userDetails } = useAuthStore();
 
   const { data: userData } = useQuery<TUserDataReponseData | null>({
@@ -71,7 +71,7 @@ const AffiliateRequestVerification = () => {
     if (verificationImage) {
       // remove whitespaces
       const firstName = (userDetails?.firstName || "User").replace(/\s/g, "");
-      const { url } = await uploadFile(
+      const { key } = await uploadFile(
         methods.base64ToFile(
           verificationImage,
           `${Date.now()}-${firstName}-v-image.png`,
@@ -80,7 +80,7 @@ const AffiliateRequestVerification = () => {
         "image"
       );
 
-      verificationImageUrl = url;
+      verificationImageUrl = key;
     }
 
     upsertAffiliateBiometricDataMutation({

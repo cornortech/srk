@@ -1,12 +1,13 @@
 "use client";
 
-import { Card, CardBody, CardFooter, Button } from "@nextui-org/react";
+import { Card, CardBody, CardFooter, Button, Spinner } from "@nextui-org/react";
 import { Play } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { getAllCoursesOfPackageApi } from "../../../lib/apiClient";
 import useAuthStore from "../../../store/useAuth";
 import { TCourse } from "../../../lib/types/entities";
+import { getUniversityAssetUrl } from "../../../lib/cdn";
 
 export default function CoursesDashboard({
   dashboardType,
@@ -22,7 +23,7 @@ export default function CoursesDashboard({
     // location.href = `/study/courses/${courseId}`;
   };
 
-  const { data: coursesData } = useQuery<TCourse[]>({
+  const { data: coursesData, isLoading } = useQuery<TCourse[]>({
     queryKey: ["courses", packageId],
     queryFn: async () => {
       if (!packageId) return;
@@ -32,8 +33,20 @@ export default function CoursesDashboard({
     enabled: !!packageId,
   });
 
-  if (!coursesData) {
-    return <div></div>;
+  if (isLoading || !coursesData) {
+    return (
+      <div className="flex items-center justify-center py-24">
+        <Spinner size="lg" color="primary" />
+      </div>
+    );
+  }
+
+  if (coursesData.length === 0) {
+    return (
+      <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center text-textPrimary">
+        No courses available yet.
+      </div>
+    );
   }
 
   return (
@@ -53,7 +66,7 @@ export default function CoursesDashboard({
               <CardBody
                 className={`p-0 bg-no-repeat bg-cover bg-center`}
                 style={{
-                  backgroundImage: `url(${course.image})`,
+                  backgroundImage: `url(${getUniversityAssetUrl(course.image)})`,
                 }}
               ></CardBody>
               <CardFooter className="flex-col gap-2 items-start">

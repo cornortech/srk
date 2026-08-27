@@ -1,4 +1,4 @@
-import { AnimationButton } from "../ReusableComponents";
+import { AnimationButton } from "../AnimationButton";
 import { useNavigate } from "react-router-dom";
 import { whyChooseUsData } from "../../Data/WhyChooseUsData";
 import TradingSchool from "./Test";
@@ -7,10 +7,27 @@ export function WhyChooseSection() {
   const navigate = useNavigate();
   const proPackageId = import.meta.env.VITE_PRO_PACKAGE_ID;
 
+  const sectionRoutes = [
+    "/learn/uncover-essentials",
+    "/learn/exclusive-community",
+    "/learn/learn-from-experts",
+  ];
+  const sectionCaptions = [
+    "discover how our learning platform works",
+    "see how our community helps you learn and grow",
+    "meet the experts behind our courses",
+  ];
+
   return (
     <div className="min-h-screen bg-black gap-y-8 pb-8 flex flex-col text-white relative z-10">
       {whyChooseUsData.map((section, index) => (
-        <TradingSchool key={section.id} feature={section} index={index} />
+        <TradingSchool
+          key={section.id}
+          feature={section}
+          index={index}
+          knowMoreRoute={sectionRoutes[index]}
+          knowMoreCaption={sectionCaptions[index]}
+        />
       ))}
       <AnimationButton
         onClick={() => {

@@ -15,7 +15,7 @@ import { useMutation } from '@tanstack/react-query';
 import { rejectKycApi, verifyKycApi } from '../../lib/apiClient';
 import useAlert from '../../hooks/useAlert';
 import { AxiosError } from 'axios';
-import { ArrowLeft, ArrowRight, ViewIcon } from 'lucide-react';
+import { ViewIcon } from 'lucide-react';
 import TablePagination from './Pagination';
 
 interface UserTableProps {
@@ -105,6 +105,9 @@ export default function UserTable({
         documentType={activeUser?.kycDetails?.documentType || ''}
         documentName={activeUser?.kycDetails?.documentNumber || ''}
         verificationImage={activeUser?.kycDetails?.verificationImage || ''}
+        leftThumbFingerprint={activeUser?.kycDetails?.leftThumbFingerprint || ''}
+        rightThumbFingerprint={activeUser?.kycDetails?.rightThumbFingerprint || ''}
+        signature={activeUser?.kycDetails?.signature || ''}
         onApprove={handleOnApprove}
         onClose={handleOnClose}
         onReject={handleOnReject}

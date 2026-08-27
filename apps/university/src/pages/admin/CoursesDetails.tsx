@@ -27,7 +27,8 @@ import { TCourse, TCourseVideo } from "../../lib/types/entities";
 import { TUploadVideoPayload } from "../../lib/types";
 import useAlert from "../../hooks/useAlert";
 import { AxiosError } from "axios";
-import useUploadFile from "../../hooks/useFileUpload";
+import { useSRKFileUpload } from '@srk/shared/hooks';
+import { getUniversityAssetUrl } from "../../lib/cdn";
 
 interface Video {
   url: string;
@@ -46,7 +47,7 @@ function CourseDetail() {
   const [chapters, setChapters] = useState<Chapter[]>([]);
   const [editableCourse, setEditableCourse] = useState<TCourse | null>(null);
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
-  const { uploadFile } = useUploadFile();
+  const { uploadFile } = useSRKFileUpload('university');
   const { show } = useAlert();
   console.log("chapters", chapters);
 
@@ -126,7 +127,7 @@ function CourseDetail() {
     if (!file || !chapterName) return;
     try {
       const duration = await getVideoDuration(file);
-      const { url } = await uploadFile(file, "video", (progress, url) => {
+      const { key } = await uploadFile(file, "video", (progress, url) => {
         setProgress(progress);
         if (url && progress === 100) {
           setProgress(100);
@@ -137,7 +138,7 @@ function CourseDetail() {
         courseId: course?._id || "",
         duration, // Set the actual duration
         name: chapterName,
-        videoUrl: url,
+        videoUrl: key,
       });
     } catch (error) {
       console.error("Error getting video duration:", error);
@@ -170,7 +171,7 @@ function CourseDetail() {
         />
       </div>
       <img
-        src={editableCourse?.image}
+        src={getUniversityAssetUrl(editableCourse?.image)}
         alt={editableCourse?.title}
         className="w-full h-64 object-cover rounded-lg mb-4"
       />
@@ -225,7 +226,7 @@ function CourseDetail() {
             <CardHeader>{video.name}</CardHeader>
             <CardBody>
               <video controls className="w-full h-64 object-cover rounded-lg">
-                <source src={video.videoUrl} type="video/mp4" />
+                <source src={getUniversityAssetUrl(video.videoUrl)} type="video/mp4" />
                 Your browser does not support the video tag.
               </video>
             </CardBody>

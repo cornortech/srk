@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import { AppRouteImplementation } from '@ts-rest/express';
 import { balancePayoutModel } from '../../model/balancePayoutModel';
 import { BankModel } from '../../model/bankModel';
@@ -266,6 +267,16 @@ const upsertKYCDetails: AppRouteImplementation<
     };
   } catch (error) {
     console.error('upsertKYCDetails error:', error);
+    if (error instanceof mongoose.Error.ValidationError) {
+      const fieldMessages = Object.values(error.errors).map((e) => e.message);
+      return {
+        status: 400,
+        body: {
+          success: false,
+          message: fieldMessages.join(' '),
+        },
+      };
+    }
     return {
       status: 500,
       body: {

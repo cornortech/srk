@@ -38,7 +38,7 @@ export const createDataUrlUploadMiddleware = (
       for (const [key, value] of Object.entries(req.body)) {
         if (isDataUrl(value) && fieldMappings[key]) {
           try {
-            parseImageDataUrl(value);
+            await parseImageDataUrl(value);
           } catch (error) {
             console.error(`Invalid image data for ${key}:`, error);
             return res.status(400).json({

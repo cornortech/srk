@@ -4,6 +4,7 @@ import { Select, SelectItem } from "@nextui-org/select";
 import { Input } from "@nextui-org/input";
 import { Button } from "@nextui-org/button";
 import { Image } from "@nextui-org/image";
+import { AxiosError } from "axios";
 import useAlert from "../../../hooks/useAlert";
 import { useMutation } from "@tanstack/react-query";
 import useAuthStore from "../../../store/useAuth";
@@ -96,9 +97,12 @@ export default function KYCForm({
       // Refetch user data to update the status
       await handleRefetch();
     },
-    onError: (error) => {
+    onError: (error: AxiosError<{ message?: string }>) => {
       console.error("API Error:", error);
-      show("Failed to update KYC details", "error");
+      show(
+        error.response?.data?.message || "Failed to update KYC details",
+        "error"
+      );
       setLoading(false);
       handleRefetch();
     },

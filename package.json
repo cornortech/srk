@@ -41,7 +41,9 @@
     "migrate:firebase-videos": "tsx apps/backend/src/scripts/migrateFirebaseVideosToR2.ts",
     "migrate:firebase-videos:dry-run": "tsx apps/backend/src/scripts/migrateFirebaseVideosToR2.ts --dry-run",
     "migrate:firebase-images": "tsx apps/backend/src/scripts/migrateFirebaseImagesToR2.ts",
-    "migrate:firebase-images:dry-run": "tsx apps/backend/src/scripts/migrateFirebaseImagesToR2.ts --dry-run"
+    "migrate:firebase-images:dry-run": "tsx apps/backend/src/scripts/migrateFirebaseImagesToR2.ts --dry-run",
+    "script:inspect-course-videos": "tsx apps/backend/src/scripts/inspectCourseVideos.ts",
+    "script:compress-course-videos": "tsx apps/backend/src/scripts/compressCourseVideos.ts"
   },
   "private": true,
   "devDependencies": {
@@ -67,6 +69,7 @@
     "@testing-library/react": "16.3.0",
     "@types/cors": "^2.8.19",
     "@types/express": "^4.17.25",
+    "@types/heic-convert": "^2.1.1",
     "@types/jest": "^30.0.0",
     "@types/node": "^22.19.1",
     "@types/react": "^18.3.12",
@@ -149,6 +152,7 @@
     "firebase": "^11.10.0",
     "firebase-admin": "^13.0.1",
     "framer-motion": "^11.18.2",
+    "heic-convert": "^2.1.0",
     "http-status-codes": "^2.3.0",
     "jsonwebtoken": "^9.0.2",
     "jspdf": "^3.0.4",

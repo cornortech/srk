@@ -15,6 +15,9 @@ const courseVideoSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    originalVideoUrl: {
+      type: String,
+    },
     thumbnailUrl: {
       type: String,
     },

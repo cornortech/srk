@@ -1,4 +1,5 @@
 import { randomUUID } from 'crypto';
+import convert from 'heic-convert';
 import { deleteFileFromR2, uploadFileToR2 } from './r2Service';
 import { env } from '../config/env';
 
@@ -10,13 +11,19 @@ export const MIME_EXTENSION_MAP: Record<string, string> = {
   'image/gif': 'gif',
 };
 
+// iPhones (and some Android phones in high-efficiency mode) save photos as
+// HEIC/HEIF by default. Neither browsers nor our installed sharp build can
+// decode it, so convert it to JPEG before it hits the normal image pipeline.
+const HEIC_MIME_TYPES = new Set(['image/heic', 'image/heif']);
+
 /**
- * Parses a data URL string and extracts the image buffer, content type, and extension
+ * Parses a data URL string and extracts the image buffer, content type, and extension.
+ * Transparently converts HEIC/HEIF (iPhone default photo format) to JPEG.
  * @param dataUrl - Base64 data URL in format: data:image/jpeg;base64,...
  * @returns Object with buffer, contentType, and extension
  * @throws Error if data URL is invalid or unsupported format
  */
-export const parseImageDataUrl = (dataUrl: string) => {
+export const parseImageDataUrl = async (dataUrl: string) => {
   const match = dataUrl.match(/^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/);
 
   if (!match) {
@@ -24,17 +31,34 @@ export const parseImageDataUrl = (dataUrl: string) => {
   }
 
   const contentType = match[1].toLowerCase();
+  const rawBuffer = Buffer.from(match[2], 'base64');
+  if (!rawBuffer.length) {
+    throw new Error('Image payload is empty');
+  }
+
+  if (HEIC_MIME_TYPES.has(contentType)) {
+    let jpegBuffer: Buffer;
+    try {
+      jpegBuffer = Buffer.from(
+        await convert({ buffer: rawBuffer, format: 'JPEG', quality: 0.9 })
+      );
+    } catch (error) {
+      console.error('HEIC conversion failed:', error);
+      throw new Error('Unsupported image type: ' + contentType);
+    }
+    return {
+      buffer: jpegBuffer,
+      contentType: 'image/jpeg',
+      extension: 'jpg',
+    };
+  }
+
   if (!MIME_EXTENSION_MAP[contentType]) {
     throw new Error(`Unsupported image type: ${contentType}`);
   }
 
-  const buffer = Buffer.from(match[2], 'base64');
-  if (!buffer.length) {
-    throw new Error('Image payload is empty');
-  }
-
   return {
-    buffer,
+    buffer: rawBuffer,
     contentType,
     extension: MIME_EXTENSION_MAP[contentType],
   };
@@ -53,7 +77,7 @@ export const uploadImageDataUrlToR2 = async (
   filePrefix: string
 ) => {
   const rootFolder = env.R2_PREFIX_FOLDER;
-  const { buffer, contentType, extension } = parseImageDataUrl(dataUrl);
+  const { buffer, contentType, extension } = await parseImageDataUrl(dataUrl);
   const fileName = `${filePrefix}-${Date.now()}-${randomUUID()}.${extension}`;
   // Log the effective target (prefix + folder) so runtime shows srk/dev clearly
   console.log(`[R2] Upload target: ${rootFolder}/${folder}/${fileName}`);

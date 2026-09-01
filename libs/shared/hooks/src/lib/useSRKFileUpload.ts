@@ -21,6 +21,25 @@ const s3Client = new S3Client({
   forcePathStyle: true,
 });
 
+async function withRetry<T>(
+  fn: () => Promise<T>,
+  retries = 2,
+  delayMs = 800
+): Promise<T> {
+  let lastError: unknown;
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      return await fn();
+    } catch (error) {
+      lastError = error;
+      if (attempt < retries) {
+        await new Promise((resolve) => setTimeout(resolve, delayMs * (attempt + 1)));
+      }
+    }
+  }
+  throw lastError;
+}
+
 export interface UploadProgress {
   [uploadId: string]: {
     progress: number;
@@ -127,8 +146,10 @@ export const useSRKFileUpload = (appName: string) => {
         ContentType: fileToUpload.type,
       };
 
-      // S3 upload (no progress events in browser, so just set 100% after upload)
-      await s3Client.send(new PutObjectCommand(params));
+      // S3 upload (no progress events in browser, so just set 100% after upload).
+      // Retries a couple times on transient failures (e.g. mobile network drops)
+      // before giving up, since a single blip used to kill the whole flow.
+      await withRetry(() => s3Client.send(new PutObjectCommand(params)));
       const url = `${R2_ENDPOINT}/${R2_BUCKET}/${key}`;
 
       setUploadProgress((prev) => ({

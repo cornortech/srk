@@ -174,7 +174,10 @@ export function SignupComponent({
         console.log(err);
 
         setIsRegisterring(false);
-        show("Registration failed", "error");
+        show(
+          "Failed to upload payment proof. Please check your connection and try again.",
+          "error"
+        );
       }
     }
   };

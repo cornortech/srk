@@ -1,5 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
-import { uploadImageDataUrlToR2, cleanupR2Uploads } from '../services/imageUploadService';
+import {
+  uploadImageDataUrlToR2,
+  cleanupR2Uploads,
+  parseImageDataUrl,
+} from '../services/imageUploadService';
 
 const isDataUrl = (value: unknown): value is string =>
   typeof value === 'string' && value.startsWith('data:');
@@ -28,28 +32,42 @@ export const createDataUrlUploadMiddleware = (
         return next();
       }
 
-      // Process each body key
+      // Validate every data URL field up front so a single malformed field
+      // can't trigger cleanup of images that already uploaded successfully.
+      const fieldsToUpload: [string, string][] = [];
       for (const [key, value] of Object.entries(req.body)) {
-        if (isDataUrl(value)) {
-          const mapping = fieldMappings[key];
-          if (mapping) {
-            try {
-              const r2Key = await uploadImageDataUrlToR2(
-                value,
-                mapping.folder,
-                mapping.prefix
-              );
-              req.body[key] = r2Key;
-              uploadedR2Keys.push(r2Key);
-            } catch (error) {
-              console.error(`Failed to upload ${key} to R2:`, error);
-              // Cleanup any already-uploaded files on error
-              if (uploadedR2Keys.length) {
-                await cleanupR2Uploads(uploadedR2Keys);
-              }
-              throw error;
-            }
+        if (isDataUrl(value) && fieldMappings[key]) {
+          try {
+            parseImageDataUrl(value);
+          } catch (error) {
+            console.error(`Invalid image data for ${key}:`, error);
+            return res.status(400).json({
+              success: false,
+              message: `Invalid image data for ${key}. Please retake/reselect the image and try again.`,
+            });
           }
+          fieldsToUpload.push([key, value]);
+        }
+      }
+
+      // Process each validated field
+      for (const [key, value] of fieldsToUpload) {
+        const mapping = fieldMappings[key];
+        try {
+          const r2Key = await uploadImageDataUrlToR2(
+            value,
+            mapping.folder,
+            mapping.prefix
+          );
+          req.body[key] = r2Key;
+          uploadedR2Keys.push(r2Key);
+        } catch (error) {
+          console.error(`Failed to upload ${key} to R2:`, error);
+          // Cleanup any already-uploaded files on error
+          if (uploadedR2Keys.length) {
+            await cleanupR2Uploads(uploadedR2Keys);
+          }
+          throw error;
         }
       }
 

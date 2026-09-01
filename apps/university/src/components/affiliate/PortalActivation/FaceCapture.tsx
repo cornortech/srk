@@ -3,6 +3,7 @@ import * as faceapi from "face-api.js";
 import { Button, Card } from "@nextui-org/react";
 import { CameraIcon, SkipBack, StepForward, CheckCircle } from "lucide-react";
 import { getUniversityAssetUrl } from "../../../lib/cdn";
+import useAlert from "../../../hooks/useAlert";
 
 interface FaceCaptureProps {
   handleTabChange: () => void;
@@ -24,6 +25,8 @@ const WebcamCapture: React.FC<FaceCaptureProps> = ({
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [showVideo, setShowVideo] = React.useState(false);
+  const [isCameraReady, setIsCameraReady] = React.useState(false);
+  const { show } = useAlert();
 
   useEffect(() => {
     startWebcam();
@@ -31,9 +34,24 @@ const WebcamCapture: React.FC<FaceCaptureProps> = ({
   }, []);
 
   const startWebcam = async () => {
-    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-    if (videoRef.current) {
-      videoRef.current.srcObject = stream;
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+      }
+    } catch (error) {
+      console.error("Error accessing webcam", error);
+      show("Unable to access camera. Please allow camera access and try again.", "error");
+    }
+  };
+
+  const handleVideoReady = () => {
+    if (
+      videoRef.current &&
+      videoRef.current.videoWidth > 0 &&
+      videoRef.current.videoHeight > 0
+    ) {
+      setIsCameraReady(true);
     }
   };
 
@@ -51,6 +69,15 @@ const WebcamCapture: React.FC<FaceCaptureProps> = ({
   const captureImage = () => {
     if (!videoRef.current || !canvasRef.current) return;
 
+    if (
+      !isCameraReady ||
+      videoRef.current.videoWidth === 0 ||
+      videoRef.current.videoHeight === 0
+    ) {
+      show("Camera is still starting up. Please wait a moment and try again.", "error");
+      return;
+    }
+
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
@@ -60,6 +87,12 @@ const WebcamCapture: React.FC<FaceCaptureProps> = ({
     ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
 
     const imageData = canvas.toDataURL("image/png"); // Get captured image
+
+    if (!/^data:image\/png;base64,.+/.test(imageData)) {
+      show("Failed to capture photo. Please try again.", "error");
+      return;
+    }
+
     setVerificationImage(imageData);
     setShowVideo(false);
   };
@@ -119,6 +152,8 @@ const WebcamCapture: React.FC<FaceCaptureProps> = ({
                 ref={videoRef}
                 autoPlay
                 muted
+                onLoadedMetadata={handleVideoReady}
+                onCanPlay={handleVideoReady}
                 className="w-full h-96 object-cover rounded-lg"
                 style={{ display: showVideo ? "block" : "none" }}
               />
@@ -206,10 +241,12 @@ const WebcamCapture: React.FC<FaceCaptureProps> = ({
                 color="primary"
                 variant="solid"
                 onPress={captureImage}
+                isDisabled={!isCameraReady}
                 size="lg"
                 className="w-full"
               >
-                <CameraIcon size={18} /> Capture Photo
+                <CameraIcon size={18} />{" "}
+                {isCameraReady ? "Capture Photo" : "Starting camera..."}
               </Button>
             </div>
           ))}

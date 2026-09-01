@@ -9,6 +9,7 @@ import {
   Chip,
 } from '@nextui-org/react';
 import { useState } from 'react';
+import { isAxiosError } from 'axios';
 import { ViewIcon } from 'lucide-react';
 import { TGetAllUsersAdmin, userStatusColorMap } from '../../../lib/types';
 import { PaymentVerification } from '../modal/PaymentVerification';
@@ -52,8 +53,12 @@ export default function PaymentVerificationPendingUsersTable({
       show('Payment approved successfully', 'success');
       setActiveUser(null);
     },
-    onError: () => {
-      show('Something went wrong', 'error');
+    onError: (error) => {
+      refetch();
+      const message =
+        (isAxiosError(error) && error.response?.data?.message) ||
+        'Something went wrong';
+      show(message, 'error');
     },
   });
 
@@ -67,8 +72,12 @@ export default function PaymentVerificationPendingUsersTable({
       refetch();
       show('Payment rejected successfully', 'success');
     },
-    onError: () => {
-      show('Something went wrong', 'error');
+    onError: (error) => {
+      refetch();
+      const message =
+        (isAxiosError(error) && error.response?.data?.message) ||
+        'Something went wrong';
+      show(message, 'error');
     },
   });
 

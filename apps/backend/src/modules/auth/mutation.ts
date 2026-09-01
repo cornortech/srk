@@ -690,9 +690,26 @@ const rejectPaymentDetails: AppRouteImplementationOrOptions<
       };
     }
 
+    // Atomic, condition-guarded write: only flips status if it is still
+    // PAYMENT_VERIFICATION_PENDING at the moment of the write, so a
+    // concurrent approve/edit request can never be silently overwritten.
+    const updatedUser = await UserModel.findOneAndUpdate(
+      { _id: userExist._id, status: 'PAYMENT_VERIFICATION_PENDING' },
+      { $set: { status: 'PAYMENT_VERIFICATION_REJECTED' } },
+      { new: true }
+    );
+
+    if (!updatedUser) {
+      return {
+        status: 409,
+        body: {
+          success: false,
+          message: 'Payment status changed by another request. Please refresh and try again.',
+        },
+      };
+    }
+
     paymentDetailsExist.rejectionReason = body.reason;
-    userExist.status = 'PAYMENT_VERIFICATION_REJECTED';
-    await userExist.save();
     await paymentDetailsExist.save();
 
     return {
@@ -764,6 +781,28 @@ const approvePaymentDetails: AppRouteImplementationOrOptions<
       };
     }
 
+    // Atomically claim the approval before doing any other work: only
+    // succeeds if status is still PAYMENT_VERIFICATION_PENDING at write
+    // time. This closes the race with editPaymentDetails/reject/a second
+    // concurrent approve click — whichever request wins this atomic write
+    // is the only one that can proceed; everyone else gets a 409 instead
+    // of silently overwriting an already-approved user.
+    const claimedUser = await UserModel.findOneAndUpdate(
+      { _id: userId, status: 'PAYMENT_VERIFICATION_PENDING' },
+      { $set: { status: 'REGISTERED' } },
+      { new: true }
+    );
+
+    if (!claimedUser) {
+      return {
+        status: 409,
+        body: {
+          success: false,
+          message: 'Payment status changed by another request. Please refresh and try again.',
+        },
+      };
+    }
+
     // Process referral earnings if user was referred
     if (userExist.referredBy) {
       try {
@@ -830,21 +869,6 @@ const approvePaymentDetails: AppRouteImplementationOrOptions<
       }
     }
 
-    // Update user status to REGISTERED
-    userExist.status = 'REGISTERED';
-    const saveResult = await userExist.save();
-
-    if (!saveResult) {
-      console.error(`Failed to save user status update for userId: ${userId}`);
-      return {
-        status: 500,
-        body: {
-          success: false,
-          message: 'Failed to update user status',
-        },
-      };
-    }
-
     console.log(`Payment approved successfully for userId: ${userId}, new status: REGISTERED`);
 
     return {
@@ -907,8 +931,25 @@ const editPaymentDetails: AppRouteImplementationOrOptions<
       await paymentDetailsExist.save();
     }
 
-    userExist.status = 'PAYMENT_VERIFICATION_PENDING';
-    await userExist.save();
+    // Atomic, condition-guarded write: only resets status to pending if the
+    // user isn't REGISTERED at write time (not just at the read above), so
+    // a resubmit that lands after a concurrent admin approval can never
+    // silently overwrite that approval.
+    const updatedUser = await UserModel.findOneAndUpdate(
+      { _id: userExist._id, status: { $ne: 'REGISTERED' } },
+      { $set: { status: 'PAYMENT_VERIFICATION_PENDING' } },
+      { new: true }
+    );
+
+    if (!updatedUser) {
+      return {
+        status: 409,
+        body: {
+          success: false,
+          message: 'User is already registered.',
+        },
+      };
+    }
 
     return {
       status: 200,

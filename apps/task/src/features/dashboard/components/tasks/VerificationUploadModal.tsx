@@ -9,6 +9,7 @@ import { api } from '../../../../lib/api';
 import { useTaskAuthStore } from '../../../../store/useTaskAuthStore';
 // Sending image data URLs to backend; backend middleware will upload to R2
 import { Task } from '../../types';
+import { toExternalUrl } from '../../../../lib/cdn';
 
 interface VerificationUploadModalProps {
   task: Task
@@ -187,7 +188,7 @@ export const VerificationUploadModal: React.FC<
                     {task.type === 'like' ? 'Post Link' : 'Profile Link'}
                   </label>
                   <a
-                    href={task.url || '#'}
+                    href={toExternalUrl(task.url)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-sm text-yellow-400 underline break-all"

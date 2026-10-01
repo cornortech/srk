@@ -15,6 +15,7 @@ import {
 import { CARD_BG, GOLD_PRIMARY, GOLD_ACCENT } from '../constants/theme';
 import { api } from '../../../lib/api';
 import { getTaskAssetUrl } from '../../../lib/cdn';
+import { toExternalUrl } from '../../../lib/cdn';
 
 export const TaskDoneContent: React.FC = React.memo(() => {
   type TaskTabType = 'follow' | 'like';
@@ -195,7 +196,7 @@ export const TaskDoneContent: React.FC = React.memo(() => {
                 <div className="flex flex-wrap gap-3">
                   {task.profileUrl && (
                     <a
-                      href={task.profileUrl}
+                      href={toExternalUrl(task.profileUrl)}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center gap-1 text-sm text-blue-400 hover:text-blue-300 transition-colors"
@@ -207,7 +208,7 @@ export const TaskDoneContent: React.FC = React.memo(() => {
 
                   {task.postUrl && (
                     <a
-                      href={task.postUrl}
+                      href={toExternalUrl(task.postUrl)}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center gap-1 text-sm text-blue-400 hover:text-blue-300 transition-colors"

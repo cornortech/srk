@@ -8,6 +8,7 @@ import { DashboardGlassCard } from '../ui/DashboardGlassCard';
 import MagneticButton from '../ui/DashboardMagneticButton';
 import { api } from '../../../../lib/api';
 import { useTaskAuthStore } from '../../../../store/useTaskAuthStore';
+import { toExternalUrl } from '../../../../lib/cdn';
 
 interface PlatformSelectorModalProps {
   type: TaskType;
@@ -241,7 +242,7 @@ export const PlatformSpecificTaskModal: React.FC<
                           </p>
                           <div className="mt-4">
                             <a
-                              href={task.url}
+                              href={toExternalUrl(task.url)}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="text-sm text-yellow-400 underline"

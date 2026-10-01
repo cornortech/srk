@@ -19,6 +19,7 @@ import { GoldButton } from '../components/ui/GoldButton';
 import { CARD_BG } from '../constants/theme';
 import { api } from '../../../lib/api';
 import { getTaskAssetUrl } from '../../../lib/cdn';
+import { toExternalUrl } from '../../../lib/cdn';
 
 export const TaskVerificationContent: React.FC = () => {
   const [viewingUserId, setViewingUserId] = useState<string | null>(null);
@@ -650,7 +651,7 @@ export const TaskVerificationContent: React.FC = () => {
                       "{submission.description}"
                     </p>
                     <a
-                      href={todo.postUrl}
+                      href={toExternalUrl(todo.postUrl)}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-1.5 text-xs text-blue-400 hover:text-blue-300 font-bold transition-colors"

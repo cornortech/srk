@@ -41,6 +41,59 @@ async function withRetry<T>(
   throw lastError;
 }
 
+// A single upload attempt is aborted after this long so a stalled mobile
+// connection fails (and retries) instead of hanging the UI forever.
+// Allows ~10KB/s for large files, never less than 45s.
+const uploadTimeoutMs = (sizeBytes: number) =>
+  Math.max(45_000, Math.round((sizeBytes / 10_240) * 1000));
+
+export type UploadErrorCode =
+  | 'OFFLINE'
+  | 'TIMEOUT'
+  | 'NETWORK'
+  | 'CLOCK_SKEW'
+  | 'STORAGE_DENIED'
+  | 'TOO_LARGE'
+  | 'UNKNOWN';
+
+/**
+ * Turns a raw upload failure into a stable code (for logs/support) and a
+ * message the user can act on.
+ */
+export const describeUploadError = (
+  error: unknown
+): { code: UploadErrorCode; message: string; detail: string } => {
+  const err = error as {
+    name?: string;
+    message?: string;
+    Code?: string;
+    $metadata?: { httpStatusCode?: number };
+  };
+  const detail = `${err?.name ?? 'Error'}: ${err?.message ?? String(error)}`.slice(0, 300);
+  const status = err?.$metadata?.httpStatusCode;
+  const text = `${err?.name ?? ''} ${err?.Code ?? ''} ${err?.message ?? ''}`;
+
+  if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+    return { code: 'OFFLINE', detail, message: 'You appear to be offline. Please reconnect to the internet and try again.' };
+  }
+  if (/RequestTimeTooSkewed/i.test(text)) {
+    return { code: 'CLOCK_SKEW', detail, message: "Your phone's date and time look wrong. Turn on automatic date & time in your phone settings, then try again." };
+  }
+  if (err?.name === 'UploadTimeout' || /timed? ?out|TimeoutError/i.test(text)) {
+    return { code: 'TIMEOUT', detail, message: 'The upload took too long because your connection is slow or unstable. Move to better network coverage (or Wi-Fi) and try again.' };
+  }
+  if (status === 413 || /EntityTooLarge/i.test(text)) {
+    return { code: 'TOO_LARGE', detail, message: 'One of your images is too large. Please choose a smaller photo and try again.' };
+  }
+  if (status === 403 || /AccessDenied|SignatureDoesNotMatch|InvalidAccessKeyId/i.test(text)) {
+    return { code: 'STORAGE_DENIED', detail, message: 'Our file storage rejected the upload. This is a problem on our side, please contact support and share the reference below.' };
+  }
+  if (/Failed to fetch|NetworkError|Network request failed|NetworkingError|Load failed|ERR_/i.test(text)) {
+    return { code: 'NETWORK', detail, message: 'Your internet connection dropped while uploading. Please check your connection and try again.' };
+  }
+  return { code: 'UNKNOWN', detail, message: 'Something went wrong while uploading your image. Please try again, and contact support with the reference below if it keeps happening.' };
+};
+
 export interface UploadProgress {
   [uploadId: string]: {
     progress: number;
@@ -54,9 +107,12 @@ export interface UploadProgress {
 const compressImage = async (file: File): Promise<File> => {
   return new Promise((resolve) => {
     const reader = new FileReader();
+    reader.onerror = () => resolve(file);
     reader.readAsDataURL(file);
     reader.onload = (event) => {
       const img = new Image();
+      // Undecodable images (e.g. HEIC) upload as-is instead of hanging forever.
+      img.onerror = () => resolve(file);
       img.src = event.target?.result as string;
       img.onload = () => {
         const canvas = document.createElement('canvas');
@@ -188,8 +244,21 @@ export const useSRKFileUpload = (appName: string) => {
           if (onProgress) onProgress(percent);
         });
 
-        await upload.done();
-      });
+        let timer: ReturnType<typeof setTimeout> | undefined;
+        const timeout = new Promise<never>((_, reject) => {
+          timer = setTimeout(() => {
+            upload.abort();
+            const e = new Error('Upload timed out');
+            e.name = 'UploadTimeout';
+            reject(e);
+          }, uploadTimeoutMs(fileToUpload.size));
+        });
+        try {
+          await Promise.race([upload.done(), timeout]);
+        } finally {
+          clearTimeout(timer);
+        }
+      }, 3, 1000);
       const url = `${R2_ENDPOINT}/${R2_BUCKET}/${key}`;
 
       setUploadProgress((prev) => ({

@@ -11,6 +11,7 @@ import { apiContract } from '@srk/shared/contracts';
 import { JwtAuthMiddleware } from './utils/middleware';
 import { env } from './config/env';
 import { slowRequestLogger } from './utils/perfMonitor';
+import { clientLogHandler } from './utils/clientLog';
 
 export const app = express();
 
@@ -59,6 +60,9 @@ app.use(
     maxAge: 3600,
   })
 );
+
+// Frontend failure reports (see utils/clientLog.ts)
+app.post('/client-log', clientLogHandler);
 
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerApiDocs));
 

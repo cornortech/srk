@@ -12,7 +12,11 @@ import {
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { SignaturePad } from './SignaturePad';
 import DashboardGradientText from '../ui/DashboardGradientText';
-import { useSRKFileUpload } from '../../../../../../../libs/shared/hooks/src/lib/useSRKFileUpload';
+import {
+  describeUploadError,
+  useSRKFileUpload,
+} from '../../../../../../../libs/shared/hooks/src/lib/useSRKFileUpload';
+import { makeErrorRef, reportClientError } from '../../../../lib/clientErrorLog';
 import { api } from '../../../../lib/api';
 import useTaskAuthStore from '../../../../store/useTaskAuthStore';
 
@@ -49,6 +53,11 @@ export const VerificationModal: React.FC<VerificationModalProps> = ({
     dob: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submissionError, setSubmissionError] = useState<{
+    message: string;
+    code: string;
+    ref: string;
+  } | null>(null);
   const [submissionStatus, setSubmissionStatus] = useState<
     'success' | 'error' | null
   >(null);
@@ -145,10 +154,17 @@ export const VerificationModal: React.FC<VerificationModalProps> = ({
     const ctx = canvas.getContext('2d');
 
     if (ctx) {
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
+      // Downscale + JPEG: a full-resolution PNG selfie is several MB, which
+      // is slow/fragile to upload on mobile data and heavy on low-end phones.
+      const maxSide = 1280;
+      const scale = Math.min(
+        1,
+        maxSide / Math.max(video.videoWidth, video.videoHeight)
+      );
+      canvas.width = Math.round(video.videoWidth * scale);
+      canvas.height = Math.round(video.videoHeight * scale);
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-      const dataUrl = canvas.toDataURL('image/png');
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
       setFormData((f) => ({ ...f, selfieImage: dataUrl }));
       stopCamera();
     }
@@ -179,6 +195,13 @@ export const VerificationModal: React.FC<VerificationModalProps> = ({
     setIsSubmitting(true);
     setSubmissionStatus(null);
 
+    setSubmissionError(null);
+    // Tracks what we were doing so a failure can say exactly which step broke.
+    let step = 'validate';
+    const ref = makeErrorRef();
+    const fileSizes = () =>
+      `doc=${formData.documentFile?.size ?? 0} selfie=${formData.selfieImage?.length ?? 0} sig=${formData.signature?.length ?? 0}`;
+
     try {
       if (
         !formData.documentFile ||
@@ -187,17 +210,23 @@ export const VerificationModal: React.FC<VerificationModalProps> = ({
       ) {
         throw new Error('Missing required files');
       }
-      // 1. Upload files
-      const [docRes, selfieRes, sigRes] = await Promise.all([
-        uploadFile(formData.documentFile!, 'image'),
-        uploadFile(dataURLtoFile(formData.selfieImage!, 'selfie.png'), 'image'),
-        uploadFile(
-          dataURLtoFile(formData.signature!, 'signature.png'),
-          'image'
-        ),
-      ]);
+      // 1. Upload files one at a time: three parallel uploads compete for the
+      // same weak mobile connection and make every one of them slower to fail.
+      step = 'upload-document';
+      const docRes = await uploadFile(formData.documentFile, 'image');
+      step = 'upload-selfie';
+      const selfieRes = await uploadFile(
+        dataURLtoFile(formData.selfieImage, 'selfie.jpg'),
+        'image'
+      );
+      step = 'upload-signature';
+      const sigRes = await uploadFile(
+        dataURLtoFile(formData.signature, 'signature.png'),
+        'image'
+      );
 
       // 2. Submit to backend
+      step = 'submit';
       const response = await submitVerification({
         params: { srkUniversityId: universityID },
         body: {
@@ -217,10 +246,55 @@ export const VerificationModal: React.FC<VerificationModalProps> = ({
           onClose();
         }, 2000);
       } else {
-        throw new Error('Submission failed');
+        const serverMessage = (response.body as { message?: string } | undefined)
+          ?.message;
+        const err = new Error(serverMessage || `Server replied ${response.status}`);
+        (err as Error & { status?: number; fromServer?: boolean }).status =
+          response.status;
+        (err as Error & { fromServer?: boolean }).fromServer = true;
+        throw err;
       }
     } catch (error) {
-      console.error('Verification submission failed:', error);
+      console.error(`Verification submission failed at ${step}:`, error);
+      const serverError = error as Error & { status?: number; fromServer?: boolean };
+      let code: string;
+      let message: string;
+      let detail: string;
+      if (step === 'validate') {
+        code = 'MISSING_FILES';
+        message = 'Please add your document, selfie and signature before submitting.';
+        detail = serverError.message;
+      } else if (step === 'submit') {
+        // Upload worked; the failure is talking to our server.
+        const offline = typeof navigator !== 'undefined' && navigator.onLine === false;
+        code = serverError.fromServer ? `SERVER_${serverError.status}` : offline ? 'OFFLINE' : 'NETWORK';
+        message = serverError.fromServer
+          ? serverError.message
+          : 'Your images uploaded, but we could not reach our server. Check your connection and tap Try Again.';
+        detail = `${serverError.name}: ${serverError.message}`;
+      } else {
+        const described = describeUploadError(error);
+        code = described.code;
+        message = described.message;
+        detail = described.detail;
+      }
+      const stepLabel: Record<string, string> = {
+        'upload-document': 'your ID document',
+        'upload-selfie': 'your selfie',
+        'upload-signature': 'your signature',
+      };
+      const where = stepLabel[step] ? ` (failed on ${stepLabel[step]})` : '';
+      setSubmissionError({ message: `${message}${where}`, code, ref });
+      reportClientError({
+        ref,
+        step,
+        code,
+        message,
+        detail,
+        status: serverError.status,
+        userId: universityID,
+        files: fileSizes(),
+      });
       setSubmissionStatus('error');
       setCurrentStep(totalSteps);
     } finally {
@@ -547,9 +621,16 @@ export const VerificationModal: React.FC<VerificationModalProps> = ({
                 <h3 className="text-xl font-bold text-white mb-2">
                   Submission Failed
                 </h3>
-                <p className="text-gray-400 mb-6">
-                  An error occurred. Please check your connection and try again.
+                <p className="text-gray-400 mb-3">
+                  {submissionError?.message ??
+                    'An error occurred. Please check your connection and try again.'}
                 </p>
+                {submissionError && (
+                  <p className="text-xs text-gray-500 mb-6">
+                    Error code: {submissionError.code} · Reference:{' '}
+                    {submissionError.ref}
+                  </p>
+                )}
                 <button
                   onClick={() => setSubmissionStatus(null)}
                   className="px-6 py-2 bg-linear-to-r from-amber-500 to-yellow-500 text-black font-medium rounded-lg hover:opacity-90 transition"

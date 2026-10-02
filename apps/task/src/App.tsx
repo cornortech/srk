@@ -1,15 +1,11 @@
 import './App.css';
+import { lazy, Suspense } from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
 import { TaskLandingPage } from './pages/landing/LandingPage';
 import { LoginPage } from './pages/auth/LoginPage';
 import { CallbackPage } from './pages/auth/CallbackPage';
-import AdminCallbackPage from './pages/AdminCallbackPage';
-import {
-  AdminDashboard,
-  AfterVerifiedDashboardPage,
-  MainDashboardPage,
-} from './pages';
+import { AfterVerifiedDashboardPage } from './pages/dashboard/AfterVerifiedDashboardPage';
 import AuthInitializer from './components/auth/AuthInitializer';
 import { AdminProtectedRoute } from './components/auth/AdminProtectedRoute';
 import { TermsAndConditions } from './pages/TermsAndConditions';
@@ -22,8 +18,29 @@ import { Features } from './pages/Features';
 import { GettingStarted } from './pages/GettingStarted';
 import { Help } from './pages/Help';
 import { Blog } from './pages/Blog';
-import { BlogPost } from './pages/BlogPost';
-import Articles from './pages/articles/ArticleFirst';
+
+// Admin and rarely-visited pages are split out so regular users don't download
+// (or parse) them on every visit to the dashboard.
+const AdminCallbackPage = lazy(() => import('./pages/AdminCallbackPage'));
+const AdminDashboard = lazy(() =>
+  import('./pages/dashboard/AdminDashboardPage').then((m) => ({
+    default: m.AdminDashboard,
+  }))
+);
+const MainDashboardPage = lazy(() =>
+  import('./pages/dashboard/MainDashboardPage').then((m) => ({
+    default: m.MainDashboardPage,
+  }))
+);
+const BlogPost = lazy(() =>
+  import('./pages/BlogPost').then((m) => ({ default: m.BlogPost }))
+);
+const Articles = lazy(() => import('./pages/articles/ArticleFirst'));
+const lazyPage = (node: React.ReactNode) => (
+  <Suspense fallback={<div className="min-h-screen bg-zinc-950" />}>
+    {node}
+  </Suspense>
+);
 
 const queryClient = new QueryClient();
 
@@ -66,11 +83,11 @@ const router = createBrowserRouter([
   },
   {
     path: '/blog/:slug',
-    element: <BlogPost />,
+    element: lazyPage(<BlogPost />),
   },
   {
     path:'/articles' , 
-    element: <Articles/>
+    element: lazyPage(<Articles />)
   },
   {
     path: '/terms-and-conditions',
@@ -90,7 +107,7 @@ const router = createBrowserRouter([
   },
   {
     path: '/admin/callback',
-    element: <AdminCallbackPage />,
+    element: lazyPage(<AdminCallbackPage />),
   },
   // {
   //   path: '/task/verification',
@@ -103,22 +120,18 @@ const router = createBrowserRouter([
   {
     path: '/admin/dashboard',
     element: (
-      <AdminProtectedRoute>
-        <AdminDashboard />
-      </AdminProtectedRoute>
+      <AdminProtectedRoute>{lazyPage(<AdminDashboard />)}</AdminProtectedRoute>
     ),
   },
   {
     path: '/admin',
     element: (
-      <AdminProtectedRoute>
-        <AdminDashboard />
-      </AdminProtectedRoute>
+      <AdminProtectedRoute>{lazyPage(<AdminDashboard />)}</AdminProtectedRoute>
     ),
   },
   {
     path: '/dashboard',
-    element: <MainDashboardPage />,
+    element: lazyPage(<MainDashboardPage />),
   },
 ]);
 

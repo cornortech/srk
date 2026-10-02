@@ -69,7 +69,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
       {/* Hamburger Button */}
       <button
         onClick={() => setIsMenuOpen(!isMenuOpen)}
-        className="lg:hidden fixed top-6 right-6 z-50 p-2 bg-black/50 backdrop-blur-sm rounded-lg border border-white/10"
+        className="lg:hidden fixed top-6 right-6 z-50 p-2 bg-black/70 rounded-lg border border-white/10"
       >
         <Menu size={24} className="text-white" />
       </button>
@@ -80,7 +80,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="lg:hidden fixed inset-0 z-40 bg-black/90 backdrop-blur-sm"
+          className="lg:hidden fixed inset-0 z-40 bg-black/95"
           onClick={() => setIsMenuOpen(false)}
         >
           <motion.div

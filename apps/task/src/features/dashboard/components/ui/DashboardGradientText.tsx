@@ -1,5 +1,4 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 
 const DashboardGradientText: React.FC<{
   children: React.ReactNode;
@@ -14,17 +13,14 @@ const DashboardGradientText: React.FC<{
   };
 
   return (
-    <motion.span
+    <span
       className={`bg-clip-text text-transparent font-bold ${className}`}
       style={{
         backgroundImage: gradientMap[gradient],
-        backgroundSize: '200% 200%', // 🔥 required for animation
       }}
-      animate={{ backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'] }}
-      transition={{ duration: 5, repeat: Infinity }}
     >
       {children}
-    </motion.span>
+    </span>
   );
 };
 

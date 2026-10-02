@@ -46,7 +46,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
     <div className="min-h-screen">
       <div className="relative z-10">
         {/* Header */}
-        <header className="border-b border-white/10 bg-black/20 backdrop-blur-xl sticky top-0 z-40">
+        <header className="border-b border-white/10 bg-zinc-950/95 sticky top-0 z-40">
           <div className="max-w-7xl mx-auto px-6 py-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -69,16 +69,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               <div className="flex items-center gap-4">
                 {/* Balance Display */}
                 <div className="hidden sm:flex items-center gap-2 px-4 py-2 bg-white/5 rounded-full group">
-                  <motion.div
-                    animate={{ rotate: [0, 360] }}
-                    transition={{
-                      duration: 20,
-                      repeat: Infinity,
-                      ease: 'linear',
-                    }}
-                  >
-                    <Coins size={16} className="text-amber-400" />
-                  </motion.div>
+                  <Coins size={16} className="text-amber-400" />
                   <span className="text-white font-bold">
                     {balance.toLocaleString()}
                   </span>

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { AnimatePresence } from 'framer-motion';
+import { AnimatePresence, MotionGlobalConfig } from 'framer-motion';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import {
   DashboardView,
   RejectedTaskEntry,
@@ -10,7 +11,6 @@ import {
   UserProfile,
 } from 'apps/task/src/features/dashboard/types';
 import { followTasks, likeTasks } from '../../data/dummyDashboardMockData';
-import AnimatedBackground from '../../components/ui/AnimatedBackground';
 import FloatingNotification from '../../features/dashboard/components/ui/DashboardFloatingNotification';
 import { VerificationModal } from '../../features/dashboard/components/verification/VerificationModal';
 import { VerificationView } from '../../features/dashboard/views/VerificationView';
@@ -37,7 +37,55 @@ import { TaskHistoryView } from '../../features/dashboard/views/TaskHistoryView'
 import { PaymentDetailsView } from '../../features/dashboard/views/PaymentDetailsView';
 import { useAuthAffiliateVerification } from '../../../../../libs/shared/hooks/src/lib/useAuthAffiliate';
 
-export const AfterVerifiedDashboardPage: React.FC = () => {
+// The user dashboard re-mounts a view on every sidebar click. With react-query's
+// defaults (staleTime 0, refetch on focus) that meant a loading state and a full
+// refetch each time. This client is scoped to the dashboard only (admin pages keep
+// the app-wide client): data stays fresh for 30s, so revisiting a tab is instant.
+const dashboardQueryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 30_000,
+      gcTime: 5 * 60_000,
+      refetchOnWindowFocus: false,
+      retry: 1,
+    },
+  },
+});
+
+// Static replacement for the old animated background (50 floating particles,
+// 40 pulsing lines and two 128px-blurred orbs running non-stop behind every page).
+const StaticBackground: React.FC = () => (
+  <div
+    className="fixed inset-0 pointer-events-none z-0"
+    style={{
+      background:
+        'radial-gradient(circle at 25% 15%, rgba(182,137,56,0.10), transparent 45%), radial-gradient(circle at 75% 85%, rgba(225,186,115,0.08), transparent 45%)',
+    }}
+  />
+);
+
+// Turns off every framer-motion animation while the user dashboard is mounted so
+// buttons, tab changes and cards respond instantly (also on low-end phones).
+// Scoped: restored on unmount so landing/admin pages are unaffected.
+const useDisableMotion = () => {
+  MotionGlobalConfig.skipAnimations = true;
+  React.useEffect(() => {
+    MotionGlobalConfig.skipAnimations = true;
+    return () => {
+      MotionGlobalConfig.skipAnimations = false;
+    };
+  }, []);
+};
+
+export const AfterVerifiedDashboardPage: React.FC = () => (
+  <QueryClientProvider client={dashboardQueryClient}>
+    <AfterVerifiedDashboardContent />
+  </QueryClientProvider>
+);
+
+const AfterVerifiedDashboardContent: React.FC = () => {
+  useDisableMotion();
+
   const { user, isAuthenticated, isLoading } = useAuthAffiliateVerification();
 
   const [view, setView] = useState<'landing' | 'dashboard'>('landing');
@@ -299,7 +347,6 @@ export const AfterVerifiedDashboardPage: React.FC = () => {
         
         .animate-gradient {
           background-size: 200% auto;
-          animation: gradient 3s ease infinite;
         }
         
         /* Custom scrollbar */
@@ -325,11 +372,6 @@ export const AfterVerifiedDashboardPage: React.FC = () => {
         ::selection {
           background: rgba(182, 137, 56, 0.3);
           color: white;
-        }
-        
-        /* Smooth transitions */
-        * {
-          transition: background-color 0.3s ease, border-color 0.3s ease;
         }
         
         /* Focus styles */
@@ -365,7 +407,7 @@ export const AfterVerifiedDashboardPage: React.FC = () => {
         // title={viewsConfig[dashView].title}
         // desc={viewsConfig[dashView].desc}
         >
-          <AnimatedBackground />
+          <StaticBackground />
           {renderView()}
         </DashboardLayout>
       )}

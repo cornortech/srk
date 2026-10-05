@@ -1,5 +1,6 @@
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { keepPreviousData } from '@tanstack/react-query';
 import { GradientText } from '../components/ui/GradientText';
 import { GlassCard } from '../components/ui/GlassCard';
 import { THEME } from '../constants/theme';
@@ -14,29 +15,61 @@ const platformIcons: Record<string, string> = {
   TikTok: '🎵',
 };
 
+const PAGE_SIZE = 20;
+
 export const TaskMonitoringView = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
-  
+  const [page, setPage] = useState(1);
+
   const { show } = useSRKAlert();
 
   // Debounce search
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(searchQuery);
+      setPage(1);
     }, 500);
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  const { data: taskMonitoringResponse, isLoading, refetch } = api.grow.getTaskMonitoring.useQuery(
-    ['taskMonitoring', debouncedSearch],
+  const {
+    data: taskMonitoringResponse,
+    isLoading,
+    isFetching,
+    refetch,
+  } = api.grow.getTaskMonitoring.useQuery(
+    ['taskMonitoring', debouncedSearch, page],
     {
-      query: debouncedSearch ? { search: debouncedSearch } : undefined,
+      query: {
+        ...(debouncedSearch ? { search: debouncedSearch } : {}),
+        page,
+        limit: PAGE_SIZE,
+      },
+    },
+    {
+      queryKey: ['taskMonitoring', debouncedSearch, page],
+      // Keep showing the current page while the next one loads
+      placeholderData: keepPreviousData,
     }
   );
 
-  const taskMonitoringData = taskMonitoringResponse?.status === 200 ? taskMonitoringResponse.body : [];
+  const taskMonitoringData = useMemo(
+    () =>
+      taskMonitoringResponse?.status === 200
+        ? taskMonitoringResponse.body.data
+        : [],
+    [taskMonitoringResponse]
+  );
+  const totalRecords =
+    taskMonitoringResponse?.status === 200
+      ? taskMonitoringResponse.body.totalRecords
+      : 0;
+  const totalPages =
+    taskMonitoringResponse?.status === 200
+      ? taskMonitoringResponse.body.totalPages
+      : 0;
 
   // Toggle enrollment active status mutation
   const toggleEnrollmentMutation = api.grow.toggleEnrollmentActiveStatus.useMutation({
@@ -152,7 +185,7 @@ export const TaskMonitoringView = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-400 mb-2">
-                    Select Grow User ({taskMonitoringData.length})
+                    Select Grow User ({totalRecords})
                   </label>
                   <div className="space-y-2 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
                     {isLoading ? (
@@ -164,14 +197,11 @@ export const TaskMonitoringView = () => {
                         <p className="text-gray-400">No users found</p>
                       </div>
                     ) : (
-                      taskMonitoringData.map((user, index) => (
-                        <motion.button
+                      taskMonitoringData.map((user) => (
+                        <button
                           key={user._id}
                           onClick={() => handleUserSelect(user._id)}
-                          initial={{ x: -20, opacity: 0 }}
-                          animate={{ x: 0, opacity: 1 }}
-                          transition={{ duration: 0.3, delay: index * 0.05 }}
-                          className={`w-full text-left p-4 rounded-xl transition-all duration-200 ${
+                          className={`w-full text-left p-4 rounded-xl transition-colors duration-150 ${
                             selectedUserId === user._id
                               ? 'bg-gradient-to-r from-[#b68938]/20 to-[#e1ba73]/10 border-2 border-[#b68938] shadow-xl ring-2 ring-[#b68938]/30'
                               : 'bg-white/5 hover:bg-white/10 border border-transparent hover:border-white/10'
@@ -191,18 +221,41 @@ export const TaskMonitoringView = () => {
                             </div>
                           </div>
                           <div className="mt-3 w-full bg-gray-800/50 rounded-full h-2 overflow-hidden">
-                            <motion.div
-                              initial={{ width: 0 }}
-                              animate={{ width: `${user.overallCompletionPercentage}%` }}
-                              transition={{ duration: 1, delay: index * 0.1 }}
+                            <div
                               className="h-2 rounded-full"
-                              style={{ background: THEME.colors.goldGradient }}
+                              style={{
+                                width: `${user.overallCompletionPercentage}%`,
+                                background: THEME.colors.goldGradient,
+                              }}
                             />
                           </div>
-                        </motion.button>
+                        </button>
                       ))
                     )}
                   </div>
+
+                  {totalPages > 1 && (
+                    <div className="flex items-center justify-between pt-3">
+                      <button
+                        onClick={() => setPage((p) => Math.max(1, p - 1))}
+                        disabled={page <= 1 || isFetching}
+                        className="px-3 py-2 rounded-lg text-sm text-white bg-white/5 hover:bg-white/10 disabled:opacity-40 disabled:cursor-not-allowed"
+                      >
+                        ← Prev
+                      </button>
+                      <span className="text-xs text-gray-400">
+                        Page {page} of {totalPages}
+                        {isFetching ? ' · loading…' : ''}
+                      </span>
+                      <button
+                        onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                        disabled={page >= totalPages || isFetching}
+                        className="px-3 py-2 rounded-lg text-sm text-white bg-white/5 hover:bg-white/10 disabled:opacity-40 disabled:cursor-not-allowed"
+                      >
+                        Next →
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -288,7 +341,7 @@ export const TaskMonitoringView = () => {
                             key={index}
                             initial={{ scale: 0.95, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
-                            transition={{ duration: 0.3, delay: index * 0.05 }}
+                            transition={{ duration: 0.15 }}
                             className="p-5 rounded-xl bg-gradient-to-br from-blue-500/10 to-cyan-600/5 border border-blue-500/20"
                           >
                             <div className="flex items-start justify-between mb-3">
@@ -325,7 +378,7 @@ export const TaskMonitoringView = () => {
                                 <motion.div
                                   initial={{ width: 0 }}
                                   animate={{ width: `${profile.percentage}%` }}
-                                  transition={{ duration: 1, delay: index * 0.1 }}
+                                  transition={{ duration: 0.3 }}
                                   className="h-2 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500"
                                 />
                               </div>
@@ -351,7 +404,7 @@ export const TaskMonitoringView = () => {
                             key={index}
                             initial={{ scale: 0.95, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
-                            transition={{ duration: 0.3, delay: 0.2 + index * 0.05 }}
+                            transition={{ duration: 0.15 }}
                             className="p-5 rounded-xl bg-gradient-to-br from-purple-500/10 to-purple-600/5 border border-purple-500/20"
                           >
                             <div className="flex items-start justify-between mb-3">
@@ -400,7 +453,7 @@ export const TaskMonitoringView = () => {
                                 <motion.div
                                   initial={{ width: 0 }}
                                   animate={{ width: `${video.percentage}%` }}
-                                  transition={{ duration: 1, delay: 0.3 + index * 0.1 }}
+                                  transition={{ duration: 0.3 }}
                                   className="h-2 rounded-full bg-gradient-to-r from-purple-500 to-pink-500"
                                 />
                               </div>
@@ -422,7 +475,7 @@ export const TaskMonitoringView = () => {
                   <motion.div
                     initial={{ y: 20, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
-                    transition={{ duration: 0.3, delay: 0.2 }}
+                    transition={{ duration: 0.15 }}
                     className="p-6 rounded-xl bg-gradient-to-br from-[#b68938]/10 to-[#e1ba73]/5 border border-[#b68938]/20"
                   >
                     <h3 className="text-lg font-bold text-white mb-4">Overall Progress</h3>
@@ -473,7 +526,7 @@ export const TaskMonitoringView = () => {
                       <motion.div
                         initial={{ width: 0 }}
                         animate={{ width: `${currentUser.overallCompletionPercentage}%` }}
-                        transition={{ duration: 1.5 }}
+                        transition={{ duration: 0.4 }}
                         className="h-4 rounded-full"
                         style={{ background: THEME.colors.goldGradient }}
                       />

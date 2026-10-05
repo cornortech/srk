@@ -1005,41 +1005,77 @@ const getSrkGrowAffiliateVerificationRequest: AppRouteImplementationOrOptions<
   }
 };
 
+const escapeRegex = (value: string) =>
+  value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+// Completion maths shared by the ranking pass (aggregated sums, all enrollments)
+// and the detail pass (full todo rows, current page only).
+const summariseTaskCompletion = (
+  requiredFollows: number,
+  requiredLikes: number,
+  completedFollows: number,
+  completedLikes: number
+) => {
+  const followPercentage =
+    requiredFollows > 0
+      ? Math.min(100, Math.round((completedFollows / requiredFollows) * 100))
+      : 0;
+  const likePercentage =
+    requiredLikes > 0
+      ? Math.min(100, Math.round((completedLikes / requiredLikes) * 100))
+      : 0;
+
+  let overall = 0;
+  let taskCount = 0;
+  if (requiredFollows > 0) {
+    overall += followPercentage;
+    taskCount++;
+  }
+  if (requiredLikes > 0) {
+    overall += likePercentage;
+    taskCount++;
+  }
+  overall = taskCount > 0 ? Math.round(overall / taskCount) : 0;
+
+  return { followPercentage, likePercentage, overall };
+};
+
 const getTaskMonitoring: AppRouteImplementationOrOptions<
   typeof growContract.getTaskMonitoring
 > = async ({ query }) => {
   try {
     const { search = '' } = query || {};
+    const page = Math.max(1, Number(query?.page ?? 1));
+    const limit = Math.min(100, Math.max(1, Number(query?.limit ?? 20)));
 
-    // Build user filter based on search
-    const userFilter: any = {};
+    const emptyPage = {
+      status: 200 as const,
+      body: { data: [], page, limit, totalRecords: 0, totalPages: 0 },
+    };
 
+    // Build user filter based on search (escaped so "(" etc. cannot break the regex)
+    const userFilter: Record<string, unknown> = {};
     if (search) {
+      const pattern = escapeRegex(search);
       userFilter.$or = [
-        { fullName: { $regex: search, $options: 'i' } },
-        { email: { $regex: search, $options: 'i' } },
+        { fullName: { $regex: pattern, $options: 'i' } },
+        { email: { $regex: pattern, $options: 'i' } },
       ];
     }
+
     // Get all package users (not affiliates)
     const users = await growSocialMediaPackageUserModel
       .find(userFilter)
       .select('_id fullName email status')
       .lean();
 
-    if (users.length === 0) {
-      return {
-        status: 200,
-        body: [],
-      };
-    }
+    if (users.length === 0) return emptyPage;
 
-    const userIds = users.map((u) => u._id);
+    const userById = new Map(users.map((u) => [u._id.toString(), u]));
 
-    // Get enrollments for these users
+    // Enrollments for these users (one query, plus the two batched populates)
     const enrollments = await growSocialMediaPackageEnrollmentModel
-      .find({
-        growSocialMediaPackageUserId: { $in: userIds },
-      })
+      .find({ growSocialMediaPackageUserId: { $in: users.map((u) => u._id) } })
       .populate('growSocialMediaPackageId', 'name')
       .populate(
         'growSocialMediaPackageSubTypeId',
@@ -1047,32 +1083,96 @@ const getTaskMonitoring: AppRouteImplementationOrOptions<
       )
       .lean();
 
-    // Build result array
-    const taskMonitoringData = await Promise.all(
-      enrollments.map(async (enrollment: any) => {
-        const user = users.find(
-          (u) =>
-            u._id.toString() ===
-            enrollment.growSocialMediaPackageUserId.toString()
-        );
+    if (enrollments.length === 0) return emptyPage;
 
-        if (!user) return null;
+    // Completed counts for ALL these enrollments in a single aggregation
+    // (previously one find() per enrollment).
+    const sums = await growPackageTodoModel.aggregate([
+      {
+        $match: {
+          growSocialMediaPackageEnrollmentId: {
+            $in: enrollments.map((e: any) => e._id),
+          },
+        },
+      },
+      {
+        $group: {
+          _id: {
+            enrollment: '$growSocialMediaPackageEnrollmentId',
+            type: '$type',
+          },
+          followCounts: { $sum: '$followCounts' },
+          likeCounts: { $sum: '$likeCounts' },
+        },
+      },
+    ]);
 
-        // Get todo tasks for this enrollment
-        const todos = await growPackageTodoModel
-          .find({
-            growSocialMediaPackageEnrollmentId: enrollment._id,
-          })
-          .lean();
+    const completedByEnrollment = new Map<
+      string,
+      { follows: number; likes: number }
+    >();
+    for (const row of sums) {
+      const key = row._id.enrollment.toString();
+      const entry = completedByEnrollment.get(key) ?? { follows: 0, likes: 0 };
+      if (row._id.type === 'follow') entry.follows += row.followCounts || 0;
+      if (row._id.type === 'like') entry.likes += row.likeCounts || 0;
+      completedByEnrollment.set(key, entry);
+    }
 
-        // Calculate task completion
-        const followTasks = todos.filter((t) => t.type === 'follow');
-        const likeTasks = todos.filter((t) => t.type === 'like');
-
+    // Rank every enrollment by completion (highest first), then page the result
+    const ranked = enrollments
+      .filter((e: any) =>
+        userById.has(e.growSocialMediaPackageUserId.toString())
+      )
+      .map((e: any) => {
+        const completed = completedByEnrollment.get(e._id.toString()) ?? {
+          follows: 0,
+          likes: 0,
+        };
         const requiredFollows =
-          enrollment.growSocialMediaPackageSubTypeId?.noOfFollowers || 0;
-        const requiredLikes =
-          enrollment.growSocialMediaPackageSubTypeId?.noOfLikes || 0;
+          e.growSocialMediaPackageSubTypeId?.noOfFollowers || 0;
+        const requiredLikes = e.growSocialMediaPackageSubTypeId?.noOfLikes || 0;
+        const summary = summariseTaskCompletion(
+          requiredFollows,
+          requiredLikes,
+          completed.follows,
+          completed.likes
+        );
+        return { enrollment: e, requiredFollows, requiredLikes, summary };
+      })
+      .sort((a, b) => b.summary.overall - a.summary.overall);
+
+    const totalRecords = ranked.length;
+    const totalPages = Math.max(1, Math.ceil(totalRecords / limit));
+    const pageItems = ranked.slice((page - 1) * limit, page * limit);
+
+    // Per-video / per-profile detail only for the enrollments on this page
+    const todos = pageItems.length
+      ? await growPackageTodoModel
+          .find({
+            growSocialMediaPackageEnrollmentId: {
+              $in: pageItems.map((i) => i.enrollment._id),
+            },
+          })
+          .lean()
+      : [];
+
+    const todosByEnrollment = new Map<string, typeof todos>();
+    for (const todo of todos) {
+      const key = todo.growSocialMediaPackageEnrollmentId.toString();
+      const list = todosByEnrollment.get(key);
+      if (list) list.push(todo);
+      else todosByEnrollment.set(key, [todo]);
+    }
+
+    const data = pageItems.map(
+      ({ enrollment, requiredFollows, requiredLikes, summary }) => {
+        const user = userById.get(
+          enrollment.growSocialMediaPackageUserId.toString()
+        ) as NonNullable<ReturnType<typeof userById.get>>;
+        const enrollmentTodos = todosByEnrollment.get(enrollment._id.toString()) ?? [];
+        const followTasks = enrollmentTodos.filter((t) => t.type === 'follow');
+        const likeTasks = enrollmentTodos.filter((t) => t.type === 'like');
 
         const completedFollows = followTasks.reduce(
           (sum, task) => sum + task.followCounts,
@@ -1083,26 +1183,9 @@ const getTaskMonitoring: AppRouteImplementationOrOptions<
           0
         );
 
-        const followPercentage =
-          requiredFollows > 0
-            ? Math.min(
-                100,
-                Math.round((completedFollows / requiredFollows) * 100)
-              )
-            : 0;
-
-        const likePercentage =
-          requiredLikes > 0
-            ? Math.min(100, Math.round((completedLikes / requiredLikes) * 100))
-            : 0;
-
-        // Get individual video details for like tasks
         const noOfVideos = enrollment.noOfVideos || likeTasks.length;
         const likesPerVideo =
-          noOfVideos > 0
-            ? Math.ceil(requiredLikes / noOfVideos)
-            : requiredLikes;
-
+          noOfVideos > 0 ? Math.ceil(requiredLikes / noOfVideos) : requiredLikes;
         const videos = likeTasks.map((task) => ({
           postUrl: task.postUrl || '',
           profileUrl: task.profileUrl || '',
@@ -1110,14 +1193,10 @@ const getTaskMonitoring: AppRouteImplementationOrOptions<
           totalRequired: likesPerVideo,
           percentage:
             likesPerVideo > 0
-              ? Math.min(
-                  100,
-                  Math.round((task.likeCounts / likesPerVideo) * 100)
-                )
+              ? Math.min(100, Math.round((task.likeCounts / likesPerVideo) * 100))
               : 0,
         }));
 
-        // Get profile details for follow tasks
         const followsPerProfile =
           followTasks.length > 0
             ? Math.ceil(requiredFollows / followTasks.length)
@@ -1135,22 +1214,6 @@ const getTaskMonitoring: AppRouteImplementationOrOptions<
               : 0,
         }));
 
-        // Calculate overall completion percentage
-        let overallPercentage = 0;
-        let taskCount = 0;
-
-        if (requiredFollows > 0) {
-          overallPercentage += followPercentage;
-          taskCount++;
-        }
-        if (requiredLikes > 0) {
-          overallPercentage += likePercentage;
-          taskCount++;
-        }
-
-        overallPercentage =
-          taskCount > 0 ? Math.round(overallPercentage / taskCount) : 0;
-
         return {
           _id: user._id.toString(),
           fullName: user.fullName,
@@ -1165,34 +1228,27 @@ const getTaskMonitoring: AppRouteImplementationOrOptions<
             follow: {
               total: requiredFollows,
               completed: completedFollows,
-              percentage: followPercentage,
+              percentage: summary.followPercentage,
             },
             like: {
               total: requiredLikes,
               completed: completedLikes,
-              percentage: likePercentage,
+              percentage: summary.likePercentage,
             },
             videos: videos.length > 0 ? videos : undefined,
             profiles: profiles.length > 0 ? profiles : undefined,
           },
-          overallCompletionPercentage: overallPercentage,
+          overallCompletionPercentage: summary.overall,
           isActive: enrollment.isActive || false,
           createdAt:
             enrollment.createdAt?.toISOString() || new Date().toISOString(),
         };
-      })
+      }
     );
-
-    // Filter out nulls and sort by completion percentage
-    const filteredData = taskMonitoringData
-      .filter((data) => data !== null)
-      .sort(
-        (a, b) => b.overallCompletionPercentage - a.overallCompletionPercentage
-      );
 
     return {
       status: 200,
-      body: filteredData,
+      body: { data, page, limit, totalRecords, totalPages },
     };
   } catch (error: any) {
     console.error('Error in getTaskMonitoring:', error);

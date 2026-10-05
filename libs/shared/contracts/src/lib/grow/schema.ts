@@ -453,7 +453,13 @@ export const taskMonitoringUserSchema = z.object({
   createdAt: z.string(),
 });
 
-export const taskMonitoringResponseSchema = z.array(taskMonitoringUserSchema);
+export const taskMonitoringResponseSchema = z.object({
+  data: z.array(taskMonitoringUserSchema),
+  page: z.number(),
+  limit: z.number(),
+  totalRecords: z.number(),
+  totalPages: z.number(),
+});
 
 export type TTaskMonitoringUser = z.infer<typeof taskMonitoringUserSchema>;
 export type TTaskMonitoringResponse = z.infer<

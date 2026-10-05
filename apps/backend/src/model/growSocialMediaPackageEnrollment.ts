@@ -69,6 +69,9 @@ const growSocialMediaPackageEnrollmentSchema =
     }
   );
 
+// Task monitoring looks enrollments up by user
+growSocialMediaPackageEnrollmentSchema.index({ growSocialMediaPackageUserId: 1 });
+
 growSocialMediaPackageEnrollmentSchema.index({
   isActive: 1,
   type: 1,

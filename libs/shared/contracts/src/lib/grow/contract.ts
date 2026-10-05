@@ -360,6 +360,8 @@ export const growContract = c.router({
     query: z
       .object({
         search: z.string().optional(),
+        page: z.coerce.number().int().min(1).optional(),
+        limit: z.coerce.number().int().min(1).max(100).optional(),
       })
       .optional(),
     responses: {

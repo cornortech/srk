@@ -331,24 +331,7 @@ export const PaymentDetailsView: React.FC<PaymentDetailsViewProps> = ({
               )}
             </div>
           </div>
-          {!pendingRequest && (
-            <button
-              onClick={() => {
-                setFormData({
-                  accountHolderName: approvedDetails.accountHolderName,
-                  bankName: approvedDetails.bankName,
-                  accountNumber: approvedDetails.accountNumber,
-                  branchName: approvedDetails.branchName,
-                  qrCodeUrl: approvedDetails.qrCodeUrl,
-                });
-                setQrPreview(getTaskAssetUrl(approvedDetails.qrCodeUrl));
-                setIsEditing(true);
-              }}
-              className="mt-4 px-4 py-2 rounded-lg bg-[#B68938] hover:bg-[#E1BA73] text-black font-medium transition-colors"
-            >
-              Update Payment Details
-            </button>
-          )}
+          {/* No "Update Payment Details" button: approved details are final. */}
         </motion.div>
       )}
 
@@ -558,8 +541,8 @@ export const PaymentDetailsView: React.FC<PaymentDetailsViewProps> = ({
           <li className="flex items-start gap-2">
             <span className="text-blue-500 mt-1">•</span>
             <span>
-              You can update your payment details anytime, but changes require
-              re-verification
+              Once your payment details are approved they cannot be changed
+              here. Contact support if you need to update them
             </span>
           </li>
           <li className="flex items-start gap-2">

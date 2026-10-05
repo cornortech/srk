@@ -1035,7 +1035,12 @@ const reviewPaymentDetailsRequest: AppRouteImplementationOrOptions<
       };
     }
 
-    if (request.status !== 'pending') {
+    // Admins may revoke (reject) an already-approved request so the user can
+    // submit new payment details; no other transition out of a final state is allowed.
+    const isRevokingApproved =
+      request.status === 'approved' && request.isActive && status === 'rejected';
+
+    if (request.status !== 'pending' && !isRevokingApproved) {
       await session.abortTransaction();
       return {
         status: 400,
@@ -1051,6 +1056,9 @@ const reviewPaymentDetailsRequest: AppRouteImplementationOrOptions<
     request.reviewedAt = new Date();
     if (status === 'rejected' && rejectionReason) {
       request.rejectionReason = rejectionReason;
+    }
+    if (isRevokingApproved) {
+      request.isActive = false;
     }
 
     // If approved, mark any previous approved requests as inactive

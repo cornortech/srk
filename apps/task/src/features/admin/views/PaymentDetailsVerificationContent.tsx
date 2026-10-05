@@ -438,17 +438,22 @@ export const PaymentDetailsVerificationContent: React.FC = () => {
               </div>
 
               {/* Actions */}
-              {selectedRequest.status === 'pending' && (
+              {/* Pending: approve/reject. The user's current approved details can also
+                  be rejected so they can resubmit new details. */}
+              {(selectedRequest.status === 'pending' ||
+                (selectedRequest.status === 'approved' && selectedRequest.isActive)) && (
                 <div className="space-y-4">
                   {!actionType ? (
                     <div className="flex gap-4">
-                      <button
-                        onClick={() => setActionType('approve')}
-                        className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-green-600 hover:bg-green-700 rounded-lg transition-colors"
-                      >
-                        <CheckCircle className="w-5 h-5" />
-                        Approve
-                      </button>
+                      {selectedRequest.status === 'pending' && (
+                        <button
+                          onClick={() => setActionType('approve')}
+                          className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-green-600 hover:bg-green-700 rounded-lg transition-colors"
+                        >
+                          <CheckCircle className="w-5 h-5" />
+                          Approve
+                        </button>
+                      )}
                       <button
                         onClick={() => setActionType('reject')}
                         className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-red-600 hover:bg-red-700 rounded-lg transition-colors"

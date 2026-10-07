@@ -8,7 +8,7 @@ import { srkTaskActionSubmissionModel } from '../../../model/task/srkTaskActionS
 import { srkTaskEarningStatementModel } from '../../../model/task/srkTaskEarningStatementModel';
 import { srkTasksEarningsPayoutModel } from '../../../model/task/srkTasksEarningsPayoutModel';
 import { srkTaskOnboardingVerificationRequestModel } from '../../../model/task/srkTaskOnboardingVerificationRequestModel';
-import { IUser } from '../../../model/userModel';
+import { IUser, UserModel } from '../../../model/userModel';
 import { srkTaskUserBalanceModel } from '../../../model/task/srkTaskUserBalanceModel';
 import { growPackageTodoModel } from '../../../model/growPackageTodoModel';
 import { growSocialMediaPackageEnrollmentModel } from '../../../model/growSocialMediaPackageEnrollment';
@@ -1524,9 +1524,18 @@ const getAllSrkTaskUsersForAdmin: AppRouteImplementationOrOptions<
     // Build filter
     const filter: any = {};
     if (search) {
+      // email / phone live on the linked university user, so resolve them first
+      const escaped = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = { $regex: escaped, $options: 'i' };
+      const matchedUsers = await UserModel.find({
+        $or: [{ email: regex }, { phoneNumber: regex }],
+      })
+        .select('_id')
+        .limit(500)
+        .lean();
       filter.$or = [
-        { fullName: { $regex: search, $options: 'i' } },
-        { 'srkUniversityUserId.email': { $regex: search, $options: 'i' } },
+        { fullName: regex },
+        { srkUniversityUserId: { $in: matchedUsers.map((u) => u._id) } },
       ];
     }
     if (isActivated !== undefined) {

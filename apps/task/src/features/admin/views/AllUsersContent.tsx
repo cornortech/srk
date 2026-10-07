@@ -13,6 +13,7 @@ import {
   TrendingUp,
   Filter,
 } from 'lucide-react';
+import { keepPreviousData } from '@tanstack/react-query';
 import { api } from '../../../lib/api';
 
 export const AllUsersContent: React.FC = () => {
@@ -43,10 +44,12 @@ export const AllUsersContent: React.FC = () => {
         isActivated:
           isActivatedFilter !== 'all' ? isActivatedFilter : undefined,
       },
-    }
+    },
+    { placeholderData: keepPreviousData }
   );
 
   const { data, isLoading, error } = queryResult;
+  const isFirstLoad = isLoading && !data;
 
   const users = data?.body?.data || [];
   const totalPages = data?.body?.totalPages || 1;
@@ -78,7 +81,7 @@ export const AllUsersContent: React.FC = () => {
     );
   };
 
-  if (isLoading) {
+  if (isFirstLoad) {
     return (
       <div className="text-center p-10 text-gray-400">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#E1BA73] mx-auto"></div>
@@ -137,7 +140,7 @@ export const AllUsersContent: React.FC = () => {
         />
         <input
           type="text"
-          placeholder="Search by name or email..."
+          placeholder="Search by name, email or phone..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="w-full pl-10 pr-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-[#E1BA73] transition-colors"

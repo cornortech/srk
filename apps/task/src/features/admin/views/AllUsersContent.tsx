@@ -45,7 +45,10 @@ export const AllUsersContent: React.FC = () => {
           isActivatedFilter !== 'all' ? isActivatedFilter : undefined,
       },
     },
-    { placeholderData: keepPreviousData }
+    {
+      queryKey: ['admin-all-users', page, debouncedSearch, isActivatedFilter],
+      placeholderData: keepPreviousData,
+    }
   );
 
   const { data, isLoading, error } = queryResult;

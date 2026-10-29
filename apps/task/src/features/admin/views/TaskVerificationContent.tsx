@@ -670,6 +670,8 @@ export const TaskVerificationContent: React.FC = () => {
                     <img
                       src={getTaskAssetUrl(submission.screenshotUrl)}
                       alt="Verification"
+                      loading="lazy"
+                      decoding="async"
                       className="w-full h-52 object-contain bg-black/50 transition-transform duration-500 group-hover:scale-105"
                     />
                     <a

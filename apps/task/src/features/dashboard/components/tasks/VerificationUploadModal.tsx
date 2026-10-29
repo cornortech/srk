@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useQueryClient } from '@tanstack/react-query';
 import { RefreshCw, Send, Upload, X } from 'lucide-react';
@@ -10,6 +10,7 @@ import { useTaskAuthStore } from '../../../../store/useTaskAuthStore';
 // Sending image data URLs to backend; backend middleware will upload to R2
 import { Task } from '../../types';
 import { toExternalUrl } from '../../../../lib/cdn';
+import { compressScreenshot } from '../../../../lib/compressScreenshot';
 
 interface VerificationUploadModalProps {
   task: Task
@@ -28,8 +29,24 @@ export const VerificationUploadModal: React.FC<
   const [preview, setPreview] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
-  const overallProgress = 0;
+  const [phase, setPhase] = useState<'compressing' | 'sending'>('compressing');
+  const [elapsedSec, setElapsedSec] = useState(0);
   const activeUploads: any[] = [];
+
+  // The request has no byte-level progress, so show elapsed time and say so
+  // when it is slow instead of a bar frozen at 0%.
+  useEffect(() => {
+    if (!isUploading) {
+      setElapsedSec(0);
+      return;
+    }
+    const startedAt = Date.now();
+    const timer = setInterval(
+      () => setElapsedSec(Math.floor((Date.now() - startedAt) / 1000)),
+      1000
+    );
+    return () => clearInterval(timer);
+  }, [isUploading]);
   const { taskUserID } = useTaskAuthStore();
   const submitAction = api.srkTask.srkTaskActionSubmission.useMutation();
   const queryClient = useQueryClient();
@@ -92,15 +109,21 @@ export const VerificationUploadModal: React.FC<
 
     setIsUploading(true);
     setUploadError(null);
+    setPhase('compressing');
 
     try {
+      // Shrink first: the data URL is the whole request body, so on a weak
+      // mobile connection its size is the upload time.
+      const imageDataUrl = await compressScreenshot(screenshot, preview ?? '');
+      setPhase('sending');
+
       // Send the image data URL directly to backend; middleware will handle upload
       submitAction.mutate(
         {
           body: {
             actionTodoId: task.id,
             srkTaskUserId: taskUserID || '',
-            actionVerificationImageUrl: preview, // data URL
+            actionVerificationImageUrl: imageDataUrl, // data URL
           },
         },
         {
@@ -292,25 +315,26 @@ export const VerificationUploadModal: React.FC<
                   <div className="flex items-center gap-2">
                     <div className="animate-spin">⚙️</div>
                     <span className="text-sm font-medium text-amber-400">
-                      Uploading to Firebase...
+                      {phase === 'compressing'
+                        ? 'Preparing your screenshot...'
+                        : 'Sending your proof...'}
                     </span>
                   </div>
                   <span className="text-sm font-bold text-amber-400">
-                    {overallProgress}%
+                    {elapsedSec}s
                   </span>
                 </div>
                 <div className="w-full h-2 bg-zinc-800 rounded-full overflow-hidden">
                   <motion.div
-                    className="h-full bg-gradient-to-r from-amber-500 to-yellow-500"
-                    initial={{ width: '0%' }}
-                    animate={{ width: `${overallProgress}%` }}
-                    transition={{ duration: 0.3 }}
+                    className="h-full w-1/3 bg-gradient-to-r from-amber-500 to-yellow-500"
+                    animate={{ x: ['-100%', '300%'] }}
+                    transition={{ duration: 1.4, repeat: Infinity, ease: 'easeInOut' }}
                   />
                 </div>
                 <p className="text-xs text-zinc-400">
-                  {overallProgress < 100
-                    ? '📤 Compressing & uploading... If stuck at 0%, check your connection'
-                    : '✅ Upload complete, processing submission...'}
+                  {elapsedSec < 20
+                    ? '📤 Please keep this screen open while we send your proof.'
+                    : '⏳ Your connection looks slow. Please keep this screen open; moving to better signal or Wi-Fi will help.'}
                 </p>
               </motion.div>
             )}
@@ -329,9 +353,7 @@ export const VerificationUploadModal: React.FC<
                   >
                     <RefreshCw size={16} />
                   </motion.div>
-                  {overallProgress < 100
-                    ? `Uploading ${overallProgress}%...`
-                    : 'Processing...'}
+                  {phase === 'compressing' ? 'Preparing...' : 'Sending...'}
                 </span>
               ) : uploadError ? (
                 <span className="flex items-center justify-center gap-2">

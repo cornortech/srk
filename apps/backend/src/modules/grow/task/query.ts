@@ -1729,32 +1729,37 @@ const getAllPendingTaskSubmissionsByUserForAdmin: AppRouteImplementationOrOption
         }),
     ]);
 
+    // Every submission here belongs to the same user (filtered by taskUserId),
+    // so the approved count and balance are identical for all of them: look
+    // them up once instead of once per submission.
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const [userApprovedCount, userBalance] = submissions.some(
+      (s: any) => s.taskUserId
+    )
+      ? await Promise.all([
+          srkTaskActionSubmissionModel.countDocuments({
+            taskUserId: taskUserId,
+            status: 'approved',
+            createdAt: { $gte: today },
+          }),
+          srkTaskUserBalanceModel
+            .findOne({
+              $or: [{ taskUserId: taskUserId }, { taskUserId: taskUserId.toString() }],
+            })
+            .lean(),
+        ])
+      : [0, null];
+
     const data = await Promise.all(
       submissions.map(async (submission: any) => {
         const taskUser = submission.taskUserId;
         const todo = submission.growPackageTodoId;
         const enrollment = todo?.growSocialMediaPackageEnrollmentId;
 
-        // Get approved count for today and balance for this user
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-
-        const [approvedCount, balance] = await Promise.all([
-          taskUser
-            ? srkTaskActionSubmissionModel.countDocuments({
-                taskUserId: taskUserId,
-                status: 'approved',
-                createdAt: { $gte: today },
-              })
-            : Promise.resolve(0),
-          taskUser
-            ? srkTaskUserBalanceModel
-                .findOne({
-                  $or: [{ taskUserId: taskUserId }, { taskUserId: taskUserId.toString() }],
-                })
-                .lean()
-            : Promise.resolve(null),
-        ]);
+        const approvedCount = taskUser ? userApprovedCount : 0;
+        const balance = taskUser ? userBalance : null;
 
         return {
           _id: submission._id.toString(),

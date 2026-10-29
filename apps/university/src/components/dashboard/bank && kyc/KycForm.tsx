@@ -12,6 +12,11 @@ import { upsertKycDetailsApi } from "../../../lib/apiClient";
 import { TKyc } from "../../../lib/types/entities";
 import { FileText, CheckCircle, Clock, AlertCircle } from "lucide-react";
 import { getUniversityAssetUrl } from "../../../../src/lib/cdn";
+import {
+  checkImageFile,
+  prepareImageDataUrl,
+  UnreadableImageError,
+} from "../../../lib/kycImage";
 
 const documentTypes = [
   { label: "Citizenship", value: "citizenship" },
@@ -33,14 +38,6 @@ interface KYCFormProps {
   isFirstTab?: boolean;
   isLastTab?: boolean;
 }
-
-const fileToDataURL = (file: File): Promise<string> =>
-  new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onloadend = () => resolve(reader.result as string);
-    reader.onerror = () => reject(new Error("Failed to read file"));
-    reader.readAsDataURL(file);
-  });
 
 export default function KYCForm({
   handleRefetch,
@@ -97,10 +94,20 @@ export default function KYCForm({
       // Refetch user data to update the status
       await handleRefetch();
     },
-    onError: (error: AxiosError<{ message?: string }>) => {
+    onError: (
+      error: AxiosError<{
+        message?: string;
+        bodyErrors?: { issues?: { message?: string }[] };
+      }>
+    ) => {
       console.error("API Error:", error);
+      const data = error.response?.data;
       show(
-        error.response?.data?.message || "Failed to update KYC details",
+        data?.message ||
+          data?.bodyErrors?.issues?.[0]?.message ||
+          (error.response
+            ? "Failed to update KYC details"
+            : "Your connection dropped while uploading. Please try again on a stronger connection or Wi-Fi."),
         "error"
       );
       setLoading(false);
@@ -130,8 +137,8 @@ export default function KYCForm({
     setLoading(true);
 
     try {
-      const frontImageDataURL = frontImage ? await fileToDataURL(frontImage) : undefined;
-      const backImageDataURL = backImage ? await fileToDataURL(backImage) : undefined;
+      const frontImageDataURL = frontImage ? await prepareImageDataUrl(frontImage) : undefined;
+      const backImageDataURL = backImage ? await prepareImageDataUrl(backImage) : undefined;
 
       const leftThumbFingerprintDataURL = leftThumbFingerprint && leftThumbFingerprint.startsWith("data:")
         ? leftThumbFingerprint
@@ -153,17 +160,36 @@ export default function KYCForm({
       });
     } catch (error) {
       console.error("Error preparing submission:", error);
-      show("Failed to process images", "error");
+      show(
+        error instanceof UnreadableImageError
+          ? error.message
+          : "Failed to process images",
+        "error"
+      );
       setLoading(false);
     }
   };
 
-  const handleChangeFileInput = (
+  const handleChangeFileInput = async (
     type: "front" | "back",
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
-    const file = event.target.files?.[0];
+    const input = event.target;
+    const file = input.files?.[0];
     if (file) {
+      // Reject damaged/unreadable photos now, not after a failed upload.
+      try {
+        await checkImageFile(file);
+      } catch (error) {
+        show(
+          error instanceof UnreadableImageError
+            ? error.message
+            : "This photo could not be read. Please choose another photo.",
+          "error"
+        );
+        input.value = "";
+        return;
+      }
       if (type === "back") {
         setBackImage(file);
       } else {

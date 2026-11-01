@@ -21,6 +21,11 @@ import {
   paginatedSrkTaskPaymentDetailsRequestsSchema,
   getSrkTaskPaymentDetailsRequestsQueryParams,
   reviewSrkTaskPaymentDetailsRequestSchema,
+  createSrkTaskRewardSchema,
+  paginatedSrkTaskRewardsSchema,
+  getSrkTaskUserRewardsResponseSchema,
+  paginatedSrkTaskRewardClaimsSchema,
+  getSrkTaskRewardClaimsQueryParams,
 } from './schema';
 
 import { paginatedSrkTaskEarningRequestsByUserSchema } from './schema';
@@ -427,5 +432,76 @@ export const srkTaskContract = c.router({
       500: ErrorSchema,
     },
     summary: 'Approve or reject payment details request',
+  },
+
+  // Reward Endpoints
+  createSrkTaskReward: {
+    method: 'POST',
+    path: '/task/admin/rewards',
+    body: createSrkTaskRewardSchema,
+    responses: {
+      201: SuccessSchema,
+      400: ErrorSchema,
+      500: ErrorSchema,
+    },
+    summary: 'Create a reward (admin)',
+  },
+
+  getAllSrkTaskRewardsForAdmin: {
+    method: 'GET',
+    path: '/task/admin/rewards',
+    query: commonPaginatedQueryParamsSchema.optional(),
+    responses: {
+      200: paginatedSrkTaskRewardsSchema,
+      500: ErrorSchema,
+    },
+    summary: 'Get all rewards with claim counts (admin)',
+  },
+
+  toggleSrkTaskRewardActive: {
+    method: 'POST',
+    path: '/task/admin/rewards/:rewardId/toggle-active',
+    body: z.object({}),
+    responses: {
+      200: SuccessSchema,
+      404: ErrorSchema,
+      500: ErrorSchema,
+    },
+    summary: 'Enable or disable a reward (admin)',
+  },
+
+  getSrkTaskRewardClaimsForAdmin: {
+    method: 'GET',
+    path: '/task/admin/reward-claims',
+    query: getSrkTaskRewardClaimsQueryParams.optional(),
+    responses: {
+      200: paginatedSrkTaskRewardClaimsSchema,
+      500: ErrorSchema,
+    },
+    summary: 'Get users who claimed rewards, with contact details (admin)',
+  },
+
+  getSrkTaskUserRewards: {
+    method: 'GET',
+    path: '/task/user/:userId/rewards',
+    responses: {
+      200: getSrkTaskUserRewardsResponseSchema,
+      404: ErrorSchema,
+      500: ErrorSchema,
+    },
+    summary: 'Get rewards with progress for a task user',
+  },
+
+  claimSrkTaskReward: {
+    method: 'POST',
+    path: '/task/user/:userId/rewards/:rewardId/claim',
+    body: z.object({}),
+    responses: {
+      200: SuccessSchema,
+      400: ErrorSchema,
+      404: ErrorSchema,
+      500: ErrorSchema,
+    },
+    summary: 'Claim a completed reward',
   },
 });

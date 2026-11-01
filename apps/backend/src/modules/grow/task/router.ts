@@ -2,6 +2,7 @@ import { initServer } from '@ts-rest/express';
 import { srkTaskContract } from '@srk/shared/contracts';
 import { srkTaskQueryHandler } from './query';
 import { srkTaskMutationHandler } from './mutation';
+import { srkTaskRewardHandler } from './reward';
 import { createDataUrlUploadMiddleware } from '../../../utils/dataUrlUploadMiddleware';
 
 const s = initServer();
@@ -76,4 +77,5 @@ export const srkTaskRouter = s.router(srkTaskContract, {
     srkTaskMutationHandler.reviewPaymentDetailsRequest,
     claimCoinsForTaskActionSubmission:
     srkTaskMutationHandler.claimCoinsForTaskActionSubmission,
+  ...srkTaskRewardHandler,
 });

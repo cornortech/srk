@@ -4,6 +4,7 @@ import {
   CreditCard,
   DollarSign,
   FileClock,
+  Gift,
   History,
   ListChecks,
   Lock,
@@ -111,6 +112,12 @@ const Sidebar: React.FC<SidebarProps> = ({
       view: 'finance',
       icon: History,
       label: 'Finance History',
+      requiresApproval: true,
+    },
+    {
+      view: 'rewards',
+      icon: Gift,
+      label: 'Rewards',
       requiresApproval: true,
     },
     {

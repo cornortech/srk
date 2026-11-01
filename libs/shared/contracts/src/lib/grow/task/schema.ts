@@ -670,3 +670,81 @@ export const getUserPaymentDetailsResponseSchema = z.object({
 export type TGetUserPaymentDetailsResponse = z.infer<
   typeof getUserPaymentDetailsResponseSchema
 >;
+
+// ---------------------------------------------------------------------------
+// Rewards
+// ---------------------------------------------------------------------------
+
+export const createSrkTaskRewardSchema = z.object({
+  title: z.string().trim().min(1, 'Title is required'),
+  description: z.string().trim().min(1, 'Description is required'),
+  photoUrl: z.string().min(1, 'Photo is required'),
+  requiredCoins: z.number().int().min(1, 'Earning must be at least 1'),
+});
+
+export type TCreateSrkTaskReward = z.infer<typeof createSrkTaskRewardSchema>;
+
+export const srkTaskRewardSchema = z.object({
+  _id: z.string(),
+  title: z.string(),
+  description: z.string(),
+  photoUrl: z.string(),
+  requiredCoins: z.number(),
+  isActive: z.boolean(),
+  claimCount: z.number(),
+  createdAt: z.string(),
+});
+
+export type TSrkTaskReward = z.infer<typeof srkTaskRewardSchema>;
+
+export const paginatedSrkTaskRewardsSchema = commonPaginationResponse.extend({
+  data: z.array(srkTaskRewardSchema),
+});
+
+export const srkTaskUserRewardSchema = z.object({
+  _id: z.string(),
+  title: z.string(),
+  description: z.string(),
+  photoUrl: z.string(),
+  requiredCoins: z.number(),
+  createdAt: z.string(),
+  // false when the user registered before the reward was created
+  isEligible: z.boolean(),
+  currentCoins: z.number(),
+  isCompleted: z.boolean(),
+  isClaimed: z.boolean(),
+  claimedAt: z.string().optional(),
+});
+
+export type TSrkTaskUserReward = z.infer<typeof srkTaskUserRewardSchema>;
+
+export const getSrkTaskUserRewardsResponseSchema = z.object({
+  success: z.boolean(),
+  data: z.array(srkTaskUserRewardSchema),
+});
+
+export const srkTaskRewardClaimSchema = z.object({
+  _id: z.string(),
+  rewardTitle: z.string(),
+  requiredCoins: z.number(),
+  coinsAtClaim: z.number(),
+  user: z.object({
+    _id: z.string(),
+    fullName: z.string(),
+    email: z.string(),
+    phoneNumber: z.string(),
+  }),
+  claimedAt: z.string(),
+});
+
+export type TSrkTaskRewardClaim = z.infer<typeof srkTaskRewardClaimSchema>;
+
+export const paginatedSrkTaskRewardClaimsSchema =
+  commonPaginationResponse.extend({
+    data: z.array(srkTaskRewardClaimSchema),
+  });
+
+export const getSrkTaskRewardClaimsQueryParams =
+  commonPaginatedQueryParamsSchema.extend({
+    rewardId: z.string().optional(),
+  });

@@ -15,6 +15,7 @@ export type DashboardView =
   | 'leaderboard'
   | 'coinExchange'
   | 'paymentDetails'
+  | 'rewards'
   | 'profile'
   | 'payout'
   | 'finance'

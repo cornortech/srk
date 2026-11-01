@@ -11,6 +11,7 @@ import {
   CheckCircle,
   Settings,
   CreditCard,
+  Gift,
 } from 'lucide-react';
 import { useIsDesktop } from '../../features/admin/hooks/useIsDesktop';
 import { NavLink, Payout } from '../../features/admin/types';
@@ -22,6 +23,7 @@ import { TaskVerificationContent } from '../../features/admin/views/TaskVerifica
 import { AllUsersContent } from '../../features/admin/views/AllUsersContent';
 import { LeaderboardContent } from '../../features/admin/views/LeaderboardContent';
 import { AppSettingsContent } from '../../features/admin/views/AppSettingsContent';
+import { RewardsContent } from '../../features/admin/views/RewardsContent';
 import { PaymentDetailsVerificationContent } from '../../features/admin/views/PaymentDetailsVerificationContent';
 import {
   DARK_BG,
@@ -80,6 +82,11 @@ export const AdminDashboard: React.FC = () => {
       name: 'Payment Details',
       icon: CreditCard,
       content: <PaymentDetailsVerificationContent />,
+    },
+    {
+      name: 'Rewards',
+      icon: Gift,
+      content: <RewardsContent />,
     },
     {
       name: 'Leaderboard',

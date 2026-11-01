@@ -34,6 +34,7 @@ import { api } from '../../lib/api';
 import { useTaskAuthStore } from '../../store/useTaskAuthStore';
 import { FinanceHistoryView } from '../../features/dashboard/views/FinanceHistoryView';
 import { TaskHistoryView } from '../../features/dashboard/views/TaskHistoryView';
+import { RewardsView } from '../../features/dashboard/views/RewardsView';
 import { PaymentDetailsView } from '../../features/dashboard/views/PaymentDetailsView';
 import { useAuthAffiliateVerification } from '../../../../../libs/shared/hooks/src/lib/useAuthAffiliate';
 
@@ -301,6 +302,8 @@ const AfterVerifiedDashboardContent: React.FC = () => {
         return <FinanceHistoryView />;
       case 'taskHistory':
         return <TaskHistoryView />;
+      case 'rewards':
+        return <RewardsView addNotification={addNotification} />;
       case 'paymentDetails':
         return <PaymentDetailsView addNotification={addNotification} />;
       default:

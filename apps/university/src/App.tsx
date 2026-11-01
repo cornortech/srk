@@ -77,6 +77,8 @@ const GettingStarted = lazy(() => import('./pages/GettingStarted'));
 const Help = lazy(() => import('./pages/Help'));
 const HowItWorks = lazy(() => import('./pages/HowItWorks'));
 const PaymentGateway = lazy(() => import('./pages/PaymentGateway'));
+const RewardsPage = lazy(() => import('./pages/affiliate/Rewards'));
+const AdminRewardsPage = lazy(() => import('./pages/admin/Rewards'));
 const AdminTourTargetUserPage = lazy(() => import('./pages/admin/TourTargetUserPage'));
 const SRKGrowPortal = lazy(() => import('./pages/dashboard/GrowViewPage'));
 const WhoIsItForPage = lazy(() => import('./pages/learn/WhoIsItFor'));
@@ -187,6 +189,7 @@ const AppRouter = () => {
         { path: 'create-users', element: <Suspense fallback={<PageLoader />}><AddUsers /></Suspense> },
         { path: 'webinar', element: <Suspense fallback={<PageLoader />}><WebinarPage /></Suspense> },
         { path: 'target', element: <Suspense fallback={<PageLoader />}><TourTargetsPage /></Suspense> },
+        { path: 'rewards', element: <Suspense fallback={<PageLoader />}><RewardsPage /></Suspense> },
       ],
     },
     {
@@ -264,6 +267,10 @@ const AppRouter = () => {
         {
           path: 'srk-bonus/:id',
           element: <Suspense fallback={<PageLoader />}><SrkBonusFlowAdminUser /></Suspense>,
+        },
+        {
+          path: 'rewards',
+          element: <Suspense fallback={<PageLoader />}><AdminRewardsPage /></Suspense>,
         },
         {
           path: 'target',

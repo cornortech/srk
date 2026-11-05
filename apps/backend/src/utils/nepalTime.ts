@@ -35,7 +35,9 @@ export const getSubmissionWindow = (now = new Date()) => {
   const closesToday = new Date(
     opensToday.getTime() + SUBMISSION_WINDOW_HOURS * HOUR_MS
   );
-  const isOpen = now >= opensToday && now < closesToday;
+  // Testing only: set CONTENT_REWARD_SKIP_WINDOW=true to ignore the daily window
+  const skipWindow = process.env['CONTENT_REWARD_SKIP_WINDOW'] === 'true';
+  const isOpen = skipWindow || (now >= opensToday && now < closesToday);
   const nextOpensAt =
     now < opensToday ? opensToday : new Date(opensToday.getTime() + 24 * HOUR_MS);
 

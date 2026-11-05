@@ -14,6 +14,7 @@ export interface IUser extends Document {
 
   affiliateEnabled: boolean;
   allowedToAddUsers: boolean;
+  canUploadContent: boolean;
 
   profilePicture?: string;
 
@@ -88,6 +89,11 @@ const userSchema = new mongoose.Schema<IUser>(
       default: false,
     },
     allowedToAddUsers: {
+      type: Boolean,
+      default: false,
+    },
+    // Admin-controlled: may submit content for Content Rewards
+    canUploadContent: {
       type: Boolean,
       default: false,
     },

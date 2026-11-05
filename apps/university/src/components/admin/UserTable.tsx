@@ -7,16 +7,18 @@ import {
   TableCell,
   Button,
   Chip,
+  Switch,
 } from '@nextui-org/react';
 import { TGetAllUsersAdmin, userStatusColorMap } from '../../lib/types';
 import { useState } from 'react';
 import { VerifyKYCModal } from './modal/VerifyKYCModal';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { rejectKycApi, verifyKycApi } from '../../lib/apiClient';
 import useAlert from '../../hooks/useAlert';
 import { AxiosError } from 'axios';
 import { ViewIcon } from 'lucide-react';
 import TablePagination from './Pagination';
+import { contentRewardApi } from '../../lib/api/contentReward/contentReward.api';
 
 interface UserTableProps {
   users: TGetAllUsersAdmin[];
@@ -33,6 +35,23 @@ export default function UserTable({
 }: UserTableProps) {
   const [activeUser, setActiveUser] = useState<TGetAllUsersAdmin | null>(null);
   const { show } = useAlert();
+  const queryClient = useQueryClient();
+
+  const { mutate: setContentPermission, isPending: isUpdatingPermission } =
+    useMutation({
+      mutationFn: (data: { userId: string; canUpload: boolean }) =>
+        contentRewardApi.setUploadPermission(data.userId, data.canUpload),
+      onSuccess: (res: { message: string }) => {
+        show(res.message, 'success');
+        queryClient.invalidateQueries({ queryKey: ['users'] });
+      },
+      onError: (error: AxiosError<{ message: string }>) => {
+        show(
+          error.response?.data?.message || 'Failed to update permission',
+          'error'
+        );
+      },
+    });
 
   const { mutate: approveKycMutation , isPending: isApproving } = useMutation({
     mutationFn: async (data: { userId: string }) => {
@@ -125,6 +144,7 @@ export default function UserTable({
           <TableColumn>Purpose</TableColumn>
           <TableColumn>Contact Number</TableColumn>
           <TableColumn>status</TableColumn>
+          <TableColumn>Content Upload</TableColumn>
           <TableColumn>
             <span className="sr-only">Actions</span>
           </TableColumn>
@@ -150,6 +170,17 @@ export default function UserTable({
                 <Chip variant="flat" color={userStatusColorMap[user.status]}>
                   {user.status} {user.isSelfSignup ? ' (web)' : ''}
                 </Chip>
+              </TableCell>
+              <TableCell>
+                <Switch
+                  size="sm"
+                  aria-label={`Allow ${user.firstName} to upload content`}
+                  isSelected={!!user.canUploadContent}
+                  isDisabled={isUpdatingPermission}
+                  onValueChange={(value) =>
+                    setContentPermission({ userId: user._id, canUpload: value })
+                  }
+                />
               </TableCell>
               <TableCell>
                 <Button

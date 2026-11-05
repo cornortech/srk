@@ -13,6 +13,7 @@ import { growRouter } from './grow/router';
 import { growAffiliateRouter } from './grow/affiliate/router';
 import { apiContract } from '@srk/shared/contracts';
 import { srkTaskRouter } from './grow/task/router';
+import { contentRewardRouter } from './contentReward/router';
 import { appSettingsRouter } from './appSettings/router';
 
 const s = initServer();
@@ -32,4 +33,5 @@ export const router = s.router(apiContract, {
   growAffiliate: growAffiliateRouter,
   srkTask: srkTaskRouter,
   appSettings: appSettingsRouter,
+  contentReward: contentRewardRouter,
 });

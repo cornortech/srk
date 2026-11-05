@@ -266,6 +266,7 @@ const getAllUsers: AppRouteImplementationOrOptions<
           gender: user.gender,
           referralCode: user.referralCode,
           allowedToAddUsers: !!user.allowedToAddUsers,
+          canUploadContent: !!user.canUploadContent,
           purpose: user.purpose || null,
           packageId: {
             _id: user.packageId?._id?.toString() || '',

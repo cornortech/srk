@@ -21,6 +21,7 @@ import {
   Undo2,
   Group,
   Settings,
+  Award,
 } from 'lucide-react';
 
 export type TSidebarItem = {
@@ -89,6 +90,11 @@ export const getAffiliateSidebarItems = (
     { title: 'target', icon: Package, href: '/affiliate/target' },
     // { title: "Rewards", icon: Gift, href: "/affiliate/rewards" },
     // { title: "Invoice", icon: Receipt, href: "/affiliate/invoice" },
+    {
+      title: 'Content Rewards',
+      icon: Award,
+      href: '/affiliate/content-rewards',
+    },
     { title: 'Edit Profile', icon: Edit, href: '/affiliate/edit-profile' },
     { title: 'Webinar', icon: Video, href: '/affiliate/webinar' },
   ];
@@ -147,6 +153,7 @@ export const AdminSidebarItems: TSidebarItem[] = [
     icon: Sparkle,
     href: '/admin/srk-bonus',
   },
+  { title: 'Content Rewards', icon: Award, href: '/admin/content-rewards' },
   {
     title: 'Settings',
     icon: Settings,

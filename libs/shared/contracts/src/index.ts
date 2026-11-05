@@ -35,3 +35,6 @@ export * from './lib/grow/task/schema'
 export * from './lib/appSettings/contract'
 export * from './lib/appSettings/schema'
 
+
+export * from './lib/contentReward/contract'
+export * from './lib/contentReward/schema'

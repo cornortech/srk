@@ -171,6 +171,7 @@ export const getAllUsersSchema = z.array(
     referredAt: z.date(),
     dob: z.date(),
     allowedToAddUsers: z.boolean(),
+    canUploadContent: z.boolean().optional(),
     status: z.string(),
     isSelfSignup: z.boolean(),
     isActive: z.boolean(),

@@ -253,6 +253,7 @@ export type TGetAllUsersAdmin = {
   phoneNumber: string;
   courseEnrollAgreementUrl?: string;
   allowedToAddUsers: boolean;
+  canUploadContent?: boolean;
   isSelfSignup: boolean;
   referredAt: Date;
   dob: Date;

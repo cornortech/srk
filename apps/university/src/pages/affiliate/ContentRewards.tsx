@@ -1,19 +1,29 @@
 "use client";
 
 import { useState } from "react";
-import { Avatar, Button, Card, CardBody, Chip, Input } from "@heroui/react";
 import {
-  Facebook,
-  Instagram,
-  Music2,
+  Avatar,
+  Button,
+  Card,
+  CardBody,
+  Chip,
+  Input,
+  Skeleton,
+} from "@heroui/react";
+import {
+  Award,
+  CalendarDays,
+  CheckCircle2,
+  Clock,
+  ExternalLink,
+  Link2,
+  Medal,
   Plus,
   Trash2,
   Trophy,
-  Twitter,
   Upload,
-  Youtube,
+  X,
 } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import {
@@ -24,21 +34,90 @@ import {
   TContentLeader,
   TContentPlatform,
 } from "../../lib/api/contentReward/contentReward.api";
+import { platformMeta } from "../../lib/api/contentReward/platforms";
 import { getUniversityAssetUrl } from "../../lib/cdn";
 import useAlert from "../../hooks/useAlert";
 
 const MAX_LINKS = 3;
 
-const platformIcons: Record<TContentPlatform, LucideIcon> = {
-  YouTube: Youtube,
-  Facebook: Facebook,
-  Instagram: Instagram,
-  Twitter: Twitter,
-  TikTok: Music2,
-};
+const cardClass = "bg-bgSecondary border border-white/5 rounded-2xl shadow-none";
+
+const medalColor = ["text-[#e1ba73]", "text-gray-300", "text-orange-500"];
 
 const placeholderFor = (platform: TContentPlatform | null) =>
   `https://${platform ? platform.toLowerCase() : "example"}.com/your-content`;
+
+function RankBadge({ rank }: { rank: number }) {
+  if (rank <= 3) {
+    return (
+      <div className="w-9 h-9 rounded-full bg-white/5 flex items-center justify-center shrink-0">
+        <Medal className={`w-5 h-5 ${medalColor[rank - 1]}`} />
+      </div>
+    );
+  }
+  return (
+    <div className="w-9 h-9 rounded-full bg-white/5 flex items-center justify-center shrink-0 text-sm font-bold text-gray-400">
+      #{rank}
+    </div>
+  );
+}
+
+function LeaderRow({ leader }: { leader: TContentLeader }) {
+  const meta = platformMeta[leader.platform];
+  const Icon = meta.icon;
+  const isFirst = leader.rank === 1;
+
+  return (
+    <div
+      className={`flex flex-wrap items-center gap-3 rounded-xl p-3 border ${
+        isFirst
+          ? "border-primary/40 bg-primary/10"
+          : "border-white/5 bg-white/[0.03]"
+      }`}
+    >
+      <RankBadge rank={leader.rank} />
+      <Avatar
+        size="sm"
+        name={leader.userName}
+        src={
+          leader.profilePicture
+            ? getUniversityAssetUrl(leader.profilePicture)
+            : undefined
+        }
+      />
+      <div className="flex-1 min-w-[140px]">
+        <p className="font-semibold text-textPrimary truncate">
+          {leader.userName}
+        </p>
+        {isFirst && (
+          <p className="text-xs text-[#e1ba73] flex items-center gap-1">
+            <Trophy className="w-3 h-3" /> Winner of the week
+          </p>
+        )}
+      </div>
+      <span
+        className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${meta.bg} ${meta.text}`}
+      >
+        <Icon className="w-3.5 h-3.5" />
+        {leader.platform}
+      </span>
+      <div className="flex flex-wrap gap-2">
+        {leader.links.map((link, i) => (
+          <a
+            key={i}
+            href={link}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
+          >
+            Post {i + 1}
+            <ExternalLink className="w-3 h-3" />
+          </a>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export default function ContentRewardsPage() {
   const { show } = useAlert();
@@ -51,7 +130,7 @@ export default function ContentRewardsPage() {
     queryFn: contentRewardApi.getStatus,
   });
 
-  const { data: leaders } = useQuery({
+  const { data: leaders, isLoading: isLoadingLeaders } = useQuery({
     queryKey: ["contentLeaderboard"],
     queryFn: contentRewardApi.getLeaderboard,
   });
@@ -98,59 +177,131 @@ export default function ContentRewardsPage() {
   );
 
   return (
-    <div className="w-full px-4 py-8 space-y-6">
+    <div className="w-full max-w-5xl mx-auto px-4 py-6 space-y-8">
+      {/* Header */}
+      <div className="flex items-center gap-4">
+        <div className="w-12 h-12 rounded-xl bg-custom-gradient flex items-center justify-center shrink-0">
+          <Award className="w-6 h-6 text-black" />
+        </div>
+        <div>
+          <h1 className="text-2xl font-bold text-textPrimary">
+            Content Rewards
+          </h1>
+          <p className="text-sm text-gray-400">
+            Share your content and get picked as a weekly leader.
+          </p>
+        </div>
+      </div>
+
+      {/* Upload (only for users the admin has allowed) */}
       {status?.canUpload && (
         <div className="space-y-4">
-          <Button
-            color="primary"
-            startContent={<Upload className="w-4 h-4" />}
-            onPress={() => setShowForm((v) => !v)}
-          >
-            Upload Content
-          </Button>
+          <div className="flex flex-wrap items-center gap-3">
+            <Button
+              className="bg-custom-gradient text-black font-semibold"
+              startContent={
+                showForm ? (
+                  <X className="w-4 h-4" />
+                ) : (
+                  <Upload className="w-4 h-4" />
+                )
+              }
+              onPress={() => setShowForm((v) => !v)}
+            >
+              {showForm ? "Close" : "Upload Content"}
+            </Button>
+
+            {status.hasSubmittedToday ? (
+              <Chip
+                variant="flat"
+                color="success"
+                startContent={<CheckCircle2 className="w-3.5 h-3.5 ml-1" />}
+              >
+                Submitted today
+              </Chip>
+            ) : status.isWindowOpen ? (
+              <Chip
+                variant="flat"
+                color="success"
+                startContent={<Clock className="w-3.5 h-3.5 ml-1" />}
+              >
+                Submissions open now
+              </Chip>
+            ) : (
+              <Chip
+                variant="flat"
+                color="warning"
+                startContent={<Clock className="w-3.5 h-3.5 ml-1" />}
+              >
+                Opens {formatNepalDateTime(status.nextOpensAt)}
+              </Chip>
+            )}
+          </div>
 
           {showForm && (
-            <Card>
-              <CardBody className="space-y-5">
+            <Card className={cardClass}>
+              <CardBody className="p-5 sm:p-6 space-y-6">
+                {/* Platform */}
                 <div>
-                  <p className="text-sm font-semibold mb-2">
-                    Choose platform *
+                  <p className="text-sm font-semibold text-textPrimary mb-3">
+                    Choose platform <span className="text-primary">*</span>
                   </p>
                   <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
                     {CONTENT_PLATFORMS.map((p) => {
-                      const Icon = platformIcons[p];
+                      const meta = platformMeta[p];
+                      const Icon = meta.icon;
                       const selected = platform === p;
                       return (
                         <button
                           key={p}
                           type="button"
                           onClick={() => setPlatform(p)}
-                          className={`rounded-xl border p-4 flex flex-col items-center gap-2 transition-colors ${
+                          aria-pressed={selected}
+                          className={`relative rounded-xl border p-4 flex flex-col items-center gap-2 transition-all ${
                             selected
-                              ? "border-primary bg-primary/10"
-                              : "border-default-200 hover:bg-default-100"
+                              ? "border-primary bg-primary/10 shadow-[0_0_0_1px_rgba(182,137,56,0.6)]"
+                              : "border-white/5 bg-white/[0.03] hover:bg-white/[0.07]"
                           }`}
                         >
-                          <Icon className="w-6 h-6" />
-                          <span className="text-sm font-medium">{p}</span>
+                          {selected && (
+                            <CheckCircle2 className="w-4 h-4 text-primary absolute top-2 right-2" />
+                          )}
+                          <span
+                            className={`w-11 h-11 rounded-full flex items-center justify-center ${meta.bg}`}
+                          >
+                            <Icon className={`w-5 h-5 ${meta.text}`} />
+                          </span>
+                          <span className="text-sm font-medium text-textPrimary">
+                            {p}
+                          </span>
                         </button>
                       );
                     })}
                   </div>
                 </div>
 
+                {/* Links */}
                 <div className="space-y-3">
-                  <p className="text-sm font-semibold">
-                    POST/VIDEO LINKS * (1 to {MAX_LINKS})
-                  </p>
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-semibold text-textPrimary">
+                      Post / video links <span className="text-primary">*</span>
+                    </p>
+                    <span className="text-xs text-gray-400">
+                      {links.length} of {MAX_LINKS}
+                    </span>
+                  </div>
                   {links.map((link, index) => (
-                    <div key={index} className="flex items-center gap-3">
-                      <span className="text-sm w-14 shrink-0">
-                        Post {index + 1}:
-                      </span>
+                    <div key={index} className="flex items-center gap-2">
                       <Input
                         aria-label={`Post ${index + 1} link`}
+                        variant="bordered"
                         placeholder={placeholderFor(platform)}
+                        startContent={
+                          <span className="flex items-center gap-1.5 text-xs text-gray-400 shrink-0">
+                            <Link2 className="w-4 h-4" />
+                            Post {index + 1}
+                          </span>
+                        }
                         value={link}
                         onChange={(e) =>
                           setLinks((prev) =>
@@ -190,24 +341,29 @@ export default function ContentRewardsPage() {
                   )}
                 </div>
 
-                {status && !canSubmit && (
-                  <p className="text-sm text-warning">
-                    {status.hasSubmittedToday
-                      ? "You have already submitted today. "
-                      : `Submissions are only open ${status.windowLabel}. `}
-                    Next window opens {formatNepalDateTime(status.nextOpensAt)}{" "}
-                    (Nepal time).
-                  </p>
-                )}
-                {status && canSubmit && (
-                  <p className="text-sm text-default-500">
-                    Only one submission per day. Submissions are open{" "}
-                    {status.windowLabel}.
-                  </p>
+                {/* Rules / state */}
+                {status && !canSubmit ? (
+                  <div className="flex items-start gap-2 rounded-xl bg-warning/10 text-warning p-3 text-sm">
+                    <Clock className="w-4 h-4 mt-0.5 shrink-0" />
+                    <span>
+                      {status.hasSubmittedToday
+                        ? "You have already submitted today. "
+                        : `Submissions are only open ${status.windowLabel}. `}
+                      Next window opens{" "}
+                      {formatNepalDateTime(status.nextOpensAt)} (Nepal time).
+                    </span>
+                  </div>
+                ) : (
+                  status && (
+                    <p className="text-xs text-gray-400">
+                      One submission per day. Submissions are open{" "}
+                      {status.windowLabel}.
+                    </p>
+                  )
                 )}
 
                 <Button
-                  color="primary"
+                  className="bg-custom-gradient text-black font-semibold w-full sm:w-auto"
                   isDisabled={!canSubmit}
                   isLoading={isPending}
                   onPress={handleSubmit}
@@ -220,62 +376,47 @@ export default function ContentRewardsPage() {
         </div>
       )}
 
+      {/* Leaderboard */}
       <div className="space-y-4">
-        <h2 className="text-xl font-semibold flex items-center gap-2">
-          <Trophy className="w-5 h-5" /> Leaderboard
+        <h2 className="text-lg font-semibold text-textPrimary flex items-center gap-2">
+          <Trophy className="w-5 h-5 text-primary" />
+          Leaderboard
         </h2>
 
+        {isLoadingLeaders && (
+          <div className="space-y-3">
+            <Skeleton className="h-24 rounded-2xl" />
+            <Skeleton className="h-24 rounded-2xl" />
+          </div>
+        )}
+
         {leaders && leaders.length === 0 && (
-          <p className="text-default-500">
-            No weekly leaders have been announced yet.
-          </p>
+          <Card className={cardClass}>
+            <CardBody className="py-12 text-center">
+              <Trophy className="w-12 h-12 mx-auto mb-3 text-gray-600" />
+              <p className="text-textPrimary font-medium">
+                No leaders announced yet
+              </p>
+              <p className="text-sm text-gray-400">
+                Weekly winners will appear here.
+              </p>
+            </CardBody>
+          </Card>
         )}
 
         {Object.entries(weeks).map(([key, entries]) => {
           const [weekStart, weekEnd] = key.split("|");
           return (
-            <Card key={key}>
-              <CardBody className="space-y-3">
-                <h3 className="font-semibold">
-                  Week: {formatDateKey(weekStart)} - {formatDateKey(weekEnd)}
-                </h3>
+            <Card key={key} className={cardClass}>
+              <CardBody className="p-5 space-y-3">
+                <div className="flex items-center gap-2 text-sm text-gray-400">
+                  <CalendarDays className="w-4 h-4 text-primary" />
+                  <span className="font-semibold text-textPrimary">
+                    {formatDateKey(weekStart)} - {formatDateKey(weekEnd)}
+                  </span>
+                </div>
                 {entries.map((leader) => (
-                  <div
-                    key={leader._id}
-                    className="flex items-center gap-3 rounded-lg bg-default-100 p-3"
-                  >
-                    <span className="w-8 text-center font-bold text-primary">
-                      #{leader.rank}
-                    </span>
-                    <Avatar
-                      size="sm"
-                      name={leader.userName}
-                      src={
-                        leader.profilePicture
-                          ? getUniversityAssetUrl(leader.profilePicture)
-                          : undefined
-                      }
-                    />
-                    <span className="font-medium flex-1 truncate">
-                      {leader.userName}
-                    </span>
-                    <Chip size="sm" variant="flat">
-                      {leader.platform}
-                    </Chip>
-                    <div className="flex gap-2">
-                      {leader.links.map((link, i) => (
-                        <a
-                          key={i}
-                          href={link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-primary text-sm hover:underline"
-                        >
-                          Post {i + 1}
-                        </a>
-                      ))}
-                    </div>
-                  </div>
+                  <LeaderRow key={leader._id} leader={leader} />
                 ))}
               </CardBody>
             </Card>

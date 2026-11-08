@@ -20,7 +20,7 @@ import {
   TableRow,
   Tabs,
 } from "@nextui-org/react";
-import { Trash2 } from "lucide-react";
+import { Award, ExternalLink, Trash2 } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import {
@@ -32,22 +32,38 @@ import {
 } from "../../lib/api/contentReward/contentReward.api";
 import useAlert from "../../hooks/useAlert";
 import ConfirmationModal from "../../components/admin/modal/ConfirmationModal";
+import { platformMeta } from "../../lib/api/contentReward/platforms";
 
 const Links = ({ links }: { links: string[] }) => (
-  <div className="flex flex-col gap-1">
+  <div className="flex flex-wrap gap-1.5">
     {links.map((link, i) => (
       <a
         key={i}
         href={link}
         target="_blank"
         rel="noopener noreferrer"
-        className="text-blue-500 hover:underline max-w-[220px] truncate"
+        title={link}
+        className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary hover:bg-primary/20 transition-colors"
       >
-        {link}
+        Post {i + 1}
+        <ExternalLink className="w-3 h-3" />
       </a>
     ))}
   </div>
 );
+
+const PlatformChip = ({ platform }: { platform: keyof typeof platformMeta }) => {
+  const meta = platformMeta[platform];
+  const Icon = meta.icon;
+  return (
+    <span
+      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${meta.bg} ${meta.text}`}
+    >
+      <Icon className="w-3.5 h-3.5" />
+      {platform}
+    </span>
+  );
+};
 
 export default function AdminContentRewards() {
   const { show } = useAlert();
@@ -140,16 +156,21 @@ export default function AdminContentRewards() {
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold mb-2">Content Rewards</h1>
-        <p className="text-sm text-gray-200">
-          Review submitted content, then pick and rank the leaders of the week
-        </p>
+      <div className="flex items-center gap-4 mb-6">
+        <div className="w-12 h-12 rounded-xl bg-custom-gradient flex items-center justify-center shrink-0">
+          <Award className="w-6 h-6 text-black" />
+        </div>
+        <div>
+          <h1 className="text-2xl font-bold">Content Rewards</h1>
+          <p className="text-sm text-gray-400">
+            Review submitted content, then pick and rank the leaders of the week
+          </p>
+        </div>
       </div>
 
       <Tabs aria-label="Content rewards" className="mb-4">
         <Tab key="submissions" title="Submissions">
-          <div className="flex flex-wrap items-end gap-3 mb-4">
+          <div className="flex flex-wrap items-end gap-3 mb-4 rounded-2xl bg-bgSecondary border border-white/5 p-4">
             <Input
               type="date"
               label="From"
@@ -225,11 +246,15 @@ export default function AdminContentRewards() {
                     <div className="text-xs text-gray-400">{s.user.email}</div>
                   </TableCell>
                   <TableCell>{s.user.phoneNumber}</TableCell>
-                  <TableCell>{s.platform}</TableCell>
+                  <TableCell>
+                    <PlatformChip platform={s.platform} />
+                  </TableCell>
                   <TableCell>
                     <Links links={s.links} />
                   </TableCell>
-                  <TableCell>{formatNepalDateTime(s.submittedAt)}</TableCell>
+                  <TableCell className="text-sm text-gray-300 whitespace-nowrap">
+                    {formatNepalDateTime(s.submittedAt)}
+                  </TableCell>
                   <TableCell>
                     {s.leader ? (
                       <Chip size="sm" color="success" variant="flat">
@@ -273,9 +298,19 @@ export default function AdminContentRewards() {
                   <TableCell>
                     {formatDateKey(l.weekStart)} - {formatDateKey(l.weekEnd)}
                   </TableCell>
-                  <TableCell>#{l.rank}</TableCell>
+                  <TableCell>
+                    <Chip
+                      size="sm"
+                      variant="flat"
+                      color={l.rank === 1 ? "warning" : "default"}
+                    >
+                      #{l.rank}
+                    </Chip>
+                  </TableCell>
                   <TableCell>{l.userName}</TableCell>
-                  <TableCell>{l.platform}</TableCell>
+                  <TableCell>
+                    <PlatformChip platform={l.platform} />
+                  </TableCell>
                   <TableCell>
                     <Links links={l.links} />
                   </TableCell>
@@ -310,9 +345,12 @@ export default function AdminContentRewards() {
             <>
               <ModalHeader>Select as leader</ModalHeader>
               <ModalBody className="space-y-3">
-                <p className="text-sm">
-                  {picked?.user.fullName} - {picked?.platform}
-                </p>
+                {picked && (
+                  <div className="flex items-center justify-between rounded-xl bg-white/5 p-3">
+                    <span className="font-medium">{picked.user.fullName}</span>
+                    <PlatformChip platform={picked.platform} />
+                  </div>
+                )}
                 <Input
                   type="number"
                   min={1}
@@ -322,6 +360,10 @@ export default function AdminContentRewards() {
                   value={rank}
                   onChange={(e) => setRank(e.target.value)}
                 />
+                <p className="text-xs text-gray-400">
+                  Leaders with the same week dates are grouped together on the
+                  leaderboard. Each rank can be used once per week.
+                </p>
                 <Input
                   type="date"
                   label="Week start"

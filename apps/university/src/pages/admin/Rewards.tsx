@@ -23,6 +23,7 @@ import {
   Textarea,
   useDisclosure,
 } from "@nextui-org/react";
+import { Gift, Plus } from "lucide-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { useSRKFileUpload } from "@srk/shared/hooks";
@@ -110,14 +111,23 @@ export default function AdminRewards() {
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h1 className="text-2xl font-bold mb-2">Rewards</h1>
-          <p className="text-sm text-gray-200">
-            Create rewards and contact users who claimed them
-          </p>
+      <div className="flex flex-wrap justify-between items-center gap-4 mb-6">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-xl bg-custom-gradient flex items-center justify-center shrink-0">
+            <Gift className="w-6 h-6 text-black" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold">Rewards</h1>
+            <p className="text-sm text-gray-400">
+              Create rewards and contact users who claimed them
+            </p>
+          </div>
         </div>
-        <Button color="primary" size="sm" onPress={onOpen}>
+        <Button
+          className="bg-custom-gradient text-black font-semibold"
+          startContent={<Plus className="w-4 h-4" />}
+          onPress={onOpen}
+        >
           Add Reward
         </Button>
       </div>
@@ -151,10 +161,18 @@ export default function AdminRewards() {
               {(claims?.data ?? []).map((claim, index) => (
                 <TableRow key={claim._id}>
                   <TableCell>{(claimsPage - 1) * 10 + index + 1}</TableCell>
-                  <TableCell>{claim.user.fullName}</TableCell>
-                  <TableCell>{claim.user.phoneNumber}</TableCell>
+                  <TableCell className="font-medium">
+                    {claim.user.fullName}
+                  </TableCell>
+                  <TableCell className="whitespace-nowrap">
+                    {claim.user.phoneNumber}
+                  </TableCell>
                   <TableCell>{claim.user.email}</TableCell>
-                  <TableCell>{claim.rewardTitle}</TableCell>
+                  <TableCell>
+                    <Chip size="sm" variant="flat" color="warning">
+                      {claim.rewardTitle}
+                    </Chip>
+                  </TableCell>
                   <TableCell>
                     {claim.earningAtClaim.toLocaleString()} /{" "}
                     {claim.requiredEarning.toLocaleString()}
@@ -201,13 +219,15 @@ export default function AdminRewards() {
                     <Image
                       src={getUniversityAssetUrl(reward.photoUrl)}
                       alt={reward.title}
-                      className="w-20 h-12 object-cover"
+                      className="w-20 h-12 object-cover rounded-lg"
                       width={80}
                       height={48}
                     />
                   </TableCell>
                   <TableCell>{reward.title}</TableCell>
-                  <TableCell>{reward.requiredEarning.toLocaleString()}</TableCell>
+                  <TableCell className="font-semibold text-[#e1ba73]">
+                    Nrs. {reward.requiredEarning.toLocaleString()}
+                  </TableCell>
                   <TableCell>{reward.claimCount}</TableCell>
                   <TableCell>
                     <Chip

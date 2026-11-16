@@ -14,6 +14,12 @@ const serverError = (error: unknown, message: string) => {
   };
 };
 
+// A user can use rewards only for this many days after registering
+const REWARD_WINDOW_DAYS = 80;
+const DAY_MS = 24 * 60 * 60 * 1000;
+const getWindowEnd = (registeredAt: Date) =>
+  new Date(registeredAt.getTime() + REWARD_WINDOW_DAYS * DAY_MS);
+
 // Same number the affiliate sees as "all time earnings" on the Earning page
 const getAllTimeEarning = async (userId: string) => {
   const balance = await balanceModel.findOne({ userId }).lean();
@@ -182,6 +188,10 @@ const getMyRewards: AppRouteImplementationOrOptions<
         const claim = claimByReward.get(r._id.toString());
         // Only users who registered after the reward was created qualify
         const isEligible = user.createdAt > (r as any).createdAt;
+        // ...and only within 80 days of their registration (already-claimed
+        // rewards stay claimed)
+        const windowEnd = getWindowEnd(user.createdAt);
+        const isExpired = isEligible && !claim && new Date() > windowEnd;
         return {
           _id: r._id.toString(),
           title: r.title,
@@ -190,8 +200,11 @@ const getMyRewards: AppRouteImplementationOrOptions<
           requiredEarning: r.requiredEarning,
           createdAt: (r as any).createdAt.toISOString(),
           isEligible,
+          isExpired,
+          expiresAt: windowEnd.toISOString(),
           currentEarning,
-          isCompleted: isEligible && currentEarning >= r.requiredEarning,
+          isCompleted:
+            isEligible && !isExpired && currentEarning >= r.requiredEarning,
           isClaimed: !!claim,
           claimedAt: (claim as any)?.createdAt.toISOString(),
         };
@@ -226,6 +239,16 @@ const claimReward: AppRouteImplementationOrOptions<
         body: {
           success: false,
           message: 'This reward is not available for your account',
+        },
+      };
+    }
+
+    if (new Date() > getWindowEnd(user.createdAt)) {
+      return {
+        status: 400,
+        body: {
+          success: false,
+          message: `Time out. Rewards can only be claimed within ${REWARD_WINDOW_DAYS} days of registration`,
         },
       };
     }

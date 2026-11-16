@@ -35,6 +35,10 @@ export const userRewardSchema = z.object({
   createdAt: z.string(),
   // false when the user registered before the reward was created
   isEligible: z.boolean(),
+  // eligible user whose 80-day window after registration has ended
+  isExpired: z.boolean(),
+  // end of the user's 80-day window (ISO string)
+  expiresAt: z.string(),
   currentEarning: z.number(),
   isCompleted: z.boolean(),
   isClaimed: z.boolean(),

@@ -1,7 +1,15 @@
 "use client";
 
 import { Button, Card, CardBody, Chip, Progress, Skeleton } from "@heroui/react";
-import { CheckCircle2, Gift, Lock, PartyPopper, Target } from "lucide-react";
+import {
+  CheckCircle2,
+  Clock,
+  Gift,
+  Lock,
+  PartyPopper,
+  Target,
+  TimerOff,
+} from "lucide-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { rewardApi, TUserReward } from "../../lib/api/reward/reward.api";
@@ -16,7 +24,26 @@ const percentOf = (reward: TUserReward) =>
 const cardClass =
   "bg-bgSecondary border border-white/5 rounded-2xl shadow-none overflow-hidden";
 
+const formatDate = (iso: string) =>
+  new Date(iso).toLocaleDateString("en-US", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+
 function StateChip({ reward }: { reward: TUserReward }) {
+  if (reward.isEligible && reward.isExpired) {
+    return (
+      <Chip
+        size="sm"
+        variant="flat"
+        color="danger"
+        startContent={<TimerOff className="w-3 h-3 ml-1" />}
+      >
+        Time out
+      </Chip>
+    );
+  }
   if (!reward.isEligible) {
     return (
       <Chip
@@ -118,10 +145,10 @@ export default function RewardsPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {(rewards ?? []).map((reward) => {
           const percent = percentOf(reward);
-          const remaining = Math.max(
-            reward.requiredEarning - reward.currentEarning,
-            0
-          );
+          // Whole numbers only (e.g. 540.059 -> 540); round down so we never
+          // show more earning than the user actually has
+          const earned = Math.floor(reward.currentEarning);
+          const remaining = Math.max(reward.requiredEarning - earned, 0);
 
           return (
             <Card
@@ -135,7 +162,9 @@ export default function RewardsPage() {
                   alt={reward.title}
                   loading="lazy"
                   className={`w-full aspect-video object-cover ${
-                    reward.isEligible ? "" : "grayscale opacity-50"
+                    reward.isEligible && !reward.isExpired
+                      ? ""
+                      : "grayscale opacity-50"
                   }`}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-bgSecondary via-transparent to-transparent" />
@@ -158,14 +187,23 @@ export default function RewardsPage() {
                   </p>
                 </div>
 
-                {reward.isEligible ? (
+                {reward.isExpired ? (
+                  <div className="flex items-start gap-2 rounded-xl bg-danger/10 p-3 text-sm text-danger-300">
+                    <TimerOff className="w-4 h-4 mt-0.5 shrink-0" />
+                    <span>
+                      Time out. This reward could only be claimed within 80 days
+                      of your registration, which ended on{" "}
+                      {formatDate(reward.expiresAt)}.
+                    </span>
+                  </div>
+                ) : reward.isEligible ? (
                   <>
                     <div className="space-y-2">
                       <div className="flex justify-between text-xs">
                         <span className="text-gray-400">
                           Nrs.{" "}
                           {Math.min(
-                            reward.currentEarning,
+                            earned,
                             reward.requiredEarning
                           ).toLocaleString()}{" "}
                           / {reward.requiredEarning.toLocaleString()}
@@ -189,6 +227,13 @@ export default function RewardsPage() {
                         </p>
                       )}
                     </div>
+
+                    {!reward.isClaimed && (
+                      <p className="flex items-center gap-1.5 text-xs text-gray-400">
+                        <Clock className="w-3.5 h-3.5" />
+                        Claim before {formatDate(reward.expiresAt)}
+                      </p>
+                    )}
 
                     {reward.isClaimed ? (
                       <div className="flex items-center justify-center gap-2 rounded-xl bg-success/10 text-success py-2.5 font-semibold">

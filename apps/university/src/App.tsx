@@ -79,6 +79,8 @@ const HowItWorks = lazy(() => import('./pages/HowItWorks'));
 const PaymentGateway = lazy(() => import('./pages/PaymentGateway'));
 const ContentRewardsPage = lazy(() => import('./pages/affiliate/ContentRewards'));
 const AdminContentRewardsPage = lazy(() => import('./pages/admin/ContentRewards'));
+const RewardsPage = lazy(() => import('./pages/affiliate/Rewards'));
+const AdminRewardsPage = lazy(() => import('./pages/admin/Rewards'));
 const AdminTourTargetUserPage = lazy(() => import('./pages/admin/TourTargetUserPage'));
 const SRKGrowPortal = lazy(() => import('./pages/dashboard/GrowViewPage'));
 const WhoIsItForPage = lazy(() => import('./pages/learn/WhoIsItFor'));
@@ -190,6 +192,7 @@ const AppRouter = () => {
         { path: 'webinar', element: <Suspense fallback={<PageLoader />}><WebinarPage /></Suspense> },
         { path: 'target', element: <Suspense fallback={<PageLoader />}><TourTargetsPage /></Suspense> },
         { path: 'content-rewards', element: <Suspense fallback={<PageLoader />}><ContentRewardsPage /></Suspense> },
+        { path: 'rewards', element: <Suspense fallback={<PageLoader />}><RewardsPage /></Suspense> },
       ],
     },
     {
@@ -271,6 +274,10 @@ const AppRouter = () => {
         {
           path: 'content-rewards',
           element: <Suspense fallback={<PageLoader />}><AdminContentRewardsPage /></Suspense>,
+        },
+        {
+          path: 'rewards',
+          element: <Suspense fallback={<PageLoader />}><AdminRewardsPage /></Suspense>,
         },
         {
           path: 'target',

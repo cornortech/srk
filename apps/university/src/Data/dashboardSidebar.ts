@@ -88,7 +88,7 @@ export const getAffiliateSidebarItems = (
     { title: 'bank', icon: DollarSign, href: '/affiliate/bank' },
     { title: 'Payout', icon: DollarSign, href: '/affiliate/payout' },
     { title: 'target', icon: Package, href: '/affiliate/target' },
-    // { title: "Rewards", icon: Gift, href: "/affiliate/rewards" },
+    { title: 'Rewards', icon: Gift, href: '/affiliate/rewards' },
     // { title: "Invoice", icon: Receipt, href: "/affiliate/invoice" },
     {
       title: 'Content Rewards',
@@ -154,6 +154,7 @@ export const AdminSidebarItems: TSidebarItem[] = [
     href: '/admin/srk-bonus',
   },
   { title: 'Content Rewards', icon: Award, href: '/admin/content-rewards' },
+  { title: 'Rewards', icon: Gift, href: '/admin/rewards' },
   {
     title: 'Settings',
     icon: Settings,

@@ -8,7 +8,7 @@ import swaggerApiDocs from './config/swagger';
 import { router } from './modules';
 import ssoRouter from './modules/sso/router';
 import { apiContract } from '@srk/shared/contracts';
-import { JwtAuthMiddleware } from './utils/middleware';
+import { JwtAuthMiddleware, JwtAdminMiddleware } from './utils/middleware';
 import { env } from './config/env';
 import { slowRequestLogger } from './utils/perfMonitor';
 import { clientLogHandler } from './utils/clientLog';
@@ -71,6 +71,10 @@ app.use(ssoRouter);
 // Apply JWT middleware to protected tour endpoints
 app.use('/tour/targets', JwtAuthMiddleware);
 // app.use('/tour/active-achievements', JwtAuthMiddleware);
+
+// Rewards: users need a session, admin endpoints need an admin session
+app.use('/reward/my', JwtAuthMiddleware);
+app.use('/reward/admin', JwtAuthMiddleware, JwtAdminMiddleware);
 
 createExpressEndpoints(apiContract, router, app);
 // cronJobInit();

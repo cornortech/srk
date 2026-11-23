@@ -13,6 +13,7 @@ import { taskContract } from './task/contract';
 import { growAffiliateContract } from './grow/affiliate/contract';
 import { srkTaskContract } from './grow/task/contract';
 import { contentRewardContract } from './contentReward/contract';
+import { rewardContract } from './reward/contract';
 import { appSettingsContract } from './appSettings/contract';
 
 const c = initContract();
@@ -33,4 +34,5 @@ export const apiContract = c.router({
   srkTask: srkTaskContract,
   appSettings: appSettingsContract,
   contentReward: contentRewardContract,
+  reward: rewardContract,
 });

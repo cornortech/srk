@@ -38,3 +38,5 @@ export * from './lib/appSettings/schema'
 
 export * from './lib/contentReward/contract'
 export * from './lib/contentReward/schema'
+export * from './lib/reward/contract'
+export * from './lib/reward/schema'

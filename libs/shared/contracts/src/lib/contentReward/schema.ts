@@ -50,9 +50,24 @@ export const contentLeaderSchema = z.object({
   profilePicture: z.string().nullable().optional(),
   platform: contentPlatformSchema,
   links: z.array(z.string()),
+  postImage: z.string().nullable().optional(),
+  rewardAmount: z.number().optional(),
 });
 
 export const contentLeadersSchema = z.array(contentLeaderSchema);
+
+export const contentRewardStatementSchema = z.array(
+  z.object({
+    _id: z.string(),
+    amount: z.number(),
+    rank: z.number(),
+    weekStart: z.string(),
+    weekEnd: z.string(),
+    platform: contentPlatformSchema,
+    // When the admin confirmed the reward and it reached the user's earnings
+    creditedAt: z.string(),
+  })
+);
 
 export const getContentSubmissionsQuerySchema =
   commonPaginatedQueryParamsSchema.extend({
@@ -76,6 +91,7 @@ export const adminContentSubmissionSchema = z.object({
       rank: z.number(),
       weekStart: z.string(),
       weekEnd: z.string(),
+      rewardAmount: z.number().optional(),
     })
     .nullable(),
 });
@@ -87,9 +103,14 @@ export const paginatedContentSubmissionsSchema =
 
 export const selectContentLeaderSchema = z.object({
   submissionId: z.string(),
-  rank: z.number().int().min(1).max(100),
+  // Only 1st, 2nd and 3rd place are selectable
+  rank: z.number().int().min(1).max(3),
   weekStart: dateKeySchema,
   weekEnd: dateKeySchema,
+  // Image data URL from the admin form; the upload middleware swaps it for an R2 key
+  postImage: z.string().optional(),
+  // Credited to the user's earnings; 0/omitted = no payment
+  rewardAmount: z.number().min(0).max(1_000_000).optional(),
 });
 
 export const setContentPermissionSchema = z.object({

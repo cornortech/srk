@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { ErrorSchema, SuccessSchema } from '../common';
 import {
   contentLeadersSchema,
+  contentRewardStatementSchema,
   contentSubmissionStatusSchema,
   getContentSubmissionsQuerySchema,
   paginatedContentSubmissionsSchema,
@@ -42,6 +43,17 @@ export const contentRewardContract = c.router({
     path: '/content-reward/user/leaderboard',
     responses: { 200: contentLeadersSchema, 500: ErrorSchema },
     summary: 'Weekly content reward leaders',
+  },
+
+  getContentRewardStatement: {
+    method: 'GET',
+    path: '/content-reward/user/statement',
+    responses: {
+      200: contentRewardStatementSchema,
+      401: ErrorSchema,
+      500: ErrorSchema,
+    },
+    summary: "The user's earnings received from content rewards",
   },
 
   // ---- admin ----

@@ -26,6 +26,18 @@ export type TContentLeader = {
   profilePicture?: string | null;
   platform: TContentPlatform;
   links: string[];
+  postImage?: string | null;
+  rewardAmount?: number;
+};
+
+export type TRewardStatementItem = {
+  _id: string;
+  amount: number;
+  rank: number;
+  weekStart: string;
+  weekEnd: string;
+  platform: TContentPlatform;
+  creditedAt: string;
 };
 
 export type TAdminContentSubmission = {
@@ -34,7 +46,12 @@ export type TAdminContentSubmission = {
   platform: TContentPlatform;
   links: string[];
   submittedAt: string;
-  leader: { rank: number; weekStart: string; weekEnd: string } | null;
+  leader: {
+    rank: number;
+    weekStart: string;
+    weekEnd: string;
+    rewardAmount?: number;
+  } | null;
 };
 
 export type TPaginatedSubmissions = {
@@ -56,6 +73,9 @@ const submitContent = async (data: {
 const getLeaderboard = async (): Promise<TContentLeader[]> =>
   (await apiClient.get("/content-reward/user/leaderboard")).data;
 
+const getRewardStatement = async (): Promise<TRewardStatementItem[]> =>
+  (await apiClient.get("/content-reward/user/statement")).data;
+
 const getSubmissionsForAdmin = async (params: {
   page: number;
   from?: string;
@@ -72,6 +92,8 @@ const selectLeader = async (data: {
   rank: number;
   weekStart: string;
   weekEnd: string;
+  postImage?: string;
+  rewardAmount?: number;
 }) => (await apiClient.post("/content-reward/admin/leaders", data)).data;
 
 const getLeadersForAdmin = async (): Promise<TContentLeader[]> =>
@@ -92,6 +114,7 @@ export const contentRewardApi = {
   getStatus,
   submitContent,
   getLeaderboard,
+  getRewardStatement,
   getSubmissionsForAdmin,
   selectLeader,
   getLeadersForAdmin,

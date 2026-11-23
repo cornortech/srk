@@ -17,8 +17,8 @@ import {
   Clock,
   ExternalLink,
   Link2,
-  Medal,
   Plus,
+  Wallet,
   Trash2,
   Trophy,
   Upload,
@@ -42,66 +42,90 @@ const MAX_LINKS = 3;
 
 const cardClass = "bg-bgSecondary border border-white/5 rounded-2xl shadow-none";
 
-const medalColor = ["text-[#e1ba73]", "text-gray-300", "text-orange-500"];
-
 const placeholderFor = (platform: TContentPlatform | null) =>
   `https://${platform ? platform.toLowerCase() : "example"}.com/your-content`;
 
-function RankBadge({ rank }: { rank: number }) {
-  if (rank <= 3) {
-    return (
-      <div className="w-9 h-9 rounded-full bg-white/5 flex items-center justify-center shrink-0">
-        <Medal className={`w-5 h-5 ${medalColor[rank - 1]}`} />
-      </div>
-    );
-  }
-  return (
-    <div className="w-9 h-9 rounded-full bg-white/5 flex items-center justify-center shrink-0 text-sm font-bold text-gray-400">
-      #{rank}
-    </div>
-  );
-}
+// Same look as the earning leaderboard's RankCard: one card per place
+const badgeColor: Record<number, string> = {
+  1: "bg-yellow-400",
+  2: "bg-orange-300",
+  3: "bg-gray-200",
+};
 
-function LeaderRow({ leader }: { leader: TContentLeader }) {
+function LeaderCard({ leader }: { leader: TContentLeader }) {
   const meta = platformMeta[leader.platform];
   const Icon = meta.icon;
-  const isFirst = leader.rank === 1;
+  const imageUrl = leader.postImage ? getUniversityAssetUrl(leader.postImage) : "";
 
   return (
-    <div
-      className={`flex flex-wrap items-center gap-3 rounded-xl p-3 border ${
-        isFirst
-          ? "border-primary/40 bg-primary/10"
-          : "border-white/5 bg-white/[0.03]"
+    <Card
+      className={`bg-bgSecondary p-4 relative ${
+        leader.rank === 1 ? "border border-primary/40" : "border border-white/5"
       }`}
     >
-      <RankBadge rank={leader.rank} />
-      <Avatar
-        size="sm"
-        name={leader.userName}
-        src={
-          leader.profilePicture
-            ? getUniversityAssetUrl(leader.profilePicture)
-            : undefined
-        }
-      />
-      <div className="flex-1 min-w-[140px]">
-        <p className="font-semibold text-textPrimary truncate">
-          {leader.userName}
-        </p>
-        {isFirst && (
+      {/* Position badge */}
+      <div className="flex justify-end mb-2">
+        <div
+          className={`w-8 h-8 flex items-center justify-center rounded-lg ${
+            badgeColor[leader.rank] ?? "bg-gray-200"
+          }`}
+        >
+          <span className="text-sm font-bold text-blue-900">{leader.rank}</span>
+        </div>
+      </div>
+
+      <div className="flex flex-col items-center text-center gap-2">
+        <Avatar
+          name={leader.userName}
+          className="w-20 h-20"
+          src={
+            leader.profilePicture
+              ? getUniversityAssetUrl(leader.profilePicture)
+              : undefined
+          }
+        />
+        <h3 className="text-white font-medium italic">{leader.userName}</h3>
+        {leader.rank === 1 && (
           <p className="text-xs text-[#e1ba73] flex items-center gap-1">
             <Trophy className="w-3 h-3" /> Winner of the week
           </p>
         )}
       </div>
-      <span
-        className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${meta.bg} ${meta.text}`}
-      >
-        <Icon className="w-3.5 h-3.5" />
-        {leader.platform}
-      </span>
-      <div className="flex flex-wrap gap-2">
+
+      {imageUrl && (
+        <a
+          href={imageUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="block mt-4"
+        >
+          <img
+            src={imageUrl}
+            alt={`${leader.userName}'s post`}
+            loading="lazy"
+            className="w-full max-h-64 object-cover rounded-xl border border-white/10"
+          />
+        </a>
+      )}
+
+      <div className="flex justify-between items-center text-sm text-gray-300 mt-4">
+        <span
+          className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${meta.bg} ${meta.text}`}
+        >
+          <Icon className="w-3.5 h-3.5" />
+          {leader.platform}
+        </span>
+        {!!leader.rewardAmount && (
+          <div className="text-right">
+            <p className="text-gray-400 text-xs">Reward</p>
+            <p className="font-semibold text-[#e1ba73]">
+              ${leader.rewardAmount}
+            </p>
+          </div>
+        )}
+      </div>
+
+      <div className="flex flex-wrap gap-2 mt-3">
         {leader.links.map((link, i) => (
           <a
             key={i}
@@ -115,7 +139,7 @@ function LeaderRow({ leader }: { leader: TContentLeader }) {
           </a>
         ))}
       </div>
-    </div>
+    </Card>
   );
 }
 
@@ -134,6 +158,13 @@ export default function ContentRewardsPage() {
     queryKey: ["contentLeaderboard"],
     queryFn: contentRewardApi.getLeaderboard,
   });
+
+  const { data: statement } = useQuery({
+    queryKey: ["contentRewardStatement"],
+    queryFn: contentRewardApi.getRewardStatement,
+  });
+  const totalRewarded = (statement ?? []).reduce((sum, r) => sum + r.amount, 0);
+  const ordinal = (n: number) => ["1st", "2nd", "3rd"][n - 1] ?? `${n}th`;
 
   const { mutate: submit, isPending } = useMutation({
     mutationFn: contentRewardApi.submitContent,
@@ -294,12 +325,26 @@ export default function ContentRewardsPage() {
                     <div key={index} className="flex items-center gap-2">
                       <Input
                         aria-label={`Post ${index + 1} link`}
-                        variant="bordered"
+                        variant="flat"
+                        type="url"
                         placeholder={placeholderFor(platform)}
+                        classNames={{
+                          base: "flex-1",
+                          inputWrapper:
+                            "h-12 rounded-xl bg-white/5 border border-white/10 shadow-none px-3 gap-3 " +
+                            "data-[hover=true]:bg-white/10 data-[hover=true]:border-white/20 " +
+                            "group-data-[focus=true]:bg-white/5 group-data-[focus=true]:border-primary",
+                          // kill the browser's inner blue focus box so there is one clean border
+                          input:
+                            "text-sm text-textPrimary placeholder:text-gray-500 " +
+                            "!outline-none !ring-0 !shadow-none !border-0 bg-transparent focus:!outline-none focus:!ring-0",
+                        }}
                         startContent={
-                          <span className="flex items-center gap-1.5 text-xs text-gray-400 shrink-0">
-                            <Link2 className="w-4 h-4" />
-                            Post {index + 1}
+                          <span className="flex items-center gap-2 shrink-0">
+                            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/15 text-xs font-bold text-[#e1ba73]">
+                              {index + 1}
+                            </span>
+                            <Link2 className="w-4 h-4 text-gray-500" />
                           </span>
                         }
                         value={link}
@@ -376,6 +421,49 @@ export default function ContentRewardsPage() {
         </div>
       )}
 
+      {/* Earnings statement: shown only once the user has been paid a reward */}
+      {statement && statement.length > 0 && (
+        <div className="space-y-4">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h2 className="text-lg font-semibold text-textPrimary flex items-center gap-2">
+              <Wallet className="w-5 h-5 text-primary" />
+              Your Reward Statement
+            </h2>
+            <Chip color="success" variant="flat">
+              Total earned: ${totalRewarded.toFixed(2)}
+            </Chip>
+          </div>
+          <Card className={cardClass}>
+            <CardBody className="p-3 space-y-2">
+              {statement.map((item) => (
+                <div
+                  key={item._id}
+                  className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-white/5 bg-white/[0.03] p-3"
+                >
+                  <div>
+                    <p className="font-medium text-textPrimary">
+                      Content Reward - {ordinal(item.rank)} place ({item.platform})
+                    </p>
+                    <p className="text-xs text-gray-400">
+                      Week {formatDateKey(item.weekStart)} -{" "}
+                      {formatDateKey(item.weekEnd)} · Credited{" "}
+                      {formatNepalDateTime(item.creditedAt)}
+                    </p>
+                  </div>
+                  <p className="font-semibold text-green-400">
+                    +${item.amount.toFixed(2)}
+                  </p>
+                </div>
+              ))}
+              <p className="text-xs text-gray-400 px-1 pt-1">
+                These amounts were added to your earnings when the admin
+                confirmed you as a weekly leader.
+              </p>
+            </CardBody>
+          </Card>
+        </div>
+      )}
+
       {/* Leaderboard */}
       <div className="space-y-4">
         <h2 className="text-lg font-semibold text-textPrimary flex items-center gap-2">
@@ -415,9 +503,14 @@ export default function ContentRewardsPage() {
                     {formatDateKey(weekStart)} - {formatDateKey(weekEnd)}
                   </span>
                 </div>
-                {entries.map((leader) => (
-                  <LeaderRow key={leader._id} leader={leader} />
-                ))}
+                <div className="flex flex-col gap-4 md:grid md:grid-cols-3">
+                  {entries
+                    .slice()
+                    .sort((x, y) => x.rank - y.rank)
+                    .map((leader) => (
+                      <LeaderCard key={leader._id} leader={leader} />
+                    ))}
+                </div>
               </CardBody>
             </Card>
           );

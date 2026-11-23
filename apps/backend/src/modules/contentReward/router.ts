@@ -4,6 +4,7 @@ import { contentRewardContract } from '@srk/shared/contracts';
 import { contentRewardHandler as h } from './handler';
 import { JwtAuthMiddleware } from '../../utils/middleware';
 import { adminModel } from '../../model/adminModel';
+import { createDataUrlUploadMiddleware } from '../../utils/dataUrlUploadMiddleware';
 
 const s = initServer();
 
@@ -29,6 +30,15 @@ const adminOnly = async (req: Request, res: Response, next: NextFunction) => {
 const user = [JwtAuthMiddleware];
 const admin = [JwtAuthMiddleware, adminOnly];
 
+// The post image arrives as a data URL and is stored in R2 before the handler runs
+const leaderImageUpload = createDataUrlUploadMiddleware({
+  postImage: {
+    folder: 'university/content-rewards',
+    prefix: 'content-leader',
+    compress: true,
+  },
+});
+
 export const contentRewardRouter = s.router(contentRewardContract, {
   getContentSubmissionStatus: {
     middleware: user,
@@ -36,11 +46,18 @@ export const contentRewardRouter = s.router(contentRewardContract, {
   },
   submitContent: { middleware: user, handler: h.submitContent },
   getContentLeaderboard: { middleware: user, handler: h.getContentLeaderboard },
+  getContentRewardStatement: {
+    middleware: user,
+    handler: h.getContentRewardStatement,
+  },
   getContentSubmissionsForAdmin: {
     middleware: admin,
     handler: h.getContentSubmissionsForAdmin,
   },
-  selectContentLeader: { middleware: admin, handler: h.selectContentLeader },
+  selectContentLeader: {
+    middleware: [...admin, leaderImageUpload],
+    handler: h.selectContentLeader,
+  },
   getContentLeadersForAdmin: {
     middleware: admin,
     handler: h.getContentLeadersForAdmin,

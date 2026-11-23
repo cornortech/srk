@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   Button,
   Chip,
@@ -11,6 +11,8 @@ import {
   ModalFooter,
   ModalHeader,
   Pagination,
+  Select,
+  SelectItem,
   Tab,
   Table,
   TableBody,
@@ -20,7 +22,7 @@ import {
   TableRow,
   Tabs,
 } from "@nextui-org/react";
-import { Award, ExternalLink, Trash2 } from "lucide-react";
+import { Award, ExternalLink, ImagePlus, Trash2, X } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import {
@@ -33,6 +35,18 @@ import {
 import useAlert from "../../hooks/useAlert";
 import ConfirmationModal from "../../components/admin/modal/ConfirmationModal";
 import { platformMeta } from "../../lib/api/contentReward/platforms";
+import {
+  prepareImageDataUrl,
+  UnreadableImageError,
+} from "../../lib/kycImage";
+import { getUniversityAssetUrl } from "../../lib/cdn";
+
+// Only the top three places are rewarded
+const RANK_OPTIONS = [
+  { key: "1", label: "1st place" },
+  { key: "2", label: "2nd place" },
+  { key: "3", label: "3rd place" },
+];
 
 const Links = ({ links }: { links: string[] }) => (
   <div className="flex flex-wrap gap-1.5">
@@ -78,6 +92,9 @@ export default function AdminContentRewards() {
   const [rank, setRank] = useState("1");
   const [weekStart, setWeekStart] = useState("");
   const [weekEnd, setWeekEnd] = useState("");
+  const [postImage, setPostImage] = useState("");
+  const [rewardAmount, setRewardAmount] = useState("");
+  const imageInputRef = useRef<HTMLInputElement>(null);
 
   const { data: submissions } = useQuery({
     queryKey: ["contentSubmissions", page, from, to],
@@ -125,6 +142,8 @@ export default function AdminContentRewards() {
   const openPicker = (submission: TAdminContentSubmission) => {
     setPicked(submission);
     setRank("1");
+    setPostImage("");
+    setRewardAmount("");
     // The week being reviewed is whatever date range the admin filtered on
     setWeekStart(from);
     setWeekEnd(to);
@@ -133,8 +152,13 @@ export default function AdminContentRewards() {
   const handleSelect = () => {
     const rankNumber = Number(rank);
     if (!picked) return;
-    if (!Number.isInteger(rankNumber) || rankNumber < 1) {
-      show("Rank must be a whole number, 1 or higher", "error");
+    if (![1, 2, 3].includes(rankNumber)) {
+      show("Choose 1st, 2nd or 3rd place", "error");
+      return;
+    }
+    const amount = rewardAmount === "" ? 0 : Number(rewardAmount);
+    if (!Number.isFinite(amount) || amount < 0) {
+      show("Reward amount must be 0 or more", "error");
       return;
     }
     if (!weekStart || !weekEnd || weekStart > weekEnd) {
@@ -146,7 +170,23 @@ export default function AdminContentRewards() {
       rank: rankNumber,
       weekStart,
       weekEnd,
+      postImage: postImage || undefined,
+      rewardAmount: amount > 0 ? amount : undefined,
     });
+  };
+
+  const handleImagePick = async (file?: File) => {
+    if (!file) return;
+    try {
+      setPostImage(await prepareImageDataUrl(file));
+    } catch (error) {
+      show(
+        error instanceof UnreadableImageError
+          ? error.message
+          : "Could not read this image",
+        "error"
+      );
+    }
   };
 
   const changeDate = (setter: (v: string) => void) => (value: string) => {
@@ -290,6 +330,8 @@ export default function AdminContentRewards() {
               <TableColumn>User</TableColumn>
               <TableColumn>Platform</TableColumn>
               <TableColumn>Links</TableColumn>
+              <TableColumn>Image</TableColumn>
+              <TableColumn>Reward</TableColumn>
               <TableColumn>Actions</TableColumn>
             </TableHeader>
             <TableBody emptyContent="No leaders selected yet">
@@ -313,6 +355,26 @@ export default function AdminContentRewards() {
                   </TableCell>
                   <TableCell>
                     <Links links={l.links} />
+                  </TableCell>
+                  <TableCell>
+                    {l.postImage ? (
+                      <a
+                        href={getUniversityAssetUrl(l.postImage)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <img
+                          src={getUniversityAssetUrl(l.postImage)}
+                          alt="Post"
+                          className="h-12 w-12 rounded-lg object-cover"
+                        />
+                      </a>
+                    ) : (
+                      "-"
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {l.rewardAmount ? `$${l.rewardAmount}` : "-"}
                   </TableCell>
                   <TableCell>
                     <ConfirmationModal
@@ -351,19 +413,71 @@ export default function AdminContentRewards() {
                     <PlatformChip platform={picked.platform} />
                   </div>
                 )}
+                <Select
+                  label="Position"
+                  labelPlacement="outside"
+                  disallowEmptySelection
+                  selectedKeys={[rank]}
+                  onChange={(e) => e.target.value && setRank(e.target.value)}
+                >
+                  {RANK_OPTIONS.map((o) => (
+                    <SelectItem key={o.key}>{o.label}</SelectItem>
+                  ))}
+                </Select>
+                <p className="text-xs text-gray-400">
+                  Each position can be used once per week (same week dates).
+                </p>
                 <Input
                   type="number"
-                  min={1}
-                  label="Rank"
+                  min={0}
+                  step="0.01"
+                  label="Reward amount ($)"
                   labelPlacement="outside"
-                  placeholder="1"
-                  value={rank}
-                  onChange={(e) => setRank(e.target.value)}
+                  placeholder="0"
+                  description="Added to the user's earnings right away. Leave empty for no payment."
+                  value={rewardAmount}
+                  onChange={(e) => setRewardAmount(e.target.value)}
                 />
-                <p className="text-xs text-gray-400">
-                  Leaders with the same week dates are grouped together on the
-                  leaderboard. Each rank can be used once per week.
-                </p>
+                <div className="space-y-2">
+                  <p className="text-sm">Post image (shown on the leaderboard)</p>
+                  <input
+                    ref={imageInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      handleImagePick(e.target.files?.[0]);
+                      e.target.value = "";
+                    }}
+                  />
+                  {postImage ? (
+                    <div className="relative">
+                      <img
+                        src={postImage}
+                        alt="Post preview"
+                        className="w-full max-h-48 object-cover rounded-xl border border-white/10"
+                      />
+                      <Button
+                        isIconOnly
+                        size="sm"
+                        variant="flat"
+                        className="absolute top-2 right-2"
+                        aria-label="Remove image"
+                        onPress={() => setPostImage("")}
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <Button
+                      variant="flat"
+                      startContent={<ImagePlus className="w-4 h-4" />}
+                      onPress={() => imageInputRef.current?.click()}
+                    >
+                      Upload image
+                    </Button>
+                  )}
+                </div>
                 <Input
                   type="date"
                   label="Week start"

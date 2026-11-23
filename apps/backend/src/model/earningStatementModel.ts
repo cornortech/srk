@@ -10,7 +10,7 @@ const earningStatementModelSchema = new mongoose.Schema(
     type: {
       type: String,
       required: true,
-      enum: ['REFERRAL_EANRING', 'SENIOR_EARNING'],
+      enum: ['REFERRAL_EANRING', 'SENIOR_EARNING', 'CONTENT_REWARD'],
     },
     referredTo: {
       type: mongoose.Schema.Types.ObjectId,

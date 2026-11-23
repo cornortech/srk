@@ -4,6 +4,9 @@ import mongoose from 'mongoose';
 import { ContentSubmissionModel } from '../../model/contentSubmissionModel';
 import { ContentLeaderModel } from '../../model/contentLeaderModel';
 import { UserModel } from '../../model/userModel';
+import { cleanupR2Uploads } from '../../services/imageUploadService';
+import { balanceModel } from '../../model/balanceModel';
+import { EarningStatementModel } from '../../model/earningStatementModel';
 import {
   getSubmissionWindow,
   nptDayKey,
@@ -144,6 +147,8 @@ const loadLeaders = async () => {
       profilePicture: l.userId?.profilePicture ?? null,
       platform: l.submissionId.platform,
       links: l.submissionId.links as string[],
+      postImage: l.postImage ?? null,
+      rewardAmount: l.rewardAmount ?? 0,
     }));
 };
 
@@ -154,6 +159,47 @@ const getContentLeaderboard: AppRouteImplementationOrOptions<
     return { status: 200, body: await loadLeaders() };
   } catch (error) {
     return serverError(error, 'Failed to fetch leaderboard');
+  }
+};
+
+const getContentRewardStatement: AppRouteImplementationOrOptions<
+  typeof contentRewardContract.getContentRewardStatement
+> = async ({ req }) => {
+  try {
+    const userId = getUserId(req);
+    if (!userId || !mongoose.isValidObjectId(userId)) {
+      return {
+        status: 401,
+        body: { success: false, message: 'Unauthorized' },
+      };
+    }
+
+    // One row per paid selection (the reward is credited when it is created)
+    const paid = await ContentLeaderModel.find({
+      userId,
+      rewardAmount: { $gt: 0 },
+    })
+      .sort({ createdAt: -1 })
+      .limit(200)
+      .populate('submissionId', 'platform')
+      .lean();
+
+    return {
+      status: 200,
+      body: paid
+        .filter((l: any) => l.submissionId)
+        .map((l: any) => ({
+          _id: l._id.toString(),
+          amount: l.rewardAmount,
+          rank: l.rank,
+          weekStart: l.weekStart,
+          weekEnd: l.weekEnd,
+          platform: l.submissionId.platform,
+          creditedAt: l.createdAt.toISOString(),
+        })),
+    };
+  } catch (error) {
+    return serverError(error, 'Failed to fetch content reward statement');
   }
 };
 
@@ -216,6 +262,7 @@ const getContentSubmissionsForAdmin: AppRouteImplementationOrOptions<
                   rank: leader.rank,
                   weekStart: leader.weekStart,
                   weekEnd: leader.weekEnd,
+                  rewardAmount: leader.rewardAmount ?? 0,
                 }
               : null,
           };
@@ -253,15 +300,22 @@ const selectContentLeader: AppRouteImplementationOrOptions<
       };
     }
 
+    const rewardAmount = body.rewardAmount ?? 0;
+
+    let leader;
     try {
-      await ContentLeaderModel.create({
+      leader = await ContentLeaderModel.create({
         submissionId: submission._id,
         userId: submission.userId,
         rank: body.rank,
         weekStart: body.weekStart,
         weekEnd: body.weekEnd,
+        postImage: body.postImage,
+        rewardAmount,
       });
     } catch (error) {
+      // The image was already uploaded by the middleware; don't leave it orphaned
+      if (body.postImage) await cleanupR2Uploads([body.postImage]);
       if ((error as { code?: number }).code === 11000) {
         return {
           status: 400,
@@ -273,6 +327,38 @@ const selectContentLeader: AppRouteImplementationOrOptions<
         };
       }
       throw error;
+    }
+
+    // Pay the reward into the user's earnings (shows in Today's Earning and
+    // the earning dashboard). If the payment fails, undo the selection so the
+    // admin can retry without the user being a leader but unpaid.
+    if (rewardAmount > 0) {
+      try {
+        await balanceModel.updateOne(
+          { userId: submission.userId },
+          { $inc: { balance: rewardAmount, totalEarnings: rewardAmount } },
+          { upsert: true }
+        );
+        await EarningStatementModel.create({
+          userId: submission.userId,
+          type: 'CONTENT_REWARD',
+          earning: rewardAmount,
+          balanceWallet: rewardAmount,
+          srkBonus: 0,
+          eventWallet: 0,
+          ceoSalary: 0,
+          officeManagementCharge: 0,
+          companyTurnover: 0,
+          tms: 0,
+          vat: 0,
+        });
+      } catch (error) {
+        console.error('Failed to credit content reward', error);
+        // Best-effort rollback of whichever half was applied
+        await ContentLeaderModel.findByIdAndDelete(leader._id);
+        if (body.postImage) await cleanupR2Uploads([body.postImage]);
+        return serverError(error, 'Failed to credit content reward');
+      }
     }
 
     return {
@@ -298,15 +384,28 @@ const removeContentLeader: AppRouteImplementationOrOptions<
   typeof contentRewardContract.removeContentLeader
 > = async ({ params }) => {
   try {
-    const removed = mongoose.isValidObjectId(params.leaderId)
-      ? await ContentLeaderModel.findByIdAndDelete(params.leaderId)
+    const leader = mongoose.isValidObjectId(params.leaderId)
+      ? await ContentLeaderModel.findById(params.leaderId)
       : null;
-    if (!removed) {
+    if (!leader) {
       return {
         status: 404,
         body: { success: false, message: 'Leader not found' },
       };
     }
+    // A paid reward is already in the user's earnings; removing the leader
+    // would not take it back, so block it rather than leave them out of sync.
+    if ((leader.rewardAmount ?? 0) > 0) {
+      return {
+        status: 400,
+        body: {
+          success: false,
+          message:
+            'This leader has already been paid a reward and cannot be removed',
+        },
+      };
+    }
+    await leader.deleteOne();
     return { status: 200, body: { success: true, message: 'Leader removed' } };
   } catch (error) {
     return serverError(error, 'Failed to remove leader');
@@ -346,6 +445,7 @@ export const contentRewardHandler = {
   getContentSubmissionStatus,
   submitContent,
   getContentLeaderboard,
+  getContentRewardStatement,
   getContentSubmissionsForAdmin,
   selectContentLeader,
   getContentLeadersForAdmin,

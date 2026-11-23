@@ -149,6 +149,11 @@ export const AdminSidebarItems: TSidebarItem[] = [
     href: '/admin/target',
   },
   {
+    title: 'Manage Tour Targets',
+    icon: Sparkle,
+    href: '/admin/tour-targets',
+  },
+  {
     title: 'Srk Bonus',
     icon: Sparkle,
     href: '/admin/srk-bonus',

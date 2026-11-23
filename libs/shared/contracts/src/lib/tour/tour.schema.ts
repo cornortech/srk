@@ -43,16 +43,26 @@ export const getTourTargetSchema = z.array(
   })
 );
 
+// Used for both create and edit. `image` is an https URL, an emoji, an existing
+// storage key, or (when uploading) an image data URL that the upload middleware
+// swaps for a storage key before validation runs.
 export const createTourTargetSchema = z.object({
-  destination: z.string(),
-  description: z.string(),
-  targetAmount: z.number(),
-  duration: z.number(),
-  accommodation: z.string(),
+  destination: z.string().trim().min(1, "Destination is required").max(120),
+  description: z.string().trim().min(1, "Description is required").max(2000),
+  targetAmount: z.number().positive("Target amount must be more than 0"),
+  // Number of days users have to reach the target
+  duration: z.number().int().min(1, "Duration must be at least 1 day").max(3650),
+  accommodation: z.string().trim().min(1, "Accommodation is required").max(120),
   difficulty: z.enum(["Easy", "Medium", "Hard"]),
   rating: z.number().min(0).max(5),
-  image: z.string(),
-  features: z.array(z.string()).optional(),
+  image: z.string().max(2048).default(""),
+  features: z.array(z.string().trim().min(1).max(80)).max(20).optional(),
+  // Only used on create. The target becomes the one users earn towards.
+  isActive: z.boolean().optional(),
+});
+
+export const setTourTargetActiveSchema = z.object({
+  isActive: z.boolean(),
 });
 
 export const tourTargetResponseSchema = z.object({

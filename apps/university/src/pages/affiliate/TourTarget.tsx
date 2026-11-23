@@ -14,7 +14,7 @@ import {
     Clock,
 } from "lucide-react"
 import { useQuery } from "@tanstack/react-query"
-import { tourApi } from "../../lib/api/tour/tour.api"
+import { tourApi, isTourImage } from "../../lib/api/tour/tour.api"
 import { TTourTarget } from "../../lib/types/entities"
 import useAuthStore from "../../store/useAuth"
 import { getUniversityAssetUrl } from "../../lib/cdn"
@@ -52,14 +52,7 @@ export default function TourTargetsPage() {
         }
     }
 
-    const isImageUrl = (str: string) => {
-        try {
-            const url = new URL(str);
-            return url.protocol === 'http:' || url.protocol === 'https:';
-        } catch {
-            return false;
-        }
-    }
+    const isImageUrl = isTourImage
 
     const calculateRemainingDays = (createdAt: string, duration: number) => {
         try {

@@ -23,6 +23,8 @@ export type TUserReward = {
   isCompleted: boolean;
   isClaimed: boolean;
   claimedAt?: string;
+  isExpired: boolean;
+  expiresAt: string;
 };
 
 export type TRewardClaim = {

@@ -82,6 +82,7 @@ const AdminContentRewardsPage = lazy(() => import('./pages/admin/ContentRewards'
 const RewardsPage = lazy(() => import('./pages/affiliate/Rewards'));
 const AdminRewardsPage = lazy(() => import('./pages/admin/Rewards'));
 const AdminTourTargetUserPage = lazy(() => import('./pages/admin/TourTargetUserPage'));
+const AdminTourTargetsPage = lazy(() => import('./pages/admin/TourTarget'));
 const SRKGrowPortal = lazy(() => import('./pages/dashboard/GrowViewPage'));
 const WhoIsItForPage = lazy(() => import('./pages/learn/WhoIsItFor'));
 const WhySRKUniversityPage = lazy(() => import('./pages/learn/WhySRKUniversity'));
@@ -282,6 +283,10 @@ const AppRouter = () => {
         {
           path: 'target',
           element: <Suspense fallback={<PageLoader />}><AdminTourTargetUserPage /></Suspense>,
+        },
+        {
+          path: 'tour-targets',
+          element: <Suspense fallback={<PageLoader />}><AdminTourTargetsPage /></Suspense>,
         },
         {
           path: 'settings',

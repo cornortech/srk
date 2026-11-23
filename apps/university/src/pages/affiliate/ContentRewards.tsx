@@ -9,6 +9,8 @@ import {
   Chip,
   Input,
   Skeleton,
+  Tab,
+  Tabs,
 } from "@heroui/react";
 import {
   Award,
@@ -22,7 +24,6 @@ import {
   Trash2,
   Trophy,
   Upload,
-  X,
 } from "lucide-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
@@ -103,6 +104,9 @@ function LeaderCard({ leader }: { leader: TContentLeader }) {
             src={imageUrl}
             alt={`${leader.userName}'s post`}
             loading="lazy"
+            onError={(e) => {
+              (e.currentTarget.parentElement as HTMLElement).style.display = "none";
+            }}
             className="w-full max-h-64 object-cover rounded-xl border border-white/10"
           />
         </a>
@@ -119,7 +123,7 @@ function LeaderCard({ leader }: { leader: TContentLeader }) {
           <div className="text-right">
             <p className="text-gray-400 text-xs">Reward</p>
             <p className="font-semibold text-[#e1ba73]">
-              ${leader.rewardAmount}
+              NRS {leader.rewardAmount.toLocaleString()}
             </p>
           </div>
         )}
@@ -145,7 +149,6 @@ function LeaderCard({ leader }: { leader: TContentLeader }) {
 
 export default function ContentRewardsPage() {
   const { show } = useAlert();
-  const [showForm, setShowForm] = useState(false);
   const [platform, setPlatform] = useState<TContentPlatform | null>(null);
   const [links, setLinks] = useState<string[]>([""]);
 
@@ -170,7 +173,6 @@ export default function ContentRewardsPage() {
     mutationFn: contentRewardApi.submitContent,
     onSuccess: () => {
       show("Content submitted successfully", "success");
-      setShowForm(false);
       setPlatform(null);
       setLinks([""]);
       refetchStatus();
@@ -207,41 +209,141 @@ export default function ContentRewardsPage() {
     {}
   );
 
-  return (
-    <div className="w-full max-w-5xl mx-auto px-4 py-6 space-y-8">
-      {/* Header */}
-      <div className="flex items-center gap-4">
-        <div className="w-12 h-12 rounded-xl bg-custom-gradient flex items-center justify-center shrink-0">
-          <Award className="w-6 h-6 text-black" />
-        </div>
-        <div>
-          <h1 className="text-2xl font-bold text-textPrimary">
-            Content Rewards
-          </h1>
-          <p className="text-sm text-gray-400">
-            Share your content and get picked as a weekly leader.
-          </p>
-        </div>
-      </div>
+  const tabs = [
+    {
+      id: "leaderboard",
+      title: (
+        <span className="flex items-center gap-2">
+          <Trophy className="w-4 h-4" /> Leaderboard
+        </span>
+      ),
+      content: (
+        <div className="space-y-4">
+        {isLoadingLeaders && (
+          <div className="space-y-3">
+            <Skeleton className="h-24 rounded-2xl" />
+            <Skeleton className="h-24 rounded-2xl" />
+          </div>
+        )}
 
-      {/* Upload (only for users the admin has allowed) */}
-      {status?.canUpload && (
+        {leaders && leaders.length === 0 && (
+          <Card className={cardClass}>
+            <CardBody className="py-12 text-center">
+              <Trophy className="w-12 h-12 mx-auto mb-3 text-gray-600" />
+              <p className="text-textPrimary font-medium">
+                No leaders announced yet
+              </p>
+              <p className="text-sm text-gray-400">
+                Weekly winners will appear here.
+              </p>
+            </CardBody>
+          </Card>
+        )}
+
+        {Object.entries(weeks).map(([key, entries]) => {
+          const [weekStart, weekEnd] = key.split("|");
+          return (
+            <Card key={key} className={cardClass}>
+              <CardBody className="p-5 space-y-3">
+                <div className="flex items-center gap-2 text-sm text-gray-400">
+                  <CalendarDays className="w-4 h-4 text-primary" />
+                  <span className="font-semibold text-textPrimary">
+                    {formatDateKey(weekStart)} - {formatDateKey(weekEnd)}
+                  </span>
+                </div>
+                <div className="flex flex-col gap-4 md:grid md:grid-cols-3">
+                  {entries
+                    .slice()
+                    .sort((x, y) => x.rank - y.rank)
+                    .map((leader) => (
+                      <LeaderCard key={leader._id} leader={leader} />
+                    ))}
+                </div>
+              </CardBody>
+            </Card>
+          );
+        })}
+        </div>
+      ),
+    },
+    {
+      id: "statement",
+      title: (
+        <span className="flex items-center gap-2">
+          <Wallet className="w-4 h-4" /> My Statement
+          {!!statement?.length && (
+            <Chip size="sm" variant="flat" color="success">
+              {statement.length}
+            </Chip>
+          )}
+        </span>
+      ),
+      content: (
+      <div className="space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <p className="text-sm text-gray-400">
+            Rewards added to your earnings when the admin confirmed you as a
+            weekly leader.
+          </p>
+          <Chip color="success" variant="flat">
+            Total earned: NRS {totalRewarded.toLocaleString()}
+          </Chip>
+        </div>
+
+        {statement && statement.length === 0 && (
+          <Card className={cardClass}>
+            <CardBody className="py-12 text-center">
+              <Wallet className="w-12 h-12 mx-auto mb-3 text-gray-600" />
+              <p className="text-textPrimary font-medium">No rewards yet</p>
+              <p className="text-sm text-gray-400">
+                When you win a weekly reward it will be listed here.
+              </p>
+            </CardBody>
+          </Card>
+        )}
+
+        {statement && statement.length > 0 && (
+          <Card className={cardClass}>
+            <CardBody className="p-3 space-y-2">
+              {statement.map((item) => (
+                <div
+                  key={item._id}
+                  className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-white/5 bg-white/[0.03] p-3"
+                >
+                  <div>
+                    <p className="font-medium text-textPrimary">
+                      Content Reward - {ordinal(item.rank)} place ({item.platform})
+                    </p>
+                    <p className="text-xs text-gray-400">
+                      Week {formatDateKey(item.weekStart)} -{" "}
+                      {formatDateKey(item.weekEnd)} · Credited{" "}
+                      {formatNepalDateTime(item.creditedAt)}
+                    </p>
+                  </div>
+                  <p className="font-semibold text-green-400">
+                    +NRS {item.amount.toLocaleString()}
+                  </p>
+                </div>
+              ))}
+            </CardBody>
+          </Card>
+        )}
+      </div>
+      ),
+    },
+    ...(status?.canUpload
+      ? [
+          {
+            id: "upload",
+            title: (
+              <span className="flex items-center gap-2">
+                <Upload className="w-4 h-4" /> Upload Content
+              </span>
+            ),
+            content: (
+      <div className="space-y-4">
         <div className="space-y-4">
           <div className="flex flex-wrap items-center gap-3">
-            <Button
-              className="bg-custom-gradient text-black font-semibold"
-              startContent={
-                showForm ? (
-                  <X className="w-4 h-4" />
-                ) : (
-                  <Upload className="w-4 h-4" />
-                )
-              }
-              onPress={() => setShowForm((v) => !v)}
-            >
-              {showForm ? "Close" : "Upload Content"}
-            </Button>
-
             {status.hasSubmittedToday ? (
               <Chip
                 variant="flat"
@@ -269,7 +371,7 @@ export default function ContentRewardsPage() {
             )}
           </div>
 
-          {showForm && (
+          {(
             <Card className={cardClass}>
               <CardBody className="p-5 sm:p-6 space-y-6">
                 {/* Platform */}
@@ -419,103 +521,49 @@ export default function ContentRewardsPage() {
             </Card>
           )}
         </div>
-      )}
-
-      {/* Earnings statement: shown only once the user has been paid a reward */}
-      {statement && statement.length > 0 && (
-        <div className="space-y-4">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <h2 className="text-lg font-semibold text-textPrimary flex items-center gap-2">
-              <Wallet className="w-5 h-5 text-primary" />
-              Your Reward Statement
-            </h2>
-            <Chip color="success" variant="flat">
-              Total earned: ${totalRewarded.toFixed(2)}
-            </Chip>
-          </div>
-          <Card className={cardClass}>
-            <CardBody className="p-3 space-y-2">
-              {statement.map((item) => (
-                <div
-                  key={item._id}
-                  className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-white/5 bg-white/[0.03] p-3"
-                >
-                  <div>
-                    <p className="font-medium text-textPrimary">
-                      Content Reward - {ordinal(item.rank)} place ({item.platform})
-                    </p>
-                    <p className="text-xs text-gray-400">
-                      Week {formatDateKey(item.weekStart)} -{" "}
-                      {formatDateKey(item.weekEnd)} · Credited{" "}
-                      {formatNepalDateTime(item.creditedAt)}
-                    </p>
-                  </div>
-                  <p className="font-semibold text-green-400">
-                    +${item.amount.toFixed(2)}
-                  </p>
-                </div>
-              ))}
-              <p className="text-xs text-gray-400 px-1 pt-1">
-                These amounts were added to your earnings when the admin
-                confirmed you as a weekly leader.
-              </p>
-            </CardBody>
-          </Card>
-        </div>
-      )}
-
-      {/* Leaderboard */}
-      <div className="space-y-4">
-        <h2 className="text-lg font-semibold text-textPrimary flex items-center gap-2">
-          <Trophy className="w-5 h-5 text-primary" />
-          Leaderboard
-        </h2>
-
-        {isLoadingLeaders && (
-          <div className="space-y-3">
-            <Skeleton className="h-24 rounded-2xl" />
-            <Skeleton className="h-24 rounded-2xl" />
-          </div>
-        )}
-
-        {leaders && leaders.length === 0 && (
-          <Card className={cardClass}>
-            <CardBody className="py-12 text-center">
-              <Trophy className="w-12 h-12 mx-auto mb-3 text-gray-600" />
-              <p className="text-textPrimary font-medium">
-                No leaders announced yet
-              </p>
-              <p className="text-sm text-gray-400">
-                Weekly winners will appear here.
-              </p>
-            </CardBody>
-          </Card>
-        )}
-
-        {Object.entries(weeks).map(([key, entries]) => {
-          const [weekStart, weekEnd] = key.split("|");
-          return (
-            <Card key={key} className={cardClass}>
-              <CardBody className="p-5 space-y-3">
-                <div className="flex items-center gap-2 text-sm text-gray-400">
-                  <CalendarDays className="w-4 h-4 text-primary" />
-                  <span className="font-semibold text-textPrimary">
-                    {formatDateKey(weekStart)} - {formatDateKey(weekEnd)}
-                  </span>
-                </div>
-                <div className="flex flex-col gap-4 md:grid md:grid-cols-3">
-                  {entries
-                    .slice()
-                    .sort((x, y) => x.rank - y.rank)
-                    .map((leader) => (
-                      <LeaderCard key={leader._id} leader={leader} />
-                    ))}
-                </div>
-              </CardBody>
-            </Card>
-          );
-        })}
       </div>
+            ),
+          },
+        ]
+      : []),
+  ];
+
+  return (
+    <div className="w-full max-w-5xl mx-auto px-4 py-6 space-y-8">
+      {/* Header */}
+      <div className="flex items-center gap-4">
+        <div className="w-12 h-12 rounded-xl bg-custom-gradient flex items-center justify-center shrink-0">
+          <Award className="w-6 h-6 text-black" />
+        </div>
+        <div>
+          <h1 className="text-2xl font-bold text-textPrimary">
+            Content Rewards
+          </h1>
+          <p className="text-sm text-gray-400">
+            Share your content and get picked as a weekly leader.
+          </p>
+        </div>
+      </div>
+
+      <Tabs
+        aria-label="Content rewards"
+        variant="underlined"
+        color="primary"
+        classNames={{
+          base: "w-full",
+          tabList: "gap-4 w-full overflow-x-auto border-b border-white/10 p-0",
+          tab: "h-11 px-2",
+          cursor: "w-full bg-primary",
+          tabContent: "group-data-[selected=true]:text-primary",
+        }}
+        items={tabs}
+      >
+        {(item) => (
+          <Tab key={item.id} title={item.title}>
+            <div className="pt-4">{item.content}</div>
+          </Tab>
+        )}
+      </Tabs>
     </div>
   );
 }

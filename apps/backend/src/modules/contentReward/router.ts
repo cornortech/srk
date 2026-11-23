@@ -62,6 +62,10 @@ export const contentRewardRouter = s.router(contentRewardContract, {
     middleware: admin,
     handler: h.getContentLeadersForAdmin,
   },
+  setContentLeaderImage: {
+    middleware: [...admin, leaderImageUpload],
+    handler: h.setContentLeaderImage,
+  },
   removeContentLeader: { middleware: admin, handler: h.removeContentLeader },
   setContentUploadPermission: {
     middleware: admin,

@@ -18,7 +18,7 @@ const contentLeaderSchema = new mongoose.Schema(
     // R2 key of the post screenshot/image shown on the leaderboard
     postImage: { type: String },
     // Amount credited to the user's earnings when selected (0 = none)
-    rewardAmount: { type: Number, default: 0, min: 0 },
+    rewardAmount: { type: Number, default: 0, min: 0, max: 500 },
     // Week the leader was chosen for (Nepal dates, YYYY-MM-DD, inclusive)
     weekStart: { type: String, required: true },
     weekEnd: { type: String, required: true },

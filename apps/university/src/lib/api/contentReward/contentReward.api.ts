@@ -99,6 +99,13 @@ const selectLeader = async (data: {
 const getLeadersForAdmin = async (): Promise<TContentLeader[]> =>
   (await apiClient.get("/content-reward/admin/leaders")).data;
 
+const setLeaderImage = async (leaderId: string, postImage: string) =>
+  (
+    await apiClient.put(`/content-reward/admin/leaders/${leaderId}/image`, {
+      postImage,
+    })
+  ).data;
+
 const removeLeader = async (leaderId: string) =>
   (await apiClient.delete(`/content-reward/admin/leaders/${leaderId}`, { data: {} }))
     .data;
@@ -118,6 +125,7 @@ export const contentRewardApi = {
   getSubmissionsForAdmin,
   selectLeader,
   getLeadersForAdmin,
+  setLeaderImage,
   removeLeader,
   setUploadPermission,
 };

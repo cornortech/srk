@@ -42,6 +42,9 @@ import {
 import { getUniversityAssetUrl } from "../../lib/cdn";
 
 // Only the top three places are rewarded
+// The most (in NRS) one leader can be rewarded
+const MAX_REWARD_NRS = 500;
+
 const RANK_OPTIONS = [
   { key: "1", label: "1st place" },
   { key: "2", label: "2nd place" },
@@ -93,8 +96,13 @@ export default function AdminContentRewards() {
   const [weekStart, setWeekStart] = useState("");
   const [weekEnd, setWeekEnd] = useState("");
   const [postImage, setPostImage] = useState("");
+  const [isPreparingImage, setIsPreparingImage] = useState(false);
+  const [imageError, setImageError] = useState("");
   const [rewardAmount, setRewardAmount] = useState("");
   const imageInputRef = useRef<HTMLInputElement>(null);
+  // Photo being added to an already selected leader
+  const leaderPhotoInputRef = useRef<HTMLInputElement>(null);
+  const [photoLeaderId, setPhotoLeaderId] = useState<string | null>(null);
 
   const { data: submissions } = useQuery({
     queryKey: ["contentSubmissions", page, from, to],
@@ -128,6 +136,19 @@ export default function AdminContentRewards() {
     },
   });
 
+  const { mutate: saveLeaderPhoto, isPending: isSavingPhoto } = useMutation({
+    mutationFn: ({ id, image }: { id: string; image: string }) =>
+      contentRewardApi.setLeaderImage(id, image),
+    onSuccess: () => {
+      show("Photo saved", "success");
+      refreshAll();
+      queryClient.invalidateQueries({ queryKey: ["contentLeaderboard"] });
+    },
+    onError: (error: AxiosError<{ message: string }>) => {
+      show(error.response?.data.message || "Failed to save photo", "error");
+    },
+  });
+
   const { mutate: removeLeader } = useMutation({
     mutationFn: contentRewardApi.removeLeader,
     onSuccess: () => {
@@ -143,6 +164,8 @@ export default function AdminContentRewards() {
     setPicked(submission);
     setRank("1");
     setPostImage("");
+    setImageError("");
+    setIsPreparingImage(false);
     setRewardAmount("");
     // The week being reviewed is whatever date range the admin filtered on
     setWeekStart(from);
@@ -157,8 +180,12 @@ export default function AdminContentRewards() {
       return;
     }
     const amount = rewardAmount === "" ? 0 : Number(rewardAmount);
-    if (!Number.isFinite(amount) || amount < 0) {
-      show("Reward amount must be 0 or more", "error");
+    if (!Number.isFinite(amount) || amount < 0 || amount > MAX_REWARD_NRS) {
+      show(`Reward amount must be between 0 and NRS ${MAX_REWARD_NRS}`, "error");
+      return;
+    }
+    if (isPreparingImage) {
+      show("Please wait, the photo is still being prepared", "error");
       return;
     }
     if (!weekStart || !weekEnd || weekStart > weekEnd) {
@@ -177,8 +204,31 @@ export default function AdminContentRewards() {
 
   const handleImagePick = async (file?: File) => {
     if (!file) return;
+    setImageError("");
+    setPostImage("");
+    setIsPreparingImage(true);
     try {
       setPostImage(await prepareImageDataUrl(file));
+    } catch (error) {
+      const message =
+        error instanceof UnreadableImageError
+          ? error.message
+          : "Could not read this image";
+      // Shown inside the form (a pop-up can be hidden behind it)
+      setImageError(message);
+      show(message, "error");
+    } finally {
+      setIsPreparingImage(false);
+    }
+  };
+
+  // Add or replace the photo of a leader that is already selected
+  const handleLeaderPhoto = async (file?: File) => {
+    const id = photoLeaderId;
+    setPhotoLeaderId(null);
+    if (!file || !id) return;
+    try {
+      saveLeaderPhoto({ id, image: await prepareImageDataUrl(file) });
     } catch (error) {
       show(
         error instanceof UnreadableImageError
@@ -357,24 +407,36 @@ export default function AdminContentRewards() {
                     <Links links={l.links} />
                   </TableCell>
                   <TableCell>
-                    {l.postImage ? (
-                      <a
-                        href={getUniversityAssetUrl(l.postImage)}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                    <div className="flex items-center gap-2">
+                      {l.postImage && (
+                        <a
+                          href={getUniversityAssetUrl(l.postImage)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <img
+                            src={getUniversityAssetUrl(l.postImage)}
+                            alt="Post"
+                            className="h-12 w-12 rounded-lg object-cover"
+                          />
+                        </a>
+                      )}
+                      <Button
+                        size="sm"
+                        variant="flat"
+                        isDisabled={isSavingPhoto}
+                        startContent={<ImagePlus className="w-3.5 h-3.5" />}
+                        onPress={() => {
+                          setPhotoLeaderId(l._id);
+                          leaderPhotoInputRef.current?.click();
+                        }}
                       >
-                        <img
-                          src={getUniversityAssetUrl(l.postImage)}
-                          alt="Post"
-                          className="h-12 w-12 rounded-lg object-cover"
-                        />
-                      </a>
-                    ) : (
-                      "-"
-                    )}
+                        {l.postImage ? "Change" : "Add photo"}
+                      </Button>
+                    </div>
                   </TableCell>
                   <TableCell>
-                    {l.rewardAmount ? `$${l.rewardAmount}` : "-"}
+                    {l.rewardAmount ? `NRS ${l.rewardAmount}` : "-"}
                   </TableCell>
                   <TableCell>
                     <ConfirmationModal
@@ -400,6 +462,17 @@ export default function AdminContentRewards() {
           </Table>
         </Tab>
       </Tabs>
+
+      <input
+        ref={leaderPhotoInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={(e) => {
+          handleLeaderPhoto(e.target.files?.[0]);
+          e.target.value = "";
+        }}
+      />
 
       <Modal isOpen={!!picked} onClose={() => setPicked(null)}>
         <ModalContent>
@@ -430,11 +503,14 @@ export default function AdminContentRewards() {
                 <Input
                   type="number"
                   min={0}
+                  max={MAX_REWARD_NRS}
                   step="0.01"
-                  label="Reward amount ($)"
+                  label="Reward amount (NRS)"
                   labelPlacement="outside"
                   placeholder="0"
-                  description="Added to the user's earnings right away. Leave empty for no payment."
+                  description={`Added to the user's earnings right away. Maximum NRS ${MAX_REWARD_NRS}. Leave empty for no payment.`}
+                  isInvalid={Number(rewardAmount) > MAX_REWARD_NRS}
+                  errorMessage={`Cannot be more than NRS ${MAX_REWARD_NRS}`}
                   value={rewardAmount}
                   onChange={(e) => setRewardAmount(e.target.value)}
                 />
@@ -450,6 +526,12 @@ export default function AdminContentRewards() {
                       e.target.value = "";
                     }}
                   />
+                  {isPreparingImage && (
+                    <p className="text-xs text-primary">Preparing photo...</p>
+                  )}
+                  {imageError && (
+                    <p className="text-xs text-danger">{imageError}</p>
+                  )}
                   {postImage ? (
                     <div className="relative">
                       <img
@@ -471,6 +553,7 @@ export default function AdminContentRewards() {
                   ) : (
                     <Button
                       variant="flat"
+                      isLoading={isPreparingImage}
                       startContent={<ImagePlus className="w-4 h-4" />}
                       onPress={() => imageInputRef.current?.click()}
                     >
@@ -500,6 +583,7 @@ export default function AdminContentRewards() {
                 <Button
                   color="primary"
                   isLoading={isSelecting}
+                  isDisabled={isPreparingImage}
                   onPress={handleSelect}
                 >
                   Select

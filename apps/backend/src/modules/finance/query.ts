@@ -144,6 +144,17 @@ const getFinanceDetailsOfUser: AppRouteImplementationOrOptions<
     const todayEarnings = await calculateEarnings(userId, 1);
     const last7DaysEarnings = await calculateEarnings(userId, 7);
     const last30DaysEarnings = await calculateEarnings(userId, 30);
+    // Only grows when an admin confirms a content reward for this user
+    const contentRewardAgg = await EarningStatementModel.aggregate([
+      {
+        $match: {
+          userId: new mongoose.Types.ObjectId(userId),
+          type: 'CONTENT_REWARD',
+        },
+      },
+      { $group: { _id: null, total: { $sum: '$balanceWallet' } } },
+    ]);
+    const contentRewardEarnings = contentRewardAgg[0]?.total ?? 0;
     const allTimeEarnings = userBalance.totalEarnings;
     const totalBankPayout = bankPayouts.reduce(
       (total, payout) => total + payout.amount,
@@ -161,6 +172,7 @@ const getFinanceDetailsOfUser: AppRouteImplementationOrOptions<
         srkBankAmount: srkBankAmount?.amount || 0,
         tourBalance: userBalance.tourBalance || 0,
         totalBankPayout,
+        contentRewardEarnings,
         todayEarnings,
         last7DaysEarnings,
         last30DaysEarnings,

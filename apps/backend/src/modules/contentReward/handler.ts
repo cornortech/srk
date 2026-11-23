@@ -15,6 +15,9 @@ import {
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
+// The most (in NRS) an admin can reward one leader
+const MAX_REWARD_NRS = 500;
+
 const serverError = (error: unknown, message: string) => {
   console.error(message, error);
   return {
@@ -300,7 +303,18 @@ const selectContentLeader: AppRouteImplementationOrOptions<
       };
     }
 
-    const rewardAmount = body.rewardAmount ?? 0;
+    // Whole paisa only, and never above the cap, even if the contract is out of date
+    const rewardAmount = Math.round((body.rewardAmount ?? 0) * 100) / 100;
+    if (rewardAmount < 0 || rewardAmount > MAX_REWARD_NRS) {
+      if (body.postImage) await cleanupR2Uploads([body.postImage]);
+      return {
+        status: 400,
+        body: {
+          success: false,
+          message: `Reward amount must be between 0 and NRS ${MAX_REWARD_NRS}`,
+        },
+      };
+    }
 
     let leader;
     try {
@@ -380,6 +394,43 @@ const getContentLeadersForAdmin: AppRouteImplementationOrOptions<
   }
 };
 
+const setContentLeaderImage: AppRouteImplementationOrOptions<
+  typeof contentRewardContract.setContentLeaderImage
+> = async ({ req, params, body }) => {
+  const newKeys = ((req as { uploadedR2Keys?: string[] }).uploadedR2Keys ?? []).slice();
+  try {
+    const leader = mongoose.isValidObjectId(params.leaderId)
+      ? await ContentLeaderModel.findById(params.leaderId)
+      : null;
+    if (!leader) {
+      await cleanupR2Uploads(newKeys);
+      return {
+        status: 404,
+        body: { success: false, message: 'Leader not found' },
+      };
+    }
+    // If the upload step did not turn the picture into a stored file, refuse
+    if (body.postImage.startsWith('data:')) {
+      return {
+        status: 400,
+        body: { success: false, message: 'The image could not be saved. Try again.' },
+      };
+    }
+
+    const oldImage = leader.postImage;
+    leader.postImage = body.postImage;
+    await leader.save();
+
+    if (oldImage && oldImage !== body.postImage && !/^https?:\/\//i.test(oldImage)) {
+      await cleanupR2Uploads([oldImage]);
+    }
+    return { status: 200, body: { success: true, message: 'Image updated' } };
+  } catch (error) {
+    await cleanupR2Uploads(newKeys);
+    return serverError(error, 'Failed to update leader image');
+  }
+};
+
 const removeContentLeader: AppRouteImplementationOrOptions<
   typeof contentRewardContract.removeContentLeader
 > = async ({ params }) => {
@@ -449,6 +500,7 @@ export const contentRewardHandler = {
   getContentSubmissionsForAdmin,
   selectContentLeader,
   getContentLeadersForAdmin,
+  setContentLeaderImage,
   removeContentLeader,
   setContentUploadPermission,
 };

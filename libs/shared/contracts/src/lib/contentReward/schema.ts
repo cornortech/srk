@@ -110,7 +110,13 @@ export const selectContentLeaderSchema = z.object({
   // Image data URL from the admin form; the upload middleware swaps it for an R2 key
   postImage: z.string().optional(),
   // Credited to the user's earnings; 0/omitted = no payment
-  rewardAmount: z.number().min(0).max(1_000_000).optional(),
+  // NRS, at most 500 per leader
+  rewardAmount: z.number().min(0).max(500).optional(),
+});
+
+export const setContentLeaderImageSchema = z.object({
+  // Image data URL from the admin form; the upload middleware swaps it for a stored key
+  postImage: z.string().min(1, 'Choose an image'),
 });
 
 export const setContentPermissionSchema = z.object({

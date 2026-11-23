@@ -148,6 +148,8 @@ export type TEarningDetails = {
   srkBankAmount: number;
   totalBankPayout: number;
   tourBalance: number;
+  // Total received from admin-confirmed content rewards
+  contentRewardEarnings?: number;
 };
 
 export type TLeaderBoardData = {

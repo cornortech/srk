@@ -8,6 +8,7 @@ import {
   getContentSubmissionsQuerySchema,
   paginatedContentSubmissionsSchema,
   selectContentLeaderSchema,
+  setContentLeaderImageSchema,
   setContentPermissionSchema,
   submitContentSchema,
 } from './schema';
@@ -81,6 +82,18 @@ export const contentRewardContract = c.router({
     path: '/content-reward/admin/leaders',
     responses: { 200: contentLeadersSchema, 500: ErrorSchema },
     summary: 'All selected leaders (admin)',
+  },
+  setContentLeaderImage: {
+    method: 'PUT',
+    path: '/content-reward/admin/leaders/:leaderId/image',
+    body: setContentLeaderImageSchema,
+    responses: {
+      200: SuccessSchema,
+      400: ErrorSchema,
+      404: ErrorSchema,
+      500: ErrorSchema,
+    },
+    summary: 'Add or replace the post image of a selected leader (admin)',
   },
   removeContentLeader: {
     method: 'DELETE',

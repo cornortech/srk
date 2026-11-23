@@ -3,7 +3,7 @@ import { Divider } from "@nextui-org/divider";
 import { EarningsChart } from "../../components/dashboard/earning/EarningCharts";
 import ProfileSection from "../../components/dashboard/earning/ProfileSection";
 import { Chip } from "@nextui-org/chip";
-import { DollarSign, Wallet, CreditCard, Gift, Calendar } from "lucide-react";
+import { DollarSign, Wallet, CreditCard, Gift, Calendar, Award } from "lucide-react";
 import { ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getEarningDetailsofUserApi } from "../../lib/apiClient";
@@ -93,6 +93,13 @@ export default function EarningsDashboard() {
               icon={<DollarSign className="text-red-500" size={24} />}
               chipText="Tax"
               chipColor="danger"
+            />
+            <EarningCard
+              title="Content Reward"
+              amount={earningsData.contentRewardEarnings ?? 0}
+              icon={<Award className="text-orange-400" size={24} />}
+              chipText="Rewards"
+              chipColor="warning"
             />
           </div>
           <Card className="bg-bgSecondary">

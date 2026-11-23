@@ -99,6 +99,8 @@ export const getFinanceDetailsOfUserSchema = z.object({
   srkBankAmount: z.number(),
   totalBankPayout: z.number(),
   tourBalance: z.number(),
+  // Total received from admin-confirmed content rewards
+  contentRewardEarnings: z.number(),
 });
 
 export const getEarningLeaderboardSchema = z.array(

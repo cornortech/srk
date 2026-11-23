@@ -105,14 +105,80 @@ export const selectContentLeaderSchema = z.object({
   submissionId: z.string(),
   // Only 1st, 2nd and 3rd place are selectable
   rank: z.number().int().min(1).max(3),
-  weekStart: dateKeySchema,
-  weekEnd: dateKeySchema,
   // Image data URL from the admin form; the upload middleware swaps it for an R2 key
   postImage: z.string().optional(),
   // Credited to the user's earnings; 0/omitted = no payment
   // NRS, at most 500 per leader
   rewardAmount: z.number().min(0).max(500).optional(),
 });
+
+// ---- grouped by week ----
+
+export const userSubmissionWeeksSchema = z.array(
+  z.object({
+    weekStart: z.string(),
+    weekEnd: z.string(),
+    // The week we are in right now
+    isCurrent: z.boolean(),
+    // The admin has chosen leaders for this week
+    decisionMade: z.boolean(),
+    // Set when this user was picked as a leader in the week
+    result: z
+      .object({ rank: z.number(), rewardAmount: z.number() })
+      .nullable(),
+    submissions: z.array(
+      z.object({
+        _id: z.string(),
+        platform: contentPlatformSchema,
+        links: z.array(z.string()),
+        submittedAt: z.string(),
+        leaderRank: z.number().nullable(),
+      })
+    ),
+  })
+);
+
+export const getSubmissionsByWeekQuerySchema = z.object({
+  from: dateKeySchema.optional(),
+  to: dateKeySchema.optional(),
+});
+
+export const adminSubmissionWeeksSchema = z.array(
+  z.object({
+    weekStart: z.string(),
+    weekEnd: z.string(),
+    isCurrent: z.boolean(),
+    totalSubmissions: z.number(),
+    // Leaders already chosen for the week (to show which places are taken)
+    leaders: z.array(
+      z.object({
+        leaderId: z.string(),
+        rank: z.number(),
+        userName: z.string(),
+        rewardAmount: z.number(),
+      })
+    ),
+    users: z.array(
+      z.object({
+        userId: z.string(),
+        fullName: z.string(),
+        email: z.string(),
+        phoneNumber: z.string(),
+        submissions: z.array(
+          z.object({
+            _id: z.string(),
+            platform: contentPlatformSchema,
+            links: z.array(z.string()),
+            submittedAt: z.string(),
+            leader: z
+              .object({ rank: z.number(), rewardAmount: z.number() })
+              .nullable(),
+          })
+        ),
+      })
+    ),
+  })
+);
 
 export const setContentLeaderImageSchema = z.object({
   // Image data URL from the admin form; the upload middleware swaps it for a stored key

@@ -54,6 +54,56 @@ export type TAdminContentSubmission = {
   } | null;
 };
 
+export type TWeekSubmission = {
+  _id: string;
+  platform: TContentPlatform;
+  links: string[];
+  submittedAt: string;
+  leaderRank: number | null;
+};
+
+/** One week (Sunday - Saturday, Nepal) of the user's own submissions */
+export type TMyWeek = {
+  weekStart: string;
+  weekEnd: string;
+  isCurrent: boolean;
+  /** The admin has already chosen leaders for this week */
+  decisionMade: boolean;
+  /** Set when this user was picked as a leader in the week */
+  result: { rank: number; rewardAmount: number } | null;
+  submissions: TWeekSubmission[];
+};
+
+export type TAdminWeekSubmission = {
+  _id: string;
+  platform: TContentPlatform;
+  links: string[];
+  submittedAt: string;
+  leader: { rank: number; rewardAmount: number } | null;
+};
+
+export type TAdminWeekUser = {
+  userId: string;
+  fullName: string;
+  email: string;
+  phoneNumber: string;
+  submissions: TAdminWeekSubmission[];
+};
+
+export type TAdminWeek = {
+  weekStart: string;
+  weekEnd: string;
+  isCurrent: boolean;
+  totalSubmissions: number;
+  leaders: {
+    leaderId: string;
+    rank: number;
+    userName: string;
+    rewardAmount: number;
+  }[];
+  users: TAdminWeekUser[];
+};
+
 export type TPaginatedSubmissions = {
   page: number;
   limit: number;
@@ -76,6 +126,16 @@ const getLeaderboard = async (): Promise<TContentLeader[]> =>
 const getRewardStatement = async (): Promise<TRewardStatementItem[]> =>
   (await apiClient.get("/content-reward/user/statement")).data;
 
+const getMySubmissions = async (): Promise<TMyWeek[]> =>
+  (await apiClient.get("/content-reward/user/submissions")).data;
+
+const getSubmissionsByWeek = async (params: {
+  from?: string;
+  to?: string;
+}): Promise<TAdminWeek[]> =>
+  (await apiClient.get("/content-reward/admin/submissions-by-week", { params }))
+    .data;
+
 const getSubmissionsForAdmin = async (params: {
   page: number;
   from?: string;
@@ -90,8 +150,6 @@ const getSubmissionsForAdmin = async (params: {
 const selectLeader = async (data: {
   submissionId: string;
   rank: number;
-  weekStart: string;
-  weekEnd: string;
   postImage?: string;
   rewardAmount?: number;
 }) => (await apiClient.post("/content-reward/admin/leaders", data)).data;
@@ -122,6 +180,8 @@ export const contentRewardApi = {
   submitContent,
   getLeaderboard,
   getRewardStatement,
+  getMySubmissions,
+  getSubmissionsByWeek,
   getSubmissionsForAdmin,
   selectLeader,
   getLeadersForAdmin,
@@ -160,3 +220,9 @@ export const nepalDateKey = (offsetDays = 0) => {
   d.setUTCDate(d.getUTCDate() + offsetDays);
   return d.toISOString().slice(0, 10);
 };
+
+/** '2026-11-22','2026-11-28' -> '22 Nov 2026 - 28 Nov 2026' */
+export const formatWeekRange = (weekStart: string, weekEnd: string) =>
+  `${formatDateKey(weekStart)} - ${formatDateKey(weekEnd)}`;
+
+export const ordinalRank = (n: number) => ["1st", "2nd", "3rd"][n - 1] ?? `${n}th`;

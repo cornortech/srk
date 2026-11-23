@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import {
+  Accordion,
+  AccordionItem,
   Avatar,
   Button,
   Card,
@@ -18,6 +20,10 @@ import {
   CheckCircle2,
   Clock,
   ExternalLink,
+  Hourglass,
+  ImageOff,
+  Send,
+  Sparkles,
   Link2,
   Plus,
   Wallet,
@@ -25,14 +31,17 @@ import {
   Trophy,
   Upload,
 } from "lucide-react";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import {
   CONTENT_PLATFORMS,
   contentRewardApi,
   formatDateKey,
   formatNepalDateTime,
+  formatWeekRange,
+  ordinalRank,
   TContentLeader,
+  TMyWeek,
   TContentPlatform,
 } from "../../lib/api/contentReward/contentReward.api";
 import { platformMeta } from "../../lib/api/contentReward/platforms";
@@ -46,109 +55,182 @@ const cardClass = "bg-bgSecondary border border-white/5 rounded-2xl shadow-none"
 const placeholderFor = (platform: TContentPlatform | null) =>
   `https://${platform ? platform.toLowerCase() : "example"}.com/your-content`;
 
-// Same look as the earning leaderboard's RankCard: one card per place
+// Badge colours for 1st / 2nd / 3rd (same as the earning leaderboard)
 const badgeColor: Record<number, string> = {
   1: "bg-yellow-400",
   2: "bg-orange-300",
   3: "bg-gray-200",
 };
 
+// A leaderboard entry shaped like a social media post: who posted it, the
+// poster itself as the main picture, then the reward and the links.
 function LeaderCard({ leader }: { leader: TContentLeader }) {
   const meta = platformMeta[leader.platform];
   const Icon = meta.icon;
   const imageUrl = leader.postImage ? getUniversityAssetUrl(leader.postImage) : "";
+  const [imageFailed, setImageFailed] = useState(false);
+  const showImage = !!imageUrl && !imageFailed;
 
   return (
     <Card
-      className={`bg-bgSecondary p-4 relative ${
+      className={`bg-bgSecondary p-0 ${
         leader.rank === 1 ? "border border-primary/40" : "border border-white/5"
       }`}
     >
-      {/* Position badge */}
-      <div className="flex justify-end mb-2">
-        <div
-          className={`w-8 h-8 flex items-center justify-center rounded-lg ${
-            badgeColor[leader.rank] ?? "bg-gray-200"
-          }`}
-        >
-          <span className="text-sm font-bold text-blue-900">{leader.rank}</span>
-        </div>
-      </div>
-
-      <div className="flex flex-col items-center text-center gap-2">
+      {/* Post header */}
+      <div className="flex items-center gap-3 p-3">
         <Avatar
+          size="sm"
           name={leader.userName}
-          className="w-20 h-20"
           src={
             leader.profilePicture
               ? getUniversityAssetUrl(leader.profilePicture)
               : undefined
           }
         />
-        <h3 className="text-white font-medium italic">{leader.userName}</h3>
-        {leader.rank === 1 && (
-          <p className="text-xs text-[#e1ba73] flex items-center gap-1">
-            <Trophy className="w-3 h-3" /> Winner of the week
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-semibold text-white truncate">
+            {leader.userName}
           </p>
-        )}
+          <p className="text-xs text-gray-400">
+            {ordinalRank(leader.rank)} content creator
+          </p>
+        </div>
+        <span
+          className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${meta.bg}`}
+          title={leader.platform}
+        >
+          <Icon className={`w-4 h-4 ${meta.text}`} />
+        </span>
       </div>
 
-      {imageUrl && (
-        <a
-          href={imageUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="block mt-4"
-        >
-          <img
-            src={imageUrl}
-            alt={`${leader.userName}'s post`}
-            loading="lazy"
-            onError={(e) => {
-              (e.currentTarget.parentElement as HTMLElement).style.display = "none";
-            }}
-            className="w-full max-h-64 object-cover rounded-xl border border-white/10"
-          />
-        </a>
-      )}
-
-      <div className="flex justify-between items-center text-sm text-gray-300 mt-4">
-        <span
-          className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${meta.bg} ${meta.text}`}
-        >
-          <Icon className="w-3.5 h-3.5" />
-          {leader.platform}
-        </span>
-        {!!leader.rewardAmount && (
-          <div className="text-right">
-            <p className="text-gray-400 text-xs">Reward</p>
-            <p className="font-semibold text-[#e1ba73]">
-              NRS {leader.rewardAmount.toLocaleString()}
-            </p>
+      {/* Poster */}
+      <div className="relative w-full aspect-[4/5] bg-black/30">
+        {showImage ? (
+          <a href={imageUrl} target="_blank" rel="noopener noreferrer">
+            <img
+              src={imageUrl}
+              alt={`${leader.userName}'s poster`}
+              loading="lazy"
+              onError={() => setImageFailed(true)}
+              className="w-full h-full object-cover"
+            />
+          </a>
+        ) : (
+          <div className="w-full h-full flex flex-col items-center justify-center gap-2 bg-gradient-to-br from-white/[0.06] to-white/[0.02] text-gray-500">
+            <ImageOff className="w-10 h-10" />
+            <span className="text-xs">Poster coming soon</span>
           </div>
         )}
+        <div
+          className={`absolute top-3 left-3 flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-bold text-blue-900 shadow ${
+            badgeColor[leader.rank] ?? "bg-gray-200"
+          }`}
+        >
+          <Trophy className="w-4 h-4" />
+          {ordinalRank(leader.rank)}
+        </div>
       </div>
 
-      <div className="flex flex-wrap gap-2 mt-3">
-        {leader.links.map((link, i) => (
-          <a
-            key={i}
-            href={link}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
-          >
-            Post {i + 1}
-            <ExternalLink className="w-3 h-3" />
-          </a>
-        ))}
+      {/* Footer */}
+      <div className="p-3 space-y-3">
+        {!!leader.rewardAmount && (
+          <div className="flex items-center justify-between rounded-xl bg-primary/10 px-3 py-2">
+            <span className="text-xs text-gray-300">Reward</span>
+            <span className="font-semibold text-[#e1ba73]">
+              NRS {leader.rewardAmount.toLocaleString()}
+            </span>
+          </div>
+        )}
+        <div className="flex flex-wrap gap-2">
+          {leader.links.map((link, i) => (
+            <a
+              key={i}
+              href={link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
+            >
+              View post {leader.links.length > 1 ? i + 1 : ""}
+              <ExternalLink className="w-3 h-3" />
+            </a>
+          ))}
+        </div>
       </div>
     </Card>
   );
 }
 
+// What a week means for this user, in words
+function WeekResult({ week }: { week: TMyWeek }) {
+  if (week.result) {
+    return (
+      <div className="flex items-start gap-2 rounded-xl bg-success/10 text-success p-3 text-sm">
+        <Sparkles className="w-4 h-4 mt-0.5 shrink-0" />
+        <span>
+          Congratulations! You have been selected as the{" "}
+          <b>{ordinalRank(week.result.rank)}</b> content creator for this week.
+          {week.result.rewardAmount > 0 &&
+            ` NRS ${week.result.rewardAmount.toLocaleString()} was added to your earnings.`}
+        </span>
+      </div>
+    );
+  }
+  if (!week.isCurrent && week.decisionMade) {
+    return (
+      <div className="flex items-start gap-2 rounded-xl bg-white/5 text-gray-300 p-3 text-sm">
+        <Clock className="w-4 h-4 mt-0.5 shrink-0" />
+        <span>
+          Sorry, you were not selected this time. Keep creating, your next
+          chance is the coming week!
+        </span>
+      </div>
+    );
+  }
+  return (
+    <div className="flex items-start gap-2 rounded-xl bg-warning/10 text-warning p-3 text-sm">
+      <Hourglass className="w-4 h-4 mt-0.5 shrink-0" />
+      <span>
+        {week.isCurrent
+          ? "This is the current week. The admin will review the submissions when the week ends."
+          : "Your submissions are waiting for the admin's decision."}
+      </span>
+    </div>
+  );
+}
+
+function WeekStatusChip({ week }: { week: TMyWeek }) {
+  if (week.result) {
+    return (
+      <Chip size="sm" color="success" variant="flat">
+        Selected - {ordinalRank(week.result.rank)}
+      </Chip>
+    );
+  }
+  if (week.isCurrent) {
+    return (
+      <Chip size="sm" color="primary" variant="flat">
+        Current week
+      </Chip>
+    );
+  }
+  if (week.decisionMade) {
+    return (
+      <Chip size="sm" variant="flat">
+        Not selected
+      </Chip>
+    );
+  }
+  return (
+    <Chip size="sm" color="warning" variant="flat">
+      Pending
+    </Chip>
+  );
+}
+
 export default function ContentRewardsPage() {
   const { show } = useAlert();
+  const queryClient = useQueryClient();
   const [platform, setPlatform] = useState<TContentPlatform | null>(null);
   const [links, setLinks] = useState<string[]>([""]);
 
@@ -167,7 +249,13 @@ export default function ContentRewardsPage() {
     queryFn: contentRewardApi.getRewardStatement,
   });
   const totalRewarded = (statement ?? []).reduce((sum, r) => sum + r.amount, 0);
-  const ordinal = (n: number) => ["1st", "2nd", "3rd"][n - 1] ?? `${n}th`;
+  const ordinal = ordinalRank;
+
+  const { data: myWeeks, isLoading: isLoadingMyWeeks } = useQuery({
+    queryKey: ["myContentSubmissions"],
+    queryFn: contentRewardApi.getMySubmissions,
+    enabled: !!status?.canUpload,
+  });
 
   const { mutate: submit, isPending } = useMutation({
     mutationFn: contentRewardApi.submitContent,
@@ -176,6 +264,7 @@ export default function ContentRewardsPage() {
       setPlatform(null);
       setLinks([""]);
       refetchStatus();
+      queryClient.invalidateQueries({ queryKey: ["myContentSubmissions"] });
     },
     onError: (error: AxiosError<{ message: string }>) => {
       show(error.response?.data.message || "Failed to submit content", "error");
@@ -266,6 +355,117 @@ export default function ContentRewardsPage() {
         </div>
       ),
     },
+    ...(status?.canUpload
+      ? [
+          {
+            id: "submissions",
+            title: (
+              <span className="flex items-center gap-2">
+                <Send className="w-4 h-4" /> My Submissions
+              </span>
+            ),
+            content: (
+              <div className="space-y-4">
+                {isLoadingMyWeeks && (
+                  <div className="space-y-3">
+                    <Skeleton className="h-16 rounded-2xl" />
+                    <Skeleton className="h-16 rounded-2xl" />
+                  </div>
+                )}
+
+                {myWeeks && myWeeks.length === 0 && (
+                  <Card className={cardClass}>
+                    <CardBody className="py-12 text-center">
+                      <Send className="w-12 h-12 mx-auto mb-3 text-gray-600" />
+                      <p className="text-textPrimary font-medium">
+                        No submissions yet
+                      </p>
+                      <p className="text-sm text-gray-400">
+                        Your weekly submissions will be listed here.
+                      </p>
+                    </CardBody>
+                  </Card>
+                )}
+
+                {myWeeks && myWeeks.length > 0 && (
+                  <Accordion
+                    selectionMode="multiple"
+                    variant="splitted"
+                    defaultExpandedKeys={myWeeks
+                      .filter((w) => w.isCurrent)
+                      .map((w) => w.weekStart)}
+                  >
+                    {myWeeks.map((week) => (
+                      <AccordionItem
+                        key={week.weekStart}
+                        aria-label={formatWeekRange(week.weekStart, week.weekEnd)}
+                        title={
+                          <span className="flex flex-wrap items-center gap-2">
+                            <span className="font-semibold text-textPrimary">
+                              {formatWeekRange(week.weekStart, week.weekEnd)}
+                            </span>
+                            <WeekStatusChip week={week} />
+                          </span>
+                        }
+                        subtitle={`${week.submissions.length} submission${
+                          week.submissions.length === 1 ? "" : "s"
+                        }`}
+                        startContent={<CalendarDays className="w-5 h-5 text-primary" />}
+                        classNames={{ base: "bg-bgSecondary border border-white/5 shadow-none" }}
+                      >
+                        <div className="space-y-3 pb-2">
+                          <WeekResult week={week} />
+                          {week.submissions.map((sub) => {
+                            const meta = platformMeta[sub.platform];
+                            const Icon = meta.icon;
+                            return (
+                              <div
+                                key={sub._id}
+                                className="flex flex-wrap items-center gap-3 rounded-xl border border-white/5 bg-white/[0.03] p-3"
+                              >
+                                <span
+                                  className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${meta.bg} ${meta.text}`}
+                                >
+                                  <Icon className="w-3.5 h-3.5" />
+                                  {sub.platform}
+                                </span>
+                                <div className="flex-1 min-w-[140px]">
+                                  <div className="flex flex-wrap gap-2">
+                                    {sub.links.map((link, i) => (
+                                      <a
+                                        key={i}
+                                        href={link}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
+                                      >
+                                        Post {i + 1}
+                                        <ExternalLink className="w-3 h-3" />
+                                      </a>
+                                    ))}
+                                  </div>
+                                  <p className="text-xs text-gray-400 mt-1">
+                                    {formatNepalDateTime(sub.submittedAt)}
+                                  </p>
+                                </div>
+                                {sub.leaderRank && (
+                                  <Chip size="sm" color="success" variant="flat">
+                                    {ordinalRank(sub.leaderRank)} place
+                                  </Chip>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </AccordionItem>
+                    ))}
+                  </Accordion>
+                )}
+              </div>
+            ),
+          },
+        ]
+      : []),
     {
       id: "statement",
       title: (

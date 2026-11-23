@@ -2,6 +2,8 @@
 
 import { useRef, useState } from "react";
 import {
+  Accordion,
+  AccordionItem,
   Button,
   Chip,
   Input,
@@ -10,7 +12,6 @@ import {
   ModalContent,
   ModalFooter,
   ModalHeader,
-  Pagination,
   Select,
   SelectItem,
   Tab,
@@ -29,8 +30,12 @@ import {
   contentRewardApi,
   formatDateKey,
   formatNepalDateTime,
+  formatWeekRange,
   nepalDateKey,
-  TAdminContentSubmission,
+  ordinalRank,
+  TAdminWeek,
+  TAdminWeekSubmission,
+  TAdminWeekUser,
 } from "../../lib/api/contentReward/contentReward.api";
 import useAlert from "../../hooks/useAlert";
 import ConfirmationModal from "../../components/admin/modal/ConfirmationModal";
@@ -41,10 +46,10 @@ import {
 } from "../../lib/kycImage";
 import { getUniversityAssetUrl } from "../../lib/cdn";
 
-// Only the top three places are rewarded
 // The most (in NRS) one leader can be rewarded
 const MAX_REWARD_NRS = 500;
 
+// Only the top three places are rewarded
 const RANK_OPTIONS = [
   { key: "1", label: "1st place" },
   { key: "2", label: "2nd place" },
@@ -82,19 +87,23 @@ const PlatformChip = ({ platform }: { platform: keyof typeof platformMeta }) => 
   );
 };
 
+type TPicked = {
+  week: TAdminWeek;
+  user: TAdminWeekUser;
+  submission: TAdminWeekSubmission;
+};
+
 export default function AdminContentRewards() {
   const { show } = useAlert();
   const queryClient = useQueryClient();
 
-  // Default to the last 7 days (Nepal dates), the usual "week" to review
-  const [from, setFrom] = useState(nepalDateKey(-6));
+  // Weeks are Sunday - Saturday (Nepal). Any date inside a week selects the whole
+  // week, so the default shows last week and this week.
+  const [from, setFrom] = useState(nepalDateKey(-7));
   const [to, setTo] = useState(nepalDateKey(0));
-  const [page, setPage] = useState(1);
 
-  const [picked, setPicked] = useState<TAdminContentSubmission | null>(null);
+  const [picked, setPicked] = useState<TPicked | null>(null);
   const [rank, setRank] = useState("1");
-  const [weekStart, setWeekStart] = useState("");
-  const [weekEnd, setWeekEnd] = useState("");
   const [postImage, setPostImage] = useState("");
   const [isPreparingImage, setIsPreparingImage] = useState(false);
   const [imageError, setImageError] = useState("");
@@ -104,11 +113,10 @@ export default function AdminContentRewards() {
   const leaderPhotoInputRef = useRef<HTMLInputElement>(null);
   const [photoLeaderId, setPhotoLeaderId] = useState<string | null>(null);
 
-  const { data: submissions } = useQuery({
-    queryKey: ["contentSubmissions", page, from, to],
+  const { data: weeks, isLoading: isLoadingWeeks } = useQuery({
+    queryKey: ["contentSubmissionsByWeek", from, to],
     queryFn: () =>
-      contentRewardApi.getSubmissionsForAdmin({
-        page,
+      contentRewardApi.getSubmissionsByWeek({
         from: from || undefined,
         to: to || undefined,
       }),
@@ -120,7 +128,7 @@ export default function AdminContentRewards() {
   });
 
   const refreshAll = () => {
-    queryClient.invalidateQueries({ queryKey: ["contentSubmissions"] });
+    queryClient.invalidateQueries({ queryKey: ["contentSubmissionsByWeek"] });
     queryClient.invalidateQueries({ queryKey: ["contentLeadersAdmin"] });
   };
 
@@ -160,16 +168,23 @@ export default function AdminContentRewards() {
     },
   });
 
-  const openPicker = (submission: TAdminContentSubmission) => {
-    setPicked(submission);
-    setRank("1");
+  const takenRanks = (week: TAdminWeek) =>
+    new Set(week.leaders.map((l) => l.rank));
+
+  const openPicker = (
+    week: TAdminWeek,
+    user: TAdminWeekUser,
+    submission: TAdminWeekSubmission
+  ) => {
+    const taken = takenRanks(week);
+    // Start on the first place that is still free
+    const firstFree = [1, 2, 3].find((r) => !taken.has(r)) ?? 1;
+    setPicked({ week, user, submission });
+    setRank(String(firstFree));
     setPostImage("");
     setImageError("");
     setIsPreparingImage(false);
     setRewardAmount("");
-    // The week being reviewed is whatever date range the admin filtered on
-    setWeekStart(from);
-    setWeekEnd(to);
   };
 
   const handleSelect = () => {
@@ -177,6 +192,10 @@ export default function AdminContentRewards() {
     if (!picked) return;
     if (![1, 2, 3].includes(rankNumber)) {
       show("Choose 1st, 2nd or 3rd place", "error");
+      return;
+    }
+    if (takenRanks(picked.week).has(rankNumber)) {
+      show(`${ordinalRank(rankNumber)} place is already taken this week`, "error");
       return;
     }
     const amount = rewardAmount === "" ? 0 : Number(rewardAmount);
@@ -188,15 +207,10 @@ export default function AdminContentRewards() {
       show("Please wait, the photo is still being prepared", "error");
       return;
     }
-    if (!weekStart || !weekEnd || weekStart > weekEnd) {
-      show("Choose a valid week (start date before end date)", "error");
-      return;
-    }
+    // The week is taken from the submission itself on the server
     selectLeader({
-      submissionId: picked._id,
+      submissionId: picked.submission._id,
       rank: rankNumber,
-      weekStart,
-      weekEnd,
       postImage: postImage || undefined,
       rewardAmount: amount > 0 ? amount : undefined,
     });
@@ -239,10 +253,14 @@ export default function AdminContentRewards() {
     }
   };
 
-  const changeDate = (setter: (v: string) => void) => (value: string) => {
-    setter(value);
-    setPage(1);
+  const setRange = (fromKey: string, toKey: string) => {
+    setFrom(fromKey);
+    setTo(toKey);
   };
+
+  const currentWeekKeys = (weeks ?? [])
+    .filter((w) => w.isCurrent)
+    .map((w) => w.weekStart);
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
@@ -253,7 +271,8 @@ export default function AdminContentRewards() {
         <div>
           <h1 className="text-2xl font-bold">Content Rewards</h1>
           <p className="text-sm text-gray-400">
-            Review submitted content, then pick and rank the leaders of the week
+            Open a week, then a user, and pick the 1st, 2nd and 3rd place from
+            their submissions
           </p>
         </div>
       </div>
@@ -268,7 +287,7 @@ export default function AdminContentRewards() {
               className="w-44"
               value={from}
               max={to || undefined}
-              onChange={(e) => changeDate(setFrom)(e.target.value)}
+              onChange={(e) => setFrom(e.target.value)}
             />
             <Input
               type="date"
@@ -277,99 +296,162 @@ export default function AdminContentRewards() {
               className="w-44"
               value={to}
               min={from || undefined}
-              onChange={(e) => changeDate(setTo)(e.target.value)}
+              onChange={(e) => setTo(e.target.value)}
             />
             <Button
               size="sm"
               variant="flat"
-              onPress={() => {
-                setFrom(nepalDateKey(-6));
-                setTo(nepalDateKey(0));
-                setPage(1);
-              }}
+              onPress={() => setRange(nepalDateKey(0), nepalDateKey(0))}
             >
-              Last 7 days
+              This week
             </Button>
             <Button
               size="sm"
-              variant="light"
-              onPress={() => {
-                setFrom("");
-                setTo("");
-                setPage(1);
-              }}
+              variant="flat"
+              onPress={() => setRange(nepalDateKey(-7), nepalDateKey(-7))}
             >
-              Clear
+              Last week
             </Button>
+            <Button
+              size="sm"
+              variant="flat"
+              onPress={() => setRange(nepalDateKey(-28), nepalDateKey(0))}
+            >
+              Last 4 weeks
+            </Button>
+            <p className="text-xs text-gray-400 w-full">
+              Weeks run Sunday to Saturday (Nepal time). Any date you choose
+              includes its whole week.
+            </p>
           </div>
 
-          <Table
-            aria-label="Content submissions"
-            bottomContent={
-              submissions && submissions.totalPages > 1 ? (
-                <div className="flex justify-center">
-                  <Pagination
-                    page={page}
-                    total={submissions.totalPages}
-                    onChange={setPage}
-                  />
-                </div>
-              ) : null
-            }
-          >
-            <TableHeader>
-              <TableColumn>SN</TableColumn>
-              <TableColumn>User</TableColumn>
-              <TableColumn>Phone</TableColumn>
-              <TableColumn>Platform</TableColumn>
-              <TableColumn>Links</TableColumn>
-              <TableColumn>Submitted (Nepal time)</TableColumn>
-              <TableColumn>Leader</TableColumn>
-              <TableColumn>Actions</TableColumn>
-            </TableHeader>
-            <TableBody emptyContent="No submissions in this date range">
-              {(submissions?.data ?? []).map((s, index) => (
-                <TableRow key={s._id}>
-                  <TableCell>{(page - 1) * 10 + index + 1}</TableCell>
-                  <TableCell>
-                    <div>{s.user.fullName}</div>
-                    <div className="text-xs text-gray-400">{s.user.email}</div>
-                  </TableCell>
-                  <TableCell>{s.user.phoneNumber}</TableCell>
-                  <TableCell>
-                    <PlatformChip platform={s.platform} />
-                  </TableCell>
-                  <TableCell>
-                    <Links links={s.links} />
-                  </TableCell>
-                  <TableCell className="text-sm text-gray-300 whitespace-nowrap">
-                    {formatNepalDateTime(s.submittedAt)}
-                  </TableCell>
-                  <TableCell>
-                    {s.leader ? (
-                      <Chip size="sm" color="success" variant="flat">
-                        Rank {s.leader.rank} ({formatDateKey(s.leader.weekStart)} -{" "}
-                        {formatDateKey(s.leader.weekEnd)})
-                      </Chip>
-                    ) : (
-                      "-"
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <Button
-                      size="sm"
-                      color="primary"
-                      variant="flat"
-                      isDisabled={!!s.leader}
-                      onPress={() => openPicker(s)}
-                    >
-                      Select as leader
-                    </Button>
-                  </TableCell>
-                </TableRow>
+          {isLoadingWeeks && <p className="text-gray-400">Loading...</p>}
+
+          {weeks && weeks.length === 0 && (
+            <div className="rounded-2xl bg-bgSecondary border border-white/5 p-10 text-center text-gray-400">
+              No submissions in these weeks
+            </div>
+          )}
+
+          {weeks && weeks.length > 0 && (
+            <Accordion
+              selectionMode="multiple"
+              variant="splitted"
+              defaultExpandedKeys={currentWeekKeys}
+              key={`${from}|${to}|${weeks.length}`}
+            >
+              {weeks.map((week) => (
+                <AccordionItem
+                  key={week.weekStart}
+                  aria-label={formatWeekRange(week.weekStart, week.weekEnd)}
+                  title={
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="font-semibold">
+                        {formatWeekRange(week.weekStart, week.weekEnd)}
+                      </span>
+                      {week.isCurrent && (
+                        <Chip size="sm" color="primary" variant="flat">
+                          Current week
+                        </Chip>
+                      )}
+                    </div>
+                  }
+                  subtitle={`${week.totalSubmissions} submission${
+                    week.totalSubmissions === 1 ? "" : "s"
+                  } · ${week.users.length} user${
+                    week.users.length === 1 ? "" : "s"
+                  } · ${week.leaders.length}/3 leaders chosen`}
+                >
+                  {/* Places already given this week */}
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {[1, 2, 3].map((r) => {
+                      const l = week.leaders.find((x) => x.rank === r);
+                      return (
+                        <Chip
+                          key={r}
+                          size="sm"
+                          variant="flat"
+                          color={l ? "success" : "default"}
+                        >
+                          {ordinalRank(r)}:{" "}
+                          {l
+                            ? `${l.userName}${
+                                l.rewardAmount ? ` (NRS ${l.rewardAmount})` : ""
+                              }`
+                            : "not chosen yet"}
+                        </Chip>
+                      );
+                    })}
+                  </div>
+
+                  <Accordion selectionMode="multiple" variant="bordered">
+                    {week.users.map((user) => {
+                      const userLeader = user.submissions.find((s) => s.leader);
+                      return (
+                        <AccordionItem
+                          key={user.userId}
+                          aria-label={user.fullName}
+                          title={
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span className="font-medium">{user.fullName}</span>
+                              {userLeader?.leader && (
+                                <Chip size="sm" color="warning" variant="flat">
+                                  {ordinalRank(userLeader.leader.rank)} place
+                                </Chip>
+                              )}
+                            </div>
+                          }
+                          subtitle={`${user.email} · ${user.phoneNumber} · ${
+                            user.submissions.length
+                          } submission${user.submissions.length === 1 ? "" : "s"}`}
+                        >
+                          <div className="space-y-2">
+                            {user.submissions.map((s) => (
+                              <div
+                                key={s._id}
+                                className="flex flex-wrap items-center gap-3 rounded-xl border border-white/5 bg-white/[0.03] p-3"
+                              >
+                                <PlatformChip platform={s.platform} />
+                                <div className="flex-1 min-w-[160px]">
+                                  <Links links={s.links} />
+                                  <p className="text-xs text-gray-400 mt-1">
+                                    {formatNepalDateTime(s.submittedAt)}
+                                  </p>
+                                </div>
+                                {s.leader ? (
+                                  <Chip size="sm" color="success" variant="flat">
+                                    {ordinalRank(s.leader.rank)} place
+                                  </Chip>
+                                ) : (
+                                  <Button
+                                    size="sm"
+                                    color="primary"
+                                    variant="flat"
+                                    isDisabled={
+                                      !!userLeader ||
+                                      week.leaders.length >= 3
+                                    }
+                                    onPress={() => openPicker(week, user, s)}
+                                  >
+                                    Select as leader
+                                  </Button>
+                                )}
+                              </div>
+                            ))}
+                            {userLeader && user.submissions.some((s) => !s.leader) && (
+                              <p className="text-xs text-gray-400">
+                                This user already has a place this week.
+                              </p>
+                            )}
+                          </div>
+                        </AccordionItem>
+                      );
+                    })}
+                  </Accordion>
+                </AccordionItem>
               ))}
-            </TableBody>
-          </Table>
+            </Accordion>
+          )}
         </Tab>
 
         <Tab key="leaders" title="Selected Leaders">
@@ -481,9 +563,18 @@ export default function AdminContentRewards() {
               <ModalHeader>Select as leader</ModalHeader>
               <ModalBody className="space-y-3">
                 {picked && (
-                  <div className="flex items-center justify-between rounded-xl bg-white/5 p-3">
-                    <span className="font-medium">{picked.user.fullName}</span>
-                    <PlatformChip platform={picked.platform} />
+                  <div className="rounded-xl bg-white/5 p-3 space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium">{picked.user.fullName}</span>
+                      <PlatformChip platform={picked.submission.platform} />
+                    </div>
+                    <p className="text-xs text-gray-400">
+                      Week{" "}
+                      {formatWeekRange(
+                        picked.week.weekStart,
+                        picked.week.weekEnd
+                      )}
+                    </p>
                   </div>
                 )}
                 <Select
@@ -491,6 +582,11 @@ export default function AdminContentRewards() {
                   labelPlacement="outside"
                   disallowEmptySelection
                   selectedKeys={[rank]}
+                  disabledKeys={
+                    picked
+                      ? [...takenRanks(picked.week)].map((r) => String(r))
+                      : []
+                  }
                   onChange={(e) => e.target.value && setRank(e.target.value)}
                 >
                   {RANK_OPTIONS.map((o) => (
@@ -498,7 +594,7 @@ export default function AdminContentRewards() {
                   ))}
                 </Select>
                 <p className="text-xs text-gray-400">
-                  Each position can be used once per week (same week dates).
+                  Places already given this week are greyed out.
                 </p>
                 <Input
                   type="number"
@@ -515,7 +611,7 @@ export default function AdminContentRewards() {
                   onChange={(e) => setRewardAmount(e.target.value)}
                 />
                 <div className="space-y-2">
-                  <p className="text-sm">Post image (shown on the leaderboard)</p>
+                  <p className="text-sm">Poster image (shown on the leaderboard)</p>
                   <input
                     ref={imageInputRef}
                     type="file"
@@ -561,20 +657,6 @@ export default function AdminContentRewards() {
                     </Button>
                   )}
                 </div>
-                <Input
-                  type="date"
-                  label="Week start"
-                  labelPlacement="outside"
-                  value={weekStart}
-                  onChange={(e) => setWeekStart(e.target.value)}
-                />
-                <Input
-                  type="date"
-                  label="Week end"
-                  labelPlacement="outside"
-                  value={weekEnd}
-                  onChange={(e) => setWeekEnd(e.target.value)}
-                />
               </ModalBody>
               <ModalFooter>
                 <Button variant="light" onPress={() => setPicked(null)}>

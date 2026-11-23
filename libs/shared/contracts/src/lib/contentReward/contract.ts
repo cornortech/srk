@@ -5,7 +5,10 @@ import {
   contentLeadersSchema,
   contentRewardStatementSchema,
   contentSubmissionStatusSchema,
+  adminSubmissionWeeksSchema,
   getContentSubmissionsQuerySchema,
+  getSubmissionsByWeekQuerySchema,
+  userSubmissionWeeksSchema,
   paginatedContentSubmissionsSchema,
   selectContentLeaderSchema,
   setContentLeaderImageSchema,
@@ -57,7 +60,21 @@ export const contentRewardContract = c.router({
     summary: "The user's earnings received from content rewards",
   },
 
+  getMyContentSubmissions: {
+    method: 'GET',
+    path: '/content-reward/user/submissions',
+    responses: { 200: userSubmissionWeeksSchema, 401: ErrorSchema, 500: ErrorSchema },
+    summary: "The user's own submissions grouped by week, with each week's result",
+  },
+
   // ---- admin ----
+  getContentSubmissionsByWeek: {
+    method: 'GET',
+    path: '/content-reward/admin/submissions-by-week',
+    query: getSubmissionsByWeekQuerySchema.optional(),
+    responses: { 200: adminSubmissionWeeksSchema, 500: ErrorSchema },
+    summary: 'Submissions grouped by week, then by user (admin)',
+  },
   getContentSubmissionsForAdmin: {
     method: 'GET',
     path: '/content-reward/admin/submissions',

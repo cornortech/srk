@@ -11,6 +11,8 @@ import {
   getSubmissionWindow,
   nptDayKey,
   nptDayStart,
+  nptWeekOf,
+  nptWeekOfDate,
 } from '../../utils/nepalTime';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -68,6 +70,76 @@ const getContentSubmissionStatus: AppRouteImplementationOrOptions<
     };
   } catch (error) {
     return serverError(error, 'Failed to get content submission status');
+  }
+};
+
+const getMyContentSubmissions: AppRouteImplementationOrOptions<
+  typeof contentRewardContract.getMyContentSubmissions
+> = async ({ req }) => {
+  try {
+    const userId = getUserId(req);
+    if (!userId || !mongoose.isValidObjectId(userId)) {
+      return {
+        status: 401,
+        body: { success: false, message: 'Unauthorized' },
+      };
+    }
+
+    const submissions = await ContentSubmissionModel.find({ userId })
+      .sort({ createdAt: -1 })
+      .limit(400)
+      .lean();
+
+    const currentWeek = nptWeekOfDate(new Date()).weekStart;
+    const byWeek = new Map<
+      string,
+      { weekEnd: string; items: typeof submissions }
+    >();
+    for (const s of submissions) {
+      const w = nptWeekOfDate(s.createdAt);
+      const entry = byWeek.get(w.weekStart) ?? { weekEnd: w.weekEnd, items: [] };
+      entry.items.push(s);
+      byWeek.set(w.weekStart, entry);
+    }
+    const weekStarts = [...byWeek.keys()];
+
+    // This user's own wins, and which of these weeks have any decision at all
+    const [myLeaders, decidedWeeks] = await Promise.all([
+      ContentLeaderModel.find({ userId, weekStart: { $in: weekStarts } }).lean(),
+      ContentLeaderModel.distinct('weekStart', { weekStart: { $in: weekStarts } }),
+    ]);
+    const decided = new Set<string>(decidedWeeks);
+    const leaderBySubmission = new Map(
+      myLeaders.map((l) => [l.submissionId.toString(), l])
+    );
+    const leaderByWeek = new Map(myLeaders.map((l) => [l.weekStart, l]));
+
+    const weeks = weekStarts
+      .sort((a, b) => (a < b ? 1 : -1))
+      .map((weekStart) => {
+        const entry = byWeek.get(weekStart)!;
+        const win = leaderByWeek.get(weekStart);
+        return {
+          weekStart,
+          weekEnd: entry.weekEnd,
+          isCurrent: weekStart === currentWeek,
+          decisionMade: decided.has(weekStart),
+          result: win
+            ? { rank: win.rank, rewardAmount: win.rewardAmount ?? 0 }
+            : null,
+          submissions: entry.items.map((s) => ({
+            _id: s._id.toString(),
+            platform: s.platform,
+            links: s.links as string[],
+            submittedAt: s.createdAt.toISOString(),
+            leaderRank: leaderBySubmission.get(s._id.toString())?.rank ?? null,
+          })),
+        };
+      });
+
+    return { status: 200, body: weeks };
+  } catch (error) {
+    return serverError(error, 'Failed to fetch your submissions');
   }
 };
 
@@ -277,16 +349,124 @@ const getContentSubmissionsForAdmin: AppRouteImplementationOrOptions<
   }
 };
 
+const getContentSubmissionsByWeek: AppRouteImplementationOrOptions<
+  typeof contentRewardContract.getContentSubmissionsByWeek
+> = async ({ query }) => {
+  try {
+    const today = nptDayKey(new Date());
+    const currentWeek = nptWeekOf(today).weekStart;
+
+    // Whole weeks only: the range is widened to the Sunday before / Saturday after
+    const fromKey =
+      query?.from ??
+      nptWeekOf(
+        nptDayKey(new Date(nptDayStart(today).getTime() - 7 * DAY_MS))
+      ).weekStart;
+    const toKey = query?.to ?? today;
+    const rangeStart = nptDayStart(nptWeekOf(fromKey).weekStart);
+    const rangeEnd = new Date(
+      nptDayStart(nptWeekOf(toKey).weekEnd).getTime() + DAY_MS
+    );
+
+    const submissions = await ContentSubmissionModel.find({
+      createdAt: { $gte: rangeStart, $lt: rangeEnd },
+    })
+      .sort({ createdAt: -1 })
+      .limit(5000)
+      .populate('userId', 'firstName lastName email phoneNumber')
+      .lean();
+
+    const weekStarts = [
+      ...new Set(submissions.map((s) => nptWeekOfDate(s.createdAt).weekStart)),
+    ];
+    const leaders = await ContentLeaderModel.find({
+      weekStart: { $in: weekStarts },
+    })
+      .populate('userId', 'firstName lastName')
+      .lean();
+    const leaderBySubmission = new Map(
+      leaders.map((l) => [l.submissionId.toString(), l])
+    );
+
+    type UserRow = {
+      userId: string;
+      fullName: string;
+      email: string;
+      phoneNumber: string;
+      submissions: {
+        _id: string;
+        platform: any;
+        links: string[];
+        submittedAt: string;
+        leader: { rank: number; rewardAmount: number } | null;
+      }[];
+    };
+    const weeks = new Map<
+      string,
+      { weekEnd: string; users: Map<string, UserRow>; total: number }
+    >();
+
+    for (const s of submissions as any[]) {
+      const w = nptWeekOfDate(s.createdAt);
+      const week = weeks.get(w.weekStart) ?? {
+        weekEnd: w.weekEnd,
+        users: new Map<string, UserRow>(),
+        total: 0,
+      };
+      const uid = s.userId?._id?.toString() ?? 'unknown';
+      const row = week.users.get(uid) ?? {
+        userId: uid,
+        fullName: fullName(s.userId),
+        email: s.userId?.email ?? 'N/A',
+        phoneNumber: s.userId?.phoneNumber ?? 'N/A',
+        submissions: [],
+      };
+      const lead = leaderBySubmission.get(s._id.toString());
+      row.submissions.push({
+        _id: s._id.toString(),
+        platform: s.platform,
+        links: s.links,
+        submittedAt: s.createdAt.toISOString(),
+        leader: lead
+          ? { rank: lead.rank, rewardAmount: lead.rewardAmount ?? 0 }
+          : null,
+      });
+      week.users.set(uid, row);
+      week.total += 1;
+      weeks.set(w.weekStart, week);
+    }
+
+    const body = [...weeks.entries()]
+      .sort((a, b) => (a[0] < b[0] ? 1 : -1))
+      .map(([weekStart, week]) => ({
+        weekStart,
+        weekEnd: week.weekEnd,
+        isCurrent: weekStart === currentWeek,
+        totalSubmissions: week.total,
+        leaders: leaders
+          .filter((l) => l.weekStart === weekStart)
+          .sort((a, b) => a.rank - b.rank)
+          .map((l: any) => ({
+            leaderId: l._id.toString(),
+            rank: l.rank,
+            userName: fullName(l.userId),
+            rewardAmount: l.rewardAmount ?? 0,
+          })),
+        users: [...week.users.values()].sort((a, b) =>
+          a.fullName.localeCompare(b.fullName)
+        ),
+      }));
+
+    return { status: 200, body };
+  } catch (error) {
+    return serverError(error, 'Failed to fetch submissions by week');
+  }
+};
+
 const selectContentLeader: AppRouteImplementationOrOptions<
   typeof contentRewardContract.selectContentLeader
 > = async ({ body }) => {
   try {
-    if (body.weekStart > body.weekEnd) {
-      return {
-        status: 400,
-        body: { success: false, message: 'Week start must be before week end' },
-      };
-    }
     if (!mongoose.isValidObjectId(body.submissionId)) {
       return {
         status: 404,
@@ -316,14 +496,29 @@ const selectContentLeader: AppRouteImplementationOrOptions<
       };
     }
 
+    // The week is the one the content was submitted in (Sunday - Saturday, Nepal)
+    const { weekStart, weekEnd } = nptWeekOfDate(submission.createdAt);
+
+    // One place per user per week
+    if (await ContentLeaderModel.exists({ userId: submission.userId, weekStart })) {
+      if (body.postImage) await cleanupR2Uploads([body.postImage]);
+      return {
+        status: 400,
+        body: {
+          success: false,
+          message: 'This user is already a leader for this week',
+        },
+      };
+    }
+
     let leader;
     try {
       leader = await ContentLeaderModel.create({
         submissionId: submission._id,
         userId: submission.userId,
         rank: body.rank,
-        weekStart: body.weekStart,
-        weekEnd: body.weekEnd,
+        weekStart,
+        weekEnd,
         postImage: body.postImage,
         rewardAmount,
       });
@@ -347,12 +542,14 @@ const selectContentLeader: AppRouteImplementationOrOptions<
     // the earning dashboard). If the payment fails, undo the selection so the
     // admin can retry without the user being a leader but unpaid.
     if (rewardAmount > 0) {
+      let balanceApplied = false;
       try {
         await balanceModel.updateOne(
           { userId: submission.userId },
           { $inc: { balance: rewardAmount, totalEarnings: rewardAmount } },
           { upsert: true }
         );
+        balanceApplied = true;
         await EarningStatementModel.create({
           userId: submission.userId,
           type: 'CONTENT_REWARD',
@@ -368,7 +565,13 @@ const selectContentLeader: AppRouteImplementationOrOptions<
         });
       } catch (error) {
         console.error('Failed to credit content reward', error);
-        // Best-effort rollback of whichever half was applied
+        // Undo every half that was applied so no money is left behind
+        if (balanceApplied) {
+          await balanceModel.updateOne(
+            { userId: submission.userId },
+            { $inc: { balance: -rewardAmount, totalEarnings: -rewardAmount } }
+          );
+        }
         await ContentLeaderModel.findByIdAndDelete(leader._id);
         if (body.postImage) await cleanupR2Uploads([body.postImage]);
         return serverError(error, 'Failed to credit content reward');
@@ -497,7 +700,9 @@ export const contentRewardHandler = {
   submitContent,
   getContentLeaderboard,
   getContentRewardStatement,
+  getMyContentSubmissions,
   getContentSubmissionsForAdmin,
+  getContentSubmissionsByWeek,
   selectContentLeader,
   getContentLeadersForAdmin,
   setContentLeaderImage,

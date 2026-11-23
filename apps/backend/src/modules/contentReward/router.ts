@@ -50,6 +50,14 @@ export const contentRewardRouter = s.router(contentRewardContract, {
     middleware: user,
     handler: h.getContentRewardStatement,
   },
+  getMyContentSubmissions: {
+    middleware: user,
+    handler: h.getMyContentSubmissions,
+  },
+  getContentSubmissionsByWeek: {
+    middleware: admin,
+    handler: h.getContentSubmissionsByWeek,
+  },
   getContentSubmissionsForAdmin: {
     middleware: admin,
     handler: h.getContentSubmissionsForAdmin,

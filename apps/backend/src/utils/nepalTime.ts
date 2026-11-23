@@ -49,3 +49,22 @@ export const getSubmissionWindow = (now = new Date()) => {
     )} (Nepal time)`,
   };
 };
+
+const DAY_MS_NT = 24 * HOUR_MS;
+const toKey = (d: Date) => d.toISOString().slice(0, 10);
+
+/**
+ * The Nepal week (Sunday to Saturday, both inclusive) containing a Nepal date.
+ * Everything about content rewards (submissions, leaders, statuses) is grouped
+ * by this one definition so the user and admin views always agree.
+ */
+export const nptWeekOf = (dayKey: string) => {
+  const [y, m, d] = dayKey.split('-').map(Number);
+  const date = new Date(Date.UTC(y, m - 1, d));
+  const start = new Date(date.getTime() - date.getUTCDay() * DAY_MS_NT);
+  const end = new Date(start.getTime() + 6 * DAY_MS_NT);
+  return { weekStart: toKey(start), weekEnd: toKey(end) };
+};
+
+/** The Nepal week an instant falls in */
+export const nptWeekOfDate = (date: Date) => nptWeekOf(nptDayKey(date));

@@ -1,45 +1,133 @@
-import type { Article } from "./types";
+import type { Article } from './types';
 
 export const graphicDesignArticles: Article[] = [
   {
-    slug: "principles-of-visual-hierarchy-every-designer-should-know",
-    title: "Principles of Visual Hierarchy Every Designer Should Know",
-    topic: "Graphic Design",
-    topicSlug: "graphic-design",
-    excerpt: "The visual design enhances the user's enjoyment of each page. Good design is simple and uncluttered. Key facts are easily accessible for users.",
-    readTime: "8 min read",
-    image: "/articles/principles-of-visual-hierarchy-every-designer-should-know-1.webp",
+    slug: 'principles-of-visual-hierarchy-every-designer-should-know',
+    title: 'Principles of Visual Hierarchy Every Designer Should Know',
+    topic: 'Graphic Design',
+    topicSlug: 'graphic-design',
+    excerpt:
+      'Learn how to arrange type, color, spacing, and contrast so readers can find the important information first. Includes a worked event-poster example and a practical review checklist.',
+    readTime: '5 min read',
+    image:
+      '/articles/principles-of-visual-hierarchy-every-designer-should-know-1.webp',
     content: [
-      { type: "p", text: "The visual design enhances the user's enjoyment of each page. Good design is simple and uncluttered. Key facts are easily accessible for users. Much time can be saved with a smart layout. Good order must be maintained on each page. Good concentration makes users feel good. Design builds more trust. Clear pages provide better flow. For each detail, there is one purpose. When there's good visual order, it helps with each task. This rule is followed by many brands. Smart design equals better results. Simple pages are the favorite of all users. Good pages retain users longer. This guide contains helpful tips and ideas. These rules are designed to enable all designers to develop." },
-      { type: "image", src: "/articles/principles-of-visual-hierarchy-every-designer-should-know-1.webp" },
-      { type: "p", text: "Visual hierarchy = clear page order. It helps users know where to start their search. It leads the eye effortlessly. Simple pages are easy to read if they are well arranged. If there are pages that are hard to read, it is probably because of bad order. Users do not stay on poor pages. The layout is smart, which helps people stay poised. Good pages are more useful. The design provides more value if it is better. All projects should have direction. Little things can make a big difference. Good habits make good work!" },
-      { type: "h2", text: "Understanding Visual Hierarchy" },
-      { type: "h3", text: "Why Visual Hierarchy Matters" },
-      { type: "p", text: "Each user step is provided with visual hierarchy. It makes it easier for users to read. In good design, important components are displayed first. Fewer key parts remain below. This improves pages' usefulness. Users spend less time. They quickly locate important information. Users are happy when there is good flow. The better the page, the more trust it will create. A smart layout seems more natural. Clear goals for all pages. Good order is a way to achieve goals. Good design is what makes a user's life joyous. The better the pages are, the more views they will receive. It is better to clean up work and get more appreciation. It's a skill that every designer should learn." },
-      { type: "p", text: "Helpful hierarchy for all screens. It can also be used with apps. It is beneficial to the growth of web pages. It will also assist you in printing work. All designs require balance. Every task is helped with good focus. Researchers appreciate easy-to-use designs. Consumers like simple designs. Clean pages look more spacious. Stress is reduced with good order. Good flow fosters good trust. Each page is a story on its own. This is the story of good design. There is a longer user time. Happy users mean repeat customers. Smart design results in increased success." },
-      { type: "h3", text: "Size Creates Strong Focus. Size must be a factor." },
-      { type: "p", text: "Large text is more prominent. Details are provided in small text. First, users read the title; then they look at the contents. They then read the body text. Each eye is guided by good size. Improved attention can lead to improved reading. All pages must have clear sizes. Equal-sized body design. Users are missing pertinent information. Smart size fixes this issue. Photographs are attention seekers. Content is complemented by small images. Well-balanced pages are neat. The bigger the size, the higher the page value. Size is a plan that every designer should plan." },
-      { type: "p", text: "Headings should be placed above the text. They lead the users without confusing them. Body text should remain legible. The font size needs to be just right. Small print is a problem for readability. Very large text is cumbersome. The balance is achieved in a smart size. Good pages sound natural. The layouts are easy to read for users. Trust is developed through improved reading. Each word should be a help. A purpose is a must for every title. Each page is improved by good size. With better concentration comes better work. Good design always works!" },
-      { type: "h2", text: "Color and Typography Principles" },
-      { type: "h3", text: "Color Guides User Focus" },
-      { type: "p", text: "Color helps guide every user fast. Bright color gets more focus. Soft color gives less focus. Good color shows key parts. Smart color builds page flow. Users find key items fast. Strong color lifts page value. Poor color hurts user trust. Good color keeps pages clean. Every shade needs clear use. Too many shades confuse users. Simple color feels more calm. Good color helps every brand. Users enjoy clear page style. Better color brings better views. Smart color makes each page shine." },
-      { type: "image", src: "/articles/principles-of-visual-hierarchy-every-designer-should-know-2.webp" },
-      { type: "p", text: "Each color has one goal. Red may show alert signs. Blue gives a calm feeling. Green shows fresh ideas. A dark color adds a strong look. Light colors feel more open. Good color builds a clear path. Users know where to look first. Smart color helps each task. Every page needs balance. A good mix keeps pages neat. Better color lifts each design. Users trust clean color plans. Good design wins more praise. Every designer should test color." },
-      { type: "h3", text: "Typography Improves Reading" },
-      { type: "p", text: "Good text helps every user. Clear font feels easy to read. Smart fonts build good trust. Bold text shows key facts. Small text gives more detail. A good font size helps all. Users read pages with ease. Hard fonts slow reading speed. Simple font feels cleaner. Good text keeps users longer. Every word needs a clear view. Line spacing helps with more reading. Good text lifts page value. Better font builds better flow. Smart text keeps users happy. Every page needs clear type." },
-      { type: "p", text: "Text should stay easy to read. Good font fits each page. Long text needs more space. Short text needs less space. Good size gives balance. Smart type guides each eye. Users enjoy simple words. Clean text feels more useful. Better reading saves more time. Every title needs a bold look. Body text stays simple. Good type builds a clear path. Smart design feels more natural. Good pages earn more trust. Better text brings better results." },
-      { type: "h2", text: "Layout, Space, and Balance" },
-      { type: "h3", text: "Space And Alignment" },
-      { type: "p", text: "White space provides breathing space for each page. It makes all parts stand clear. Users can read more easily. The page noise is reduced by good space. Disorderly pages are more agitated. Smart space creates good flow. All blocks must have room to move. Tight pages have a harder feel. Good gaps conduct electricity. Key facts are readily accessible to users. Value is added to each item by the space. A good layout looks more tidy. There must be space on every page. Smart use lifts the page look. Keeping users happy with better space. The starting point of good design is space." },
-      { type: "h4", text: "Aligning Elements for Clarity" },
-      { type: "p", text: "With good alignment, each part is neat and tidy. The text should be aligned well. Images should be congruent with page flow. Each item requires one space. A messy layout appears more feeble. User trust is fostered by good order. Smart lines maintain clear pages. The user has the following advantages: a beautiful design. The better the layout, the more time that will be saved. Balance is required on each page. Clean work looks more professional. Well-designed plans deter the mess on a page. Smoothing out the layout elevates each task. Better-designed things are more applauded. Checking the layout is a must-do for every designer. Care is evident in good work." },
-      { type: "h3", text: "Balance And Contrast" },
-      { type: "p", text: "Balance helps pages feel right. Good balance keeps users calm. Every part needs fair space. Large items need a good match. Small items need a clear place. Smart balance builds page flow. Users enjoy clean layouts. Good design feels more real. Better pages hold user care. Every screen needs balance. Good work builds trust fast. Smart layout helps every task. Better balance lifts page value. Clean pages bring more joy. Every project needs this rule. Good balance means better design." },
-      { type: "image", src: "/articles/principles-of-visual-hierarchy-every-designer-should-know-3.webp" },
-      { type: "h4", text: "Using Contrast to Draw Attention" },
-      { type: "p", text: "Contrast helps key parts stand out. Dark text fits a light base. Bright buttons catch more eyes. Bold titles guide each user. Good contrast boosts reading ease. Weak contrast hurts page use. Users miss key details fast. Smart contrast builds clear focus. Every page needs a strong view. Good design feels clearer. Better focus lifts user joy. Smart work brings more clicks. Good contrast helps every brand. Better pages earn more trust. Every designer should test contrast. Strong focus brings better results." },
-      { type: "h2", text: "Conclusion" },
-      { type: "p", text: "Visual hierarchy is an important component of all effective designs. It makes it easy to locate important information. Every page is simple and clear due to good order. Smart design ensures that users are happy every time they visit. The better the page, the more time the user will spend there. Structured presentations gain credibility with all users. When learners have a good focus, it enhances all reading activities. A smart size assists all eyes. A page flow is created when good color is added. Clean text makes reading easier. Leaves more space for each element. Good alignment makes each page neat. Good contrast emphasizes all of the important elements. All designs should have a single purpose. Sometimes it is better to have simple pages. The user interface is neat and functional. It is a basic rule that every designer must know. The little things make a big difference. Practice makes perfect design skills! Improved skills lead to higher work quality. Design is a great means for the growth of any brand. As happy users come back with trust, so do their profits. As users come back happy, so do profits with trust. Good design provides enduring value. Continue to learn on each project. Every design that's well done has to be well planned." }
+      {
+        type: 'p',
+        text: 'Visual hierarchy is the order in which a design invites people to notice and read its elements. It matters on a concert poster, a web page, a slide, or a product label: if everything looks equally important, the viewer has to work out where to begin. Hierarchy does not mean making one item enormous and everything else tiny. It means making the most useful next step easy to recognize.',
+      },
+      {
+        type: 'p',
+        text: 'A useful way to check a layout is to look at it briefly, then look away. What do you remember first? If that answer is not the main message, adjust the design before adding decoration.',
+      },
+      {
+        type: 'image',
+        src: '/articles/principles-of-visual-hierarchy-every-designer-should-know-1.webp',
+      },
+      { type: 'h2', text: 'Start with the message, not the styling' },
+      {
+        type: 'p',
+        text: 'Before choosing colors or typefaces, write down what someone needs to understand or do. For a workshop poster, that might be: what the workshop is, who it is for, when and where it happens, and how to register. Put those details in order. A decorative subtitle should not compete with the date, and a registration link should not be hard to find.',
+      },
+      {
+        type: 'ol',
+        items: [
+          'Name the main audience and the one action or idea the design needs to communicate.',
+          'List every required detail, then rank it from essential to supporting.',
+          'Group related information, such as date, time, and location, so it reads as one unit.',
+          'Choose a visual treatment for each level and check that the order still makes sense without color.',
+        ],
+      },
+      {
+        type: 'h2',
+        text: 'Use scale and typography to show importance',
+      },
+      {
+        type: 'p',
+        text: 'Larger type tends to attract attention, so reserve the largest size for the main message rather than using it on several unrelated items. Build a small type scale—for example, a headline, a section label, and comfortable body text—and use those roles consistently. Weight can add another level of emphasis, but bolding every line removes the distinction.',
+      },
+      {
+        type: 'p',
+        text: 'Typeface choice also affects tone and legibility. A display face can work well for a short headline, while a simpler face is often easier to read in longer details. Keep line lengths manageable, give lines enough leading, and avoid shrinking essential information just to make a crowded layout fit. If the copy does not fit, edit or reorganize it before reducing the type to an uncomfortable size.',
+      },
+      {
+        type: 'h3',
+        text: 'A quick type-scale example',
+      },
+      {
+        type: 'p',
+        text: 'For the workshop poster, the workshop name might be the only large headline. A smaller but still prominent line can state the topic or intended audience. Date, time, and venue can share a readable detail style, while a clear button or short URL carries the action. The exact sizes depend on the format and viewing distance; print that will be read across a room needs different sizing from a phone screen.',
+      },
+      { type: 'h2', text: 'Create focus with contrast and color' },
+      {
+        type: 'p',
+        text: 'Contrast can come from size, weight, shape, spacing, or color—not only from bright hues. A restrained palette is easier to manage: use a background, a main text color, and one accent for the element that needs attention. If the accent appears everywhere, it stops acting as an accent. Color meanings also vary by context, so do not depend on assumptions such as red always meaning urgency.',
+      },
+      {
+        type: 'p',
+        text: "Check text against its actual background, especially small text and text placed over photographs. For digital work, use a contrast checker and follow the accessibility requirements relevant to the project; WCAG's common minimum contrast ratios are 4.5:1 for normal text and 3:1 for large text. Color should not be the only way information is communicated: pair it with a label, icon, or other visible cue when the distinction matters.",
+      },
+      {
+        type: 'image',
+        src: '/articles/principles-of-visual-hierarchy-every-designer-should-know-2.webp',
+      },
+      { type: 'h2', text: 'Use spacing and alignment to organize content' },
+      {
+        type: 'p',
+        text: 'Space is part of the layout, not leftover emptiness. Put related items closer together and separate sections that serve different purposes. Consistent margins and a simple alignment grid make a page easier to scan; they also expose elements that seem out of place. On a poster, for example, keep the date, time, and venue together rather than scattering them around the artwork.',
+      },
+      {
+        type: 'p',
+        text: 'Balance does not require making both sides identical. An asymmetrical layout can feel stable when visual weight is distributed deliberately—for instance, a large image can be balanced by a smaller block of text and open space. If the composition feels lopsided, try moving or resizing one element before adding another shape to compensate.',
+      },
+      { type: 'h2', text: 'A worked example: improve a crowded event poster' },
+      {
+        type: 'p',
+        text: "Imagine a poster with the event title, sponsor logos, a paragraph of background information, three bright colors, and a registration URL all set at similar sizes. A reader may see the logos first simply because they are colorful, while the date gets lost. Rebuild the poster around the reader's questions:",
+      },
+      {
+        type: 'ol',
+        items: [
+          'Make the event name the first clear focal point.',
+          'Place the date, time, and venue together in a prominent, readable block.',
+          'Shorten the background paragraph to the detail people need before deciding to attend.',
+          'Give the registration instruction a distinct treatment and make the URL or QR code easy to locate.',
+          'Reduce the logos and decorative elements to supporting roles, while keeping any required sponsor placement intact.',
+        ],
+      },
+      {
+        type: 'p',
+        text: 'Then view the poster at its intended size and from a normal reading distance. If the date is still hard to find, adjust its placement or contrast rather than adding another bright color. A quick test with someone who has not seen the draft can reveal assumptions the designer no longer notices.',
+      },
+      {
+        type: 'image',
+        src: '/articles/principles-of-visual-hierarchy-every-designer-should-know-3.webp',
+      },
+      { type: 'h2', text: 'Review checklist before exporting' },
+      {
+        type: 'ul',
+        items: [
+          'Can a new viewer identify the main message at a glance?',
+          'Are the next most useful details easy to find without hunting?',
+          'Do headings, body text, and calls to action have clearly different roles?',
+          'Is text readable at the actual size and on the actual background?',
+          'Are related items grouped and unrelated sections given enough separation?',
+          'Does the layout still make sense in grayscale or for someone who cannot distinguish the chosen colors?',
+          'Have you checked the design on the device, paper size, or display where people will use it?',
+        ],
+      },
+      {
+        type: 'h2',
+        text: 'Practice on a design you already have',
+      },
+      {
+        type: 'p',
+        text: 'Choose an existing flyer or page and write down its intended reading order before changing anything. Make a grayscale copy, blur it slightly, or view it as a small thumbnail; these checks reduce the pull of color and detail and make the largest shapes easier to compare. If the wrong item dominates, change one variable at a time—size, position, weight, or spacing—and compare the result. The aim is not to follow a fixed formula, but to make the information easier for the intended audience to use.',
+      },
+      {
+        type: 'p',
+        text: 'Visual hierarchy improves when it is tested against a real message and real viewing conditions. Clear priorities, readable type, deliberate contrast, and consistent spacing give a design structure. The final check is simple: can the intended reader find what they need and understand what to do next?',
+      },
     ],
   },
 ];
